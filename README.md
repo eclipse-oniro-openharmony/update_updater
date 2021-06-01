@@ -1,37 +1,94 @@
-# update_updater
+# Updater<a name="EN-US_TOPIC_0000001148614629"></a>
 
-#### 介绍
-Updater module | 升级安装组件
+-   [Introduction](#section184mcpsimp)
+-   [Directory Structure](#section198mcpsimp)
+-   [Usage](#section218mcpsimp)
+    -   [Usage Guidelines](#section220mcpsimp)
 
-#### 软件架构
-软件架构说明
+-   [Repositories Involved](#section247mcpsimp)
 
+## Introduction<a name="section184mcpsimp"></a>
 
-#### 安装教程
+The updater runs in the recovery partition. It reads the misc partition information to obtain the update package status and verifies the update package to ensure that the update package is valid. Then, the updater parses the executable program from the update package, creates a subprocess, and starts the update program. After that, update operations will be automatically implemented by the update script.
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+## Directory Structure<a name="section198mcpsimp"></a>
 
-#### 使用说明
+```
+base/update/updater/
+├── resources           # UI image resources of the update subsystem
+├── services            # Service code of the updater
+│   ├── applypatch      # Update package data update code
+│   ├── fs_manager      # File system and partition management code
+│   ├── include         # Header files for the update subsystem
+│   ├── log             # Log module of the update subsystem
+│   ├── package         # Update packages
+│   ├── script          # Update scripts
+│   ├── diffpatch       # Differential package restore code
+│   ├── sparse_image    # Sparse image parsing code
+│   ├── ui              # UI code
+│   └── updater_binary  # Executable programs
+├── interfaces
+│   └── kits            # External APIs
+└── utils               # Common utilities of the update subsystem
+    └── include         # Header files for general functions of the update subsystem
+```
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+## Usage<a name="section218mcpsimp"></a>
 
-#### 参与贡献
+### Usage Guidelines<a name="section220mcpsimp"></a>
 
-1.  Fork 本仓库
-2.  新建 Feat_xxx 分支
-3.  提交代码
-4.  新建 Pull Request
+The updater runs in the recovery partition. To ensure proper functioning of the updater, perform the following operations:
 
+1. Create a recovery partition. 
 
-#### 特技
+The recovery partition is independent of other partitions. It is recommended that the size of the recovery partition be greater than or equal to 20 MB. The recovery partition image is an ext4 file system. Ensure that the  **config**  option of the ext4 file system in the system kernel is enabled.
 
-1.  使用 Readme\_XXX.md 来支持不同的语言，例如 Readme\_en.md, Readme\_zh.md
-2.  Gitee 官方博客 [blog.gitee.com](https://blog.gitee.com)
-3.  你可以 [https://gitee.com/explore](https://gitee.com/explore) 这个地址来了解 Gitee 上的优秀开源项目
-4.  [GVP](https://gitee.com/gvp) 全称是 Gitee 最有价值开源项目，是综合评定出的优秀开源项目
-5.  Gitee 官方提供的使用手册 [https://gitee.com/help](https://gitee.com/help)
-6.  Gitee 封面人物是一档用来展示 Gitee 会员风采的栏目 [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)
+2. Create the misc partition.
+
+The misc partition stores metadata required by the update subsystem during the update process. Such data includes update commands and records of resumable data transfer upon power-off. This partition is a raw partition and its size is about 1 MB. You do not need to create a file system for the misc partition, because the update subsystem can directly access this partition.
+
+3. Prepare the partition configuration table.
+
+During the update process, the updater needs to operate the partitions through the partition configuration table. The default file name of the partition configuration table is  **fstab.updater**. You need to pack the  **fstab.updater**  file into the updater during compilation.
+
+4. Start the updater.
+
+The init process in the recovery partition has an independent configuration file named  **init.cfg**. The startup configuration of the updater is stored in this file.
+
+5. Compile the updater.
+
+a. Add the updater configurations to the  **build/subsystem\_config.json**  file.
+
+Example configuration:
+
+```
+"updater": {
+"project": "hmf/updater",
+"path": "base/update/updater",
+"name": "updater",
+"dir": "base/update"
+},
+```
+
+b. Add the updater for the desired product.
+
+For example, to add the updater for Hi3516D V300, add the following code to the  **productdefine/common/products/Hi3516DV300.json**  file.
+
+```
+     "updater:updater":{},
+```
+
+6. Compile the recovery partition image.
+
+Add the compilation configuration to the  **build\_updater\_image.sh**  script, which is stored in the  **build**  repository and called by the OpenHarmony compilation system.
+
+## Repositories Involved<a name="section247mcpsimp"></a>
+
+Update subsystem
+
+**update\_updater**
+
+build
+
+productdefine\_common
+
