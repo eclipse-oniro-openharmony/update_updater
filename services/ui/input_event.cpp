@@ -22,7 +22,7 @@ constexpr int TOUCH_LOW_TH = 50;
 constexpr int TOUCH_HIGH_TH = 90;
 constexpr int INIT_DEFAULT_VALUE = 255;
 IInputInterface *g_inputInterface;
-InputReportEventCb g_callback;
+InputEventCb g_callback;
 
 bool g_touchSwiping = false;
 bool g_touchFingerDown = false;
@@ -153,7 +153,7 @@ int HdfInit()
         LOG(ERROR) << "get device1's type failed";
         return ret;
     }
-    g_callback.ReportEventPkgCallback = ReportEventPkgCallback;
+    g_callback.EventPkgCallback = ReportEventPkgCallback;
     ret  = g_inputInterface->iInputReporter->RegisterReportCallback(1, &g_callback);
     if (ret) {
         LOG(ERROR) << "register callback failed for device 1";
