@@ -3,9 +3,6 @@
   "parts": {
     "updater": {
       "module_list": [
-         "//base/startup/init_lite/services:init.cfg",
-         "//base/startup/init_lite/services:updaterueventd",
-         "//base/startup/init_lite/services:updaterinit",
          "//base/update/updater/services/package:libupdaterpackage",
          "//base/update/updater/services/script:libupdaterscript",
          "//base/update/updater/services/log:libupdaterlog",
