@@ -15,6 +15,16 @@ import("//build/ohos.gni")
 
 SUBSYSTEM_DIR = "//base/update/updater"
 
+ohos_prebuilt_etc("updater_init.cfg") {
+   source = "//base/update/updater/services/etc/updater_init.cfg"
+   part_name = "updater"
+}
+
+ohos_prebuilt_etc("init.Hi3516DV300.updater.cfg") {
+   source = "//device/hisilicon/hi3516dv300/build/rootfs/init.Hi3516DV300.updater.cfg"
+   part_name = "updater"
+}
+
 ohos_executable("updater") {
   defines = [ "BUILD_OHOS" ]
   sources = [
