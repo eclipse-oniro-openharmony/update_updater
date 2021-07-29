@@ -219,17 +219,17 @@ int32_t Lz4ImagePatch::ReadHeader(const PatchParam &param, PatchHeader &header, 
     header.targetSize = static_cast<size_t>(ReadLE<uint64_t>(param.patch + offset));
     offset += sizeof(uint64_t);
 
-    compressionLevel_ = static_cast<uint8_t>(ReadLE<int32_t>(param.patch + offset));
+    compressionLevel_ = static_cast<int32_t>(ReadLE<int32_t>(param.patch + offset));
     offset += sizeof(int32_t);
-    method_ = static_cast<uint8_t>(ReadLE<int32_t>(param.patch + offset));
+    method_ = static_cast<int32_t>(ReadLE<int32_t>(param.patch + offset));
     offset += sizeof(int32_t);
-    blockIndependence_ = static_cast<uint8_t>(ReadLE<int32_t>(param.patch + offset));
+    blockIndependence_ = static_cast<int32_t>(ReadLE<int32_t>(param.patch + offset));
     offset += sizeof(int32_t);
-    contentChecksumFlag_ = static_cast<uint8_t>(ReadLE<int32_t>(param.patch + offset));
+    contentChecksumFlag_ = static_cast<int32_t>(ReadLE<int32_t>(param.patch + offset));
     offset += sizeof(int32_t);
-    blockSizeID_ = static_cast<uint8_t>(ReadLE<int32_t>(param.patch + offset));
+    blockSizeID_ = static_cast<int32_t>(ReadLE<int32_t>(param.patch + offset));
     offset += sizeof(int32_t);
-    autoFlush_ = static_cast<uint8_t>(ReadLE<int32_t>(param.patch + offset));
+    autoFlush_ = static_cast<int32_t>(ReadLE<int32_t>(param.patch + offset));
     offset += sizeof(int32_t);
     PATCH_LOGI("ReadHeader BLOCK_LZ4 level_:%d method_:%d %d contentChecksumFlag_:%d blockSizeID_:%d %d",
         compressionLevel_, method_, blockIndependence_, contentChecksumFlag_, blockSizeID_, autoFlush_);
@@ -288,7 +288,7 @@ int32_t CompressedFileRestore::CompressData(size_t &originalSize, size_t &compre
     SHA256_Final(digest.data(), &sha256Ctx_);
     BlockBuffer buffer = { digest.data(), digest.size() };
     std::string hexDigest = ConvertSha256Hex(buffer);
-    PATCH_DEBUG("CompressedFileRestore hash %zu %s ", dataSize_, hexDigest.c_str());
+    PATCH_LOGI("CompressedFileRestore hash %zu %s ", dataSize_, hexDigest.c_str());
     return 0;
 }
 } // namespace updater

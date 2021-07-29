@@ -81,6 +81,7 @@ int32_t ImageParser::Parse(const std::string &packageName)
 
 int32_t ImageParser::Extract(const std::string &fileName, std::vector<uint8_t> &buffer)
 {
+    PATCH_DEBUG("ImageParser::Extract %s", fileName.c_str());
     PATCH_CHECK(pkgManager_ != nullptr, return PATCH_INVALID_PARAM, "Failed to get pkg manager");
     size_t bufferSize = 0;
     hpackage::PkgManager::StreamPtr outStream = nullptr;
@@ -112,9 +113,7 @@ int32_t UpdateDiff::MakePatch(const std::string &oldFileName,
     const std::string &newFileName, const std::string &patchFileName)
 {
     if (blockDiff_) {
-        std::unique_ptr<BlocksDiff> blockDiff(new BlocksDiff());
-        PATCH_CHECK(blockDiff != nullptr, return -1, "Failed to create block diff");
-        return blockDiff->MakePatch(oldFileName, newFileName, patchFileName);
+        return BlocksDiff::MakePatch(oldFileName, newFileName, patchFileName);
     }
 
     newParser_.reset(new ImageParser());
