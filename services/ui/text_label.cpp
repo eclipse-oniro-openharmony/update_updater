@@ -22,7 +22,7 @@
 #include "securec.h"
 
 namespace updater {
-TextLable::TextLable(int mStartX, int mStartY, int w, int h, Frame *mparent)
+TextLabel::TextLabel(int mStartX, int mStartY, int w, int h, Frame *mparent)
 {
     startX_ = mStartX;
     startY_ = mStartY;
@@ -60,7 +60,7 @@ TextLable::TextLable(int mStartX, int mStartY, int w, int h, Frame *mparent)
     InitFont();
 }
 
-void TextLable::SetFont(FontType fType)
+void TextLabel::SetFont(FontType fType)
 {
     fontType_ = fType;
     InitFont();
@@ -88,7 +88,7 @@ static void PNGReadRow(png_uint_32 fontWidth, png_uint_32 fontHeight, png_struct
     return;
 }
 
-void TextLable::InitFont()
+void TextLabel::InitFont()
 {
     char resPath[MAX_TEXT_SIZE + 1];
     png_infop fontInfoPtr = nullptr;
@@ -140,7 +140,7 @@ void TextLable::InitFont()
     PNGReadRow(fontWidth_, fontHeight_, fontPngPtr, fontBuf_);
 }
 
-void TextLable::SetText(const char *str)
+void TextLabel::SetText(const char *str)
 {
     UPDATER_CHECK_ONLY_RETURN(!memset_s(textBuf_, MAX_TEXT_SIZE + 1, 0, MAX_TEXT_SIZE), return);
     OnDraw();
@@ -148,7 +148,7 @@ void TextLable::SetText(const char *str)
     OnDraw();
 }
 
-void TextLable::OnDraw()
+void TextLabel::OnDraw()
 {
     std::unique_lock<std::mutex> locker(mutex_);
     SyncBuffer();
@@ -162,14 +162,14 @@ void TextLable::OnDraw()
     }
 }
 
-void TextLable::SetOutLineBold(bool topBold, bool bottomBold)
+void TextLabel::SetOutLineBold(bool topBold, bool bottomBold)
 {
     boldTopLine_ = topBold;
     boldBottomLine_ = bottomBold;
     OnDraw();
 }
 
-void TextLable::DrawOutline()
+void TextLabel::DrawOutline()
 {
     void *tmpBuf = GetBuffer();
     auto *pixelBuf = static_cast<BRGA888Pixel*>(tmpBuf);
@@ -200,7 +200,7 @@ void TextLable::DrawOutline()
     }
 }
 
-void TextLable::SetTextColor(BRGA888Pixel color)
+void TextLabel::SetTextColor(BRGA888Pixel color)
 {
     textColor_.r = color.r;
     textColor_.g = color.g;
@@ -208,18 +208,18 @@ void TextLable::SetTextColor(BRGA888Pixel color)
     textColor_.a = color.a;
 }
 
-void TextLable::SetTextAlignmentMethod(AlignmentMethod methodH, AlignmentMethod methodV)
+void TextLabel::SetTextAlignmentMethod(AlignmentMethod methodH, AlignmentMethod methodV)
 {
     fontAligMethodLevel_ = methodH;
     fontAligMethodUpright_ = methodV;
 }
 
-void TextLable::SetOnClickCallback(ClickCallback cb)
+void TextLabel::SetOnClickCallback(ClickCallback cb)
 {
     callBack_ = cb;
 }
 
-void TextLable::DrawText()
+void TextLabel::DrawText()
 {
     void *tmpBuf = GetBuffer();
     int textSx = 0;
@@ -272,7 +272,7 @@ void TextLable::DrawText()
     }
 }
 
-void TextLable::DrawFocus()
+void TextLabel::DrawFocus()
 {
     BRGA888Pixel pixBuf[viewWidth_];
     for (int a =0; a< viewWidth_; a++) {
@@ -289,7 +289,7 @@ void TextLable::DrawFocus()
     }
 }
 
-void TextLable::OnKeyEvent(int key)
+void TextLabel::OnKeyEvent(int key)
 {
     LOG(INFO) << "OnKeyEvent !";
     switch (key) {

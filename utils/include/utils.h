@@ -21,15 +21,11 @@
 
 namespace updater {
 namespace utils {
-static constexpr int N_BIN = 2;
-static constexpr int N_OCT = 8;
-static constexpr int N_DEC = 10;
-static constexpr int N_HEX = 16;
-static constexpr int S_USER_PERMISSION = 1000;
-static constexpr int S_OPEN_PERMISSION = 0600;
-static constexpr int S_DIR_PERMISSION = 0700;
-static constexpr int S_READ_WRITE_PERMISSION = 0755;
-static constexpr int S_ONLY_READ_PERMISSION = 0644;
+constexpr int N_BIN = 2;
+constexpr int N_OCT = 8;
+constexpr int N_DEC = 10;
+constexpr int N_HEX = 16;
+constexpr int O_USER_GROUP_ID = 1000;
 constexpr int ARGC_TWO_NUMS = 2;
 template<class T>
 T String2Int(const std::string &str, int base = N_HEX)
@@ -58,6 +54,8 @@ bool ReadFully(int fd, void* data, size_t size);
 bool ReadFileToString(int fd, std::string &content);
 bool WriteStringToFile(int fd, const std::string& content);
 std::string GetLocalBoardId();
+bool CopyUpdaterLogs(const std::string &sLog, const std::string &dLog);
+void CompressLogs(const std::string &name);
 } // utils
 } // updater
 #endif // UPDATER_UTILS_H

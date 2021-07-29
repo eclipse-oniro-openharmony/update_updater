@@ -24,7 +24,6 @@ constexpr int SMALL_BUFFER_SIZE = 64;
 constexpr int DEVPATH_SIZE = 128;
 constexpr int DEFAULT_PARTSUM = 16;
 constexpr size_t SECTOR_SIZE_DEFAULT = 512;
-constexpr int DEFAULT_SIZE_2KB = 2048;
 constexpr size_t DEFAULT_SIZE_1MB = 1048576;
 
 const std::string SDA_PATH = "/dev/sda";

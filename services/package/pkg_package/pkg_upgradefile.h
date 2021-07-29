@@ -112,6 +112,8 @@ private:
     int32_t ReadUpgradePkgHeader(const PkgBuffer &buffer, size_t &realLen,
         DigestAlgorithm::DigestAlgorithmPtr &algorithm);
 
+    int32_t Verify(size_t start, const PkgBuffer &buffer, DigestAlgorithm::DigestAlgorithmPtr algorithm,
+        VerifyFunction verifier, const std::vector<uint8_t> &signData);
 private:
     UpgradePkgInfo pkgInfo_ {};
     size_t packedFileSize_ {0};

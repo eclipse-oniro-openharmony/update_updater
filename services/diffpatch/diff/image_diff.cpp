@@ -24,6 +24,7 @@ namespace updatepatch {
 #define GET_REAL_DATA_LEN(info) (info) ->packedSize + (info)->dataOffset - (info)->headerOffset
 constexpr int32_t LZ4F_MAX_BLOCKID = 7;
 constexpr int32_t ZIP_MAX_LEVEL = 9;
+constexpr int32_t MAX_NEW_LENGTH = 1 << 20;
 
 template<class DataType>
 static void WriteToFile(std::ofstream &patchFile, DataType data, size_t dataSize)
@@ -100,30 +101,25 @@ int32_t ImageDiff::SplitImage(const PatchBuffer &oldInfo, const PatchBuffer &new
     return 0;
 }
 
-int32_t ImageDiff::WriteHeader(std::ofstream &patchFile, size_t &dataOffset, ImageBlock &block) const
+int32_t ImageDiff::WriteHeader(std::ofstream &patchFile,
+    std::fstream &blockPatchFile, size_t &dataOffset, ImageBlock &block) const
 {
     int32_t ret = 0;
     switch (block.type) {
         case BLOCK_NORMAL: {
-            std::vector<uint8_t> patchData;
-            BlocksDiff diff;
+            size_t patchSize = 0;
             BlockBuffer newInfo = { block.newInfo.buffer + block.newInfo.start, block.newInfo.length };
             BlockBuffer oldInfo = { block.oldInfo.buffer + block.oldInfo.start, block.oldInfo.length };
-            ret = diff.MakePatch(newInfo, oldInfo, patchData);
+            ret = MakeBlockPatch(block, blockPatchFile, newInfo, oldInfo, patchSize);
             PATCH_CHECK(ret == 0, return -1, "Failed to make block patch");
-
-            block.patchData = std::move(patchData);
-            PATCH_LOGI("WriteHeader BLOCK_NORMAL patchOffset %zu oldInfo %ld %ld newInfo:%zu %zu",
+            PATCH_LOGI("WriteHeader BLOCK_NORMAL patchOffset %zu oldInfo %ld %ld newInfo:%zu %zu patch %zu %zu",
                 static_cast<size_t>(patchFile.tellp()),
-                block.oldInfo.start, block.oldInfo.length, block.newInfo.start, block.newInfo.length);
-            BlockBuffer patchBuffer = {block.patchData.data(), block.patchData.size()};
-            PATCH_LOGI("WriteHeader BLOCK_NORMAL dataOffset:%zu hash %zu %s", dataOffset,
-                block.patchData.size(), GeneraterBufferHash(patchBuffer).c_str());
-
+                block.oldInfo.start, block.oldInfo.length, block.newInfo.start, block.newInfo.length,
+                dataOffset, patchSize);
             WriteToFile<int64_t>(patchFile, static_cast<int64_t>(block.oldInfo.start), sizeof(int64_t));
             WriteToFile<int64_t>(patchFile, static_cast<int64_t>(block.oldInfo.length), sizeof(int64_t));
             WriteToFile<int64_t>(patchFile, static_cast<int64_t>(dataOffset), sizeof(int64_t));
-            dataOffset += block.patchData.size();
+            dataOffset += patchSize;
             break;
         }
         case BLOCK_RAW: {
@@ -143,37 +139,89 @@ int32_t ImageDiff::WriteHeader(std::ofstream &patchFile, size_t &dataOffset, Ima
     return ret;
 }
 
+int32_t ImageDiff::MakeBlockPatch(ImageBlock &block, std::fstream &blockPatchFile,
+    const BlockBuffer &newInfo, const BlockBuffer &oldInfo, size_t &patchSize) const
+{
+    if (!usePatchFile_) {
+        std::vector<uint8_t> patchData;
+        int32_t ret = BlocksDiff::MakePatch(newInfo, oldInfo, patchData, 0, patchSize);
+        PATCH_CHECK(ret == 0, return -1, "Failed to make block patch");
+        BlockBuffer patchBuffer = {patchData.data(), patchSize};
+        PATCH_DEBUG("MakeBlockPatch hash %zu %s", patchSize, GeneraterBufferHash(patchBuffer).c_str());
+        block.patchData = std::move(patchData);
+    } else {
+        int32_t ret = BlocksDiff::MakePatch(newInfo, oldInfo, blockPatchFile, patchSize);
+        PATCH_CHECK(ret == 0, return -1, "Failed to make block patch");
+        PATCH_LOGI("MakeBlockPatch patch %zu patch %zu",
+            patchSize, static_cast<size_t>(blockPatchFile.tellp()));
+    }
+    return 0;
+}
+
+int32_t ImageDiff::WritePatch(std::ofstream &patchFile, std::fstream &blockPatchFile)
+{
+    if (usePatchFile_) { // copy to patch
+        size_t bsPatchSize = static_cast<size_t>(blockPatchFile.tellp());
+        PATCH_LOGI("WritePatch patch block patch %zu img patch offset %zu",
+            bsPatchSize, static_cast<size_t>(patchFile.tellp()));
+        blockPatchFile.seekg(0, std::ios::beg);
+        std::vector<char> buffer(IGMDIFF_LIMIT_UNIT);
+        while (bsPatchSize > 0) {
+            size_t readLen = (bsPatchSize > IGMDIFF_LIMIT_UNIT) ? IGMDIFF_LIMIT_UNIT : bsPatchSize;
+            blockPatchFile.read(buffer.data(), readLen);
+            patchFile.write(buffer.data(), readLen);
+            bsPatchSize -= readLen;
+        }
+        PATCH_LOGI("WritePatch patch %zu", static_cast<size_t>(patchFile.tellp()));
+    } else {
+        for (size_t index = 0; index < updateBlocks_.size(); index++) {
+            if (updateBlocks_[index].type == BLOCK_RAW) {
+                continue;
+            }
+            PATCH_LOGI("WritePatch [%zu] write patch patchOffset %zu length %zu",
+                index, static_cast<size_t>(patchFile.tellp()), updateBlocks_[index].patchData.size());
+            patchFile.write(reinterpret_cast<const char*>(updateBlocks_[index].patchData.data()),
+                updateBlocks_[index].patchData.size());
+        }
+    }
+    return 0;
+}
+
 int32_t ImageDiff::DiffImage(const std::string &patchName)
 {
-    std::ofstream patchFile(patchName, std::ios::out | std::ios::binary);
+    std::fstream blockPatchFile;
+    std::ofstream patchFile(patchName, std::ios::out | std::ios::trunc | std::ios::binary);
     PATCH_CHECK(!patchFile.fail(), return -1, "Failed to open %s", patchName.c_str());
 
-    patchFile.write(IMGDIFF_MAGIC.c_str(), IMGDIFF_MAGIC.size());
-    size_t dataOffset = IMGDIFF_MAGIC.size();
+    patchFile.write(PKGDIFF_MAGIC.c_str(), PKGDIFF_MAGIC.size());
+    size_t dataOffset = PKGDIFF_MAGIC.size();
     uint32_t size = static_cast<uint32_t>(updateBlocks_.size());
     patchFile.write(reinterpret_cast<const char*>(&size), sizeof(uint32_t));
     dataOffset += sizeof(uint32_t);
 
     for (size_t index = 0; index < updateBlocks_.size(); index++) {
         dataOffset += GetHeaderSize(updateBlocks_[index]);
+        if (updateBlocks_[index].destOriginalLength >= MAX_NEW_LENGTH ||
+            updateBlocks_[index].newInfo.length >= MAX_NEW_LENGTH) {
+            usePatchFile_ = true;
+        }
+    }
+
+    if (usePatchFile_) {
+        blockPatchFile.open(patchName + ".bspatch", std::ios::in | std::ios::out | std::ios::trunc | std::ios::binary);
+        PATCH_CHECK(!blockPatchFile.fail(), return -1, "Failed to open bspatch %s", patchName.c_str());
     }
 
     for (size_t index = 0; index < updateBlocks_.size(); index++) {
         PATCH_LOGI("DiffImage [%zu] write header patchOffset %zu dataOffset %zu",
             index, static_cast<size_t>(patchFile.tellp()), dataOffset);
         patchFile.write(reinterpret_cast<const char*>(&updateBlocks_[index].type), sizeof(uint32_t));
-        int32_t ret = WriteHeader(patchFile, dataOffset, updateBlocks_[index]);
+        int32_t ret = WriteHeader(patchFile, blockPatchFile, dataOffset, updateBlocks_[index]);
         PATCH_CHECK(ret == 0, return -1, "Failed to write header");
     }
 
-    for (size_t index = 0; index < updateBlocks_.size(); index++) {
-        if (updateBlocks_[index].type != BLOCK_RAW) {
-            PATCH_LOGI("DiffImage [%zu] write patch patchOffset %zu length %zu",
-                index, static_cast<size_t>(patchFile.tellp()), updateBlocks_[index].patchData.size());
-            patchFile.write(reinterpret_cast<const char*>(updateBlocks_[index].patchData.data()),
-                updateBlocks_[index].patchData.size());
-        }
-    }
+    int32_t ret = WritePatch(patchFile, blockPatchFile);
+    PATCH_CHECK(ret == 0, return -1, "Failed to write patch");
     PATCH_LOGI("DiffImage success patchOffset %zu %s", static_cast<size_t>(patchFile.tellp()), patchName.c_str());
     patchFile.close();
     return 0;
@@ -279,26 +327,23 @@ int32_t CompressedImageDiff::DiffFile(const std::string &fileName, size_t &oldOf
     return 0;
 }
 
-int32_t ZipImageDiff::WriteHeader(std::ofstream &patchFile, size_t &dataOffset, ImageBlock &block) const
+int32_t ZipImageDiff::WriteHeader(std::ofstream &patchFile,
+    std::fstream &blockPatchFile, size_t &dataOffset, ImageBlock &block) const
 {
     int32_t ret = 0;
     if (block.type == BLOCK_DEFLATE) {
-        std::vector<uint8_t> patchData;
-        BlocksDiff diff;
+        size_t patchSize = 0;
         BlockBuffer oldInfo = { block.srcOriginalData.data(), block.srcOriginalLength };
         BlockBuffer newInfo = { block.destOriginalData.data(), block.destOriginalLength };
-        ret = diff.MakePatch(newInfo, oldInfo, patchData);
+        ret = MakeBlockPatch(block, blockPatchFile, newInfo, oldInfo, patchSize);
         PATCH_CHECK(ret == 0, return -1, "Failed to make block patch");
-        block.patchData = std::move(patchData);
 
         PATCH_LOGI("WriteHeader BLOCK_DEFLATE patchoffset %zu dataOffset:%zu patchData:%zu",
-            static_cast<size_t>(patchFile.tellp()), dataOffset, block.patchData.size());
+            static_cast<size_t>(patchFile.tellp()), dataOffset, patchSize);
         PATCH_LOGI("WriteHeader oldInfo start:%zu length:%zu", block.oldInfo.start, block.oldInfo.length);
         PATCH_LOGI("WriteHeader uncompressedLength:%zu %zu", block.srcOriginalLength, block.destOriginalLength);
         PATCH_LOGI("WriteHeader level_:%d method_:%d windowBits_:%d memLevel_:%d strategy_:%d",
             level_, method_, windowBits_, memLevel_, strategy_);
-        PATCH_LOGI("WriteHeader BLOCK_DEFLATE decompressed hash %zu %s",
-            newInfo.length, GeneraterBufferHash(newInfo).c_str());
 
         WriteToFile<int64_t>(patchFile, static_cast<int64_t>(block.oldInfo.start), sizeof(int64_t));
         WriteToFile<int64_t>(patchFile, static_cast<int64_t>(block.oldInfo.length), sizeof(int64_t));
@@ -311,9 +356,9 @@ int32_t ZipImageDiff::WriteHeader(std::ofstream &patchFile, size_t &dataOffset, 
         WriteToFile<int32_t>(patchFile, windowBits_, sizeof(int32_t));
         WriteToFile<int32_t>(patchFile, memLevel_, sizeof(int32_t));
         WriteToFile<int32_t>(patchFile, strategy_, sizeof(int32_t));
-        dataOffset += block.patchData.size();
+        dataOffset += patchSize;
     } else {
-        ret = ImageDiff::WriteHeader(patchFile, dataOffset, block);
+        ret = ImageDiff::WriteHeader(patchFile, blockPatchFile, dataOffset, block);
     }
     return ret;
 }
@@ -363,20 +408,19 @@ int32_t ZipImageDiff::TestAndSetConfig(const BlockBuffer &buffer, const std::str
     return -1;
 }
 
-int32_t Lz4ImageDiff::WriteHeader(std::ofstream &patchFile, size_t &dataOffset, ImageBlock &block) const
+int32_t Lz4ImageDiff::WriteHeader(std::ofstream &patchFile,
+    std::fstream &blockPatchFile, size_t &dataOffset, ImageBlock &block) const
 {
     int32_t ret = 0;
     if (block.type == BLOCK_LZ4) {
-        std::vector<uint8_t> patchData;
-        BlocksDiff diff;
+        size_t patchSize = 0;
         BlockBuffer oldInfo = { block.srcOriginalData.data(), block.srcOriginalLength };
         BlockBuffer newInfo = { block.destOriginalData.data(), block.destOriginalLength };
-        ret = diff.MakePatch(newInfo, oldInfo, patchData);
+        ret = MakeBlockPatch(block, blockPatchFile, newInfo, oldInfo, patchSize);
         PATCH_CHECK(ret == 0, return -1, "Failed to make block patch");
-        block.patchData = std::move(patchData);
 
-        PATCH_LOGI("WriteHeader BLOCK_LZ4 patchoffset %zu dataOffset:%zu patchData:%zu",
-            static_cast<size_t>(patchFile.tellp()), dataOffset, block.patchData.size());
+        PATCH_LOGI("WriteHeader BLOCK_LZ4 patchoffset %zu dataOffset:%zu %zu",
+            static_cast<size_t>(patchFile.tellp()), dataOffset, patchSize);
         PATCH_LOGI("WriteHeader oldInfo start:%zu length:%zu", block.oldInfo.start, block.oldInfo.length);
         PATCH_LOGI("WriteHeader uncompressedLength:%zu %zu", block.srcOriginalLength, block.destOriginalLength);
         PATCH_LOGI("WriteHeader level_:%d method_:%d blockIndependence_:%d contentChecksumFlag_:%d blockSizeID_:%d %d",
@@ -396,9 +440,9 @@ int32_t Lz4ImageDiff::WriteHeader(std::ofstream &patchFile, size_t &dataOffset, 
         WriteToFile<int32_t>(patchFile, contentChecksumFlag_, sizeof(int32_t));
         WriteToFile<int32_t>(patchFile, blockSizeID_, sizeof(int32_t));
         WriteToFile<int32_t>(patchFile, autoFlush_, sizeof(int32_t));
-        dataOffset += block.patchData.size();
+        dataOffset += patchSize;
     } else {
-        ret = ImageDiff::WriteHeader(patchFile, dataOffset, block);
+        ret = ImageDiff::WriteHeader(patchFile, blockPatchFile, dataOffset, block);
     }
     return ret;
 }

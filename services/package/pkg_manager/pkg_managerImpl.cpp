@@ -153,11 +153,13 @@ int32_t PkgManagerImpl::CreatePackage(const std::string &path, PkgInfoPtr header
         digestInfos[DIGEST_INFO_HAS_SIGN].resize(digestLen);
         ret = GenerateFileDigest(pkgFile->GetPkgStream(),
             header->digestMethod, DIGEST_FLAGS_HAS_SIGN, digestInfos, offset);
+        offset = (header->digestMethod == PKG_DIGEST_TYPE_SHA384) ? (offset + SIGN_SHA256_LEN) : offset;
         PKG_CHECK(ret == PKG_SUCCESS,
             return ret, "Fail to generate signature %s", pkgFile->GetPkgStream()->GetFileName().c_str());
         hashValue = ConvertShaHex(digestInfos[DIGEST_INFO_HAS_SIGN]);
         PKG_LOGI("PkgManagerImpl::CreatePackage sign offset %zu ", offset);
     } else {
+        offset = (header->digestMethod == PKG_DIGEST_TYPE_SHA384) ? (offset + SIGN_SHA256_LEN) : offset;
         ret = Sign(pkgFile->GetPkgStream(), offset, header);
     }
     delete pkgFile;

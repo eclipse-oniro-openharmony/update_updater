@@ -41,15 +41,17 @@ int32_t BZip2Adapter::Close()
     return ret;
 }
 
-int32_t BZip2Adapter::WriteData(const BlockBuffer &srcData)
+int32_t BZipBuffer2Adapter::WriteData(const BlockBuffer &srcData)
 {
     stream_.next_in = reinterpret_cast<char*>(srcData.buffer);
-    if (offset_ + srcData.length > buffer_.size()) {
+    stream_.avail_in = srcData.length;
+
+    if (offset_ + dataSize_ + srcData.length > buffer_.size()) {
         buffer_.resize(buffer_.size() + srcData.length);
     }
-    stream_.avail_in = srcData.length;
-    stream_.avail_out =  buffer_.size() - offset_;
-    stream_.next_out = reinterpret_cast<char*>(buffer_.data() + offset_);
+    char *next = reinterpret_cast<char*>(buffer_.data() + offset_ + dataSize_);
+    stream_.avail_out = buffer_.size() - offset_ - dataSize_;
+    stream_.next_out = next;
     int32_t ret = BZ_RUN_OK;
     do {
         ret = BZ2_bzCompress(&stream_, BZ_RUN);
@@ -59,31 +61,96 @@ int32_t BZip2Adapter::WriteData(const BlockBuffer &srcData)
     } while (ret == BZ_RUN_OK);
     PATCH_CHECK(ret == BZ_RUN_OK, return ret, "Failed to write data ret %d", ret);
     PATCH_CHECK(stream_.avail_in == 0, return ret, "Failed to write data");
-    offset_ = stream_.next_out - reinterpret_cast<char*>(buffer_.data());
+    dataSize_ += stream_.next_out - next;
     return PATCH_SUCCESS;
 }
 
-int32_t BZip2Adapter::FlushData(size_t &offset)
+int32_t BZipBuffer2Adapter::FlushData(size_t &dataSize)
 {
-    PATCH_DEBUG("FlushData offset_ %d offset %zu ", offset_, offset);
-    stream_.next_in = nullptr;
+    dataSize = 0;
+    PATCH_DEBUG("FlushData dataSize_ %d ", dataSize_);
+    stream_.next_in = 0;
     stream_.avail_in = 0;
-    stream_.avail_out = buffer_.size() - offset_;
-    stream_.next_out = reinterpret_cast<char*>(buffer_.data() + offset_);
+    stream_.avail_out = buffer_.size() - offset_ - dataSize_;
+    char *next = reinterpret_cast<char*>(buffer_.data() + offset_ + dataSize_);
+    stream_.next_out = next;
     int ret = BZ_FINISH_OK;
     while (ret == BZ_FINISH_OK) {
         ret = BZ2_bzCompress(&stream_, BZ_FINISH);
         if (stream_.avail_out == 0) {
-            offset_ = stream_.next_out - reinterpret_cast<char*>(buffer_.data());
+            dataSize_ += stream_.next_out - next;
             buffer_.resize(buffer_.size() + IGMDIFF_LIMIT_UNIT);
-            stream_.avail_out = buffer_.size() - offset_;
-            stream_.next_out = reinterpret_cast<char*>(buffer_.data() + offset_);
+            stream_.avail_out = buffer_.size() - offset_ + dataSize_;
+            next = reinterpret_cast<char*>(buffer_.data() + offset_ + dataSize_);
+            stream_.next_out = next;
         }
     }
     PATCH_CHECK(ret == BZ_RUN_OK || ret == BZ_STREAM_END, return ret, "Failed to write data %d", ret);
-    offset_ = stream_.next_out - reinterpret_cast<char*>(buffer_.data());
-    PATCH_DEBUG("FlushData offset_ %zu ", offset_);
-    offset = offset_;
+    dataSize_ += stream_.next_out - next;
+    PATCH_DEBUG("FlushData offset_ %zu dataSize_ %zu ", offset_, dataSize_);
+    dataSize = dataSize_;
+    return 0;
+}
+
+int32_t BZip2StreamAdapter::Open()
+{
+    buffer_.resize(IGMDIFF_LIMIT_UNIT);
+    return BZip2Adapter::Open();
+}
+
+int32_t BZip2StreamAdapter::WriteData(const BlockBuffer &srcData)
+{
+    stream_.next_in = reinterpret_cast<char*>(srcData.buffer);
+    stream_.avail_in = srcData.length;
+
+    stream_.avail_out = buffer_.size();
+    stream_.next_out = reinterpret_cast<char*>(buffer_.data());
+    int32_t ret = BZ_RUN_OK;
+    do {
+        ret = BZ2_bzCompress(&stream_, BZ_RUN);
+        if (stream_.avail_out == 0) {
+            outStream_.write(buffer_.data(), buffer_.size());
+            dataSize_ += stream_.next_out - reinterpret_cast<char*>(buffer_.data());
+            stream_.avail_out = buffer_.size();
+            stream_.next_out = reinterpret_cast<char*>(buffer_.data());
+        }
+        if (stream_.avail_in == 0) {
+            break;
+        }
+    } while (ret == BZ_RUN_OK);
+    PATCH_CHECK(ret == BZ_RUN_OK, return ret, "Failed to write data ret %d", ret);
+    PATCH_CHECK(stream_.avail_in == 0, return ret, "Failed to write data");
+    if (stream_.avail_out != buffer_.size()) {
+        outStream_.write(buffer_.data(), stream_.next_out - reinterpret_cast<char*>(buffer_.data()));
+    }
+    dataSize_ += stream_.next_out - reinterpret_cast<char*>(buffer_.data());
+    return PATCH_SUCCESS;
+}
+int32_t BZip2StreamAdapter::FlushData(size_t &dataSize)
+{
+    dataSize = 0;
+    PATCH_DEBUG("FlushData dataSize_ %d ", dataSize_);
+    stream_.next_in = 0;
+    stream_.avail_in = 0;
+    stream_.avail_out = buffer_.size();
+    stream_.next_out = reinterpret_cast<char*>(buffer_.data());
+    int ret = BZ_FINISH_OK;
+    while (ret == BZ_FINISH_OK) {
+        ret = BZ2_bzCompress(&stream_, BZ_FINISH);
+        if (stream_.avail_out == 0) {
+            outStream_.write(buffer_.data(), stream_.next_out - reinterpret_cast<char*>(buffer_.data()));
+            dataSize_ += stream_.next_out - reinterpret_cast<char*>(buffer_.data());
+            stream_.avail_out = buffer_.size();
+            stream_.next_out = reinterpret_cast<char*>(buffer_.data());
+        }
+    }
+    PATCH_CHECK(ret == BZ_RUN_OK || ret == BZ_STREAM_END, return ret, "Failed to write data %d", ret);
+    if (stream_.avail_out != buffer_.size()) {
+        outStream_.write(buffer_.data(), stream_.next_out - reinterpret_cast<char*>(buffer_.data()));
+    }
+    dataSize_ += stream_.next_out - reinterpret_cast<char*>(buffer_.data());
+    PATCH_DEBUG("FlushData dataSize %zu %zu", dataSize_, static_cast<size_t>(outStream_.tellp()));
+    dataSize = dataSize_;
     return 0;
 }
 

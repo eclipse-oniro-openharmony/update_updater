@@ -24,6 +24,7 @@ ohos_static_library("libfsmanager") {
 
   include_dirs = [
     "//base/update/updater/services/include",
+    "//base/update/updater/interfaces/kits/include",
     "//base/update/updater/utils/include",
     "//third_party/bounds_checking_function/include",
   ]

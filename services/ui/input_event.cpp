@@ -16,11 +16,16 @@
 #include <cstdio>
 #include <cstdlib>
 #include "log/log.h"
+#include "updater_ui_const.h"
 
 namespace updater {
 constexpr int TOUCH_LOW_TH = 50;
 constexpr int TOUCH_HIGH_TH = 90;
 constexpr int INIT_DEFAULT_VALUE = 255;
+constexpr int LABEL_HEIGHT = 64;
+constexpr int LABEL_OFFSET_2 = 2;
+constexpr int LABEL_OFFSET_3 = 3;
+constexpr int DIALOG_START_Y = 550;
 IInputInterface *g_inputInterface;
 InputEventCb g_callback;
 
@@ -31,7 +36,7 @@ int g_touchX;
 int g_touchY;
 int g_touchStartX;
 int g_touchStartY;
-extern Frame *g_hosFrame;
+extern Frame *g_menuFrame;
 
 enum SwipeDirection {
     UP,
@@ -39,6 +44,28 @@ enum SwipeDirection {
     RIGHT,
     LEFT
 };
+
+void TouchToClickEvent(const int dx, const int dy, int event)
+{
+    if (!g_menuFrame->IsVisiable()) {
+        LOG(INFO) << "menu page is not top";
+        return;
+    }
+    if (abs(dy) >= 0 && abs(dy) <= LABEL_HEIGHT) {
+        g_menuFrame->DispatchKeyEvent(LABEL_ID_0, event);
+    } else if (abs(dy) > LABEL_HEIGHT && abs(dy) <= LABEL_HEIGHT * LABEL_OFFSET_2) {
+        g_menuFrame->DispatchKeyEvent(LABEL_ID_1, event);
+    } else if (abs(dy) > LABEL_HEIGHT * LABEL_OFFSET_2 && abs(dy) <= LABEL_HEIGHT * LABEL_OFFSET_3) {
+        g_menuFrame->DispatchKeyEvent(LABEL_ID_2, event);
+    } else if (abs(dy) > WIDTH1 && abs(dy) <= DIALOG_START_Y) {
+        if (abs(dx) > 0 && abs(dx) <= DIALOG_OK_WIDTH) {
+            g_menuFrame->DispatchKeyEvent(DIALOG_OK_ID, event);
+        } else if (abs(dx) > DIALOG_CANCEL_X && abs(dx) <= WIDTH1) {
+            g_menuFrame->DispatchKeyEvent(DIALOG_CANCEL_ID, event);
+        }
+    }
+    return;
+}
 
 void TouchToKey(const int dx, const int dy)
 {
@@ -52,19 +79,45 @@ void TouchToKey(const int dx, const int dy)
     }
     switch (direction) {
         case SwipeDirection::UP:
-            g_hosFrame->DispatchKeyEvent(KEY_UP);
+            g_menuFrame->DispatchKeyEvent(KEY_UP);
             break;
         case SwipeDirection::DOWN:
-            g_hosFrame->DispatchKeyEvent(KEY_DOWN);
+            g_menuFrame->DispatchKeyEvent(KEY_DOWN);
             break;
         case SwipeDirection::LEFT:
         case SwipeDirection::RIGHT:
-            g_hosFrame->DispatchKeyEvent(KEY_POWER);
+            g_menuFrame->DispatchKeyEvent(KEY_POWER);
             break;
         default:
             break;
     }
     return;
+}
+
+void SwipEvent()
+{
+    if (g_touchFingerDown && !g_touchSwiping) {
+        g_touchStartX = g_touchX;
+        g_touchStartY = g_touchY;
+        g_touchSwiping = true;
+    } else if (!g_touchFingerDown && g_touchSwiping) {
+        g_touchSwiping = false;
+        TouchToKey(g_touchX - g_touchStartX, g_touchY - g_touchStartY);
+    }
+}
+
+void ClickEvent()
+{
+    if (!g_menuFrame->IsVisiable()) {
+        LOG(INFO) << "click event";
+        TouchToClickEvent(g_touchX, g_touchY, -1);
+        return;
+    }
+    if (g_touchFingerDown) {
+        TouchToClickEvent(g_touchX, g_touchY, PRESS_EVENT);
+    } else if (!g_touchFingerDown) {
+        TouchToClickEvent(g_touchX, g_touchY, RELEASE_EVENT);
+    }
 }
 
 int HandleInputEvent(const struct input_event *iev)
@@ -77,14 +130,11 @@ int HandleInputEvent(const struct input_event *iev)
         if (ev.code == SYN_REPORT) {
             // There might be multiple SYN_REPORT events. We should only detect
             // a swipe after lifting the contact.
-            if (g_touchFingerDown && !g_touchSwiping) {
-                g_touchStartX = g_touchX;
-                g_touchStartY = g_touchY;
-                g_touchSwiping = true;
-            } else if (!g_touchFingerDown && g_touchSwiping) {
-                g_touchSwiping = false;
-                TouchToKey(g_touchX - g_touchStartX, g_touchY - g_touchStartY);
-            }
+#ifdef CONVERT_RL_SLIDE_TO_CLICK
+            SwipEvent();
+#else
+            ClickEvent();
+#endif
         }
         return 0;
     }
@@ -122,7 +172,7 @@ int HandleInputEvent(const struct input_event *iev)
 
 void ReportEventPkgCallback(const EventPackage **pkgs, const uint32_t count, uint32_t devIndex)
 {
-    if (pkgs == nullptr || *pkgs == nullptr) {
+    if (pkgs == nullptr || *pkgs == nullptr || !g_menuFrame->IsVisiable()) {
         return;
     }
     for (uint32_t i = 0; i < count; i++) {

@@ -16,12 +16,13 @@ ohos_static_library("libui") {
   sources = [
     "animation_label.cpp",
     "frame.cpp",
-    "updater_ui.cpp",
     "input_event.cpp",
     "progress_bar.cpp",
     "surface_dev.cpp",
     "text_label.cpp",
+    "updater_ui.cpp",
     "view.cpp",
+    "drm_driver.cpp",
   ]
 
   include_dirs = [

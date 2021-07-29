@@ -154,8 +154,6 @@ void PkgFile::AddSignData(uint8_t digestMethod, size_t currOffset, size_t &signO
     signOffset = currOffset;
     if (digestMethod == PKG_DIGEST_TYPE_NONE) {
         return;
-    } else if (digestMethod == PKG_DIGEST_TYPE_SHA384) {
-        signOffset += SIGN_SHA256_LEN;
     }
     std::vector<uint8_t> buffer(SIGN_SHA256_LEN + SIGN_SHA384_LEN, 0);
     int32_t ret = pkgStream_->Write(buffer, buffer.size(), currOffset);

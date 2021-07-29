@@ -44,15 +44,20 @@ public:
     }
 
     virtual int32_t MakePatch(const std::string &patchName);
-    virtual int32_t WriteHeader(std::ofstream &patchFile, size_t &offset, ImageBlock &block) const;
+    virtual int32_t WriteHeader(std::ofstream &patchFile,
+        std::fstream &blockPatchFile, size_t &offset, ImageBlock &block) const;
 protected:
     int32_t SplitImage(const PatchBuffer &oldInfo, const PatchBuffer &newInfo);
     int32_t DiffImage(const std::string &patchName);
+    int32_t MakeBlockPatch(ImageBlock &block, std::fstream &blockPatchFile,
+        const BlockBuffer &newInfo, const BlockBuffer &oldInfo, size_t &patchSize) const;
+    int32_t WritePatch(std::ofstream &patchFile, std::fstream &blockPatchFile);
 
     size_t limit_;
     std::vector<ImageBlock> updateBlocks_ {};
     UpdateDiff::ImageParserPtr newParser_ {nullptr};
     UpdateDiff::ImageParserPtr oldParser_ {nullptr};
+    bool usePatchFile_ { false };
 };
 
 class CompressedImageDiff : public ImageDiff {
@@ -77,7 +82,8 @@ public:
         : CompressedImageDiff(limit, newParser, oldParser, BLOCK_DEFLATE) {}
     ~ZipImageDiff() override {}
 
-    int32_t WriteHeader(std::ofstream &patchFile, size_t &offset, ImageBlock &block) const override;
+    int32_t WriteHeader(std::ofstream &patchFile,
+        std::fstream &blockPatchFile, size_t &offset, ImageBlock &block) const override;
 protected:
     int32_t TestAndSetConfig(const BlockBuffer &buffer, const std::string &fileName) override;
 
@@ -94,7 +100,8 @@ public:
         : CompressedImageDiff(limit, newParser, oldParser, BLOCK_LZ4) {}
     ~Lz4ImageDiff() override {}
 
-    int32_t WriteHeader(std::ofstream &patchFile, size_t &offset, ImageBlock &block) const override;
+    int32_t WriteHeader(std::ofstream &patchFile,
+        std::fstream &blockPatchFile, size_t &offset, ImageBlock &block) const override;
 protected:
     int32_t TestAndSetConfig(const BlockBuffer &buffer, const std::string &fileName) override;
 private:

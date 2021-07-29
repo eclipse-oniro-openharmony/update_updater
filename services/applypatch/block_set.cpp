@@ -320,7 +320,7 @@ int32_t BlockSet::WriteDiffToBlock(const Command &cmd, std::vector<uint8_t> &src
             reinterpret_cast<u_char*>(srcBuffer.data()), srcBuffSize, reinterpret_cast<u_char*>(patchBuff), length
         };
         std::unique_ptr<BlockWriter> writer = std::make_unique<BlockWriter>(cmd.GetFileDescriptor(), *this);
-        UPDATER_ERROR_CHECK(writer.get() != nullptr, "Cannot create block writer, imgdiff patch abort!", return -1);
+        UPDATER_ERROR_CHECK(writer.get() != nullptr, "Cannot create block writer, pkgdiff patch abort!", return -1);
         int32_t ret = updatepatch::UpdatePatch::ApplyImagePatch(patchParam, empty,
             [&](size_t start, const updatepatch::BlockBuffer &data, size_t size) -> int {
                 bool ret = writer->Write(data.buffer, size, WRITE_BLOCK, "");

@@ -40,12 +40,11 @@ using updater::utils::SplitString;
 using updater::utils::Trim;
 using namespace hpackage;
 
-extern TextLable *g_updateInfoLabel;
+extern TextLabel *g_updateInfoLabel;
 extern ProgressBar *g_progressBar;
-extern TextLable *g_updateStateLable;
-extern int g_updateErrFlag;
-int g_percentage;
 
+int g_percentage;
+int g_tmpProgressValue;
 static int GetTemprature()
 {
     int temprature = FAKE_TEMPRATURE;
@@ -140,14 +139,17 @@ static UpdaterStatus IsSpaceCapacitySufficient(PkgManager::PkgManagerPtr pkgMana
             return UPDATE_ERROR);
 
         UPDATER_ERROR_CHECK(statvfs64("/sdcard", &updaterVfs) >= 0, "Statvfs read /sdcard error!", return UPDATE_ERROR);
-        UPDATER_ERROR_CHECK(updaterVfs.f_bfree * updaterVfs.f_bsize > info->unpackedSize,
+        uint64_t freeSpaceSize = static_cast<uint64_t>(updaterVfs.f_bfree);
+        uint64_t blockSize = static_cast<uint64_t>(updaterVfs.f_bsize);
+        uint64_t totalFreeSize = freeSpaceSize * blockSize;
+        UPDATER_ERROR_CHECK(totalFreeSize > static_cast<uint64_t>(info->unpackedSize),
             "Can not update, free space is not enough",
-            g_updateInfoLabel->SetText("Can't update, free space is not enough"); return UPDATE_ERROR);
+            ShowText(g_updateInfoLabel, "Free space is not enough"); return UPDATE_ERROR);
     } else {
         UPDATER_ERROR_CHECK(statvfs64("/data", &updaterVfs) >= 0, "Statvfs read /data error!", return UPDATE_ERROR);
         UPDATER_ERROR_CHECK(updaterVfs.f_bfree * updaterVfs.f_bsize > (info->unpackedSize + MAX_LOG_SPACE),
             "Can not update, free space is not enough",
-            g_updateInfoLabel->SetText("Can't update, free space is not enough"); return UPDATE_ERROR);
+            ShowText(g_updateInfoLabel, "Free space is not enough"); return UPDATE_ERROR);
     }
     return UPDATE_SUCCESS;
 }
@@ -155,10 +157,10 @@ static UpdaterStatus IsSpaceCapacitySufficient(PkgManager::PkgManagerPtr pkgMana
 UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, const std::string &packagePath,
     int retryCount)
 {
+    g_progressBar->Hide();
     ShowUpdateFrame(true);
-
     UPDATER_ERROR_CHECK(pkgManager != nullptr, "Fail to GetPackageInstance", return UPDATE_CORRUPT);
-    UPDATER_CHECK_ONLY_RETURN(SetupPartitions() == 0, g_updateInfoLabel->SetText("update failed\n");
+    UPDATER_CHECK_ONLY_RETURN(SetupPartitions() == 0, ShowText(g_updateInfoLabel, "update failed");
         return UPDATE_ERROR);
     int beforeTemperature = GetTemprature();
 
@@ -166,7 +168,7 @@ UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, cons
     g_updateInfoLabel->SetText("Verify package...");
 
     UPDATER_ERROR_CHECK(access(packagePath.c_str(), 0) == 0, "package is not exist",
-        g_updateInfoLabel->SetText("package is not exist"); return UPDATE_CORRUPT);
+        ShowText(g_updateInfoLabel, "package is not exist"); return UPDATE_CORRUPT);
     if (retryCount > 0) {
         LOG(INFO) << "Retry for " << retryCount << " time(s)";
     } else {
@@ -175,7 +177,6 @@ UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, cons
         // If it returns UPDATE_CORRUPT, which means something wrong with package manager.
         // Let package verify handle this.
         if (ret == UPDATE_ERROR) {
-            g_updateErrFlag = 1;
             return ret;
         } else if (ret == UPDATE_SUCCESS) {
             pkgManager = PkgManager::GetPackageInstance();
@@ -184,9 +185,8 @@ UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, cons
 
     int32_t verifyret = GetUpdatePackageInfo(pkgManager, packagePath);
     UPDATER_ERROR_CHECK(verifyret == PKG_SUCCESS, "Verify package Fail...",
-        g_updateInfoLabel->SetText("Verify package Fail...\n"); return UPDATE_CORRUPT);
+        ShowText(g_updateInfoLabel, "Verify package Fail..."); return UPDATE_CORRUPT);
     LOG(INFO) << "Package verified. start to install package...";
-    g_updateInfoLabel->SetText("Start to install package...");
     int32_t versionRet = UpdatePreProcess(pkgManager, packagePath);
     UPDATER_ERROR_CHECK(versionRet == PKG_SUCCESS, "Version Check Fail...", return UPDATE_CORRUPT);
 
@@ -194,12 +194,10 @@ UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, cons
     UpdaterStatus updateRet = StartUpdaterProc(pkgManager, packagePath, retryCount, maxTemperature);
     if (updateRet == UPDATE_SUCCESS) {
         g_progressBar->SetProgressValue(FULL_PERCENT_PROGRESS);
-        g_updateStateLable->SetText("100%");
         g_updateInfoLabel->SetText("Update success, reboot now");
         std::this_thread::sleep_for(std::chrono::milliseconds(SHOW_FULL_PROGRESS_TIME));
         LOG(INFO)<< "update success , do reboot now";
     } else {
-        g_updateErrFlag = 1;
         g_updateInfoLabel->SetText("Install failed.");
         LOG(ERROR) << "Install package failed.";
     }
@@ -233,10 +231,18 @@ static void HandleChildOutput(const std::string &buffer, int32_t bufferLen,
         if (progress.size() != DEFAULT_PROCESS_NUM) {
             LOG(ERROR) << "show progress with wrong arguments";
         } else {
+            g_progressBar->Show();
+            g_updateInfoLabel->SetText("Start to install package.");
             frac = std::stof(progress[0]);
             g_percentage = g_percentage + static_cast<int>(frac * FULL_PERCENT_PROGRESS);
-            g_percentage = g_percentage / PROGRESS_VALUE_CONST;
-            g_updateStateLable->SetText(std::to_string(g_percentage).append("%").c_str());
+            while (g_tmpProgressValue < g_percentage) {
+                g_progressBar->SetProgressValue(g_tmpProgressValue++);
+                std::this_thread::sleep_for(std::chrono::milliseconds(INTERVAL_TIME));
+                if (g_tmpProgressValue >= FULL_PERCENT_PROGRESS - PROGRESS_VALUE_CONST) {
+                    g_percentage = g_percentage - PROGRESS_VALUE_CONST;
+                    break;
+                }
+            }
             g_progressBar->SetProgressValue(g_percentage);
         }
     } else if (outputHeader == "set_progress") {
@@ -253,8 +259,6 @@ static void HandleChildOutput(const std::string &buffer, int32_t bufferLen,
 UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, const std::string &packagePath,
     int retryCount, int &maxTemperature)
 {
-    ShowUpdateFrame(true);
-
     int pfd[DEFAULT_PIPE_NUM]; /* communication between parent and child */
     UPDATER_FILE_CHECK(pipe(pfd) >= 0, "Create pipe failed: ", return UPDATE_ERROR);
     UPDATER_ERROR_CHECK(pkgManager != nullptr, "Fail to GetPackageInstance", return UPDATE_CORRUPT);
@@ -275,7 +279,7 @@ UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, const std::
             fullPath = "/system/bin/test_update_binary";
         }
 #endif
-        UPDATER_ERROR_CHECK_NOT_RETURN(chmod(fullPath.c_str(), utils::S_READ_WRITE_PERMISSION) == 0,
+        UPDATER_ERROR_CHECK_NOT_RETURN(chmod(fullPath.c_str(), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) == 0,
             "Failed to change mode");
 
         if (retryCount > 0) {
@@ -291,6 +295,7 @@ UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, const std::
     char buffer[MAX_BUFFER_SIZE];
     bool retryUpdate = false;
     FILE* fromChild = fdopen(pipeRead, "r");
+    g_tmpProgressValue = 0;
     g_progressBar->SetProgressValue(0);
     while (fgets(buffer, MAX_BUFFER_SIZE, fromChild) != nullptr) {
         size_t n = strlen(buffer);

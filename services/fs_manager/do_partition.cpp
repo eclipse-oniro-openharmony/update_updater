@@ -25,6 +25,7 @@
 #include "fs_manager/mount.h"
 #include "fs_manager/partitions.h"
 #include "log/log.h"
+#include "misc_info/misc_info.h"
 #include "partition_const.h"
 #include "securec.h"
 
@@ -175,7 +176,7 @@ static void DestroyDiskDevices(const Disk &disk)
 static bool WriteDiskPartitionToMisc(PartitonList &nlist)
 {
     UPDATER_CHECK_ONLY_RETURN(nlist.empty()==0, return false);
-    char blkdevparts[BUFFER_SIZE] = "mmcblk0:";
+    char blkdevparts[MISC_RECORD_UPDATE_PARTITIONS_SIZE] = "mmcblk0:";
     std::sort(nlist.begin(), nlist.end(), [](const struct Partition *a, const struct Partition *b) {
             return (a->start < b->start);
     }); // Sort in ascending order
@@ -191,7 +192,7 @@ static bool WriteDiskPartitionToMisc(PartitonList &nlist)
             UPDATER_CHECK_ONLY_RETURN(snprintf_s(tmp, sizeof(tmp), sizeof(tmp) - 1, "%luM(%s),",
                 size, p->partName.c_str()) != -1, return false);
         }
-        int ncatRet = strncat_s(blkdevparts, BUFFER_SIZE - 1, tmp, strlen(tmp));
+        int ncatRet = strncat_s(blkdevparts, MISC_RECORD_UPDATE_PARTITIONS_SIZE - 1, tmp, strlen(tmp));
         UPDATER_ERROR_CHECK(ncatRet == EOK, "Block device name overflow", return false);
     }
 
@@ -202,7 +203,7 @@ static bool WriteDiskPartitionToMisc(PartitonList &nlist)
     FILE *fp = fopen(miscDevPath.c_str(), "rb+");
     UPDATER_ERROR_CHECK(fp, "fopen error " << errno, return false);
 
-    fseek(fp, DEFAULT_SIZE_2KB, SEEK_SET);
+    fseek(fp, MISC_RECORD_UPDATE_PARTITIONS_OFFSET, SEEK_SET);
     size_t ret = fwrite(blkdevparts, sizeof(blkdevparts), 1, fp);
     UPDATER_ERROR_CHECK(ret >= 0, "fwrite error " << errno, fclose(fp); return false);
 

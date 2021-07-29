@@ -55,53 +55,40 @@ enum {
 };
 
 /*
- * The imgdiff patch header looks like this:
+ * The pkgdiff patch header looks like this:
  *
- *    "IMGDIFF2"                  (8)   [magic number and version]
- *    chunk count                 (4)
- *    for each chunk:
- *        chunk type              (4)   [CHUNK_{NORMAL, GZIP, DEFLATE, RAW}]
- *        if chunk type == CHUNK_NORMAL:
+ *    "pkgdiff0"                  (8)   [magic number and version]
+ *    block count                 (4)
+ *    for each block:
+ *        block type              (4)   [BLOCK_{NORMAL, DEFLATE, RAW, Lz4}]
+ *        if block type == BLOCK_NORMAL:
  *           source start         (8)
  *           source len           (8)
  *           bsdiff patch offset  (8)   [from start of patch file]
- *        if chunk type == CHUNK_GZIP:      (version 1 only)
+ *        if block type == BLOCK_DEFLATE:
  *           source start         (8)
  *           source len           (8)
  *           bsdiff patch offset  (8)   [from start of patch file]
  *           source expanded len  (8)   [size of uncompressed source]
  *           target expected len  (8)   [size of uncompressed target]
- *           gzip level           (4)
+ *           zip level            (4)
  *                method          (4)
  *                windowBits      (4)
  *                memLevel        (4)
  *                strategy        (4)
- *           gzip header len      (4)
- *           gzip header          (gzip header len)
- *           gzip footer          (8)
- *        if chunk type == CHUNK_DEFLATE:   (version 2 only)
+ *        if block type == BLOCK_LZ4:
  *           source start         (8)
  *           source len           (8)
  *           bsdiff patch offset  (8)   [from start of patch file]
  *           source expanded len  (8)   [size of uncompressed source]
  *           target expected len  (8)   [size of uncompressed target]
- *           gzip level           (4)
- *                method          (4)
- *                windowBits      (4)
- *                memLevel        (4)
- *                strategy        (4)
- *        if chunk type == CHUNK_LZ4:   (version 3 only)
- *           source start         (8)
- *           source len           (8)
- *           bsdiff patch offset  (8)   [from start of patch file]
- *           source expanded len  (8)   [size of uncompressed source]
- *           target expected len  (8)   [size of uncompressed target]
- *           gzip level           (4)
+ *           lz4 level            (4)
  *                method          (4)
  *                blockIndependence     (4)
  *                contentChecksumFlag   (4)
  *                blockSizeID     (4)
- *        if chunk type == RAW:             (version 2 only)
+ *                autoFlush       (4)
+ *        if block type == RAW:
  *           target len           (4)
  *           data                 (target len)
  *
@@ -120,17 +107,13 @@ enum {
     48	56	Bzip2ed extra block
 */
 
-// Image patch block types
+// patch block types
 #define BLOCK_NORMAL 0
-#define BLOCK_GZIP 1     // version 1 only
-#define BLOCK_DEFLATE 2  // version 2 only
-#define BLOCK_RAW 3      // version 2 only
-#define BLOCK_LZ4 4      // version 3 only
+#define BLOCK_GZIP 1
+#define BLOCK_DEFLATE 2
+#define BLOCK_RAW 3
+#define BLOCK_LZ4 4
 
-// The gzip header size is actually variable, but we currently don't
-// support gzipped data with any of the optional fields, so for now it
-// will always be ten bytes.  See RFC 1952 for the definition of the
-// gzip format.
 static constexpr size_t GZIP_HEADER_LEN = 10;
 static constexpr size_t VERSION = 2;
 static constexpr unsigned short HEADER_CRC = 0x02; /* bit 1 set: CRC16 for the gzip header */
@@ -154,7 +137,7 @@ static constexpr int PATCH_DEFLATE_MIN_HEADER_LEN = 60;
 static constexpr int PATCH_LZ4_MIN_HEADER_LEN = 64;
 
 static const std::string BSDIFF_MAGIC = "BSDIFF40";
-static const std::string IMGDIFF_MAGIC = "IMGDIFF2";
+static const std::string PKGDIFF_MAGIC = "PKGDIFF0";
 
 struct PatchHeader {
     size_t srcStart = 0;

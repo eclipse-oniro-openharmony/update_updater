@@ -49,19 +49,24 @@ public:
     BlocksDiff() = default;
     virtual ~BlocksDiff() {}
 
-    int32_t MakePatch(const std::string &oldFileName,
+    static int32_t MakePatch(const std::string &oldFileName,
         const std::string &newFileName, const std::string &patchFileName);
-    int32_t MakePatch(const BlockBuffer &newInfo,
-        const BlockBuffer &oldInfo, std::vector<uint8_t> &patchData);
+    static int32_t MakePatch(const BlockBuffer &newInfo,
+        const BlockBuffer &oldInfo, std::vector<uint8_t> &patchData, size_t offset, size_t &patchSize);
+    static int32_t MakePatch(const BlockBuffer &newInfo,
+        const BlockBuffer &oldInfo, std::fstream &patchFile, size_t &patchSize);
+
+    int32_t MakePatch(const BlockBuffer &newInfo, const BlockBuffer &oldInfo, size_t &patchSize);
 private:
+    virtual std::unique_ptr<DeflateAdapter> CreateBZip2Adapter(size_t patchOffset) = 0;
+    virtual int32_t WritePatchHeader(int64_t controlSize,
+        int64_t diffDataSize, int64_t newSize, size_t &patchOffset) = 0;
+
     int32_t GetCtrlDatas(const BlockBuffer &newInfo,
         const BlockBuffer &oldInfo, std::vector<ControlData> &controlDatas);
-    int32_t WriteControlData(const std::vector<ControlData> controlDatas,
-        std::vector<uint8_t> &patchData, size_t &patchSize) const;
-    int32_t WriteDiffData(const std::vector<ControlData> controlDatas,
-        std::vector<uint8_t> &patchData, size_t &patchSize) const;
-    int32_t WriteExtraData(const std::vector<ControlData> controlDatas,
-        std::vector<uint8_t> &patchData, size_t &patchSize) const;
+    int32_t WriteControlData(const std::vector<ControlData> controlDatas, size_t &patchSize);
+    int32_t WriteDiffData(const std::vector<ControlData> controlDatas, size_t &patchSize);
+    int32_t WriteExtraData(const std::vector<ControlData> controlDatas, size_t &patchSize);
 
     void ComputeOldScore(const BlockBuffer &newInfo,
         const BlockBuffer &oldInfo, int64_t &oldScore, int64_t &matchLen);
@@ -75,6 +80,31 @@ private:
     int64_t lastOffset_ { 0 };
     int64_t lastScan_ { 0 };
     int64_t lastPos_ { 0 };
+};
+
+class BlocksStreamDiff : public BlocksDiff {
+public:
+    BlocksStreamDiff(std::fstream &stream, size_t offset) : BlocksDiff(), stream_(stream), offset_(offset) {}
+    ~BlocksStreamDiff() override {}
+private:
+    std::unique_ptr<DeflateAdapter> CreateBZip2Adapter(size_t patchOffset) override;
+    int32_t WritePatchHeader(int64_t controlSize,
+        int64_t diffDataSize, int64_t newSize, size_t &patchOffset) override;
+    std::fstream &stream_;
+    size_t offset_ { 0 };
+};
+
+class BlocksBufferDiff : public BlocksDiff {
+public:
+    BlocksBufferDiff(std::vector<uint8_t> &patchData, size_t offset)
+        : BlocksDiff(), patchData_(patchData), offset_(offset) {}
+    ~BlocksBufferDiff() override {}
+private:
+    std::unique_ptr<DeflateAdapter> CreateBZip2Adapter(size_t patchOffset) override;
+    int32_t WritePatchHeader(int64_t controlSize,
+        int64_t diffDataSize, int64_t newSize, size_t &patchOffset) override;
+    std::vector<uint8_t> &patchData_;
+    size_t offset_ { 0 };
 };
 } // namespace updatepatch
 #endif // BLOCKS_DIFF_H

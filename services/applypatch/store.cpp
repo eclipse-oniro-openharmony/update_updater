@@ -59,13 +59,13 @@ int32_t Store::CreateNewSpace(const std::string &path, bool needClear)
     LOG(INFO) << "Create dir " << dirPath;
     if (stat(dirPath.c_str(), &fileStat) == -1) {
         UPDATER_ERROR_CHECK(errno == ENOENT, "Create new space, failed to stat", return -1);
-        UPDATER_ERROR_CHECK(MkdirRecursive(dirPath, S_DIR_PERMISSION) == 0, "Failed to make store", return -1);
-        UPDATER_ERROR_CHECK(chown(dirPath.c_str(), S_USER_PERMISSION, S_USER_PERMISSION) == 0,
+        UPDATER_ERROR_CHECK(MkdirRecursive(dirPath, S_IRWXU) == 0, "Failed to make store", return -1);
+        UPDATER_ERROR_CHECK(chown(dirPath.c_str(), O_USER_GROUP_ID, O_USER_GROUP_ID) == 0,
                              "Failed to chown store", return -1);
     } else {
         UPDATER_CHECK_ONLY_RETURN(needClear, return 0);
-        std::vector<std::string> files;
-        UPDATER_CHECK_ONLY_RETURN(GetFilesFromDirectory(dirPath, files) > 0, return -1);
+        std::vector<std::string> files {};
+        UPDATER_CHECK_ONLY_RETURN(GetFilesFromDirectory(dirPath, files) >= 0, return -1);
         UPDATER_CHECK_ONLY_RETURN(!files.empty(), return 0);
         std::vector<std::string>::iterator iter = files.begin();
         while (iter != files.end()) {
@@ -90,9 +90,9 @@ int32_t Store::WriteDataToStore(const std::string &dirPath, const std::string &f
     std::string path = pathTmp + fileName;
     pathTmp = pathTmp + fileName + ".tmp";
 
-    int fd = open(pathTmp.c_str(), O_WRONLY | O_CREAT | O_TRUNC, S_OPEN_PERMISSION);
+    int fd = open(pathTmp.c_str(), O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
     UPDATER_ERROR_CHECK(fd != -1, "Failed to create store", return -1);
-    UPDATER_ERROR_CHECK(fchown(fd, S_USER_PERMISSION, S_USER_PERMISSION) == 0,
+    UPDATER_ERROR_CHECK(fchown(fd, O_USER_GROUP_ID, O_USER_GROUP_ID) == 0,
         "Failed to chown", close(fd); return -1);
     LOG(INFO) << "Writing " << size << " blocks to " << path;
     if (!WriteFully(fd, const_cast<uint8_t *>(buffer.data()), size)) {

@@ -82,6 +82,7 @@ struct UpgradePkgInfoExt {
     char *softwareVersion;
     char *date;
     char *time;
+    char *descriptPackageId = nullptr;
 };
 
 struct ComponentInfoExt {

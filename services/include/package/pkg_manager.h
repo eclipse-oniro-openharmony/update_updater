@@ -83,6 +83,7 @@ struct UpgradePkgInfo {
     std::string softwareVersion;
     std::string date;
     std::string time;
+    std::string descriptPackageId;
 };
 
 /**

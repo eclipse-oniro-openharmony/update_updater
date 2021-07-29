@@ -15,11 +15,18 @@
 #ifndef UPDATE_UI_UPDATER_UI_H
 #define UPDATE_UI_UPDATER_UI_H
 
+#include <string>
+#include "text_label.h"
+
 namespace updater {
 void DoProgress();
 
 void ShowUpdateFrame(bool isShow);
 
-void HosInit();
+void UpdaterUiInit();
+
+void ShowText(TextLabel *label, std::string text);
+
+void DeleteView();
 } // namespace updater
 #endif /* UPDATE_UI_HOS_UPDATER_H */

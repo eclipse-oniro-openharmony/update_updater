@@ -72,7 +72,7 @@ CommandType Command::ParseCommandType(const std::string &firstCmd)
         return CommandType::ERASE;
     } else if (firstCmd == "free") {
         return CommandType::FREE;
-    } else if (firstCmd == "imgdiff") {
+    } else if (firstCmd == "pkgdiff") {
         return CommandType::IMGDIFF;
     } else if (firstCmd == "move") {
         return CommandType::MOVE;

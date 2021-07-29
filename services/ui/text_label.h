@@ -26,20 +26,21 @@ constexpr int MAX_FONT_BUFFER_SIZE_HW  = 4096;
 constexpr int MAX_TEXT_SIZE = 512;
 const std::string DEFAULT_FONT_NAME = "font";
 
-class TextLable : public View {
+class TextLabel : public View {
 using ClickCallback = std::function<void(int id)>;
 enum FontType {
     DEFAULT_FONT,
 };
 
-enum AlignmentMethod {
-    ALIGN_CENTER,
-    ALIGN_TO_LEFT,
-    ALIGN_TO_TOP,
-};
 public:
-    TextLable(int startX, int startY, int w, int h, Frame *parent);
-    ~TextLable() override {};
+    enum AlignmentMethod {
+        ALIGN_CENTER,
+        ALIGN_TO_LEFT,
+        ALIGN_TO_TOP,
+    };
+
+    TextLabel(int startX, int startY, int w, int h, Frame *parent);
+    ~TextLabel() override {};
     void SetText(const char *str);
     void SetTextColor(BRGA888Pixel color);
     void SetFont(FontType fType);

@@ -40,6 +40,8 @@ public:
     void ViewRegister(View *view);
 
     void DispatchKeyEvent(int key);
+
+    void DispatchKeyEvent(int id, int event);
 private:
     void FlushThreadLoop();
 
@@ -52,6 +54,10 @@ private:
     void ProcessKeyLoop();
 
     void DoEvent(int key);
+
+    void ReleaseEvent();
+
+    void PressEvent();
 
     int currentActionIndex_ = 0;
     int maxActionIndex_ = 0;
@@ -69,6 +75,8 @@ private:
     std::condition_variable_any mCondKey_;
     std::list<int> keyFifo_;
     std::map<View*, int, CmpByStartY> viewMapList_;
+    int keyEvent_ = -1;
+    int btnId_ = -1;
 };
 } // namespace updater
 #endif // UPDATER_UI_FRAME_H
