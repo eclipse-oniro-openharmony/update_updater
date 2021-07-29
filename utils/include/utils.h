@@ -17,6 +17,7 @@
 
 #include <cerrno>
 #include <string>
+#include <sys/types.h>
 #include <vector>
 
 namespace updater {

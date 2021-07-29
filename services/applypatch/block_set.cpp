@@ -18,6 +18,7 @@
 #include <sys/ioctl.h>
 #include <openssl/sha.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 #include <unistd.h>
 #include "applypatch/command.h"
 #include "applypatch/store.h"

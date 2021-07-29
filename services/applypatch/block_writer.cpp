@@ -14,6 +14,7 @@
  */
 
 #include "applypatch/block_writer.h"
+#include <sys/types.h>
 #include "applypatch/block_set.h"
 #include "log/log.h"
 #include "utils.h"
