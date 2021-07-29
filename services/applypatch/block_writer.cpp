@@ -86,7 +86,7 @@ bool BlockWriter::Write(const uint8_t *addr, size_t len, WriteMode mode, const s
 
     if (fsync(fd_) == -1) {
         LOG(ERROR) << "Failed to fsync ";
-        return -1;
+        return false;
     }
 
     return true;
