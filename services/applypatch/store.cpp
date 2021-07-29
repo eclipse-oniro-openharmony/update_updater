@@ -64,8 +64,8 @@ int32_t Store::CreateNewSpace(const std::string &path, bool needClear)
                              "Failed to chown store", return -1);
     } else {
         UPDATER_CHECK_ONLY_RETURN(needClear, return 0);
-        std::vector<std::string> files;
-        UPDATER_CHECK_ONLY_RETURN(GetFilesFromDirectory(dirPath, files) > 0, return -1);
+        std::vector<std::string> files {};
+        UPDATER_CHECK_ONLY_RETURN(GetFilesFromDirectory(dirPath, files) >= 0, return -1);
         UPDATER_CHECK_ONLY_RETURN(!files.empty(), return 0);
         std::vector<std::string>::iterator iter = files.begin();
         while (iter != files.end()) {
