@@ -46,5 +46,14 @@ constexpr int RELEASE_EVENT = 1;
 constexpr int LABEL0_OFFSET = 0;
 constexpr int LABEL1_OFFSET = 1;
 constexpr int LABEL2_OFFSET = 2;
+constexpr int LABEL_ID_0 = 100;
+constexpr int LABEL_ID_1 = 101;
+constexpr int LABEL_ID_2 = 102;
+constexpr int DIALOG_OK_ID = 200;
+constexpr int DIALOG_CANCEL_ID = 201;
+constexpr int DIALOG_CANCEL_X = 340;
+constexpr int DIALOG_OK_WIDTH = 150;
+constexpr int SCREEN_WIDTH = 480;
+constexpr int SCREEN_HEIGHT = 960;
 } // namespace updater
 #endif /* UPDATE_UI_HOS_UPDATER_H */

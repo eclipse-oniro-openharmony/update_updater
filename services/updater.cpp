@@ -40,12 +40,11 @@ using updater::utils::SplitString;
 using updater::utils::Trim;
 using namespace hpackage;
 
-extern TextLable *g_updateInfoLabel;
+extern TextLabel *g_updateInfoLabel;
 extern ProgressBar *g_progressBar;
-extern TextLable *g_updateStateLable;
+
 int g_percentage;
 int g_tmpProgressValue;
-
 static int GetTemprature()
 {
     int temprature = FAKE_TEMPRATURE;
@@ -140,7 +139,10 @@ static UpdaterStatus IsSpaceCapacitySufficient(PkgManager::PkgManagerPtr pkgMana
             return UPDATE_ERROR);
 
         UPDATER_ERROR_CHECK(statvfs64("/sdcard", &updaterVfs) >= 0, "Statvfs read /sdcard error!", return UPDATE_ERROR);
-        UPDATER_ERROR_CHECK(updaterVfs.f_bfree * updaterVfs.f_bsize > info->unpackedSize,
+        uint64_t freeSpaceSize = static_cast<uint64_t>(updaterVfs.f_bfree);
+        uint64_t blockSize = static_cast<uint64_t>(updaterVfs.f_bsize);
+        uint64_t totalFreeSize = freeSpaceSize * blockSize;
+        UPDATER_ERROR_CHECK(totalFreeSize > static_cast<uint64_t>(info->unpackedSize),
             "Can not update, free space is not enough",
             ShowText(g_updateInfoLabel, "Free space is not enough"); return UPDATE_ERROR);
     } else {
@@ -192,7 +194,6 @@ UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, cons
     UpdaterStatus updateRet = StartUpdaterProc(pkgManager, packagePath, retryCount, maxTemperature);
     if (updateRet == UPDATE_SUCCESS) {
         g_progressBar->SetProgressValue(FULL_PERCENT_PROGRESS);
-        g_updateStateLable->SetText("100%");
         g_updateInfoLabel->SetText("Update success, reboot now");
         std::this_thread::sleep_for(std::chrono::milliseconds(SHOW_FULL_PROGRESS_TIME));
         LOG(INFO)<< "update success , do reboot now";
@@ -236,14 +237,12 @@ static void HandleChildOutput(const std::string &buffer, int32_t bufferLen,
             g_percentage = g_percentage + static_cast<int>(frac * FULL_PERCENT_PROGRESS);
             while (g_tmpProgressValue < g_percentage) {
                 g_progressBar->SetProgressValue(g_tmpProgressValue++);
-                g_updateStateLable->SetText(std::to_string(g_tmpProgressValue).append("%").c_str());
                 std::this_thread::sleep_for(std::chrono::milliseconds(INTERVAL_TIME));
                 if (g_tmpProgressValue >= FULL_PERCENT_PROGRESS - PROGRESS_VALUE_CONST) {
                     g_percentage = g_percentage - PROGRESS_VALUE_CONST;
                     break;
                 }
             }
-            g_updateStateLable->SetText(std::to_string(g_percentage).append("%").c_str());
             g_progressBar->SetProgressValue(g_percentage);
         }
     } else if (outputHeader == "set_progress") {

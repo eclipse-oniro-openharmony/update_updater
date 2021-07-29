@@ -15,12 +15,10 @@
 
 #ifndef UPDATER_UI_SURFACE_DEV_H
 #define UPDATER_UI_SURFACE_DEV_H
-#include <cstdio>
-#include <cstdlib>
-#include <mutex>
+#include "drm_driver.h"
 
 namespace updater {
-class SurfaceDev {
+class SurfaceDev : public DrmDriver {
 public:
     enum DevType {
         FB_DEVICE = 0,
@@ -28,11 +26,12 @@ public:
     };
 
     explicit SurfaceDev(SurfaceDev::DevType deviceType);
-    ~SurfaceDev();
+    ~SurfaceDev() override;
     void Flip(void* buf);
     void GetScreenSize(int &w, int &h);
 private:
-    std::mutex mMutex;
+    int screenSizeW_ = 0;
+    int screenSizeH_ = 0;
 };
 } // namespace updater
 #endif

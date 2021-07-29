@@ -22,9 +22,9 @@
 namespace updater {
 using namespace std;
 extern int g_textLabelNum;
-extern Frame *g_updateFrame;
+extern Frame *g_menuFrame;
 
-Frame::Frame(unsigned int w, unsigned int h, View::PixelFormat pixType, SurfaceDev  *sfDev)
+Frame::Frame(unsigned int w, unsigned int h, View::PixelFormat pixType, SurfaceDev *sfDev)
 {
     this->CreateBuffer(w, h, pixType);
     this->startX_ = 0;
@@ -44,7 +44,6 @@ Frame::Frame(unsigned int w, unsigned int h, View::PixelFormat pixType, SurfaceD
 Frame::~Frame()
 {
     needStop_ = true;
-    FreeBuffer();
 }
 
 void Frame::FlushThreadLoop()
@@ -151,7 +150,7 @@ void Frame::DownFoucs()
     frameMutex_.lock();
     std::map<View*, int>::iterator iter;
     currentActionIndex_++;
-    View *view;
+    View *view = nullptr;
     for (iter = viewMapList_.begin(); iter != viewMapList_.end(); ++iter) {
         View *tmpView = (*iter).first;
         if (tmpView->IsVisiable() && tmpView->IsFocusAble()) {
@@ -253,6 +252,9 @@ void Frame::DispatchKeyEvent(int id, int event)
     if (isClicked) {
         return;
     }
+    if (!g_menuFrame->IsVisiable()) {
+        event = -1;
+    }
     switch (event) {
         case INVALID_EVENT:
             LOG(INFO) << "DispatchKeyEvent invalid";
@@ -279,7 +281,7 @@ void Frame::ReleaseEvent()
     for (iter = viewMapList_.begin(); iter != viewMapList_.end(); ++iter) {
         View* tmpView = (*iter).first;
         if (tmpView->IsVisiable() && btnId_ == tmpView->GetViewId()) {
-            if (g_updateFrame->IsVisiable()) {
+            if (!g_menuFrame->IsVisiable()) {
                 return;
             }
             frameMutex_.unlock();
@@ -299,7 +301,7 @@ void Frame::PressEvent()
     for (iter = viewMapList_.begin(); iter != viewMapList_.end(); ++iter) {
         View* tmpView = (*iter).first;
         if (tmpView->IsVisiable() && btnId_ == tmpView->GetViewId()) {
-            if (g_updateFrame->IsVisiable()) {
+            if (!g_menuFrame->IsVisiable()) {
                 return;
             }
             frameMutex_.unlock();

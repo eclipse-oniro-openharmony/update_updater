@@ -22,6 +22,7 @@ ohos_static_library("libui") {
     "text_label.cpp",
     "updater_ui.cpp",
     "view.cpp",
+    "drm_driver.cpp",
   ]
 
   include_dirs = [

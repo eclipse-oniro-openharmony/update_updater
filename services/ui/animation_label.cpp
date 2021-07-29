@@ -39,12 +39,13 @@ AnimationLable::AnimationLable(int startX, int startY, int w, int h, Frame *mPar
 
 AnimationLable::~AnimationLable()
 {
+    startFlag_ = false;
     needStop_ = true;
-    FreeBuffer();
-    int imgSize = imgList_.size();
-
-    for (int i = 0; i < imgSize; i++) {
-        free(imgList_[i]);
+    for (std::vector<void *>::iterator it = imgList_.begin(); it != imgList_.end(); it++) {
+        if (*it != nullptr) {
+            free(*it);
+            *it = nullptr;
+        }
     }
     imgList_.clear();
 }
@@ -83,7 +84,7 @@ void AnimationLable::UpdateLoop()
             usleep(intervalMs_ * SECOND_PER_MS);
         }
         if (imgList_.size() <= 0) {
-            continue;
+            return;
         }
         if (!startFlag_ && IsVisiable()) {
             continue;
@@ -115,7 +116,9 @@ void AnimationLable::AddImg(const std::string &imgFileName)
 {
     mutex_.lock();
     void *buf = LoadPng(imgFileName);
-    imgList_.push_back(buf);
+    if (buf != nullptr) {
+        imgList_.push_back(buf);
+    }
     mutex_.unlock();
 }
 

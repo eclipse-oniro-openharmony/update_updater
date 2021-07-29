@@ -29,6 +29,7 @@ const std::string UPDATER_STAGE_LOG = "/data/updater/log/updater_stage_log";
 const std::string UPDATER_PATH = "/data/updater";
 const std::string MISC_FILE = "/dev/block/platform/soc/10100000.himci.eMMC/by-name/misc";
 const std::string UPDATER_BINARY = "updater_binary";
+const std::string SDCARD_PATH = "/sdcard";
 #ifndef UPDATER_UT
 const std::string SDCARD_CARD_PATH = "/sdcard/updater";
 const std::string SDCARD_CARD_PKG_PATH = "/sdcard/updater/updater.zip";

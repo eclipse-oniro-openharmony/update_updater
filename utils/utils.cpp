@@ -20,11 +20,10 @@
 #include <cstdlib>
 #include <dirent.h>
 #include <limits>
+#include <linux/reboot.h>
 #include <string>
-#include <sys/reboot.h>
 #include <sys/stat.h>
 #include <sys/syscall.h>
-#include <sys/types.h>
 #include <unistd.h>
 #include <vector>
 #include "fs_manager/mount.h"
@@ -40,6 +39,8 @@ using namespace hpackage;
 namespace utils {
 constexpr uint32_t MAX_PATH_LEN = 256;
 constexpr uint8_t SHIFT_RIGHT_FOUR_BITS = 4;
+constexpr int USER_ROOT_AUTHORITY = 0;
+constexpr int GROUP_SYS_AUTHORITY = 1000;
 int32_t DeleteFile(const std::string& filename)
 {
     UPDATER_ERROR_CHECK (!filename.empty(), "Invalid filename", return -1);
@@ -313,6 +314,10 @@ bool CopyUpdaterLogs(const std::string &sLog, const std::string &dLog)
     if (access(UPDATER_LOG_DIR.c_str(), 0) != 0) {
         UPDATER_ERROR_CHECK(!MkdirRecursive(UPDATER_LOG_DIR, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH),
             "MkdirRecursive error!", return false);
+        UPDATER_ERROR_CHECK(chown(UPDATER_PATH.c_str(), USER_ROOT_AUTHORITY, GROUP_SYS_AUTHORITY) == 0,
+            "Chown failed!", return false);
+        UPDATER_ERROR_CHECK(chmod(UPDATER_PATH.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) == 0,
+            "Chmod failed!", return false);
     }
 
     FILE* dFp = fopen(dLog.c_str(), "ab+");

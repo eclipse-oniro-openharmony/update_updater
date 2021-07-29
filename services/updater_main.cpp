@@ -19,6 +19,7 @@
 #include <getopt.h>
 #include <libgen.h>
 #include <string>
+#include <sys/mount.h>
 #include <sys/reboot.h>
 #include <sys/stat.h>
 #include <sys/statvfs.h>
@@ -46,9 +47,9 @@ using utils::String2Int;
 using namespace hpackage;
 using namespace updater::utils;
 
-extern TextLable *g_logLabel;
-extern TextLable* g_logResultLabel;
-extern TextLable* g_updateInfoLabel;
+extern TextLabel *g_logLabel;
+extern TextLabel *g_logResultLabel;
+extern TextLabel *g_updateInfoLabel;
 extern int g_updateFlag;
 constexpr struct option OPTIONS[] = {
     { "update_package", required_argument, nullptr, 0 },
@@ -104,19 +105,31 @@ int FactoryReset(FactoryResetMode mode, const std::string &path)
 UpdaterStatus UpdaterFromSdcard()
 {
 #ifndef UPDATER_UT
-    UPDATER_WARING_CHECK(MountForPath("/sdcard") == 0, "MountForPath /sdcard failed!", return UPDATE_ERROR);
+    // sdcard fsType only support ext4/vfat
+    if (MountForPath(SDCARD_PATH) != 0) {
+        std::string sdcardStr = GetBlockDeviceByMountPoint(SDCARD_PATH);
+        int ret = mount(sdcardStr.c_str(), SDCARD_PATH.c_str(), "vfat", 0, NULL);
+        UPDATER_WARING_CHECK(ret == 0, "MountForPath /sdcard failed!", return UPDATE_ERROR);
+    }
 #endif
     UPDATER_ERROR_CHECK(access(SDCARD_CARD_PKG_PATH.c_str(), 0) == 0, "package is not exist",
-        ShowText(g_logLabel, "package is not exist!");
+        ShowText(g_logLabel, "Package is not exist!");
         return UPDATE_CORRUPT);
     PkgManager::PkgManagerPtr pkgManager = PkgManager::GetPackageInstance();
     UPDATER_ERROR_CHECK(pkgManager != nullptr, "pkgManager is nullptr", return UPDATE_CORRUPT);
 
     STAGE(UPDATE_STAGE_BEGIN) << "UpdaterFromSdcard";
-    g_logLabel->SetText("Please do not remove SD Card");
     LOG(INFO) << "UpdaterFromSdcard start, sdcard updaterPath : " << SDCARD_CARD_PKG_PATH;
 
     UpdaterStatus updateRet = DoInstallUpdaterPackage(pkgManager, SDCARD_CARD_PKG_PATH.c_str(), 0);
+    if (updateRet != UPDATE_SUCCESS) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(UI_SHOW_DURATION));
+        g_logLabel->SetText("SD Card update failed!");
+        STAGE(UPDATE_STAGE_FAIL) << "UpdaterFromSdcard failed";
+    } else {
+        LOG(INFO) << "Update from SD Card successfully!";
+        STAGE(UPDATE_STAGE_SUCCESS) << "UpdaterFromSdcard success";
+    }
     return updateRet;
 }
 
@@ -146,7 +159,6 @@ static UpdaterStatus InstallUpdaterPackage(UpdaterParams &upParams, const std::v
         if (status != UPDATE_SUCCESS) {
             std::this_thread::sleep_for(std::chrono::milliseconds(UI_SHOW_DURATION));
             g_logLabel->SetText("update failed!");
-            g_updateInfoLabel->SetText("update failed!");
             STAGE(UPDATE_STAGE_FAIL) << "Install failed";
             if (status == UPDATE_RETRY && upParams.retryCount < MAX_RETRY_COUNT) {
                 upParams.retryCount += 1;
@@ -354,7 +366,7 @@ int UpdaterMain(int argc, char **argv)
     std::vector<std::string> args = ParseParams(argc, argv);
 
     LOG(INFO) << "Ready to start";
-    HosInit();
+    UpdaterUiInit();
     status = StartUpdater(manager, args, argv);
     std::this_thread::sleep_for(std::chrono::milliseconds(UI_SHOW_DURATION));
 #ifndef UPDATER_UT
@@ -367,15 +379,10 @@ int UpdaterMain(int argc, char **argv)
         return 0;
     }
 #endif
+    DeleteView();
     PostUpdater();
     PkgManager::ReleasePackageInstance(manager);
     utils::DoReboot("");
-    // Never get here.
-#ifndef UPDATER_UT
-    while (true) {
-        pause();
-    }
-#endif
     return 0;
 }
 } // updater

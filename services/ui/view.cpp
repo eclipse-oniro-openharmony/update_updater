@@ -105,7 +105,6 @@ void View::Hide()
 void View::Show()
 {
     if (!isVisiable_) {
-        LOG(DEBUG) << "isVisiable:" << isVisiable_;
         isVisiable_ = true;
         OnDraw();
     }
@@ -175,5 +174,10 @@ void View::SetFocusAble(bool focusable)
 void View::OnKeyEvent(int key)
 {
     (void)(key);
+}
+
+View::~View()
+{
+    FreeBuffer();
 }
 } // namespace updater

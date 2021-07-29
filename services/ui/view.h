@@ -15,9 +15,9 @@
 #ifndef UPDATER_UI_VIEW_H
 #define UPDATER_UI_VIEW_H
 #include <condition_variable>
-#include <cstring>
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 #include <functional>
 #include <mutex>
 
@@ -41,8 +41,7 @@ public:
         BGRA888,
     };
     View() {};
-    virtual ~View() {};
-    void* CreateBuffer(int w, int h, int pixelFormat);
+    virtual ~View();
     virtual void SetBackgroundColor(BRGA888Pixel *color);
     virtual void DrawSubView(int x, int y, int w, int h, void *buf);
     virtual void OnKeyEvent(int key);
@@ -69,6 +68,8 @@ public:
     int viewWidth_ = 0;
     int viewHeight_ = 0;
     std::mutex mutex_;
+protected:
+    void* CreateBuffer(int w, int h, int pixelFormat);
 private:
     char* viewBuffer_ = nullptr;
     char* shadowBuffer_ = nullptr;

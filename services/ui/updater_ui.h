@@ -23,8 +23,10 @@ void DoProgress();
 
 void ShowUpdateFrame(bool isShow);
 
-void HosInit();
+void UpdaterUiInit();
 
-void ShowText(TextLable *label, std::string text);
+void ShowText(TextLabel *label, std::string text);
+
+void DeleteView();
 } // namespace updater
 #endif /* UPDATE_UI_HOS_UPDATER_H */
