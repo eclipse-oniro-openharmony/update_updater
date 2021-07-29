@@ -22,7 +22,6 @@
 #include "progress_bar.h"
 #include "securec.h"
 #include "surface_dev.h"
-#include "text_label.h"
 #include "updater_main.h"
 #include "updater_ui_const.h"
 #include "utils.h"
@@ -32,15 +31,11 @@ namespace updater {
 using utils::String2Int;
 
 constexpr int LABEL_HEIGHT = 15;
-constexpr int LABEL0_OFFSET = 0;
-constexpr int LABEL2_OFFSET = 1;
-constexpr int LABEL3_OFFSET = 2;
 constexpr int MAX_IMGS_NAME_SIZE = 255;
 constexpr int MAX_IMGS = 62;
 
 int g_updateFlag = 0;
 int g_textLabelNum = 0;
-int g_updateErrFlag = 0;
 
 Frame *g_hosFrame;
 Frame *g_updateFrame;
@@ -54,13 +49,38 @@ TextLable *g_updateInfoLabel;
 AnimationLable *g_anmimationLabel;
 ProgressBar *g_progressBar;
 
+static void ClearText()
+{
+    if (g_logLabel != nullptr) {
+        g_logLabel->SetText("");
+    }
+    if (g_logResultLabel != nullptr) {
+        g_logResultLabel->SetText("");
+    }
+    if (g_updateInfoLabel != nullptr) {
+        g_updateInfoLabel->SetText("");
+    }
+}
+
+void ShowText(TextLable *label, std::string text)
+{
+    if (label != nullptr) {
+        ClearText();
+        label->SetText(text.c_str());
+    }
+}
+
 void OnKeyEvent(int viewId)
 {
-    if (viewId == g_textLabel0->GetViewId()) {
+    if (!g_hosFrame->IsVisiable()) {
+        return;
+    }
+    ClearText();
+    if (viewId == g_textLabel0->GetViewId() && g_hosFrame->IsVisiable()) {
         LOG(INFO) << "g_textLabel0 clicked!";
         PostUpdater();
         utils::DoReboot("");
-    } else if (viewId == g_textLabel2->GetViewId()) {
+    } else if (viewId == g_textLabel2->GetViewId() && g_hosFrame->IsVisiable()) {
         g_logLabel->SetText("Wipe data");
         g_updateFlag = 1;
         ShowUpdateFrame(true);
@@ -72,14 +92,9 @@ void OnKeyEvent(int viewId)
         } else {
             g_logResultLabel->SetText("Wipe data done");
         }
-    } else if (viewId == g_textLabel3->GetViewId()) {
+    } else if (viewId == g_textLabel3->GetViewId() && g_hosFrame->IsVisiable()) {
         g_logLabel->SetText("Update system!");
-        auto status = UpdaterFromSdcard();
-        if (status != UPDATE_SUCCESS) {
-            g_logResultLabel->SetText("install failed.\n");
-        } else {
-            g_logResultLabel->SetText("install success\n");
-        }
+        UpdaterFromSdcard();
     }
 }
 
@@ -104,7 +119,6 @@ void LoadImgs()
 void ShowUpdateFrame(bool isShow)
 {
     const int sleepMs = 300 * 100;
-    g_updateErrFlag = 0;
     if (isShow) {
         g_hosFrame->Hide();
         g_updateInfoLabel->SetText("");
@@ -115,6 +129,7 @@ void ShowUpdateFrame(bool isShow)
     }
     usleep(sleepMs);
     g_anmimationLabel->Stop();
+    g_progressBar->Show();
     g_updateFrame->Hide();
     g_hosFrame->Show();
     g_updateFlag = 0;
@@ -182,7 +197,7 @@ static void MenuItemInit(int height, int width, View::BRGA888Pixel bgColor)
     }
     g_textLabel0 = new TextLable(0, height * LABEL0_OFFSET / LABEL_HEIGHT, width, height /
         LABEL_HEIGHT, g_hosFrame);
-    struct FocusInfo info {true, true};
+    struct FocusInfo info {false, true};
     struct Bold bold {true, false};
     TextLableInit(g_textLabel0, "Reboot to normal system", bold, info, bgColor);
     if (!g_textLabel0) {
@@ -192,7 +207,7 @@ static void MenuItemInit(int height, int width, View::BRGA888Pixel bgColor)
     g_textLabel0->SetOnClickCallback(OnKeyEvent);
     g_textLabelNum++;
 
-    g_textLabel2 = new TextLable(0, height * LABEL2_OFFSET / LABEL_HEIGHT, width, height /
+    g_textLabel2 = new TextLable(0, height * LABEL1_OFFSET / LABEL_HEIGHT, width, height /
         LABEL_HEIGHT, g_hosFrame);
     info = {false, true};
     bold = {false, false};
@@ -204,7 +219,7 @@ static void MenuItemInit(int height, int width, View::BRGA888Pixel bgColor)
     g_textLabel2->SetOnClickCallback(OnKeyEvent);
     g_textLabelNum++;
 
-    g_textLabel3 = new TextLable(0, height * LABEL3_OFFSET / LABEL_HEIGHT, width, height /
+    g_textLabel3 = new TextLable(0, height * LABEL2_OFFSET / LABEL_HEIGHT, width, height /
         LABEL_HEIGHT, g_hosFrame);
     info = {false, true};
     bold = {false, true};
@@ -244,7 +259,7 @@ void HosInit()
     g_updateFrame->SetBackgroundColor(&bgColor);
     g_updateFrame->Hide();
 
-    g_anmimationLabel = new AnimationLable(screenW / START_X_SCALE, screenH / START_Y_SCALE,
+    g_anmimationLabel = new AnimationLable(START_X_SCALE, START_Y_SCALE,
             screenW * WIDTH_SCALE1 / WIDTH_SCALE2, screenH >> 1, g_updateFrame);
     g_anmimationLabel->SetBackgroundColor(&bgColor);
     LoadImgs();

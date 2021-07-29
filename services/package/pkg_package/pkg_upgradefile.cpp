@@ -153,10 +153,12 @@ int32_t UpgradePkgFile::SavePackage(size_t &signOffset)
 
     // Clear buffer and save signature information
     offset += pkgInfo_.pkgInfo.entryCount * sizeof(UpgradeCompInfo);
-    signOffset = (pkgInfo_.pkgInfo.digestMethod == PKG_DIGEST_TYPE_SHA384) ?
-        (offset + UPGRADE_RESERVE_LEN + SIGN_SHA256_LEN) : (offset + UPGRADE_RESERVE_LEN);
+    signOffset = offset + UPGRADE_RESERVE_LEN;
 
     buffer.assign(buffer.capacity(), 0);
+    size_t nameLen = 0;
+    ret = PkgFile::ConvertStringToBuffer(pkgInfo_.descriptPackageId, {buffer.data(), UPGRADE_RESERVE_LEN}, nameLen);
+    PKG_CHECK(ret == PKG_SUCCESS, return ret, "Fail write descriptPackageId");
     ret = pkgStream_->Write(buffer, GetUpgradeSignatureLen() + UPGRADE_RESERVE_LEN, offset);
     PKG_CHECK(ret == PKG_SUCCESS, return ret, "Fail write sign for %s", pkgStream_->GetFileName().c_str());
     PKG_LOGI("SavePackage success file length: %zu signOffset %zu", pkgStream_->GetFileLength(), signOffset);
@@ -190,24 +192,34 @@ int32_t UpgradePkgFile::LoadPackage(std::vector<std::string> &fileNames, VerifyF
         return ret, "Decode components fail %d", ret);
 
     // Read signature information
-    std::vector<uint8_t> reversedData(UPGRADE_RESERVE_LEN + GetUpgradeSignatureLen(), 0);
-    PkgBuffer signBuffer(reversedData);
-    algorithm->Update(signBuffer, UPGRADE_RESERVE_LEN + GetUpgradeSignatureLen());
-    size_t readLen = 0;
+    size_t readBytes = 0;
+    ret = pkgStream_->Read(buffer, parsedLen, GetUpgradeSignatureLen() + UPGRADE_RESERVE_LEN, readBytes);
+    PKG_CHECK(ret == PKG_SUCCESS, return ret, "read sign data fail");
+    PkgFile::ConvertBufferToString(pkgInfo_.descriptPackageId, {buffer.buffer, UPGRADE_RESERVE_LEN});
+    std::vector<uint8_t> signData;
     if (pkgInfo_.pkgInfo.digestMethod == PKG_DIGEST_TYPE_SHA384) {
-        reversedData.resize(SIGN_SHA384_LEN);
-        ret = pkgStream_->Read(reversedData,
-            parsedLen + UPGRADE_RESERVE_LEN + SIGN_SHA256_LEN, SIGN_SHA384_LEN, readLen);
+        signData.resize(SIGN_SHA384_LEN);
+        ret = memcpy_s(signData.data(), signData.size(),
+            buffer.buffer + UPGRADE_RESERVE_LEN + SIGN_SHA256_LEN, SIGN_SHA384_LEN);
     } else {
-        reversedData.resize(SIGN_SHA256_LEN);
-        ret = pkgStream_->Read(reversedData, parsedLen + UPGRADE_RESERVE_LEN, SIGN_SHA256_LEN, readLen);
+        signData.resize(SIGN_SHA256_LEN);
+        ret = memcpy_s(signData.data(), signData.size(), buffer.buffer + UPGRADE_RESERVE_LEN, SIGN_SHA256_LEN);
     }
-    PKG_LOGI("signOffset %zu", parsedLen + UPGRADE_RESERVE_LEN);
-    PKG_CHECK(ret == PKG_SUCCESS, return ret, "read header struct fail");
+    PKG_CHECK(ret == PKG_SUCCESS, return ret, "memcpy sign data fail");
+    memset_s(buffer.buffer + UPGRADE_RESERVE_LEN, buffer.length, 0, GetUpgradeSignatureLen());
+    algorithm->Update(buffer, UPGRADE_RESERVE_LEN + GetUpgradeSignatureLen());
     parsedLen += UPGRADE_RESERVE_LEN + GetUpgradeSignatureLen();
 
-    // Calculate digest
-    size_t offset = parsedLen;
+    // Calculate digest and verify
+    return Verify(parsedLen, {buffer.buffer, buffSize}, algorithm, verifier, signData);
+}
+
+int32_t UpgradePkgFile::Verify(size_t start, const PkgBuffer &buffer,
+    DigestAlgorithm::DigestAlgorithmPtr algorithm, VerifyFunction verifier, const std::vector<uint8_t> &signData)
+{
+    int ret = 0;
+    size_t buffSize = buffer.length;
+    size_t offset = start;
     size_t readBytes = 0;
     while (offset + readBytes < pkgStream_->GetFileLength()) {
         offset += readBytes;
@@ -221,9 +233,9 @@ int32_t UpgradePkgFile::LoadPackage(std::vector<std::string> &fileNames, VerifyF
 
     PkgBuffer digest(GetDigestLen());
     algorithm->Final(digest);
-    ret = verifier(&pkgInfo_.pkgInfo, digest.data, reversedData);
+    ret = verifier(&pkgInfo_.pkgInfo, digest.data, signData);
     PKG_CHECK(ret == 0, return PKG_INVALID_SIGNATURE, "Fail to verifier signature");
-    return PKG_SUCCESS;
+    return 0;
 }
 
 int32_t UpgradePkgFile::ReadComponents(const PkgBuffer &buffer, size_t &parsedLen,
@@ -289,15 +301,13 @@ int32_t UpgradePkgFile::ReadUpgradePkgHeader(const PkgBuffer &buffer, size_t &re
     int32_t ret = pkgStream_->Read(buffer, 0, buffer.length, readLen);
     PKG_CHECK(ret == PKG_SUCCESS, return ret, "Fail to read header");
     pkgInfo_.pkgInfo.pkgType = PkgFile::PKG_TYPE_UPGRADE;
+    pkgInfo_.pkgInfo.signMethod = PKG_SIGN_METHOD_RSA;
+    pkgInfo_.pkgInfo.digestMethod = PKG_DIGEST_TYPE_SHA256;
 
     PkgTlv tlv;
     tlv.type = ReadLE16(buffer.buffer);
     tlv.length = ReadLE16(buffer.buffer + sizeof(uint16_t));
-    if (tlv.type == TLV_TYPE_FOR_SHA256) {
-        pkgInfo_.pkgInfo.signMethod = PKG_SIGN_METHOD_RSA;
-        pkgInfo_.pkgInfo.digestMethod = PKG_DIGEST_TYPE_SHA256;
-    } else if (tlv.type == TLV_TYPE_FOR_SHA384) {
-        pkgInfo_.pkgInfo.signMethod = PKG_SIGN_METHOD_RSA;
+    if (tlv.type == TLV_TYPE_FOR_SHA384) {
         pkgInfo_.pkgInfo.digestMethod = PKG_DIGEST_TYPE_SHA384;
     }
 
@@ -360,7 +370,7 @@ int32_t UpgradeFileEntry::EncodeHeader(PkgStreamPtr inStream, size_t startOffset
     PKG_CHECK(ret == EOK, return ret, "Fail to memcpy_s ret：%d", ret);
     WriteLE32(reinterpret_cast<uint8_t *>(&comp.size), fileInfo_.fileInfo.unpackedSize);
     WriteLE16(reinterpret_cast<uint8_t *>(&comp.id), fileInfo_.id);
-    WriteLE32(reinterpret_cast<uint8_t *>(&comp.originalSize), fileInfo_.fileInfo.unpackedSize);
+    WriteLE32(reinterpret_cast<uint8_t *>(&comp.originalSize), fileInfo_.originalSize);
     comp.resType = fileInfo_.resType;
     comp.flags = fileInfo_.compFlags;
     comp.type = fileInfo_.type;
@@ -414,7 +424,8 @@ int32_t UpgradeFileEntry::DecodeHeader(const PkgBuffer &buffer, size_t headerOff
 
     UpgradeCompInfo *info = reinterpret_cast<UpgradeCompInfo *>(buffer.buffer);
     fileInfo_.fileInfo.packedSize = ReadLE32(buffer.buffer + offsetof(UpgradeCompInfo, size));
-    fileInfo_.fileInfo.unpackedSize = ReadLE32(buffer.buffer + offsetof(UpgradeCompInfo, originalSize));
+    fileInfo_.fileInfo.unpackedSize = fileInfo_.fileInfo.packedSize;
+    fileInfo_.originalSize = ReadLE32(buffer.buffer + offsetof(UpgradeCompInfo, originalSize));
     fileInfo_.fileInfo.packMethod = PKG_COMPRESS_METHOD_NONE;
     fileInfo_.fileInfo.digestMethod = PKG_DIGEST_TYPE_SHA256;
     int32_t ret = memcpy_s(fileInfo_.digest, sizeof(fileInfo_.digest), info->digest, sizeof(info->digest));
@@ -426,7 +437,6 @@ int32_t UpgradeFileEntry::DecodeHeader(const PkgBuffer &buffer, size_t headerOff
     fileInfo_.resType = info->resType;
     fileInfo_.compFlags = info->flags;
     fileInfo_.type = info->type;
-    fileInfo_.originalSize = fileInfo_.fileInfo.unpackedSize;
 
     headerOffset_ = headerOffset;
     dataOffset_ = dataOffset;

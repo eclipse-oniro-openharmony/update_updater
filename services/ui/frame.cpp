@@ -16,11 +16,13 @@
 #include "frame.h"
 #include <linux/input.h>
 #include "log/log.h"
+#include "updater_ui_const.h"
 #include "view.h"
 
 namespace updater {
 using namespace std;
 extern int g_textLabelNum;
+extern Frame *g_updateFrame;
 
 Frame::Frame(unsigned int w, unsigned int h, View::PixelFormat pixType, SurfaceDev  *sfDev)
 {
@@ -32,8 +34,10 @@ Frame::Frame(unsigned int w, unsigned int h, View::PixelFormat pixType, SurfaceD
     flushFlag_ = false;
     flushLoop_ = std::thread(&Frame::FlushThreadLoop, this);
     flushLoop_.detach();
+#ifdef CONVERT_RL_SLIDE_TO_CLICK
     keyProcessLoop_ = std::thread(&Frame::ProcessKeyLoop, this);
     keyProcessLoop_.detach();
+#endif
     currentActionIndex_ = 0;
 }
 
@@ -240,5 +244,70 @@ void Frame::DispatchKeyEvent(int key)
     keyFifo_.push_back(key);
     keyEventNotify_ = true;
     mCondKey_.notify_all();
+}
+
+void Frame::DispatchKeyEvent(int id, int event)
+{
+    bool isClicked = (keyEvent_ == event);
+    keyEvent_ = event;
+    if (isClicked) {
+        return;
+    }
+    switch (event) {
+        case INVALID_EVENT:
+            LOG(INFO) << "DispatchKeyEvent invalid";
+            break;
+        case PRESS_EVENT:
+            btnId_ = id;
+            PressEvent();
+            LOG(INFO) << "DispatchKeyEvent press";
+            break;
+        case RELEASE_EVENT:
+            btnId_ = id;
+            ReleaseEvent();
+            LOG(INFO) << "DispatchKeyEvent release";
+            break;
+        default:
+            break;
+        }
+}
+
+void Frame::ReleaseEvent()
+{
+    frameMutex_.lock();
+    std::map<View*, int>::iterator iter;
+    for (iter = viewMapList_.begin(); iter != viewMapList_.end(); ++iter) {
+        View* tmpView = (*iter).first;
+        if (tmpView->IsVisiable() && btnId_ == tmpView->GetViewId()) {
+            if (g_updateFrame->IsVisiable()) {
+                return;
+            }
+            frameMutex_.unlock();
+            tmpView->OnKeyEvent(KEY_POWER);
+            tmpView->OnFocus(false);
+            frameMutex_.lock();
+            break;
+        }
+    }
+    frameMutex_.unlock();
+}
+
+void Frame::PressEvent()
+{
+    frameMutex_.lock();
+    std::map<View*, int>::iterator iter;
+    for (iter = viewMapList_.begin(); iter != viewMapList_.end(); ++iter) {
+        View* tmpView = (*iter).first;
+        if (tmpView->IsVisiable() && btnId_ == tmpView->GetViewId()) {
+            if (g_updateFrame->IsVisiable()) {
+                return;
+            }
+            frameMutex_.unlock();
+            tmpView->OnFocus(true);
+            frameMutex_.lock();
+            break;
+        }
+    }
+    frameMutex_.unlock();
 }
 } // namespace updater

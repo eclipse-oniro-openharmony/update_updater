@@ -31,10 +31,21 @@ static int32_t GetUpgradePkgInfo(UpgradePkgInfo *upgradePackageInfo,
     ComponentInfoExt compInfo[])
 {
     upgradePackageInfo->updateFileVersion = pkgInfoExt->updateFileVersion;
-    upgradePackageInfo->softwareVersion = pkgInfoExt->softwareVersion;
-    upgradePackageInfo->productUpdateId = pkgInfoExt->productUpdateId;
-    upgradePackageInfo->time = pkgInfoExt->time;
-    upgradePackageInfo->date = pkgInfoExt->date;
+    if (pkgInfoExt->softwareVersion != nullptr) {
+        upgradePackageInfo->softwareVersion = pkgInfoExt->softwareVersion;
+    }
+    if (pkgInfoExt->productUpdateId != nullptr) {
+        upgradePackageInfo->productUpdateId = pkgInfoExt->productUpdateId;
+    }
+    if (pkgInfoExt->descriptPackageId != nullptr) {
+        upgradePackageInfo->descriptPackageId = pkgInfoExt->descriptPackageId;
+    }
+    if (pkgInfoExt->time != nullptr) {
+        upgradePackageInfo->time = pkgInfoExt->time;
+    }
+    if (pkgInfoExt->date != nullptr) {
+        upgradePackageInfo->date = pkgInfoExt->date;
+    }
     upgradePackageInfo->pkgInfo.digestMethod = pkgInfoExt->digestMethod;
     upgradePackageInfo->pkgInfo.signMethod = pkgInfoExt->signMethod;
     upgradePackageInfo->pkgInfo.entryCount = pkgInfoExt->entryCount;

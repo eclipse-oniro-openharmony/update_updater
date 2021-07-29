@@ -26,20 +26,50 @@
 namespace updatepatch {
 class BZip2Adapter : public DeflateAdapter {
 public:
-    BZip2Adapter(std::vector<uint8_t> &buffer, size_t offset)
-        : DeflateAdapter(), buffer_(buffer), offset_(offset) {}
+    BZip2Adapter() : DeflateAdapter() {}
     ~BZip2Adapter() override {}
 
     int32_t Open() override;
     int32_t Close() override;
+    int32_t WriteData(const BlockBuffer &srcData) override
+    {
+        return 0;
+    }
+    int32_t FlushData(size_t &offset) override
+    {
+        return 0;
+    }
+protected:
+    static constexpr int32_t BLOCK_SIZE_BEST = 9;
+    bz_stream stream_ {};
+};
+
+class BZipBuffer2Adapter : public BZip2Adapter {
+public:
+    BZipBuffer2Adapter(std::vector<uint8_t> &buffer, size_t offset)
+        : BZip2Adapter(), offset_(offset), buffer_(buffer) {}
+    ~BZipBuffer2Adapter() override {}
 
     int32_t WriteData(const BlockBuffer &srcData) override;
-    int32_t FlushData(size_t &offset) override;
+    int32_t FlushData(size_t &dataSize) override;
 private:
-    static constexpr int32_t BLOCK_SIZE_BEST = 9;
+    size_t offset_ { 0 };
+    size_t dataSize_ { 0 };
     std::vector<uint8_t> &buffer_;
-    size_t offset_;
-    bz_stream stream_ {};
+};
+
+class BZip2StreamAdapter : public BZip2Adapter {
+public:
+    explicit BZip2StreamAdapter(std::fstream &stream) : BZip2Adapter(), outStream_(stream) {}
+    ~BZip2StreamAdapter() override {}
+
+    int32_t Open() override;
+    int32_t WriteData(const BlockBuffer &srcData) override;
+    int32_t FlushData(size_t &dataSize) override;
+private:
+    std::vector<char> buffer_ { 0 };
+    size_t dataSize_ { 0 };
+    std::fstream &outStream_;
 };
 
 class BZip2ReadAdapter {

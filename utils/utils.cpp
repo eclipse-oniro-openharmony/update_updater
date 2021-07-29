@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "utils.h"
 #include <algorithm>
 #include <cerrno>
 #include <cstdint>
@@ -29,9 +30,13 @@
 #include "fs_manager/mount.h"
 #include "log/log.h"
 #include "misc_info/misc_info.h"
+#include "package/pkg_manager.h"
 #include "securec.h"
+#include "updater/updater_const.h"
 
 namespace updater {
+using namespace hpackage;
+
 namespace utils {
 constexpr uint32_t MAX_PATH_LEN = 256;
 constexpr uint8_t SHIFT_RIGHT_FOUR_BITS = 4;
@@ -71,7 +76,7 @@ int MkdirRecursive(const std::string &pathName, mode_t mode)
 }
 
 int64_t GetFilesFromDirectory(const std::string &path, std::vector<std::string> &files,
-    bool isRecursive = false)
+    bool isRecursive)
 {
     struct stat sb {};
     UPDATER_ERROR_CHECK (stat(path.c_str(), &sb) != -1, "Failed to stat", return -1);
@@ -94,11 +99,10 @@ int64_t GetFilesFromDirectory(const std::string &path, std::vector<std::string> 
         }
     }
     closedir(dirp);
-
     return totalSize;
 }
 
-std::vector<std::string> SplitString(const std::string &str, const std::string del = " \t")
+std::vector<std::string> SplitString(const std::string &str, const std::string del)
 {
     std::vector<std::string> result;
     size_t found = std::string::npos;
@@ -157,7 +161,7 @@ std::string ConvertSha256Hex(const uint8_t* shaDigest, size_t length)
 void DoReboot(const std::string& rebootTarget)
 {
     LOG(INFO) << ", rebootTarget: " << rebootTarget;
-    static const int32_t maxCommandSize = 12;
+    static const int32_t maxCommandSize = 16;
     LoadFstab();
     auto miscBlockDevice = GetBlockDeviceByMountPoint("/misc");
     struct UpdateMessage msg;
@@ -165,7 +169,7 @@ void DoReboot(const std::string& rebootTarget)
         bool ret = ReadUpdaterMessage(miscBlockDevice, msg);
         UPDATER_ERROR_CHECK(ret == true, "DoReboot read misc failed", return);
         if (strcmp(msg.command, "boot_updater") != 0) {
-            UPDATER_ERROR_CHECK(!memcpy_s(msg.command, maxCommandSize, "boot_updater", maxCommandSize),
+            UPDATER_ERROR_CHECK(!memcpy_s(msg.command, maxCommandSize, "boot_updater", maxCommandSize - 1),
                 "Memcpy failed", return);
             msg.command[maxCommandSize] = 0;
         }
@@ -266,6 +270,68 @@ bool WriteStringToFile(int fd, const std::string& content)
 std::string GetLocalBoardId()
 {
     return "HI3516";
+}
+
+void CompressLogs(const std::string &name)
+{
+    PkgManager::PkgManagerPtr pkgManager = PkgManager::GetPackageInstance();
+    UPDATER_ERROR_CHECK(pkgManager != nullptr, "pkgManager is nullptr", return);
+    std::vector<std::pair<std::string, ZipFileInfo>> files;
+    // Build the zip file to be packaged
+    std::vector<std::string> testFileNames;
+    std::string realName = name.substr(name.find_last_of("/") + 1);
+    testFileNames.push_back(realName);
+    for (auto name : testFileNames) {
+        ZipFileInfo file;
+        file.fileInfo.identity = name;
+        file.fileInfo.packMethod = PKG_COMPRESS_METHOD_ZIP;
+        file.fileInfo.digestMethod = PKG_DIGEST_TYPE_CRC;
+        std::string fileName = "/data/updater/log/" + name;
+        files.push_back(std::pair<std::string, ZipFileInfo>(fileName, file));
+    }
+
+    PkgInfo pkgInfo;
+    pkgInfo.signMethod = PKG_SIGN_METHOD_RSA;
+    pkgInfo.digestMethod = PKG_DIGEST_TYPE_SHA256;
+    pkgInfo.pkgType = PKG_PACK_TYPE_ZIP;
+
+    char realTime[MAX_TIME_SIZE];
+    auto sysTime = std::chrono::system_clock::now();
+    auto currentTime = std::chrono::system_clock::to_time_t(sysTime);
+    std::strftime(realTime, sizeof(realTime), "%H_%M_%S", std::localtime(&currentTime));
+    char pkgName[MAX_LOG_NAME_SIZE];
+    UPDATER_CHECK_ONLY_RETURN(snprintf_s(pkgName, MAX_LOG_NAME_SIZE, MAX_LOG_NAME_SIZE - 1,
+        "/data/updater/log/%s_%s.zip", realName.c_str(), realTime) != -1, return);
+    int32_t ret = pkgManager->CreatePackage(pkgName, GetCertName(), &pkgInfo, files);
+    UPDATER_CHECK_ONLY_RETURN(ret != 0, return);
+    UPDATER_CHECK_ONLY_RETURN(DeleteFile(name) == 0, return);
+}
+
+bool CopyUpdaterLogs(const std::string &sLog, const std::string &dLog)
+{
+    UPDATER_WARING_CHECK(MountForPath(UPDATER_LOG_DIR) == 0, "MountForPath /data/log failed!", return false);
+    if (access(UPDATER_LOG_DIR.c_str(), 0) != 0) {
+        UPDATER_ERROR_CHECK(!MkdirRecursive(UPDATER_LOG_DIR, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH),
+            "MkdirRecursive error!", return false);
+    }
+
+    FILE* dFp = fopen(dLog.c_str(), "ab+");
+    UPDATER_ERROR_CHECK(dFp != nullptr, "open log failed", return false);
+
+    FILE* sFp = fopen(sLog.c_str(), "r");
+    UPDATER_ERROR_CHECK(sFp != nullptr, "open log failed", fclose(dFp); return false);
+
+    char buf[MAX_LOG_BUF_SIZE];
+    size_t bytes;
+    while ((bytes = fread(buf, 1, sizeof(buf), sFp)) != 0) {
+        fwrite(buf, 1, bytes, dFp);
+    }
+    fseek(dFp, 0, SEEK_END);
+    UPDATER_INFO_CHECK(ftell(dFp) < MAX_LOG_SIZE, "log size greater than 5M!", CompressLogs(dLog));
+    sync();
+    fclose(sFp);
+    fclose(dFp);
+    return true;
 }
 } // utils
 } // namespace updater

@@ -43,10 +43,6 @@ int FactoryReset(FactoryResetMode mode, const std::string &path);
 
 UpdaterStatus UpdaterFromSdcard();
 
-bool CopyUpdaterLogs(const std::string &sLog, const std::string &dLog);
-
 bool IsBatteryCapacitySufficient();
-
-void CompressLogs(const std::string &name);
 } // namespace updater
 #endif // UPDATER_MAIN_H

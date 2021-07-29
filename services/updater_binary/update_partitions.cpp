@@ -47,24 +47,24 @@ int UpdatePartitions::ParsePartitionInfo(const std::string &partitionInfo, Parti
             cJSON_Delete(root);
             return 0;
         }
-        cJSON* thisPartion = cJSON_GetArrayItem(partitions, i);
-        UPDATER_ERROR_CHECK(thisPartion != nullptr, "Error get thisPartion", cJSON_Delete(root); break);
+        cJSON* thisPartition = cJSON_GetArrayItem(partitions, i);
+        UPDATER_ERROR_CHECK(thisPartition != nullptr, "Error get thisPartion", cJSON_Delete(root); break);
 
-        cJSON* item = cJSON_GetObjectItem(thisPartion, "start");
+        cJSON* item = cJSON_GetObjectItem(thisPartition, "start");
         UPDATER_ERROR_CHECK(item != nullptr, "Error get start", cJSON_Delete(root); break);
         myPartition->start = item->valueint;
 
-        item = cJSON_GetObjectItem(thisPartion, "length");
+        item = cJSON_GetObjectItem(thisPartition, "length");
         UPDATER_ERROR_CHECK(item != nullptr, "Error get length", cJSON_Delete(root); break);
         myPartition->length = item->valueint;
         myPartition->partNum = 0;
         myPartition->devName = "mmcblk0px";
 
-        item = cJSON_GetObjectItem(thisPartion, "partName");
+        item = cJSON_GetObjectItem(thisPartition, "partName");
         UPDATER_ERROR_CHECK(item != nullptr, "Error get partName", cJSON_Delete(root); break);
         myPartition->partName = (item->valuestring);
 
-        item = cJSON_GetObjectItem(thisPartion, "fsType");
+        item = cJSON_GetObjectItem(thisPartition, "fsType");
         UPDATER_ERROR_CHECK(item != nullptr, "Error get fsType", cJSON_Delete(root); break);
         myPartition->fsType = (item->valuestring);
 

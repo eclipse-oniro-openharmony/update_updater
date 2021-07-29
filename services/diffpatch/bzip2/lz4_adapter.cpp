@@ -83,9 +83,9 @@ int32_t Lz4FrameAdapter::Open()
     PATCH_CHECK(outBuffSize > 0, return -1, "BufferSize must > 0");
     buffer_.resize(outBuffSize);
 
-    PATCH_LOGI("frameInfo blockSizeID %d compressionLevel_: %d blockIndependence_:%d %d blockSize %zu %zu %zu",
+    PATCH_LOGI("frameInfo blockSizeID %d compressionLevel_: %d blockIndependence_:%d %d %d blockSize %zu %zu %zu",
         static_cast<int32_t>(blockSizeID_), static_cast<int32_t>(compressionLevel_),
-        static_cast<int32_t>(blockIndependence_), static_cast<int32_t>(contentChecksumFlag_),
+        static_cast<int32_t>(blockIndependence_), static_cast<int32_t>(contentChecksumFlag_), autoFlush_,
         blockSize, LZ4_BLOCK_SIZE(blockSizeID_), outBuffSize);
 
     /* write package header */

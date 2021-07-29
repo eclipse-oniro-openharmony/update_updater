@@ -23,6 +23,7 @@ namespace updater {
 constexpr int DEFAULT_PROGRESS_COLOR_A = 0xCC;
 constexpr int DEFAULT_NORMAL_COLOR = 0xFF;
 constexpr int MAX_PROGRESS_VALUE = 100;
+constexpr uint32_t DEFAULT_PROGRESS_COLOR = 0x00;
 
 ProgressBar::ProgressBar(const int mStartX, const int mStartY, const int w, const int h, Frame *mParent)
 {
@@ -32,14 +33,14 @@ ProgressBar::ProgressBar(const int mStartX, const int mStartY, const int w, cons
     parent_ = mParent;
     SetFocusAble(false);
     parent_->ViewRegister(this);
-    progressColor_.r = 0x00;
-    progressColor_.g = 0x00;
-    progressColor_.b = 0x00;
-    progressColor_.a = DEFAULT_PROGRESS_COLOR_A;
-    normalColor_.r = DEFAULT_NORMAL_COLOR;
-    normalColor_.g = DEFAULT_NORMAL_COLOR;
-    normalColor_.b = DEFAULT_NORMAL_COLOR;
-    normalColor_.a = DEFAULT_NORMAL_COLOR;
+    progressColor_.r = DEFAULT_NORMAL_COLOR;
+    progressColor_.g = DEFAULT_NORMAL_COLOR;
+    progressColor_.b = DEFAULT_NORMAL_COLOR;
+    progressColor_.a = DEFAULT_NORMAL_COLOR;
+    normalColor_.r = DEFAULT_PROGRESS_COLOR;
+    normalColor_.g = DEFAULT_PROGRESS_COLOR;
+    normalColor_.b = DEFAULT_PROGRESS_COLOR;
+    normalColor_.a = DEFAULT_PROGRESS_COLOR_A;
 }
 
 void ProgressBar::SetProgressValue(int value)

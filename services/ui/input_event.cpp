@@ -16,11 +16,15 @@
 #include <cstdio>
 #include <cstdlib>
 #include "log/log.h"
+#include "updater_ui_const.h"
 
 namespace updater {
 constexpr int TOUCH_LOW_TH = 50;
 constexpr int TOUCH_HIGH_TH = 90;
 constexpr int INIT_DEFAULT_VALUE = 255;
+constexpr int LABEL_HEIGHT = 64;
+constexpr int LABEL_OFFSET_2 = 2;
+constexpr int LABEL_OFFSET_3 = 3;
 IInputInterface *g_inputInterface;
 InputEventCb g_callback;
 
@@ -39,6 +43,18 @@ enum SwipeDirection {
     RIGHT,
     LEFT
 };
+
+void TouchToClickEvent(const int dx, const int dy, int event)
+{
+    if (abs(dy) >= 0 && abs(dy) <= LABEL_HEIGHT) {
+        g_hosFrame->DispatchKeyEvent(LABEL0_OFFSET, event);
+    } else if (abs(dy) > LABEL_HEIGHT && abs(dy) <= LABEL_HEIGHT * LABEL_OFFSET_2) {
+        g_hosFrame->DispatchKeyEvent(LABEL1_OFFSET, event);
+    } else if (abs(dy) > LABEL_HEIGHT * LABEL_OFFSET_2 && abs(dy) <= LABEL_HEIGHT * LABEL_OFFSET_3) {
+        g_hosFrame->DispatchKeyEvent(LABEL2_OFFSET, event);
+    }
+    return;
+}
 
 void TouchToKey(const int dx, const int dy)
 {
@@ -67,6 +83,27 @@ void TouchToKey(const int dx, const int dy)
     return;
 }
 
+void SwipEvent()
+{
+    if (g_touchFingerDown && !g_touchSwiping) {
+        g_touchStartX = g_touchX;
+        g_touchStartY = g_touchY;
+        g_touchSwiping = true;
+    } else if (!g_touchFingerDown && g_touchSwiping) {
+        g_touchSwiping = false;
+        TouchToKey(g_touchX - g_touchStartX, g_touchY - g_touchStartY);
+    }
+}
+
+void ClickEvent()
+{
+    if (g_touchFingerDown) {
+        TouchToClickEvent(g_touchX, g_touchY, PRESS_EVENT);
+    } else if (!g_touchFingerDown) {
+        TouchToClickEvent(g_touchX, g_touchY, RELEASE_EVENT);
+    }
+}
+
 int HandleInputEvent(const struct input_event *iev)
 {
     struct input_event ev {};
@@ -77,14 +114,11 @@ int HandleInputEvent(const struct input_event *iev)
         if (ev.code == SYN_REPORT) {
             // There might be multiple SYN_REPORT events. We should only detect
             // a swipe after lifting the contact.
-            if (g_touchFingerDown && !g_touchSwiping) {
-                g_touchStartX = g_touchX;
-                g_touchStartY = g_touchY;
-                g_touchSwiping = true;
-            } else if (!g_touchFingerDown && g_touchSwiping) {
-                g_touchSwiping = false;
-                TouchToKey(g_touchX - g_touchStartX, g_touchY - g_touchStartY);
-            }
+#ifdef CONVERT_RL_SLIDE_TO_CLICK
+            SwipEvent();
+#else
+            ClickEvent();
+#endif
         }
         return 0;
     }
@@ -122,7 +156,7 @@ int HandleInputEvent(const struct input_event *iev)
 
 void ReportEventPkgCallback(const EventPackage **pkgs, const uint32_t count, uint32_t devIndex)
 {
-    if (pkgs == nullptr || *pkgs == nullptr) {
+    if (pkgs == nullptr || *pkgs == nullptr || !g_hosFrame->IsVisiable()) {
         return;
     }
     for (uint32_t i = 0; i < count; i++) {

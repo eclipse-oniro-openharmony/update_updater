@@ -42,10 +42,10 @@ int32_t PkgAlgorithm::FinalDigest(DigestAlgorithm::DigestAlgorithmPtr algorithm,
     if (context.digestMethod == PKG_DIGEST_TYPE_SHA256) {
         PkgBuffer digest(DIGEST_MAX_LEN);
         algorithm->Final(digest);
-        if (check && memcmp(digest.buffer, context.digest, sizeof(digest)) != 0) {
+        if (check && memcmp(digest.buffer, context.digest, DIGEST_MAX_LEN) != 0) {
             return PKG_INVALID_DIGEST;
         }
-        PKG_CHECK(!memcpy_s(context.digest, sizeof(context.digest), digest.buffer, sizeof(digest)),
+        PKG_CHECK(!memcpy_s(context.digest, sizeof(context.digest), digest.buffer, DIGEST_MAX_LEN),
             return PKG_NONE_MEMORY, "FinalDigest memcpy failed");
     }
     return PKG_SUCCESS;
@@ -76,8 +76,8 @@ int32_t PkgAlgorithm::Pack(const PkgStreamPtr inStream, const PkgStreamPtr outSt
         destOffset += readLen;
     }
 
-    FinalDigest(algorithm, context, true);
-
+    ret = FinalDigest(algorithm, context, true);
+    PKG_CHECK(ret == 0, return ret, "Check digest fail");
     PKG_CHECK(srcOffset - context.srcOffset == context.unpackedSize, return ret,
         "original size error %zu %zu", srcOffset, context.unpackedSize);
     context.packedSize = destOffset - context.destOffset;
@@ -108,7 +108,8 @@ int32_t PkgAlgorithm::Unpack(const PkgStreamPtr inStream, const PkgStreamPtr out
         destOffset += readLen;
     }
 
-    FinalDigest(algorithm, context, true);
+    ret = FinalDigest(algorithm, context, true);
+    PKG_CHECK(ret == 0, return ret, "Check digest fail");
     PKG_CHECK(destOffset - context.destOffset == context.packedSize, return ret,
         "original size error %zu %zu", destOffset, context.packedSize);
     context.unpackedSize = srcOffset - context.srcOffset;

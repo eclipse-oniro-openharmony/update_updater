@@ -72,7 +72,7 @@ int32_t CheckFile(const std::string &fileName)
         return PKG_SUCCESS;
     }
     if (access(path.c_str(), F_OK) == -1) {
-        mkdir(path.c_str(), S_READ_WRITE_PERMISSION);
+        mkdir(path.c_str(), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
     }
     // If the path writable
     int ret = access(path.c_str(), R_OK | W_OK);

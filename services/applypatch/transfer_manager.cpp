@@ -108,9 +108,9 @@ void TransferManager::Init()
 bool TransferManager::RegisterForRetry(const std::string &cmd)
 {
     std::string path = globalParams->storeBase + "/" + "retry_flag";
-    int fd = open(path.c_str(), O_WRONLY | O_CREAT | O_TRUNC, S_OPEN_PERMISSION);
+    int fd = open(path.c_str(), O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
     UPDATER_ERROR_CHECK(fd != -1, "Failed to create", return false);
-    UPDATER_ERROR_CHECK(fchown(fd, S_USER_PERMISSION, S_USER_PERMISSION) == 0,
+    UPDATER_ERROR_CHECK(fchown(fd, O_USER_GROUP_ID, O_USER_GROUP_ID) == 0,
         "Failed to chown", close(fd); return -1);
     bool ret = utils::WriteStringToFile(fd, cmd);
     UPDATER_ERROR_CHECK_NOT_RETURN(ret, "Write retry flag error");

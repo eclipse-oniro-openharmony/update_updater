@@ -61,7 +61,7 @@ bool PartitionRecord::RecordPartitionUpdateStatus(const std::string &partitionNa
         int fd = open(miscBlockDevice.c_str(), O_RDWR | O_EXCL | O_CLOEXEC | O_BINARY);
         UPDATER_FILE_CHECK(fd >= 0, "PartitionRecord: Open misc to recording partition failed", return false);
         off_t newOffset = 0;
-        UPDATER_CHECK_FILE_OP(lseek(fd, MISC_PARTITION_RECORD_OFFSET, SEEK_SET) >= 0,
+        UPDATER_CHECK_FILE_OP(lseek(fd, PARTITION_RECORD_OFFSET, SEEK_SET) >= 0,
                 "PartitionRecord: Seek misc to record offset failed", fd, return false);
         UPDATER_CHECK_FILE_OP(read(fd, &newOffset, sizeof(off_t)) == sizeof(off_t),
             "PartitionRecord: Read offset failed", fd, return false);
@@ -76,7 +76,7 @@ bool PartitionRecord::RecordPartitionUpdateStatus(const std::string &partitionNa
             UPDATER_CHECK_FILE_OP(write(fd, &info_, sizeof(PartitionRecordInfo)) == sizeof(PartitionRecordInfo),
                 "PartitionRecord: write failed", fd, return false);
             offset_ += sizeof(PartitionRecordInfo);
-            UPDATER_CHECK_FILE_OP(lseek(fd, MISC_PARTITION_RECORD_OFFSET, SEEK_SET) >= 0,
+            UPDATER_CHECK_FILE_OP(lseek(fd, PARTITION_RECORD_OFFSET, SEEK_SET) >= 0,
                 "PartitionRecord: Seek misc to record offset failed", fd, return false);
             UPDATER_CHECK_FILE_OP(write(fd, &offset_, sizeof(off_t)) == sizeof(off_t),
                 "PartitionRecord: Seek misc to record offset failed", fd, return false);
@@ -99,7 +99,7 @@ bool PartitionRecord::ClearRecordPartitionOffset()
     if (!miscBlockDevice.empty()) {
         int fd = open(miscBlockDevice.c_str(), O_RDWR | O_EXCL | O_CLOEXEC | O_BINARY);
         UPDATER_FILE_CHECK(fd >= 0, "Open misc to recording partition failed", return false);
-        UPDATER_CHECK_FILE_OP(lseek(fd, MISC_PARTITION_RECORD_OFFSET, SEEK_SET) >= 0,
+        UPDATER_CHECK_FILE_OP(lseek(fd, PARTITION_RECORD_OFFSET, SEEK_SET) >= 0,
             "Seek misc to specific offset failed", fd, return false);
 
         off_t initOffset = 0;

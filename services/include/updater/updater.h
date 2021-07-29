@@ -26,8 +26,7 @@ enum UpdaterStatus {
     UPDATE_CORRUPT, /* package or verify failed, something is broken. */
     UPDATE_SKIP, /* skip update because of condition is not satisfied, e.g, battery is low */
     UPDATE_RETRY,
-    UPDATE_NORMAL,
-    UPDATE_FINISH
+    UPDATE_UNKNOWN
 };
 
 UpdaterStatus DoInstallUpdaterPackage(hpackage::PkgManager::PkgManagerPtr pkgManager,
