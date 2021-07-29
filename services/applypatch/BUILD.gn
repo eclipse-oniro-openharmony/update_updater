@@ -23,7 +23,6 @@ ohos_static_library("libapplypatch") {
     "data_writer.cpp",
     "partition_record.cpp",
     "raw_writer.cpp",
-    "sparse_writer.cpp",
     "store.cpp",
     "transfer_manager.cpp",
   ]
@@ -45,7 +44,6 @@ ohos_static_library("libapplypatch") {
   deps = [
     "//base/update/updater/services/diffpatch/patch:libpatch",
     "//base/update/updater/services/fs_manager:libfsmanager",
-    "//base/update/updater/services/sparse_image:libsparseimage",
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/bzip2:libbz2",
   ]

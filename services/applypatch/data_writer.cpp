@@ -23,7 +23,6 @@
 #include "fs_manager/mount.h"
 #include "log/log.h"
 #include "raw_writer.h"
-#include "sparse_writer.h"
 
 namespace updater {
 int DataWriter::OpenPartition(const std::string &partitionName)
@@ -53,11 +52,6 @@ int DataWriter::OpenPartition(const std::string &partitionName)
 std::unique_ptr<DataWriter> DataWriter::CreateDataWriter(WriteMode mode, const std::string &partitionName)
 {
     switch (mode) {
-        case WRITE_SPARSE:
-        {
-            std::unique_ptr<SparseWriter> writer(std::make_unique<SparseWriter>(partitionName));
-            return std::move(writer);
-        }
         case WRITE_RAW:
         {
             std::unique_ptr<RawWriter> writer(std::make_unique<RawWriter>(partitionName));
