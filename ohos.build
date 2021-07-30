@@ -26,7 +26,8 @@
          "//base/update/updateservice/engine/sa_profile:updater_sa_profile",
          "//base/update/updateservice/interfaces/innerkits/engine:updateservicekits",
          "//base/update/updater/services/ui:libui",
-         "//third_party/libdrm:libdrm"
+         "//third_party/libdrm:libdrm",
+         "//third_party/e2fsprogs:e2fsprogs"
 	]
     }
   }
