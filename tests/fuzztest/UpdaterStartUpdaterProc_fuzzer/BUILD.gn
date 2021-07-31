@@ -1,0 +1,76 @@
+# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+module_output_path = "updater/updater_start_updater_proc"
+
+#####################hydra-fuzz###################
+import("//build/config/features.gni")
+import("//build/test.gni")
+
+##############################fuzztest##########################################
+ohos_fuzztest("UpdaterStartUpdaterProcFuzzTest") {
+  module_out_path = module_output_path
+
+  include_dirs = [
+    "//base/update/updater/utils/include",
+    "//base/update/updater/interfaces/kits/include/",
+    "//base/update/updater/services/include/updater",
+    "//base/update/updater/services/package/pkg_manager",
+    "//base/update/updater/services/package/pkg_algorithm",
+    "//base/update/updater/services/include/log",
+    "//base/update/updater/services",
+    "//base/update/updater/services/include",
+    "//base/update/updater/services/include/package",
+    "//base/update/updater/services/ui",
+    "//third_party/openssl/include",
+  ]
+
+  deps = [
+    "//base/update/updater/services/package:libupdaterpackage",
+    "//base/update/updater/services/log:libupdaterlog",
+    "//base/update/updater/interfaces/kits/misc_info:libmiscinfo",
+    "//base/update/updater/interfaces/kits/packages:libpackageExt",
+    "//base/update/updater/services/applypatch:libapplypatch",
+    "//base/update/updater/services/diffpatch/patch:libpatch",
+    "//base/update/updater/services/fs_manager:libfsmanager",
+    "//base/update/updater/services/ui:libui",
+    "//base/update/updater/utils:libutils",
+    "//third_party/bounds_checking_function:libsec_static",
+    "//third_party/bzip2:libbz2",
+    "//third_party/libdrm:libdrm",
+    "//third_party/lz4:liblz4_static",
+    "//third_party/openssl:crypto_source",
+    "//third_party/openssl:ssl_source",
+    "//third_party/zlib:libz",
+    "//drivers/peripheral/input/hal:hdi_input",
+    "//third_party/libpng:libpng",
+  ]
+
+  cflags = ["-g","-O0","-Wno-unused-variable","-fno-omit-frame-pointer"]
+  sources = [
+    "UpdaterStartUpdaterProc_fuzzer.cpp",
+    "//base/update/updater/services/updater.cpp",
+    "//base/update/updater/services/ui/updater_ui.cpp",
+    "//base/update/updater/services/updater_main.cpp",
+  ]
+}
+###############################################################################
+group("fuzztest") {
+  testonly = true
+  deps = []
+  deps += [
+    # deps file
+    ":UpdaterStartUpdaterProcFuzzTest",
+  ]
+}
+###############################################################################

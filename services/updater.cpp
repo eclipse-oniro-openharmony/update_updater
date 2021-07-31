@@ -296,7 +296,9 @@ UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, const std::
     bool retryUpdate = false;
     FILE* fromChild = fdopen(pipeRead, "r");
     g_tmpProgressValue = 0;
-    g_progressBar->SetProgressValue(0);
+    if (g_progressBar != nullptr) {
+        g_progressBar->SetProgressValue(0);
+    }
     while (fgets(buffer, MAX_BUFFER_SIZE, fromChild) != nullptr) {
         size_t n = strlen(buffer);
         if (buffer[n - 1] == '\n') {
