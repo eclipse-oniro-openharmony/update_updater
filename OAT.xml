@@ -67,7 +67,9 @@ Note:If the text contains special characters, please escape them according to th
         </policylist>
 		<filefilterlist>			
 			<filefilter name="licenseFileNamePolicyFilter" desc="根目录LICENSE文件校验策略的过滤条件" >
-				<filteritem type="filepath" name="adapter/.*" desc="adapter目录下是自研代码"/>			
+				<filteritem type="filepath" name="adapter/.*" desc="adapter目录下是自研代码"/>		
+				<filteritem type="filepath" name="services/etc/updater_init.cfg" desc="升级服务应用的资源文件"/>
+				<filteritem type="filepath" name="services/resources/*.png" desc="升级服务应用的资源文件"/>
 			</filefilter>				
 	
 		</filefilterlist>
