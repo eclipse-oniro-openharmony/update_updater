@@ -1,0 +1,38 @@
+Stdout("Test math ================");
+// 测试加减乘除
+a = 3 + 10;
+b =  5 + 6;
+c = (a + b) * (a - b);
+
+f = (a + b) / (a - 3);
+
+Stdout("1+2*3 ", 1+2*3);
+Stdout("1+2/3 ", 1+2/3);
+
+e1 = 0.5;
+f = e1 * 100;
+// 失败，除0
+//f = f / 0;
+
+Stdout(a, b, c, f);
+
+str = "dddddddddd";
+str = str + a;
+
+// 失败，脚本执行退出
+//a = a + str;
+
+Stdout(str);
+
+
+t1 = 3.0 + 10.0;
+t2 =  5 + 6;
+t3 = (t1 + t2) * (t1 - t2);
+t4 = t1 / t2;
+if (t3 > t4) {
+	Stdout(t1, t2, t3, t4);
+}
+Stdout(t1, t2, t3, t4);
+
+
+
