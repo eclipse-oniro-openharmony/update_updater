@@ -40,7 +40,8 @@ ohos_executable("updater_reboot") {
     "//base/update/updater/services/fs_manager:libfsmanager",
     "//base/update/updater/utils:libutils",
   ]
-
+  module_install_dir = "system/bin"
+  install_images = [ "updater" ]
   install_enable = true
   part_name = "updater"
 }
