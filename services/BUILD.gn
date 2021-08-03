@@ -102,7 +102,6 @@ ohos_executable("updater") {
     "//third_party/openssl:ssl_source",
     "//third_party/zlib:libz",
   ]
-  module_install_dir = "system/bin"
   install_images = [ "updater" ]
   install_enable = true
   part_name = "updater"
