@@ -1,0 +1,231 @@
+# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/ohos.gni")
+
+config("utest_config") {
+  visibility = [ ":*" ]
+
+  cflags = [
+    "-fprofile-arcs",
+    "-ftest-coverage",
+    "-Wno-implicit-fallthrough",
+    "-Wno-unused-function",
+  ]
+  cflags_cc = [ "-Wno-implicit-fallthrough" ]
+
+  ldflags = [ "--coverage" ]
+}
+
+ohos_executable("updater_ut") {
+  sources = [
+    "applypatch_test/all_cmd_unittest.cpp",
+    "applypatch_test/applypatch_unittest.cpp",
+    "applypatch_test/blockset_unittest.cpp",
+    "applypatch_test/bspatch_unittest.cpp",
+    "applypatch_test/commands_unittest.cpp",
+    "applypatch_test/imagepatch_unittest.cpp",
+    "applypatch_test/partition_update_record_unittest.cpp",
+    "applypatch_test/store_unittest.cpp",
+    "applypatch_test/transfer_manager_unittest.cpp",
+    "diffpatch/bzip2_unittest.cpp",
+    "diffpatch/diffpatch_unittest.cpp",
+    "fs_manager/do_partition_unittest.cpp",
+    "log_test/log_unittest.cpp",
+    "misc_info_test/misc_info_unittest.cpp",
+    "mount_test/fstabapi_unittest.cpp",
+    "mount_test/mount_unittest.cpp",
+    "package/package_unittest.cpp",
+    "package/pkg_algo_unittest.cpp",
+    "package/pkg_manager_unittest.cpp",
+    "package/pkg_package_unittest.cpp",
+    "script/basic_instruction_unittest.cpp",
+    "script/script_interpreter_unittest.cpp",
+    "script/script_instruction_unittest.cpp",
+    "script/script_unittest.cpp",
+    "script/threadpool_unittest.cpp",
+    "updater_binary/update_image_block_test.cpp",
+    "updater_binary/update_partitions_unittest.cpp",
+    "updater_binary/update_processor_unittest.cpp",
+    "updater_binary/updater_binary_unittest.cpp",
+    "updater_main_test/updater_main_unittest.cpp",
+    "updater_test/updater_unittest.cpp",
+    "updater_ut_entry.cpp",
+    "updaterkits_test/updaterkits_unittest.cpp",
+    "updater_ui_test/updater_ui_unittest.cpp",
+    "utils/utils_unittest.cpp",
+  ]
+
+  sources += [
+    "//base/update/updater/interfaces/kits/misc_info/misc_info.cpp",
+    "//base/update/updater/interfaces/kits/packages/package.cpp",
+    "//base/update/updater/interfaces/kits/updaterkits/updaterkits.cpp",
+    "//base/update/updater/services/applypatch/block_set.cpp",
+    "//base/update/updater/services/applypatch/command.cpp",
+    "//base/update/updater/services/applypatch/command_function.cpp",
+    "//base/update/updater/services/applypatch/command_process.cpp",
+    "//base/update/updater/services/applypatch/data_writer.cpp",
+    "//base/update/updater/services/applypatch/raw_writer.cpp",
+    "//base/update/updater/services/applypatch/store.cpp",
+    "//base/update/updater/services/applypatch/transfer_manager.cpp",
+    "//base/update/updater/services/diffpatch/bzip2/bzip2_adapter.cpp",
+    "//base/update/updater/services/diffpatch/bzip2/lz4_adapter.cpp",
+    "//base/update/updater/services/diffpatch/bzip2/zip_adapter.cpp",
+    "//base/update/updater/services/diffpatch/diff/blocks_diff.cpp",
+    "//base/update/updater/services/diffpatch/diff/image_diff.cpp",
+    "//base/update/updater/services/diffpatch/diff/update_diff.cpp",
+    "//base/update/updater/services/diffpatch/diffpatch.cpp",
+    "//base/update/updater/services/diffpatch/patch/blocks_patch.cpp",
+    "//base/update/updater/services/diffpatch/patch/image_patch.cpp",
+    "//base/update/updater/services/diffpatch/patch/update_patch.cpp",
+    "//base/update/updater/services/fs_manager/cmp_partition.cpp",
+    "//base/update/updater/services/fs_manager/do_partition.cpp",
+    "//base/update/updater/services/fs_manager/fstab.cpp",
+    "//base/update/updater/services/fs_manager/mount.cpp",
+    "//base/update/updater/services/fs_manager/partitions.cpp",
+    "//base/update/updater/services/log/log.cpp",
+    "//base/update/updater/services/package/pkg_algorithm/pkg_algo_deflate.cpp",
+    "//base/update/updater/services/package/pkg_algorithm/pkg_algo_digest.cpp",
+    "//base/update/updater/services/package/pkg_algorithm/pkg_algo_lz4.cpp",
+    "//base/update/updater/services/package/pkg_algorithm/pkg_algo_sign.cpp",
+    "//base/update/updater/services/package/pkg_algorithm/pkg_algorithm.cpp",
+    "//base/update/updater/services/package/pkg_manager/pkg_managerImpl.cpp",
+    "//base/update/updater/services/package/pkg_manager/pkg_stream.cpp",
+    "//base/update/updater/services/package/pkg_manager/pkg_utils.cpp",
+    "//base/update/updater/services/package/pkg_package/pkg_gzipfile.cpp",
+    "//base/update/updater/services/package/pkg_package/pkg_lz4file.cpp",
+    "//base/update/updater/services/package/pkg_package/pkg_pkgfile.cpp",
+    "//base/update/updater/services/package/pkg_package/pkg_upgradefile.cpp",
+    "//base/update/updater/services/package/pkg_package/pkg_zipfile.cpp",
+    "//base/update/updater/services/script/script_instruction/script_basicinstruction.cpp",
+    "//base/update/updater/services/script/script_instruction/script_instructionhelper.cpp",
+    "//base/update/updater/services/script/script_instruction/script_loadscript.cpp",
+    "//base/update/updater/services/script/script_instruction/script_registercmd.cpp",
+    "//base/update/updater/services/script/script_instruction/script_updateprocesser.cpp",
+    "//base/update/updater/services/script/script_interpreter/script_context.cpp",
+    "//base/update/updater/services/script/script_interpreter/script_expression.cpp",
+    "//base/update/updater/services/script/script_interpreter/script_function.cpp",
+    "//base/update/updater/services/script/script_interpreter/script_interpreter.cpp",
+    "//base/update/updater/services/script/script_interpreter/script_param.cpp",
+    "//base/update/updater/services/script/script_interpreter/script_scanner.cpp",
+    "//base/update/updater/services/script/script_interpreter/script_statement.cpp",
+    "//base/update/updater/services/script/script_manager/script_managerImpl.cpp",
+    "//base/update/updater/services/script/script_manager/script_utils.cpp",
+    "//base/update/updater/services/script/threadpool/threadpool.cpp",
+    "//base/update/updater/services/script/yacc/lexer.cpp",
+    "//base/update/updater/services/script/yacc/parser.cpp",
+    "//base/update/updater/services/updater_binary/update_image_block.cpp",
+    "//base/update/updater/services/updater_binary/update_partitions.cpp",
+    "//base/update/updater/services/updater_binary/update_processor.cpp",
+    "//base/update/updater/services/updater_main.cpp",
+    "//base/update/updater/utils/utils.cpp",
+  ]
+  include_dirs = [
+    "//base/update/updater/interfaces/kits/include/",
+    "//base/update/updater/interfaces/kits/include/package",
+    "//base/update/updater/services/include/",
+    "//base/update/updater/utils/include/",
+    "//base/update/updater/services/",
+    "//base/update/updater/services/include/package",
+    "//base/update/updater/services/include/script",
+    "//base/update/updater/services/include/log",
+    "//base/update/updater/services/include/patch",
+    "//base/update/updater/services/script/script_instruction",
+    "//base/update/updater/services/script/script_interpreter",
+    "//base/update/updater/services/script/script_manager",
+    "//base/update/updater/services/script/threadpool",
+    "//base/update/updater/services/script/yacc",
+    "//base/update/updater/services/package/pkg_algorithm",
+    "//base/update/updater/services/package/pkg_manager",
+    "//base/update/updater/services/package/pkg_package",
+    "//base/update/updater/services/updater_binary",
+    "//base/update/updater/services/include/fs_manager",
+    "//base/update/updater/services/fs_manager",
+    "//base/update/updater/services/applypatch",
+    "//base/update/updater/services/diffpatch",
+    "//base/update/updater/services/diffpatch/diff",
+    "//base/update/updater/services/diffpatch/patch",
+    "//base/update/updater/services/diffpatch/bzip2",
+    "//base/update/updater/services/ui",
+    "//base/update/updater/test/unittest",
+    "//third_party/zlib",
+    "//third_party/lz4/lib",
+    "//third_party/bounds_checking_function/include",
+    "//foundation/ace/napi/interfaces/kits",
+    "//third_party/cJSON",
+    "//third_party/curl/include",
+    "//third_party/openssl/include",
+    "//third_party/bzip2",
+    "//third_party/libdrm/include/drm",
+    "//third_party/libdrm",
+    "//drivers/framework/ability/sbuf/include",
+    "//drivers/framework/include/platform",
+    "//drivers/framework/include/core",
+    "//drivers/framework/include/osal",
+    "//drivers/framework/include/utils",
+    "//drivers/framework/include/config",
+    "//drivers/framework/include",
+    "//drivers/peripheral/input/hal/include",
+    "//drivers/peripheral/input/interfaces/include",
+    "//third_party/bounds_checking_function/include",
+  ]
+  deps = [
+    "//base/startup/syspara_lite/interfaces/innerkits/native/syspara:syspara",
+    "//base/update/updater/interfaces/kits/misc_info:libmiscinfo",
+    "//base/update/updater/services/applypatch:libapplypatch",
+    "//base/update/updater/services/diffpatch/diff:libdiff",
+    "//base/update/updater/services/diffpatch/patch:libpatch",
+    "//base/update/updater/services/fs_manager:libfsmanager",
+    "//base/update/updater/services/log:libupdaterlog",
+    "//base/update/updater/services/package:libupdaterpackage",
+    "//base/update/updater/utils:libutils",
+    "//base/update/updater/services/ui:libui",
+    "//third_party/bounds_checking_function:libsec_static",
+    "//third_party/bzip2:libbz2",
+    "//third_party/cJSON:cjson_static",
+    "//third_party/googletest:gmock",
+    "//third_party/googletest:gtest",
+    "//third_party/lz4:liblz4_static",
+    "//third_party/openssl:crypto_source",
+    "//third_party/openssl:ssl_source",
+    "//third_party/zlib:libz",
+  ]
+
+  deps += [
+    "//base/update/updater/test/unittest:test_update_binary",
+    "//base/update/updater/test/unittest:test_update_binary_abnormal",
+  ]
+
+  defines = [
+    "UPDATER_UT",
+    "BUILD_OHOS",
+  ]
+
+  cflags_cc = [ "-fexceptions" ]
+
+  public_configs = [ ":utest_config" ]
+  install_enable = true
+  part_name = "updater"
+}
+
+ohos_executable("test_update_binary") {
+  sources = [ "updater_test/test_update_binary.cpp" ]
+  install_enable = true
+  part_name = "updater"
+}
+
+ohos_executable("test_update_binary_abnormal") {
+  sources = [ "updater_test/test_update_binary_abnormal.cpp" ]
+  install_enable = true
+  part_name = "updater"
+}
