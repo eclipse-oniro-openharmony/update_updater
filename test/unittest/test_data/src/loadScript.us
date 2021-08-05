@@ -1,0 +1,7 @@
+LoadScript("test_function.us", 1);
+LoadScript("test_logic.us", 3);
+LoadScript("test_if.us", 1);
+LoadScript("test_math.us", 1);
+LoadScript("testscript.us", 1);
+LoadScript("Verse-script.us", 2);
+LoadScript("test_script.us", 0);

@@ -1,0 +1,14 @@
+{
+    "searchStatus": 0,
+    "errMsg": "",
+    "checkResults": [
+        {
+            "versionName": "200.2.2",
+            "versionCode": "QP1A.190710.020",
+            "verifyInfo": "128e026b15af50c368bf914dedbe36cdda4242893685c3136a71a20cad5f9220",
+            "size": 26167980,
+            "packageType": 1,
+            "descriptPackageId": "updater.zip"
+        }
+    ]
+}

@@ -1,0 +1,25 @@
+// 测试加减乘除
+a = 3 + 56;
+b =  5 + 6;
+c = (a + b) * (a - b);
+
+Stdout();
+
+if (a == b) {
+	Stdout(100);
+} else {
+	Stdout(Concat("sss", "ssss"));
+}
+
+function computer(a, b, c) {
+	f = a + b;
+	return f, a, b;
+}
+
+function computer2() {
+	f = a + b;
+	return f, a, b;
+}
+
+
+

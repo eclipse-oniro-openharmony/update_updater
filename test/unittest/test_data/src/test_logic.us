@@ -1,0 +1,74 @@
+Stdout("Test logic ================");
+
+a1 = 10;
+a2 = 100;
+Stdout("a1 > a2 = ", a1 > a2);
+Stdout("a1 < a2 = ", a1 < a2);
+Stdout("a1 >= 10 = ", a1 >= 10);
+Stdout("a1 < 10 = ", a1 < 10);
+Stdout("a1 <= 10 = ", a1 <= 10);
+Stdout("a1 == 10 = ", a1 == 10);
+Stdout("a1 != 10 = ", a1 != 10);
+Stdout("a1 != 10 = ", a1 != 5 + 5);
+Stdout("a1 == 5 * 5  ", 25 == 5 * 5);
+
+//测试flot
+f1 = 10.0;
+f2 = 100.0;
+Stdout("f1 > f2 = ", f1 > f2);
+Stdout("f1 < f2 = ", f1 < f2);
+Stdout("f1 >= 10 = ", f1 >= 10);
+Stdout("f1 < 10 = ", f1 < 10);
+Stdout("f1 <= 10 = ", f1 <= 10);
+Stdout("f1 == 10 = ", f1 == 10);
+Stdout("f1 != 10 = ", f1 != 10);
+Stdout("f1 != 10 = ", f1 != 5 + 5);
+Stdout("f1 == 5 * 5  ", 25 == 5 * 5);
+
+f1 = 10.0;
+f2 = 100;
+Stdout("f1 > f2 = ", f1 > f2);
+Stdout("f1 < f2 = ", f1 < f2);
+Stdout("f1 >= 10 = ", f1 >= 10);
+Stdout("f1 < 10 = ", f1 < 10);
+Stdout("f1 <= 10 = ", f1 <= 10);
+Stdout("f1 == 10 = ", f1 == 10);
+Stdout("f1 != 10 = ", f1 != 10);
+Stdout("f1 != 10 = ", f1 != 5 + 5);
+Stdout("f1 == 5 * 5  ", 25 == 5 * 5);
+
+f1 = 10;
+f2 = 100.0;
+Stdout("f1 > f2 = ", f1 > f2);
+Stdout("f1 < f2 = ", f1 < f2);
+Stdout("f1 >= 10 = ", f1 >= 10);
+Stdout("f1 < 10 = ", f1 < 10);
+Stdout("f1 <= 10 = ", f1 <= 10);
+Stdout("f1 == 10 = ", f1 == 10);
+Stdout("f1 != 10 = ", f1 != 10);
+Stdout("f1 != 10 = ", f1 != 5 + 5);
+Stdout("f1 == 5 * 5  ", 25 == 5 * 5);
+
+//测试string操作  Concat + int或者float存在问题
+s1 = "111111";
+s2 = "dddddddddd";
+s1 = Concat(s1, s2);
+Stdout(s1);
+s1 = Concat(s1, 10);
+Stdout(s1);
+s1 = Concat(s1, 77.7);
+Stdout(s1);
+s1 = Concat(s1, "%%%%%%%%%%%%%");
+Stdout(s1);
+
+IsSubString(s1, s2);
+IsSubString(s1, "1111");
+Sleep(1);
+Assert(1==1);
+// 这个不能修改，根据返回值处理ut
+Abort(0);
+
+
+
+
+
