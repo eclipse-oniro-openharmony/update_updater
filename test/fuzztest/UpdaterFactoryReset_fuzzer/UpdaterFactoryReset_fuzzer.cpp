@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "UpdaterMountForPath_fuzzer.h"
+#include "UpdaterFactoryReset_fuzzer.h"
 
 #include <array>
 #include <cstddef>
@@ -22,15 +22,18 @@
 #include <string>
 #include <vector>
 #include "mount.h"
+#include "updater_main.h"
 
 using namespace updater;
 
 namespace OHOS {
-    bool FuzzMountForPath(const uint8_t* data, size_t size)
+    bool FuzzFactoryReset(const uint8_t* data, size_t size)
     {
+        FactoryResetMode mode = USER_WIPE_DATA;
+
         if (size < 20) {  /* fstable name length */
-            LoadSpecificFstab("/data/test/MountForPath_fuzzer.fstable");
-            MountForPath(reinterpret_cast<const char*>(data));
+            LoadSpecificFstab("/data/fuzz/test/FormatPartition_fuzzer.fstable");
+            FactoryReset(mode, reinterpret_cast<const char*>(data));
         }
 
         return 0;
@@ -41,7 +44,7 @@ namespace OHOS {
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    OHOS::FuzzMountForPath(data, size);
+    OHOS::FuzzFactoryReset(data, size);
     return 0;
 }
 

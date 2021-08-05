@@ -1,0 +1,6 @@
+RegisterCmder("LoadScript" , "/data/fuzz/test/libthirdInstruction.z.so");
+RegisterCmder("TestWriteSpace" , "/data/fuzz/test/libthirdInstruction.z.so");
+RegisterCmder("TestWriteSpace" , "/data/fuzz/test/libthirdInstruction.z.so");
+RegisterCmder("TestWriteSpace" , "/data/fuzz/test/libthirdInstruction.z.so");
+RegisterCmder("TestWriteSpace" , "/data/fuzz/test/libthirdInstruction.z.so");
+RegisterCmder("TestWriteSpace" , "/data/fuzz/test/libthirdInstruction.z.so");

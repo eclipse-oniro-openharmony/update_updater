@@ -30,7 +30,7 @@
 using namespace updater;
 using namespace hpackage;
 
-const static std::string TEST_PATH_TO = "/data/test/";
+const static std::string TEST_PATH_TO = "/data/fuzz/test/";
 
 static inline std::string GetTestCertName()
 {

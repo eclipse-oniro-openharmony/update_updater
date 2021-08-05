@@ -37,7 +37,7 @@ using namespace hpackage;
 using namespace uscript;
 using namespace updater;
 
-const static std::string TEST_PATH_TO = "/data/test/";
+const static std::string TEST_PATH_TO = "/data/fuzz/test/";
 const static int32_t SCRIPT_TEST_PRIORITY_NUM = 3;
 const static int32_t SCRIPT_TEST_LAST_PRIORITY = 2;
 
