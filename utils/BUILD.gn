@@ -14,7 +14,9 @@
 import("//build/ohos.gni")
 
 ohos_static_library("libutils") {
-  sources = [ "utils.cpp" ]
+  sources = [
+    "utils.cpp",
+  ]
 
   include_dirs = [
     "include",
@@ -23,11 +25,15 @@ ohos_static_library("libutils") {
     "//third_party/bounds_checking_function/include",
   ]
 
-  deps = [ "//third_party/bounds_checking_function:libsec_static" ]
+  deps = [
+    "//third_party/bounds_checking_function:libsec_static",
+  ]
 }
 
 ohos_executable("updater_reboot") {
-  sources = [ "updater_reboot.cpp" ]
+  sources = [
+    "updater_reboot.cpp",
+  ]
 
   include_dirs = [
     "include",
@@ -40,13 +46,15 @@ ohos_executable("updater_reboot") {
     "//base/update/updater/services/fs_manager:libfsmanager",
     "//base/update/updater/utils:libutils",
   ]
-
+  install_images = [ "updater" ]
   install_enable = true
   part_name = "updater"
 }
 
 ohos_executable("write_updater") {
-  sources = [ "write_updater.cpp" ]
+  sources = [
+    "write_updater.cpp",
+  ]
 
   include_dirs = [
     "include",

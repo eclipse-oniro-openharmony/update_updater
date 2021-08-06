@@ -1,0 +1,100 @@
+# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/ohos.gni")
+
+updater_resouces_list = [
+  "font.png",
+  "icon_error.png",
+  "progress_empty.png",
+  "progress_fill.png",
+  "loop00000.png",
+  "loop00001.png",
+  "loop00002.png",
+  "loop00003.png",
+  "loop00004.png",
+  "loop00005.png",
+  "loop00006.png",
+  "loop00007.png",
+  "loop00008.png",
+  "loop00009.png",
+  "loop00010.png",
+  "loop00011.png",
+  "loop00012.png",
+  "loop00013.png",
+  "loop00014.png",
+  "loop00015.png",
+  "loop00016.png",
+  "loop00017.png",
+  "loop00018.png",
+  "loop00019.png",
+  "loop00020.png",
+  "loop00021.png",
+  "loop00022.png",
+  "loop00023.png",
+  "loop00024.png",
+  "loop00025.png",
+  "loop00026.png",
+  "loop00027.png",
+  "loop00028.png",
+  "loop00029.png",
+  "loop00030.png",
+  "loop00031.png",
+  "loop00032.png",
+  "loop00033.png",
+  "loop00034.png",
+  "loop00035.png",
+  "loop00036.png",
+  "loop00037.png",
+  "loop00038.png",
+  "loop00039.png",
+  "loop00040.png",
+  "loop00041.png",
+  "loop00042.png",
+  "loop00043.png",
+  "loop00044.png",
+  "loop00045.png",
+  "loop00046.png",
+  "loop00047.png",
+  "loop00048.png",
+  "loop00049.png",
+  "loop00050.png",
+  "loop00051.png",
+  "loop00052.png",
+  "loop00053.png",
+  "loop00054.png",
+  "loop00055.png",
+  "loop00056.png",
+  "loop00057.png",
+  "loop00058.png",
+  "loop00059.png",
+  "loop00060.png",
+  "loop00061.png",
+]
+
+updater_resources_target = []
+
+foreach(file, updater_resouces_list) {
+  _name = "$file"
+  ohos_prebuilt_etc(_name) {
+    source = "//base/update/updater/resources/$file"
+    module_install_dir = "resources"
+    install_images = [ "updater" ]
+    part_name = "updater"
+  }
+  updater_resources_target += [ ":$_name" ]
+}
+
+group("updater_resources") {
+  deps = updater_resources_target
+}

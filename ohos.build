@@ -3,8 +3,8 @@
   "parts": {
     "updater": {
       "module_list": [
-         "//base/update/updater/services:updater_init.cfg",
-         "//base/update/updater/services:init.Hi3516DV300.updater.cfg",
+         "//base/update/updater/resources:updater_resources",
+         "//base/update/updater/services:updater_etc",
          "//base/update/updater/services/package:libupdaterpackage",
          "//base/update/updater/services/script:libupdaterscript",
          "//base/update/updater/services/log:libupdaterlog",

@@ -16,13 +16,41 @@ import("//build/ohos.gni")
 SUBSYSTEM_DIR = "//base/update/updater"
 
 ohos_prebuilt_etc("updater_init.cfg") {
-   source = "//base/update/updater/services/etc/updater_init.cfg"
-   part_name = "updater"
+  source = "//base/update/updater/services/etc/init.cfg"
+  module_install_dir = "."
+  install_images = [ "updater" ]
+  part_name = "updater"
 }
 
 ohos_prebuilt_etc("init.Hi3516DV300.updater.cfg") {
-   source = "//device/hisilicon/hi3516dv300/build/rootfs/init.Hi3516DV300.updater.cfg"
-   part_name = "updater"
+  source =
+      "//device/hisilicon/hi3516dv300/build/rootfs/init.Hi3516DV300.updater.cfg"
+  module_install_dir = "."
+  install_images = [ "updater" ]
+  part_name = "updater"
+}
+
+ohos_prebuilt_etc("signing_cert.crt") {
+  source =
+      "//device/hisilicon/hi3516dv300/build/updater_config/signing_cert.crt"
+  module_install_dir = "certificate"
+  install_images = [ "updater" ]
+  part_name = "updater"
+}
+
+ohos_prebuilt_etc("fstab.updater") {
+  source = "//device/hisilicon/hi3516dv300/build/vendor/etc/fstab.updater"
+  install_images = [ "updater" ]
+  part_name = "updater"
+}
+
+group("updater_etc") {
+  deps = [
+    ":fstab.updater",
+    ":init.Hi3516DV300.updater.cfg",
+    ":signing_cert.crt",
+    ":updater_init.cfg",
+  ]
 }
 
 ohos_executable("updater") {
@@ -74,7 +102,7 @@ ohos_executable("updater") {
     "//third_party/openssl:ssl_source",
     "//third_party/zlib:libz",
   ]
-
+  install_images = [ "updater" ]
   install_enable = true
   part_name = "updater"
 }
