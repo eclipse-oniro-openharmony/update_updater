@@ -1,6 +1,0 @@
-RegisterCmder("LoadScript" , "/data/test/libthirdInstruction.z.so");
-RegisterCmder("TestWriteSpace" , "/data/test/libthirdInstruction.z.so");
-RegisterCmder("TestWriteSpace" , "/data/test/libthirdInstruction.z.so");
-RegisterCmder("TestWriteSpace" , "/data/test/libthirdInstruction.z.so");
-RegisterCmder("TestWriteSpace" , "/data/test/libthirdInstruction.z.so");
-RegisterCmder("TestWriteSpace" , "/data/test/libthirdInstruction.z.so");

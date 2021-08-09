@@ -1,0 +1,6 @@
+RegisterCmder("LoadScript" , "/data/updater/src/libthirdInstruction.z.so");
+RegisterCmder("TestWriteSpace" , "/data/updater/src/libthirdInstruction.z.so");
+RegisterCmder("TestWriteSpace" , "/data/updater/src/libthirdInstruction.z.so");
+RegisterCmder("TestWriteSpace" , "/data/updater/src/libthirdInstruction.z.so");
+RegisterCmder("TestWriteSpace" , "/data/updater/src/libthirdInstruction.z.so");
+RegisterCmder("TestWriteSpace" , "/data/updater/src/libthirdInstruction.z.so");

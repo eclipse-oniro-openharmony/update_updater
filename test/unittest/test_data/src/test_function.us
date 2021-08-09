@@ -1,0 +1,17 @@
+Stdout("Test function ================");
+
+function computer(a, b, c) {
+	f = a + b;
+	return f, a, b;
+}
+
+function computer2() {
+	// 变量不存在失败
+	f = a + b;
+	return f, a, b;
+}
+
+a1, a2, a3 = computer(10, 20, 30);
+Stdout(a1, a2, a3);
+Stdout(computer(10, 20, 30), computer(10, 100, 30), computer(100, 20, 30));
+

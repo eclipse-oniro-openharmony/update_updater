@@ -1,0 +1,13 @@
+set_progress(0.40, 0.56);
+ui_print("Patching hos image unconditionally...");
+sparse_image_write("/hos");
+set_progress(0.56, 0.68);
+ui_print("Patching system image unconditionally...");
+sparse_image_write("/system");
+set_progress(0.68, 1.00);
+ui_print("Patching vendor image unconditionally...");
+sparse_image_write("/vendor");
+
+
+
+
