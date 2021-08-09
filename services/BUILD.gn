@@ -17,15 +17,6 @@ SUBSYSTEM_DIR = "//base/update/updater"
 
 ohos_prebuilt_etc("updater_init.cfg") {
   source = "//base/update/updater/services/etc/init.cfg"
-  module_install_dir = "."
-  install_images = [ "updater" ]
-  part_name = "updater"
-}
-
-ohos_prebuilt_etc("init.Hi3516DV300.updater.cfg") {
-  source =
-      "//device/hisilicon/hi3516dv300/build/rootfs/init.Hi3516DV300.updater.cfg"
-  module_install_dir = "."
   install_images = [ "updater" ]
   part_name = "updater"
 }
@@ -47,7 +38,6 @@ ohos_prebuilt_etc("fstab.updater") {
 group("updater_etc") {
   deps = [
     ":fstab.updater",
-    ":init.Hi3516DV300.updater.cfg",
     ":signing_cert.crt",
     ":updater_init.cfg",
   ]
