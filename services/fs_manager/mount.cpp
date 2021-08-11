@@ -74,8 +74,8 @@ static int ExecCommand(std::vector<std::string> cmds)
 static int DoFormat(const std::string &devPath, const std::string &fsType)
 {
     std::map<std::string, std::string> fsToolsMap = {
-        { "ext4", "/system/bin/mke2fs" },
-        { "f2fs", "/system/bin/make_f2fs" },
+        { "ext4", "/bin/mke2fs" },
+        { "f2fs", "/bin/make_f2fs" },
     };
     int ret = 0;
     auto it = fsToolsMap.find(fsType);
