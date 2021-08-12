@@ -52,12 +52,18 @@ ohos_fuzztest("UpdaterFactoryResetFuzzTest") {
     "//third_party/zlib:libz",
   ]
 
-  cflags = ["-g","-O0","-Wno-unused-variable","-fno-omit-frame-pointer"]
+  cflags = [
+    "-g",
+    "-O0",
+    "-Wno-unused-variable",
+    "-fno-omit-frame-pointer",
+  ]
   sources = [
-    "UpdaterFactoryReset_fuzzer.cpp",
     "//base/update/updater/services/updater_main.cpp",
+    "UpdaterFactoryReset_fuzzer.cpp",
   ]
 }
+
 ###############################################################################
 group("fuzztest") {
   testonly = true

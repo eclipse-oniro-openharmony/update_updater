@@ -15,6 +15,7 @@ import("//build/ohos.gni")
 ohos_static_library("libui") {
   sources = [
     "animation_label.cpp",
+    "drm_driver.cpp",
     "frame.cpp",
     "input_event.cpp",
     "progress_bar.cpp",
@@ -22,7 +23,6 @@ ohos_static_library("libui") {
     "text_label.cpp",
     "updater_ui.cpp",
     "view.cpp",
-    "drm_driver.cpp",
   ]
 
   include_dirs = [
