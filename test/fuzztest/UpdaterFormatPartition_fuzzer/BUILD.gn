@@ -38,12 +38,18 @@ ohos_fuzztest("UpdaterFormatPartitionFuzzTest") {
     "//base/update/updater/services/log:libupdaterlog",
   ]
 
-  cflags = ["-g","-O0","-Wno-unused-variable","-fno-omit-frame-pointer"]
+  cflags = [
+    "-g",
+    "-O0",
+    "-Wno-unused-variable",
+    "-fno-omit-frame-pointer",
+  ]
   sources = [
-    "UpdaterFormatPartition_fuzzer.cpp",
     "//base/update/updater/services/fs_manager/mount.cpp",
+    "UpdaterFormatPartition_fuzzer.cpp",
   ]
 }
+
 ###############################################################################
 group("fuzztest") {
   testonly = true

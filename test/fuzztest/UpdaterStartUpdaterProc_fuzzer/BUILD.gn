@@ -36,34 +36,40 @@ ohos_fuzztest("UpdaterStartUpdaterProcFuzzTest") {
   ]
 
   deps = [
-    "//base/update/updater/services/package:libupdaterpackage",
-    "//base/update/updater/services/log:libupdaterlog",
     "//base/update/updater/interfaces/kits/misc_info:libmiscinfo",
     "//base/update/updater/interfaces/kits/packages:libpackageExt",
     "//base/update/updater/services/applypatch:libapplypatch",
     "//base/update/updater/services/diffpatch/patch:libpatch",
     "//base/update/updater/services/fs_manager:libfsmanager",
+    "//base/update/updater/services/log:libupdaterlog",
+    "//base/update/updater/services/package:libupdaterpackage",
     "//base/update/updater/services/ui:libui",
     "//base/update/updater/utils:libutils",
+    "//drivers/peripheral/input/hal:hdi_input",
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/bzip2:libbz2",
     "//third_party/libdrm:libdrm",
+    "//third_party/libpng:libpng",
     "//third_party/lz4:liblz4_static",
     "//third_party/openssl:crypto_source",
     "//third_party/openssl:ssl_source",
     "//third_party/zlib:libz",
-    "//drivers/peripheral/input/hal:hdi_input",
-    "//third_party/libpng:libpng",
   ]
 
-  cflags = ["-g","-O0","-Wno-unused-variable","-fno-omit-frame-pointer"]
+  cflags = [
+    "-g",
+    "-O0",
+    "-Wno-unused-variable",
+    "-fno-omit-frame-pointer",
+  ]
   sources = [
-    "UpdaterStartUpdaterProc_fuzzer.cpp",
-    "//base/update/updater/services/updater.cpp",
     "//base/update/updater/services/ui/updater_ui.cpp",
+    "//base/update/updater/services/updater.cpp",
     "//base/update/updater/services/updater_main.cpp",
+    "UpdaterStartUpdaterProc_fuzzer.cpp",
   ]
 }
+
 ###############################################################################
 group("fuzztest") {
   testonly = true

@@ -55,9 +55,7 @@ ohos_static_library("libupdaterpackage") {
     "$SUBSYSTEM_DIR/pkg_package/pkg_zipfile.cpp",
   ]
 
-  deps = [
-    "//third_party/bounds_checking_function:libsec_static",
-  ]
+  deps = [ "//third_party/bounds_checking_function:libsec_static" ]
 
   configs = [ ":package_config" ]
 }
