@@ -60,6 +60,8 @@ public:
     static int32_t ApplyBlockPatch(const PatchBuffer &patchInfo,
         const BlockBuffer &oldInfo, UpdatePatchWriterPtr writer);
     static int32_t ApplyBlockPatch(const PatchBuffer &patchInfo,
+        const BlockBuffer &oldInfo, ImageProcessor writer, const std::string& expected);
+    static int32_t ApplyBlockPatch(const PatchBuffer &patchInfo,
         const BlockBuffer &oldInfo, std::vector<uint8_t> &newData);
     static int32_t ApplyBlockPatch(const PatchBuffer &patchInfo,
         hpackage::PkgManager::StreamPtr stream, UpdatePatchWriterPtr writer);

@@ -23,6 +23,7 @@
 #include "applypatch/block_set.h"
 #include "applypatch/store.h"
 #include "applypatch/transfer_manager.h"
+#include "applypatch/partition_record.h"
 #include "fs_manager/mount.h"
 #include "log/log.h"
 #include "utils.h"
@@ -246,6 +247,15 @@ static int32_t ExecuteUpdateBlock(uscript::UScriptEnv &env, uscript::UScriptCont
     UPDATER_CHECK_ONLY_RETURN(!GetUpdateBlockInfo(infos, env, context), return USCRIPT_ERROR_EXECUTE);
     UPDATER_ERROR_CHECK(env.GetPkgManager() != nullptr, "Error to get pkg manager", return USCRIPT_ERROR_EXECUTE);
 
+    if (env.IsRetry()) {
+        LOG(DEBUG) << "Retry updater, check if current partition updatered already during last time";
+        bool isUpdated = PartitionRecord::GetInstance().IsPartitionUpdated(infos.partitionName);
+        if (isUpdated) {
+            LOG(INFO) << infos.partitionName << " already updated, skip";
+            return USCRIPT_SUCCESS;
+        }
+    }
+
     int32_t ret = ExtractDiffPackageAndLoad(infos, env, context);
     UPDATER_CHECK_ONLY_RETURN(ret == USCRIPT_SUCCESS, return USCRIPT_ERROR_EXECUTE);
 
@@ -289,6 +299,9 @@ static int32_t ExecuteUpdateBlock(uscript::UScriptEnv &env, uscript::UScriptCont
     fd = -1;
     env.GetPkgManager()->ClosePkgStream(outStream);
     TransferManager::ReleaseTransferManagerInstance(tm);
+    if (ret == USCRIPT_SUCCESS) {
+         PartitionRecord::GetInstance().RecordPartitionUpdateStatus(infos.partitionName, true);
+    }
     return ret;
 }
 

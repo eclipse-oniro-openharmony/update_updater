@@ -132,7 +132,7 @@ TEST_F(ApplyPatchUnitTest, updater_CreateDataWriter)
             EXPECT_EQ(writer, nullptr);
             continue;
         }
-        writer = DataWriter::CreateDataWriter(mode, "");
+        writer = DataWriter::CreateDataWriter(mode, "", DataWriter::GetUpdaterEnv());
         EXPECT_NE(writer, nullptr);
         DataWriter::ReleaseDataWriter(writer);
         writer = nullptr;

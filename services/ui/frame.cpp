@@ -56,6 +56,7 @@ void Frame::FlushThreadLoop()
             });
         }
         if (!IsVisiable()) {
+            flushFlag_ = false;
             continue;
         }
         SyncBuffer();

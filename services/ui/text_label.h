@@ -24,6 +24,7 @@
 namespace updater {
 constexpr int MAX_FONT_BUFFER_SIZE_HW  = 4096;
 constexpr int MAX_TEXT_SIZE = 512;
+constexpr int FONT_BUFFER_SIZE = 96;
 const std::string DEFAULT_FONT_NAME = "font";
 
 class TextLabel : public View {
@@ -71,7 +72,7 @@ private:
     bool boldBottomLine_ = false;
 
     FontType fontType_ { DEFAULT_FONT };
-    char fontBuf_[MAX_FONT_BUFFER_SIZE_HW * MAX_FONT_BUFFER_SIZE_HW] {};
+    char fontBuf_[MAX_FONT_BUFFER_SIZE_HW * FONT_BUFFER_SIZE] {};
     unsigned int fontWidth_ = 0;
     unsigned int fontHeight_ = 0;
 };

@@ -45,11 +45,7 @@ extern ProgressBar *g_progressBar;
 
 int g_percentage;
 int g_tmpProgressValue;
-static int GetTemprature()
-{
-    int temprature = FAKE_TEMPRATURE;
-    return temprature;
-}
+int g_tmpValue;
 
 static int32_t ExtractUpdaterBinary(PkgManager::PkgManagerPtr manager, const std::string &updaterBinary)
 {
@@ -162,7 +158,6 @@ UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, cons
     UPDATER_ERROR_CHECK(pkgManager != nullptr, "Fail to GetPackageInstance", return UPDATE_CORRUPT);
     UPDATER_CHECK_ONLY_RETURN(SetupPartitions() == 0, ShowText(g_updateInfoLabel, "update failed");
         return UPDATE_ERROR);
-    int beforeTemperature = GetTemprature();
 
     LOG(INFO) << "Verify package...";
     g_updateInfoLabel->SetText("Verify package...");
@@ -201,8 +196,6 @@ UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, cons
         g_updateInfoLabel->SetText("Install failed.");
         LOG(ERROR) << "Install package failed.";
     }
-    int afterTemprature = GetTemprature();
-    LOG(INFO) << "Before install temprature: " << beforeTemperature << ",After install temprature: " << afterTemprature;
     return updateRet;
 }
 
@@ -234,23 +227,24 @@ static void HandleChildOutput(const std::string &buffer, int32_t bufferLen,
             g_progressBar->Show();
             g_updateInfoLabel->SetText("Start to install package.");
             frac = std::stof(progress[0]);
-            g_percentage = g_percentage + static_cast<int>(frac * FULL_PERCENT_PROGRESS);
-            while (g_tmpProgressValue < g_percentage) {
-                g_progressBar->SetProgressValue(g_tmpProgressValue++);
-                std::this_thread::sleep_for(std::chrono::milliseconds(INTERVAL_TIME));
-                if (g_tmpProgressValue >= FULL_PERCENT_PROGRESS - PROGRESS_VALUE_CONST) {
-                    g_percentage = g_percentage - PROGRESS_VALUE_CONST;
-                    break;
-                }
-            }
-            g_progressBar->SetProgressValue(g_percentage);
+            g_percentage = static_cast<int>(frac * FULL_PERCENT_PROGRESS);
         }
     } else if (outputHeader == "set_progress") {
         UPDATER_ERROR_CHECK(output.size() >= DEFAULT_PROCESS_NUM, "check output fail", return);
         auto outputInfo = Trim(output[1]);
         float frac = 0.0;
         frac = std::stof(output[1]);
-        g_progressBar->SetProgressValue(FULL_PERCENT_PROGRESS);
+        if(frac >= -EPSINON && frac <= EPSINON) {
+            return;
+        } else {
+            g_tmpProgressValue = static_cast<int>(frac * g_percentage);
+        }
+        if (frac >= FULL_EPSINON && g_tmpValue + g_percentage < FULL_PERCENT_PROGRESS) {
+            g_tmpValue += g_percentage;
+            return;
+        }
+        g_tmpProgressValue = g_tmpProgressValue + g_tmpValue;
+        g_progressBar->SetProgressValue(g_tmpProgressValue);
     } else {
         LOG(WARNING) << "Child process returns unexpected message.";
     }
@@ -267,6 +261,10 @@ UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, const std::
 
     UPDATER_ERROR_CHECK(ExtractUpdaterBinary(pkgManager, UPDATER_BINARY) == 0,
         "Updater: cannot extract updater binary from update package.", return UPDATE_CORRUPT);
+    g_tmpProgressValue = 0;
+    if (g_progressBar != nullptr) {
+        g_progressBar->SetProgressValue(0);
+    }
     pid_t pid = fork();
     UPDATER_CHECK_ONLY_RETURN(pid >= 0, ERROR_CODE(CODE_FORK_FAIL); return UPDATE_ERROR);
     if (pid == 0) { // child
@@ -295,10 +293,6 @@ UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, const std::
     char buffer[MAX_BUFFER_SIZE];
     bool retryUpdate = false;
     FILE* fromChild = fdopen(pipeRead, "r");
-    g_tmpProgressValue = 0;
-    if (g_progressBar != nullptr) {
-        g_progressBar->SetProgressValue(0);
-    }
     while (fgets(buffer, MAX_BUFFER_SIZE, fromChild) != nullptr) {
         size_t n = strlen(buffer);
         if (buffer[n - 1] == '\n') {

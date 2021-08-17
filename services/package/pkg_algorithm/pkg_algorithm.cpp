@@ -20,7 +20,7 @@
 #include "securec.h"
 
 namespace hpackage {
-constexpr uint32_t MAX_BUFFER_SIZE = 1 << 10;
+constexpr uint32_t MAX_BUFFER_SIZE = (4 *1024 * 1024);
 
 int32_t PkgAlgorithm::ReadData(const PkgStreamPtr inStream, size_t offset, PkgBuffer &buffer,
     size_t &remainSize, size_t &readLen) const

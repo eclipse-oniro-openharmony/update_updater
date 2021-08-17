@@ -25,6 +25,7 @@
 #include "raw_writer.h"
 
 namespace updater {
+UpdaterEnv *DataWriter::env_ = nullptr;
 int DataWriter::OpenPartition(const std::string &partitionName)
 {
     if (partitionName.empty()) {
@@ -64,6 +65,18 @@ std::unique_ptr<DataWriter> DataWriter::CreateDataWriter(WriteMode mode, const s
             break;
     }
     return nullptr;
+}
+
+UpdaterEnv *DataWriter::GetUpdaterEnv()
+{
+    return env_;
+}
+
+std::unique_ptr<DataWriter> DataWriter::CreateDataWriter(WriteMode mode, const std::string &partitionName,
+    UpdaterEnv *env)
+{
+    env_ = env;
+    return CreateDataWriter(mode, partitionName);
 }
 
 void DataWriter::ReleaseDataWriter(std::unique_ptr<DataWriter> &writer)

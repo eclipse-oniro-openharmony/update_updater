@@ -379,9 +379,7 @@ int UpdaterMain(int argc, char **argv)
         return 0;
     }
 #endif
-    DeleteView();
     PostUpdater();
-    PkgManager::ReleasePackageInstance(manager);
     utils::DoReboot("");
     return 0;
 }

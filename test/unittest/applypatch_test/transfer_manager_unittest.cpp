@@ -51,7 +51,7 @@ TEST_F(TransferManagerUnitTest, transfer_manager_test_001)
 {
     TransferManagerPtr tm = TransferManager::GetTransferManagerInstance();
     std::string cmd = "zero 2,0,1";
-    tm->CheckResult(CommandResult::NEED_RETRY, cmd);
+    tm->CheckResult(CommandResult::NEED_RETRY, cmd, CommandType::ZERO);
     TransferManager::ReleaseTransferManagerInstance(tm);
 }
 

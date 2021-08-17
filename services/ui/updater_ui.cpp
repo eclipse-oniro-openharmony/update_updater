@@ -163,8 +163,6 @@ void OnKeyEvent(int viewId)
     ClearText();
     if (viewId == g_textLabel0->GetViewId() && g_textLabel0->IsVisiable()) {
         HideDialog();
-        LOG(INFO) << "g_textLabel0 clicked!";
-        DeleteView();
         PostUpdater();
         utils::DoReboot("");
     } else if (viewId == g_textLabel2->GetViewId() && g_textLabel2->IsVisiable()) {
@@ -179,7 +177,6 @@ void OnKeyEvent(int viewId)
             ShowMenu();
             return;
         }
-        DeleteView();
         PostUpdater();
         utils::DoReboot("");
     } else if (viewId == g_dialogCancalBtn->GetViewId() && g_dialogCancalBtn->IsVisiable()) {
