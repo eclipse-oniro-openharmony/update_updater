@@ -74,5 +74,7 @@ constexpr int PROGRESS_VALUE_CONST = 2;
 constexpr int SHOW_FULL_PROGRESS_TIME = 2000;
 constexpr unsigned int UI_SHOW_DURATION = 2000;
 constexpr unsigned int INTERVAL_TIME = 300;
+constexpr float EPSINON = 0.00001;
+constexpr float FULL_EPSINON = 1;
 } // namespace updater
 #endif

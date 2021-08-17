@@ -88,8 +88,7 @@ int32_t Store::WriteDataToStore(const std::string &dirPath, const std::string &f
         pathTmp = dirPath + "/";
     }
     std::string path = pathTmp + fileName;
-    pathTmp = pathTmp + fileName + ".tmp";
-
+    pathTmp = pathTmp + fileName;
     int fd = open(pathTmp.c_str(), O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
     UPDATER_ERROR_CHECK(fd != -1, "Failed to create store", return -1);
     UPDATER_ERROR_CHECK(fchown(fd, O_USER_GROUP_ID, O_USER_GROUP_ID) == 0,
@@ -102,8 +101,6 @@ int32_t Store::WriteDataToStore(const std::string &dirPath, const std::string &f
         return -1;
     }
     UPDATER_ERROR_CHECK(fsync(fd) != -1, "Failed to fsync", close(fd); return -1);
-    UPDATER_ERROR_CHECK(rename(pathTmp.c_str(), path.c_str()) != -1,
-        "Failed rename store", close(fd); return -1);
     close(fd);
     int fdd = open(dirPath.c_str(), O_RDONLY | O_DIRECTORY);
     UPDATER_ERROR_CHECK(fdd != -1, "Failed to open", return -1);
@@ -122,6 +119,7 @@ int32_t Store::LoadDataFromStore(const std::string &dirPath, const std::string &
     struct stat fileStat {};
     UPDATER_WARING_CHECK(stat(path.c_str(), &fileStat) != -1, "Failed to stat", return -1);
     UPDATER_ERROR_CHECK((fileStat.st_size % H_BLOCK_SIZE) == 0, "Not multiple of block size 4096", return -1);
+
     int fd = open(path.c_str(), O_RDONLY);
     UPDATER_ERROR_CHECK(fd != -1, "Failed to create", return -1);
     buffer.resize(fileStat.st_size);

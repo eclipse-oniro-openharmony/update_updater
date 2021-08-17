@@ -211,16 +211,18 @@ int32_t UpgradePkgFile::LoadPackage(std::vector<std::string> &fileNames, VerifyF
     parsedLen += UPGRADE_RESERVE_LEN + GetUpgradeSignatureLen();
 
     // Calculate digest and verify
-    return Verify(parsedLen, {buffer.buffer, buffSize}, algorithm, verifier, signData);
+    return Verify(parsedLen, algorithm, verifier, signData);
 }
 
-int32_t UpgradePkgFile::Verify(size_t start, const PkgBuffer &buffer,
-    DigestAlgorithm::DigestAlgorithmPtr algorithm, VerifyFunction verifier, const std::vector<uint8_t> &signData)
+int32_t UpgradePkgFile::Verify(size_t start, DigestAlgorithm::DigestAlgorithmPtr algorithm,
+    VerifyFunction verifier, const std::vector<uint8_t> &signData)
 {
     int ret = 0;
-    size_t buffSize = buffer.length;
+    size_t buffSize = (4 * 1024 * 1024);
     size_t offset = start;
     size_t readBytes = 0;
+    PkgBuffer buffer(buffSize);
+
     while (offset + readBytes < pkgStream_->GetFileLength()) {
         offset += readBytes;
         readBytes = 0;
@@ -427,7 +429,7 @@ int32_t UpgradeFileEntry::DecodeHeader(const PkgBuffer &buffer, size_t headerOff
     fileInfo_.fileInfo.unpackedSize = fileInfo_.fileInfo.packedSize;
     fileInfo_.originalSize = ReadLE32(buffer.buffer + offsetof(UpgradeCompInfo, originalSize));
     fileInfo_.fileInfo.packMethod = PKG_COMPRESS_METHOD_NONE;
-    fileInfo_.fileInfo.digestMethod = PKG_DIGEST_TYPE_SHA256;
+    fileInfo_.fileInfo.digestMethod = PKG_DIGEST_TYPE_NONE;
     int32_t ret = memcpy_s(fileInfo_.digest, sizeof(fileInfo_.digest), info->digest, sizeof(info->digest));
     PKG_CHECK(ret == EOK, return ret, "Fail to memcpy_s ret：%d", ret);
     PkgFile::ConvertBufferToString(fileInfo_.fileInfo.identity, {info->address, sizeof(info->address)});

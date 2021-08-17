@@ -80,7 +80,7 @@ int32_t BZipBuffer2Adapter::FlushData(size_t &dataSize)
         if (stream_.avail_out == 0) {
             dataSize_ += stream_.next_out - next;
             buffer_.resize(buffer_.size() + IGMDIFF_LIMIT_UNIT);
-            stream_.avail_out = buffer_.size() - offset_ + dataSize_;
+            stream_.avail_out = buffer_.size() - offset_ - dataSize_;
             next = reinterpret_cast<char*>(buffer_.data() + offset_ + dataSize_);
             stream_.next_out = next;
         }

@@ -109,6 +109,30 @@ int32_t UpdatePatch::ApplyBlockPatch(const PatchBuffer &patchInfo,
 }
 
 int32_t UpdatePatch::ApplyBlockPatch(const PatchBuffer &patchInfo,
+    const BlockBuffer &oldInfo, ImageProcessor writer, const std::string& expected)
+{
+    PATCH_CHECK(writer != nullptr, return -1, "processor is null");
+    std::unique_ptr<ImagePatchWriter> patchWriter = std::make_unique<ImagePatchWriter>(writer, expected, "");
+    PATCH_CHECK(patchWriter != nullptr, return -1, "Failed to create patch writer");
+    int32_t ret = patchWriter->Init();
+    PATCH_CHECK(ret == 0, return -1, "Failed to init patch writer");
+
+    PkgManager* pkgManager = hpackage::PkgManager::GetPackageInstance();
+    PATCH_CHECK(pkgManager != nullptr, return -1, "Failed to get pkg manager");
+
+    hpackage::PkgManager::StreamPtr stream = nullptr;
+    ret = pkgManager->CreatePkgStream(stream, "", {oldInfo.buffer, oldInfo.length});
+    PATCH_CHECK(stream != nullptr, pkgManager->ClosePkgStream(stream); return -1, "Failed to create stream");
+
+    std::unique_ptr<BlocksStreamPatch> patch = std::make_unique<BlocksStreamPatch>(patchInfo, stream, patchWriter.get());
+    PATCH_CHECK(patch != nullptr, pkgManager->ClosePkgStream(stream); return -1, "Failed to  creare patch ");
+    ret = patch->ApplyPatch();
+    pkgManager->ClosePkgStream(stream);
+    PATCH_CHECK(ret == 0, return -1, "Failed to applay patch ");
+    return patchWriter->Finish();
+}
+
+int32_t UpdatePatch::ApplyBlockPatch(const PatchBuffer &patchInfo,
     hpackage::PkgManager::StreamPtr stream, UpdatePatchWriterPtr writer)
 {
     std::unique_ptr<BlocksStreamPatch> patch = std::make_unique<BlocksStreamPatch>(patchInfo, stream, writer);

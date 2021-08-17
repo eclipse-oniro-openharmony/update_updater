@@ -31,6 +31,8 @@ using namespace hpackage;
 using namespace updater;
 
 namespace updater {
+size_t UScriptInstructionRawImageWrite::totalSize_ = 0;
+size_t UScriptInstructionRawImageWrite::readSize_ = 0;
 UpdaterEnv::~UpdaterEnv()
 {
     if (factory_ != nullptr) {
@@ -102,6 +104,12 @@ int UScriptInstructionRawImageWrite::RawImageWriteProcessor(const PkgBuffer &buf
         LOG(ERROR) << "Write " << size << " byte(s) failed";
         return PKG_INVALID_STREAM;
     }
+
+    if (totalSize_ != 0) {
+        readSize_ += size;
+        writer->GetUpdaterEnv()->PostMessage("set_progress", std::to_string((float)readSize_/totalSize_));
+    }
+
     return PKG_SUCCESS;
 }
 
@@ -122,12 +130,14 @@ int32_t UScriptInstructionRawImageWrite::Execute(uscript::UScriptEnv &env, uscri
     LOG(INFO) << "UScriptInstructionRawImageWrite::Execute " << partitionName;
     UPDATER_ERROR_CHECK(env.GetPkgManager() != nullptr, "Error to get pkg manager", return USCRIPT_ERROR_EXECUTE);
 
-    std::unique_ptr<DataWriter> writer = DataWriter::CreateDataWriter(WRITE_RAW, partitionName);
+    std::unique_ptr<DataWriter> writer = DataWriter::CreateDataWriter(WRITE_RAW, partitionName,
+        static_cast<UpdaterEnv *>(&env));
     UPDATER_ERROR_CHECK(writer != nullptr, "Error to create writer", return USCRIPT_ERROR_EXECUTE);
 
     // Extract partition information
     hpackage::PkgManager::StreamPtr outStream = nullptr;
     const FileInfo *info = env.GetPkgManager()->GetFileInfo(partitionName);
+    totalSize_ = info->unpackedSize;
     UPDATER_ERROR_CHECK(info != nullptr, "Error to get file info",
         DataWriter::ReleaseDataWriter(writer); return USCRIPT_ERROR_EXECUTE);
 
@@ -145,6 +155,9 @@ int32_t UScriptInstructionRawImageWrite::Execute(uscript::UScriptEnv &env, uscri
     ret = USCRIPT_SUCCESS;
     env.GetPkgManager()->ClosePkgStream(outStream);
     DataWriter::ReleaseDataWriter(writer);
+    totalSize_ = 0;
+    readSize_ = 0;
+    LOG(INFO)<<"UScriptInstructionRawImageWrite  finish";
     return ret;
 }
 

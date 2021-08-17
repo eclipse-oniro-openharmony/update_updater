@@ -20,8 +20,8 @@
 
 namespace hpackage {
 constexpr uint8_t INFLATE_ERROR_TIMES = 5;
-constexpr uint32_t IN_BUFFER_SIZE = 1024 * 32;
-constexpr uint32_t OUT_BUFFER_SIZE = 1024 * 4;
+constexpr uint32_t IN_BUFFER_SIZE = 1024 * 64;
+constexpr uint32_t OUT_BUFFER_SIZE = 1024 * 32;
 
 int32_t PkgAlgoDeflate::DeflateData(const PkgStreamPtr outStream, z_stream &zstream, int32_t flush,
     PkgBuffer &outBuffer, size_t &destOffset) const

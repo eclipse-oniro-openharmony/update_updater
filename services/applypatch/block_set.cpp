@@ -330,23 +330,17 @@ int32_t BlockSet::WriteDiffToBlock(const Command &cmd, std::vector<uint8_t> &src
         writer.reset();
         UPDATER_ERROR_CHECK(ret == 0, "Fail to ApplyImagePatch", return -1);
     } else {
-        std::vector<uint8_t> targetBuffer;
-        targetBuffer.resize(TotalBlockSize() * H_BLOCK_SIZE);
         LOG(DEBUG) << "Run bsdiff patch.";
         updatepatch::PatchBuffer patchInfo = {patchBuff, 0, length};
-        auto ret = updatepatch::UpdatePatch::ApplyBlockPatch(patchInfo, {srcBuffer.data(), srcBuffSize}, targetBuffer);
-        if (ret != 0) {
-            LOG(ERROR) << "Failed to apply bspatch";
-            return -1;
-        }
-        if (VerifySha256(targetBuffer, TotalBlockSize(), cmd.GetArgumentByPos(pos + 1)) != 0) {
-            LOG(ERROR) << "Not match sha256 after bspatch";
-            return -1;
-        }
-        if (WriteDataToBlock(cmd.GetFileDescriptor(), targetBuffer) <= 0) {
-            LOG(ERROR) << "Error to write source to file";
-            return -1;
-        }
+        std::unique_ptr<BlockWriter> writer = std::make_unique<BlockWriter>(cmd.GetFileDescriptor(), *this);
+        UPDATER_ERROR_CHECK(writer.get() != nullptr, "Cannot create block writer, pkgdiff patch abort!", return -1);
+        auto ret = updatepatch::UpdatePatch::ApplyBlockPatch(patchInfo, {srcBuffer.data(), srcBuffSize},
+            [&](size_t start, const updatepatch::BlockBuffer &data, size_t size) -> int {
+                bool ret = writer->Write(data.buffer, size, WRITE_BLOCK, "");
+                return ret ? 0 : -1;
+            }, cmd.GetArgumentByPos(pos + 1));
+        writer.reset();
+        UPDATER_ERROR_CHECK(ret == 0, "Fail to ApplyBlockPatch", return -1);
     }
     return 0;
 }

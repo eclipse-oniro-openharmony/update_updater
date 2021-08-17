@@ -20,6 +20,7 @@
 #include <memory>
 #include <string>
 #include <unistd.h>
+#include "updater_env.h"
 
 namespace updater {
 enum WriteMode : int {
@@ -35,8 +36,13 @@ public:
     virtual bool Write(const uint8_t *addr, size_t len, WriteMode mode, const std::string &partitionName) = 0;
     virtual int OpenPartition(const std::string &partitionName);
     virtual ~DataWriter() {}
+    static std::unique_ptr<DataWriter> CreateDataWriter(WriteMode mode, const std::string &partitionName,
+        UpdaterEnv *env);
     static std::unique_ptr<DataWriter> CreateDataWriter(WriteMode mode, const std::string &partitionName);
+    static UpdaterEnv *GetUpdaterEnv();
     static void ReleaseDataWriter(std::unique_ptr<DataWriter> &writer);
+private:
+    static UpdaterEnv *env_;
 };
 
 // Maybe we should read sector size from flash.

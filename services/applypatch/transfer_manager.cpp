@@ -58,6 +58,7 @@ bool TransferManager::CommandsParser(int fd, const std::vector<std::string> &con
     globalParams->blockCount = utils::String2Int<size_t>(*ct++, utils::N_DEC);
     globalParams->maxEntries = utils::String2Int<size_t>(*ct++, utils::N_DEC);
     globalParams->maxBlocks = utils::String2Int<size_t>(*ct++, utils::N_DEC);
+    size_t totalSize = globalParams->maxBlocks * globalParams->blockCount;
     std::string retryCmd = "";
     if (globalParams != nullptr && globalParams->env != nullptr && globalParams->env->IsRetry()) {
         retryCmd = ReloadForRetry();
@@ -65,7 +66,6 @@ bool TransferManager::CommandsParser(int fd, const std::vector<std::string> &con
     std::unique_ptr<Command> cmd;
     while (ct != context.end()) {
         cmd = std::make_unique<Command>();
-        // null pointer, return false
         UPDATER_ERROR_CHECK(cmd != nullptr, "Failed to parse command line.", return false);
         if (cmd->Init(*ct) && cmd->GetCommandType() != CommandType::LAST) {
             if (!retryCmd.empty() && globalParams->env->IsRetry()) {
@@ -87,8 +87,15 @@ bool TransferManager::CommandsParser(int fd, const std::vector<std::string> &con
             }
             CommandResult ret = cf->Execute(const_cast<Command &>(*cmd.get()));
             CommandFunctionFactory::ReleaseCommandFunction(cf);
-            if (CheckResult(ret, cmd->GetCommandLine()) == false) {
+            if (CheckResult(ret, cmd->GetCommandLine(), cmd->GetCommandType()) == false) {
                 return false;
+            }
+
+            bool typeResult = cmd->GetCommandType() == CommandType::NEW ||
+                cmd->GetCommandType() == CommandType::IMGDIFF ||
+                cmd->GetCommandType() == CommandType::BSDIFF;
+            if (totalSize != 0 && globalParams->env != nullptr && typeResult) {
+                globalParams->env->PostMessage("set_progress", std::to_string((float)globalParams->written/totalSize));
             }
             LOG(INFO) << "Running command : " << cmd->GetArgumentByPos(0) << " success";
         }
@@ -132,11 +139,13 @@ std::string TransferManager::ReloadForRetry() const
     return cmd;
 }
 
-bool TransferManager::CheckResult(const CommandResult result, const std::string &cmd)
+bool TransferManager::CheckResult(const CommandResult result, const std::string &cmd, const CommandType &type)
 {
     switch (result) {
         case SUCCESS:
-            RegisterForRetry(cmd);
+            if (type != CommandType::NEW) {
+                RegisterForRetry(cmd);
+            }
             break;
         case NEED_RETRY:
             LOG(INFO) << "Running command need retry!";

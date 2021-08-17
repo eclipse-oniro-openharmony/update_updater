@@ -30,25 +30,6 @@ using uscript::UScriptInstructionFactoryPtr;
 using uscript::UScriptInstructionPtr;
 
 namespace updater {
-class UpdaterEnv : public UScriptEnv {
-public:
-    UpdaterEnv(hpackage::PkgManager::PkgManagerPtr pkgManager, FILE* pipeWrite, bool retry) :
-        UScriptEnv(pkgManager), pipeWrite_(pipeWrite), isRetry_(retry) {}
-    virtual ~UpdaterEnv();
-
-    virtual void PostMessage(const std::string &cmd, std::string content);
-    virtual UScriptInstructionFactoryPtr GetInstructionFactory();
-    virtual const std::vector<std::string> GetInstructionNames() const;
-    virtual bool IsRetry() const
-    {
-        return isRetry_;
-    }
-private:
-    UScriptInstructionFactoryPtr factory_ = nullptr;
-    FILE* pipeWrite_ = nullptr;
-    bool isRetry_ = false;
-};
-
 class UpdaterInstructionFactory : public UScriptInstructionFactory {
 public:
     virtual int32_t CreateInstructionInstance(UScriptInstructionPtr& instr, const std::string& name);
@@ -71,6 +52,8 @@ public:
 private:
     static int RawImageWriteProcessor(const hpackage::PkgBuffer &buffer, size_t size, size_t start, bool isFinish,
         const void* context);
+    static size_t totalSize_;
+    static size_t readSize_;
 };
 } // updater
 

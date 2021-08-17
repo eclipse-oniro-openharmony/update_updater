@@ -179,6 +179,7 @@ void DoReboot(const std::string& rebootTarget)
             LOG(INFO) << "DoReboot: WriteUpdaterMessage boot_updater error";
             return;
         }
+        sync();
     } else {
         UPDATER_ERROR_CHECK(!memset_s(msg.command, MAX_COMMAND_SIZE, 0, MAX_COMMAND_SIZE), "Memset_s failed", return);
         bool ret = WriteUpdaterMessage(miscBlockDevice, msg);
@@ -186,9 +187,13 @@ void DoReboot(const std::string& rebootTarget)
             LOG(INFO) << "DoReboot: WriteUpdaterMessage empty error";
             return;
         }
+        sync();
     }
 #ifndef UPDATER_UT
     syscall(__NR_reboot, LINUX_REBOOT_MAGIC1, LINUX_REBOOT_MAGIC2, LINUX_REBOOT_CMD_RESTART2, rebootTarget.c_str());
+    while (true) {
+        pause();
+    }
 #else
     return;
 #endif

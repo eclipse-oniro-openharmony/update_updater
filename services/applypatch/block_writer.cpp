@@ -84,12 +84,6 @@ bool BlockWriter::Write(const uint8_t *addr, size_t len, WriteMode mode, const s
         currentBlockLeft_ -= written;
         totalWritten_ += written;
     }
-
-    if (fsync(fd_) == -1) {
-        LOG(ERROR) << "Failed to fsync";
-        return false;
-    }
-
     return true;
 }
 } // namespace updater
