@@ -238,7 +238,7 @@ int32_t PkgManagerImpl::ParsePackage(StreamPtr stream, std::vector<std::string> 
     PKG_CHECK(pkgFile != nullptr, return PKG_INVALID_PARAM, "Create package fail %s", stream->GetFileName().c_str());
 
     int32_t ret = pkgFile->LoadPackage(fileIds,
-        [this](const PkgInfoPtr info, const std::vector<uint8_t> &digest, const std::vector<uint8_t> &signature)->int {
+        [](const PkgInfoPtr info, const std::vector<uint8_t> &digest, const std::vector<uint8_t> &signature)->int {
             return PKG_SUCCESS;
         });
     PKG_CHECK(ret == PKG_SUCCESS, pkgFile->SetPkgStream(); delete pkgFile;
