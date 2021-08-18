@@ -285,8 +285,8 @@ UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, const std::
         UPDATER_ERROR_CHECK_NOT_RETURN(chmod(fullPath.c_str(), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) == 0,
             "Failed to change mode");
 
-	// Set process scheduler to normal if current scheduler is
-	// SCHED_FIFO, which may cause bad performance.
+        // Set process scheduler to normal if current scheduler is
+        // SCHED_FIFO, which may cause bad performance.
         int policy = syscall(SYS_sched_getscheduler, getpid());
         if (policy == -1) {
             LOG(INFO) << "Cannnot get current process scheduler";
