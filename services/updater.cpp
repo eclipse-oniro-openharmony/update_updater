@@ -244,6 +244,9 @@ static void HandleChildOutput(const std::string &buffer, int32_t bufferLen,
             return;
         }
         g_tmpProgressValue = g_tmpProgressValue + g_tmpValue;
+        if (g_tmpProgressValue == 0) {
+            return;
+        }
         g_progressBar->SetProgressValue(g_tmpProgressValue);
     } else {
         LOG(WARNING) << "Child process returns unexpected message.";
