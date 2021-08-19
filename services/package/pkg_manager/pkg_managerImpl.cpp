@@ -420,8 +420,8 @@ void PkgManagerImpl::ClosePkgStream(StreamPtr &stream)
 
 int32_t PkgManagerImpl::CreatePkgStream(PkgStreamPtr &stream, const std::string &fileName, size_t size, int32_t type)
 {
-    //First assign a NULL value to the outgoing parameter 'stream', 
-    //avoid the caller from passing in a non-empty scene
+    // First assign a NULL value to the outgoing parameter 'stream', 
+    // avoid the caller from passing in a non-empty scene
     stream = nullptr;
     if (type == PkgStream::PkgStreamType_Write || type == PkgStream::PkgStreamType_Read) {
         static char const *modeFlags[] = { "rb", "wb+" };
