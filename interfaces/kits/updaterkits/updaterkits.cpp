@@ -39,7 +39,7 @@ static bool WriteToMiscAndRebootToUpdater(const std::string &miscFile,
     int32_t propertyMaxSize = 92;
     char updateCmd[propertyMaxSize];
     void(snprintf_s(updateCmd, propertyMaxSize, propertyMaxSize - 1, "reboot,updater:%s", updateMsg.update));
-    bool bRet = OHOS::system::SetParameter("sys.powerctl", updateCmd);
+    bool bRet = OHOS::system::SetParameter("sys.powerctrl", updateCmd);
     if (!bRet) {
         std::cout << "WriteToMiscAndRebootToUpdater SetParameter failed, errno: " << errno << std::endl;
         return false;
