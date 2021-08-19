@@ -18,6 +18,8 @@
 #include <cstdio>
 #include <iomanip>
 #include <string>
+#include <sched.h>
+#include <syscall.h>
 #include <sys/stat.h>
 #include <sys/statvfs.h>
 #include <sys/wait.h>
@@ -283,6 +285,20 @@ UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, const std::
         UPDATER_ERROR_CHECK_NOT_RETURN(chmod(fullPath.c_str(), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) == 0,
             "Failed to change mode");
 
+        // Set process scheduler to normal if current scheduler is
+        // SCHED_FIFO, which may cause bad performance.
+        int policy = syscall(SYS_sched_getscheduler, getpid());
+        if (policy == -1) {
+            LOG(INFO) << "Cannnot get current process scheduler";
+        } else if (policy == SCHED_FIFO) {
+            LOG(DEBUG) << "Current process with scheduler SCHED_FIFO";
+            struct sched_param sp = {
+                .sched_priority = 0,
+            };
+            if (syscall(SYS_sched_setscheduler, getpid(), SCHED_OTHER, &sp) < 0) {
+                LOG(WARNING) << "Cannot set current process schedule with SCHED_OTHER";
+            }
+        }
         if (retryCount > 0) {
             execl(fullPath.c_str(), packagePath.c_str(), std::to_string(pipeWrite).c_str(), "retry", nullptr);
         } else {
