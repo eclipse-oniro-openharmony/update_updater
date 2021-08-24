@@ -91,16 +91,6 @@ protected:
     int32_t strategy_ {0};
 };
 
-class GZipImagePatch : public ZipImagePatch {
-public:
-    GZipImagePatch(UpdatePatchWriterPtr writer, const std::vector<uint8_t> &bonusData)
-        : ZipImagePatch(writer, bonusData) {}
-    ~GZipImagePatch() override {}
-
-protected:
-    int32_t ReadHeader(const PatchParam &param, PatchHeader &header, size_t &offset) override;
-};
-
 class Lz4ImagePatch : public CompressedImagePatch {
 public:
     Lz4ImagePatch(UpdatePatchWriterPtr writer, const std::vector<uint8_t> &bonusData)
@@ -123,7 +113,10 @@ class CompressedFileRestore : public UpdatePatchWriter {
 public:
     CompressedFileRestore(hpackage::PkgManager::FileInfoPtr fileInfo, UpdatePatchWriterPtr writer)
         : UpdatePatchWriter(), fileInfo_(fileInfo), writer_(writer) {}
-    ~CompressedFileRestore() override {}
+    ~CompressedFileRestore() override
+    {
+        Finish();
+    }
 
     int32_t Init() override;
     int32_t Write(size_t start, const BlockBuffer &buffer, size_t len) override;

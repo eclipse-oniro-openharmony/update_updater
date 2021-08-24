@@ -275,7 +275,7 @@ void TextLabel::DrawText()
 void TextLabel::DrawFocus()
 {
     BRGA888Pixel pixBuf[viewWidth_];
-    for (int a =0; a< viewWidth_; a++) {
+    for (int a = 0; a < viewWidth_; a++) {
         pixBuf[a].r = actionBgColor_.r;
         pixBuf[a].g = actionBgColor_.g;
         pixBuf[a].b = actionBgColor_.b;

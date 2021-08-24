@@ -35,11 +35,6 @@ public:
     static constexpr uint32_t LZ4B_REVERSED_LEN = 4;
     Lz4Adapter(UpdatePatchWriterPtr outStream, size_t offset, const hpackage::PkgManager::FileInfoPtr fileInfo);
     ~Lz4Adapter() override {}
-
-    int32_t Open() override;
-    int32_t Close() override;
-    int32_t WriteData(const BlockBuffer &srcData) override;
-    int32_t FlushData(size_t &offset) override;
 protected:
     virtual int32_t CompressData(const BlockBuffer &srcData) = 0;
     std::vector<uint8_t> buffer_ {};
@@ -57,7 +52,10 @@ class Lz4FrameAdapter : public Lz4Adapter {
 public:
     Lz4FrameAdapter(UpdatePatchWriterPtr outStream, size_t offset,
         const hpackage::PkgManager::FileInfoPtr fileInfo) : Lz4Adapter(outStream, offset, fileInfo) {}
-    ~Lz4FrameAdapter() override {}
+    ~Lz4FrameAdapter() override
+    {
+        Close();
+    }
 
     int32_t Open() override;
     int32_t Close() override;
@@ -75,7 +73,10 @@ class Lz4BlockAdapter : public Lz4FrameAdapter {
 public:
     Lz4BlockAdapter(UpdatePatchWriterPtr outStream, size_t offset,
         const hpackage::PkgManager::FileInfoPtr fileInfo) : Lz4FrameAdapter(outStream, offset, fileInfo) {}
-    ~Lz4BlockAdapter() override {}
+    ~Lz4BlockAdapter() override
+    {
+        Close();
+    }
 
     int32_t Open() override;
     int32_t Close() override;

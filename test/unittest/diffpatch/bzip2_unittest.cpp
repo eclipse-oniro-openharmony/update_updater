@@ -272,7 +272,7 @@ TEST_F(BZip2AdapterUnitTest, DeflateAdapterTestForZip)
     zipInfo.memLevel = 8;
     zipInfo.strategy = 0;
     BZip2AdapterUnitTest test;
-    EXPECT_EQ(0, test.DeflateAdapterTest("../diffpatch/2.log.new", &zipInfo.fileInfo));
+    EXPECT_EQ(0, test.DeflateAdapterTest("../diffpatch/patchtest.new", &zipInfo.fileInfo));
 }
 
 TEST_F(BZip2AdapterUnitTest, DeflateAdapterTestForLz4)
@@ -284,7 +284,7 @@ TEST_F(BZip2AdapterUnitTest, DeflateAdapterTestForLz4)
     lz4Info.contentChecksumFlag = 0;
     lz4Info.blockSizeID = 0;
     BZip2AdapterUnitTest test;
-    EXPECT_EQ(0, test.DeflateAdapterTest("../diffpatch/2.log.test", &lz4Info.fileInfo));
+    EXPECT_EQ(0, test.DeflateAdapterTest("../diffpatch/patchtest.test", &lz4Info.fileInfo));
 }
 
 TEST_F(BZip2AdapterUnitTest, DeflateAdapterTestForLz4_2)
@@ -296,7 +296,7 @@ TEST_F(BZip2AdapterUnitTest, DeflateAdapterTestForLz4_2)
     lz4Info.contentChecksumFlag = 0;
     lz4Info.blockSizeID = 7;
     BZip2AdapterUnitTest test;
-    EXPECT_EQ(0, test.DeflateAdapterTest("../diffpatch/2.log.test", &lz4Info.fileInfo));
+    EXPECT_EQ(0, test.DeflateAdapterTest("../diffpatch/patchtest.test", &lz4Info.fileInfo));
 }
 
 TEST_F(BZip2AdapterUnitTest, DeflateAdapterTestForLz4_3)
@@ -308,7 +308,7 @@ TEST_F(BZip2AdapterUnitTest, DeflateAdapterTestForLz4_3)
     lz4Info.contentChecksumFlag = 0;
     lz4Info.blockSizeID = 4;
     BZip2AdapterUnitTest test;
-    EXPECT_EQ(0, test.DeflateAdapterTest("../diffpatch/2.log.test", &lz4Info.fileInfo));
+    EXPECT_EQ(0, test.DeflateAdapterTest("../diffpatch/patchtest.test", &lz4Info.fileInfo));
 }
 
 TEST_F(BZip2AdapterUnitTest, DeflateAdapterTestForLz4_4)
@@ -320,7 +320,7 @@ TEST_F(BZip2AdapterUnitTest, DeflateAdapterTestForLz4_4)
     lz4Info.contentChecksumFlag = 0;
     lz4Info.blockSizeID = 5;
     BZip2AdapterUnitTest test;
-    EXPECT_EQ(0, test.DeflateAdapterTest("../diffpatch/2.log.test", &lz4Info.fileInfo));
+    EXPECT_EQ(0, test.DeflateAdapterTest("../diffpatch/patchtest.test", &lz4Info.fileInfo));
 }
 
 TEST_F(BZip2AdapterUnitTest, DeflateAdapterTestForLz4_5)
@@ -333,7 +333,7 @@ TEST_F(BZip2AdapterUnitTest, DeflateAdapterTestForLz4_5)
     lz4Info.blockSizeID = 5;
     lz4Info.autoFlush = 0;
     BZip2AdapterUnitTest test;
-    EXPECT_EQ(0, test.DeflateAdapterTest("../diffpatch/2.log.test", &lz4Info.fileInfo));
+    EXPECT_EQ(0, test.DeflateAdapterTest("../diffpatch/patchtest.test", &lz4Info.fileInfo));
 }
 
 TEST_F(BZip2AdapterUnitTest, DeflateAdapterTestForLz4Block)
@@ -345,7 +345,7 @@ TEST_F(BZip2AdapterUnitTest, DeflateAdapterTestForLz4Block)
     lz4Info.contentChecksumFlag = 1;
     lz4Info.blockSizeID = 5;
     BZip2AdapterUnitTest test;
-    EXPECT_EQ(0, test.DeflateAdapterTest("../diffpatch/2.log.test", &lz4Info.fileInfo));
+    EXPECT_EQ(0, test.DeflateAdapterTest("../diffpatch/patchtest.test", &lz4Info.fileInfo));
 }
 
 TEST_F(BZip2AdapterUnitTest, DeflateAdapterTestForLz4Block_2)
@@ -357,7 +357,7 @@ TEST_F(BZip2AdapterUnitTest, DeflateAdapterTestForLz4Block_2)
     lz4Info.contentChecksumFlag = 1;
     lz4Info.blockSizeID = 5;
     BZip2AdapterUnitTest test;
-    EXPECT_EQ(0, test.DeflateAdapterTest("../diffpatch/2.log.test", &lz4Info.fileInfo));
+    EXPECT_EQ(0, test.DeflateAdapterTest("../diffpatch/patchtest.test", &lz4Info.fileInfo));
 }
 
 TEST_F(BZip2AdapterUnitTest, DeflateAdapterTestForLz4Block_3)
@@ -369,7 +369,7 @@ TEST_F(BZip2AdapterUnitTest, DeflateAdapterTestForLz4Block_3)
     lz4Info.contentChecksumFlag = 1;
     lz4Info.blockSizeID = 0;
     BZip2AdapterUnitTest test;
-    EXPECT_EQ(0, test.DeflateAdapterTest("../diffpatch/2.log.test", &lz4Info.fileInfo));
+    EXPECT_EQ(0, test.DeflateAdapterTest("../diffpatch/patchtest.test", &lz4Info.fileInfo));
 }
 
 TEST_F(BZip2AdapterUnitTest, DeflateAdapterTestForLz4Block_4)

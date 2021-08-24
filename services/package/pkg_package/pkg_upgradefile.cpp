@@ -43,6 +43,7 @@ constexpr int32_t UPGRADE_FILE_HEADER_LEN = 3 * sizeof(PkgTlv) + sizeof(UpgradeP
 constexpr int32_t UPGRADE_RESERVE_LEN = 16;
 constexpr int16_t TLV_TYPE_FOR_SHA256 = 0x0001;
 constexpr int16_t TLV_TYPE_FOR_SHA384 = 0x0011;
+constexpr size_t BUFFER_SIZE = 4 * 1024 * 1024;
 
 int32_t UpgradeFileEntry::Init(const PkgManager::FileInfoPtr fileInfo, PkgStreamPtr inStream)
 {
@@ -218,7 +219,7 @@ int32_t UpgradePkgFile::Verify(size_t start, DigestAlgorithm::DigestAlgorithmPtr
     VerifyFunction verifier, const std::vector<uint8_t> &signData)
 {
     int ret = 0;
-    size_t buffSize = (4 * 1024 * 1024);
+    size_t buffSize = BUFFER_SIZE;
     size_t offset = start;
     size_t readBytes = 0;
     PkgBuffer buffer(buffSize);

@@ -28,13 +28,22 @@ public:
         Close();
     }
 
-    virtual int32_t Open() = 0;
+    virtual int32_t Open()
+    {
+        return 0;
+    };
     virtual int32_t Close()
     {
         return 0;
     };
-    virtual int32_t WriteData(const BlockBuffer &srcData) = 0;
-    virtual int32_t FlushData(size_t &offset) = 0;
+    virtual int32_t WriteData(const BlockBuffer &srcData)
+    {
+        return 0;
+    };
+    virtual int32_t FlushData(size_t &offset)
+    {
+        return 0;
+    };
 protected:
     bool init_ = false;
 };

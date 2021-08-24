@@ -37,7 +37,6 @@ using namespace updater;
 using namespace std;
 using namespace testing;
 constexpr unsigned int BUFFER_LEN = 12;
-constexpr int O_BINARY = 0;
 
 void ApplyPatchUnitTest::SetUp()
 {
@@ -86,7 +85,7 @@ TEST_F(ApplyPatchUnitTest, updater_RawWriter)
     int mRet = memcpy_s(buf, BUFFER_LEN, "hello, world", BUFFER_LEN);
     EXPECT_EQ(mRet, 0);
     auto devPath = GetBlockDeviceByMountPoint(partitionName);
-    auto devDir = std::string(dirname(const_cast<char*>(devPath.c_str())));
+    const std::string devDir = "/data/updater/ut/datawriter";
     updater::utils::MkdirRecursive(devDir, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
     close(open(devPath.c_str(), O_CREAT | O_WRONLY | O_EXCL, 0664));
     ret = writer->Write(buf, BUFFER_LEN, mode, partitionName);
@@ -106,10 +105,12 @@ TEST_F(ApplyPatchUnitTest, updater_RawWriter)
 
 TEST_F(ApplyPatchUnitTest, updater_DataWriterOpenPartition)
 {
+    WriteMode mode = WRITE_RAW;
+    std::string partitionName = "";
     partitionName = "non_exist";
-    writer = DataWriter::CreateDataWriter(mode, partitionName);
+    std::unique_ptr<DataWriter> writer = DataWriter::CreateDataWriter(mode, partitionName);
     EXPECT_NE(writer, nullptr);
-    ret = writer->OpenPartition(partitionName);
+    int ret = writer->OpenPartition(partitionName);
     EXPECT_EQ(ret, -1);
     DataWriter::ReleaseDataWriter(writer);
 

@@ -183,80 +183,80 @@ TEST_F(DiffPatchUnitTest, BlockDiffPatchTest)
 {
     DiffPatchUnitTest test;
     EXPECT_EQ(0, test.BlockDiffPatchTest(
-        "../diffpatch/2.log.old",
-        "../diffpatch/2.log.new",
-        "../diffpatch/2.log.patch",
-        "../diffpatch/2.log.new_1"));
+        "../diffpatch/patchtest.old",
+        "../diffpatch/patchtest.new",
+        "../diffpatch/patchtest.patch",
+        "../diffpatch/patchtest.new_1"));
 }
 
 TEST_F(DiffPatchUnitTest, ImgageDiffPatchFileTest)
 {
     DiffPatchUnitTest test;
     EXPECT_EQ(0, test.ImgageDiffPatchFileTest(0,
-        "../diffpatch/2.log.old",
-        "../diffpatch/2.log.new",
-        "../diffpatch/2.log.img_patch",
-        "../diffpatch/2.log.new_2"));
+        "../diffpatch/patchtest.old",
+        "../diffpatch/patchtest.new",
+        "../diffpatch/patchtest.img_patch",
+        "../diffpatch/patchtest.new_2"));
 }
 
 TEST_F(DiffPatchUnitTest, ImgageDiffPatchFileWithLimit)
 {
     DiffPatchUnitTest test;
     EXPECT_EQ(0, test.ImgageDiffPatchFileTest(16,
-        "../diffpatch/2.log.old",
-        "../diffpatch/2.log.new",
-        "../diffpatch/2.log.img_patch",
-        "../diffpatch/2.log.new_3"));
+        "../diffpatch/patchtest.old",
+        "../diffpatch/patchtest.new",
+        "../diffpatch/patchtest.img_patch",
+        "../diffpatch/patchtest.new_3"));
 }
 
 TEST_F(DiffPatchUnitTest, ImgageDiffPatchGzFile)
 {
     DiffPatchUnitTest test;
     EXPECT_EQ(0, test.ImgageDiffPatchFileTest(0,
-        "../diffpatch/5_old.gz",
-        "../diffpatch/5_new.gz",
-        "../diffpatch/5_gz.img_patch",
-        "../diffpatch/5_gz_new.zip"));
+        "../diffpatch/PatchGztest_old.gz",
+        "../diffpatch/PatchGztest_new.gz",
+        "../diffpatch/PatchGztest_gz.img_patch",
+        "../diffpatch/PatchGztest_gz_new.zip"));
 }
 
 TEST_F(DiffPatchUnitTest, ImgageDiffPatchLz4File)
 {
     DiffPatchUnitTest test;
     EXPECT_EQ(0, test.ImgageDiffPatchFileTest(0,
-        "../diffpatch/4_old.lz4",
-        "../diffpatch/4_new.lz4",
-        "../diffpatch/4_lz4.img_patch",
-        "../diffpatch/4_lz4_new.lz"));
+        "../diffpatch/PatchLz4test_old.lz4",
+        "../diffpatch/PatchLz4test_new.lz4",
+        "../diffpatch/PatchLz4test_lz4.img_patch",
+        "../diffpatch/PatchLz4test_lz4_new.lz"));
 }
 
 TEST_F(DiffPatchUnitTest, ImgageDiffPatchLz4File_1)
 {
     DiffPatchUnitTest test;
     EXPECT_EQ(0, test.ImgageDiffPatchFileTest(0,
-        "../diffpatch/4_1_old.lz",
-        "../diffpatch/4_1_new.lz",
-        "../diffpatch/4_1_lz4.img_patch",
-        "../diffpatch/4_1_lz4_new.lz"));
+        "../diffpatch/ImgageDiffPatchLz4File_1_old.lz",
+        "../diffpatch/ImgageDiffPatchLz4File_1_new.lz",
+        "../diffpatch/ImgageDiffPatchLz4File_1_lz4.img_patch",
+        "../diffpatch/ImgageDiffPatchLz4File_1_lz4_new.lz"));
 }
 
 TEST_F(DiffPatchUnitTest, ImgageDiffPatchLz4File_2)
 {
     DiffPatchUnitTest test;
     EXPECT_EQ(0, test.ImgageDiffPatchFileTest(1,
-        "../diffpatch/4_1_old.lz",
-        "../diffpatch/4_1_new.lz",
-        "../diffpatch/4_1_lz4.img_patch",
-        "../diffpatch/4_1_lz4_new.lz"));
+        "../diffpatch/ImgageDiffPatchLz4File_1_old.lz",
+        "../diffpatch/ImgageDiffPatchLz4File_1_new.lz",
+        "../diffpatch/ImgageDiffPatchLz4File_1_lz4.img_patch",
+        "../diffpatch/ImgageDiffPatchLz4File_1_lz4_new.lz"));
 }
 
 TEST_F(DiffPatchUnitTest, ImgageDiffPatchLz4File_3)
 {
     DiffPatchUnitTest test;
     EXPECT_EQ(0, test.ImgageDiffPatchFileTest(0,
-        "../diffpatch/7_old.lz4",
-        "../diffpatch/7_new.lz4",
-        "../diffpatch/7_lz4.img_patch",
-        "../diffpatch/7_lz4_new.lz"));
+        "../diffpatch/ImgageDiffPatchLz4File_3_old.lz4",
+        "../diffpatch/ImgageDiffPatchLz4File_3_new.lz4",
+        "../diffpatch/ImgageDiffPatchLz4File_3_lz4.img_patch",
+        "../diffpatch/ImgageDiffPatchLz4File_3_lz4_new.lz"));
 }
 
 // 测试包含一个文件时，新增一个文件
@@ -264,10 +264,10 @@ TEST_F(DiffPatchUnitTest, ImgageDiffPatchZipFile)
 {
     DiffPatchUnitTest test;
     EXPECT_EQ(0, test.ImgageDiffPatchFileTest(0,
-        "../diffpatch/2_old.zip",
-        "../diffpatch/2_new.zip",
-        "../diffpatch/2_zip.img_patch",
-        "../diffpatch/2_zip_new.zip"));
+        "../diffpatch/ImgageDiffPatchZipFile_old.zip",
+        "../diffpatch/ImgageDiffPatchZipFile_new.zip",
+        "../diffpatch/ImgageDiffPatchZipFile_zip.img_patch",
+        "../diffpatch/ImgageDiffPatchZipFile_zip_new.zip"));
 }
 
 // 测试使用winrar的压缩文件
@@ -275,10 +275,10 @@ TEST_F(DiffPatchUnitTest, ImgageDiffPatchZipFile_1)
 {
     DiffPatchUnitTest test;
     EXPECT_EQ(0, test.ImgageDiffPatchFileTest(0,
-        "../diffpatch/2_1_old.zip",
-        "../diffpatch/2_1_new.zip",
-        "../diffpatch/2_1_zip.img_patch",
-        "../diffpatch/2_1_zip_new.zip"));
+        "../diffpatch/ImgageDiffPatchZipFile_1_old.zip",
+        "../diffpatch/ImgageDiffPatchZipFile_1_new.zip",
+        "../diffpatch/ImgageDiffPatchZipFile_1_zip.img_patch",
+        "../diffpatch/ImgageDiffPatchZipFile_1_zip_new.zip"));
 }
 
 // 测试包含一个文件时，文件内容不相同
@@ -286,10 +286,10 @@ TEST_F(DiffPatchUnitTest, ImgageDiffPatchZipFile_2)
 {
     DiffPatchUnitTest test;
     EXPECT_EQ(0, test.ImgageDiffPatchFileTest(0,
-        "../diffpatch/2_2_old.zip",
-        "../diffpatch/2_2_new.zip",
-        "../diffpatch/2_2_zip.img_patch",
-        "../diffpatch/2_2_zip_new.zip"));
+        "../diffpatch/ImgageDiffPatchZipFile_2_old.zip",
+        "../diffpatch/ImgageDiffPatchZipFile_2_new.zip",
+        "../diffpatch/ImgageDiffPatchZipFile_2_zip.img_patch",
+        "../diffpatch/ImgageDiffPatchZipFile_2_zip_new.zip"));
 }
 
 // linux 上压缩，多文件测试
@@ -297,10 +297,10 @@ TEST_F(DiffPatchUnitTest, ImgageDiffPatchZipFile_3)
 {
     DiffPatchUnitTest test;
     EXPECT_EQ(0, test.ImgageDiffPatchFileTest(0,
-        "../diffpatch/2_3_old.zip",
-        "../diffpatch/2_3_new.zip",
-        "../diffpatch/2_3_zip.img_patch",
-        "../diffpatch/2_3_zip_new.zip"));
+        "../diffpatch/ImgageDiffPatchZipFile_3_old.zip",
+        "../diffpatch/ImgageDiffPatchZipFile_3_new.zip",
+        "../diffpatch/ImgageDiffPatchZipFile_3_zip.img_patch",
+        "../diffpatch/ImgageDiffPatchZipFile_3_zip_new.zip"));
 }
 
 // linux 上压缩，超大buffer length测试
@@ -308,80 +308,80 @@ TEST_F(DiffPatchUnitTest, ImgageDiffPatchZipFile_4)
 {
     DiffPatchUnitTest test;
     EXPECT_EQ(0, test.ImgageDiffPatchFileTest(0,
-        "../diffpatch/6_old.zip",
-        "../diffpatch/6_new.zip",
-        "../diffpatch/6_zip.img_patch",
-        "../diffpatch/6_zip_new.zip"));
+        "../diffpatch/ImgageDiffPatchZipFile_4_old.zip",
+        "../diffpatch/ImgageDiffPatchZipFile_4_new.zip",
+        "../diffpatch/ImgageDiffPatchZipFile_4_zip.img_patch",
+        "../diffpatch/ImgageDiffPatchZipFile_4_zip_new.zip"));
 }
 
 TEST_F(DiffPatchUnitTest, ImgageDiffPatchGzFile2)
 {
     DiffPatchUnitTest test;
     EXPECT_EQ(0, test.ImgageDiffPatchFileTest2(0,
-        "../diffpatch/5_old.gz",
-        "../diffpatch/5_new.gz",
-        "../diffpatch/5_gz.img_patch",
-        "../diffpatch/5_gz_new.zip"));
+        "../diffpatch/PatchGztest_old.gz",
+        "../diffpatch/PatchGztest_new.gz",
+        "../diffpatch/PatchGztest_gz.img_patch",
+        "../diffpatch/PatchGztest_gz_new.zip"));
 }
 
 TEST_F(DiffPatchUnitTest, BlockDiffPatchGzFile)
 {
     DiffPatchUnitTest test;
     EXPECT_EQ(0, test.BlockDiffPatchTest2(
-        "../diffpatch/5_old.gz",
-        "../diffpatch/5_new.gz",
-        "../diffpatch/5_gz.img_patch",
-        "../diffpatch/5_gz_new.zip", true));
+        "../diffpatch/PatchGztest_old.gz",
+        "../diffpatch/PatchGztest_new.gz",
+        "../diffpatch/PatchGztest_gz.img_patch",
+        "../diffpatch/PatchGztest_gz_new.zip", true));
 }
 
 TEST_F(DiffPatchUnitTest, BlockDiffPatchGzFile_1)
 {
     DiffPatchUnitTest test;
     EXPECT_EQ(0, test.BlockDiffPatchTest2(
-        "../diffpatch/5_old.gz",
-        "../diffpatch/5_new.gz",
-        "../diffpatch/5_gz.img_patch",
-        "../diffpatch/5_gz_new.zip", false));
+        "../diffpatch/PatchGztest_old.gz",
+        "../diffpatch/PatchGztest_new.gz",
+        "../diffpatch/PatchGztest_gz.img_patch",
+        "../diffpatch/PatchGztest_gz_new.zip", false));
 }
 
 TEST_F(DiffPatchUnitTest, BlockDiffPatchLz4File)
 {
     DiffPatchUnitTest test;
     EXPECT_EQ(0, test.BlockDiffPatchTest2(
-        "../diffpatch/4_old.lz4",
-        "../diffpatch/4_new.lz4",
-        "../diffpatch/4_lz4.img_patch",
-        "../diffpatch/4_lz4_new.lz", true));
+        "../diffpatch/PatchLz4test_old.lz4",
+        "../diffpatch/PatchLz4test_new.lz4",
+        "../diffpatch/PatchLz4test_lz4.img_patch",
+        "../diffpatch/PatchLz4test_lz4_new.lz", true));
 }
 
 TEST_F(DiffPatchUnitTest, BlockDiffPatchLz4File_1)
 {
     DiffPatchUnitTest test;
     EXPECT_EQ(0, test.BlockDiffPatchTest2(
-        "../diffpatch/4_old.lz4",
-        "../diffpatch/4_new.lz4",
-        "../diffpatch/4_lz4.img_patch",
-        "../diffpatch/4_lz4_new.lz", false));
+        "../diffpatch/PatchLz4test_old.lz4",
+        "../diffpatch/PatchLz4test_new.lz4",
+        "../diffpatch/PatchLz4test_lz4.img_patch",
+        "../diffpatch/PatchLz4test_lz4_new.lz", false));
 }
 
 TEST_F(DiffPatchUnitTest, BlockDiffPatchTest_0)
 {
     DiffPatchUnitTest test;
     EXPECT_EQ(0, test.BlockDiffPatchTest2(
-        "../diffpatch/2.log.old",
-        "../diffpatch/2.log.new",
-        "../diffpatch/2.log.img_patch",
-        "../diffpatch/2.log.new_2", true));
+        "../diffpatch/patchtest.old",
+        "../diffpatch/patchtest.new",
+        "../diffpatch/patchtest.img_patch",
+        "../diffpatch/patchtest.new_2", true));
 }
 
 TEST_F(DiffPatchUnitTest, BlockDiffPatchTest_1)
 {
     DiffPatchUnitTest test;
     EXPECT_EQ(0, test.BlockDiffPatchTest2(
-        "../diffpatch/2.log.old",
-        "../diffpatch/2.log.new",
-        "../diffpatch/2.log.img_patch",
-        "../diffpatch/2.log.new_2", false));
+        "../diffpatch/patchtest.old",
+        "../diffpatch/patchtest.new",
+        "../diffpatch/patchtest.img_patch",
+        "../diffpatch/patchtest.new_2", false));
 }
 
 TEST_F(DiffPatchUnitTest, BlockDiffPatchTest_2)

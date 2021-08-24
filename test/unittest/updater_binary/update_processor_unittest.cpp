@@ -56,7 +56,7 @@ void UpdateProcessorUnitTest::TearDownTestCase(void) {}
 
 TEST(UpdateProcessorUnitTest, UpdateProcessor_001)
 {
-    LoadSpecificFstab("/data/updater/applypatch/etc/fstab1.ut.updater");
+    LoadSpecificFstab("/data/updater/applypatch/etc/fstab.ut.updater");
     const string packagePath = "/data/updater/updater/raw_image_write.zip";
     PkgManager::PkgManagerPtr pkgManager = PkgManager::GetPackageInstance();
     std::vector<std::string> components;

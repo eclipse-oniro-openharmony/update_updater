@@ -166,7 +166,7 @@ static int32_t GetUpdateBlockInfo(struct UpdateBlockInfo &infos, uscript::UScrip
     return USCRIPT_SUCCESS;
 }
 
-static int32_t ExecuteTransferCommand(int fd, std::vector<std::string> &lines, uscript::UScriptEnv &env,
+static int32_t ExecuteTransferCommand(int fd, const std::vector<std::string> &lines, uscript::UScriptEnv &env,
     uscript::UScriptContext &context)
 {
     TransferManagerPtr tm = TransferManager::GetTransferManagerInstance();
@@ -241,6 +241,23 @@ static int32_t ExtractDiffPackageAndLoad(const UpdateBlockInfo &infos, uscript::
     return USCRIPT_SUCCESS;
 }
 
+static int32_t DoExecuteUpdateBlock(UpdateBlockInfo &infos, uscript::UScriptEnv &env,
+    hpackage::PkgManager::StreamPtr &outStream, const std::vector<std::string> &lines, uscript::UScriptContext &context)
+{
+    int fd = open(infos.devPath.c_str(), O_RDWR | O_LARGEFILE);
+    UPDATER_ERROR_CHECK (fd != -1, "Failed to open block",
+        env.GetPkgManager()->ClosePkgStream(outStream); return USCRIPT_ERROR_EXECUTE);
+    int32_t ret = ExecuteTransferCommand(fd, lines, env, context);
+    fsync(fd);
+    close(fd);
+    fd = -1;
+    env.GetPkgManager()->ClosePkgStream(outStream);
+    if (ret == USCRIPT_SUCCESS) {
+        PartitionRecord::GetInstance().RecordPartitionUpdateStatus(infos.partitionName, true);
+    }
+    return ret;
+}
+
 static int32_t ExecuteUpdateBlock(uscript::UScriptEnv &env, uscript::UScriptContext &context)
 {
     UpdateBlockInfo infos {};
@@ -289,19 +306,8 @@ static int32_t ExecuteUpdateBlock(uscript::UScriptEnv &env, uscript::UScriptCont
         env.GetPkgManager()->ClosePkgStream(outStream); return USCRIPT_ERROR_EXECUTE);
     outStream->GetBuffer(globalParams->patchDataBuffer, globalParams->patchDataSize);
     LOG(DEBUG) << "Patch data size is: " << globalParams->patchDataSize;
-
-    int fd = open(infos.devPath.c_str(), O_RDWR | O_LARGEFILE);
-    UPDATER_ERROR_CHECK (fd != -1, "Failed to open block",
-        env.GetPkgManager()->ClosePkgStream(outStream); return USCRIPT_ERROR_EXECUTE);
-    ret = ExecuteTransferCommand(fd, lines, env, context);
-    fsync(fd);
-    close(fd);
-    fd = -1;
-    env.GetPkgManager()->ClosePkgStream(outStream);
+    ret = DoExecuteUpdateBlock(infos, env, outStream, lines, context);
     TransferManager::ReleaseTransferManagerInstance(tm);
-    if (ret == USCRIPT_SUCCESS) {
-         PartitionRecord::GetInstance().RecordPartitionUpdateStatus(infos.partitionName, true);
-    }
     return ret;
 }
 

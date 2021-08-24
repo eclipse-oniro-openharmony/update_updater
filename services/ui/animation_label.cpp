@@ -33,8 +33,10 @@ AnimationLable::AnimationLable(int startX, int startY, int w, int h, Frame *mPar
     needStop_ = false;
     parent_->ViewRegister(this);
     startFlag_ = false;
+#ifndef UPDATER_UT
     updateThread = std::thread(&AnimationLable::UpdateLoop, this);
     updateThread.detach();
+#endif
 }
 
 AnimationLable::~AnimationLable()

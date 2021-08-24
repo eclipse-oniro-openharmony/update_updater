@@ -254,7 +254,6 @@ void DoProgress()
             progressvalueTmp = progressvalueTmp + progressValueStep;
             g_progressBar->SetProgressValue(progressvalueTmp);
             if (progressvalueTmp >= maxProgressValue) {
-                g_anmimationLabel->Stop();
                 usleep(maxSleepMs);
                 return;
             }

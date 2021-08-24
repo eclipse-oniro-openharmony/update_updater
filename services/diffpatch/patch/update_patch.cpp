@@ -67,9 +67,6 @@ int32_t UpdatePatch::ApplyImagePatch(const PatchParam &param,
             case BLOCK_DEFLATE:
                 imagePatch = std::make_unique<ZipImagePatch>(writer, ((i == 1) ? bonusData : empty));
                 break;
-            case BLOCK_GZIP:
-                imagePatch = std::make_unique<GZipImagePatch>(writer, ((i == 1) ? bonusData : empty));
-                break;
             case BLOCK_LZ4:
                 imagePatch = std::make_unique<Lz4ImagePatch>(writer, ((i == 1) ? bonusData : empty));
                 break;
@@ -124,7 +121,8 @@ int32_t UpdatePatch::ApplyBlockPatch(const PatchBuffer &patchInfo,
     ret = pkgManager->CreatePkgStream(stream, "", {oldInfo.buffer, oldInfo.length});
     PATCH_CHECK(stream != nullptr, pkgManager->ClosePkgStream(stream); return -1, "Failed to create stream");
 
-    std::unique_ptr<BlocksStreamPatch> patch = std::make_unique<BlocksStreamPatch>(patchInfo, stream, patchWriter.get());
+    std::unique_ptr<BlocksStreamPatch> patch = std::make_unique<BlocksStreamPatch>(patchInfo,
+        stream, patchWriter.get());
     PATCH_CHECK(patch != nullptr, pkgManager->ClosePkgStream(stream); return -1, "Failed to  creare patch ");
     ret = patch->ApplyPatch();
     pkgManager->ClosePkgStream(stream);

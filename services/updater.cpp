@@ -152,6 +152,21 @@ static UpdaterStatus IsSpaceCapacitySufficient(PkgManager::PkgManagerPtr pkgMana
     return UPDATE_SUCCESS;
 }
 
+static inline void ProgressSmoothHandler()
+{
+    while (g_tmpProgressValue < FULL_PERCENT_PROGRESS) {
+        int gap = FULL_PERCENT_PROGRESS - g_tmpProgressValue;
+        int increase = gap / PROGRESS_VALUE_CONST;
+        g_tmpProgressValue += increase;
+        if (g_tmpProgressValue >= FULL_PERCENT_PROGRESS || increase == 0) {
+            break;
+        } else {
+            g_progressBar->SetProgressValue(g_tmpProgressValue);
+            std::this_thread::sleep_for(std::chrono::milliseconds(SHOW_FULL_PROGRESS_TIME));
+        }
+    }
+}
+
 UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, const std::string &packagePath,
     int retryCount)
 {
@@ -190,6 +205,7 @@ UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, cons
     int maxTemperature;
     UpdaterStatus updateRet = StartUpdaterProc(pkgManager, packagePath, retryCount, maxTemperature);
     if (updateRet == UPDATE_SUCCESS) {
+        ProgressSmoothHandler();
         g_progressBar->SetProgressValue(FULL_PERCENT_PROGRESS);
         g_updateInfoLabel->SetText("Update success, reboot now");
         std::this_thread::sleep_for(std::chrono::milliseconds(SHOW_FULL_PROGRESS_TIME));
@@ -236,7 +252,7 @@ static void HandleChildOutput(const std::string &buffer, int32_t bufferLen,
         auto outputInfo = Trim(output[1]);
         float frac = 0.0;
         frac = std::stof(output[1]);
-        if(frac >= -EPSINON && frac <= EPSINON) {
+        if (frac >= -EPSINON && frac <= EPSINON) {
             return;
         } else {
             g_tmpProgressValue = static_cast<int>(frac * g_percentage);

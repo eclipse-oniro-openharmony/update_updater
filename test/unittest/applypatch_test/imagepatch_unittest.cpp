@@ -79,9 +79,9 @@ int ImagePatchTest::TestNormalModeImagePatch() const
 {
     std::string expectedSHA256 = "d5c87f954c3fb45685888d5edd359c27950a1a0acd33c45ad4e284b6a85686e5";
     std::string sourceData;
-    auto rc = ReadContentFromFile("/data/updater/diffpatch/2.log.old", sourceData);
+    auto rc = ReadContentFromFile("/data/updater/diffpatch/patchtest.old", sourceData);
     EXPECT_TRUE(rc);
-    std::string patchFile = "/data/updater/diffpatch/2.log.img_patch";
+    std::string patchFile = "/data/updater/diffpatch/patchtest.img_patch";
     std::string patchContent;
     rc = ReadContentFromFile(patchFile, patchContent);
     EXPECT_TRUE(rc);
@@ -96,10 +96,10 @@ int ImagePatchTest::TestGZipModeImagePatch() const
 {
     std::string expectedSHA256 = "805486a0df9b8919107ef6bf383452e642aca5d371848e4c7a9b8b59cd741b1f";
     std::string sourceData;
-    auto rc = ReadContentFromFile("/data/updater/applypatch/pkg_managerImpl.cpp.old.gz", sourceData);
+    auto rc = ReadContentFromFile("/data/updater/applypatch/TestGZipModeImagePatch.old.gz", sourceData);
     EXPECT_TRUE(rc);
     std::string patchContent;
-    rc = ReadContentFromFile("/data/updater/applypatch/pkg_managerImpl.gz.patch", patchContent);
+    rc = ReadContentFromFile("/data/updater/applypatch/TestGZipModeImagePatch.gz.patch", patchContent);
     EXPECT_TRUE(rc);
     updatepatch::PatchParam param = {
         reinterpret_cast<uint8_t *>(sourceData.data()), sourceData.size(),
@@ -113,10 +113,10 @@ int ImagePatchTest::TestLZ4ModeImagePatch() const
 {
     std::string expectedSHA256 = "ec500f45b48886dd20e1e0042a74954026b9c59e5168e1d6465d928cea7a1064";
     std::string sourceData;
-    auto rc = ReadContentFromFile("/data/updater/diffpatch/4_old.lz4", sourceData);
+    auto rc = ReadContentFromFile("/data/updater/diffpatch/PatchLz4test_old.lz4", sourceData);
     EXPECT_TRUE(rc);
     std::string patchContent;
-    rc = ReadContentFromFile("/data/updater/diffpatch/4_lz4.img_patch", patchContent);
+    rc = ReadContentFromFile("/data/updater/diffpatch/PatchLz4test_lz4.img_patch", patchContent);
     EXPECT_TRUE(rc);
     updatepatch::PatchParam param = {
         reinterpret_cast<uint8_t *>(sourceData.data()), sourceData.size(),

@@ -41,26 +41,6 @@ Lz4Adapter::Lz4Adapter(UpdatePatchWriterPtr outStream, size_t offset, const PkgM
     }
 }
 
-int32_t Lz4Adapter::Open()
-{
-    return 0;
-}
-
-int32_t Lz4Adapter::Close()
-{
-    return 0;
-}
-
-int32_t Lz4Adapter::WriteData(const BlockBuffer &srcData)
-{
-    return 0;
-}
-
-int32_t Lz4Adapter::FlushData(size_t &offset)
-{
-    return 0;
-}
-
 int32_t Lz4FrameAdapter::Open()
 {
     PATCH_CHECK(!init_, return 0, "Has been open");

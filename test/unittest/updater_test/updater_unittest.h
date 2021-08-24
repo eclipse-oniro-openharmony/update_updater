@@ -22,8 +22,8 @@
 namespace updater_ut {
 class UpdaterUnitTest : public testing::Test {
 public:
-    static void SetUpTestCase(void) {}
-    static void TearDownTestCase(void) {}
+    static void SetUpTestCase(void);
+    static void TearDownTestCase(void);
     void SetUp();
     void TearDown();
 };
