@@ -124,11 +124,11 @@ ohos_executable("updater_ut") {
     "//base/update/updater/services/script/threadpool/threadpool.cpp",
     "//base/update/updater/services/script/yacc/lexer.cpp",
     "//base/update/updater/services/script/yacc/parser.cpp",
+    "//base/update/updater/services/updater.cpp",
     "//base/update/updater/services/updater_binary/update_image_block.cpp",
     "//base/update/updater/services/updater_binary/update_partitions.cpp",
     "//base/update/updater/services/updater_binary/update_processor.cpp",
     "//base/update/updater/services/updater_main.cpp",
-    "//base/update/updater/services/updater.cpp",
     "//base/update/updater/utils/utils.cpp",
   ]
   include_dirs = [

@@ -95,7 +95,8 @@ bool TransferManager::CommandsParser(int fd, const std::vector<std::string> &con
                 cmd->GetCommandType() == CommandType::IMGDIFF ||
                 cmd->GetCommandType() == CommandType::BSDIFF;
             if (totalSize != 0 && globalParams->env != nullptr && typeResult) {
-                globalParams->env->PostMessage("set_progress", std::to_string((float)globalParams->written / totalSize));
+                globalParams->env->PostMessage("set_progress", 
+                    std::to_string((float)globalParams->written / totalSize));
             }
             LOG(INFO) << "Running command : " << cmd->GetArgumentByPos(0) << " success";
         }
