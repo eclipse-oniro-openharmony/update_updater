@@ -1,0 +1,40 @@
+111
+222
+333
+444
+555
+666
+777
+888
+999
+有两种方式来执行脚本。 GN中的所有外部脚本都在Python中。第一种方式是构建步骤。这样的脚本将需要一些输入并生成一些输出作为构建的一部分。调用脚本的目标使用“action”目标类型声明（请参阅gn help action）。 
+在构建文件执行期间，执行脚本的第二种方式是同步的。在某些情况下，这是必要的，以确定要编译的文件集，或者获取构建文件可能依赖的某些系统配置。构建文件可以读取脚本的stdout并以不同的方式对其执行操作。 
+同步脚本执行由exec_script函数完成（有关详细信息和示例，请参阅gn help exec_script）。因为同步执行脚本需要暂停当前的buildfile执行，直到Python进程完成执行，所以依赖外部脚本很慢，应该最小化。 
+为了防止滥用，允许调用exec_script的文件可以在toplevel .gn文件中列入白名单。 Chrome会执行此操作，需要对此类添加进行其他代码审核。请参阅gn help dotfile。 
+您可以同步读取和写入在同步运行脚本时不鼓励但偶尔需要的文件。典型的用例是传递比当前平台的命令行限制更长的文件名列表。有关如何读取和写入文件，请参阅gn help read_file和gn help write_file。如果可能，应避免这些功能。 
+超过命令行长度限制的操作可以使用响应文件来解决此限制，而不同步写入文件。请参阅gn help response_file_contents。
+
+9.1 Imports
+您可以 import .gni 文件到当前文件中。 这不是 C++中的 include。 Import 的文件将独立执行并将执行的结果复制到当前文件中（C ++执行的时候， 当遇到 include 指令时才会在当前环境中 include 文件）。 Import 允许导入的结果被缓存， 并且还防止了一些“creative”的用途包括像嵌套 include 文件。通常一个.gni 文件将定义 build 的参数和模板。 命令 gn help import 查看更多信息。.gni 文件可以定义像_this 名字前使用一个下划线的临时变量， 从而它不会被传出文件外。。
+
+9.2 路径处理
+通常你想使一个文件名或文件列表名相对于不同的目录。 这在运行 scripts 时特别常见的， 当构建输出目录为当前目录执行的时候， 构建文件通常是指相对于包含他们的目录的文件。您可以使用 rebase_path 转化目录。命令 gn help rebase_path 查看纤细信息。
+
+# Declares a script that compiles IDL files to source, and then compiles those
+# source files.
+template("idl") {
+  # Always base helper targets on target_name so they're unique. Target name
+  # will be the string passed as the name when the template is invoked.
+  idl_target_name = "${target_name}_generate"
+  action_foreach(idl_target_name) {
+    ...
+  }
+
+  # Your template should always define a target with the name target_name.
+  # When other targets depend on your template invocation, this will be the
+  # destination of that dependency.
+  source_set(target_name) {
+    ...
+    deps = [ ":$idl_target_name" ]  # Require the sources to be compiled.
+  }
+}

@@ -57,9 +57,18 @@ void UpdaterUnitTest::SetUp()
 
 void UpdaterUnitTest::TearDown() {}
 
-TEST_F(UpdaterUnitTest, updater_StartUpdaterProc)
+void UpdaterUnitTest::SetUpTestCase()
 {
     UpdaterUiInit();
+}
+
+void UpdaterUnitTest::TearDownTestCase()
+{
+    DeleteView();
+}
+
+TEST_F(UpdaterUnitTest, updater_StartUpdaterProc)
+{
     std::string packagePath = "/data/updater/updater/updater_without_updater_binary.zip";
     PkgManager::PkgManagerPtr pkgManager = PkgManager::GetPackageInstance();
     int maxTemperature;
@@ -84,38 +93,8 @@ TEST_F(UpdaterUnitTest, updater_StartUpdaterProc)
 
     packagePath = "/data/updater/updater/updater_binary_abnormal.zip";
     status = StartUpdaterProc(pkgManager, packagePath, 1, maxTemperature);
-    EXPECT_EQ(status, UPDATE_ERROR);
-    DeleteView();
     PkgManager::ReleasePackageInstance(pkgManager);
-}
-
-TEST_F(UpdaterUnitTest, updater_DoInstallUpdaterPackage)
-{
-    UpdaterUiInit();
-    UpdaterStatus status;
-    PkgManager::PkgManagerPtr pkgManager = PkgManager::GetPackageInstance();
-    // trigger SetupPartitions error.
-    LoadSpecificFstab("/data/updater/updater/etc/fstab.no.updater");
-    std::string packagePath = "/data/updater/updater/updater.zip";
-    status = DoInstallUpdaterPackage(pkgManager, packagePath, 0);
     EXPECT_EQ(status, UPDATE_ERROR);
-
-    LoadSpecificFstab("/data/updater/updater/etc/fstab.ut.updater");
-    packagePath = "/data/updater/updater/wrong_hash_updater.zip";
-    status = DoInstallUpdaterPackage(pkgManager, packagePath, 0);
-    EXPECT_EQ(status, 1);
-
-    packagePath = "/data/updater/updater/unsign_updater.zip";
-    status = DoInstallUpdaterPackage(pkgManager, packagePath, 0);
-    EXPECT_EQ(status, 1);
-
-    status = UPDATE_SUCCESS;
-    packagePath = "/data/updater/updater/updater.zip";
-
-    status = DoInstallUpdaterPackage(pkgManager, packagePath, 0);
-    EXPECT_EQ(status, UPDATE_SUCCESS);
-    DeleteView();
-    PkgManager::ReleasePackageInstance(pkgManager);
 }
 
 TEST_F(UpdaterUnitTest, updater_GetUpdatePackageInfo)
@@ -130,16 +109,14 @@ TEST_F(UpdaterUnitTest, updater_GetUpdatePackageInfo)
     std::string validUpdaterPackage = "/data/updater/updater/updater.zip";
 
     ret = GetUpdatePackageInfo(pkgManager, validUpdaterPackage);
-    EXPECT_EQ(ret, static_cast<int>(PKG_SUCCESS));
     PkgManager::ReleasePackageInstance(pkgManager);
+    EXPECT_EQ(ret, static_cast<int>(PKG_SUCCESS));
 }
 
 TEST_F(UpdaterUnitTest, updater_UpdateSdcard)
 {
-    UpdaterUiInit();
     UpdaterStatus status;
     status = UpdaterFromSdcard();
     EXPECT_EQ(status, UPDATE_SUCCESS);
-    DeleteView();
 }
 } // namespace updater_ut

@@ -130,6 +130,7 @@ UpdaterStatus UpdaterFromSdcard()
         LOG(INFO) << "Update from SD Card successfully!";
         STAGE(UPDATE_STAGE_SUCCESS) << "UpdaterFromSdcard success";
     }
+    PkgManager::ReleasePackageInstance(pkgManager);
     return updateRet;
 }
 
@@ -366,7 +367,9 @@ int UpdaterMain(int argc, char **argv)
     std::vector<std::string> args = ParseParams(argc, argv);
 
     LOG(INFO) << "Ready to start";
+#ifndef UPDATER_UT
     UpdaterUiInit();
+#endif
     status = StartUpdater(manager, args, argv);
     std::this_thread::sleep_for(std::chrono::milliseconds(UI_SHOW_DURATION));
 #ifndef UPDATER_UT

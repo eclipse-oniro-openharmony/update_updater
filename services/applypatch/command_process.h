@@ -31,8 +31,6 @@ public:
     NewCommandFn() {}
     ~NewCommandFn() override {}
     CommandResult Execute(const Command &params) override;
-private:
-    static void DumpBlockSetInfo(const BlockSet &bs);
 };
 
 class ZeroAndEraseCommandFn : public CommandFunction {

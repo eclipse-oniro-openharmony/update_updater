@@ -130,7 +130,6 @@ int AllCmdUnitTest::AllCmdUnitTestMove(int &fd, std::vector<std::string> &allCmd
 {
     size_t bufferSize = 4096;
     size_t count = 10;
-    // move 1
     std::vector<uint8_t> buffer1(bufferSize, 1);
     lseek64(fd, 0, SEEK_SET);
     auto res = WriteTestBin(fd, *buffer1.data(), bufferSize * count);
@@ -148,7 +147,8 @@ int AllCmdUnitTest::AllCmdUnitTestMove(int &fd, std::vector<std::string> &allCmd
     allCmd.pop_back();
     allCmd.push_back("move ad7facb2586fc6e966c004d7d1d16b024f5805ff7cb47c7a85dabd8b48892ca7 2,0,1 1 2,1,2");
     bool result = tm.CommandsParser(fd, allCmd);
-    // move 2
+    LOG(INFO) << "CommandsParser result:" << result;
+
     lseek64(fd, 0, SEEK_SET);
     res = WriteTestBin(fd, *buffer1.data(), bufferSize * count);
     if (!res) {
@@ -158,9 +158,6 @@ int AllCmdUnitTest::AllCmdUnitTestMove(int &fd, std::vector<std::string> &allCmd
         std::cout << "Write 0 to bin error: " << errno << std::endl;
     }
 
-    allCmd.pop_back();
-    allCmd.push_back("move ad7facb2586fc6e966c004d7d1d16b024f5805ff7cb47c7a85dabd8b48892ca7 2,0,1 1 2,1,2 2,2,3");
-    result = tm.CommandsParser(fd, allCmd);
     close(fd);
     return 0;
 }

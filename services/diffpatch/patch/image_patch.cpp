@@ -192,19 +192,6 @@ std::unique_ptr<hpackage::FileInfo> ZipImagePatch::GetFileInfo() const
     return std::unique_ptr<hpackage::FileInfo>((FileInfo *)fileInfo);
 }
 
-int32_t GZipImagePatch::ReadHeader(const PatchParam &param, PatchHeader &header, size_t &offset)
-{
-    int32_t ret = ZipImagePatch::ReadHeader(param, header, offset);
-    PATCH_CHECK(ret == 0, return -1, "Failed to read header");
-    PATCH_CHECK((offset + sizeof(int32_t) + sizeof(int64_t) + GZIP_HEADER_LEN + GZIP_FOOTER_LEN) <= param.patchSize,
-        return -1, "Invalid patch");
-    offset += sizeof(int32_t);
-    offset += GZIP_HEADER_LEN;
-    offset += sizeof(int64_t);
-    offset += GZIP_FOOTER_LEN;
-    return 0;
-}
-
 int32_t Lz4ImagePatch::ReadHeader(const PatchParam &param, PatchHeader &header, size_t &offset)
 {
     PATCH_CHECK((offset + PATCH_LZ4_MIN_HEADER_LEN) <= param.patchSize, return -1, "Failed to check datalen");

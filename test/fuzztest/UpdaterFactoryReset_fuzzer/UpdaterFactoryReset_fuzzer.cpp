@@ -25,13 +25,14 @@
 #include "updater_main.h"
 
 using namespace updater;
+static constexpr int FSTAB_NAME_LENGTH = 20;
 
 namespace OHOS {
     bool FuzzFactoryReset(const uint8_t* data, size_t size)
     {
         FactoryResetMode mode = USER_WIPE_DATA;
 
-        if (size < 20) {  /* fstable name length */
+        if (size < FSTAB_NAME_LENGTH) {  /* fstable name length */
             LoadSpecificFstab("/data/fuzz/test/FormatPartition_fuzzer.fstable");
             FactoryReset(mode, reinterpret_cast<const char*>(data));
         }

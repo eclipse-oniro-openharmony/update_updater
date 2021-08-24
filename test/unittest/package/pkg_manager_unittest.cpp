@@ -511,7 +511,7 @@ public:
     int TestDecompressLz4(hpackage::Lz4FileInfo &lz4Info,
         std::vector<uint8_t> &uncompressedData, std::vector<uint8_t> &digest)
     {
-        std::string testFileName = TEST_PATH_FROM + "../diffpatch/4_new.lz4";
+        std::string testFileName = TEST_PATH_FROM + "../diffpatch/PatchLz4test_new.lz4";
         size_t fileSize = GetFileSize(testFileName);
         int32_t fd = open(testFileName.c_str(), O_RDWR);
         PKG_CHECK(fd > 0, return -1, "Can not open file ");
@@ -602,7 +602,7 @@ public:
     int TestDecompressGzip(hpackage::ZipFileInfo &zipInfo, std::vector<uint8_t> &uncompressedData,
         std::vector<uint8_t> &digest)
     {
-        std::string testFileName = TEST_PATH_FROM + "../applypatch/pkg_managerImpl.cpp.new.gz";
+        std::string testFileName = TEST_PATH_FROM + "../applypatch/TestDecompressGzip.new.gz";
         size_t fileSize = GetFileSize(testFileName);
         size_t uncompressedDataSize = 1024;
         int32_t fd = open(testFileName.c_str(), O_RDWR);

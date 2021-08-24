@@ -26,6 +26,7 @@
 #include "securec.h"
 
 using namespace updater;
+static constexpr int FSTAB_NAME_LENGTH = 20;
 
 static void InitEmmcPartition(struct Partition &part, const std::string &partName, size_t start, size_t length)
 {
@@ -44,7 +45,7 @@ namespace OHOS {
         struct Partition myPaty;
         memset_s(&myPaty, sizeof(struct Partition), 0, sizeof(struct Partition));
 
-        if (size < 20) {  /* fstable name length */
+        if (size < FSTAB_NAME_LENGTH) {  /* fstable name length */
             InitEmmcPartition(myPaty, reinterpret_cast<const char*>(data), 0, size);
             nList.push_back(&myPaty);
             DoPartitions(nList);

@@ -32,8 +32,10 @@ Frame::Frame(unsigned int w, unsigned int h, View::PixelFormat pixType, SurfaceD
     sfDev_ = sfDev;
     listIndex_ = 0;
     flushFlag_ = false;
+#ifndef UPDATER_UT
     flushLoop_ = std::thread(&Frame::FlushThreadLoop, this);
     flushLoop_.detach();
+#endif
 #ifdef CONVERT_RL_SLIDE_TO_CLICK
     keyProcessLoop_ = std::thread(&Frame::ProcessKeyLoop, this);
     keyProcessLoop_.detach();
@@ -44,13 +46,16 @@ Frame::Frame(unsigned int w, unsigned int h, View::PixelFormat pixType, SurfaceD
 Frame::~Frame()
 {
     needStop_ = true;
+    std::unique_lock<std::mutex> locker(mutex_);
+    flushFlag_ = true;
+    viewMapList_.clear();
 }
 
 void Frame::FlushThreadLoop()
 {
     while (!needStop_) {
         std::unique_lock<std::mutex> locker(mutex_);
-        if (!flushFlag_) {
+        while (!flushFlag_) {
             mCondFlush_.wait(mutex_, [&] {
                 return flushFlag_;
             });

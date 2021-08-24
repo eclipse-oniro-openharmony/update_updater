@@ -39,22 +39,10 @@ CommandResult AbortCommandFn::Execute(const Command &params)
     return SUCCESS;
 }
 
-void NewCommandFn::DumpBlockSetInfo(const BlockSet &bs)
-{
-    LOG(DEBUG) << "Block set info: ";
-    size_t num = 0;
-    for (auto blockPair = bs.CBegin(); blockPair != bs.CEnd(); ++blockPair) {
-        LOG(DEBUG) << "\t[ " << blockPair->first << ", " << blockPair->second << " ]";
-        num++;
-    }
-    LOG(DEBUG) << "\tTotal block pairs: " << num;
-}
-
 CommandResult NewCommandFn::Execute(const Command &params)
 {
     BlockSet bs;
     bs.ParserAndInsert(params.GetArgumentByPos(1));
-    DumpBlockSetInfo(bs);
     LOG(INFO) << " writing " << bs.TotalBlockSize() << " blocks of new data";
     auto writerThreadInfo = TransferManager::GetTransferManagerInstance()->GetGlobalParams()->writerThreadInfo.get();
     pthread_mutex_lock(&writerThreadInfo->mutex);
