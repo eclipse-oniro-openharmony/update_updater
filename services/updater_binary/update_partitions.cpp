@@ -69,8 +69,8 @@ int UpdatePartitions::ParsePartitionInfo(const std::string &partitionInfo, Parti
         myPartition->fsType = (item->valuestring);
 
         LOG(INFO) << "<start> <length> <devname> <partname> <fstype>";
-        LOG(INFO) << myPartition->start << myPartition->length << myPartition->devName <<
-            myPartition->partName << myPartition->fsType;
+        LOG(INFO) << myPartition->start << " " << myPartition->length << " " << myPartition->devName << " " <<
+            myPartition->partName << " " << myPartition->fsType;
         newPartList.push_back(myPartition);
     }
     cJSON_Delete(root);
@@ -84,7 +84,7 @@ int UpdatePartitions::DoNewPartitions(PartitonList &newPartList)
     if (ret <= 0) {
         LOG(INFO) << "do_partitions FAIL ";
     } else if (ret == 1) {
-        LOG(INFO) << "new partition == old partition ";
+        LOG(INFO) << "partitions not changed，Skip. ";
     } else if (ret > 1) {
         LOG(INFO) << "do_partitions success reboot";
 #ifndef UPDATER_UT
