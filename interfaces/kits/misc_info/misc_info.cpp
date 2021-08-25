@@ -23,7 +23,10 @@
 namespace updater {
 bool WriteUpdaterMessage(const std::string &path, const UpdateMessage &boot)
 {
-    FILE* fp = fopen(path.c_str(), "rb+");
+    char *realPath = realpath(path.c_str(), NULL);
+    UPDATER_FILE_CHECK(realPath != nullptr, "realPath is NULL", return false);
+    FILE* fp = fopen(realPath, "rb+");
+    free(realPath);
     UPDATER_FILE_CHECK(fp != nullptr, "WriteUpdaterMessage fopen failed", return false);
 
     size_t ret = fwrite(&boot, sizeof(UpdateMessage), 1, fp);
@@ -36,7 +39,10 @@ bool WriteUpdaterMessage(const std::string &path, const UpdateMessage &boot)
 
 bool ReadUpdaterMessage(const std::string &path, UpdateMessage &boot)
 {
-    FILE* fp = fopen(path.c_str(), "rb");
+    char *realPath = realpath(path.c_str(), NULL);
+    UPDATER_FILE_CHECK(realPath != nullptr, "realPath is NULL", return false);
+    FILE* fp = fopen(realPath, "rb");
+    free(realPath);
     UPDATER_FILE_CHECK(fp != nullptr, "ReadUpdaterMessage fopen failed", return false);
 
     struct UpdateMessage tempBoot {};
@@ -47,7 +53,6 @@ bool ReadUpdaterMessage(const std::string &path, UpdateMessage &boot)
     UPDATER_FILE_CHECK(ret == 0, "ReadUpdaterMessage fclose failed", return false);
     UPDATER_FILE_CHECK(!memcpy_s(&boot, sizeof(UpdateMessage), &tempBoot, sizeof(UpdateMessage)),
         "ReadUpdaterMessage memcpy failed", return false);
-
     return true;
 }
 } // updater

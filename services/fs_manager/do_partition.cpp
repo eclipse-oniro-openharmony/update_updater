@@ -200,7 +200,10 @@ static bool WriteDiskPartitionToMisc(PartitonList &nlist)
     LOG(INFO) << "blkdevparts is " << blkdevparts;
 
     const std::string miscDevPath = GetBlockDeviceByMountPoint("/misc");
-    FILE *fp = fopen(miscDevPath.c_str(), "rb+");
+    char *realPath = realpath(miscDevPath.c_str(), NULL);
+    UPDATER_ERROR_CHECK(realPath != nullptr, "realPath is NULL", return false);
+    FILE *fp = fopen(realPath, "rb+");
+    free(realPath);
     UPDATER_ERROR_CHECK(fp, "fopen error " << errno, return false);
 
     fseek(fp, MISC_RECORD_UPDATE_PARTITIONS_OFFSET, SEEK_SET);

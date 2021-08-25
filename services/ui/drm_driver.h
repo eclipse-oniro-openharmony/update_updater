@@ -40,7 +40,7 @@ struct BufferObject {
 
 class DrmDriver {
 protected:
-    DrmDriver();
+    DrmDriver() : fd_(-1), conn_(nullptr), res_(nullptr) {}
     virtual ~DrmDriver();
     void FlipBuffer(void* buf);
     void LoadDrmDriver();

@@ -67,8 +67,8 @@ int32_t BlocksDiff::MakePatch(const std::string &oldFileName, const std::string 
     MemMapInfo oldBuffer {};
     MemMapInfo newBuffer {};
     int32_t ret = PatchMapFile(oldFileName, oldBuffer);
-    ret |= PatchMapFile(newFileName, newBuffer);
-    PATCH_CHECK(ret == 0, return -1, "Failed to open %s", newFileName.c_str());
+    int32_t ret1 = PatchMapFile(newFileName, newBuffer);
+    PATCH_CHECK((ret == 0 && ret1 == 0), return -1, "Failed to open %s", newFileName.c_str());
     BlockBuffer newInfo = {newBuffer.memory, newBuffer.length};
     BlockBuffer oldInfo = {oldBuffer.memory, oldBuffer.length};
     std::unique_ptr<BlocksDiff> blockdiff = std::make_unique<BlocksStreamDiff>(patchFile, 0);

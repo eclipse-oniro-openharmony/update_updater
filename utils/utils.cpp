@@ -301,10 +301,13 @@ void CompressLogs(const std::string &name)
     pkgInfo.digestMethod = PKG_DIGEST_TYPE_SHA256;
     pkgInfo.pkgType = PKG_PACK_TYPE_ZIP;
 
-    char realTime[MAX_TIME_SIZE];
+    char realTime[MAX_TIME_SIZE] = {0};
     auto sysTime = std::chrono::system_clock::now();
     auto currentTime = std::chrono::system_clock::to_time_t(sysTime);
-    std::strftime(realTime, sizeof(realTime), "%H_%M_%S", std::localtime(&currentTime));
+    struct tm *localTime = std::localtime(&currentTime);
+    if (localTime != nullptr) {
+        std::strftime(realTime, sizeof(realTime), "%H_%M_%S", localTime);
+    }
     char pkgName[MAX_LOG_NAME_SIZE];
     UPDATER_CHECK_ONLY_RETURN(snprintf_s(pkgName, MAX_LOG_NAME_SIZE, MAX_LOG_NAME_SIZE - 1,
         "/data/updater/log/%s_%s.zip", realName.c_str(), realTime) != -1, return);

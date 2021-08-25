@@ -121,8 +121,8 @@ int32_t UpdateDiff::MakePatch(const std::string &oldFileName,
     PATCH_CHECK(newParser_ != nullptr, return -1, "Failed to create new parser");
     PATCH_CHECK(oldParser_ != nullptr, return -1, "Failed to create old parser");
     int32_t ret = newParser_->Parse(newFileName);
-    ret |= oldParser_->Parse(oldFileName);
-    PATCH_CHECK(ret == 0, return -1, "Failed to parse image");
+    int32_t ret1 = oldParser_->Parse(oldFileName);
+    PATCH_CHECK((ret == 0 && ret1 == 0), return -1, "Failed to parse image");
 
     std::unique_ptr<ImageDiff> imageDiff = nullptr;
     PATCH_DEBUG("UpdateDiff::MakePatch type: %d %d", newParser_->GetType(), oldParser_->GetType());

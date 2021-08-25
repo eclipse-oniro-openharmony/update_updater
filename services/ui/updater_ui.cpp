@@ -438,7 +438,7 @@ void UpdaterUiInit()
     g_updateFrame->Hide();
 
     g_anmimationLabel = new AnimationLable(START_X_SCALE, START_Y_SCALE,
-            screenW * WIDTH_SCALE1 / WIDTH_SCALE2, screenH >> 1, g_updateFrame);
+            screenW * WIDTH_SCALE1 / WIDTH_SCALE2, screenH / MEDIAN_NUMBER, g_updateFrame);
     g_anmimationLabel->SetBackgroundColor(&bgColor);
     LoadImgs();
     g_progressBar = new ProgressBar(START_X3, START_Y3, WIDTH3, HEIGHT3, g_updateFrame);
@@ -453,51 +453,67 @@ void DeleteView()
 {
     if (g_updateInfoLabel != nullptr) {
         delete g_updateInfoLabel;
+        g_updateInfoLabel = nullptr;
     }
     if (g_anmimationLabel != nullptr) {
         delete g_anmimationLabel;
+        g_anmimationLabel = nullptr;
     }
     if (g_progressBar != nullptr) {
         delete g_progressBar;
+        g_progressBar = nullptr;
     }
     if (g_dialogTitle != nullptr) {
         delete g_dialogTitle;
+        g_dialogTitle = nullptr;
     }
     if (g_dialogNote != nullptr) {
         delete g_dialogNote;
+        g_dialogNote = nullptr;
     }
     if (g_dialogNoteNext != nullptr) {
         delete g_dialogNoteNext;
+        g_dialogNoteNext = nullptr;
     }
     if (g_dialogCancalBtn != nullptr) {
         delete g_dialogCancalBtn;
+        g_dialogCancalBtn = nullptr;
     }
     if (g_dialogOkBtn != nullptr) {
         delete g_dialogOkBtn;
+        g_dialogOkBtn = nullptr;
     }
     if (g_logResultLabel != nullptr) {
         delete g_logResultLabel;
+        g_logResultLabel = nullptr;
     }
     if (g_textLabel0 != nullptr) {
         delete g_textLabel0;
+        g_textLabel0 = nullptr;
     }
     if (g_textLabel2 != nullptr) {
         delete g_textLabel2;
+        g_textLabel2 = nullptr;
     }
     if (g_textLabel3 != nullptr) {
         delete g_textLabel3;
+        g_textLabel3 = nullptr;
     }
     if (g_logLabel == nullptr) {
         delete g_logLabel;
+        g_logLabel = nullptr;
     }
     if (g_updateFrame != nullptr) {
         delete g_updateFrame;
+        g_updateFrame = nullptr;
     }
     if (g_menuFrame != nullptr) {
         delete g_menuFrame;
+        g_menuFrame = nullptr;
     }
     if (g_sfDev != nullptr) {
         delete g_sfDev;
+        g_sfDev = nullptr;
     }
 }
 } // namespace updater

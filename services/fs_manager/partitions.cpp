@@ -77,12 +77,14 @@ static bool ReadDeviceSysfsFile(BlockDevice &dev, const std::string &file, std::
 
     UPDATER_CHECK_ONLY_RETURN(snprintf_s(nameBuf, DEVPATH_SIZE, DEVPATH_SIZE - 1, "/sys/block/%s/device/%s",
         LastComponent(dev.devPath).c_str(), file.c_str()) != -1, return false);
+    char *realPath = realpath(nameBuf, NULL);
+    UPDATER_CHECK_ONLY_RETURN(realPath != nullptr, return false);
+    UPDATER_CHECK_ONLY_RETURN((f = fopen(realPath, "r")) != nullptr, free(realPath); return false);
 
-    UPDATER_CHECK_ONLY_RETURN((f = fopen(nameBuf, "r")) != nullptr, return false);
-
-    UPDATER_CHECK_ONLY_RETURN(fgets(buf, BUFFER_SIZE, f) != nullptr, fclose(f); return false);
+    UPDATER_CHECK_ONLY_RETURN(fgets(buf, BUFFER_SIZE, f) != nullptr, fclose(f); free(realPath); return false);
     strl = buf;
     fclose(f);
+    free(realPath);
     return true;
 }
 
@@ -151,7 +153,6 @@ static std::string ReadPartitionFromSys(const std::string &devname, const std::s
             if (str != nullptr) {
                 UPDATER_CHECK_ONLY_RETURN(memcpy_s(partInf, BUFFER_SIZE, buf + table.size(),
                 sizeof(buf) - table.size()) == 0, fclose(f); free(partInf); return partString);
-                LOG(INFO) << "partInf : " << partInf;
                 partInf[strlen(partInf) - 1] = '\0';
                 partString = partInf;
                 goto end;
@@ -174,6 +175,7 @@ static std::string ReadPartitionFromSys(const std::string &devname, const std::s
     }
     end:
     free(partInf);
+    fclose(f);
     return partString;
 }
 

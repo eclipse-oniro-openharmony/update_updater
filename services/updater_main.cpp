@@ -63,19 +63,19 @@ static void SetRetryCountToMisc(int retryCount, const std::vector<std::string> a
 {
     struct UpdateMessage msg {};
     char buffer[20];
-    UPDATER_ERROR_CHECK(!strncpy_s(msg.command, sizeof(msg.command), "boot_updater", sizeof(msg.command) - 1),
+    UPDATER_ERROR_CHECK(!strncpy_s(msg.command, sizeof(msg.command), "boot_updater", strlen("boot_updater") + 1),
         "SetRetryCountToMisc strncpy_s failed", return);
     for (const auto& arg : args) {
         if (arg.find("--retry_count") == std::string::npos) {
-            UPDATER_ERROR_CHECK(!strncat_s(msg.update, sizeof(msg.update), arg.c_str(), sizeof(msg.update) - 1),
+            UPDATER_ERROR_CHECK(!strncat_s(msg.update, sizeof(msg.update), arg.c_str(), strlen(arg.c_str()) + 1),
                 "SetRetryCountToMisc strncat_s failed", return);
-            UPDATER_ERROR_CHECK(!strncat_s(msg.update, sizeof(msg.update), "\n", sizeof(msg.update)),
+            UPDATER_ERROR_CHECK(!strncat_s(msg.update, sizeof(msg.update), "\n", strlen("\n") + 1),
                 "SetRetryCountToMisc strncat_s failed", return);
         }
     }
-    UPDATER_ERROR_CHECK(snprintf_s(buffer, sizeof(buffer), sizeof(buffer), "--retry_count=%d", retryCount) != -1,
+    UPDATER_ERROR_CHECK(snprintf_s(buffer, sizeof(buffer), sizeof(buffer) - 1, "--retry_count=%d", retryCount) != -1,
         "SetRetryCountToMisc snprintf_s failed", return);
-    UPDATER_ERROR_CHECK(!strncat_s(msg.update, sizeof(msg.update), buffer, sizeof(msg.update)),
+    UPDATER_ERROR_CHECK(!strncat_s(msg.update, sizeof(msg.update), buffer, strlen(buffer) + 1),
         "SetRetryCountToMisc strncat_s failed", return);
     UPDATER_ERROR_CHECK_NOT_RETURN(WriteUpdaterMessage(MISC_FILE, msg) == true, "Write command to misc failed.");
 }

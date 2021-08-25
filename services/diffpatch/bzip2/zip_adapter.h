@@ -38,7 +38,7 @@ public:
     int32_t WriteData(const BlockBuffer &srcData) override;
     int32_t FlushData(size_t &offset) override;
 private:
-    std::vector<uint8_t> buffer_;
+    std::vector<uint8_t> buffer_ {};
     UpdatePatchWriterPtr outStream_;
     z_stream zstream_;
     size_t offset_;

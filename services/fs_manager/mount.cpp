@@ -141,7 +141,7 @@ static MountStatus GetMountStatusForMountPoint(const std::string &mountPoint)
     const std::string mountFile = "/proc/mounts";
     auto fp = std::unique_ptr<FILE, decltype(&fclose)>(fopen(mountFile.c_str(), "r"), fclose);
 
-    while (fgets(buffer, sizeof(buffer), fp.get()) != nullptr) {
+    while (fgets(buffer, sizeof(buffer) - 1, fp.get()) != nullptr) {
         n = strlen(buffer);
         if (buffer[n - 1] == '\n') {
             buffer[n - 1] = '\0';

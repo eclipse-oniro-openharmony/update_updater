@@ -55,8 +55,8 @@ int32_t ImageDiff::MakePatch(const std::string &patchName)
     BlockBuffer newBuffer;
     BlockBuffer olduffer;
     int32_t ret = newParser_->GetPkgBuffer(newBuffer);
-    ret |= oldParser_->GetPkgBuffer(olduffer);
-    PATCH_CHECK(ret == 0, return -1, "Failed to get pkgbuffer");
+    int32_t ret1 = oldParser_->GetPkgBuffer(olduffer);
+    PATCH_CHECK((ret == 0 && ret1 == 0), return -1, "Failed to get pkgbuffer");
 
     PATCH_LOGI("ImageDiff::MakePatch newBuffer %zu %zu ", newBuffer.length, olduffer.length);
 
@@ -234,8 +234,8 @@ int32_t CompressedImageDiff::MakePatch(const std::string &patchName)
     BlockBuffer newBuffer;
     BlockBuffer oldBuffer;
     int32_t ret = newParser_->GetPkgBuffer(newBuffer);
-    ret |= oldParser_->GetPkgBuffer(oldBuffer);
-    PATCH_CHECK(ret == 0, return -1, "Failed to get pkgbuffer");
+    int32_t ret1 = oldParser_->GetPkgBuffer(oldBuffer);
+    PATCH_CHECK((ret == 0 && ret1 == 0), return -1, "Failed to get pkgbuffer");
 
     if (limit_ != 0 && newBuffer.length >= limit_) {
         PatchBuffer oldInfo = { oldBuffer.buffer, 0, oldBuffer.length };
@@ -275,8 +275,8 @@ int32_t CompressedImageDiff::DiffFile(const std::string &fileName, size_t &oldOf
     BlockBuffer orgNewBuffer;
     BlockBuffer orgOldBuffer;
     int32_t ret = newParser_->GetPkgBuffer(orgNewBuffer);
-    ret |= oldParser_->GetPkgBuffer(orgOldBuffer);
-    PATCH_CHECK(ret == 0, return -1, "Failed to get pkgbuffer");
+    int32_t ret1 = oldParser_->GetPkgBuffer(orgOldBuffer);
+    PATCH_CHECK((ret == 0 && ret1 == 0), return -1, "Failed to get pkgbuffer");
 
     std::vector<uint8_t> newBuffer;
     std::vector<uint8_t> oldBuffer;

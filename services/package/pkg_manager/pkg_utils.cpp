@@ -48,7 +48,10 @@ std::string GetFilePath(const std::string &fileName)
 
 size_t GetFileSize(const std::string &fileName)
 {
-    FILE *fp = fopen(fileName.c_str(), "r");
+    char *realPath = realpath(fileName.c_str(), NULL);
+    PKG_CHECK(realPath != nullptr, return 0, "realPath is null");
+    FILE *fp = fopen(realPath, "r");
+    free(realPath);
     PKG_CHECK(fp != nullptr, return 0, "Invalid file %s", fileName.c_str());
 
     fseek(fp, 0, SEEK_END);

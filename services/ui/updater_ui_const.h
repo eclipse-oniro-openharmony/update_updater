@@ -55,5 +55,6 @@ constexpr int DIALOG_CANCEL_X = 340;
 constexpr int DIALOG_OK_WIDTH = 150;
 constexpr int SCREEN_WIDTH = 480;
 constexpr int SCREEN_HEIGHT = 960;
+constexpr int MEDIAN_NUMBER = 2;
 } // namespace updater
 #endif /* UPDATE_UI_HOS_UPDATER_H */

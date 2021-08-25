@@ -207,7 +207,8 @@ int32_t UpgradePkgFile::LoadPackage(std::vector<std::string> &fileNames, VerifyF
         ret = memcpy_s(signData.data(), signData.size(), buffer.buffer + UPGRADE_RESERVE_LEN, SIGN_SHA256_LEN);
     }
     PKG_CHECK(ret == PKG_SUCCESS, return ret, "memcpy sign data fail");
-    memset_s(buffer.buffer + UPGRADE_RESERVE_LEN, buffer.length, 0, GetUpgradeSignatureLen());
+    ret = memset_s(buffer.buffer + UPGRADE_RESERVE_LEN, buffer.length, 0, GetUpgradeSignatureLen());
+    PKG_CHECK(ret == 0, return ret, "memset buff fail");
     algorithm->Update(buffer, UPGRADE_RESERVE_LEN + GetUpgradeSignatureLen());
     parsedLen += UPGRADE_RESERVE_LEN + GetUpgradeSignatureLen();
 
@@ -286,6 +287,7 @@ int32_t UpgradePkgFile::ReadComponents(const PkgBuffer &buffer, size_t &parsedLe
 
         currLen += decodeLen;
         srcOffset += decodeLen;
+        PKG_CHECK(entry->GetFileInfo() != nullptr, delete entry; return PKG_INVALID_FILE, "Failed to get file info");
         dataOffset += entry->GetFileInfo()->packedSize;
         pkgInfo_.pkgInfo.entryCount++;
         PKG_LOGI("Component packedSize %zu unpackedSize %zu %s", entry->GetFileInfo()->packedSize,
