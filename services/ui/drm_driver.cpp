@@ -102,10 +102,6 @@ int DrmDriver::DrmInit(void)
     return 0;
 }
 
-DrmDriver::DrmDriver() : fd_(-1), conn_(nullptr), res_(nullptr)
-{
-}
-
 void DrmDriver::LoadDrmDriver()
 {
     if (DrmInit() == -1) {

@@ -81,11 +81,8 @@ bool TransferManager::CommandsParser(int fd, const std::vector<std::string> &con
             }
             cmd->SetFileDescriptor(fd);
             std::unique_ptr<CommandFunction> cf = CommandFunctionFactory::GetCommandFunction(cmd->GetCommandType());
-            if (cf == nullptr) {
-                LOG(ERROR) << "Failed to get cmd exec";
-                return false;
-            }
-            CommandResult ret = cf->Execute(const_cast<Command &>(*cmd.get()));
+            UPDATER_ERROR_CHECK(cf != nullptr, "Failed to get cmd exec", return false);
+	    CommandResult ret = cf->Execute(const_cast<Command &>(*cmd.get()));
             CommandFunctionFactory::ReleaseCommandFunction(cf);
             if (CheckResult(ret, cmd->GetCommandLine(), cmd->GetCommandType()) == false) {
                 return false;

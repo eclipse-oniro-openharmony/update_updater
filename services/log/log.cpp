@@ -71,11 +71,13 @@ std::ostream& UpdaterLogger::OutputUpdaterLog(const std::string &path, int line)
         { FATAL, "FATAL" }
     };
 
-    char realTime[MAX_TIME_SIZE];
+    char realTime[MAX_TIME_SIZE] = {0};
     auto sysTime = std::chrono::system_clock::now();
     auto currentTime = std::chrono::system_clock::to_time_t(sysTime);
-    std::strftime(realTime, sizeof(realTime), "%Y-%m-%d %H:%M:%S", std::localtime(&currentTime));
-
+    struct tm *localTime = std::localtime(&currentTime);
+    if (localTime != nullptr) {
+        std::strftime(realTime, sizeof(realTime), "%Y-%m-%d %H:%M:%S", localTime);
+    }
     if (g_updaterLog.is_open() && g_logLevel <= level_) {
         return g_updaterLog << realTime <<  "  " << "[" << logLevelMap[level_] << "]" <<
             g_logTag << " " << path << " " << line << " : ";
@@ -91,10 +93,13 @@ std::ostream& StageLogger::OutputUpdaterStage()
         { UPDATE_STAGE_FAIL, "FAIL" },
         { UPDATE_STAGE_OUT, "OUT" }
     };
-    char realTime[MAX_TIME_SIZE];
+    char realTime[MAX_TIME_SIZE] = {0};
     auto sysTime = std::chrono::system_clock::now();
     auto currentTime = std::chrono::system_clock::to_time_t(sysTime);
-    std::strftime(realTime, sizeof(realTime), "%Y-%m-%d %H:%M:%S", std::localtime(&currentTime));
+    struct tm *localTime = std::localtime(&currentTime);
+    if (localTime != nullptr) {
+        std::strftime(realTime, sizeof(realTime), "%Y-%m-%d %H:%M:%S", localTime);
+    }
 
     if (g_updaterLog.is_open()) {
         if (stage_ == UPDATE_STAGE_OUT) {
@@ -119,10 +124,13 @@ void Logger(int level, const char* fileName, int32_t line, const char* format, .
 
 std::ostream& ErrorCode::OutputErrorCode(const std::string &path, int line, UpdaterErrorCode code)
 {
-    char realTime[MAX_TIME_SIZE];
+    char realTime[MAX_TIME_SIZE] = {0};
     auto sysTime = std::chrono::system_clock::now();
     auto currentTime = std::chrono::system_clock::to_time_t(sysTime);
-    std::strftime(realTime, sizeof(realTime), "%Y-%m-%d %H:%M:%S", std::localtime(&currentTime));
+    struct tm *localTime = std::localtime(&currentTime);
+    if (localTime != nullptr) {
+        std::strftime(realTime, sizeof(realTime), "%Y-%m-%d %H:%M:%S", localTime);
+    }
     if (g_errorCode.is_open()) {
         return g_errorCode << realTime <<  "  " << path << " " << line << " , error code is : " << code << std::endl;
     }

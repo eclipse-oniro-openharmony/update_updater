@@ -109,7 +109,10 @@ int32_t ScriptInstructionHelper::RegisterUserInstruction(const std::string& libN
     userInstrLibName_.assign(libName);
     uscript::UScriptInstructionFactoryPtr factory = nullptr;
     if (instrLib_ == nullptr) {
-        instrLib_ = dlopen(libName.c_str(), RTLD_LAZY);
+        char *realPath = realpath(libName.c_str(), NULL);
+        USCRIPT_CHECK(realPath != nullptr, return USCRIPT_INVALID_PARAM, "realPath is NULL");
+        instrLib_ = dlopen(realPath, RTLD_LAZY);
+        free(realPath);
     }
     USCRIPT_CHECK(instrLib_ != nullptr, return USCRIPT_INVALID_PARAM,
         "Fail to dlopen %s ", libName.c_str());

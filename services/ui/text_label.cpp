@@ -20,6 +20,7 @@
 #include "log/log.h"
 #include "png.h"
 #include "securec.h"
+#include "updater_ui_const.h"
 
 namespace updater {
 TextLabel::TextLabel(int mStartX, int mStartY, int w, int h, Frame *mparent)
@@ -56,7 +57,9 @@ TextLabel::TextLabel(int mStartX, int mStartY, int w, int h, Frame *mparent)
     textColor_.b = maxLevel;
     textColor_.a = maxLevel;
 
-    (void)memset_s(textBuf_, MAX_TEXT_SIZE + 1, 0, MAX_TEXT_SIZE);
+    if (memset_s(textBuf_, MAX_TEXT_SIZE + 1, 0, MAX_TEXT_SIZE) != 0) {
+        LOG(WARNING) << "clear buffer failed";
+    }
     InitFont();
 }
 
@@ -115,15 +118,17 @@ void TextLabel::InitFont()
     const int headerNumber = 8;
     uint8_t header[headerNumber];
     size_t bytesRead = fread(header, 1, sizeof(header), fp);
-    UPDATER_ERROR_CHECK(bytesRead == sizeof(header), "read header failed!", return);
+    UPDATER_ERROR_CHECK(bytesRead == sizeof(header), "read header failed!", fclose(fp); return);
     if (png_sig_cmp(header, 0, sizeof(header))) {
         LOG(ERROR) << "cmp header failed!";
+        fclose(fp);
         return;
     }
     fontPngPtr = png_create_read_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
-    UPDATER_ERROR_CHECK(fontPngPtr, "creat font ptr_ failed!", return);
+    UPDATER_ERROR_CHECK(fontPngPtr, "creat font ptr_ failed!", fclose(fp); return);
     fontInfoPtr = png_create_info_struct(fontPngPtr);
-    if ((!fontInfoPtr) || (setjmp(png_jmpbuf(fontPngPtr)))) {
+    if (fontInfoPtr == nullptr) {
+        fclose(fp);
         return;
     }
     PngInitSet(fontPngPtr, fp, sizeof(header), fontInfoPtr);
@@ -226,7 +231,7 @@ void TextLabel::DrawText()
     int textSy = 0;
     switch (fontAligMethodUpright_) {
         case ALIGN_CENTER:
-            textSy = (viewHeight_ - fontHeight_) >> 1;
+            textSy = (viewHeight_ - fontHeight_) / MEDIAN_NUMBER;
             break;
         case ALIGN_TO_TOP:
             textSy = 0;

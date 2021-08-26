@@ -31,8 +31,11 @@ bool PartitionRecord::IsPartitionUpdated(const std::string &partitionName)
 {
     auto miscBlockDevice = GetMiscPartitionPath();
     uint8_t buffer[PARTITION_UPDATER_RECORD_MSG_SIZE];
+    char *realPath = realpath(miscBlockDevice.c_str(), NULL);
+    UPDATER_FILE_CHECK(realPath != nullptr, "realPath is NULL", return false);
     if (!miscBlockDevice.empty()) {
-        int fd = open(miscBlockDevice.c_str(), O_RDONLY | O_EXCL | O_CLOEXEC | O_BINARY);
+        int fd = open(realPath, O_RDONLY | O_EXCL | O_CLOEXEC | O_BINARY);
+        free(realPath);
         UPDATER_FILE_CHECK(fd >= 0, "PartitionRecord: Open misc to recording partition failed", return false);
         UPDATER_CHECK_FILE_OP(lseek(fd, PARTITION_RECORD_START, SEEK_CUR) >= 0,
             "PartitionRecord: Seek misc to specific offset failed", fd, return false);
@@ -57,8 +60,11 @@ bool PartitionRecord::IsPartitionUpdated(const std::string &partitionName)
 bool PartitionRecord::RecordPartitionUpdateStatus(const std::string &partitionName, bool updated)
 {
     auto miscBlockDevice = GetMiscPartitionPath();
+    char *realPath = realpath(miscBlockDevice.c_str(), NULL);
+    UPDATER_FILE_CHECK(realPath != nullptr, "realPath is NULL", return false);
     if (!miscBlockDevice.empty()) {
-        int fd = open(miscBlockDevice.c_str(), O_RDWR | O_EXCL | O_CLOEXEC | O_BINARY);
+        int fd = open(realPath, O_RDWR | O_EXCL | O_CLOEXEC | O_BINARY);
+        free(realPath);
         UPDATER_FILE_CHECK(fd >= 0, "PartitionRecord: Open misc to recording partition failed", return false);
         off_t newOffset = 0;
         UPDATER_CHECK_FILE_OP(lseek(fd, PARTITION_RECORD_OFFSET, SEEK_SET) >= 0,
@@ -70,8 +76,8 @@ bool PartitionRecord::RecordPartitionUpdateStatus(const std::string &partitionNa
         UPDATER_CHECK_FILE_OP(lseek(fd, PARTITION_RECORD_START + offset_, SEEK_SET) >= 0,
             "PartitionRecord: Seek misc to specific offset failed", fd, return false);
         if (offset_ + sizeof(PartitionRecordInfo) < PARTITION_UPDATER_RECORD_SIZE) {
-            UPDATER_ERROR_CHECK(!strncpy_s(info_.partitionName, PARTITION_NAME_LEN, partitionName.c_str(),
-                PARTITION_NAME_LEN - 1), "PartitionRecord: strncpy_s failed", return false);
+            UPDATER_CHECK_FILE_OP(!strncpy_s(info_.partitionName, PARTITION_NAME_LEN, partitionName.c_str(),
+                PARTITION_NAME_LEN - 1), "PartitionRecord: strncpy_s failed", fd, return false);
             info_.updated = updated;
             UPDATER_CHECK_FILE_OP(write(fd, &info_, sizeof(PartitionRecordInfo)) == sizeof(PartitionRecordInfo),
                 "PartitionRecord: write failed", fd, return false);

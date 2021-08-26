@@ -48,29 +48,29 @@ int UpdatePartitions::ParsePartitionInfo(const std::string &partitionInfo, Parti
             return 0;
         }
         cJSON* thisPartition = cJSON_GetArrayItem(partitions, i);
-        UPDATER_ERROR_CHECK(thisPartition != nullptr, "Error get thisPartion", cJSON_Delete(root); break);
+        UPDATER_ERROR_CHECK(thisPartition != nullptr, "Error get thisPartion", free(myPartition); break);
 
         cJSON* item = cJSON_GetObjectItem(thisPartition, "start");
-        UPDATER_ERROR_CHECK(item != nullptr, "Error get start", cJSON_Delete(root); break);
+        UPDATER_ERROR_CHECK(item != nullptr, "Error get start", free(myPartition); break);
         myPartition->start = item->valueint;
 
         item = cJSON_GetObjectItem(thisPartition, "length");
-        UPDATER_ERROR_CHECK(item != nullptr, "Error get length", cJSON_Delete(root); break);
+        UPDATER_ERROR_CHECK(item != nullptr, "Error get length", free(myPartition); break);
         myPartition->length = item->valueint;
         myPartition->partNum = 0;
         myPartition->devName = "mmcblk0px";
 
         item = cJSON_GetObjectItem(thisPartition, "partName");
-        UPDATER_ERROR_CHECK(item != nullptr, "Error get partName", cJSON_Delete(root); break);
+        UPDATER_ERROR_CHECK(item != nullptr, "Error get partName", free(myPartition); break);
         myPartition->partName = (item->valuestring);
 
         item = cJSON_GetObjectItem(thisPartition, "fsType");
-        UPDATER_ERROR_CHECK(item != nullptr, "Error get fsType", cJSON_Delete(root); break);
+        UPDATER_ERROR_CHECK(item != nullptr, "Error get fsType", free(myPartition); break);
         myPartition->fsType = (item->valuestring);
 
         LOG(INFO) << "<start> <length> <devname> <partname> <fstype>";
-        LOG(INFO) << myPartition->start << myPartition->length << myPartition->devName <<
-            myPartition->partName << myPartition->fsType;
+        LOG(INFO) << myPartition->start << " " << myPartition->length << " " << myPartition->devName << " " <<
+            myPartition->partName << " " << myPartition->fsType;
         newPartList.push_back(myPartition);
     }
     cJSON_Delete(root);
@@ -84,7 +84,7 @@ int UpdatePartitions::DoNewPartitions(PartitonList &newPartList)
     if (ret <= 0) {
         LOG(INFO) << "do_partitions FAIL ";
     } else if (ret == 1) {
-        LOG(INFO) << "new partition == old partition ";
+        LOG(INFO) << "partitions not changed，Skip. ";
     } else if (ret > 1) {
         LOG(INFO) << "do_partitions success reboot";
 #ifndef UPDATER_UT

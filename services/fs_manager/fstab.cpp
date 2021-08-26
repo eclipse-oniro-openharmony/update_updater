@@ -28,7 +28,7 @@
 namespace updater {
 using utils::SplitString;
 
-static std::map<std::string, int> g_fsManagerMap = {
+static std::map<std::string, unsigned int> g_fsManagerMap = {
     {"check", FS_MANAGER_CHECK},
     {"wait", FS_MANAGER_WAIT},
 };
@@ -68,10 +68,10 @@ void ParseFstabPerLine(std::string &line, Fstab &fstab, bool &parseError)
             fprintf(stderr, "Failed to parse fs manager flags.\n");
             break;
         }
-
+        item.fsManagerFlags = 0;
         std::string fsFlags = p;
         for (const auto& flag : g_fsManagerMap) {
-            if (flag.first == p) {
+            if (fsFlags.find(flag.first) != std::string::npos) {
                 item.fsManagerFlags |= flag.second;
             }
         }
@@ -90,12 +90,17 @@ bool ReadFstabFromFile(const std::string &fstabFile, Fstab &fstab)
     ssize_t readLen = 0;
     std::string tmpStr = "";
     Fstab tmpTab;
-    auto fp = std::unique_ptr<FILE, decltype(&fclose)>(fopen(fstabFile.c_str(), "r"), fclose);
-    if (fp.get() == nullptr) {
-        LOG(ERROR) << "fp is nullptr";
+    char *realPath = realpath(fstabFile.c_str(), NULL);
+    if (realPath == nullptr) {
         return false;
     }
-
+    auto fp = std::unique_ptr<FILE, decltype(&fclose)>(fopen(realPath, "r"), fclose);
+    if (fp.get() == nullptr) {
+        LOG(ERROR) << "fp is nullptr";
+        free(realPath);
+        return false;
+    }
+    free(realPath);
     while ((readLen = getline(&line, &allocLen, fp.get())) != -1) {
         char *p = nullptr;
         if (line[readLen - 1] == '\n') {

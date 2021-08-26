@@ -89,6 +89,7 @@ int32_t Store::WriteDataToStore(const std::string &dirPath, const std::string &f
     }
     std::string path = pathTmp + fileName;
     pathTmp = pathTmp + fileName;
+
     int fd = open(pathTmp.c_str(), O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
     UPDATER_ERROR_CHECK(fd != -1, "Failed to create store", return -1);
     UPDATER_ERROR_CHECK(fchown(fd, O_USER_GROUP_ID, O_USER_GROUP_ID) == 0,
@@ -123,7 +124,10 @@ int32_t Store::LoadDataFromStore(const std::string &dirPath, const std::string &
     int fd = open(path.c_str(), O_RDONLY);
     UPDATER_ERROR_CHECK(fd != -1, "Failed to create", return -1);
     buffer.resize(fileStat.st_size);
-    UPDATER_ERROR_CHECK(ReadFully(fd, buffer.data(), fileStat.st_size), "Failed to read store data", return -1);
+    UPDATER_ERROR_CHECK(ReadFully(fd, buffer.data(), fileStat.st_size), "Failed to read store data",
+            close(fd); fd = -1; return -1);
+    close(fd);
+    fd = -1;
     return 0;
 }
 } // namespace updater

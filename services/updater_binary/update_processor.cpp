@@ -137,10 +137,9 @@ int32_t UScriptInstructionRawImageWrite::Execute(uscript::UScriptEnv &env, uscri
     // Extract partition information
     hpackage::PkgManager::StreamPtr outStream = nullptr;
     const FileInfo *info = env.GetPkgManager()->GetFileInfo(partitionName);
-    totalSize_ = info->unpackedSize;
     UPDATER_ERROR_CHECK(info != nullptr, "Error to get file info",
         DataWriter::ReleaseDataWriter(writer); return USCRIPT_ERROR_EXECUTE);
-
+    totalSize_ = info->unpackedSize;
     ret = env.GetPkgManager()->CreatePkgStream(outStream,
         partitionName, RawImageWriteProcessor, writer.get());
     UPDATER_ERROR_CHECK(outStream != nullptr, "Error to create output stream",

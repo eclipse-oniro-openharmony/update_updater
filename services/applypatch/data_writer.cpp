@@ -43,8 +43,10 @@ int DataWriter::OpenPartition(const std::string &partitionName)
         LOG(ERROR) << "Datawriter: " << devPath << " is not writable.";
         return -1;
     }
-
-    int fd = open(devPath.c_str(), O_WRONLY | O_EXCL);
+    char *realPath = realpath(devPath.c_str(), NULL);
+    UPDATER_FILE_CHECK(realPath != nullptr, "realPath is NULL", return -1);
+    int fd = open(realPath, O_WRONLY | O_EXCL);
+    free(realPath);
     UPDATER_FILE_CHECK(fd >= 0, "Datawriter: open block device " << devPath << " failed ", return fd);
     UPDATER_CHECK_FILE_OP(lseek(fd, 0, SEEK_SET) != -1, "Datawriter: seek " << devPath << "failed ", fd, fd = -1);
     return fd;
