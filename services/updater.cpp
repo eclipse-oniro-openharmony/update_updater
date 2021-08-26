@@ -137,8 +137,8 @@ static UpdaterStatus IsSpaceCapacitySufficient(PkgManager::PkgManagerPtr pkgMana
             return UPDATE_ERROR);
 
         UPDATER_ERROR_CHECK(statvfs64("/sdcard", &updaterVfs) >= 0, "Statvfs read /sdcard error!", return UPDATE_ERROR);
-        uint64_t freeSpaceSize = static_cast<uint64_t>(updaterVfs.f_bfree);
-        uint64_t blockSize = static_cast<uint64_t>(updaterVfs.f_bsize);
+        auto freeSpaceSize = static_cast<uint64_t>(updaterVfs.f_bfree);
+        auto blockSize = static_cast<uint64_t>(updaterVfs.f_bsize);
         uint64_t totalFreeSize = freeSpaceSize * blockSize;
         UPDATER_ERROR_CHECK(totalFreeSize > static_cast<uint64_t>(info->unpackedSize),
             "Can not update, free space is not enough",
