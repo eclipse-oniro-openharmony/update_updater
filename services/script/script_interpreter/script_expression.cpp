@@ -128,7 +128,7 @@ UScriptValuePtr BinaryExpression::Execute(ScriptInterpreter &inter, UScriptConte
         left = left_->Execute(inter, local);
     }
 
-    if (action_ == OR_OPERATOR && left->IsTrue()) {
+    if (action_ == OR_OPERATOR && left_ != nullptr && left->IsTrue()) {
         INTERPRETER_LOGE(inter, local, "BinaryExpression::Execute left:%s %s",
             UScriptValue::ScriptToString(left).c_str(), opStr[action_].c_str());
         return std::make_shared<IntegerValue>(1);
