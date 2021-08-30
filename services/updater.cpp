@@ -116,9 +116,9 @@ int UpdatePreProcess(PkgManager::PkgManagerPtr pkgManager, const std::string &pa
     return ret;
 }
 
-static UpdaterStatus IsSpaceCapacitySufficient(PkgManager::PkgManagerPtr pkgManager,
-    const std::string &packagePath)
+static UpdaterStatus IsSpaceCapacitySufficient(const std::string &packagePath)
 {
+    PkgManager::PkgManagerPtr pkgManager = hpackage::PkgManager::CreatePackageInstance();
     UPDATER_ERROR_CHECK(pkgManager != nullptr, "pkgManager is nullptr", return UPDATE_CORRUPT);
     std::vector<std::string> fileIds;
     int ret = pkgManager->LoadPackageWithoutUnPack(packagePath, fileIds);
@@ -184,7 +184,7 @@ UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, cons
     if (retryCount > 0) {
         LOG(INFO) << "Retry for " << retryCount << " time(s)";
     } else {
-        UpdaterStatus ret = IsSpaceCapacitySufficient(pkgManager, packagePath);
+        UpdaterStatus ret = IsSpaceCapacitySufficient(packagePath);
         // Only handle UPATE_ERROR and UPDATE_SUCCESS here.
         // If it returns UPDATE_CORRUPT, which means something wrong with package manager.
         // Let package verify handle this.
