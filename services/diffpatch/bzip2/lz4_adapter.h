@@ -44,7 +44,7 @@ protected:
     int32_t compressionLevel_ { 0 };
     int32_t blockIndependence_ { 0 };
     int32_t contentChecksumFlag_ { 0 };
-    int32_t blockSizeID_ { 0 };
+    uint32_t blockSizeID_ { 0 };
     int32_t autoFlush_ {1};
 };
 

@@ -449,7 +449,7 @@ void UpdaterUiInit()
     HdfInit();
 }
 
-void DeleteView()
+static void DeleteOtherView()
 {
     if (g_updateInfoLabel != nullptr) {
         delete g_updateInfoLabel;
@@ -487,6 +487,11 @@ void DeleteView()
         delete g_logResultLabel;
         g_logResultLabel = nullptr;
     }
+}
+
+void DeleteView()
+{
+    DeleteOtherView();
     if (g_textLabel0 != nullptr) {
         delete g_textLabel0;
         g_textLabel0 = nullptr;
