@@ -264,6 +264,15 @@ static UpdaterStatus StartUpdater(PkgManager::PkgManagerPtr manager, const std::
     return StartUpdaterEntry(manager, args, upParams);
 }
 
+static bool IsDir(const std::string &path)
+{
+    struct stat st{};
+    if (stat(path.c_str(), &st) < 0) {
+        return false;
+    }
+    return S_ISDIR(st.st_mode);
+}
+
 static bool DeleteUpdaterPath(const std::string &path)
 {
     auto pDir = std::unique_ptr<DIR, decltype(&closedir)>(opendir(path.c_str()), closedir);
@@ -276,7 +285,7 @@ static bool DeleteUpdaterPath(const std::string &path)
             if (currentName[0] != '.' && (currentName.compare("log") != 0)) {
                 std::string tmpName(path);
                 tmpName.append("/" + currentName);
-                if (tmpName.find(".") == std::string::npos) {
+                if (IsDir(tmpName)) {
                     DeleteUpdaterPath(tmpName);
                 }
 #ifndef UPDATER_UT
