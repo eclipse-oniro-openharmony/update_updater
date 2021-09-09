@@ -116,7 +116,7 @@ void TransferManager::Init()
 
 bool TransferManager::RegisterForRetry(const std::string &cmd)
 {
-    std::string path = globalParams->storeBase + "/" + "retry_flag";
+    std::string path = globalParams->retryFile;
     int fd = open(path.c_str(), O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
     UPDATER_ERROR_CHECK(fd != -1, "Failed to create", return false);
     UPDATER_ERROR_CHECK(fchown(fd, O_USER_GROUP_ID, O_USER_GROUP_ID) == 0,
@@ -130,7 +130,7 @@ bool TransferManager::RegisterForRetry(const std::string &cmd)
 
 std::string TransferManager::ReloadForRetry() const
 {
-    std::string path = globalParams->storeBase + "/" + "retry_flag";
+    std::string path = globalParams->retryFile;
     int fd = open(path.c_str(), O_RDONLY);
     UPDATER_ERROR_CHECK(fd >= 0, "Failed to open", return "");
     (void)lseek(fd, 0, SEEK_SET);
