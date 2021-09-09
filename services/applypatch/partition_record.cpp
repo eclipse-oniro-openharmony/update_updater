@@ -31,9 +31,9 @@ bool PartitionRecord::IsPartitionUpdated(const std::string &partitionName)
 {
     auto miscBlockDevice = GetMiscPartitionPath();
     uint8_t buffer[PARTITION_UPDATER_RECORD_MSG_SIZE];
-    char *realPath = realpath(miscBlockDevice.c_str(), NULL);
-    UPDATER_FILE_CHECK(realPath != nullptr, "realPath is NULL", return false);
     if (!miscBlockDevice.empty()) {
+        char *realPath = realpath(miscBlockDevice.c_str(), NULL);
+        UPDATER_FILE_CHECK(realPath != nullptr, "realPath is NULL", return false);
         int fd = open(realPath, O_RDONLY | O_EXCL | O_CLOEXEC | O_BINARY);
         free(realPath);
         UPDATER_FILE_CHECK(fd >= 0, "PartitionRecord: Open misc to recording partition failed", return false);
@@ -60,9 +60,9 @@ bool PartitionRecord::IsPartitionUpdated(const std::string &partitionName)
 bool PartitionRecord::RecordPartitionUpdateStatus(const std::string &partitionName, bool updated)
 {
     auto miscBlockDevice = GetMiscPartitionPath();
-    char *realPath = realpath(miscBlockDevice.c_str(), NULL);
-    UPDATER_FILE_CHECK(realPath != nullptr, "realPath is NULL", return false);
     if (!miscBlockDevice.empty()) {
+        char *realPath = realpath(miscBlockDevice.c_str(), NULL);
+        UPDATER_FILE_CHECK(realPath != nullptr, "realPath is NULL", return false);
         int fd = open(realPath, O_RDWR | O_EXCL | O_CLOEXEC | O_BINARY);
         free(realPath);
         UPDATER_FILE_CHECK(fd >= 0, "PartitionRecord: Open misc to recording partition failed", return false);

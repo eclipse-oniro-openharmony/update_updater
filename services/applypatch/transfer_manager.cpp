@@ -58,12 +58,13 @@ bool TransferManager::CommandsParser(int fd, const std::vector<std::string> &con
     globalParams->blockCount = utils::String2Int<size_t>(*ct++, utils::N_DEC);
     globalParams->maxEntries = utils::String2Int<size_t>(*ct++, utils::N_DEC);
     globalParams->maxBlocks = utils::String2Int<size_t>(*ct++, utils::N_DEC);
-    size_t totalSize = globalParams->maxBlocks * globalParams->blockCount;
+    size_t totalSize = globalParams->blockCount;
     std::string retryCmd = "";
     if (globalParams != nullptr && globalParams->env != nullptr && globalParams->env->IsRetry()) {
         retryCmd = ReloadForRetry();
     }
     std::unique_ptr<Command> cmd;
+    int initBlock = 0;
     while (ct != context.end()) {
         cmd = std::make_unique<Command>();
         UPDATER_ERROR_CHECK(cmd != nullptr, "Failed to parse command line.", return false);
@@ -82,18 +83,21 @@ bool TransferManager::CommandsParser(int fd, const std::vector<std::string> &con
             cmd->SetFileDescriptor(fd);
             std::unique_ptr<CommandFunction> cf = CommandFunctionFactory::GetCommandFunction(cmd->GetCommandType());
             UPDATER_ERROR_CHECK(cf != nullptr, "Failed to get cmd exec", return false);
-	    CommandResult ret = cf->Execute(const_cast<Command &>(*cmd.get()));
+            CommandResult ret = cf->Execute(const_cast<Command &>(*cmd.get()));
             CommandFunctionFactory::ReleaseCommandFunction(cf);
             if (CheckResult(ret, cmd->GetCommandLine(), cmd->GetCommandType()) == false) {
                 return false;
             }
-
+            if (initBlock == 0) {
+                initBlock = globalParams->written;
+            }
             bool typeResult = cmd->GetCommandType() == CommandType::NEW ||
                 cmd->GetCommandType() == CommandType::IMGDIFF ||
-                cmd->GetCommandType() == CommandType::BSDIFF;
+                cmd->GetCommandType() == CommandType::BSDIFF ||
+                cmd->GetCommandType() == CommandType::ZERO;
             if (totalSize != 0 && globalParams->env != nullptr && typeResult) {
-                globalParams->env->PostMessage("set_progress", 
-                    std::to_string((float)globalParams->written / totalSize));
+                globalParams->env->PostMessage("set_progress",
+                    std::to_string((float)(globalParams->written - initBlock) / totalSize));
             }
             LOG(INFO) << "Running command : " << cmd->GetArgumentByPos(0) << " success";
         }
@@ -121,7 +125,6 @@ bool TransferManager::RegisterForRetry(const std::string &cmd)
     UPDATER_ERROR_CHECK_NOT_RETURN(ret, "Write retry flag error");
     fsync(fd);
     close(fd);
-
     return ret;
 }
 

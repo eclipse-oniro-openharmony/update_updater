@@ -101,8 +101,7 @@ void TextLabel::InitFont()
     png_structp fontPngPtr = nullptr;
     int fontBitDepth = 0;
     int fontColorType = 0;
-    uint32_t offset = 2;
-    UPDATER_CHECK_ONLY_RETURN(!memset_s(resPath, MAX_TEXT_SIZE + offset, 0, MAX_TEXT_SIZE + 1), return);
+    UPDATER_CHECK_ONLY_RETURN(!memset_s(resPath, MAX_TEXT_SIZE + offset_, 0, MAX_TEXT_SIZE + 1), return);
     switch (fontType_) {
         case DEFAULT_FONT:
             UPDATER_CHECK_ONLY_RETURN(snprintf_s(resPath, sizeof(resPath), sizeof(resPath) -1, "/resources/%s.png",
@@ -115,8 +114,7 @@ void TextLabel::InitFont()
     }
     FILE* fp = fopen(resPath, "rb");
     UPDATER_ERROR_CHECK(fp, "open font failed!", return);
-    const int headerNumber = 8;
-    uint8_t header[headerNumber];
+    uint8_t header[headerNumber_];
     size_t bytesRead = fread(header, 1, sizeof(header), fp);
     UPDATER_ERROR_CHECK(bytesRead == sizeof(header), "read header failed!", fclose(fp); return);
     if (png_sig_cmp(header, 0, sizeof(header))) {
@@ -135,14 +133,16 @@ void TextLabel::InitFont()
     png_get_IHDR(fontPngPtr, fontInfoPtr, &fontWidth, &fontHeight, &fontBitDepth, &fontColorType,
         nullptr, nullptr, nullptr);
     fontChannels = png_get_channels(fontPngPtr, fontInfoPtr);
-    const int defaultFontBitDepth = 8;
-    if (fontBitDepth <= defaultFontBitDepth && fontChannels == 1 && fontColorType == PNG_COLOR_TYPE_GRAY) {
+    if (fontBitDepth <= defaultFontBitDepth_ && fontChannels == 1 && fontColorType == PNG_COLOR_TYPE_GRAY) {
         png_set_expand_gray_1_2_4_to_8(fontPngPtr);
     }
-    const int defaultFontWidth = 96;
-    fontWidth_ = fontWidth / defaultFontWidth;
+    fontWidth_ = fontWidth / defaultFontWidth_;
     fontHeight_ = fontHeight >> 1;
     PNGReadRow(fontWidth_, fontHeight_, fontPngPtr, fontBuf_);
+    if (fp != nullptr) {
+        fclose(fp);
+        fp = nullptr;
+    }
 }
 
 void TextLabel::SetText(const char *str)
