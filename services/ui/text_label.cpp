@@ -78,6 +78,15 @@ static void PngInitSet(png_structp fontPngPtr, FILE *fp, int size, png_infop fon
     return;
 }
 
+static void CheckInitFont(png_structp fontPngPtr, FILE *fp, png_infop fontInfoPtr)
+{
+    png_destroy_read_struct(&fontPngPtr, &fontInfoPtr, 0);
+    if (fp != nullptr) {
+        fclose(fp);
+        fp = nullptr;
+    }
+}
+
 static void PNGReadRow(png_uint_32 fontWidth, png_uint_32 fontHeight, png_structp fontPngPtr, char *fontBuf)
 {
     if ((fontWidth > MAX_FONT_BUFFER_SIZE_HW) || (fontHeight > MAX_FONT_BUFFER_SIZE_HW)) {
@@ -97,7 +106,6 @@ void TextLabel::InitFont()
     png_infop fontInfoPtr = nullptr;
     png_uint_32 fontWidth = 0;
     png_uint_32 fontHeight = 0;
-    png_byte fontChannels = 0;
     png_structp fontPngPtr = nullptr;
     int fontBitDepth = 0;
     int fontColorType = 0;
@@ -126,23 +134,21 @@ void TextLabel::InitFont()
     UPDATER_ERROR_CHECK(fontPngPtr, "creat font ptr_ failed!", fclose(fp); return);
     fontInfoPtr = png_create_info_struct(fontPngPtr);
     if (fontInfoPtr == nullptr) {
+        png_destroy_read_struct(&fontPngPtr, nullptr, nullptr);
         fclose(fp);
         return;
     }
     PngInitSet(fontPngPtr, fp, sizeof(header), fontInfoPtr);
     png_get_IHDR(fontPngPtr, fontInfoPtr, &fontWidth, &fontHeight, &fontBitDepth, &fontColorType,
         nullptr, nullptr, nullptr);
-    fontChannels = png_get_channels(fontPngPtr, fontInfoPtr);
+    png_byte fontChannels = png_get_channels(fontPngPtr, fontInfoPtr);
     if (fontBitDepth <= defaultFontBitDepth_ && fontChannels == 1 && fontColorType == PNG_COLOR_TYPE_GRAY) {
         png_set_expand_gray_1_2_4_to_8(fontPngPtr);
     }
     fontWidth_ = fontWidth / defaultFontWidth_;
     fontHeight_ = fontHeight >> 1;
     PNGReadRow(fontWidth_, fontHeight_, fontPngPtr, fontBuf_);
-    if (fp != nullptr) {
-        fclose(fp);
-        fp = nullptr;
-    }
+    CheckInitFont(fontPngPtr, fp, fontInfoPtr);
 }
 
 void TextLabel::SetText(const char *str)
