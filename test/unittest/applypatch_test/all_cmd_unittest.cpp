@@ -98,7 +98,7 @@ bool AllCmdUnitTest::WriteTestBin(int fd, const uint8_t &data, size_t size) cons
 // new command is not easy to simulate, it depends on
 // compression and other condition.
 // Leave new command to be covered by update_image_block test.
-HWTEST_F(AllCmdUnitTest, allCmd_test_001,TestSize.Level1)
+HWTEST_F(AllCmdUnitTest, allCmd_test_001, TestSize.Level1)
 {
     TransferManager *tm = TransferManager::GetTransferManagerInstance();
     // Read source
@@ -164,7 +164,7 @@ int AllCmdUnitTest::AllCmdUnitTestMove(int &fd, std::vector<std::string> &allCmd
     return 0;
 }
 
-HWTEST_F(AllCmdUnitTest, allCmd_test_002,TestSize.Level1)
+HWTEST_F(AllCmdUnitTest, allCmd_test_002, TestSize.Level1)
 {
     TransferManagerPtr tm = TransferManager::GetTransferManagerInstance();
     std::string filePath = "/tmp/test.bin";

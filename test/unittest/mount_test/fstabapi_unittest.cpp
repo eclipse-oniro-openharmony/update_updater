@@ -121,10 +121,18 @@ HWTEST_F(FstabApiUnitTest, FindFstabItemForMountPoint_unitest, TestSize.Level1)
         SUCCEED();
     }
 }
-/*
+
 HWTEST_F(FstabApiUnitTest, GetMountFlags_unitest, TestSize.Level1)
 {
     const std::string fstabFile1 = "/data/updater/mount_unitest/GetMountFlags1.fstable";
+    int fd = open(fstabFile1.c_str(), O_RDONLY);
+    if (fd < 0) {
+        cout << "fstabFile open failed, fd = " << fd << endl;
+        FAIL();
+        return;
+    } else {
+        close(fd);
+    }
     Fstab fstab1;
     ReadFstabFromFile(fstabFile1, fstab1);
     struct FstabItem* item = nullptr;
@@ -137,5 +145,4 @@ HWTEST_F(FstabApiUnitTest, GetMountFlags_unitest, TestSize.Level1)
     unsigned long flags = GetMountFlags(item->mountOptions, fsSpecificOptions);
     EXPECT_EQ(flags, static_cast<unsigned long>(MS_NOSUID | MS_NODEV | MS_NOATIME));
 }
-*/
 } // namespace updater_ut
