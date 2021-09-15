@@ -39,7 +39,7 @@ void BlockSetUnitTest::TearDown(void)
     cout << "TearDownTestCase" << endl;
 }
 
-HWTEST_F(BlockSetUnitTest, blockset_test_001,TestSize.Level1)
+HWTEST_F(BlockSetUnitTest, blockset_test_001, TestSize.Level1)
 {
     cout << "Blockset ut start";
     BlockSet block(std::vector<BlockPair> {BlockPair{0, 1}});
@@ -66,7 +66,7 @@ HWTEST_F(BlockSetUnitTest, blockset_test_001,TestSize.Level1)
     EXPECT_EQ(ret, -1);
 }
 
-HWTEST_F(BlockSetUnitTest, blockset_test_002,TestSize.Level1)
+HWTEST_F(BlockSetUnitTest, blockset_test_002, TestSize.Level1)
 {
     cout << "Blockset ut two blocks overlap";
     BlockSet block(std::vector<BlockPair> {BlockPair{0, 1}});
@@ -78,7 +78,7 @@ HWTEST_F(BlockSetUnitTest, blockset_test_002,TestSize.Level1)
     EXPECT_EQ(ret, false);
 }
 
-HWTEST_F(BlockSetUnitTest, blockset_test_003,TestSize.Level1)
+HWTEST_F(BlockSetUnitTest, blockset_test_003, TestSize.Level1)
 {
     cout << "Blockset ut two blocks overlap";
     std::vector<uint8_t> buffer;
@@ -90,7 +90,7 @@ HWTEST_F(BlockSetUnitTest, blockset_test_003,TestSize.Level1)
     blk.WriteDataToBlock(fd, buffer);
 }
 
-HWTEST_F(BlockSetUnitTest, blockset_test_004,TestSize.Level1)
+HWTEST_F(BlockSetUnitTest, blockset_test_004, TestSize.Level1)
 {
     cout << "Blockset ut two blocks overlap";
     std::vector<uint8_t> srcBuffer;
@@ -103,7 +103,7 @@ HWTEST_F(BlockSetUnitTest, blockset_test_004,TestSize.Level1)
     BlockSet::MoveBlock(srcBuffer, blk, tgtBuffer);
 }
 
-HWTEST_F(BlockSetUnitTest, blockset_test_005,TestSize.Level1)
+HWTEST_F(BlockSetUnitTest, blockset_test_005, TestSize.Level1)
 {
     std::string hashValue = "5aa246ebe8e817740f12cc0f6e536c5ea22e5db177563a1caea5a86614275546";
     std::string blockInfo = "2,20755,21031 276 2,20306,20582";

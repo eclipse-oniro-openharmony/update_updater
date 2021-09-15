@@ -64,7 +64,7 @@ HWTEST_F(CommandsUnitTest, command_test_001, TestSize.Level0)
     EXPECT_EQ(cmd->GetCommandLine(), cmdLine);
 }
 
-HWTEST_F(CommandsUnitTest, command_test_002,TestSize.Level0)
+HWTEST_F(CommandsUnitTest, command_test_002, TestSize.Level0)
 {
     std::string hashValue = "5aa246ebe8e817740f12cc0f6e536c5ea22e5db177563a1caea5a86614275546";
     std::string blockInfo = "2,20755,21031 276 2,20306,20582";

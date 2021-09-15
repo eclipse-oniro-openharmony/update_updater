@@ -117,67 +117,41 @@ HWTEST_F(UpdaterMainUnitTest, updater_main_test_003, TestSize.Level1)
 
 HWTEST_F(UpdaterMainUnitTest, updater_main_test_004, TestSize.Level1)
 {
-    printf("//////  1\n");
     UpdaterUiInit();
-    printf("//////  2\n");
     auto fp = std::unique_ptr<FILE, decltype(&fclose)>(fopen("/data/updater/updater.zip", "wb"), fclose);
-    printf("//////  3\n");
     EXPECT_NE(fp, nullptr);
 
     UpdateMessage boot {};
     EXPECT_EQ(strncpy_s(boot.command, sizeof(boot.command), "boot_updater", sizeof(boot.command)), 0);
     EXPECT_EQ(strncpy_s(boot.update, sizeof(boot.update),
         "--update_package=/data/updater/updater.zip\n--retry_count=0", sizeof(boot.update)), 0);
-    printf("//////  4\n");
     bool ret = WriteUpdaterMessage(MISC_FILE, boot);
-    printf("//////  5\n");
     EXPECT_EQ(ret, true);
     
     int lRet = 0;
     int argc = 1;
     char **argv = new char*[MAX_ARG_SIZE];
     argv[0] = new char[10];
-    /*
-    char **argv = new char*[MAX_ARG_SIZE];
-    argv[0] = new char[10];
-    printf("//////  6\n");
-    EXPECT_EQ(strncpy_s(argv[0], MAX_ARG_SIZE, "./main", MAX_ARG_SIZE), 0);
-    printf("//////  7\n");
-    int argc = 1;
-    int lRet = UpdaterMain(argc, argv);
-    printf("//////  8\n");
-    EXPECT_EQ(lRet, 0);
-    */
     EXPECT_EQ(memset_s(boot.update, sizeof(boot.update), 0, sizeof(boot.update)), 0);
     EXPECT_EQ(strncpy_s(boot.update, sizeof(boot.update), "--user_wipe_data", sizeof(boot.update)), 0);
     ret = WriteUpdaterMessage(MISC_FILE, boot);
-    printf("//////  9\n");
     EXPECT_EQ(ret, true);
     lRet = UpdaterMain(argc, argv);
-    printf("//////  10\n");
     EXPECT_EQ(lRet, 0);
 
     EXPECT_EQ(memset_s(boot.update, sizeof(boot.update), 0, sizeof(boot.update)), 0);
-    printf("//////  11\n");
     EXPECT_EQ(strncpy_s(boot.update, sizeof(boot.update), "--factory_wipe_data", sizeof(boot.update)), 0);
-    printf("//////  12\n");
     ret = WriteUpdaterMessage(MISC_FILE, boot);
-    printf("//////  13\n");
     EXPECT_EQ(ret, true);
     lRet = UpdaterMain(argc, argv);
-    printf("//////  14\n");
     EXPECT_EQ(lRet, 0);
 
     ret = ReadUpdaterMessage(MISC_FILE, boot);
-    printf("//////  15\n");
     EXPECT_EQ(ret, true);
     EXPECT_STREQ(boot.update, "");
-    printf("//////  16\n");
     delete argv[0];
     delete []argv;
-    printf("//////  17\n");
     DeleteView();
-    printf("//////  18\n");
 }
 
 
