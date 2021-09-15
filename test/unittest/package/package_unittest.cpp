@@ -30,6 +30,7 @@
 using namespace std;
 using namespace hpackage;
 using namespace updater;
+using namespace testing::ext;
 
 namespace {
 class PackageUnitTest : public PkgTest {
@@ -219,7 +220,7 @@ public:
         return ret;
     }
 
-    int TestVersifyUpgradePackage()
+    int TestVerifyUpgradePackage()
     {
         int ret = TestPackagePack();
         constexpr size_t digestSize = 32;
@@ -236,9 +237,9 @@ public:
         return 0;
     }
 
-    int TestVersifyZipWithCallback()
+    int TestVerifyZipWithCallback()
     {
-        int32_t ret = TestVersifyZip();
+        int32_t ret = TestVerifyZip();
         EXPECT_EQ(ret, 0);
         std::string path = GetCurrPath();
         path = TEST_PATH_TO + testZipPackageName;
@@ -248,7 +249,7 @@ public:
         return 0;
     }
 
-    int TestVersifyZip()
+    int TestVerifyZip()
     {
         int32_t ret = TestZipPkgCompress();
         EXPECT_EQ(ret, 0);
@@ -267,7 +268,7 @@ public:
         return 0;
     }
 
-    int TestVersifyLz4()
+    int TestVerifyLz4()
     {
         int32_t ret = TestLz4PkgCompress();
         EXPECT_EQ(ret, 0);
@@ -559,101 +560,101 @@ public:
     }
 };
 
-TEST_F(PackageUnitTest, TestPackage)
+HWTEST_F(PackageUnitTest, TestPackage, TestSize.Level1)
 {
     PackageUnitTest test;
     EXPECT_EQ(0, test.TestPackagePack());
     EXPECT_EQ(0, test.TestPackageUnpack());
 }
 
-TEST_F(PackageUnitTest, TestZipPackage)
+HWTEST_F(PackageUnitTest, TestZipPackage, TestSize.Level1)
 {
     PackageUnitTest test;
     EXPECT_EQ(0, test.TestZipPkgCompress());
     EXPECT_EQ(0, test.TestZipPkgDecompress());
 }
 
-TEST_F(PackageUnitTest, TestLz4Package)
+HWTEST_F(PackageUnitTest, TestLz4Package, TestSize.Level1)
 {
     PackageUnitTest test;
     EXPECT_EQ(0, test.TestLz4PkgCompress());
     EXPECT_EQ(0, test.TestLz4PkgDecompress());
 }
 
-TEST_F(PackageUnitTest, TestLz4PackageBlock)
+HWTEST_F(PackageUnitTest, TestLz4PackageBlock, TestSize.Level1)
 {
     PackageUnitTest test;
     EXPECT_EQ(0, test.TestLz4PkgCompressBlock());
     EXPECT_EQ(0, test.TestLz4PkgDecompress());
 }
 
-TEST_F(PackageUnitTest, TestCombinePkg)
+HWTEST_F(PackageUnitTest, TestCombinePkg, TestSize.Level1)
 {
     PackageUnitTest test;
     EXPECT_EQ(0, test.TestCombinePkgUnpack());
 }
 
-TEST_F(PackageUnitTest, TestVersifyUpgradePackage)
+HWTEST_F(PackageUnitTest, TestVerifyUpgradePackage, TestSize.Level1)
 {
     PackageUnitTest test;
-    EXPECT_EQ(0, test.TestVersifyUpgradePackage());
+    EXPECT_EQ(0, test.TestVerifyUpgradePackage());
 }
 
-TEST_F(PackageUnitTest, TestVersifyZipWithCallback)
+HWTEST_F(PackageUnitTest, TestVerifyZipWithCallback, TestSize.Level1)
 {
     PackageUnitTest test;
-    EXPECT_EQ(0, test.TestVersifyZipWithCallback());
+    EXPECT_EQ(0, test.TestVerifyZipWithCallback());
 }
 
-TEST_F(PackageUnitTest, TestVersifyZip)
+HWTEST_F(PackageUnitTest, TestVerifyZip, TestSize.Level1)
 {
     PackageUnitTest test;
-    EXPECT_EQ(0, test.TestVersifyZip());
+    EXPECT_EQ(0, test.TestVerifyZip());
 }
 
-TEST_F(PackageUnitTest, TestVersifyLz4) {
+HWTEST_F(PackageUnitTest, TestVerifyLz4, TestSize.Level1) {
     PackageUnitTest test;
-    EXPECT_EQ(0, test.TestVersifyLz4());
+    EXPECT_EQ(0, test.TestVerifyLz4());
 }
 
-TEST_F(PackageUnitTest, TestInterfaceLz4)
+HWTEST_F(PackageUnitTest, TestInterfaceLz4, TestSize.Level1)
 {
     PackageUnitTest test;
     EXPECT_EQ(0, test.TestInterfaceLz4());
 }
 
-TEST_F(PackageUnitTest, TestInterfaceZip)
+HWTEST_F(PackageUnitTest, TestInterfaceZip, TestSize.Level1)
 {
     PackageUnitTest test;
     EXPECT_EQ(0, test.TestInterfaceZip());
 }
 
-TEST_F(PackageUnitTest, TestInvalidCreatePackage)
+HWTEST_F(PackageUnitTest, TestInvalidCreatePackage, TestSize.Level1)
 {
     PackageUnitTest test;
     EXPECT_EQ(0, test.TestInvalidCreatePackage());
 }
 
-TEST_F(PackageUnitTest, TestGZipPkg)
+HWTEST_F(PackageUnitTest, TestGZipPkg, TestSize.Level1)
 {
     PackageUnitTest test;
     EXPECT_EQ(0, test.TestGZipPkgCompress());
     EXPECT_EQ(0, test.TestGZipPkgDecompressAll());
 }
 
-TEST_F(PackageUnitTest, TestSecondLoadPackage)
+HWTEST_F(PackageUnitTest, TestSecondLoadPackage, TestSize.Level1)
 {
     PackageUnitTest test;
     EXPECT_EQ(0, test.TestSecondLoadPackage());
 }
 
-TEST_F(PackageUnitTest, TestL1PackagePack)
+HWTEST_F(PackageUnitTest, TestL1PackagePack, TestSize.Level1)
 {
     PackageUnitTest test;
     EXPECT_EQ(0, test.TestL1PackagePack());
 }
 
-TEST_F(PackageUnitTest, TestL1PackagePackSha384)
+HWTEST_F(PackageUnitTest, TestL1PackagePackSha384, TestSize.Level1)
 {
     PackageUnitTest test;
     EXPECT_EQ(0, test.TestL1PackagePackSha384());

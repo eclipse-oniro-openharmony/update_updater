@@ -36,7 +36,7 @@ void UpdaterKitsUnitTest::TearDownTestCase(void)
     cout << "Updater Unit UpdaterKitsUnitTest End!" << endl;
 }
 
-TEST_F(UpdaterKitsUnitTest, updater_kits_test01)
+HWTEST_F(UpdaterKitsUnitTest, updater_kits_test01, TestSize.Level1)
 {
     const std::string packageName1 = "";
     bool ret = RebootAndInstallUpgradePackage(MISC_FILE, packageName1);
@@ -50,7 +50,7 @@ TEST_F(UpdaterKitsUnitTest, updater_kits_test01)
     unlink(MISC_FILE.c_str());
 }
 
-TEST_F(UpdaterKitsUnitTest, updater_kits_test02)
+HWTEST_F(UpdaterKitsUnitTest, updater_kits_test02, TestSize.Level1)
 {
     const std::string cmd1 = "";
     bool ret = RebootAndCleanUserData(MISC_FILE, cmd1);

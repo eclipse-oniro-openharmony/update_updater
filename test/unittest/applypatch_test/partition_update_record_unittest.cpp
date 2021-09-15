@@ -25,6 +25,7 @@
 #include "package/pkg_manager.h"
 #include "updater/updater.h"
 
+using namespace testing::ext;
 using namespace updater;
 using namespace std;
 namespace updater_ut {
@@ -51,7 +52,7 @@ void PartitionUpdateRecordUnitTest::TearDown()
     PartitionRecord::GetInstance().ClearRecordPartitionOffset();
 }
 
-TEST_F(PartitionUpdateRecordUnitTest, partition_record_test_001)
+HWTEST_F(PartitionUpdateRecordUnitTest, partition_record_test_001, TestSize.Level1)
 {
     const std::string partitionName = "ut_partition";
     bool ret = PartitionRecord::GetInstance().RecordPartitionUpdateStatus(partitionName, true);
@@ -61,14 +62,14 @@ TEST_F(PartitionUpdateRecordUnitTest, partition_record_test_001)
     EXPECT_EQ(ret, true);
 }
 
-TEST_F(PartitionUpdateRecordUnitTest, partition_record_test_002)
+HWTEST_F(PartitionUpdateRecordUnitTest, partition_record_test_002, TestSize.Level1)
 {
     const std::string partitionName = "ut_partition1";
     bool ret = PartitionRecord::GetInstance().IsPartitionUpdated(partitionName);
     EXPECT_EQ(ret, false);
 }
 
-TEST_F(PartitionUpdateRecordUnitTest, partition_record_test_003)
+HWTEST_F(PartitionUpdateRecordUnitTest, partition_record_test_003, TestSize.Level1)
 {
     string partitionName = "partitionName";
     for (int i = 0; i < MAX_PARTITION_NUM; i++) {

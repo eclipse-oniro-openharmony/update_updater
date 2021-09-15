@@ -63,7 +63,7 @@ void ApplyPatchUnitTest::TearDown()
     unlink(devPath.c_str());
 }
 
-TEST_F(ApplyPatchUnitTest, updater_RawWriter)
+HWTEST_F(ApplyPatchUnitTest, updater_RawWriter, TestSize.Level1)
 {
     WriteMode mode = WRITE_RAW;
     uint8_t *addr = nullptr;
@@ -103,7 +103,7 @@ TEST_F(ApplyPatchUnitTest, updater_RawWriter)
     DataWriter::ReleaseDataWriter(writer);
 }
 
-TEST_F(ApplyPatchUnitTest, updater_DataWriterOpenPartition)
+HWTEST_F(ApplyPatchUnitTest, updater_DataWriterOpenPartition, TestSize.Level1)
 {
     WriteMode mode = WRITE_RAW;
     std::string partitionName = "";
@@ -124,7 +124,7 @@ TEST_F(ApplyPatchUnitTest, updater_DataWriterOpenPartition)
     DataWriter::ReleaseDataWriter(writer);
 }
 
-TEST_F(ApplyPatchUnitTest, updater_CreateDataWriter)
+HWTEST_F(ApplyPatchUnitTest, updater_CreateDataWriter, TestSize.Level1)
 {
     std::vector<WriteMode> modes = { WRITE_RAW, WRITE_DECRYPT };
     std::unique_ptr<DataWriter> writer = nullptr;

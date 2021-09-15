@@ -28,7 +28,10 @@
          "//base/update/updater/services/ui:libui",
          "//third_party/libdrm:libdrm",
          "//third_party/e2fsprogs:e2fsprogs"
-	]
+      ],
+      "test_list": [
+         "//base/update/updater:unittest"
+      ]
     }
   }
 }

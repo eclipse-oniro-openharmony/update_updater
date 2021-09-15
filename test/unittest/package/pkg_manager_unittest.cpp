@@ -34,6 +34,7 @@
 using namespace std;
 using namespace hpackage;
 using namespace updater;
+using namespace testing::ext;
 
 namespace {
 constexpr auto WINDOWBITS = -15;  // 32kb window; negative to indicate a raw stream.
@@ -695,7 +696,7 @@ public:
     }
 };
 
-TEST_F(PkgMangerTest, TestGZipBuffer)
+HWTEST_F(PkgMangerTest, TestGZipBuffer, TestSize.Level1)
 {
     PkgMangerTest test;
     hpackage::ZipFileInfo zipInfo;
@@ -714,7 +715,7 @@ TEST_F(PkgMangerTest, TestGZipBuffer)
     uncompressedData.clear();
 }
 
-TEST_F(PkgMangerTest, TestLz4Buffer)
+HWTEST_F(PkgMangerTest, TestLz4Buffer, TestSize.Level1)
 {
     PkgMangerTest test;
     hpackage::Lz4FileInfo lz4Info;
@@ -734,7 +735,7 @@ TEST_F(PkgMangerTest, TestLz4Buffer)
     uncompressedData.clear();
 }
 
-TEST_F(PkgMangerTest, TestInvalidCreatePackage)
+HWTEST_F(PkgMangerTest, TestInvalidCreatePackage, TestSize.Level1)
 {
     PkgMangerTest test;
     EXPECT_EQ(0, test.TestPackagePack());
@@ -742,49 +743,49 @@ TEST_F(PkgMangerTest, TestInvalidCreatePackage)
     EXPECT_EQ(0, test.TestPackagePackParamInvalid());
 }
 
-TEST_F(PkgMangerTest, TestPkgStreamImpl)
+HWTEST_F(PkgMangerTest, TestPkgStreamImpl, TestSize.Level1)
 {
     PkgMangerTest test;
     EXPECT_EQ(0, test.TestPkgStreamImpl());
 }
 
-TEST_F(PkgMangerTest, TestPkgMmmapStream)
+HWTEST_F(PkgMangerTest, TestPkgMmmapStream, TestSize.Level1)
 {
     PkgMangerTest test;
     EXPECT_EQ(0, test.TestPkgMmmapStream());
 }
 
-TEST_F(PkgMangerTest, TestPkgFileStream)
+HWTEST_F(PkgMangerTest, TestPkgFileStream, TestSize.Level1)
 {
     PkgMangerTest test;
     EXPECT_EQ(0, test.TestPkgFileStream());
 }
 
-TEST_F(PkgMangerTest, TestPkgProcessStream)
+HWTEST_F(PkgMangerTest, TestPkgProcessStream, TestSize.Level1)
 {
     PkgMangerTest test;
     EXPECT_EQ(0, test.TestPkgProcessStream());
 }
 
-TEST_F(PkgMangerTest, TestInvalidStream)
+HWTEST_F(PkgMangerTest, TestInvalidStream, TestSize.Level1)
 {
     PkgMangerTest test;
     EXPECT_EQ(0, test.TestInvalidStream());
 }
 
-TEST_F(PkgMangerTest, TestRead)
+HWTEST_F(PkgMangerTest, TestRead, TestSize.Level1)
 {
     PkgMangerTest test;
     EXPECT_EQ(0, test.TestRead());
 }
 
-TEST_F(PkgMangerTest, TestCheckFile)
+HWTEST_F(PkgMangerTest, TestCheckFile, TestSize.Level1)
 {
     PkgMangerTest test;
     EXPECT_EQ(0, test.TestCheckFile());
 }
 
-TEST_F(PkgMangerTest, TestCreatePackageFail)
+HWTEST_F(PkgMangerTest, TestCreatePackageFail, TestSize.Level1)
 {
     PkgMangerTest test;
     EXPECT_EQ(0, test.TestCreatePackageInvalidFile());
@@ -794,7 +795,7 @@ TEST_F(PkgMangerTest, TestCreatePackageFail)
     EXPECT_EQ(0, test.TestZipPackageInvalidFile());
 }
 
-TEST_F(PkgMangerTest, TestLoadPackageFail)
+HWTEST_F(PkgMangerTest, TestLoadPackageFail, TestSize.Level1)
 {
     PkgMangerTest test;
     EXPECT_EQ(0, test.TestLoadPackageFail());

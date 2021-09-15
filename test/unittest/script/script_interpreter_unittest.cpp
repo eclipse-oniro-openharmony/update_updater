@@ -31,6 +31,7 @@ using namespace std;
 using namespace hpackage;
 using namespace uscript;
 using namespace updater;
+using namespace testing::ext;
 
 namespace {
 class ScriptInterpreterUnitTest : public ::testing::Test {
@@ -191,37 +192,37 @@ protected:
     void TestBody() {}
 };
 
-TEST_F(ScriptInterpreterUnitTest, TestScriptInterpreterScriptValue)
+HWTEST_F(ScriptInterpreterUnitTest, TestScriptInterpreterScriptValue, TestSize.Level0)
 {
     ScriptInterpreterUnitTest test;
     EXPECT_EQ(0, test.TestScriptInterpreterScriptValue());
 }
 
-TEST_F(ScriptInterpreterUnitTest, TestScriptInstructionContext)
+HWTEST_F(ScriptInterpreterUnitTest, TestScriptInstructionContext, TestSize.Level0)
 {
     ScriptInterpreterUnitTest test;
     EXPECT_EQ(0, test.TestScriptInstructionContext());
 }
 
-TEST_F(ScriptInterpreterUnitTest, TestIntegerValueComputer)
+HWTEST_F(ScriptInterpreterUnitTest, TestIntegerValueComputer, TestSize.Level0)
 {
     ScriptInterpreterUnitTest test;
     EXPECT_EQ(0, test.TestIntegerValueComputer());
 }
 
-TEST_F(ScriptInterpreterUnitTest, TestFloatValueComputer)
+HWTEST_F(ScriptInterpreterUnitTest, TestFloatValueComputer, TestSize.Level0)
 {
     ScriptInterpreterUnitTest test;
     EXPECT_EQ(0, test.TestFloatValueComputer());
 }
 
-TEST_F(ScriptInterpreterUnitTest, TestStringValueComputer)
+HWTEST_F(ScriptInterpreterUnitTest, TestStringValueComputer, TestSize.Level0)
 {
     ScriptInterpreterUnitTest test;
     EXPECT_EQ(0, test.TestStringValueComputer());
 }
 
-TEST_F(ScriptInterpreterUnitTest, SomeDestructor)
+HWTEST_F(ScriptInterpreterUnitTest, SomeDestructor, TestSize.Level0)
 {
     IntegerValue a1(0);
     FloatValue a2(0.0);

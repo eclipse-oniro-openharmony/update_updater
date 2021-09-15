@@ -26,6 +26,7 @@
 #include "securec.h"
 
 using namespace updater;
+using namespace testing::ext;
 using namespace std;
 
 namespace updater_ut {
@@ -74,7 +75,7 @@ static void InitEmmcPartition(struct Partition &part, const std::string &partNam
     part.fsType = "emmc";
 }
 
-TEST_F(DoPartitionUnitTest, do_partition_test_001)
+HWTEST_F(DoPartitionUnitTest, do_partition_test_001, TestSize.Level1)
 {
     PartitonList nList;
     int partitionIndex = 0;

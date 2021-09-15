@@ -21,6 +21,7 @@
 #include "applypatch/transfer_manager.h"
 #include "log/log.h"
 
+using namespace testing::ext;
 using namespace updater;
 using namespace std;
 namespace updater_ut {
@@ -47,7 +48,7 @@ void TransferManagerUnitTest::TearDown()
     cout << "Updater Unit TransferManagerUnitTest End!" << endl;
 }
 
-TEST_F(TransferManagerUnitTest, transfer_manager_test_001)
+HWTEST_F(TransferManagerUnitTest, transfer_manager_test_001, TestSize.Level1)
 {
     TransferManagerPtr tm = TransferManager::GetTransferManagerInstance();
     std::string cmd = "zero 2,0,1";
@@ -55,7 +56,7 @@ TEST_F(TransferManagerUnitTest, transfer_manager_test_001)
     TransferManager::ReleaseTransferManagerInstance(tm);
 }
 
-TEST_F(TransferManagerUnitTest, transfer_manager_test_002)
+HWTEST_F(TransferManagerUnitTest, transfer_manager_test_002, TestSize.Level1)
 {
     TransferManagerPtr tm = TransferManager::GetTransferManagerInstance();
     tm->ReloadForRetry();

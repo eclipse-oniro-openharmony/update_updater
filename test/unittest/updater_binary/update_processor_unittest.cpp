@@ -29,6 +29,7 @@
 #include "utils.h"
 
 using namespace updater;
+using namespace testing::ext;
 using namespace uscript;
 using namespace std;
 using namespace hpackage;
@@ -54,7 +55,7 @@ void UpdateProcessorUnitTest::SetUpTestCase(void) {}
 // do something at the each function end
 void UpdateProcessorUnitTest::TearDownTestCase(void) {}
 
-TEST(UpdateProcessorUnitTest, UpdateProcessor_001)
+HWTEST_F(UpdateProcessorUnitTest, UpdateProcessor_001, TestSize.Level1)
 {
     LoadSpecificFstab("/data/updater/applypatch/etc/fstab.ut.updater");
     const string packagePath = "/data/updater/updater/raw_image_write.zip";

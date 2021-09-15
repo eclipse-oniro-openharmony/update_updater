@@ -60,7 +60,7 @@ void MountUnitTest::TearDownTestCase(void)
     rmdir("/misc");
 }
 
-TEST_F(MountUnitTest, FormatPartition_unitest)
+HWTEST_F(MountUnitTest, FormatPartition_unitest, TestSize.Level1)
 {
     const std::string fstabFile1 = "/data/updater/mount_unitest/FormatPartition1.fstable";
     LoadSpecificFstab(fstabFile1);
@@ -78,7 +78,7 @@ TEST_F(MountUnitTest, FormatPartition_unitest)
     EXPECT_EQ(ret, -1);
 }
 
-TEST_F(MountUnitTest, MountForPath_unitest)
+HWTEST_F(MountUnitTest, MountForPath_unitest, TestSize.Level1)
 {
     const std::string fstabFile1 = "/data/updater/mount_unitest/MountForPath1.fstable";
     LoadSpecificFstab(fstabFile1);
@@ -99,7 +99,7 @@ TEST_F(MountUnitTest, MountForPath_unitest)
     EXPECT_EQ(ret, -1);
 }
 
-TEST_F(MountUnitTest, UmountForPath_unitest)
+HWTEST_F(MountUnitTest, UmountForPath_unitest, TestSize.Level1)
 {
     const std::string fstabFile1 = "/data/updater/mount_unitest/UmountForPath1.fstable";
     LoadSpecificFstab(fstabFile1);
@@ -114,7 +114,7 @@ TEST_F(MountUnitTest, UmountForPath_unitest)
     EXPECT_EQ(ret, 0);
 }
 
-TEST_F(MountUnitTest, GetMountStatusForPath_unitest)
+HWTEST_F(MountUnitTest, GetMountStatusForPath_unitest, TestSize.Level1)
 {
     const std::string fstabFile1 = "/data/updater/mount_unitest/GetMountStatusForPath1.fstable";
     LoadSpecificFstab(fstabFile1);
@@ -129,7 +129,7 @@ TEST_F(MountUnitTest, GetMountStatusForPath_unitest)
     EXPECT_EQ(ret, MountStatus::MOUNT_UMOUNTED);
 }
 
-TEST_F(MountUnitTest, GetItemForMountPoint_unitest)
+HWTEST_F(MountUnitTest, GetItemForMountPoint_unitest, TestSize.Level1)
 {
     const std::string fstabFile1 = "/data/updater/mount_unitest/GetItemForMountPoint1.fstable";
     LoadSpecificFstab(fstabFile1);
@@ -152,7 +152,7 @@ TEST_F(MountUnitTest, GetItemForMountPoint_unitest)
     }
 }
 
-TEST_F(MountUnitTest, SetupPartitions_unitest)
+HWTEST_F(MountUnitTest, SetupPartitions_unitest, TestSize.Level1)
 {
     const std::string fstabFile1 = "/data/updater/mount_unitest/SetupPartitions1.fstable";
     LoadSpecificFstab(fstabFile1);
@@ -164,7 +164,7 @@ TEST_F(MountUnitTest, SetupPartitions_unitest)
     EXPECT_EQ(ret, 0);
 }
 
-TEST_F(MountUnitTest, GetBlockDeviceByMountPoint_unitest)
+HWTEST_F(MountUnitTest, GetBlockDeviceByMountPoint_unitest, TestSize.Level1)
 {
     LoadFstab();
     const std::string fstabFile1 = "/data/updater/mount_unitest/GetBlockDeviceByMountPoint1.fstable";

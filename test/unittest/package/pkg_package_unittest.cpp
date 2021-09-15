@@ -32,6 +32,7 @@
 using namespace std;
 using namespace hpackage;
 using namespace updater;
+using namespace testing::ext;
 
 namespace {
 constexpr uint32_t MAX_FILE_NAME = 256;
@@ -222,25 +223,25 @@ public:
     }
 };
 
-TEST_F(PkgPackageTest, TestPkgFile)
+HWTEST_F(PkgPackageTest, TestPkgFile, TestSize.Level1)
 {
     PkgPackageTest test;
     EXPECT_EQ(0, test.TestPkgFile());
 }
 
-TEST_F(PkgPackageTest, TestPkgFileInvalid)
+HWTEST_F(PkgPackageTest, TestPkgFileInvalid, TestSize.Level1)
 {
     PkgPackageTest test;
     EXPECT_EQ(0, test.TestPkgFileInvalid());
 }
 
-TEST_F(PkgPackageTest, TestBigZip)
+HWTEST_F(PkgPackageTest, TestBigZip, TestSize.Level1)
 {
     PkgPackageTest test;
     EXPECT_EQ(0, test.TestBigZipEntry());
 }
 
-TEST_F(PkgPackageTest, TestBigZipFile)
+HWTEST_F(PkgPackageTest, TestBigZipFile, TestSize.Level1)
 {
     PkgPackageTest test;
     EXPECT_EQ(0, test.TestBigZipFile());

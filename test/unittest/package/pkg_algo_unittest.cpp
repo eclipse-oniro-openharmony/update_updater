@@ -28,6 +28,7 @@
 using namespace std;
 using namespace hpackage;
 using namespace updater;
+using namespace testing::ext;
 
 namespace {
 constexpr size_t BUFFER_LEN = 10;
@@ -217,7 +218,7 @@ private:
     };
 };
 
-TEST_F(PkgAlgoUnitTest, TestHash256Digest)
+HWTEST_F(PkgAlgoUnitTest, TestHash256Digest, TestSize.Level1)
 {
     PkgAlgoUnitTest test;
     EXPECT_EQ(0, test.TestCrcDigest());
@@ -225,31 +226,31 @@ TEST_F(PkgAlgoUnitTest, TestHash256Digest)
     EXPECT_EQ(0, test.TestHash384Digest());
 }
 
-TEST_F(PkgAlgoUnitTest, TestRsaSignVerify)
+HWTEST_F(PkgAlgoUnitTest, TestRsaSignVerify, TestSize.Level1)
 {
     PkgAlgoUnitTest test;
     EXPECT_EQ(0, test.TestSignVerify(PKG_SIGN_METHOD_RSA, "rsa_private_key2048.pem", "signing_cert.crt"));
 }
 
-TEST_F(PkgAlgoUnitTest, TestEccSignVerify)
+HWTEST_F(PkgAlgoUnitTest, TestEccSignVerify, TestSize.Level1)
 {
     PkgAlgoUnitTest test;
     EXPECT_EQ(0, test.TestSignVerify(PKG_SIGN_METHOD_ECDSA, "ecc/prime256v1-key.pem", "ecc/signing_cert.crt"));
 }
 
-TEST_F(PkgAlgoUnitTest, TestEccUserPackage)
+HWTEST_F(PkgAlgoUnitTest, TestEccUserPackage, TestSize.Level1)
 {
     PkgAlgoUnitTest test;
     EXPECT_EQ(0, test.TestEccUserPackage(PKG_SIGN_METHOD_ECDSA, "ecc/prime256v1-key.pem", "ecc/signing_cert.crt"));
 }
 
-TEST_F(PkgAlgoUnitTest, TestInvalid)
+HWTEST_F(PkgAlgoUnitTest, TestInvalid, TestSize.Level1)
 {
     PkgAlgoUnitTest test;
     EXPECT_EQ(0, test.TestInvalidParam());
 }
 
-TEST_F(PkgAlgoUnitTest, TestPkgAlgoDeflate)
+HWTEST_F(PkgAlgoUnitTest, TestPkgAlgoDeflate, TestSize.Level1)
 {
     ZipFileInfo info;
     PkgAlgoDeflate a1(info);

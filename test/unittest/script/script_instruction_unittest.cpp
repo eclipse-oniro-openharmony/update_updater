@@ -32,6 +32,7 @@ using namespace std;
 using namespace hpackage;
 using namespace uscript;
 using namespace updater;
+using namespace testing::ext;
 
 namespace {
 class ScriptInstructionUnitTest : public ::testing::Test {
@@ -49,7 +50,7 @@ protected:
     void TestBody() {}
 };
 
-TEST_F(ScriptInstructionUnitTest, TestScriptInstruction)
+HWTEST_F(ScriptInstructionUnitTest, TestScriptInstruction, TestSize.Level1)
 {
     ScriptInstructionUnitTest test;
     EXPECT_EQ(0, test.TestScriptInstruction());

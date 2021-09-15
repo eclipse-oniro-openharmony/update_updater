@@ -34,7 +34,7 @@ void LogUnitTest::TearDownTestCase(void)
     cout << "TearDownTestCase" << endl;
 }
 
-TEST(LogUnitTest, log_test_001)
+HWTEST_F(LogUnitTest, log_test_001, TestSize.Level1)
 {
     SetLogLevel(ERROR);
     LOG(ERROR) << "this is ut";
@@ -62,7 +62,7 @@ TEST(LogUnitTest, log_test_001)
     }
 }
 
-TEST(LogUnitTest, log_test_002)
+HWTEST_F(LogUnitTest, log_test_002, TestSize.Level0)
 {
     InitUpdaterLogger("UPDATER_UT", "", "", "");
     SetLogLevel(ERROR);

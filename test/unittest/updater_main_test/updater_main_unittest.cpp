@@ -27,6 +27,7 @@
 #include "utils.h"
 
 using namespace updater;
+using namespace testing::ext;
 using namespace std;
 using namespace updater::utils;
 
@@ -65,7 +66,7 @@ void UpdaterMainUnitTest::TearDownTestCase(void)
     unlink("/data/updater_stage.log");
 }
 
-TEST_F(UpdaterMainUnitTest, updater_main_test_001)
+HWTEST_F(UpdaterMainUnitTest, updater_main_test_001, TestSize.Level1)
 {
     UpdateMessage boot {};
     if (access("/data/updater/", 0)) {
@@ -91,7 +92,7 @@ TEST_F(UpdaterMainUnitTest, updater_main_test_001)
     delete []argv;
 }
 
-TEST_F(UpdaterMainUnitTest, updater_main_test_002)
+HWTEST_F(UpdaterMainUnitTest, updater_main_test_002, TestSize.Level1)
 {
     UpdateMessage boot {};
     EXPECT_EQ(strncpy_s(boot.command, sizeof(boot.command), "boot_updater", sizeof(boot.command)), 0);
@@ -104,7 +105,7 @@ TEST_F(UpdaterMainUnitTest, updater_main_test_002)
     PostUpdater();
 }
 
-TEST_F(UpdaterMainUnitTest, updater_main_test_003)
+HWTEST_F(UpdaterMainUnitTest, updater_main_test_003, TestSize.Level1)
 {
     const std::string sLog = "/data/updater/main_data/updater.tab";
     const std::string dLog = "/data/updater/main_data/ut_dLog.txt";
@@ -113,49 +114,74 @@ TEST_F(UpdaterMainUnitTest, updater_main_test_003)
     unlink(dLog.c_str());
 }
 
-TEST_F(UpdaterMainUnitTest, updater_main_test_004)
+
+HWTEST_F(UpdaterMainUnitTest, updater_main_test_004, TestSize.Level1)
 {
+    printf("//////  1\n");
     UpdaterUiInit();
+    printf("//////  2\n");
     auto fp = std::unique_ptr<FILE, decltype(&fclose)>(fopen("/data/updater/updater.zip", "wb"), fclose);
+    printf("//////  3\n");
     EXPECT_NE(fp, nullptr);
 
     UpdateMessage boot {};
     EXPECT_EQ(strncpy_s(boot.command, sizeof(boot.command), "boot_updater", sizeof(boot.command)), 0);
     EXPECT_EQ(strncpy_s(boot.update, sizeof(boot.update),
         "--update_package=/data/updater/updater.zip\n--retry_count=0", sizeof(boot.update)), 0);
+    printf("//////  4\n");
     bool ret = WriteUpdaterMessage(MISC_FILE, boot);
+    printf("//////  5\n");
     EXPECT_EQ(ret, true);
-
+    
+    int lRet = 0;
+    int argc = 1;
     char **argv = new char*[MAX_ARG_SIZE];
     argv[0] = new char[10];
+    /*
+    char **argv = new char*[MAX_ARG_SIZE];
+    argv[0] = new char[10];
+    printf("//////  6\n");
     EXPECT_EQ(strncpy_s(argv[0], MAX_ARG_SIZE, "./main", MAX_ARG_SIZE), 0);
+    printf("//////  7\n");
     int argc = 1;
     int lRet = UpdaterMain(argc, argv);
+    printf("//////  8\n");
     EXPECT_EQ(lRet, 0);
-
+    */
     EXPECT_EQ(memset_s(boot.update, sizeof(boot.update), 0, sizeof(boot.update)), 0);
     EXPECT_EQ(strncpy_s(boot.update, sizeof(boot.update), "--user_wipe_data", sizeof(boot.update)), 0);
     ret = WriteUpdaterMessage(MISC_FILE, boot);
+    printf("//////  9\n");
     EXPECT_EQ(ret, true);
     lRet = UpdaterMain(argc, argv);
+    printf("//////  10\n");
     EXPECT_EQ(lRet, 0);
 
     EXPECT_EQ(memset_s(boot.update, sizeof(boot.update), 0, sizeof(boot.update)), 0);
+    printf("//////  11\n");
     EXPECT_EQ(strncpy_s(boot.update, sizeof(boot.update), "--factory_wipe_data", sizeof(boot.update)), 0);
+    printf("//////  12\n");
     ret = WriteUpdaterMessage(MISC_FILE, boot);
+    printf("//////  13\n");
     EXPECT_EQ(ret, true);
     lRet = UpdaterMain(argc, argv);
+    printf("//////  14\n");
     EXPECT_EQ(lRet, 0);
 
     ret = ReadUpdaterMessage(MISC_FILE, boot);
+    printf("//////  15\n");
     EXPECT_EQ(ret, true);
     EXPECT_STREQ(boot.update, "");
+    printf("//////  16\n");
     delete argv[0];
     delete []argv;
+    printf("//////  17\n");
     DeleteView();
+    printf("//////  18\n");
 }
 
-TEST_F(UpdaterMainUnitTest, updater_main_test_compress)
+
+HWTEST_F(UpdaterMainUnitTest, updater_main_test_compress, TestSize.Level1)
 {
     const std::string testFile = "/data/sdcard/updater/test_compress.txt";
     FILE *fp = fopen(testFile.c_str(), "w");

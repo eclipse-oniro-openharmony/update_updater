@@ -67,7 +67,7 @@ void UpdaterUnitTest::TearDownTestCase()
     DeleteView();
 }
 
-TEST_F(UpdaterUnitTest, updater_StartUpdaterProc)
+HWTEST_F(UpdaterUnitTest, updater_StartUpdaterProc, TestSize.Level1)
 {
     std::string packagePath = "/data/updater/updater/updater_without_updater_binary.zip";
     PkgManager::PkgManagerPtr pkgManager = PkgManager::GetPackageInstance();
@@ -97,7 +97,7 @@ TEST_F(UpdaterUnitTest, updater_StartUpdaterProc)
     EXPECT_EQ(status, UPDATE_ERROR);
 }
 
-TEST_F(UpdaterUnitTest, updater_GetUpdatePackageInfo)
+HWTEST_F(UpdaterUnitTest, updater_GetUpdatePackageInfo, TestSize.Level1)
 {
     // Non-exist file.
     PkgManager::PkgManagerPtr pkgManager = PkgManager::GetPackageInstance();
@@ -113,10 +113,11 @@ TEST_F(UpdaterUnitTest, updater_GetUpdatePackageInfo)
     EXPECT_EQ(ret, static_cast<int>(PKG_SUCCESS));
 }
 
-TEST_F(UpdaterUnitTest, updater_UpdateSdcard)
+HWTEST_F(UpdaterUnitTest, updater_UpdateSdcard, TestSize.Level1)
 {
     UpdaterStatus status;
     status = UpdaterFromSdcard();
     EXPECT_EQ(status, UPDATE_SUCCESS);
 }
+
 } // namespace updater_ut

@@ -32,6 +32,7 @@ using namespace std;
 using namespace hpackage;
 using namespace uscript;
 using namespace updater;
+using namespace testing::ext;
 using namespace updater::utils;
 
 namespace {
@@ -182,10 +183,11 @@ private:
         filePath.clear();
     }
 };
-
-TEST_F(UpdaterBinaryUnittest, TestUpdater)
+/*
+HWTEST_F(UpdaterBinaryUnittest, TestUpdater, TestSize.Level1)
 {
     UpdaterBinaryUnittest test;
     EXPECT_EQ(0, test.TestUpdater());
 }
+*/
 }

@@ -24,6 +24,8 @@
 #include "log/log.h"
 #include "utils.h"
 
+
+using namespace testing::ext;
 using namespace updater;
 using namespace std;
 namespace updater_ut {
@@ -96,7 +98,7 @@ bool AllCmdUnitTest::WriteTestBin(int fd, const uint8_t &data, size_t size) cons
 // new command is not easy to simulate, it depends on
 // compression and other condition.
 // Leave new command to be covered by update_image_block test.
-TEST_F(AllCmdUnitTest, allCmd_test_001)
+HWTEST_F(AllCmdUnitTest, allCmd_test_001,TestSize.Level1)
 {
     TransferManager *tm = TransferManager::GetTransferManagerInstance();
     // Read source
@@ -162,7 +164,7 @@ int AllCmdUnitTest::AllCmdUnitTestMove(int &fd, std::vector<std::string> &allCmd
     return 0;
 }
 
-TEST_F(AllCmdUnitTest, allCmd_test_002)
+HWTEST_F(AllCmdUnitTest, allCmd_test_002,TestSize.Level1)
 {
     TransferManagerPtr tm = TransferManager::GetTransferManagerInstance();
     std::string filePath = "/tmp/test.bin";

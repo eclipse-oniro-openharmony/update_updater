@@ -28,6 +28,7 @@
 #include "input_event.h"
 
 using namespace updater;
+using namespace testing::ext;
 using namespace std;
 using namespace updater::utils;
 static constexpr int EV_VALUE_15 = 15;
@@ -61,7 +62,7 @@ void UpdaterUiUnitTest::TearDownTestCase(void)
     unlink("/data/updater_stage.log");
 }
 
-TEST_F(UpdaterUiUnitTest, updater_ui_test_HandleInputEvent)
+HWTEST_F(UpdaterUiUnitTest, updater_ui_test_HandleInputEvent, TestSize.Level1)
 {
     UpdaterUiInit();
     struct input_event ev {};
