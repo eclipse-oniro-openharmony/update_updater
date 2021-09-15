@@ -23,6 +23,7 @@
 #include <sys/mount.h>
 #include <unistd.h>
 #include <vector>
+#include <fcntl.h>
 #include "fs_manager/fstab.h"
 #include "fs_manager/fstab_api.h"
 #include "fs_manager/mount.h"
