@@ -53,7 +53,6 @@ bool ImagePatchTest::ReadContentFromFile(const std::string& file, std::string &c
     while ((n = read(fd, buffer, sizeof(buffer))) > 0) {
         content.append(buffer, n);
     }
-    printf("ReadContentFromFile %s %d \n", file.c_str(), n);
     return ((n == 0) ? true : false);
 }
 
