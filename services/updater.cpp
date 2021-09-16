@@ -332,7 +332,7 @@ UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, const std::
     UPDATER_ERROR_CHECK(fromChild != nullptr, "fdopen pipeRead failed", return UPDATE_ERROR);
     while (fgets(buffer, MAX_BUFFER_SIZE - 1, fromChild) != nullptr) {
         size_t n = strlen(buffer);
-        if (buffer[n - 1] == '\n') {
+        if (n > 0 && buffer[n - 1] == '\n') {
             buffer[n - 1] = '\0';
         }
         HandleChildOutput(buffer, MAX_BUFFER_SIZE,  retryUpdate);

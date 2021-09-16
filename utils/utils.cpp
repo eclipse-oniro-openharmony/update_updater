@@ -162,17 +162,18 @@ std::string ConvertSha256Hex(const uint8_t* shaDigest, size_t length)
 void DoReboot(const std::string& rebootTarget)
 {
     LOG(INFO) << ", rebootTarget: " << rebootTarget;
-    static const int32_t maxCommandSize = 16;
     LoadFstab();
     auto miscBlockDevice = GetBlockDeviceByMountPoint("/misc");
     struct UpdateMessage msg;
     if (rebootTarget == "updater") {
+	std::string command = "boot_updater";
         bool ret = ReadUpdaterMessage(miscBlockDevice, msg);
         UPDATER_ERROR_CHECK(ret == true, "DoReboot read misc failed", return);
-        if (strcmp(msg.command, "boot_updater") != 0) {
-            UPDATER_ERROR_CHECK(!memcpy_s(msg.command, maxCommandSize, "boot_updater", maxCommandSize - 1),
+        if (strcmp(msg.command, command.c_str()) != 0) {
+            UPDATE_ERROR_CHECK(memset_s(msg.command, MAX_COMMAND_SIZE, 0, MAX_COMMAND_SIZE) == 0,
+                "Failed to clear update message", return);
+            UPDATER_ERROR_CHECK(!memcpy_s(msg.command, MAX_COMMAND_SIZE - 1, command.c_str(), command.size()),
                 "Memcpy failed", return);
-            msg.command[maxCommandSize] = 0;
         }
         ret = WriteUpdaterMessage(miscBlockDevice, msg);
         if (ret != true) {
