@@ -528,6 +528,7 @@ public:
                 (void)start;
                 (void)buffer;
                 size_t oldSize = uncompressedData.size();
+		PKG_CHECK(oldSize != 0, return -1, "oldSize is 0");
                 if ((start + size) > uncompressedData.size()) {
                     uncompressedData.resize(oldSize * ((start + size) / oldSize + 1));
                 }
@@ -619,6 +620,7 @@ public:
                 (void)start;
                 (void)buffer;
                 size_t oldSize = uncompressedData.size();
+                PKG_CHECK(oldSize != 0, return -1, "oldSize is 0");
                 if ((start + size) > uncompressedData.size()) {
                     uncompressedData.resize(oldSize * ((start + size) / oldSize + 1));
                 }

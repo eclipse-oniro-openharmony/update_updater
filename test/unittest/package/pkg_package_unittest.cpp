@@ -154,7 +154,8 @@ public:
         centralDir->internalAttr = 0;
         centralDir->externalAttr = 0;
         centralDir->localHeaderOffset = 0;
-        EXPECT_EQ(memcpy_s(buff.data() + sizeof(CentralDirEntry), name.length(), name.c_str(), name.length()), 0);
+	int ret = memcpy_s(buff.data() + sizeof(CentralDirEntry), name.length(), name.c_str(), name.length());
+        EXPECT_EQ(ret, 0);
         WriteLE16(buff.data() + sizeof(CentralDirEntry) + name.length(), 1);
         WriteLE16(buff.data() + sizeof(CentralDirEntry) + name.length() + offsetHalfWord, offset4Words);
         size_t giantNumber = 100000;

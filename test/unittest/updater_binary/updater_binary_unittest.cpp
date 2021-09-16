@@ -45,7 +45,7 @@ public:
         int32_t ret = CreatePackageBin();
         EXPECT_EQ(0, ret);
         std::string path = TEST_PATH_TO + testPackageName;
-	int fd = open(GetTestCertName().c_str(), O_RDONLY);
+        int fd = open(GetTestCertName().c_str(), O_RDONLY);
         if (fd < 0) {
             cout << GetTestCertName() << " open failed, fd = " << fd << endl;
             return -1;

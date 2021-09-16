@@ -117,7 +117,6 @@ HWTEST_F(DoPartitionUnitTest, do_partition_test_001, TestSize.Level1)
 
     PartitonList olist;
     size_t xxxPartitionStart = dataPartitionStart + XXX_PARTITION_LEN;
-    
     InitEmmcPartition(myPaty[partitionIndex], "xxxxxx", xxxPartitionStart, XXX_PARTITION_LEN);
     olist.push_back(&myPaty[partitionIndex]);
     int ret1 = RegisterUpdaterPartitionList(nList, olist);

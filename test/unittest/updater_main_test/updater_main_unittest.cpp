@@ -127,7 +127,7 @@ HWTEST_F(UpdaterMainUnitTest, updater_main_test_004, TestSize.Level1)
         "--update_package=/data/updater/updater.zip\n--retry_count=0", sizeof(boot.update)), 0);
     bool ret = WriteUpdaterMessage(MISC_FILE, boot);
     EXPECT_EQ(ret, true);
-    
+ 
     int lRet = 0;
     int argc = 1;
     char **argv = new char*[MAX_ARG_SIZE];
