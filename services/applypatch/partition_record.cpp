@@ -76,7 +76,7 @@ bool PartitionRecord::RecordPartitionUpdateStatus(const std::string &partitionNa
         UPDATER_CHECK_FILE_OP(lseek(fd, PARTITION_RECORD_START + offset_, SEEK_SET) >= 0,
             "PartitionRecord: Seek misc to specific offset failed", fd, return false);
         if (offset_ + sizeof(PartitionRecordInfo) < PARTITION_UPDATER_RECORD_SIZE) {
-            UPDATE_CHECK_FILE_OP(memset_s(&info_, sizeof(info_), 0, sizeof(info_)) == 0,
+            UPDATER_CHECK_FILE_OP(memset_s(&info_, sizeof(info_), 0, sizeof(info_)) == 0,
                 "PartitionRecord: clear partition info failed", fd, return false);
             UPDATER_CHECK_FILE_OP(!strncpy_s(info_.partitionName, PARTITION_NAME_LEN, partitionName.c_str(),
                 PARTITION_NAME_LEN - 1), "PartitionRecord: strncpy_s failed", fd, return false);

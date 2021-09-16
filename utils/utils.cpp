@@ -170,7 +170,7 @@ void DoReboot(const std::string& rebootTarget)
         bool ret = ReadUpdaterMessage(miscBlockDevice, msg);
         UPDATER_ERROR_CHECK(ret == true, "DoReboot read misc failed", return);
         if (strcmp(msg.command, command.c_str()) != 0) {
-            UPDATE_ERROR_CHECK(memset_s(msg.command, MAX_COMMAND_SIZE, 0, MAX_COMMAND_SIZE) == 0,
+            UPDATER_ERROR_CHECK(memset_s(msg.command, MAX_COMMAND_SIZE, 0, MAX_COMMAND_SIZE) == 0,
                 "Failed to clear update message", return);
             UPDATER_ERROR_CHECK(!memcpy_s(msg.command, MAX_COMMAND_SIZE - 1, command.c_str(), command.size()),
                 "Memcpy failed", return);
