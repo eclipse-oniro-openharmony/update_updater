@@ -32,6 +32,7 @@ using namespace std;
 using namespace hpackage;
 using namespace uscript;
 using namespace updater;
+using namespace testing::ext;
 
 namespace {
 const int32_t MAX_TASK_NUMBER = 5;
@@ -71,7 +72,7 @@ private:
     ThreadPool* threadPool_;
 };
 
-TEST_F(ThreadPoolUnitTest, TestThreadPoolCreate)
+HWTEST_F(ThreadPoolUnitTest, TestThreadPoolCreate, TestSize.Level0)
 {
     ThreadPoolUnitTest test;
     for (size_t i = 0; i < MAX_TASK_NUMBER * 2; i++) {
@@ -79,7 +80,7 @@ TEST_F(ThreadPoolUnitTest, TestThreadPoolCreate)
     }
 }
 
-TEST_F(ThreadPoolUnitTest, TestThreadOneCreate)
+HWTEST_F(ThreadPoolUnitTest, TestThreadOneCreate, TestSize.Level0)
 {
     ThreadPoolUnitTest test;
     EXPECT_EQ(0, test.TestThreadPoolCreate(1));

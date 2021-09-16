@@ -23,6 +23,7 @@
 #include <sys/mount.h>
 #include <unistd.h>
 #include <vector>
+#include <fcntl.h>
 #include "fs_manager/fstab.h"
 #include "fs_manager/fstab_api.h"
 #include "fs_manager/mount.h"
@@ -52,7 +53,7 @@ void FstabApiUnitTest::SetUpTestCase(void) {}
 // do something at the each function end
 void FstabApiUnitTest::TearDownTestCase(void) {}
 
-TEST_F(FstabApiUnitTest, ReadFstabFromFile_unitest)
+HWTEST_F(FstabApiUnitTest, ReadFstabFromFile_unitest, TestSize.Level1)
 {
     Fstab fstab;
     const std::string fstabFile1 = "/data/fstab.updater1";
@@ -75,7 +76,7 @@ TEST_F(FstabApiUnitTest, ReadFstabFromFile_unitest)
     EXPECT_TRUE(ret);
 }
 
-TEST_F(FstabApiUnitTest, FindFstabItemForPath_unitest)
+HWTEST_F(FstabApiUnitTest, FindFstabItemForPath_unitest, TestSize.Level1)
 {
     const std::string fstabFile1 = "/data/updater/mount_unitest/FindFstabItemForPath1.fstable";
     Fstab fstab1;
@@ -103,7 +104,7 @@ TEST_F(FstabApiUnitTest, FindFstabItemForPath_unitest)
     }
 }
 
-TEST_F(FstabApiUnitTest, FindFstabItemForMountPoint_unitest)
+HWTEST_F(FstabApiUnitTest, FindFstabItemForMountPoint_unitest, TestSize.Level1)
 {
     const std::string fstabFile1 = "/data/updater/mount_unitest/FindFstabItemForMountPoint1.fstable";
     Fstab fstab1;
@@ -122,9 +123,17 @@ TEST_F(FstabApiUnitTest, FindFstabItemForMountPoint_unitest)
     }
 }
 
-TEST_F(FstabApiUnitTest, GetMountFlags_unitest)
+HWTEST_F(FstabApiUnitTest, GetMountFlags_unitest, TestSize.Level1)
 {
     const std::string fstabFile1 = "/data/updater/mount_unitest/GetMountFlags1.fstable";
+    int fd = open(fstabFile1.c_str(), O_RDONLY);
+    if (fd < 0) {
+        cout << "fstabFile open failed, fd = " << fd << endl;
+        FAIL();
+        return;
+    } else {
+        close(fd);
+    }
     Fstab fstab1;
     ReadFstabFromFile(fstabFile1, fstab1);
     struct FstabItem* item = nullptr;

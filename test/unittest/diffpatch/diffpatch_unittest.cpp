@@ -22,6 +22,7 @@
 using namespace std;
 using namespace hpackage;
 using namespace updatepatch;
+using namespace testing::ext;
 
 namespace {
 class DiffPatchUnitTest : public testing::Test {
@@ -179,7 +180,7 @@ public:
     }
 };
 
-TEST_F(DiffPatchUnitTest, BlockDiffPatchTest)
+HWTEST_F(DiffPatchUnitTest, BlockDiffPatchTest, TestSize.Level1)
 {
     DiffPatchUnitTest test;
     EXPECT_EQ(0, test.BlockDiffPatchTest(
@@ -189,7 +190,7 @@ TEST_F(DiffPatchUnitTest, BlockDiffPatchTest)
         "../diffpatch/patchtest.new_1"));
 }
 
-TEST_F(DiffPatchUnitTest, ImgageDiffPatchFileTest)
+HWTEST_F(DiffPatchUnitTest, ImgageDiffPatchFileTest, TestSize.Level1)
 {
     DiffPatchUnitTest test;
     EXPECT_EQ(0, test.ImgageDiffPatchFileTest(0,
@@ -199,7 +200,7 @@ TEST_F(DiffPatchUnitTest, ImgageDiffPatchFileTest)
         "../diffpatch/patchtest.new_2"));
 }
 
-TEST_F(DiffPatchUnitTest, ImgageDiffPatchFileWithLimit)
+HWTEST_F(DiffPatchUnitTest, ImgageDiffPatchFileWithLimit, TestSize.Level1)
 {
     DiffPatchUnitTest test;
     EXPECT_EQ(0, test.ImgageDiffPatchFileTest(16,
@@ -209,7 +210,7 @@ TEST_F(DiffPatchUnitTest, ImgageDiffPatchFileWithLimit)
         "../diffpatch/patchtest.new_3"));
 }
 
-TEST_F(DiffPatchUnitTest, ImgageDiffPatchGzFile)
+HWTEST_F(DiffPatchUnitTest, ImgageDiffPatchGzFile, TestSize.Level1)
 {
     DiffPatchUnitTest test;
     EXPECT_EQ(0, test.ImgageDiffPatchFileTest(0,
@@ -219,7 +220,7 @@ TEST_F(DiffPatchUnitTest, ImgageDiffPatchGzFile)
         "../diffpatch/PatchGztest_gz_new.zip"));
 }
 
-TEST_F(DiffPatchUnitTest, ImgageDiffPatchLz4File)
+HWTEST_F(DiffPatchUnitTest, ImgageDiffPatchLz4File, TestSize.Level1)
 {
     DiffPatchUnitTest test;
     EXPECT_EQ(0, test.ImgageDiffPatchFileTest(0,
@@ -229,7 +230,7 @@ TEST_F(DiffPatchUnitTest, ImgageDiffPatchLz4File)
         "../diffpatch/PatchLz4test_lz4_new.lz"));
 }
 
-TEST_F(DiffPatchUnitTest, ImgageDiffPatchLz4File_1)
+HWTEST_F(DiffPatchUnitTest, ImgageDiffPatchLz4File_1, TestSize.Level1)
 {
     DiffPatchUnitTest test;
     EXPECT_EQ(0, test.ImgageDiffPatchFileTest(0,
@@ -239,7 +240,7 @@ TEST_F(DiffPatchUnitTest, ImgageDiffPatchLz4File_1)
         "../diffpatch/ImgageDiffPatchLz4File_1_lz4_new.lz"));
 }
 
-TEST_F(DiffPatchUnitTest, ImgageDiffPatchLz4File_2)
+HWTEST_F(DiffPatchUnitTest, ImgageDiffPatchLz4File_2, TestSize.Level1)
 {
     DiffPatchUnitTest test;
     EXPECT_EQ(0, test.ImgageDiffPatchFileTest(1,
@@ -249,7 +250,7 @@ TEST_F(DiffPatchUnitTest, ImgageDiffPatchLz4File_2)
         "../diffpatch/ImgageDiffPatchLz4File_1_lz4_new.lz"));
 }
 
-TEST_F(DiffPatchUnitTest, ImgageDiffPatchLz4File_3)
+HWTEST_F(DiffPatchUnitTest, ImgageDiffPatchLz4File_3, TestSize.Level1)
 {
     DiffPatchUnitTest test;
     EXPECT_EQ(0, test.ImgageDiffPatchFileTest(0,
@@ -260,7 +261,7 @@ TEST_F(DiffPatchUnitTest, ImgageDiffPatchLz4File_3)
 }
 
 // 测试包含一个文件时，新增一个文件
-TEST_F(DiffPatchUnitTest, ImgageDiffPatchZipFile)
+HWTEST_F(DiffPatchUnitTest, ImgageDiffPatchZipFile, TestSize.Level1)
 {
     DiffPatchUnitTest test;
     EXPECT_EQ(0, test.ImgageDiffPatchFileTest(0,
@@ -271,7 +272,7 @@ TEST_F(DiffPatchUnitTest, ImgageDiffPatchZipFile)
 }
 
 // 测试使用winrar的压缩文件
-TEST_F(DiffPatchUnitTest, ImgageDiffPatchZipFile_1)
+HWTEST_F(DiffPatchUnitTest, ImgageDiffPatchZipFile_1, TestSize.Level1)
 {
     DiffPatchUnitTest test;
     EXPECT_EQ(0, test.ImgageDiffPatchFileTest(0,
@@ -282,7 +283,7 @@ TEST_F(DiffPatchUnitTest, ImgageDiffPatchZipFile_1)
 }
 
 // 测试包含一个文件时，文件内容不相同
-TEST_F(DiffPatchUnitTest, ImgageDiffPatchZipFile_2)
+HWTEST_F(DiffPatchUnitTest, ImgageDiffPatchZipFile_2, TestSize.Level1)
 {
     DiffPatchUnitTest test;
     EXPECT_EQ(0, test.ImgageDiffPatchFileTest(0,
@@ -293,7 +294,7 @@ TEST_F(DiffPatchUnitTest, ImgageDiffPatchZipFile_2)
 }
 
 // linux 上压缩，多文件测试
-TEST_F(DiffPatchUnitTest, ImgageDiffPatchZipFile_3)
+HWTEST_F(DiffPatchUnitTest, ImgageDiffPatchZipFile_3, TestSize.Level1)
 {
     DiffPatchUnitTest test;
     EXPECT_EQ(0, test.ImgageDiffPatchFileTest(0,
@@ -304,7 +305,7 @@ TEST_F(DiffPatchUnitTest, ImgageDiffPatchZipFile_3)
 }
 
 // linux 上压缩，超大buffer length测试
-TEST_F(DiffPatchUnitTest, ImgageDiffPatchZipFile_4)
+HWTEST_F(DiffPatchUnitTest, ImgageDiffPatchZipFile_4, TestSize.Level1)
 {
     DiffPatchUnitTest test;
     EXPECT_EQ(0, test.ImgageDiffPatchFileTest(0,
@@ -314,7 +315,7 @@ TEST_F(DiffPatchUnitTest, ImgageDiffPatchZipFile_4)
         "../diffpatch/ImgageDiffPatchZipFile_4_zip_new.zip"));
 }
 
-TEST_F(DiffPatchUnitTest, ImgageDiffPatchGzFile2)
+HWTEST_F(DiffPatchUnitTest, ImgageDiffPatchGzFile2, TestSize.Level1)
 {
     DiffPatchUnitTest test;
     EXPECT_EQ(0, test.ImgageDiffPatchFileTest2(0,
@@ -324,7 +325,7 @@ TEST_F(DiffPatchUnitTest, ImgageDiffPatchGzFile2)
         "../diffpatch/PatchGztest_gz_new.zip"));
 }
 
-TEST_F(DiffPatchUnitTest, BlockDiffPatchGzFile)
+HWTEST_F(DiffPatchUnitTest, BlockDiffPatchGzFile, TestSize.Level1)
 {
     DiffPatchUnitTest test;
     EXPECT_EQ(0, test.BlockDiffPatchTest2(
@@ -334,7 +335,7 @@ TEST_F(DiffPatchUnitTest, BlockDiffPatchGzFile)
         "../diffpatch/PatchGztest_gz_new.zip", true));
 }
 
-TEST_F(DiffPatchUnitTest, BlockDiffPatchGzFile_1)
+HWTEST_F(DiffPatchUnitTest, BlockDiffPatchGzFile_1, TestSize.Level1)
 {
     DiffPatchUnitTest test;
     EXPECT_EQ(0, test.BlockDiffPatchTest2(
@@ -344,7 +345,7 @@ TEST_F(DiffPatchUnitTest, BlockDiffPatchGzFile_1)
         "../diffpatch/PatchGztest_gz_new.zip", false));
 }
 
-TEST_F(DiffPatchUnitTest, BlockDiffPatchLz4File)
+HWTEST_F(DiffPatchUnitTest, BlockDiffPatchLz4File, TestSize.Level1)
 {
     DiffPatchUnitTest test;
     EXPECT_EQ(0, test.BlockDiffPatchTest2(
@@ -354,7 +355,7 @@ TEST_F(DiffPatchUnitTest, BlockDiffPatchLz4File)
         "../diffpatch/PatchLz4test_lz4_new.lz", true));
 }
 
-TEST_F(DiffPatchUnitTest, BlockDiffPatchLz4File_1)
+HWTEST_F(DiffPatchUnitTest, BlockDiffPatchLz4File_1, TestSize.Level1)
 {
     DiffPatchUnitTest test;
     EXPECT_EQ(0, test.BlockDiffPatchTest2(
@@ -364,7 +365,7 @@ TEST_F(DiffPatchUnitTest, BlockDiffPatchLz4File_1)
         "../diffpatch/PatchLz4test_lz4_new.lz", false));
 }
 
-TEST_F(DiffPatchUnitTest, BlockDiffPatchTest_0)
+HWTEST_F(DiffPatchUnitTest, BlockDiffPatchTest_0, TestSize.Level1)
 {
     DiffPatchUnitTest test;
     EXPECT_EQ(0, test.BlockDiffPatchTest2(
@@ -374,7 +375,7 @@ TEST_F(DiffPatchUnitTest, BlockDiffPatchTest_0)
         "../diffpatch/patchtest.new_2", true));
 }
 
-TEST_F(DiffPatchUnitTest, BlockDiffPatchTest_1)
+HWTEST_F(DiffPatchUnitTest, BlockDiffPatchTest_1, TestSize.Level1)
 {
     DiffPatchUnitTest test;
     EXPECT_EQ(0, test.BlockDiffPatchTest2(
@@ -384,7 +385,7 @@ TEST_F(DiffPatchUnitTest, BlockDiffPatchTest_1)
         "../diffpatch/patchtest.new_2", false));
 }
 
-TEST_F(DiffPatchUnitTest, BlockDiffPatchTest_2)
+HWTEST_F(DiffPatchUnitTest, BlockDiffPatchTest_2, TestSize.Level1)
 {
     std::vector<uint8_t> testDate;
     testDate.push_back('a');

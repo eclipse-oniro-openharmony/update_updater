@@ -20,6 +20,7 @@
 #include "utils.h"
 
 using namespace updater;
+using namespace testing::ext;
 using namespace std;
 
 namespace updater_ut {
@@ -31,7 +32,7 @@ public:
     void TearDown() {};
 };
 
-TEST_F(UtilsUnitTest, updater_utils_test_001)
+HWTEST_F(UtilsUnitTest, updater_utils_test_001, TestSize.Level0)
 {
     string emptyStr = utils::Trim("");
     EXPECT_STREQ(emptyStr.c_str(), "");
@@ -41,7 +42,7 @@ TEST_F(UtilsUnitTest, updater_utils_test_001)
     EXPECT_STREQ(emptyStr.c_str(), "aa");
 }
 
-TEST_F(UtilsUnitTest, updater_utils_test_002)
+HWTEST_F(UtilsUnitTest, updater_utils_test_002, TestSize.Level0)
 {
     uint8_t a[1] = {0};
     a[0] = 1;
@@ -49,7 +50,7 @@ TEST_F(UtilsUnitTest, updater_utils_test_002)
     EXPECT_STREQ(newStr.c_str(), "01");
 }
 
-TEST_F(UtilsUnitTest, updater_utils_test_003)
+HWTEST_F(UtilsUnitTest, updater_utils_test_003, TestSize.Level0)
 {
     string str = "aaa\nbbb";
     vector<string> newStr = utils::SplitString(str, "\n");
@@ -57,12 +58,12 @@ TEST_F(UtilsUnitTest, updater_utils_test_003)
     EXPECT_EQ(newStr[1], "bbb");
 }
 
-TEST_F(UtilsUnitTest, updater_utils_test_004)
+HWTEST_F(UtilsUnitTest, updater_utils_test_004, TestSize.Level0)
 {
     EXPECT_EQ(utils::MkdirRecursive("/data/xx?xx", S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH), 0);
 }
 
-TEST_F(UtilsUnitTest, updater_utils_test_005)
+HWTEST_F(UtilsUnitTest, updater_utils_test_005, TestSize.Level0)
 {
     string input = "";
     int output = utils::String2Int<int>(input, 10);
@@ -72,7 +73,7 @@ TEST_F(UtilsUnitTest, updater_utils_test_005)
     EXPECT_EQ(output, 1);
 }
 
-TEST_F(UtilsUnitTest, updater_utils_test_006)
+HWTEST_F(UtilsUnitTest, updater_utils_test_006, TestSize.Level0)
 {
     std::vector<std::string> files;
     string path = "/data";

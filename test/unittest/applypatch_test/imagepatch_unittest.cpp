@@ -30,6 +30,7 @@
 #include "pkg_utils.h"
 #include "utils.h"
 
+using namespace testing::ext;
 using namespace updater;
 namespace updater_ut {
 bool ImagePatchTest::ReadContentFromFile(const std::string& file, std::string &content) const
@@ -52,7 +53,6 @@ bool ImagePatchTest::ReadContentFromFile(const std::string& file, std::string &c
     while ((n = read(fd, buffer, sizeof(buffer))) > 0) {
         content.append(buffer, n);
     }
-    printf("ReadContentFromFile %s %d \n", file.c_str(), n);
     return ((n == 0) ? true : false);
 }
 
@@ -126,25 +126,25 @@ int ImagePatchTest::TestLZ4ModeImagePatch() const
     return 0;
 }
 
-TEST_F(ImagePatchTest, TestZipModeImagePatch)
+HWTEST_F(ImagePatchTest, TestZipModeImagePatch, TestSize.Level1)
 {
     ImagePatchTest test;
     EXPECT_EQ(0, test.TestZipModeImagePatch());
 }
 
-TEST_F(ImagePatchTest, TestGZipModeImagePatch)
+HWTEST_F(ImagePatchTest, TestGZipModeImagePatch, TestSize.Level1)
 {
     ImagePatchTest test;
     EXPECT_EQ(0, test.TestGZipModeImagePatch());
 }
 
-TEST_F(ImagePatchTest, TestLZ4ModeImagePatch)
+HWTEST_F(ImagePatchTest, TestLZ4ModeImagePatch, TestSize.Level1)
 {
     ImagePatchTest test;
     EXPECT_EQ(0, test.TestLZ4ModeImagePatch());
 }
 
-TEST_F(ImagePatchTest, TestNormalModeImagePatch)
+HWTEST_F(ImagePatchTest, TestNormalModeImagePatch, TestSize.Level1)
 {
     ImagePatchTest test;
     EXPECT_EQ(0, test.TestNormalModeImagePatch());

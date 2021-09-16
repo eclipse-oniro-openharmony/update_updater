@@ -23,6 +23,7 @@
 #include "log/log.h"
 #include "utils.h"
 
+using namespace testing::ext;
 using namespace updater_ut;
 using namespace updater;
 using namespace std;
@@ -38,7 +39,7 @@ void StoreUnitTest::TearDown()
     cout << "TearDownTestCase" << endl;
 }
 
-TEST(StoreUnitTest, store_test_001)
+HWTEST_F(StoreUnitTest, store_test_001, TestSize.Level1)
 {
     std::string storePath = "/data/updater/ut_test";
     Store::CreateNewSpace(storePath, true);
@@ -55,7 +56,7 @@ TEST(StoreUnitTest, store_test_001)
     EXPECT_EQ(Store::CreateNewSpace(storePath, true), 0);
 }
 
-TEST(StoreUnitTest, store_test_002)
+HWTEST_F(StoreUnitTest, store_test_002, TestSize.Level1)
 {
     std::string storePath = "/data/updater/ut_test";
     Store::CreateNewSpace(storePath, true);

@@ -21,6 +21,7 @@
 #include "applypatch/transfer_manager.h"
 #include "log/log.h"
 
+using namespace testing::ext;
 using namespace updater;
 using namespace std;
 
@@ -48,7 +49,7 @@ void BspatchUnitTest::TearDown()
     cout << "Updater Unit BspatchUnitTest End!" << endl;
 }
 
-TEST_F(BspatchUnitTest, bspatch_test_001)
+HWTEST_F(BspatchUnitTest, bspatch_test_001, TestSize.Level1)
 {
     std::string partitionName;
     std::string transferName;

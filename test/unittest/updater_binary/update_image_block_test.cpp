@@ -39,6 +39,7 @@
 #include "utils.h"
 
 using namespace updater;
+using namespace testing::ext;
 using namespace uscript;
 using namespace std;
 using namespace hpackage;
@@ -68,7 +69,7 @@ void UpdateImageBlockTest::TearDown()
     cout << "TearDownTestCase" << endl;
 }
 
-TEST(UpdateImageBlockTest, update_image_block_test_001)
+HWTEST_F(UpdateImageBlockTest, update_image_block_test_001, TestSize.Level1)
 {
     LoadSpecificFstab("/data/updater/applypatch/etc/fstab.ut.updater");
     string devPath = GetBlockDeviceByMountPoint("/vendortest1");
@@ -91,7 +92,7 @@ TEST(UpdateImageBlockTest, update_image_block_test_001)
     PkgManager::ReleasePackageInstance(pkgManager);
 }
 
-TEST(UpdateImageBlockTest, update_image_block_test_002)
+HWTEST_F(UpdateImageBlockTest, update_image_block_test_002, TestSize.Level1)
 {
     LoadSpecificFstab("/data/updater/applypatch/etc/fstab.ut.updater");
     string devPath = GetBlockDeviceByMountPoint("/vendortest");

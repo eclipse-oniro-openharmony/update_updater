@@ -32,6 +32,7 @@ using namespace std;
 using namespace hpackage;
 using namespace uscript;
 using namespace updater;
+using namespace testing::ext;
 
 namespace {
 constexpr int32_t SCRIPT_TEST_PRIORITY_NUM = 3;
@@ -280,7 +281,7 @@ private:
     std::string testPackageName = "test_package.bin";
 };
 
-TEST_F(UScriptTest, TestUscriptExecute)
+HWTEST_F(UScriptTest, TestUscriptExecute, TestSize.Level1)
 {
     UScriptTest test;
     EXPECT_EQ(0, test.TestUscriptExecute());

@@ -24,6 +24,7 @@
 using namespace std;
 using namespace hpackage;
 using namespace updatepatch;
+using namespace testing::ext;
 
 namespace {
 #define LZ4_BLOCK_SIZE(blockId) (1 << (8 + (2 * (blockId))))
@@ -250,19 +251,19 @@ public:
     }
 };
 
-TEST_F(BZip2AdapterUnitTest, BZip2AdapterBufferTest)
+HWTEST_F(BZip2AdapterUnitTest, BZip2AdapterBufferTest, TestSize.Level1)
 {
     BZip2AdapterUnitTest test;
     EXPECT_EQ(0, test.BZip2AdapterBufferTest());
 }
 
-TEST_F(BZip2AdapterUnitTest, BZip2AdapterAddMoreTest)
+HWTEST_F(BZip2AdapterUnitTest, BZip2AdapterAddMoreTest, TestSize.Level1)
 {
     BZip2AdapterUnitTest test;
     EXPECT_EQ(0, test.BZip2AdapterAddMoreTest());
 }
 
-TEST_F(BZip2AdapterUnitTest, DeflateAdapterTestForZip)
+HWTEST_F(BZip2AdapterUnitTest, DeflateAdapterTestForZip, TestSize.Level1)
 {
     ZipFileInfo zipInfo {};
     zipInfo.fileInfo.packMethod = PKG_COMPRESS_METHOD_ZIP;
@@ -275,7 +276,7 @@ TEST_F(BZip2AdapterUnitTest, DeflateAdapterTestForZip)
     EXPECT_EQ(0, test.DeflateAdapterTest("../diffpatch/patchtest.new", &zipInfo.fileInfo));
 }
 
-TEST_F(BZip2AdapterUnitTest, DeflateAdapterTestForLz4)
+HWTEST_F(BZip2AdapterUnitTest, DeflateAdapterTestForLz4, TestSize.Level1)
 {
     Lz4FileInfo lz4Info {};
     lz4Info.fileInfo.packMethod = PKG_COMPRESS_METHOD_LZ4;
@@ -287,7 +288,7 @@ TEST_F(BZip2AdapterUnitTest, DeflateAdapterTestForLz4)
     EXPECT_EQ(0, test.DeflateAdapterTest("../diffpatch/patchtest.test", &lz4Info.fileInfo));
 }
 
-TEST_F(BZip2AdapterUnitTest, DeflateAdapterTestForLz4_2)
+HWTEST_F(BZip2AdapterUnitTest, DeflateAdapterTestForLz4_2, TestSize.Level1)
 {
     Lz4FileInfo lz4Info {};
     lz4Info.fileInfo.packMethod = PKG_COMPRESS_METHOD_LZ4;
@@ -299,7 +300,7 @@ TEST_F(BZip2AdapterUnitTest, DeflateAdapterTestForLz4_2)
     EXPECT_EQ(0, test.DeflateAdapterTest("../diffpatch/patchtest.test", &lz4Info.fileInfo));
 }
 
-TEST_F(BZip2AdapterUnitTest, DeflateAdapterTestForLz4_3)
+HWTEST_F(BZip2AdapterUnitTest, DeflateAdapterTestForLz4_3, TestSize.Level1)
 {
     Lz4FileInfo lz4Info {};
     lz4Info.fileInfo.packMethod = PKG_COMPRESS_METHOD_LZ4;
@@ -311,7 +312,7 @@ TEST_F(BZip2AdapterUnitTest, DeflateAdapterTestForLz4_3)
     EXPECT_EQ(0, test.DeflateAdapterTest("../diffpatch/patchtest.test", &lz4Info.fileInfo));
 }
 
-TEST_F(BZip2AdapterUnitTest, DeflateAdapterTestForLz4_4)
+HWTEST_F(BZip2AdapterUnitTest, DeflateAdapterTestForLz4_4, TestSize.Level1)
 {
     Lz4FileInfo lz4Info {};
     lz4Info.fileInfo.packMethod = PKG_COMPRESS_METHOD_LZ4;
@@ -323,7 +324,7 @@ TEST_F(BZip2AdapterUnitTest, DeflateAdapterTestForLz4_4)
     EXPECT_EQ(0, test.DeflateAdapterTest("../diffpatch/patchtest.test", &lz4Info.fileInfo));
 }
 
-TEST_F(BZip2AdapterUnitTest, DeflateAdapterTestForLz4_5)
+HWTEST_F(BZip2AdapterUnitTest, DeflateAdapterTestForLz4_5, TestSize.Level1)
 {
     Lz4FileInfo lz4Info {};
     lz4Info.fileInfo.packMethod = PKG_COMPRESS_METHOD_LZ4;
@@ -336,7 +337,7 @@ TEST_F(BZip2AdapterUnitTest, DeflateAdapterTestForLz4_5)
     EXPECT_EQ(0, test.DeflateAdapterTest("../diffpatch/patchtest.test", &lz4Info.fileInfo));
 }
 
-TEST_F(BZip2AdapterUnitTest, DeflateAdapterTestForLz4Block)
+HWTEST_F(BZip2AdapterUnitTest, DeflateAdapterTestForLz4Block, TestSize.Level1)
 {
     Lz4FileInfo lz4Info {};
     lz4Info.fileInfo.packMethod = PKG_COMPRESS_METHOD_LZ4_BLOCK;
@@ -348,7 +349,7 @@ TEST_F(BZip2AdapterUnitTest, DeflateAdapterTestForLz4Block)
     EXPECT_EQ(0, test.DeflateAdapterTest("../diffpatch/patchtest.test", &lz4Info.fileInfo));
 }
 
-TEST_F(BZip2AdapterUnitTest, DeflateAdapterTestForLz4Block_2)
+HWTEST_F(BZip2AdapterUnitTest, DeflateAdapterTestForLz4Block_2, TestSize.Level1)
 {
     Lz4FileInfo lz4Info {};
     lz4Info.fileInfo.packMethod = PKG_COMPRESS_METHOD_LZ4_BLOCK;
@@ -360,7 +361,7 @@ TEST_F(BZip2AdapterUnitTest, DeflateAdapterTestForLz4Block_2)
     EXPECT_EQ(0, test.DeflateAdapterTest("../diffpatch/patchtest.test", &lz4Info.fileInfo));
 }
 
-TEST_F(BZip2AdapterUnitTest, DeflateAdapterTestForLz4Block_3)
+HWTEST_F(BZip2AdapterUnitTest, DeflateAdapterTestForLz4Block_3, TestSize.Level1)
 {
     Lz4FileInfo lz4Info {};
     lz4Info.fileInfo.packMethod = PKG_COMPRESS_METHOD_LZ4_BLOCK;
@@ -372,7 +373,7 @@ TEST_F(BZip2AdapterUnitTest, DeflateAdapterTestForLz4Block_3)
     EXPECT_EQ(0, test.DeflateAdapterTest("../diffpatch/patchtest.test", &lz4Info.fileInfo));
 }
 
-TEST_F(BZip2AdapterUnitTest, DeflateAdapterTestForLz4Block_4)
+HWTEST_F(BZip2AdapterUnitTest, DeflateAdapterTestForLz4Block_4, TestSize.Level1)
 {
     DeflateAdapter adapterTest;
     BlockBuffer srcTestData;

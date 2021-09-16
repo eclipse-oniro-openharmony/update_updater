@@ -37,7 +37,7 @@ void MiscInfoUnitTest::TearDownTestCase(void)
     cout << "Updater Unit MiscInfoUnitTest End!" << endl;
 }
 
-TEST(MiscInfoUnitTest, misc_info_test_001)
+HWTEST_F(MiscInfoUnitTest, misc_info_test_001, TestSize.Level1)
 {
     auto fp = std::unique_ptr<FILE, decltype(&fclose)>(fopen(MISC_FILE.c_str(), "wb"), fclose);
     EXPECT_NE(fp, nullptr);

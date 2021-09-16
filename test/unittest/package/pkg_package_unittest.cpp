@@ -32,6 +32,7 @@
 using namespace std;
 using namespace hpackage;
 using namespace updater;
+using namespace testing::ext;
 
 namespace {
 constexpr uint32_t MAX_FILE_NAME = 256;
@@ -153,7 +154,8 @@ public:
         centralDir->internalAttr = 0;
         centralDir->externalAttr = 0;
         centralDir->localHeaderOffset = 0;
-        EXPECT_EQ(memcpy_s(buff.data() + sizeof(CentralDirEntry), name.length(), name.c_str(), name.length()), 0);
+	int ret = memcpy_s(buff.data() + sizeof(CentralDirEntry), name.length(), name.c_str(), name.length());
+        EXPECT_EQ(ret, 0);
         WriteLE16(buff.data() + sizeof(CentralDirEntry) + name.length(), 1);
         WriteLE16(buff.data() + sizeof(CentralDirEntry) + name.length() + offsetHalfWord, offset4Words);
         size_t giantNumber = 100000;
@@ -222,25 +224,25 @@ public:
     }
 };
 
-TEST_F(PkgPackageTest, TestPkgFile)
+HWTEST_F(PkgPackageTest, TestPkgFile, TestSize.Level1)
 {
     PkgPackageTest test;
     EXPECT_EQ(0, test.TestPkgFile());
 }
 
-TEST_F(PkgPackageTest, TestPkgFileInvalid)
+HWTEST_F(PkgPackageTest, TestPkgFileInvalid, TestSize.Level1)
 {
     PkgPackageTest test;
     EXPECT_EQ(0, test.TestPkgFileInvalid());
 }
 
-TEST_F(PkgPackageTest, TestBigZip)
+HWTEST_F(PkgPackageTest, TestBigZip, TestSize.Level1)
 {
     PkgPackageTest test;
     EXPECT_EQ(0, test.TestBigZipEntry());
 }
 
-TEST_F(PkgPackageTest, TestBigZipFile)
+HWTEST_F(PkgPackageTest, TestBigZipFile, TestSize.Level1)
 {
     PkgPackageTest test;
     EXPECT_EQ(0, test.TestBigZipFile());
