@@ -19,7 +19,7 @@
 #include "securec.h"
 
 namespace updater {
-void DrmDriver::FlipBuffer(const void *buf)
+void DrmDriver::FlipBuffer(void *buf)
 {
     if (!buf) {
         LOG(ERROR) << "buf is null";

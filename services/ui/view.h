@@ -68,11 +68,11 @@ public:
     int viewWidth_ = 0;
     int viewHeight_ = 0;
     std::mutex mutex_;
-    char* viewBuffer_ = nullptr;
-    char* shadowBuffer_ = nullptr;
 protected:
     void* CreateBuffer(int w, int h, int pixelFormat);
 private:
+    char* viewBuffer_ = nullptr;
+    char* shadowBuffer_ = nullptr;
     int bufferSize_ = 0;
     bool isVisiable_ = true;
     int viewId_ = 0;

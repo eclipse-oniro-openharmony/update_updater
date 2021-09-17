@@ -109,6 +109,18 @@ ScriptFunction* ScriptInterpreter::FindFunction(const std::string &name)
     return nullptr;
 }
 
+UScriptValuePtr ScriptInterpreter::ExecuteFunction(UScriptContextPtr context, const std::string &name,
+    ScriptParams *params)
+{
+    ScriptFunction* function = FindFunction(name);
+    if (function == nullptr) {
+        USCRIPT_LOGI("Fail to find function %s", name.c_str());
+        return std::make_shared<ErrorValue>(USCRIPT_NOTEXIST_INSTRUCTION);
+    } else {
+        return function->Execute(*this, context, params);
+    }
+}
+
 UScriptValuePtr ScriptInterpreter::FindVariable(UScriptContextPtr local, std::string id)
 {
     for (auto context = contextStack_.rbegin(); context != contextStack_.rend(); context++) {
