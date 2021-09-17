@@ -166,7 +166,7 @@ void DoReboot(const std::string& rebootTarget)
     auto miscBlockDevice = GetBlockDeviceByMountPoint("/misc");
     struct UpdateMessage msg;
     if (rebootTarget == "updater") {
-	std::string command = "boot_updater";
+        std::string command = "boot_updater";
         bool ret = ReadUpdaterMessage(miscBlockDevice, msg);
         UPDATER_ERROR_CHECK(ret == true, "DoReboot read misc failed", return);
         if (strcmp(msg.command, command.c_str()) != 0) {
