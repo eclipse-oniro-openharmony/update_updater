@@ -200,7 +200,6 @@ public:
     static UScriptExpression* CreateExpression(std::string identifier, ScriptParams *params);
 private:
     std::string functionName_;
-    ScriptFunction* function_ = nullptr;
     ScriptParams* params_ = nullptr;
 };
 } // namespace uscript

@@ -70,9 +70,9 @@ public:
     std::mutex mutex_;
 protected:
     void* CreateBuffer(int w, int h, int pixelFormat);
-private:
     char* viewBuffer_ = nullptr;
     char* shadowBuffer_ = nullptr;
+private:
     int bufferSize_ = 0;
     bool isVisiable_ = true;
     int viewId_ = 0;

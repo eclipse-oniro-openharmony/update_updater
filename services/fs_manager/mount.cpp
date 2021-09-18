@@ -143,7 +143,7 @@ static MountStatus GetMountStatusForMountPoint(const std::string &mountPoint)
 
     while (fgets(buffer, sizeof(buffer) - 1, fp.get()) != nullptr) {
         n = strlen(buffer);
-        if (buffer[n - 1] == '\n') {
+        if (n > 0 && buffer[n - 1] == '\n') {
             buffer[n - 1] = '\0';
         }
         std::string line(buffer);

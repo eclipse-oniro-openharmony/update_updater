@@ -76,6 +76,8 @@ bool PartitionRecord::RecordPartitionUpdateStatus(const std::string &partitionNa
         UPDATER_CHECK_FILE_OP(lseek(fd, PARTITION_RECORD_START + offset_, SEEK_SET) >= 0,
             "PartitionRecord: Seek misc to specific offset failed", fd, return false);
         if (offset_ + sizeof(PartitionRecordInfo) < PARTITION_UPDATER_RECORD_SIZE) {
+            UPDATER_CHECK_FILE_OP(memset_s(&info_, sizeof(info_), 0, sizeof(info_)) == 0,
+                "PartitionRecord: clear partition info failed", fd, return false);
             UPDATER_CHECK_FILE_OP(!strncpy_s(info_.partitionName, PARTITION_NAME_LEN, partitionName.c_str(),
                 PARTITION_NAME_LEN - 1), "PartitionRecord: strncpy_s failed", fd, return false);
             info_.updated = updated;
@@ -85,7 +87,7 @@ bool PartitionRecord::RecordPartitionUpdateStatus(const std::string &partitionNa
             UPDATER_CHECK_FILE_OP(lseek(fd, PARTITION_RECORD_OFFSET, SEEK_SET) >= 0,
                 "PartitionRecord: Seek misc to record offset failed", fd, return false);
             UPDATER_CHECK_FILE_OP(write(fd, &offset_, sizeof(off_t)) == sizeof(off_t),
-                "PartitionRecord: Seek misc to record offset failed", fd, return false);
+                "PartitionRecord: write  misc to record offset failed", fd, return false);
             LOG(DEBUG) << "PartitionRecord: offset is " << offset_;
         } else {
             LOG(WARNING) << "PartitionRecord: partition record overflow, offset = " << offset_;
