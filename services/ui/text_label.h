@@ -75,6 +75,10 @@ private:
     char fontBuf_[MAX_FONT_BUFFER_SIZE_HW * FONT_BUFFER_SIZE] {};
     unsigned int fontWidth_ = 0;
     unsigned int fontHeight_ = 0;
+    uint32_t offset_ = 2;
+    const int defaultFontWidth_ = 96;
+    const int defaultFontBitDepth_ = 8;
+    const int headerNumber_ = 8;
 };
 } // namespace updater
 #endif

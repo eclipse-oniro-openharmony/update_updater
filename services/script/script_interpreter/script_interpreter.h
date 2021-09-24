@@ -49,9 +49,10 @@ public:
 
     void AddStatement(UScriptStatement *statement);
     int32_t AddFunction(ScriptFunction *function);
-    ScriptFunction* FindFunction(const std::string &name);
     bool IsNativeFunction(std::string name);
     UScriptValuePtr ExecuteNativeFunc(UScriptContextPtr upContext, const std::string &name,
+        ScriptParams *params);
+    UScriptValuePtr ExecuteFunction(UScriptContextPtr context, const std::string &name,
         ScriptParams *params);
     UScriptValuePtr FindVariable(UScriptContextPtr local, std::string id);
     UScriptValuePtr UpdateVariable(UScriptContextPtr local, std::string id, UScriptValuePtr var);
@@ -74,6 +75,7 @@ private:
     int32_t Execute();
 
 private:
+    ScriptFunction* FindFunction(const std::string &name);
     UScriptStatementList* statements_ = nullptr;
     std::map<std::string, ScriptFunction*> functions_;
     std::vector<UScriptContextPtr> contextStack_;

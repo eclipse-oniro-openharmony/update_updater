@@ -122,11 +122,12 @@ static UpdaterStatus IsSpaceCapacitySufficient(const std::string &packagePath)
     UPDATER_ERROR_CHECK(pkgManager != nullptr, "pkgManager is nullptr", return UPDATE_CORRUPT);
     std::vector<std::string> fileIds;
     int ret = pkgManager->LoadPackageWithoutUnPack(packagePath, fileIds);
-    UPDATER_ERROR_CHECK(ret == PKG_SUCCESS, "LoadPackageWithoutUnPack failed", return UPDATE_CORRUPT);
+    UPDATER_ERROR_CHECK(ret == PKG_SUCCESS, "LoadPackageWithoutUnPack failed",
+        PkgManager::ReleasePackageInstance(pkgManager); return UPDATE_CORRUPT);
 
     const FileInfo *info = pkgManager->GetFileInfo("update.bin");
-    UPDATER_ERROR_CHECK(info != nullptr, "update.bin is not exist", return UPDATE_CORRUPT);
-
+    UPDATER_ERROR_CHECK(info != nullptr, "update.bin is not exist",
+        PkgManager::ReleasePackageInstance(pkgManager); return UPDATE_CORRUPT);
     PkgManager::ReleasePackageInstance(pkgManager);
 
     struct statvfs64 updaterVfs;
@@ -331,7 +332,7 @@ UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, const std::
     UPDATER_ERROR_CHECK(fromChild != nullptr, "fdopen pipeRead failed", return UPDATE_ERROR);
     while (fgets(buffer, MAX_BUFFER_SIZE - 1, fromChild) != nullptr) {
         size_t n = strlen(buffer);
-        if (buffer[n - 1] == '\n') {
+        if (n > 0 && buffer[n - 1] == '\n') {
             buffer[n - 1] = '\0';
         }
         HandleChildOutput(buffer, MAX_BUFFER_SIZE,  retryUpdate);
