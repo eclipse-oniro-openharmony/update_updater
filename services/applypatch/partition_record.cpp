@@ -31,9 +31,9 @@ bool PartitionRecord::IsPartitionUpdated(const std::string &partitionName)
 {
     auto miscBlockDevice = GetMiscPartitionPath();
     uint8_t buffer[PARTITION_UPDATER_RECORD_MSG_SIZE];
-    char *realPath = realpath(miscBlockDevice.c_str(), NULL);
-    UPDATER_FILE_CHECK(realPath != nullptr, "realPath is NULL", return false);
     if (!miscBlockDevice.empty()) {
+        char *realPath = realpath(miscBlockDevice.c_str(), NULL);
+        UPDATER_FILE_CHECK(realPath != nullptr, "realPath is NULL", return false);
         int fd = open(realPath, O_RDONLY | O_EXCL | O_CLOEXEC | O_BINARY);
         free(realPath);
         UPDATER_FILE_CHECK(fd >= 0, "PartitionRecord: Open misc to recording partition failed", return false);
@@ -60,9 +60,9 @@ bool PartitionRecord::IsPartitionUpdated(const std::string &partitionName)
 bool PartitionRecord::RecordPartitionUpdateStatus(const std::string &partitionName, bool updated)
 {
     auto miscBlockDevice = GetMiscPartitionPath();
-    char *realPath = realpath(miscBlockDevice.c_str(), NULL);
-    UPDATER_FILE_CHECK(realPath != nullptr, "realPath is NULL", return false);
     if (!miscBlockDevice.empty()) {
+        char *realPath = realpath(miscBlockDevice.c_str(), NULL);
+        UPDATER_FILE_CHECK(realPath != nullptr, "realPath is NULL", return false);
         int fd = open(realPath, O_RDWR | O_EXCL | O_CLOEXEC | O_BINARY);
         free(realPath);
         UPDATER_FILE_CHECK(fd >= 0, "PartitionRecord: Open misc to recording partition failed", return false);
@@ -76,6 +76,8 @@ bool PartitionRecord::RecordPartitionUpdateStatus(const std::string &partitionNa
         UPDATER_CHECK_FILE_OP(lseek(fd, PARTITION_RECORD_START + offset_, SEEK_SET) >= 0,
             "PartitionRecord: Seek misc to specific offset failed", fd, return false);
         if (offset_ + sizeof(PartitionRecordInfo) < PARTITION_UPDATER_RECORD_SIZE) {
+            UPDATER_CHECK_FILE_OP(memset_s(&info_, sizeof(info_), 0, sizeof(info_)) == 0,
+                "PartitionRecord: clear partition info failed", fd, return false);
             UPDATER_CHECK_FILE_OP(!strncpy_s(info_.partitionName, PARTITION_NAME_LEN, partitionName.c_str(),
                 PARTITION_NAME_LEN - 1), "PartitionRecord: strncpy_s failed", fd, return false);
             info_.updated = updated;
@@ -85,7 +87,7 @@ bool PartitionRecord::RecordPartitionUpdateStatus(const std::string &partitionNa
             UPDATER_CHECK_FILE_OP(lseek(fd, PARTITION_RECORD_OFFSET, SEEK_SET) >= 0,
                 "PartitionRecord: Seek misc to record offset failed", fd, return false);
             UPDATER_CHECK_FILE_OP(write(fd, &offset_, sizeof(off_t)) == sizeof(off_t),
-                "PartitionRecord: Seek misc to record offset failed", fd, return false);
+                "PartitionRecord: write  misc to record offset failed", fd, return false);
             LOG(DEBUG) << "PartitionRecord: offset is " << offset_;
         } else {
             LOG(WARNING) << "PartitionRecord: partition record overflow, offset = " << offset_;

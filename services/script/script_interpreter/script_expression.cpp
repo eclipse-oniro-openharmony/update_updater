@@ -154,16 +154,7 @@ UScriptValuePtr FunctionCallExpression::Execute(ScriptInterpreter &inter, UScrip
     if (inter.IsNativeFunction(functionName_)) {
         return inter.ExecuteNativeFunc(local, functionName_, params_);
     }
-
-    ScriptFunction* function = function_;
-    if (function_ == nullptr) {
-        function = inter.FindFunction(functionName_);
-    }
-    if (function == nullptr) {
-        INTERPRETER_LOGI(inter, local, "Can not find function %s", functionName_.c_str());
-        return std::make_shared<ErrorValue>(USCRIPT_NOTEXIST_INSTRUCTION);
-    }
-    return function->Execute(inter, local, params_);
+    return inter.ExecuteFunction(local, functionName_, params_);
 }
 
 BinaryExpression::~BinaryExpression()
@@ -177,7 +168,6 @@ AssignExpression::~AssignExpression()
 }
 FunctionCallExpression::~FunctionCallExpression()
 {
-    delete function_;
     delete params_;
 }
 } // namespace uscript

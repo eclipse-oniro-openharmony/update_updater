@@ -42,7 +42,7 @@ class DrmDriver {
 protected:
     DrmDriver() : fd_(-1), conn_(nullptr), res_(nullptr) {}
     virtual ~DrmDriver();
-    void FlipBuffer(void* buf);
+    void FlipBuffer(const void* buf);
     void LoadDrmDriver();
 private:
     int ModesetCreateFb(struct BufferObject *bo);
@@ -51,7 +51,7 @@ private:
     int fd_;
     drmModeConnector *conn_;
     drmModeRes *res_;
-    struct BufferObject buff_;
+    struct BufferObject buff_ {};
 };
 } // namespace updater
 #endif
