@@ -40,7 +40,7 @@ public:
 private:
     std::vector<uint8_t> buffer_ {};
     UpdatePatchWriterPtr outStream_;
-    z_stream zstream_;
+    z_stream zstream_ {0};
     size_t offset_;
 
     int32_t level_ {0};
