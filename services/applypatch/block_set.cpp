@@ -228,7 +228,7 @@ int32_t BlockSet::LoadSourceBuffer(const Command &cmd, size_t &pos, std::vector<
         LOG(INFO) << "new start to read source block ...";
         UPDATER_CHECK_ONLY_RETURN(srcBlk.ReadDataFromBlock(cmd.GetFileDescriptor(), sourceBuffer) > 0, return -1);
         std::string nextArgv = cmd.GetArgumentByPos(pos++);
-        UPDATER_CHECK_ONLY_RETURN(nextArgv != "", return 0);
+        UPDATER_CHECK_ONLY_RETURN(nextArgv != "", return 1);
         BlockSet locations;
         locations.ParserAndInsert(nextArgv);
         MoveBlock(sourceBuffer, locations, sourceBuffer);

@@ -50,6 +50,7 @@ struct TransferParams {
     std::unique_ptr<WriterThreadInfo> writerThreadInfo;
     int storeCreated;
     std::string storeBase;
+    std::string retryFile;
     uint8_t *patchDataBuffer;
     size_t patchDataSize;
 };

@@ -58,12 +58,13 @@ bool TransferManager::CommandsParser(int fd, const std::vector<std::string> &con
     globalParams->blockCount = utils::String2Int<size_t>(*ct++, utils::N_DEC);
     globalParams->maxEntries = utils::String2Int<size_t>(*ct++, utils::N_DEC);
     globalParams->maxBlocks = utils::String2Int<size_t>(*ct++, utils::N_DEC);
-    size_t totalSize = globalParams->maxBlocks * globalParams->blockCount;
+    size_t totalSize = globalParams->blockCount;
     std::string retryCmd = "";
     if (globalParams != nullptr && globalParams->env != nullptr && globalParams->env->IsRetry()) {
         retryCmd = ReloadForRetry();
     }
     std::unique_ptr<Command> cmd;
+    int initBlock = 0;
     while (ct != context.end()) {
         cmd = std::make_unique<Command>();
         UPDATER_ERROR_CHECK(cmd != nullptr, "Failed to parse command line.", return false);
@@ -87,13 +88,16 @@ bool TransferManager::CommandsParser(int fd, const std::vector<std::string> &con
             if (CheckResult(ret, cmd->GetCommandLine(), cmd->GetCommandType()) == false) {
                 return false;
             }
-
+            if (initBlock == 0) {
+                initBlock = globalParams->written;
+            }
             bool typeResult = cmd->GetCommandType() == CommandType::NEW ||
                 cmd->GetCommandType() == CommandType::IMGDIFF ||
-                cmd->GetCommandType() == CommandType::BSDIFF;
+                cmd->GetCommandType() == CommandType::BSDIFF ||
+                cmd->GetCommandType() == CommandType::ZERO;
             if (totalSize != 0 && globalParams->env != nullptr && typeResult) {
-                globalParams->env->PostMessage("set_progress", 
-                    std::to_string((float)globalParams->written / totalSize));
+                globalParams->env->PostMessage("set_progress",
+                    std::to_string((float)(globalParams->written - initBlock) / totalSize));
             }
             LOG(INFO) << "Running command : " << cmd->GetArgumentByPos(0) << " success";
         }
@@ -112,7 +116,7 @@ void TransferManager::Init()
 
 bool TransferManager::RegisterForRetry(const std::string &cmd)
 {
-    std::string path = globalParams->storeBase + "/" + "retry_flag";
+    std::string path = globalParams->retryFile;
     int fd = open(path.c_str(), O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
     UPDATER_ERROR_CHECK(fd != -1, "Failed to create", return false);
     UPDATER_ERROR_CHECK(fchown(fd, O_USER_GROUP_ID, O_USER_GROUP_ID) == 0,
@@ -121,13 +125,12 @@ bool TransferManager::RegisterForRetry(const std::string &cmd)
     UPDATER_ERROR_CHECK_NOT_RETURN(ret, "Write retry flag error");
     fsync(fd);
     close(fd);
-
     return ret;
 }
 
 std::string TransferManager::ReloadForRetry() const
 {
-    std::string path = globalParams->storeBase + "/" + "retry_flag";
+    std::string path = globalParams->retryFile;
     int fd = open(path.c_str(), O_RDONLY);
     UPDATER_ERROR_CHECK(fd >= 0, "Failed to open", return "");
     (void)lseek(fd, 0, SEEK_SET);
