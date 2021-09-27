@@ -50,6 +50,7 @@ struct TransferParams {
     std::unique_ptr<WriterThreadInfo> writerThreadInfo;
     int storeCreated;
     std::string storeBase;
+    std::string retryFile;
     uint8_t *patchDataBuffer;
     size_t patchDataSize;
 };
@@ -72,6 +73,7 @@ public:
     }
     std::string ReloadForRetry() const;
     bool CheckResult(const CommandResult result, const std::string &cmd, const CommandType &type);
+    bool NeedSetProgress(const CommandType &type);
 
 private:
     bool RegisterForRetry(const std::string &cmd);

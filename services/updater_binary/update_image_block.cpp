@@ -167,13 +167,14 @@ static int32_t GetUpdateBlockInfo(struct UpdateBlockInfo &infos, uscript::UScrip
 }
 
 static int32_t ExecuteTransferCommand(int fd, const std::vector<std::string> &lines, uscript::UScriptEnv &env,
-    uscript::UScriptContext &context)
+    uscript::UScriptContext &context, const std::string &partitionName)
 {
     TransferManagerPtr tm = TransferManager::GetTransferManagerInstance();
     auto globalParams = tm->GetGlobalParams();
     auto writerThreadInfo = globalParams->writerThreadInfo.get();
 
     globalParams->storeBase = "/data/updater/update_tmp";
+    globalParams->retryFile = std::string("/data/updater") + partitionName + "_retry";
     LOG(INFO) << "Store base path is " << globalParams->storeBase;
     int32_t ret = Store::CreateNewSpace(globalParams->storeBase, !globalParams->env->IsRetry());
     UPDATER_ERROR_CHECK(ret != -1, "Error to create new store space",
@@ -247,7 +248,7 @@ static int32_t DoExecuteUpdateBlock(UpdateBlockInfo &infos, uscript::UScriptEnv 
     int fd = open(infos.devPath.c_str(), O_RDWR | O_LARGEFILE);
     UPDATER_ERROR_CHECK (fd != -1, "Failed to open block",
         env.GetPkgManager()->ClosePkgStream(outStream); return USCRIPT_ERROR_EXECUTE);
-    int32_t ret = ExecuteTransferCommand(fd, lines, env, context);
+    int32_t ret = ExecuteTransferCommand(fd, lines, env, context, infos.partitionName);
     fsync(fd);
     close(fd);
     fd = -1;
