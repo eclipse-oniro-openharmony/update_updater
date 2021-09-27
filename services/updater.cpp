@@ -326,7 +326,7 @@ UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, const std::
     }
 
     close(pipeWrite); // close write endpoint
-    char buffer[MAX_BUFFER_SIZE];
+    char buffer[MAX_BUFFER_SIZE] = {0};
     bool retryUpdate = false;
     FILE* fromChild = fdopen(pipeRead, "r");
     UPDATER_ERROR_CHECK(fromChild != nullptr, "fdopen pipeRead failed", return UPDATE_ERROR);

@@ -17,7 +17,7 @@
 #include "updater_ui_const.h"
 
 namespace updater {
-void SurfaceDev::Flip(void *buf)
+void SurfaceDev::Flip(const void *buf)
 {
     if (!buf) {
         LOG(ERROR) << "buf is null";
