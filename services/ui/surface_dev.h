@@ -27,7 +27,7 @@ public:
 
     explicit SurfaceDev(SurfaceDev::DevType deviceType);
     ~SurfaceDev() override;
-    void Flip(void* buf);
+    void Flip(const void* buf);
     void GetScreenSize(int &w, int &h);
 private:
     int screenSizeW_ = 0;

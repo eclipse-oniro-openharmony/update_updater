@@ -135,7 +135,7 @@ int FormatPartition(const std::string &path)
 
 static MountStatus GetMountStatusForMountPoint(const std::string &mountPoint)
 {
-    char buffer[512];
+    char buffer[512] = {0};
     size_t n;
     constexpr size_t numMountItems = 6;
     const std::string mountFile = "/proc/mounts";
