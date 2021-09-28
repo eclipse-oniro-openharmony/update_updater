@@ -62,6 +62,7 @@ HWTEST_F(CommandsUnitTest, command_test_001, TestSize.Level0)
     sha256 = cmd->GetArgumentByPos(1);
     EXPECT_EQ(sha256, "5aa246ebe8e817740f12cc0f6e536c5ea22e5db177563a1caea5a86614275546");
     EXPECT_EQ(cmd->GetCommandLine(), cmdLine);
+    delete cmd;
 }
 
 HWTEST_F(CommandsUnitTest, command_test_002, TestSize.Level0)
@@ -91,5 +92,6 @@ HWTEST_F(CommandsUnitTest, command_test_002, TestSize.Level0)
     EXPECT_EQ(cmd->Init(cmdLine), true);
     cmdLine = "last 1,1";
     EXPECT_EQ(cmd->Init(cmdLine), true);
+    delete cmd;
 }
 } // updater_ut

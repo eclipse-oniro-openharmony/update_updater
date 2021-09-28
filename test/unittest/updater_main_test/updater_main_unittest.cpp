@@ -76,7 +76,8 @@ HWTEST_F(UpdaterMainUnitTest, updater_main_test_001, TestSize.Level1)
     const std::string commandFile = "/data/updater/command";
     auto fp = std::unique_ptr<FILE, decltype(&fclose)>(fopen(commandFile.c_str(), "wb"), fclose);
     EXPECT_NE(fp, nullptr);
-    EXPECT_EQ(strncpy_s(boot.command, sizeof(boot.command), "boot_updater", sizeof(boot.command)), 0);
+    const std::string commandMsg = "boot_updater";
+    EXPECT_EQ(strncpy_s(boot.command, sizeof(boot.command) - 1, commandMsg.c_str(), commandMsg.size()), 0);
     EXPECT_EQ(strncpy_s(boot.update, sizeof(boot.update), "", sizeof(boot.update)), 0);
     bool bRet = WriteUpdaterMessage(commandFile, boot);
     EXPECT_EQ(bRet, true);
@@ -95,8 +96,10 @@ HWTEST_F(UpdaterMainUnitTest, updater_main_test_001, TestSize.Level1)
 HWTEST_F(UpdaterMainUnitTest, updater_main_test_002, TestSize.Level1)
 {
     UpdateMessage boot {};
-    EXPECT_EQ(strncpy_s(boot.command, sizeof(boot.command), "boot_updater", sizeof(boot.command)), 0);
-    EXPECT_EQ(strncpy_s(boot.update, sizeof(boot.update), "--user_wipe_data", sizeof(boot.update)), 0);
+    const std::string command1 = "boot_updater";
+    EXPECT_EQ(strncpy_s(boot.command, sizeof(boot.command) - 1, command1.c_str(), command1.size()), 0);
+    const std::string command2 = "--user_wipe_data";
+    EXPECT_EQ(strncpy_s(boot.update, sizeof(boot.update) - 1, command2.c_str(), command2.size()), 0);
     bool ret = WriteUpdaterMessage(MISC_FILE, boot);
     EXPECT_EQ(ret, true);
 
@@ -114,7 +117,6 @@ HWTEST_F(UpdaterMainUnitTest, updater_main_test_003, TestSize.Level1)
     unlink(dLog.c_str());
 }
 
-
 HWTEST_F(UpdaterMainUnitTest, updater_main_test_004, TestSize.Level1)
 {
     UpdaterUiInit();
@@ -122,25 +124,29 @@ HWTEST_F(UpdaterMainUnitTest, updater_main_test_004, TestSize.Level1)
     EXPECT_NE(fp, nullptr);
 
     UpdateMessage boot {};
-    EXPECT_EQ(strncpy_s(boot.command, sizeof(boot.command), "boot_updater", sizeof(boot.command)), 0);
-    EXPECT_EQ(strncpy_s(boot.update, sizeof(boot.update),
-        "--update_package=/data/updater/updater.zip\n--retry_count=0", sizeof(boot.update)), 0);
+    const std::string command1 = "boot_updater";
+    EXPECT_EQ(strncpy_s(boot.command, sizeof(boot.command) - 1, command1.c_str(), command1.size()), 0);
+    const std::string command2 = "--update_package=/data/updater/updater.zip\n--retry_count=0";
+    EXPECT_EQ(strncpy_s(boot.update, sizeof(boot.update) - 1, command2.c_str(), command2.size()), 0);
     bool ret = WriteUpdaterMessage(MISC_FILE, boot);
     EXPECT_EQ(ret, true);
- 
+
     int lRet = 0;
     int argc = 1;
     char **argv = new char*[MAX_ARG_SIZE];
     argv[0] = new char[10];
+
     EXPECT_EQ(memset_s(boot.update, sizeof(boot.update), 0, sizeof(boot.update)), 0);
-    EXPECT_EQ(strncpy_s(boot.update, sizeof(boot.update), "--user_wipe_data", sizeof(boot.update)), 0);
+    const std::string command3 = "--user_wipe_data";
+    EXPECT_EQ(strncpy_s(boot.update, sizeof(boot.update) - 1, command3.c_str(), command3.size()), 0);
     ret = WriteUpdaterMessage(MISC_FILE, boot);
     EXPECT_EQ(ret, true);
     lRet = UpdaterMain(argc, argv);
     EXPECT_EQ(lRet, 0);
 
     EXPECT_EQ(memset_s(boot.update, sizeof(boot.update), 0, sizeof(boot.update)), 0);
-    EXPECT_EQ(strncpy_s(boot.update, sizeof(boot.update), "--factory_wipe_data", sizeof(boot.update)), 0);
+    const std::string command4 = "--factory_wipe_data";
+    EXPECT_EQ(strncpy_s(boot.update, sizeof(boot.update) - 1, command4.c_str(), command4.size()), 0);
     ret = WriteUpdaterMessage(MISC_FILE, boot);
     EXPECT_EQ(ret, true);
     lRet = UpdaterMain(argc, argv);
@@ -153,7 +159,6 @@ HWTEST_F(UpdaterMainUnitTest, updater_main_test_004, TestSize.Level1)
     delete []argv;
     DeleteView();
 }
-
 
 HWTEST_F(UpdaterMainUnitTest, updater_main_test_compress, TestSize.Level1)
 {

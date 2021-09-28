@@ -75,7 +75,7 @@ public:
     {
         mode_t mode = (S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
         int fd = open(target.c_str(), O_WRONLY | O_CREAT | O_TRUNC | O_CLOEXEC | O_BINARY, mode);
-        EXPECT_GT(fd, 0);
+        EXPECT_GE(fd, 0);
         BlockSet targetBlk;
         targetBlk.ParserAndInsert({
             "2", "0", "1"

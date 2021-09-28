@@ -43,9 +43,10 @@ HWTEST_F(MiscInfoUnitTest, misc_info_test_001, TestSize.Level1)
     EXPECT_NE(fp, nullptr);
 
     UpdateMessage boot {};
-    EXPECT_EQ(strncpy_s(boot.command, sizeof(boot.command), "boot_updater", sizeof(boot.command)), 0);
-    EXPECT_EQ(strncpy_s(boot.update, sizeof(boot.update),
-        "--update_package=./updater/xxx.zip\n--retry_count=1", sizeof(boot.update)), 0);
+    const std::string command1 = "boot_updater";
+    EXPECT_EQ(strncpy_s(boot.command, sizeof(boot.command) - 1, command1.c_str(), command1.size()), 0);
+    const std::string command2 = "--update_package=./updater/xxx.zip\n--retry_count=1";
+    EXPECT_EQ(strncpy_s(boot.update, sizeof(boot.update) - 1, command2.c_str(), command2.size()), 0);
     bool ret = WriteUpdaterMessage(MISC_FILE, boot);
     EXPECT_EQ(ret, true);
 
