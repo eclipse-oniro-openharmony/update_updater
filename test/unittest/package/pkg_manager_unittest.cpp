@@ -528,7 +528,6 @@ public:
                 (void)start;
                 (void)buffer;
                 size_t oldSize = uncompressedData.size();
-		PKG_CHECK(oldSize != 0, return -1, "oldSize is 0");
                 if ((start + size) > uncompressedData.size()) {
                     uncompressedData.resize(oldSize * ((start + size) / oldSize + 1));
                 }
@@ -540,7 +539,7 @@ public:
             [&](hpackage::PkgManager::StreamPtr stream) {
             pkgManager_->ClosePkgStream(stream);
         });
-        PKG_CHECK(outStream != nullptr, return -1, "Can not create stream ");
+        PKG_CHECK(outStream != nullptr, close(fd); return -1, "Can not create stream ");
 
         void* mappedData = mmap(nullptr, (size_t)fileSize, PROT_READ, MAP_SHARED, fd, 0);
         PKG_CHECK(mappedData != MAP_FAILED, close(fd); return -2, "Can not mmap ");
@@ -608,7 +607,7 @@ public:
         size_t fileSize = GetFileSize(testFileName);
         size_t uncompressedDataSize = 1024;
         int32_t fd = open(testFileName.c_str(), O_RDWR);
-        EXPECT_GT(fd, 0);
+        EXPECT_GE(fd, 0);
 
         uncompressedData.resize(uncompressedDataSize);
         PkgManager::StreamPtr stream = nullptr;
@@ -620,7 +619,6 @@ public:
                 (void)start;
                 (void)buffer;
                 size_t oldSize = uncompressedData.size();
-                PKG_CHECK(oldSize != 0, return -1, "oldSize is 0");
                 if ((start + size) > uncompressedData.size()) {
                     uncompressedData.resize(oldSize * ((start + size) / oldSize + 1));
                 }
@@ -632,7 +630,7 @@ public:
             [&](hpackage::PkgManager::StreamPtr stream) {
             pkgManager_->ClosePkgStream(stream);
         });
-        PKG_CHECK(outStream != nullptr, return -1, "Can not create stream ");
+        PKG_CHECK(outStream != nullptr, close(fd); return -1, "Can not create stream ");
 
         void* mappedData = mmap(nullptr, (size_t)fileSize, PROT_READ, MAP_SHARED, fd, 0);
         PKG_CHECK(mappedData != MAP_FAILED, close(fd); return -2, "Can not mmap ");

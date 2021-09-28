@@ -92,7 +92,7 @@ HWTEST_F(ApplyPatchUnitTest, updater_RawWriter, TestSize.Level1)
     EXPECT_TRUE(ret);
 
     int fd  = open(devPath.c_str(), O_RDONLY);
-    EXPECT_GT(fd, 0);
+    EXPECT_GE(fd, 0);
 
     uint8_t buffer[BUFFER_LEN + 1] = {0};
     size_t n = read(fd, buffer, BUFFER_LEN);
@@ -116,7 +116,13 @@ HWTEST_F(ApplyPatchUnitTest, updater_DataWriterOpenPartition, TestSize.Level1)
 
     partitionName = "/rawwriter";
     auto devPath = GetBlockDeviceByMountPoint(partitionName);
-    close(open(devPath.c_str(), O_CREAT | O_WRONLY | O_EXCL, 0664));
+    int fd = open(devPath.c_str(), O_CREAT | O_WRONLY | O_EXCL, 0664);
+    if (fd < 0) {
+        printf("Open %s failed", devPath.c_str());
+        FAIL();
+        return;
+    }
+    close(fd);
     writer = DataWriter::CreateDataWriter(mode, partitionName);
     EXPECT_NE(writer, nullptr);
     ret = writer->OpenPartition(partitionName);

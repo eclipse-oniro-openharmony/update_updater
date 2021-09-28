@@ -87,7 +87,12 @@ HWTEST_F(BlockSetUnitTest, blockset_test_003, TestSize.Level1)
     std::fill(buffer.begin(), buffer.end(), 0);
     std::string filename = "/tmp/ut_blockset";
     int fd = open(filename.c_str(), O_RDWR);
+    if (fd < 0) {
+        printf("Open file failed");
+        return;
+    }
     blk.WriteDataToBlock(fd, buffer);
+    close(fd);
 }
 
 HWTEST_F(BlockSetUnitTest, blockset_test_004, TestSize.Level1)
@@ -109,6 +114,10 @@ HWTEST_F(BlockSetUnitTest, blockset_test_005, TestSize.Level1)
     std::string blockInfo = "2,20755,21031 276 2,20306,20582";
     std::string cmdLine = std::string("move ") + hashValue + " " + blockInfo;
     int fd = open("/data/updater/updater/blocksetTest.txt", O_CREAT | O_WRONLY, S_IRWXU | S_IRWXG | S_IRWXO);
+    if (fd < 0) {
+        printf("Open file failed");
+        return;
+    }
     Command *cmd = new Command();
     cmd->Init(cmdLine);
     cmd->SetFileDescriptor(fd);
@@ -122,5 +131,6 @@ HWTEST_F(BlockSetUnitTest, blockset_test_005, TestSize.Level1)
     ret = targetBlock.WriteDiffToBlock(const_cast<const Command &>(*cmd), buffer, tgtBlockSize, isImgDiff);
     EXPECT_EQ(ret, -1);
     close(fd);
+    delete cmd;
 }
 }

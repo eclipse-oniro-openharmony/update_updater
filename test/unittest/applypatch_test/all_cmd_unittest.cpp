@@ -176,11 +176,11 @@ HWTEST_F(AllCmdUnitTest, allCmd_test_002, TestSize.Level1)
     utils::MkdirRecursive(TransferManager::GetTransferManagerInstance()->GetGlobalParams()->storeBase, dirMode);
     std::vector<uint8_t> buffer(bufferSize, 0);
     int fd = open(filePath.c_str(), O_RDWR | O_CREAT, dirMode);
-    lseek64(fd, 0, SEEK_SET);
-    if (fd == -1) {
+    if (fd < 0) {
         printf("Failed to open block %s, errno: %d\n", filePath.c_str(), errno);
         return;
     }
+    lseek64(fd, 0, SEEK_SET);
     auto res = WriteTestBin(fd, *buffer.data(), bufferSize * count);
     if (!res) {
         printf("Write to bin error\n");

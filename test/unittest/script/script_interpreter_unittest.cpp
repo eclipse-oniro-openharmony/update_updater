@@ -101,15 +101,15 @@ public:
     {
         std::unique_ptr<UScriptInstructionContext> funcContext = std::make_unique<UScriptInstructionContext>();
         int intValue = 100;
-        int ret = funcContext->PushParam(intValue);
+        int ret1 = funcContext->PushParam(intValue);
         float floatValue = 100.0;
-        ret |= funcContext->PushParam(floatValue);
+        int ret2 = funcContext->PushParam(floatValue);
         std::string str = std::string("333333333");
-        ret |= funcContext->PushParam(str);
-        EXPECT_EQ(0, ret);
+        int ret3 = funcContext->PushParam(str);
+        EXPECT_EQ(0, ret1 || ret2 || ret3);
 
         int32_t outOfIndex = 3;
-        ret = funcContext->GetParamType(outOfIndex);
+        int ret = funcContext->GetParamType(outOfIndex);
         EXPECT_EQ(UScriptContext::PARAM_TYPE_INVALID, ret);
         return 0;
     }

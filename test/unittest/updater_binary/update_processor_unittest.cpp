@@ -72,6 +72,11 @@ HWTEST_F(UpdateProcessorUnitTest, UpdateProcessor_001, TestSize.Level1)
     updater::utils::MkdirRecursive(devDir, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
     int fd = open(devPath.c_str(), O_CREAT | O_WRONLY | O_EXCL, 0664);
     printf("@@@ devPath = %s, fd=%d\n", devPath.c_str(), fd);
+    if (fd < 0) {
+        printf("Open failed, fd = %d", fd);
+        FAIL();
+        return;
+    }
     close(fd);
 
     for (int32_t i = 0; i < ScriptManager::MAX_PRIORITY; i++) {
