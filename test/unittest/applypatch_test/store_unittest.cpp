@@ -58,10 +58,10 @@ HWTEST_F(StoreUnitTest, store_test_001, TestSize.Level1)
 
 HWTEST_F(StoreUnitTest, store_test_002, TestSize.Level1)
 {
-    std::string storePath = "/data/updater/ut_test";
+    std::string storePath = "";
     Store::CreateNewSpace(storePath, true);
     std::vector<uint8_t> buffer(4096, 0);
     std::string filename1 = "test_file1";
-    EXPECT_EQ(Store::WriteDataToStore(storePath, filename1, buffer, 0), -1);
+    EXPECT_EQ(Store::WriteDataToStore(storePath, filename1, buffer, buffer.size()), -1);
 }
 }

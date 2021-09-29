@@ -190,7 +190,7 @@ public:
         const FileInfo *info = pkgManager_->GetFileInfo(components[0]);
         if (info == nullptr) {
             return PKG_INVALID_FILE;
-	}
+        }
 
         ret = pkgManager_->CreatePkgStream(outStream,
             components[0], info->unpackedSize, PkgStream::PkgStreamType_MemoryMap);

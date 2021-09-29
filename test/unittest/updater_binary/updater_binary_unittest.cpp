@@ -131,7 +131,7 @@ protected:
             sizeof(ComponentInfoExt) * (testFileNames_.size() + fileNameIndex));
         if (comp == nullptr) {
             return -1;
-	}
+        }
         for (size_t i = 0; i < testFileNames_.size(); i++) {
             BuildCompnentInfo(comp[i], testFileNames_[i], testFileNames_[i], componentType);
         }
@@ -152,7 +152,7 @@ protected:
             free(comp[i].filePath);
             free(comp[i].version);
         }
-	if (pkgInfo.productUpdateId != nullptr) {
+        if (pkgInfo.productUpdateId != nullptr) {
             free(pkgInfo.productUpdateId);
         }
         if (pkgInfo.softwareVersion != nullptr) {
@@ -161,7 +161,7 @@ protected:
         if (pkgInfo.date != nullptr) {
             free(pkgInfo.date);
         }
-	if (pkgInfo.time != nullptr) {
+        if (pkgInfo.time != nullptr) {
             free(pkgInfo.time);
         }
         free(comp);
