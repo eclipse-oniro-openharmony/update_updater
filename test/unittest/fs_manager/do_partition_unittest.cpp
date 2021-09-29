@@ -122,8 +122,8 @@ HWTEST_F(DoPartitionUnitTest, do_partition_test_001, TestSize.Level1)
     int ret1 = RegisterUpdaterPartitionList(nList, olist);
     ASSERT_EQ(ret1, 1);
 
-    char aaa[BUFFER_SIZE];
-    BlockDevice myDev;
+    char aaa[BUFFER_SIZE] = {0};
+    BlockDevice myDev {};
     myDev.devPath = "xxxxxx";
     myDev.specific = (void *)aaa;
     SetBlockDeviceMode(myDev);

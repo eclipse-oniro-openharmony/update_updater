@@ -53,7 +53,6 @@ bool ImagePatchTest::ReadContentFromFile(const std::string& file, std::string &c
     while ((n = read(fd, buffer, sizeof(buffer))) > 0) {
         content.append(buffer, n);
     }
-    close(fd);
     return ((n == 0) ? true : false);
 }
 
@@ -73,7 +72,7 @@ int ImagePatchTest::TestZipModeImagePatch() const
         reinterpret_cast<uint8_t *>(sourceData.data()), sourceData.size(),
         reinterpret_cast<uint8_t *>(patchContent.data()), patchContent.size()
     };
-    return RunImageApplyPatch(param, "out_put_zip.zip", expectedSHA256);
+    return RunImageApplyPatch(param, "/data/updater/applypatch/out_put_zip.zip", expectedSHA256);
 }
 
 int ImagePatchTest::TestNormalModeImagePatch() const
@@ -90,7 +89,7 @@ int ImagePatchTest::TestNormalModeImagePatch() const
         reinterpret_cast<uint8_t *>(sourceData.data()), sourceData.size(),
         reinterpret_cast<uint8_t *>(patchContent.data()), patchContent.size()
     };
-    return RunImageApplyPatch(param, "out_put_zip.zip", expectedSHA256);
+    return RunImageApplyPatch(param, "/data/updater/diffpatch/out_put_zip.zip", expectedSHA256);
 }
 
 int ImagePatchTest::TestGZipModeImagePatch() const
@@ -106,7 +105,7 @@ int ImagePatchTest::TestGZipModeImagePatch() const
         reinterpret_cast<uint8_t *>(sourceData.data()), sourceData.size(),
         reinterpret_cast<uint8_t *>(patchContent.data()), patchContent.size()
     };
-    int ret = RunImageApplyPatch(param, "out_put_gzip.gzip", expectedSHA256);
+    int ret = RunImageApplyPatch(param, "/data/updater/applypatch/out_put_gzip.gzip", expectedSHA256);
     return ret;
 }
 
@@ -123,7 +122,7 @@ int ImagePatchTest::TestLZ4ModeImagePatch() const
         reinterpret_cast<uint8_t *>(sourceData.data()), sourceData.size(),
         reinterpret_cast<uint8_t *>(patchContent.data()), patchContent.size()
     };
-    RunImageApplyPatch(param, "out_put_lz4.lz4", expectedSHA256);
+    RunImageApplyPatch(param, "/data/updater/diffpatch/out_put_lz4.lz4", expectedSHA256);
     return 0;
 }
 

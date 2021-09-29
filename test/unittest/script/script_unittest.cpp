@@ -72,6 +72,7 @@ public:
     virtual void DestoryInstructionInstance(UScriptInstructionPtr& instr)
     {
         delete instr;
+        instr = nullptr;
     }
     TestScriptInstructionFactory() {}
     virtual ~TestScriptInstructionFactory() {}
@@ -108,8 +109,8 @@ public:
     {
         return isRetry;
     }
-private:
     UScriptInstructionFactory *factory_ = nullptr;
+private:
     bool isRetry = false;
 };
 

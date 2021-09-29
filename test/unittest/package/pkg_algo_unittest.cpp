@@ -252,9 +252,9 @@ HWTEST_F(PkgAlgoUnitTest, TestInvalid, TestSize.Level1)
 
 HWTEST_F(PkgAlgoUnitTest, TestPkgAlgoDeflate, TestSize.Level1)
 {
-    ZipFileInfo info;
+    ZipFileInfo info {};
     PkgAlgoDeflate a1(info);
-    Lz4FileInfo config;
+    Lz4FileInfo config {};
     PkgAlgorithmLz4 a2(config);
     PkgAlgorithmBlockLz4 a3(config);
     VerifyAlgorithm a4("aa", 0);
