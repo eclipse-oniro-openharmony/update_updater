@@ -129,6 +129,9 @@ protected:
 
         ComponentInfoExt *comp = (ComponentInfoExt*)malloc(
             sizeof(ComponentInfoExt) * (testFileNames_.size() + fileNameIndex));
+        if (comp == nullptr) {
+            return -1;
+        }
         for (size_t i = 0; i < testFileNames_.size(); i++) {
             BuildCompnentInfo(comp[i], testFileNames_[i], testFileNames_[i], componentType);
         }
@@ -149,10 +152,18 @@ protected:
             free(comp[i].filePath);
             free(comp[i].version);
         }
-        free(pkgInfo.productUpdateId);
-        free(pkgInfo.softwareVersion);
-        free(pkgInfo.date);
-        free(pkgInfo.time);
+        if (pkgInfo.productUpdateId != nullptr) {
+            free(pkgInfo.productUpdateId);
+        }
+        if (pkgInfo.softwareVersion != nullptr) {
+            free(pkgInfo.softwareVersion);
+        }
+        if (pkgInfo.date != nullptr) {
+            free(pkgInfo.date);
+        }
+        if (pkgInfo.time != nullptr) {
+            free(pkgInfo.time);
+        }
         free(comp);
         return ret;
     }

@@ -118,6 +118,7 @@ protected:
         EXPECT_EQ(ret, 0);
         manager->ClosePkgStream(outStream);
         const FileInfo *info = manager->GetFileInfo(components[i]);
+        ASSERT_NE(info, nullptr);
         if (info->packMethod == PKG_COMPRESS_METHOD_NONE) {
             const ComponentInfo* compInfo = (const ComponentInfo*)manager->GetFileInfo(components[i]);
             if (compInfo != nullptr) {

@@ -164,7 +164,7 @@ HWTEST_F(UpdaterMainUnitTest, updater_main_test_compress, TestSize.Level1)
 {
     const std::string testFile = "/data/sdcard/updater/test_compress.txt";
     FILE *fp = fopen(testFile.c_str(), "w");
-    EXPECT_NE(fp, nullptr);
+    ASSERT_NE(fp, nullptr);
     fclose(fp);
     CompressLogs(testFile);
 }

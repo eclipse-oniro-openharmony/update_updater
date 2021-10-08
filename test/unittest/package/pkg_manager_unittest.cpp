@@ -73,7 +73,7 @@ public:
     }
     const std::string GetFileName() const override
     {
-        return 0;
+        return "";
     }
     size_t GetFileLength() override
     {
@@ -188,7 +188,10 @@ public:
         // 测试文件提取
         PkgManager::StreamPtr outStream = nullptr;
         const FileInfo *info = pkgManager_->GetFileInfo(components[0]);
-        EXPECT_NE(info, nullptr);
+        if (info == nullptr) {
+            return PKG_INVALID_FILE;
+        }
+
         ret = pkgManager_->CreatePkgStream(outStream,
             components[0], info->unpackedSize, PkgStream::PkgStreamType_MemoryMap);
         EXPECT_NE(outStream, nullptr);
@@ -266,7 +269,9 @@ public:
         // 测试文件提取
         PkgManager::StreamPtr outStream = nullptr;
         const FileInfo *info = pkgManager_->GetFileInfo(components[0]);
-        EXPECT_NE(info, nullptr);
+        if (info == nullptr) {
+            return PKG_INVALID_FILE;
+        }
 
         ret = pkgManager_->CreatePkgStream(outStream,
             TEST_PATH_TO + components[0], info->unpackedSize, PkgStream::PkgStreamType_Write);
@@ -303,7 +308,10 @@ public:
         // 测试文件提取
         PkgManager::StreamPtr outStream = nullptr;
         const FileInfo *info = pkgManager_->GetFileInfo(components[0]);
-        EXPECT_NE(info, nullptr);
+        if (info == nullptr) {
+            return PKG_INVALID_FILE;
+        }
+
         ret = pkgManager_->CreatePkgStream(outStream,
             components[0], TestStreamProcess, this);
         EXPECT_NE(outStream, nullptr);
@@ -606,9 +614,10 @@ public:
         std::string testFileName = TEST_PATH_FROM + "../applypatch/TestDecompressGzip.new.gz";
         size_t fileSize = GetFileSize(testFileName);
         size_t uncompressedDataSize = 1024;
-        int32_t fd = open(testFileName.c_str(), O_RDWR);
-        EXPECT_GE(fd, 0);
-
+        int fd = open(testFileName.c_str(), O_RDWR);
+        if (fd < 0) {
+            return -1;
+        }
         uncompressedData.resize(uncompressedDataSize);
         PkgManager::StreamPtr stream = nullptr;
         pkgManager_->CreatePkgStream(stream, "Gzip",
