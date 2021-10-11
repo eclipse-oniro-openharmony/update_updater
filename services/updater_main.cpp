@@ -106,7 +106,7 @@ int FactoryReset(FactoryResetMode mode, const std::string &path)
 
 bool IsSDCardExist(const std::string &sdcardPath)
 {
-    //Record system error codes.
+    // Record system error codes.
     int save_errno = errno;
     struct stat st {};
     if (stat(sdcardPath.c_str(), &st) < 0) {

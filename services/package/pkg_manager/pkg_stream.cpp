@@ -88,7 +88,7 @@ size_t FileStream::GetFileLength()
         if (pos < 0) {
             PKG_LOGE("Failed to get file length, err = %d", errno);
             return 0;
-	}
+        }
         fileLength_ = static_cast<size_t>(pos);
         fseek(stream_, 0, SEEK_SET);
     }
