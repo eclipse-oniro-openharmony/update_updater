@@ -132,11 +132,6 @@ static UpdaterStatus IsSpaceCapacitySufficient(const std::string &packagePath)
 
     struct statvfs64 updaterVfs;
     if (access("/sdcard/updater", 0) == 0) {
-        struct statvfs64 dataVfs {};
-        UPDATER_ERROR_CHECK(statvfs64("/data", &dataVfs) >= 0, "Statvfs read /data error!", return UPDATE_ERROR);
-        UPDATER_ERROR_CHECK(dataVfs.f_bfree * dataVfs.f_bsize > MAX_LOG_SPACE, "/data free space is not enough",
-            return UPDATE_ERROR);
-
         UPDATER_ERROR_CHECK(statvfs64("/sdcard", &updaterVfs) >= 0, "Statvfs read /sdcard error!", return UPDATE_ERROR);
         auto freeSpaceSize = static_cast<uint64_t>(updaterVfs.f_bfree);
         auto blockSize = static_cast<uint64_t>(updaterVfs.f_bsize);
@@ -174,8 +169,6 @@ UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, cons
     g_progressBar->Hide();
     ShowUpdateFrame(true);
     UPDATER_ERROR_CHECK(pkgManager != nullptr, "Fail to GetPackageInstance", return UPDATE_CORRUPT);
-    UPDATER_CHECK_ONLY_RETURN(SetupPartitions() == 0, ShowText(g_updateInfoLabel, "update failed");
-        return UPDATE_ERROR);
 
     LOG(INFO) << "Verify package...";
     g_updateInfoLabel->SetText("Verify package...");
