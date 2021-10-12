@@ -33,7 +33,6 @@ constexpr int LABEL_HEIGHT = 13;
 constexpr int MAX_IMGS = 62;
 constexpr int DIALIG_COLOR_A = 0xAA;
 constexpr int DIALOG_COLOR = 0x00;
-constexpr int DISPLAY_TIME = 1000 * 1000;
 
 int g_updateFlag = 0;
 int g_textLabelNum = 0;
@@ -169,8 +168,6 @@ void OnKeyEvent(int viewId)
         ShowDialog();
     } else if (viewId == g_textLabel3->GetViewId() && g_textLabel3->IsVisiable()) {
         HideDialog();
-        g_logLabel->SetText("Don't remove SD Card!");
-        usleep(DISPLAY_TIME);
         UpdaterStatus status = UpdaterFromSdcard();
         if (status != UPDATE_SUCCESS) {
             ShowUpdateFrame(false);

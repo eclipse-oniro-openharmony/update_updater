@@ -51,6 +51,7 @@ extern TextLabel *g_logLabel;
 extern TextLabel *g_logResultLabel;
 extern TextLabel *g_updateInfoLabel;
 extern int g_updateFlag;
+constexpr int DISPLAY_TIME = 1000 * 1000;
 constexpr struct option OPTIONS[] = {
     { "update_package", required_argument, nullptr, 0 },
     { "retry_count", required_argument, nullptr, 0 },
@@ -102,12 +103,35 @@ int FactoryReset(FactoryResetMode mode, const std::string &path)
     return DoFactoryReset(mode, path);
 }
 
+
+bool IsSDCardExist(const std::string &sdcardPath)
+{
+    // Record system error codes.
+    int save_errno = errno;
+    struct stat st {};
+    if (stat(sdcardPath.c_str(), &st) < 0) {
+        return false;
+    } else {
+        errno = save_errno;
+        return true;
+    }
+}
+
 UpdaterStatus UpdaterFromSdcard()
 {
 #ifndef UPDATER_UT
     // sdcard fsType only support ext4/vfat
+    std::string sdcardStr = GetBlockDeviceByMountPoint(SDCARD_PATH);
+    if (!IsSDCardExist(sdcardStr)) {
+        if (errno == ENOENT) {
+            ShowText(g_logLabel, "Cannot detect SdCard!");
+        } else {
+            ShowText(g_logLabel, "Detecting SdCard abnormally!");
+        }
+        return UPDATE_ERROR;
+    }
+
     if (MountForPath(SDCARD_PATH) != 0) {
-        std::string sdcardStr = GetBlockDeviceByMountPoint(SDCARD_PATH);
         int ret = mount(sdcardStr.c_str(), SDCARD_PATH.c_str(), "vfat", 0, NULL);
         UPDATER_WARING_CHECK(ret == 0, "MountForPath /sdcard failed!", return UPDATE_ERROR);
     }
@@ -121,6 +145,8 @@ UpdaterStatus UpdaterFromSdcard()
     STAGE(UPDATE_STAGE_BEGIN) << "UpdaterFromSdcard";
     LOG(INFO) << "UpdaterFromSdcard start, sdcard updaterPath : " << SDCARD_CARD_PKG_PATH;
 
+    g_logLabel->SetText("Don't remove SD Card!");
+    usleep(DISPLAY_TIME);
     UpdaterStatus updateRet = DoInstallUpdaterPackage(pkgManager, SDCARD_CARD_PKG_PATH.c_str(), 0);
     if (updateRet != UPDATE_SUCCESS) {
         std::this_thread::sleep_for(std::chrono::milliseconds(UI_SHOW_DURATION));
@@ -155,7 +181,8 @@ static UpdaterStatus InstallUpdaterPackage(UpdaterParams &upParams, const std::v
                 "ClearRecordPartitionOffset failed", return UPDATE_ERROR);
             SetRetryCountToMisc(upParams.retryCount + 1, args);
         }
-
+        UPDATER_CHECK_ONLY_RETURN(SetupPartitions() == 0, ShowText(g_updateInfoLabel, "Setup partitions failed");
+            return UPDATE_ERROR);
         status = DoInstallUpdaterPackage(manager, upParams.updatePackage, upParams.retryCount);
         if (status != UPDATE_SUCCESS) {
             std::this_thread::sleep_for(std::chrono::milliseconds(UI_SHOW_DURATION));
@@ -319,9 +346,32 @@ static bool ClearMisc()
     return true;
 }
 
+void PostUpdaterForSdcard(std::string &updaterLogPath, std::string &stageLogPath, std::string &errorCodePath)
+{
+    if (SetupPartitions() != 0) {
+        ShowText(g_updateInfoLabel, "Mount data failed.");
+        LOG(ERROR) << "Mount for /data failed.";
+        std::string sdcardPath = GetBlockDeviceByMountPoint(SDCARD_PATH);
+        if (IsSDCardExist(sdcardPath)) {
+            if (MountForPath(SDCARD_PATH) != 0) {
+                int ret = mount(sdcardPath.c_str(), SDCARD_PATH.c_str(), "vfat", 0, NULL);
+                UPDATER_WARING_CHECK(ret == 0, "Mount for /sdcard failed!", return);
+            }
+            updaterLogPath = "/sdcard/updater/log/updater_log";
+            stageLogPath = "/sdcard/updater/log/updater_stage_log";
+            errorCodePath = "/sdcard/updater/log/error_code.log";
+        }
+    }
+    return;
+}
+
 void PostUpdater()
 {
     STAGE(UPDATE_STAGE_BEGIN) << "PostUpdater";
+    std::string updaterLogPath = "/data/updater/log/updater_log";
+    std::string stageLogPath = "/data/updater/log/updater_stage_log";
+    std::string errorCodePath = "/data/updater/log/error_code.log";
+    PostUpdaterForSdcard(updaterLogPath, stageLogPath, errorCodePath);
     // clear update misc partition.
     UPDATER_ERROR_CHECK_NOT_RETURN(ClearMisc() == true, "PostUpdater clear misc failed");
     if (!access(COMMAND_FILE.c_str(), 0)) {
@@ -336,15 +386,15 @@ void PostUpdater()
         UPDATER_ERROR_CHECK_NOT_RETURN(DeleteUpdaterPath(SDCARD_CARD_PATH), "Delete sdcard path failed");
     }
     // save logs
-    UPDATER_ERROR_CHECK_NOT_RETURN(CopyUpdaterLogs(TMP_LOG, UPDATER_LOG) == true, "Copy updater log failed!");
-    UPDATER_ERROR_CHECK_NOT_RETURN(CopyUpdaterLogs(TMP_ERROR_CODE_PATH, ERROR_CODE_PATH) == true,
+    UPDATER_ERROR_CHECK_NOT_RETURN(CopyUpdaterLogs(TMP_LOG, updaterLogPath) == true, "Copy updater log failed!");
+    UPDATER_ERROR_CHECK_NOT_RETURN(CopyUpdaterLogs(TMP_ERROR_CODE_PATH, errorCodePath) == true,
         "Copy error code log failed!");
     mode_t mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
-    chmod(UPDATER_LOG.c_str(), mode);
-    chmod(UPDATER_STAGE_LOG.c_str(), mode);
-    chmod(ERROR_CODE_PATH.c_str(), mode);
+    chmod(updaterLogPath.c_str(), mode);
+    chmod(stageLogPath.c_str(), mode);
+    chmod(errorCodePath.c_str(), mode);
     STAGE(UPDATE_STAGE_SUCCESS) << "PostUpdater";
-    UPDATER_ERROR_CHECK_NOT_RETURN(CopyUpdaterLogs(TMP_STAGE_LOG, UPDATER_STAGE_LOG) == true, "Copy stage log failed!");
+    UPDATER_ERROR_CHECK_NOT_RETURN(CopyUpdaterLogs(TMP_STAGE_LOG, stageLogPath) == true, "Copy stage log failed!");
 }
 
 std::vector<std::string> ParseParams(int argc, char **argv)

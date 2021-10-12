@@ -117,7 +117,10 @@ int32_t UScriptInstructionRawImageWrite::Execute(uscript::UScriptEnv &env, uscri
 {
     std::string partitionName;
     int32_t ret = context.GetParam(0, partitionName);
-    UPDATER_ERROR_CHECK(ret == USCRIPT_SUCCESS, "Error to get param", return ret);
+    UPDATER_ERROR_CHECK(ret == USCRIPT_SUCCESS, "Error to get partitionName", return ret);
+    std::string imageFilename;
+    ret = context.GetParam(1, imageFilename);
+    UPDATER_ERROR_CHECK(ret == USCRIPT_SUCCESS, "Error to get imageFilename", return ret);
 
     if (env.IsRetry()) {
         LOG(DEBUG) << "Retry updater, check if current partition updated already during last time";
@@ -136,16 +139,16 @@ int32_t UScriptInstructionRawImageWrite::Execute(uscript::UScriptEnv &env, uscri
 
     // Extract partition information
     hpackage::PkgManager::StreamPtr outStream = nullptr;
-    const FileInfo *info = env.GetPkgManager()->GetFileInfo(partitionName);
+    const FileInfo *info = env.GetPkgManager()->GetFileInfo(imageFilename);
     UPDATER_ERROR_CHECK(info != nullptr, "Error to get file info",
         DataWriter::ReleaseDataWriter(writer); return USCRIPT_ERROR_EXECUTE);
     totalSize_ = info->unpackedSize;
     ret = env.GetPkgManager()->CreatePkgStream(outStream,
-        partitionName, RawImageWriteProcessor, writer.get());
+        imageFilename, RawImageWriteProcessor, writer.get());
     UPDATER_ERROR_CHECK(outStream != nullptr, "Error to create output stream",
         DataWriter::ReleaseDataWriter(writer); return USCRIPT_ERROR_EXECUTE);
 
-    ret = env.GetPkgManager()->ExtractFile(partitionName, outStream);
+    ret = env.GetPkgManager()->ExtractFile(imageFilename, outStream);
     UPDATER_ERROR_CHECK(ret == USCRIPT_SUCCESS, "Error to extract file",
         env.GetPkgManager()->ClosePkgStream(outStream);
         DataWriter::ReleaseDataWriter(writer); return USCRIPT_ERROR_EXECUTE);

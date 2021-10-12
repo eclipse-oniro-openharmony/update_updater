@@ -84,7 +84,12 @@ size_t FileStream::GetFileLength()
     PKG_CHECK(stream_ != nullptr, return 0, "Invalid stream");
     if (fileLength_ == 0) {
         PKG_CHECK(Seek(0, SEEK_END) == 0, return -1, "Invalid stream");
-        fileLength_ = ftell(stream_);
+        off_t pos = ftello(stream_);
+        if (pos < 0) {
+            PKG_LOGE("Failed to get file length, err = %d", errno);
+            return 0;
+        }
+        fileLength_ = static_cast<size_t>(pos);
         fseek(stream_, 0, SEEK_SET);
     }
     return fileLength_;
@@ -101,11 +106,6 @@ int32_t FileStream::Flush(size_t size)
     PKG_CHECK(stream_ != nullptr, return PKG_INVALID_STREAM, "Invalid stream");
     if (fileLength_ == 0) {
         fileLength_ = size;
-    }
-    fseek(stream_, 0, SEEK_END);
-    fileLength_ = ftell(stream_);
-    if (size != fileLength_) {
-        PKG_LOGE("Flush size %zu local size:%zu", size, fileLength_);
     }
     PKG_CHECK(fflush(stream_) == 0, return PKG_INVALID_STREAM, "Invalid stream");
     return PKG_SUCCESS;
