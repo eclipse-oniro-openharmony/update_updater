@@ -53,7 +53,7 @@ ohos_executable("updater_binary") {
     "//third_party/bzip2:libbz2",
     "//third_party/cJSON:cjson_static",
     "//third_party/lz4:liblz4_static",
-    "//third_party/openssl:crypto_source",
+    "//third_party/openssl:libcrypto_static",
     "//third_party/openssl:ssl_source",
     "//third_party/zlib:libz",
   ]
