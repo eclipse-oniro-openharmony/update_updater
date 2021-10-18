@@ -168,7 +168,8 @@ private:
 
 class ZipPkgFile : public PkgFile {
 public:
-    explicit ZipPkgFile(PkgStreamPtr stream) : PkgFile(stream, PkgFile::PKG_TYPE_ZIP)
+    explicit ZipPkgFile(PkgManager::PkgManagerPtr manager, PkgStreamPtr stream)
+        : PkgFile(manager, stream, PkgFile::PKG_TYPE_ZIP)
     {
         pkgInfo_.signMethod = PKG_SIGN_METHOD_RSA;
         pkgInfo_.digestMethod = PKG_DIGEST_TYPE_SHA256;

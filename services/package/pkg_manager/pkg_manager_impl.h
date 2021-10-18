@@ -73,6 +73,13 @@ public:
     int32_t ParsePackage(StreamPtr stream, std::vector<std::string> &fileIds, int32_t type) override;
 
     int32_t CreatePkgStream(StreamPtr &stream, const std::string &fileName, const PkgBuffer &buffer) override;
+
+    void SetPkgDecodeProgress(PkgDecodeProgress decodeProgress) override
+    {
+        decodeProgress_ = decodeProgress;
+    }
+
+    void PostDecodeProgress(int type, size_t writeDataLen, const void *context) override;
 private:
     PkgFilePtr CreatePackage(PkgStreamPtr stream, PkgFile::PkgType type, PkgInfoPtr header = nullptr);
 
@@ -111,6 +118,7 @@ private:
     std::vector<PkgFilePtr> pkgFiles_ {};
     std::map<std::string, PkgStreamPtr> pkgStreams_ {};
     std::string signVerifyKeyName_ {};
+    PkgDecodeProgress decodeProgress_ { nullptr };
 };
 } // namespace hpackage
 #endif // PKG_MANAGER_IMPL_H

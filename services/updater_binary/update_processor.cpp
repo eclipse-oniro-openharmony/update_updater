@@ -43,8 +43,8 @@ UpdaterEnv::~UpdaterEnv()
 
 void UpdaterEnv::PostMessage(const std::string &cmd, std::string content)
 {
-    if (pipeWrite_ != nullptr) {
-        fprintf(pipeWrite_, "%s:%s\n", cmd.c_str(), content.c_str());
+    if (postMessage_ != nullptr) {
+        postMessage_(cmd.c_str(), content.c_str());
     }
 }
 
@@ -108,6 +108,7 @@ int UScriptInstructionRawImageWrite::RawImageWriteProcessor(const PkgBuffer &buf
     if (totalSize_ != 0) {
         readSize_ += size;
         writer->GetUpdaterEnv()->PostMessage("set_progress", std::to_string((float)readSize_ / totalSize_));
+        writer->GetUpdaterEnv()->PostMessage("data", std::to_string(size));
     }
 
     return PKG_SUCCESS;
@@ -212,6 +213,25 @@ int32_t UScriptInstructionSparseImageWrite::Execute(uscript::UScriptEnv &env, us
     DataWriter::ReleaseDataWriter(writer);
     return ret;
 }
+
+int ExecUpdate(PkgManager::PkgManagerPtr pkgManager, int retry, PostMessageFunction postMessage)
+{
+    UpdaterEnv* env = new UpdaterEnv(pkgManager, postMessage, retry);
+    UPDATER_ERROR_CHECK(env != nullptr, "Fail to create env", return EXIT_PARSE_SCRIPT_ERROR);
+    int ret = 0;
+    ScriptManager* scriptManager = ScriptManager::GetScriptManager(env);
+    UPDATER_ERROR_CHECK(scriptManager != nullptr, "Fail to create scriptManager",
+        ScriptManager::ReleaseScriptManager();
+        delete env;
+        return EXIT_PARSE_SCRIPT_ERROR);
+    for (int32_t i = 0; i < ScriptManager::MAX_PRIORITY; i++) {
+        ret = scriptManager->ExecuteScript(i);
+        UPDATER_ERROR_CHECK(ret == USCRIPT_SUCCESS, "Fail to execute script", break);
+    }
+    ScriptManager::ReleaseScriptManager();
+    delete env;
+    return ret;
+}
 } // updater
 
 int ProcessUpdater(bool retry, int pipeFd, const std::string &packagePath, const std::string &keyPath)
@@ -227,35 +247,15 @@ int ProcessUpdater(bool retry, int pipeFd, const std::string &packagePath, const
     std::vector<std::string> components;
     int32_t ret = pkgManager->LoadPackage(packagePath, keyPath, components);
     UPDATER_ERROR_CHECK(ret == PKG_SUCCESS, "Fail to load package",
-        fclose(pipeWrite);
-        pipeWrite = nullptr;
         PkgManager::ReleasePackageInstance(pkgManager);
         return EXIT_INVALID_ARGS);
 
-    UpdaterEnv* env = new UpdaterEnv(pkgManager, pipeWrite, retry);
-    UPDATER_ERROR_CHECK(env != nullptr, "Fail to create env",
-        fclose(pipeWrite);
-        pipeWrite = nullptr;
-        PkgManager::ReleasePackageInstance(pkgManager);
-        env = nullptr;
-        return EXIT_PARSE_SCRIPT_ERROR);
-    ScriptManager* scriptManager = ScriptManager::GetScriptManager(env);
-    UPDATER_ERROR_CHECK(scriptManager != nullptr, "Fail to create scriptManager",
-        fclose(pipeWrite);
-        pipeWrite = nullptr;
-        delete env;
-        env = nullptr;
-        PkgManager::ReleasePackageInstance(pkgManager);
-        ScriptManager::ReleaseScriptManager();
-        return EXIT_PARSE_SCRIPT_ERROR);
-    for (int32_t i = 0; i < ScriptManager::MAX_PRIORITY; i++) {
-        ret = scriptManager->ExecuteScript(i);
-        UPDATER_ERROR_CHECK(ret == USCRIPT_SUCCESS, "Fail to execute script", break);
-    }
-
-    delete env;
-    env = nullptr;
-    ScriptManager::ReleaseScriptManager();
+    ret = updater::ExecUpdate(pkgManager, retry,
+        [&pipeWrite](const char *cmd, const char *content) {
+            if (pipeWrite != nullptr) {
+                fprintf(pipeWrite, "%s:%s\n", cmd, content);
+            }
+        });
     PkgManager::ReleasePackageInstance(pkgManager);
 #ifndef UPDATER_UT
     fclose(pipeWrite);

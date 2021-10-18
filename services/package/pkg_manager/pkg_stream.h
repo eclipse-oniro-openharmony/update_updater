@@ -27,7 +27,8 @@ class PkgStreamImpl;
 using PkgStreamPtr = PkgStreamImpl *;
 class PkgStreamImpl : public PkgStream {
 public:
-    explicit PkgStreamImpl(std::string fileName) : fileName_(fileName), refCount_(0) {}
+    explicit PkgStreamImpl(PkgManager::PkgManagerPtr pkgManager, std::string fileName)
+        : fileName_(fileName), refCount_(0), pkgManager_(pkgManager) {}
 
     virtual ~PkgStreamImpl() {}
 
@@ -68,16 +69,18 @@ public:
 
     static PkgStreamPtr ConvertPkgStream(PkgManager::StreamPtr stream);
 protected:
+    void PostDecodeProgress(int type, size_t writeDataLen, const void *context);
     std::string fileName_;
 
 private:
     std::atomic_int refCount_;
+    PkgManager::PkgManagerPtr pkgManager_ = nullptr;
 };
 
 class FileStream : public PkgStreamImpl {
 public:
-    FileStream(std::string fileName, FILE *stream, int32_t streamType) : PkgStreamImpl(fileName),
-        stream_(stream), fileLength_(0), streamType_(streamType) {}
+    FileStream(PkgManager::PkgManagerPtr pkgManager, std::string fileName, FILE *stream, int32_t streamType)
+        : PkgStreamImpl(pkgManager, fileName), stream_(stream), fileLength_(0), streamType_(streamType) {}
 
     ~FileStream() override;
 
@@ -103,8 +106,8 @@ private:
 
 class MemoryMapStream : public PkgStreamImpl {
 public:
-    MemoryMapStream(std::string fileName, const PkgBuffer &buffer,
-        int32_t streamType = PkgStreamType_MemoryMap) : PkgStreamImpl(fileName), memMap_(buffer.buffer),
+    MemoryMapStream(PkgManager::PkgManagerPtr pkgManager, std::string fileName, const PkgBuffer &buffer,
+        int32_t streamType = PkgStreamType_MemoryMap) : PkgStreamImpl(pkgManager, fileName), memMap_(buffer.buffer),
         memSize_(buffer.length), currOffset_(0), streamType_(streamType) {}
     ~MemoryMapStream() override;
 
@@ -151,8 +154,9 @@ private:
 
 class ProcessorStream : public PkgStreamImpl {
 public:
-    ProcessorStream(std::string fileName, ExtractFileProcessor processor, const void *context)
-        : PkgStreamImpl(fileName), processor_(processor), context_(context) {}
+    ProcessorStream(PkgManager::PkgManagerPtr pkgManager, std::string fileName,
+        ExtractFileProcessor processor, const void *context)
+        : PkgStreamImpl(pkgManager, fileName), processor_(processor), context_(context) {}
 
     ~ProcessorStream() override {}
 
@@ -168,7 +172,9 @@ public:
     int32_t Write(const PkgBuffer &data, size_t size, size_t start) override
     {
         PKG_CHECK(processor_ != nullptr, return PKG_INVALID_STREAM, "processor not exist");
-        return processor_(data, size, start, false, context_);
+        int ret = processor_(data, size, start, false, context_);
+        PostDecodeProgress(POST_TYPE_DECODE_PKG, size, nullptr);
+        return ret;
     }
 
     int32_t Seek(long int size, int whence) override

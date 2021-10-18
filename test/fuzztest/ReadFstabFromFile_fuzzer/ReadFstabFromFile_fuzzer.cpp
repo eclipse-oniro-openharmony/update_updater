@@ -20,7 +20,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include "fstab_api.h"
+#include "fs_manager/fs_manager.h"
 #include "log/log.h"
 
 using namespace updater;
@@ -29,7 +29,7 @@ namespace OHOS {
     bool FuzzReadFstabFromFile(const uint8_t* data, size_t size)
     {
         FILE *pFile;
-        Fstab fstab;
+        Fstab *fstab = NULL;
         const std::string fstabFile = "ReadFstabFromFile.txt";
 
         pFile = fopen("ReadFstabFromFile.txt", "w+");
@@ -40,9 +40,9 @@ namespace OHOS {
 
         fwrite(data, 1, size, pFile);
         fclose(pFile);
-        ReadFstabFromFile(fstabFile, fstab);
+        fstab = ReadFstabFromFile(fstabFile.c_str(), false);
         remove("ReadFstabFromFile.txt");
-
+        ReleaseFstab(fstab);
         return 0;
     }
 }

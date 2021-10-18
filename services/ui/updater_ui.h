@@ -17,6 +17,7 @@
 
 #include <string>
 #include "text_label.h"
+#include "progress_bar.h"
 
 namespace updater {
 void DoProgress();
@@ -28,5 +29,11 @@ void UpdaterUiInit();
 void ShowText(TextLabel *label, std::string text);
 
 void DeleteView();
+
+TextLabel *GetUpdateInfoLabel();
+
+ProgressBar *GetProgressBar();
+
+void SetUpdateFlag(int updateFlag);
 } // namespace updater
 #endif /* UPDATE_UI_HOS_UPDATER_H */

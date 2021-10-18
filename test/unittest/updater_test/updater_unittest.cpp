@@ -112,4 +112,11 @@ HWTEST_F(UpdaterUnitTest, updater_GetUpdatePackageInfo, TestSize.Level1)
     PkgManager::ReleasePackageInstance(pkgManager);
     EXPECT_EQ(ret, static_cast<int>(PKG_SUCCESS));
 }
+
+HWTEST_F(UpdaterUnitTest, updater_UpdateSdcard, TestSize.Level1)
+{
+    UpdaterStatus status;
+    status = UpdaterFromSdcard();
+    EXPECT_EQ(status, UPDATE_SUCCESS);
+}
 } // namespace updater_ut

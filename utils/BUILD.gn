@@ -21,6 +21,7 @@ ohos_static_library("libutils") {
     "//base/update/updater/interfaces/kits/include/",
     "//base/update/updater/services/include/",
     "//third_party/bounds_checking_function/include",
+    "//base/startup/init_lite/interfaces/innerkits/include",
   ]
 
   deps = [ "//third_party/bounds_checking_function:libsec_static" ]
@@ -53,6 +54,7 @@ ohos_executable("write_updater") {
     "//base/update/updater/interfaces/kits/include/",
     "//base/update/updater/services/include/",
     "//third_party/bounds_checking_function/include",
+    "//base/startup/init_lite/interfaces/innerkits/include",
   ]
 
   deps = [

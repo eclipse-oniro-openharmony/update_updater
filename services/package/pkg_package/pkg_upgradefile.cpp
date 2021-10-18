@@ -233,6 +233,7 @@ int32_t UpgradePkgFile::Verify(size_t start, DigestAlgorithm::DigestAlgorithmPtr
         ret = pkgStream_->Read(buffer, offset, remainBytes, readBytes);
         PKG_CHECK(ret == PKG_SUCCESS, return ret, "Fail to read data ");
         algorithm->Update(buffer, readBytes);
+        pkgManager_->PostDecodeProgress(POST_TYPE_VERIFY_PKG, remainBytes, nullptr);
     }
 
     PkgBuffer digest(GetDigestLen());

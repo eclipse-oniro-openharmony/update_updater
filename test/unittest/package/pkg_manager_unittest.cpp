@@ -52,7 +52,8 @@ constexpr int32_t ZIP_MAX_LEVEL = 9;
 
 class TestPkgStream : public PkgStreamImpl {
 public:
-    explicit TestPkgStream(std::string fileName) : PkgStreamImpl(fileName) {}
+    explicit TestPkgStream(PkgManager::PkgManagerPtr pkgManager, std::string fileName)
+        : PkgStreamImpl(pkgManager, fileName) {}
     virtual ~TestPkgStream() {}
 
     int32_t Read(const PkgBuffer &buff, size_t start, size_t size, size_t &readLen) override
@@ -229,7 +230,7 @@ public:
     int TestPkgStreamImpl()
     {
         std::string path = TEST_PATH_TO + testCombinePkgName;
-        std::unique_ptr<TestPkgStream> stream = std::make_unique<TestPkgStream>(path);
+        std::unique_ptr<TestPkgStream> stream = std::make_unique<TestPkgStream>(pkgManager_, path);
         EXPECT_NE(stream, nullptr);
         constexpr size_t buffSize = 10;
         uint8_t buff[buffSize];
@@ -342,7 +343,7 @@ public:
     {
         std::string packagePath = TEST_PATH_TO;
         packagePath += testPackageName;
-        auto stream = std::make_unique<FileStream>(testPackageName, nullptr, 0);
+        auto stream = std::make_unique<FileStream>(pkgManager_, testPackageName, nullptr, 0);
         size_t start = 0;
         size_t readLen = 0;
         size_t bufferSize = 10;

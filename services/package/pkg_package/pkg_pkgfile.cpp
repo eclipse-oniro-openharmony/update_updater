@@ -34,6 +34,8 @@ PkgFile::~PkgFile()
     }
     pkgEntryMapId_.clear();
     pkgEntryMapFileName_.clear();
+    PkgManager::StreamPtr tmpStream = pkgStream_;
+    pkgManager_->ClosePkgStream(tmpStream);
 }
 
 PkgEntryPtr PkgFile::AddPkgEntry(const std::string &fileName)

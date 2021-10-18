@@ -85,7 +85,7 @@ int UpdatePartitions::DoNewPartitions(PartitonList &newPartList)
     if (ret <= 0) {
         LOG(INFO) << "do_partitions FAIL ";
     } else if (ret == 1) {
-        LOG(INFO) << "partitions not changed，Skip. ";
+        LOG(INFO) << "partitions not changed, Skip";
     } else if (ret > 1) {
         LOG(INFO) << "do_partitions success reboot";
 #ifndef UPDATER_UT

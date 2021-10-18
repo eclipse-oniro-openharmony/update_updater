@@ -27,10 +27,12 @@
          "//base/update/updateservice/interfaces/innerkits/engine:updateservicekits",
          "//base/update/updater/services/ui:libui",
          "//third_party/libdrm:libdrm",
-         "//third_party/e2fsprogs:e2fsprogs"
+         "//third_party/e2fsprogs:e2fsprogs",
+         "//base/update/updater/services/flashd:updater_flashd"
       ],
       "test_list": [
-         "//base/update/updater:unittest"
+         "//base/update/updater:unittest",
+         "//base/update/updateservice:unittest"
       ]
     }
   }

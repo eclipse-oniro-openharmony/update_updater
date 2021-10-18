@@ -68,7 +68,7 @@ private:
 private:
     std::string GetMiscPartitionPath(const std::string &mountPoint = "/misc");
 
-    PartitionRecordInfo info_;
+    PartitionRecordInfo info_ {};
     // offset of partition record in misc.
     // offset is not start from zero, but
     // start from the global offset of misc partition.

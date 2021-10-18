@@ -48,15 +48,13 @@ int64_t GetFilesFromDirectory(const std::string &path, std::vector<std::string> 
 std::vector<std::string> SplitString(const std::string &str, const std::string del = " \t");
 std::string Trim(const std::string &str);
 std::string ConvertSha256Hex(const uint8_t* shaDigest, size_t length);
-void DoReboot(const std::string& rebootTarget);
+void DoReboot(const std::string& rebootTarget, const std::string& extData = "");
 std::string GetCertName();
 bool WriteFully(int fd, const void *data, size_t size);
 bool ReadFully(int fd, void* data, size_t size);
 bool ReadFileToString(int fd, std::string &content);
 bool WriteStringToFile(int fd, const std::string& content);
 std::string GetLocalBoardId();
-bool CopyUpdaterLogs(const std::string &sLog, const std::string &dLog);
-void CompressLogs(const std::string &name);
 } // utils
 } // updater
 #endif // UPDATER_UTILS_H

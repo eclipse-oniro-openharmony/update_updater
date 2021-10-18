@@ -25,9 +25,9 @@ public:
         DRM_DEVICE,
     };
 
-    explicit SurfaceDev(SurfaceDev::DevType deviceType);
+    explicit SurfaceDev(SurfaceDev::DevType devType);
     ~SurfaceDev() override;
-    void Flip(void* buf);
+    void Flip(const void* buf);
     void GetScreenSize(int &w, int &h);
 private:
     int screenSizeW_ = 0;

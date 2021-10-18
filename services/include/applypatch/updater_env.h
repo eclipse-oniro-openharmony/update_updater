@@ -22,6 +22,7 @@
 #include "package/pkg_manager.h"
 #include "script_instruction.h"
 #include "script_manager.h"
+#include "updater/updater.h"
 
 using uscript::UScriptEnv;
 using uscript::UScriptInstructionFactory;
@@ -30,8 +31,8 @@ using uscript::UScriptInstructionFactoryPtr;
 namespace updater {
 class UpdaterEnv : public UScriptEnv {
 public:
-    UpdaterEnv(hpackage::PkgManager::PkgManagerPtr pkgManager, FILE* pipeWrite, bool retry) :
-        UScriptEnv(pkgManager), pipeWrite_(pipeWrite), isRetry_(retry) {}
+    UpdaterEnv(hpackage::PkgManager::PkgManagerPtr pkgManager, PostMessageFunction postMessage, bool retry)
+        : UScriptEnv(pkgManager), postMessage_(postMessage), isRetry_(retry) {}
     virtual ~UpdaterEnv();
 
     virtual void PostMessage(const std::string &cmd, std::string content);
@@ -43,7 +44,7 @@ public:
     }
 private:
     UScriptInstructionFactoryPtr factory_ = nullptr;
-    FILE* pipeWrite_ = nullptr;
+    PostMessageFunction postMessage_ = nullptr;
     bool isRetry_ = false;
 };
 }

@@ -25,8 +25,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #include <vector>
-#include "fs_manager/fstab.h"
-#include "fs_manager/fstab_api.h"
+#include "fs_manager/fs_manager.h"
 #include "fs_manager/mount.h"
 #include "log/log.h"
 #include "utils.h"
@@ -127,29 +126,6 @@ HWTEST_F(MountUnitTest, GetMountStatusForPath_unitest, TestSize.Level1)
     const std::string path3 = "/data/mount2";
     ret = GetMountStatusForPath(path3);
     EXPECT_EQ(ret, MountStatus::MOUNT_UMOUNTED);
-}
-
-HWTEST_F(MountUnitTest, GetItemForMountPoint_unitest, TestSize.Level1)
-{
-    const std::string fstabFile1 = "/data/updater/mount_unitest/GetItemForMountPoint1.fstable";
-    LoadSpecificFstab(fstabFile1);
-    const std::string mountPoint1 = "/data";
-    struct FstabItem * item = GetItemForMountPoint(mountPoint1);
-    if (item == nullptr) {
-        SUCCEED();
-    }
-    const std::string fstabFile2 = "/data/updater/mount_unitest/GetItemForMountPoint2.fstable";
-    LoadSpecificFstab(fstabFile2);
-    const std::string mountPoint2 = "/data2";
-    item = GetItemForMountPoint(mountPoint2);
-    if (item == nullptr) {
-        SUCCEED();
-    }
-    const std::string mountPoint3 = "/data";
-    item = GetItemForMountPoint(mountPoint3);
-    if (item != nullptr) {
-        SUCCEED();
-    }
 }
 
 HWTEST_F(MountUnitTest, SetupPartitions_unitest, TestSize.Level1)

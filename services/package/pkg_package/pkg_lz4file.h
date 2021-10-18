@@ -52,7 +52,8 @@ private:
 
 class Lz4PkgFile : public PkgFile {
 public:
-    explicit Lz4PkgFile(PkgStreamPtr stream) : PkgFile(stream, PkgFile::PKG_TYPE_LZ4)
+    explicit Lz4PkgFile(PkgManager::PkgManagerPtr manager, PkgStreamPtr stream)
+        : PkgFile(manager, stream, PkgFile::PKG_TYPE_LZ4)
     {
         pkgInfo_.signMethod = PKG_SIGN_METHOD_RSA;
         pkgInfo_.digestMethod = PKG_DIGEST_TYPE_SHA256;

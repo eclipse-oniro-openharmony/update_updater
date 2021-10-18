@@ -24,6 +24,7 @@
 #include "utils.h"
 
 using namespace updater;
+#ifndef UPDATER_UT
 int main(int argc, char **argv)
 {
     InitUpdaterLogger("UPDATER_BINARY", TMP_LOG, TMP_STAGE_LOG, TMP_ERROR_CODE_PATH);
@@ -42,3 +43,4 @@ int main(int argc, char **argv)
     std::string packagePath = argv[0];
     return ProcessUpdater(retry, pipeFd, packagePath, utils::GetCertName());
 }
+#endif
