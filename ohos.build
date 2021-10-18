@@ -32,7 +32,6 @@
       ],
       "test_list": [
          "//base/update/updater:unittest",
-         "//base/update/updateservice:unittest"
       ]
     }
   }
