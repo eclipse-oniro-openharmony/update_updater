@@ -31,7 +31,7 @@
          "//base/update/updater/services/flashd:updater_flashd"
       ],
       "test_list": [
-         "//base/update/updater:unittest",
+         "//base/update/updater:unittest"
       ]
     }
   }
