@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "flashd/flashd.h"
 #include "fs_manager/mount.h"
 #include "log/log.h"
 #include "misc_info/misc_info.h"
@@ -37,7 +36,6 @@ int main(int argc, char **argv)
             printf("ReadUpdaterMessage COMMAND_FILE failed!\n");
         }
     }
-
     const int flashBootLength = 10;
     bool useFlash = memcmp(boot.command, "boot_flash", flashBootLength) == 0;
     InitUpdaterLogger(useFlash ? "FLASHD" : "UPDATER", TMP_LOG, TMP_STAGE_LOG, TMP_ERROR_CODE_PATH);
@@ -46,8 +44,5 @@ int main(int argc, char **argv)
     STAGE(UPDATE_STAGE_OUT) << "Init Params: " << boot.update;
     LOG(INFO) << "boot.command " << boot.command;
     LOG(INFO) << "boot.update " << boot.update;
-    if (useFlash) {
-        return flashd::flashd_main(argc, argv);
-    }
     return updater::UpdaterMain(argc, argv);
 }
