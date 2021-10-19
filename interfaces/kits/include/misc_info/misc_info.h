@@ -23,9 +23,9 @@
 namespace updater {
 constexpr int MAX_COMMAND_SIZE = 20;
 constexpr int MAX_UPDATE_SIZE = 100;
+constexpr int MAX_LOGO_SIZE = 1024 * 2038;
 
-
-// misc partition offset definition. max size of misc is 1MB, do not overflow.
+// misc partition offset definition. max size of misc is 2MB, do not overflow.
 constexpr off_t MISC_BASE_OFFSET = 0;
 
 constexpr off_t MISC_UPDATE_MESSAGE_OFFSET = MISC_BASE_OFFSET;
@@ -36,6 +36,9 @@ constexpr off_t MISC_PARTITION_RECORD_SIZE = 1024;
 
 constexpr off_t MISC_RECORD_UPDATE_PARTITIONS_OFFSET = MISC_PARTITION_RECORD_OFFSET + MISC_PARTITION_RECORD_SIZE;
 constexpr off_t MISC_RECORD_UPDATE_PARTITIONS_SIZE = 256;
+
+constexpr off_t MISC_RECORD_MISC_PARTITIONS_OFFSET = 1536;
+constexpr off_t MISC_RECORD_MISC_PARTITIONS_SIZE = 1024 * 2038;
 
 struct UpdateMessage {
     char command[MAX_COMMAND_SIZE];
