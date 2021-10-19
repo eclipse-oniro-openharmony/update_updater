@@ -42,9 +42,6 @@ using updater::utils::SplitString;
 using updater::utils::Trim;
 using namespace hpackage;
 
-extern TextLabel *g_updateInfoLabel;
-extern ProgressBar *g_progressBar;
-
 int g_percentage;
 int g_tmpProgressValue;
 int g_tmpValue;
@@ -116,39 +113,7 @@ int UpdatePreProcess(PkgManager::PkgManagerPtr pkgManager, const std::string &pa
     return ret;
 }
 
-static UpdaterStatus IsSpaceCapacitySufficient(const std::string &packagePath)
-{
-    PkgManager::PkgManagerPtr pkgManager = hpackage::PkgManager::CreatePackageInstance();
-    UPDATER_ERROR_CHECK(pkgManager != nullptr, "pkgManager is nullptr", return UPDATE_CORRUPT);
-    std::vector<std::string> fileIds;
-    int ret = pkgManager->LoadPackageWithoutUnPack(packagePath, fileIds);
-    UPDATER_ERROR_CHECK(ret == PKG_SUCCESS, "LoadPackageWithoutUnPack failed",
-        PkgManager::ReleasePackageInstance(pkgManager); return UPDATE_CORRUPT);
-
-    const FileInfo *info = pkgManager->GetFileInfo("update.bin");
-    UPDATER_ERROR_CHECK(info != nullptr, "update.bin is not exist",
-        PkgManager::ReleasePackageInstance(pkgManager); return UPDATE_CORRUPT);
-    PkgManager::ReleasePackageInstance(pkgManager);
-
-    struct statvfs64 updaterVfs;
-    if (access("/sdcard/updater", 0) == 0) {
-        UPDATER_ERROR_CHECK(statvfs64("/sdcard", &updaterVfs) >= 0, "Statvfs read /sdcard error!", return UPDATE_ERROR);
-        auto freeSpaceSize = static_cast<uint64_t>(updaterVfs.f_bfree);
-        auto blockSize = static_cast<uint64_t>(updaterVfs.f_bsize);
-        uint64_t totalFreeSize = freeSpaceSize * blockSize;
-        UPDATER_ERROR_CHECK(totalFreeSize > static_cast<uint64_t>(info->unpackedSize),
-            "Can not update, free space is not enough",
-            ShowText(g_updateInfoLabel, "Free space is not enough"); return UPDATE_ERROR);
-    } else {
-        UPDATER_ERROR_CHECK(statvfs64("/data", &updaterVfs) >= 0, "Statvfs read /data error!", return UPDATE_ERROR);
-        UPDATER_ERROR_CHECK(updaterVfs.f_bfree * updaterVfs.f_bsize > (info->unpackedSize + MAX_LOG_SPACE),
-            "Can not update, free space is not enough",
-            ShowText(g_updateInfoLabel, "Free space is not enough"); return UPDATE_ERROR);
-    }
-    return UPDATE_SUCCESS;
-}
-
-static inline void ProgressSmoothHandler()
+static void ProgressSmoothHandler()
 {
     while (g_tmpProgressValue < FULL_PERCENT_PROGRESS) {
         int gap = FULL_PERCENT_PROGRESS - g_tmpProgressValue;
@@ -157,7 +122,9 @@ static inline void ProgressSmoothHandler()
         if (g_tmpProgressValue >= FULL_PERCENT_PROGRESS || increase == 0) {
             break;
         } else {
-            g_progressBar->SetProgressValue(g_tmpProgressValue);
+            if (GetProgressBar() != nullptr) {
+                GetProgressBar()->SetProgressValue(g_tmpProgressValue);
+            }
             std::this_thread::sleep_for(std::chrono::milliseconds(SHOW_FULL_PROGRESS_TIME));
         }
     }
@@ -166,23 +133,29 @@ static inline void ProgressSmoothHandler()
 UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, const std::string &packagePath,
     int retryCount)
 {
-    g_progressBar->Hide();
+    if (GetProgressBar() != nullptr) {
+        GetProgressBar()->Hide();
+    }
     ShowUpdateFrame(true);
     UPDATER_ERROR_CHECK(pkgManager != nullptr, "Fail to GetPackageInstance", return UPDATE_CORRUPT);
+    TextLabel *updateInfoLabel = GetUpdateInfoLabel();
+    UPDATER_ERROR_CHECK(updateInfoLabel != nullptr, "Fail to updateInfoLabel", return UPDATE_CORRUPT);
 
     LOG(INFO) << "Verify package...";
-    g_updateInfoLabel->SetText("Verify package...");
+    updateInfoLabel->SetText("Verify package...");
 
     UPDATER_ERROR_CHECK(access(packagePath.c_str(), 0) == 0, "package is not exist",
-        ShowText(g_updateInfoLabel, "package is not exist"); return UPDATE_CORRUPT);
+        ShowText(GetUpdateInfoLabel(), "package is not exist"); return UPDATE_CORRUPT);
     if (retryCount > 0) {
         LOG(INFO) << "Retry for " << retryCount << " time(s)";
     } else {
-        UpdaterStatus ret = IsSpaceCapacitySufficient(packagePath);
+        UpdaterStatus ret = static_cast<UpdaterStatus>(IsSpaceCapacitySufficient(packagePath));
         // Only handle UPATE_ERROR and UPDATE_SUCCESS here.
         // If it returns UPDATE_CORRUPT, which means something wrong with package manager.
         // Let package verify handle this.
-        if (ret == UPDATE_ERROR) {
+        if (ret == UPDATE_SPACE_NOTENOUGH) {
+            ShowText(GetUpdateInfoLabel(), "Free space is not enough");
+        } else if (ret == UPDATE_ERROR) {
             return ret;
         } else if (ret == UPDATE_SUCCESS) {
             pkgManager = PkgManager::GetPackageInstance();
@@ -191,7 +164,7 @@ UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, cons
 
     int32_t verifyret = GetUpdatePackageInfo(pkgManager, packagePath);
     UPDATER_ERROR_CHECK(verifyret == PKG_SUCCESS, "Verify package Fail...",
-        ShowText(g_updateInfoLabel, "Verify package Fail..."); return UPDATE_CORRUPT);
+        ShowText(GetUpdateInfoLabel(), "Verify package Fail..."); return UPDATE_CORRUPT);
     LOG(INFO) << "Package verified. start to install package...";
     int32_t versionRet = UpdatePreProcess(pkgManager, packagePath);
     UPDATER_ERROR_CHECK(versionRet == PKG_SUCCESS, "Version Check Fail...", return UPDATE_CORRUPT);
@@ -200,21 +173,49 @@ UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, cons
     UpdaterStatus updateRet = StartUpdaterProc(pkgManager, packagePath, retryCount, maxTemperature);
     if (updateRet == UPDATE_SUCCESS) {
         ProgressSmoothHandler();
-        g_progressBar->SetProgressValue(FULL_PERCENT_PROGRESS);
-        g_updateInfoLabel->SetText("Update success, reboot now");
+        if (GetProgressBar() != nullptr) {
+            GetProgressBar()->SetProgressValue(FULL_PERCENT_PROGRESS);
+        }
+        updateInfoLabel->SetText("Update success, reboot now");
         std::this_thread::sleep_for(std::chrono::milliseconds(SHOW_FULL_PROGRESS_TIME));
         LOG(INFO)<< "update success , do reboot now";
     } else {
-        g_updateInfoLabel->SetText("Install failed.");
+        updateInfoLabel->SetText("Install failed.");
         LOG(ERROR) << "Install package failed.";
     }
     return updateRet;
+}
+static void HandleProgressSet(const std::vector<std::string> &output)
+{
+    UPDATER_ERROR_CHECK(output.size() >= DEFAULT_PROCESS_NUM, "check output fail", return);
+    auto outputInfo = Trim(output[1]);
+    float frac = 0.0;
+    frac = std::stof(output[1]);
+    if (frac >= -EPSINON && frac <= EPSINON) {
+        return;
+    } else {
+        g_tmpProgressValue = static_cast<int>(frac * g_percentage);
+    }
+    if (frac >= FULL_EPSINON && g_tmpValue + g_percentage < FULL_PERCENT_PROGRESS) {
+        g_tmpValue += g_percentage;
+        return;
+    }
+    g_tmpProgressValue = g_tmpProgressValue + g_tmpValue;
+    if (g_tmpProgressValue == 0) {
+        return;
+    }
+    if (GetProgressBar() != nullptr) {
+        GetProgressBar()->SetProgressValue(g_tmpProgressValue);
+    }
 }
 
 static void HandleChildOutput(const std::string &buffer, int32_t bufferLen,
     bool &retryUpdate)
 {
     UPDATER_CHECK_ONLY_RETURN(bufferLen != 0, return);
+    TextLabel *updateInfoLabel = GetUpdateInfoLabel();
+    UPDATER_ERROR_CHECK(updateInfoLabel != nullptr, "Fail to updateInfoLabel", return);
+
     std::string str = buffer;
     std::vector<std::string> output = SplitString(str, ":");
     UPDATER_ERROR_CHECK(output.size() >= 1, "check output fail", return);
@@ -236,32 +237,17 @@ static void HandleChildOutput(const std::string &buffer, int32_t bufferLen,
         if (progress.size() != DEFAULT_PROCESS_NUM) {
             LOG(ERROR) << "show progress with wrong arguments";
         } else {
-            g_progressBar->Show();
-            g_updateInfoLabel->SetText("Start to install package.");
+            if (GetProgressBar() != nullptr) {
+                GetProgressBar()->Show();
+            }
+            updateInfoLabel->SetText("Start to install package.");
             frac = std::stof(progress[0]);
             g_percentage = static_cast<int>(frac * FULL_PERCENT_PROGRESS);
         }
     } else if (outputHeader == "set_progress") {
-        UPDATER_ERROR_CHECK(output.size() >= DEFAULT_PROCESS_NUM, "check output fail", return);
-        auto outputInfo = Trim(output[1]);
-        float frac = 0.0;
-        frac = std::stof(output[1]);
-        if (frac >= -EPSINON && frac <= EPSINON) {
-            return;
-        } else {
-            g_tmpProgressValue = static_cast<int>(frac * g_percentage);
-        }
-        if (frac >= FULL_EPSINON && g_tmpValue + g_percentage < FULL_PERCENT_PROGRESS) {
-            g_tmpValue += g_percentage;
-            return;
-        }
-        g_tmpProgressValue = g_tmpProgressValue + g_tmpValue;
-        if (g_tmpProgressValue == 0) {
-            return;
-        }
-        g_progressBar->SetProgressValue(g_tmpProgressValue);
+        HandleProgressSet(output);
     } else {
-        LOG(WARNING) << "Child process returns unexpected message.";
+        LOG(DEBUG) << "Child process returns unexpected message: " << outputHeader;
     }
 }
 
@@ -273,12 +259,11 @@ UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, const std::
     UPDATER_ERROR_CHECK(pkgManager != nullptr, "Fail to GetPackageInstance", return UPDATE_CORRUPT);
     int pipeRead = pfd[0];
     int pipeWrite = pfd[1];
-
     UPDATER_ERROR_CHECK(ExtractUpdaterBinary(pkgManager, UPDATER_BINARY) == 0,
         "Updater: cannot extract updater binary from update package.", return UPDATE_CORRUPT);
     g_tmpProgressValue = 0;
-    if (g_progressBar != nullptr) {
-        g_progressBar->SetProgressValue(0);
+    if (GetProgressBar() != nullptr) {
+        GetProgressBar()->SetProgressValue(0);
     }
     pid_t pid = fork();
     UPDATER_CHECK_ONLY_RETURN(pid >= 0, ERROR_CODE(CODE_FORK_FAIL); return UPDATE_ERROR);
@@ -319,7 +304,7 @@ UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, const std::
     }
 
     close(pipeWrite); // close write endpoint
-    char buffer[MAX_BUFFER_SIZE];
+    char buffer[MAX_BUFFER_SIZE] = {0};
     bool retryUpdate = false;
     FILE* fromChild = fdopen(pipeRead, "r");
     UPDATER_ERROR_CHECK(fromChild != nullptr, "fdopen pipeRead failed", return UPDATE_ERROR);

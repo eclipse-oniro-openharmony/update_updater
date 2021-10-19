@@ -52,7 +52,9 @@ PkgManager::PkgManagerPtr PkgManager::GetPackageInstance()
 
 PkgManager::PkgManagerPtr PkgManager::CreatePackageInstance()
 {
-    return new PkgManagerImpl();
+    PkgManager::PkgManagerPtr impl = new PkgManagerImpl();
+    PKG_LOGI("CreatePackageInstance %p", impl);
+    return impl;
 }
 
 void PkgManager::ReleasePackageInstance(PkgManager::PkgManagerPtr manager)
@@ -60,6 +62,7 @@ void PkgManager::ReleasePackageInstance(PkgManager::PkgManagerPtr manager)
     if (manager == nullptr) {
         return;
     }
+    PKG_LOGI("ReleasePackageInstance %p", manager);
     if (g_pkgManagerInstance == manager) {
         delete g_pkgManagerInstance;
         g_pkgManagerInstance = nullptr;
@@ -205,16 +208,16 @@ PkgFilePtr PkgManagerImpl::CreatePackage(PkgStreamPtr stream, PkgFile::PkgType t
     PkgFilePtr pkgFile = nullptr;
     switch (type) {
         case PkgFile::PKG_TYPE_UPGRADE:
-            pkgFile = new UpgradePkgFile(stream, header);
+            pkgFile = new UpgradePkgFile(this, stream, header);
             break;
         case PkgFile::PKG_TYPE_ZIP:
-            pkgFile = new ZipPkgFile(stream);
+            pkgFile = new ZipPkgFile(this, stream);
             break;
         case PkgFile::PKG_TYPE_LZ4:
-            pkgFile = new Lz4PkgFile(stream);
+            pkgFile = new Lz4PkgFile(this, stream);
             break;
         case PkgFile::PKG_TYPE_GZIP:
-            pkgFile = new GZipPkgFile(stream);
+            pkgFile = new GZipPkgFile(this, stream);
             break;
         default:
             return nullptr;
@@ -396,7 +399,7 @@ int32_t PkgManagerImpl::CreatePkgStream(StreamPtr &stream, const std::string &fi
 
 int32_t PkgManagerImpl::CreatePkgStream(StreamPtr &stream, const std::string &fileName, const PkgBuffer &buffer)
 {
-    PkgStreamPtr pkgStream = new MemoryMapStream(fileName, buffer, PkgStream::PkgStreamType_Buffer);
+    PkgStreamPtr pkgStream = new MemoryMapStream(this, fileName, buffer, PkgStream::PkgStreamType_Buffer);
     PKG_CHECK(pkgStream != nullptr, return -1, "Failed to create stream");
     stream = pkgStream;
     return PKG_SUCCESS;
@@ -438,7 +441,7 @@ int32_t PkgManagerImpl::CreatePkgStream(PkgStreamPtr &stream, const std::string 
         FILE *file = nullptr;
         file = fopen(fileName.c_str(), modeFlags[type]);
         PKG_CHECK(file != nullptr, return PKG_INVALID_FILE, "Fail to open file %s ", fileName.c_str());
-        stream = new FileStream(fileName, file, type);
+        stream = new FileStream(this, fileName, file, type);
     } else if (type == PkgStream::PkgStreamType_MemoryMap) {
         size_t fileSize = size;
         if (fileSize == 0) {
@@ -451,7 +454,7 @@ int32_t PkgManagerImpl::CreatePkgStream(PkgStreamPtr &stream, const std::string 
         uint8_t *memoryMap = MapMemory(fileName, fileSize);
         PKG_CHECK(memoryMap != nullptr, return PKG_INVALID_FILE, "Fail to map memory %s ", fileName.c_str());
         PkgBuffer buffer(memoryMap, fileSize);
-        stream = new MemoryMapStream(fileName, buffer);
+        stream = new MemoryMapStream(this, fileName, buffer);
     } else {
         return -1;
     }
@@ -462,7 +465,7 @@ int32_t PkgManagerImpl::CreatePkgStream(PkgStreamPtr &stream, const std::string 
 int32_t PkgManagerImpl::CreatePkgStream(PkgStreamPtr &stream, const std::string &fileName,
     PkgStream::ExtractFileProcessor processor, const void *context)
 {
-    stream = new ProcessorStream(fileName, processor, context);
+    stream = new ProcessorStream(this, fileName, processor, context);
     PKG_CHECK(stream != nullptr, return -1, "Failed to create stream");
     return PKG_SUCCESS;
 }
@@ -588,6 +591,7 @@ int32_t PkgManagerImpl::GenerateFileDigest(PkgStreamPtr stream,
         PKG_IS_TRUE_DONE(flags & DIGEST_FLAGS_HAS_SIGN, algorithm->Update(buff, readLen));
         PKG_IS_TRUE_DONE(flags & DIGEST_FLAGS_NO_SIGN, algorithmInner->Update(buff, readLen));
         offset += readLen;
+        PostDecodeProgress(POST_TYPE_VERIFY_PKG, readLen, nullptr);
         readLen = 0;
     }
 
@@ -677,8 +681,8 @@ int32_t PkgManagerImpl::DecompressBuffer(FileInfoPtr info, const PkgBuffer &data
     PkgAlgorithm::PkgAlgorithmPtr algorithm = PkgAlgorithmFactory::GetAlgorithm(info);
     PKG_CHECK(algorithm != nullptr, return PKG_INVALID_PARAM, "Can not get algorithm for %s", info->identity.c_str());
 
-    std::shared_ptr<MemoryMapStream> inStream = std::make_shared<MemoryMapStream>(info->identity,
-        data, PkgStream::PkgStreamType_Buffer);
+    std::shared_ptr<MemoryMapStream> inStream = std::make_shared<MemoryMapStream>(
+        (PkgManager::PkgManagerPtr)this, info->identity, data, PkgStream::PkgStreamType_Buffer);
     PKG_CHECK(inStream != nullptr, return PKG_INVALID_PARAM, "Can not create stream for %s", info->identity.c_str());
     PkgAlgorithmContext context = {{0, 0}, {data.length, 0}, 0, info->digestMethod};
     int32_t ret = algorithm->Unpack(inStream.get(), PkgStreamImpl::ConvertPkgStream(output), context);
@@ -698,8 +702,8 @@ int32_t PkgManagerImpl::CompressBuffer(FileInfoPtr info, const PkgBuffer &data, 
     PkgAlgorithm::PkgAlgorithmPtr algorithm = PkgAlgorithmFactory::GetAlgorithm(info);
     PKG_CHECK(algorithm != nullptr, return PKG_INVALID_PARAM, "Can not get algorithm for %s", info->identity.c_str());
 
-    std::shared_ptr<MemoryMapStream> inStream = std::make_shared<MemoryMapStream>(info->identity,
-        data, PkgStream::PkgStreamType_Buffer);
+    std::shared_ptr<MemoryMapStream> inStream = std::make_shared<MemoryMapStream>(
+        (PkgManager::PkgManagerPtr)this, info->identity, data, PkgStream::PkgStreamType_Buffer);
     PKG_CHECK(inStream != nullptr, return PKG_INVALID_PARAM, "Can not create stream for %s", info->identity.c_str());
     PkgAlgorithmContext context = {{0, 0}, {0, data.length}, 0, info->digestMethod};
     int32_t ret = algorithm->Pack(inStream.get(), PkgStreamImpl::ConvertPkgStream(output), context);
@@ -709,5 +713,12 @@ int32_t PkgManagerImpl::CompressBuffer(FileInfoPtr info, const PkgBuffer &data, 
     info->packedSize = context.packedSize;
     info->unpackedSize = context.unpackedSize;
     return PKG_SUCCESS;
+}
+
+void PkgManagerImpl::PostDecodeProgress(int type, size_t writeDataLen, const void *context)
+{
+    if (decodeProgress_ != nullptr) {
+        decodeProgress_(type, writeDataLen, context);
+    }
 }
 } // namespace hpackage

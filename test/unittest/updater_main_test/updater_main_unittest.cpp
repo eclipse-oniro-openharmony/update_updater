@@ -24,6 +24,7 @@
 #include "securec.h"
 #include "updater_main.h"
 #include "updater_ui.h"
+#include "updater/updater.h"
 #include "utils.h"
 
 using namespace updater;
@@ -131,10 +132,12 @@ HWTEST_F(UpdaterMainUnitTest, updater_main_test_004, TestSize.Level1)
     bool ret = WriteUpdaterMessage(MISC_FILE, boot);
     EXPECT_EQ(ret, true);
 
-    int lRet = 0;
-    int argc = 1;
     char **argv = new char*[MAX_ARG_SIZE];
     argv[0] = new char[10];
+    EXPECT_EQ(strncpy_s(argv[0], MAX_ARG_SIZE, "./main", MAX_ARG_SIZE), 0);
+    int argc = 1;
+    int lRet = UpdaterMain(argc, argv);
+    EXPECT_EQ(lRet, 0);
 
     EXPECT_EQ(memset_s(boot.update, sizeof(boot.update), 0, sizeof(boot.update)), 0);
     const std::string command3 = "--user_wipe_data";

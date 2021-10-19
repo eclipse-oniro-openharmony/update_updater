@@ -85,7 +85,8 @@ public:
         const std::vector<uint8_t> &digest, const std::vector<uint8_t> &signature)>;
 
 public:
-    PkgFile(PkgStreamPtr stream, PkgType type) : type_(type), pkgStream_(stream) {}
+    PkgFile(PkgManager::PkgManagerPtr manager, PkgStreamPtr stream, PkgType type)
+        : type_(type), pkgStream_(stream), pkgManager_(manager) {}
 
     virtual ~PkgFile();
 
@@ -136,6 +137,7 @@ protected:
 
     PkgType type_ {};
     PkgStreamPtr pkgStream_ = nullptr;
+    PkgManager::PkgManagerPtr pkgManager_ = nullptr;
     uint32_t nodeId_ = 0;
     std::map<uint32_t, PkgEntryPtr> pkgEntryMapId_ {};
     std::multimap<std::string, PkgEntryPtr, std::greater<std::string>> pkgEntryMapFileName_ {};

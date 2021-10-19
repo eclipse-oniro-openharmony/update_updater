@@ -41,7 +41,8 @@ constexpr uint32_t END_CENTRAL_SIGNATURE = 0x06054b50;
 
 class TestFile : public PkgFile {
 public:
-    explicit TestFile(PkgStreamPtr stream) : PkgFile(stream, PKG_TYPE_MAX) {}
+    explicit TestFile(PkgManager::PkgManagerPtr pkgManager, PkgStreamPtr stream)
+        : PkgFile(pkgManager, stream, PKG_TYPE_MAX) {}
 
     virtual ~TestFile() {}
 
@@ -78,7 +79,7 @@ public:
         std::string packagePath = TEST_PATH_TO;
         packagePath += testPackageName;
         int ret = pkgManager_->CreatePkgStream(stream, packagePath, 0, PkgStream::PkgStreamType_Read);
-        auto file = std::make_unique<Lz4PkgFile>(PkgStreamImpl::ConvertPkgStream(stream));
+        auto file = std::make_unique<Lz4PkgFile>(pkgManager_, PkgStreamImpl::ConvertPkgStream(stream));
         EXPECT_NE(file, nullptr);
         constexpr uint32_t lz4NodeId = 100;
         auto entry = std::make_unique<Lz4FileEntry>(file.get(), lz4NodeId);
@@ -102,7 +103,8 @@ public:
         packagePath += testPackageName;
         int ret = pkgManager_->CreatePkgStream(stream, packagePath, 0, PkgStream::PkgStreamType_Read);
         FileInfo fileInfo;
-        std::unique_ptr<TestFile> file = std::make_unique<TestFile>(PkgStreamImpl::ConvertPkgStream(stream));
+        std::unique_ptr<TestFile> file = std::make_unique<TestFile>(pkgManager_,
+            PkgStreamImpl::ConvertPkgStream(stream));
         EXPECT_NE(file, nullptr);
         ret = file->AddEntry(&fileInfo, PkgStreamImpl::ConvertPkgStream(stream));
         EXPECT_EQ(ret, 0);
@@ -122,7 +124,8 @@ public:
         packagePath += testPackageName;
         pkgManager_->CreatePkgStream(stream, packagePath, 0, PkgStream::PkgStreamType_Read);
         EXPECT_NE(stream, nullptr);
-        std::unique_ptr<TestFile> file = std::make_unique<TestFile>(PkgStreamImpl::ConvertPkgStream(stream));
+        std::unique_ptr<TestFile> file = std::make_unique<TestFile>(pkgManager_,
+            PkgStreamImpl::ConvertPkgStream(stream));
         EXPECT_NE(file, nullptr);
         std::unique_ptr<ZipFileEntry> entry = std::make_unique<ZipFileEntry>(file.get(), zipNodeId);
         EXPECT_NE(entry, nullptr);
@@ -154,7 +157,7 @@ public:
         centralDir->internalAttr = 0;
         centralDir->externalAttr = 0;
         centralDir->localHeaderOffset = 0;
-	int ret = memcpy_s(buff.data() + sizeof(CentralDirEntry), name.length(), name.c_str(), name.length());
+        int ret = memcpy_s(buff.data() + sizeof(CentralDirEntry), name.length(), name.c_str(), name.length());
         EXPECT_EQ(ret, 0);
         WriteLE16(buff.data() + sizeof(CentralDirEntry) + name.length(), 1);
         WriteLE16(buff.data() + sizeof(CentralDirEntry) + name.length() + offsetHalfWord, offset4Words);
@@ -215,7 +218,8 @@ public:
             sizeof(endDir), &endDir, sizeof(endDir)),
             0);
 
-        std::unique_ptr<ZipPkgFile> zipFile = std::make_unique<ZipPkgFile>(PkgStreamImpl::ConvertPkgStream(stream));
+        std::unique_ptr<ZipPkgFile> zipFile = std::make_unique<ZipPkgFile>(pkgManager_,
+            PkgStreamImpl::ConvertPkgStream(stream));
         EXPECT_NE(zipFile, nullptr);
         std::vector<std::string> components;
         int ret = zipFile->LoadPackage(components);

@@ -32,8 +32,12 @@ int main(int argc, char **argv)
         std::string updaterStr = "updater";
         if (!memcmp(argv[1], updaterStr.c_str(), updaterStr.length())) {
             updater::utils::DoReboot(argv[1]);
+        } else if (strcmp(argv[1], "flash") == 0) {
+            updater::utils::DoReboot(argv[1]);
+        } else if (strncmp(argv[1], "flash:", strlen("flash:")) == 0) {
+            updater::utils::DoReboot("flash", argv[1] + strlen("flash:"));
         } else {
-            updater::LOG(updater::INFO) << "param must be updater!";
+            updater::LOG(updater::INFO) << "param must be updater/flash!";
         }
     }
     return 0;

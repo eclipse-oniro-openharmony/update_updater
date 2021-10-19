@@ -91,11 +91,7 @@ bool TransferManager::CommandsParser(int fd, const std::vector<std::string> &con
             if (initBlock == 0) {
                 initBlock = globalParams->written;
             }
-            bool typeResult = cmd->GetCommandType() == CommandType::NEW ||
-                cmd->GetCommandType() == CommandType::IMGDIFF ||
-                cmd->GetCommandType() == CommandType::BSDIFF ||
-                cmd->GetCommandType() == CommandType::ZERO;
-            if (totalSize != 0 && globalParams->env != nullptr && typeResult) {
+            if (totalSize != 0 && globalParams->env != nullptr && NeedSetProgress(cmd->GetCommandType())) {
                 globalParams->env->PostMessage("set_progress",
                     std::to_string((float)(globalParams->written - initBlock) / totalSize));
             }
@@ -138,6 +134,14 @@ std::string TransferManager::ReloadForRetry() const
     UPDATER_ERROR_CHECK_NOT_RETURN(utils::ReadFileToString(fd, cmd), "Error to read retry flag");
     close(fd);
     return cmd;
+}
+
+bool TransferManager::NeedSetProgress(const CommandType &type)
+{
+    return type == CommandType::NEW ||
+        type == CommandType::IMGDIFF ||
+        type == CommandType::BSDIFF ||
+        type == CommandType::ZERO;
 }
 
 bool TransferManager::CheckResult(const CommandResult result, const std::string &cmd, const CommandType &type)

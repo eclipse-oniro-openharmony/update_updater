@@ -18,6 +18,7 @@
 #include <cstdlib>
 #include <memory>
 #include "pkg_manager.h"
+#include "pkg_manager_impl.h"
 #include "pkg_utils.h"
 #include "securec.h"
 
@@ -45,6 +46,13 @@ void PkgStreamImpl::DelRef()
 bool PkgStreamImpl::IsRef() const
 {
     return refCount_ == 0;
+}
+
+void PkgStreamImpl::PostDecodeProgress(int type, size_t writeDataLen, const void *context)
+{
+    if (pkgManager_ != nullptr) {
+        pkgManager_->PostDecodeProgress(type, writeDataLen, context);
+    }
 }
 
 FileStream::~FileStream()
@@ -76,6 +84,7 @@ int32_t FileStream::Write(const PkgBuffer &data, size_t size, size_t offset)
     fseek(stream_, offset, SEEK_SET);
     size_t len = fwrite(data.buffer, size, 1, stream_);
     PKG_CHECK(len == 1, return PKG_INVALID_STREAM, "Write buffer fail");
+    PostDecodeProgress(POST_TYPE_DECODE_PKG, size, nullptr);
     return PKG_SUCCESS;
 }
 
@@ -143,6 +152,7 @@ int32_t MemoryMapStream::Write(const PkgBuffer &data, size_t size, size_t start)
     PKG_CHECK(copyLen >= size, return PKG_INVALID_STREAM, "Write fail copyLen %zu, %zu", copyLen, size);
     int32_t ret = memcpy_s(memMap_ + currOffset_, memSize_ - currOffset_, data.buffer, size);
     PKG_CHECK(ret == PKG_SUCCESS, return PKG_INVALID_STREAM, "Write fail");
+    PostDecodeProgress(POST_TYPE_DECODE_PKG, size, nullptr);
     return PKG_SUCCESS;
 }
 

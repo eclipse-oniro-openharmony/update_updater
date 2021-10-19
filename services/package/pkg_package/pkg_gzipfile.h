@@ -56,7 +56,8 @@ private:
 
 class GZipPkgFile : public PkgFile {
 public:
-    explicit GZipPkgFile(PkgStreamPtr stream) : PkgFile(stream, PkgFile::PKG_TYPE_GZIP)
+    explicit GZipPkgFile(PkgManager::PkgManagerPtr manager, PkgStreamPtr stream)
+        : PkgFile(manager, stream, PkgFile::PKG_TYPE_GZIP)
     {
         pkgInfo_.signMethod = PKG_SIGN_METHOD_RSA;
         pkgInfo_.digestMethod = PKG_DIGEST_TYPE_SHA256;

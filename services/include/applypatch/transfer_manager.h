@@ -73,6 +73,7 @@ public:
     }
     std::string ReloadForRetry() const;
     bool CheckResult(const CommandResult result, const std::string &cmd, const CommandType &type);
+    bool NeedSetProgress(const CommandType &type);
 
 private:
     bool RegisterForRetry(const std::string &cmd);

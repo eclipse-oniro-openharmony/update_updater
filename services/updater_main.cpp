@@ -49,8 +49,7 @@ using namespace updater::utils;
 
 extern TextLabel *g_logLabel;
 extern TextLabel *g_logResultLabel;
-extern TextLabel *g_updateInfoLabel;
-extern int g_updateFlag;
+
 constexpr int DISPLAY_TIME = 1000 * 1000;
 constexpr struct option OPTIONS[] = {
     { "update_package", required_argument, nullptr, 0 },
@@ -103,20 +102,6 @@ int FactoryReset(FactoryResetMode mode, const std::string &path)
     return DoFactoryReset(mode, path);
 }
 
-
-bool IsSDCardExist(const std::string &sdcardPath)
-{
-    // Record system error codes.
-    int save_errno = errno;
-    struct stat st {};
-    if (stat(sdcardPath.c_str(), &st) < 0) {
-        return false;
-    } else {
-        errno = save_errno;
-        return true;
-    }
-}
-
 UpdaterStatus UpdaterFromSdcard()
 {
 #ifndef UPDATER_UT
@@ -130,7 +115,6 @@ UpdaterStatus UpdaterFromSdcard()
         }
         return UPDATE_ERROR;
     }
-
     if (MountForPath(SDCARD_PATH) != 0) {
         int ret = mount(sdcardStr.c_str(), SDCARD_PATH.c_str(), "vfat", 0, NULL);
         UPDATER_WARING_CHECK(ret == 0, "MountForPath /sdcard failed!", return UPDATE_ERROR);
@@ -181,7 +165,7 @@ static UpdaterStatus InstallUpdaterPackage(UpdaterParams &upParams, const std::v
                 "ClearRecordPartitionOffset failed", return UPDATE_ERROR);
             SetRetryCountToMisc(upParams.retryCount + 1, args);
         }
-        UPDATER_CHECK_ONLY_RETURN(SetupPartitions() == 0, ShowText(g_updateInfoLabel, "Setup partitions failed");
+        UPDATER_CHECK_ONLY_RETURN(SetupPartitions() == 0, ShowText(GetUpdateInfoLabel(), "Setup partitions failed");
             return UPDATE_ERROR);
         status = DoInstallUpdaterPackage(manager, upParams.updatePackage, upParams.retryCount);
         if (status != UPDATE_SUCCESS) {
@@ -213,7 +197,7 @@ static UpdaterStatus StartUpdaterEntry(PkgManager::PkgManagerPtr manager,
     } else if (upParams.factoryWipeData) {
         LOG(INFO) << "Factory level FactoryReset begin";
         status = UPDATE_SUCCESS;
-        g_updateFlag = 1;
+        SetUpdateFlag(1);
         ShowUpdateFrame(true);
         DoProgress();
         UPDATER_ERROR_CHECK(FactoryReset(FACTORY_WIPE_DATA, "/data") == 0, "FactoryReset factory level failed",
@@ -228,7 +212,7 @@ static UpdaterStatus StartUpdaterEntry(PkgManager::PkgManagerPtr manager,
     } else if (upParams.userWipeData) {
         LOG(INFO) << "User level FactoryReset begin";
         status = UPDATE_SUCCESS;
-        g_updateFlag = 1;
+        SetUpdateFlag(1);
         ShowUpdateFrame(true);
         DoProgress();
         UPDATER_ERROR_CHECK(FactoryReset(USER_WIPE_DATA, "/data") == 0, "FactoryReset user level failed",
@@ -291,138 +275,10 @@ static UpdaterStatus StartUpdater(PkgManager::PkgManagerPtr manager, const std::
     return StartUpdaterEntry(manager, args, upParams);
 }
 
-static bool IsDir(const std::string &path)
-{
-    struct stat st{};
-    if (stat(path.c_str(), &st) < 0) {
-        return false;
-    }
-    return S_ISDIR(st.st_mode);
-}
-
-static bool DeleteUpdaterPath(const std::string &path)
-{
-    auto pDir = std::unique_ptr<DIR, decltype(&closedir)>(opendir(path.c_str()), closedir);
-    UPDATER_INFO_CHECK_NOT_RETURN(pDir != nullptr, "Can not open dir");
-
-    struct dirent *dp = nullptr;
-    if (pDir != nullptr) {
-        while ((dp = readdir(pDir.get())) != nullptr) {
-            std::string currentName(dp->d_name);
-            if (currentName[0] != '.' && (currentName.compare("log") != 0)) {
-                std::string tmpName(path);
-                tmpName.append("/" + currentName);
-                if (IsDir(tmpName)) {
-                    DeleteUpdaterPath(tmpName);
-                }
-#ifndef UPDATER_UT
-                remove(tmpName.c_str());
-#endif
-            }
-        }
-    }
-    return true;
-}
-
-static bool ClearMisc()
-{
-    struct UpdateMessage cleanBoot {};
-    UPDATER_ERROR_CHECK(WriteUpdaterMessage(MISC_FILE, cleanBoot) == true,
-        "ClearMisc clear boot message to misc failed", return false);
-    auto fp = std::unique_ptr<FILE, decltype(&fclose)>(fopen(MISC_FILE.c_str(), "rb+"), fclose);
-    UPDATER_FILE_CHECK(fp != nullptr, "WriteVersionCode fopen failed", return false);
-    fseek(fp.get(), PARTITION_RECORD_OFFSET, SEEK_SET);
-    off_t clearOffset = 0;
-    UPDATER_FILE_CHECK(fwrite(&clearOffset, sizeof(off_t), 1, fp.get()) == 1,
-        "ClearMisc write misc initOffset 0 failed", return false);
-
-    struct PartitionRecordInfo cleanPartition {};
-    for (size_t tmpOffset = 0; tmpOffset < PARTITION_UPDATER_RECORD_MSG_SIZE; tmpOffset +=
-        sizeof(PartitionRecordInfo)) {
-        fseek(fp.get(), PARTITION_RECORD_START + tmpOffset, SEEK_SET);
-        UPDATER_FILE_CHECK(fwrite(&cleanPartition, sizeof(PartitionRecordInfo), 1, fp.get()) == 1,
-            "ClearMisc write misc cleanPartition failed", return false);
-    }
-    return true;
-}
-
-void PostUpdaterForSdcard(std::string &updaterLogPath, std::string &stageLogPath, std::string &errorCodePath)
-{
-    if (SetupPartitions() != 0) {
-        ShowText(g_updateInfoLabel, "Mount data failed.");
-        LOG(ERROR) << "Mount for /data failed.";
-        std::string sdcardPath = GetBlockDeviceByMountPoint(SDCARD_PATH);
-        if (IsSDCardExist(sdcardPath)) {
-            if (MountForPath(SDCARD_PATH) != 0) {
-                int ret = mount(sdcardPath.c_str(), SDCARD_PATH.c_str(), "vfat", 0, NULL);
-                UPDATER_WARING_CHECK(ret == 0, "Mount for /sdcard failed!", return);
-            }
-            updaterLogPath = "/sdcard/updater/log/updater_log";
-            stageLogPath = "/sdcard/updater/log/updater_stage_log";
-            errorCodePath = "/sdcard/updater/log/error_code.log";
-        }
-    }
-    return;
-}
-
-void PostUpdater()
-{
-    STAGE(UPDATE_STAGE_BEGIN) << "PostUpdater";
-    std::string updaterLogPath = "/data/updater/log/updater_log";
-    std::string stageLogPath = "/data/updater/log/updater_stage_log";
-    std::string errorCodePath = "/data/updater/log/error_code.log";
-    PostUpdaterForSdcard(updaterLogPath, stageLogPath, errorCodePath);
-    // clear update misc partition.
-    UPDATER_ERROR_CHECK_NOT_RETURN(ClearMisc() == true, "PostUpdater clear misc failed");
-    if (!access(COMMAND_FILE.c_str(), 0)) {
-        UPDATER_ERROR_CHECK_NOT_RETURN(unlink(COMMAND_FILE.c_str()) == 0, "Delete command failed");
-    }
-
-    // delete updater tmp files
-    if (access(UPDATER_PATH.c_str(), 0) == 0 && access(SDCARD_CARD_PATH.c_str(), 0) != 0) {
-        UPDATER_ERROR_CHECK_NOT_RETURN(DeleteUpdaterPath(UPDATER_PATH), "DeleteUpdaterPath failed");
-    }
-    if (!access(SDCARD_CARD_PATH.c_str(), 0)) {
-        UPDATER_ERROR_CHECK_NOT_RETURN(DeleteUpdaterPath(SDCARD_CARD_PATH), "Delete sdcard path failed");
-    }
-    // save logs
-    UPDATER_ERROR_CHECK_NOT_RETURN(CopyUpdaterLogs(TMP_LOG, updaterLogPath) == true, "Copy updater log failed!");
-    UPDATER_ERROR_CHECK_NOT_RETURN(CopyUpdaterLogs(TMP_ERROR_CODE_PATH, errorCodePath) == true,
-        "Copy error code log failed!");
-    mode_t mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
-    chmod(updaterLogPath.c_str(), mode);
-    chmod(stageLogPath.c_str(), mode);
-    chmod(errorCodePath.c_str(), mode);
-    STAGE(UPDATE_STAGE_SUCCESS) << "PostUpdater";
-    UPDATER_ERROR_CHECK_NOT_RETURN(CopyUpdaterLogs(TMP_STAGE_LOG, stageLogPath) == true, "Copy stage log failed!");
-}
-
-std::vector<std::string> ParseParams(int argc, char **argv)
-{
-    struct UpdateMessage boot {};
-    // read from misc
-    UPDATER_ERROR_CHECK_NOT_RETURN(ReadUpdaterMessage(MISC_FILE, boot) == true,
-        "ReadUpdaterMessage MISC_FILE failed!");
-    // if boot.update is empty, read from command.The Misc partition may have dirty data,
-    // so strlen(boot.update) is not used, which can cause system exceptions.
-    if (boot.update[0] == '\0' && !access(COMMAND_FILE.c_str(), 0)) {
-        UPDATER_ERROR_CHECK_NOT_RETURN(ReadUpdaterMessage(COMMAND_FILE, boot) == true,
-                                       "ReadUpdaterMessage COMMAND_FILE failed!");
-    }
-    STAGE(UPDATE_STAGE_OUT) << "Init Params: " << boot.update;
-    std::vector<std::string> parseParams(argv, argv + argc);
-    boot.update[sizeof(boot.update) - 1] = '\0';
-    parseParams = utils::SplitString(boot.update, "\n");
-    return parseParams;
-}
-
 int UpdaterMain(int argc, char **argv)
 {
     UpdaterStatus status = UPDATE_UNKNOWN;
     PkgManager::PkgManagerPtr manager = PkgManager::GetPackageInstance();
-    InitUpdaterLogger("UPDATER", TMP_LOG, TMP_STAGE_LOG, TMP_ERROR_CODE_PATH);
-    SetLogLevel(INFO);
-    LoadFstab();
     std::vector<std::string> args = ParseParams(argc, argv);
 
     LOG(INFO) << "Ready to start";

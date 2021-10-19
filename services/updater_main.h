@@ -35,10 +35,6 @@ struct UpdaterParams {
 
 int UpdaterMain(int argc, char **argv);
 
-std::vector<std::string> ParseParams(int argc, char **argv);
-
-void PostUpdater();
-
 int FactoryReset(FactoryResetMode mode, const std::string &path);
 
 UpdaterStatus UpdaterFromSdcard();

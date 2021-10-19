@@ -47,6 +47,13 @@ enum {
     PKG_VERIFY_FAIL,
 };
 
+enum {
+    POST_TYPE_UPLOAD_PKG = 0,
+    POST_TYPE_DECODE_PKG,
+    POST_TYPE_VERIFY_PKG,
+    POST_TYPE_WRITE_PARTITION
+};
+
 /**
  * Package information
  */
@@ -203,6 +210,8 @@ public:
     }
 };
 
+using PkgDecodeProgress = std::function<void(int type, size_t writeDataLen, const void *context)>;
+
 /**
  * Get a singleton PkgManager instance.
  */
@@ -334,6 +343,10 @@ public:
         std::vector<std::string> &fileIds) = 0;
 
     virtual int32_t ParsePackage(StreamPtr stream, std::vector<std::string> &fileIds, int32_t type) = 0;
+
+    virtual void SetPkgDecodeProgress(PkgDecodeProgress decodeProgress) = 0;
+
+    virtual void PostDecodeProgress(int type, size_t writeDataLen, const void *context) = 0;
 };
 } // namespace hpackage
 #endif // PKG_MANAGER_H

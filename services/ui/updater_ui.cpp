@@ -518,4 +518,19 @@ void DeleteView()
         g_sfDev = nullptr;
     }
 }
+
+TextLabel *GetUpdateInfoLabel()
+{
+    return g_updateInfoLabel;
+}
+
+ProgressBar *GetProgressBar()
+{
+    return g_progressBar;
+}
+
+void SetUpdateFlag(int updateFlag)
+{
+    g_updateFlag = updateFlag;
+}
 } // namespace updater

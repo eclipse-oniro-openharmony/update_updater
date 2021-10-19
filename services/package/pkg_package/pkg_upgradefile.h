@@ -78,8 +78,8 @@ private:
 
 class UpgradePkgFile : public PkgFile {
 public:
-    UpgradePkgFile(PkgStreamPtr stream, PkgManager::PkgInfoPtr header) :
-        PkgFile(stream, PkgFile::PKG_TYPE_UPGRADE)
+    UpgradePkgFile(PkgManager::PkgManagerPtr manager, PkgStreamPtr stream, PkgManager::PkgInfoPtr header)
+        : PkgFile(manager, stream, PkgFile::PKG_TYPE_UPGRADE)
     {
         if (header == nullptr || header->entryCount == 0) {
             return;
@@ -92,7 +92,7 @@ public:
 
     int32_t AddEntry(const PkgManager::FileInfoPtr file, const PkgStreamPtr input) override;
 
-    int32_t SavePackage(size_t &offset) override;
+    int32_t SavePackage(size_t &signOffset) override;
 
     int32_t LoadPackage(std::vector<std::string> &fileNames, VerifyFunction verify = nullptr) override;
 

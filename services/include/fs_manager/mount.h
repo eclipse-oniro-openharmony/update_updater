@@ -16,24 +16,16 @@
 #define UPDATER_FS_MANAGER_MOUNT_H
 
 #include <string>
-#include "fs_manager/fstab_api.h"
-#include "fs_manager/fstab.h"
+#include "fs_manager/fs_manager.h"
 
 namespace updater {
-enum MountStatus : int {
-    MOUNT_ERROR = -1,
-    MOUNT_UMOUNTED = 0,
-    MOUNT_MOUNTED = 1,
-};
-
 void LoadFstab(); /* Load fstab */
 void LoadSpecificFstab(const std::string &fstabName);
 int FormatPartition(const std::string &path);
 int UmountForPath(const std::string &path);
 int MountForPath(const std::string &path);
-MountStatus GetMountStatusForPath(const std::string &path);
-struct FstabItem *GetItemForMountPoint(const std::string &mountPoint);
 int SetupPartitions();
 const std::string GetBlockDeviceByMountPoint(const std::string &mountPoint);
+MountStatus GetMountStatusForPath(const std::string &path);
 } // updater
 #endif // UPDATER_FS_MANAGER_MOUNT_H

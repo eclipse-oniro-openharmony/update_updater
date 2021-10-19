@@ -26,8 +26,11 @@ enum UpdaterStatus {
     UPDATE_CORRUPT, /* package or verify failed, something is broken. */
     UPDATE_SKIP, /* skip update because of condition is not satisfied, e.g, battery is low */
     UPDATE_RETRY,
+    UPDATE_SPACE_NOTENOUGH,
     UPDATE_UNKNOWN
 };
+
+using PostMessageFunction = std::function<void(const char *cmd, const char *content)>;
 
 UpdaterStatus DoInstallUpdaterPackage(hpackage::PkgManager::PkgManagerPtr pkgManager,
     const std::string &packagePath, int retryCount);
@@ -38,5 +41,19 @@ UpdaterStatus StartUpdaterProc(hpackage::PkgManager::PkgManagerPtr pkgManager, c
 int GetUpdatePackageInfo(hpackage::PkgManager::PkgManagerPtr pkgManager, const std::string& path);
 
 int UpdatePreProcess(hpackage::PkgManager::PkgManagerPtr pkgManager, const std::string& path);
+
+int ExecUpdate(hpackage::PkgManager::PkgManagerPtr pkgManager, int retry, PostMessageFunction postMessage);
+
+bool CopyUpdaterLogs(const std::string &sLog, const std::string &dLog);
+
+void CompressLogs(const std::string &name);
+
+int IsSpaceCapacitySufficient(const std::string &packagePath);
+
+bool IsSDCardExist(const std::string &sdcard_path);
+
+void PostUpdater();
+
+std::vector<std::string> ParseParams(int argc, char **argv);
 } // updater
 #endif /* UPDATER_UPDATER_H */
