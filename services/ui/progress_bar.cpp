@@ -20,7 +20,6 @@
 #include "securec.h"
 
 namespace updater {
-constexpr int DEFAULT_PROGRESS_COLOR_A = 0xCC;
 constexpr int DEFAULT_NORMAL_COLOR = 0xFF;
 constexpr int MAX_PROGRESS_VALUE = 100;
 constexpr uint32_t DEFAULT_PROGRESS_COLOR = 0x00;
@@ -39,8 +38,9 @@ ProgressBar::ProgressBar(const int mStartX, const int mStartY, const int w, cons
     progressColor_.a = DEFAULT_NORMAL_COLOR;
     normalColor_.r = DEFAULT_PROGRESS_COLOR;
     normalColor_.g = DEFAULT_PROGRESS_COLOR;
-    normalColor_.b = DEFAULT_PROGRESS_COLOR;
-    normalColor_.a = DEFAULT_PROGRESS_COLOR_A;
+    normalColor_.b = DEFAULT_NORMAL_COLOR;
+    normalColor_.a = DEFAULT_NORMAL_COLOR;
+    DrawBackground();
 }
 
 void ProgressBar::SetProgressValue(int value)
@@ -82,11 +82,31 @@ void ProgressBar::DrawProgress()
 void ProgressBar::OnDraw()
 {
     SyncBuffer();
+    DrawBackground();
     DrawProgress();
     if (parent_ != nullptr) {
         parent_->OnDraw();
     } else {
         LOG(INFO) << "no draw";
+    }
+    return;
+}
+
+void ProgressBar::DrawBackground()
+{
+    int ret = 0;
+    char *tmpBuf = static_cast<char*>(GetBuffer());
+    BRGA888Pixel pixBuf[viewWidth_];
+    for (int a = 0; a < viewWidth_; a++) {
+        pixBuf[a].r = normalColor_.r;
+        pixBuf[a].g = normalColor_.g;
+        pixBuf[a].b = normalColor_.b;
+        pixBuf[a].a = normalColor_.a;
+    }
+    for (int i = 0; i < viewHeight_; i++) {
+        ret = memcpy_s(tmpBuf + i * viewWidth_ * sizeof(BRGA888Pixel), viewWidth_ * sizeof(BRGA888Pixel) + 1,
+            reinterpret_cast<char*>(pixBuf), viewWidth_ * sizeof(BRGA888Pixel));
+        UPDATER_ERROR_CHECK(ret == 0, "memcpy_s error", break);
     }
     return;
 }

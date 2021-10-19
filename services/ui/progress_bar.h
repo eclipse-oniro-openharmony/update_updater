@@ -27,6 +27,7 @@ public:
     void SetProgressValue(int value);
 private:
     void DrawProgress();
+    void DrawBackground();
     BRGA888Pixel progressColor_ {};
     BRGA888Pixel normalColor_ {};
     int pValue_ { 0 };
