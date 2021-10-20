@@ -36,9 +36,9 @@ ProgressBar::ProgressBar(const int mStartX, const int mStartY, const int w, cons
     progressColor_.g = DEFAULT_NORMAL_COLOR;
     progressColor_.b = DEFAULT_NORMAL_COLOR;
     progressColor_.a = DEFAULT_NORMAL_COLOR;
-    normalColor_.r = DEFAULT_PROGRESS_COLOR;
+    normalColor_.r = DEFAULT_NORMAL_COLOR;
     normalColor_.g = DEFAULT_PROGRESS_COLOR;
-    normalColor_.b = DEFAULT_NORMAL_COLOR;
+    normalColor_.b = DEFAULT_PROGRESS_COLOR;
     normalColor_.a = DEFAULT_NORMAL_COLOR;
     DrawBackground();
 }
