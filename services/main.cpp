@@ -39,7 +39,7 @@ int main(int argc, char **argv)
     const int flashBootLength = 10;
     bool useFlash = memcmp(boot.command, "boot_flash", flashBootLength) == 0;
     InitUpdaterLogger(useFlash ? "FLASHD" : "UPDATER", TMP_LOG, TMP_STAGE_LOG, TMP_ERROR_CODE_PATH);
-    SetLogLevel(VERBOSE);
+    SetLogLevel(INFO);
     LoadFstab();
     STAGE(UPDATE_STAGE_OUT) << "Init Params: " << boot.update;
     LOG(INFO) << "boot.command " << boot.command;

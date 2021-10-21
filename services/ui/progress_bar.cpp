@@ -24,21 +24,21 @@ constexpr int DEFAULT_NORMAL_COLOR = 0xFF;
 constexpr int MAX_PROGRESS_VALUE = 100;
 constexpr uint32_t DEFAULT_PROGRESS_COLOR = 0x00;
 
-ProgressBar::ProgressBar(const int mStartX, const int mStartY, const int w, const int h, Frame *mParent)
+ProgressBar::ProgressBar(const int startX, const int startY, const int w, const int h, Frame *parent)
 {
-    startX_ = mStartX;
-    startY_ = mStartY;
+    startX_ = startX;
+    startY_ = startY;
     this->CreateBuffer(w, h, View::PixelFormat::BGRA888);
-    parent_ = mParent;
+    parent_ = parent;
     SetFocusAble(false);
     parent_->ViewRegister(this);
     progressColor_.r = DEFAULT_NORMAL_COLOR;
     progressColor_.g = DEFAULT_NORMAL_COLOR;
     progressColor_.b = DEFAULT_NORMAL_COLOR;
     progressColor_.a = DEFAULT_NORMAL_COLOR;
-    normalColor_.r = DEFAULT_PROGRESS_COLOR;
+    normalColor_.r = DEFAULT_NORMAL_COLOR;
     normalColor_.g = DEFAULT_PROGRESS_COLOR;
-    normalColor_.b = DEFAULT_NORMAL_COLOR;
+    normalColor_.b = DEFAULT_PROGRESS_COLOR;
     normalColor_.a = DEFAULT_NORMAL_COLOR;
     DrawBackground();
 }
