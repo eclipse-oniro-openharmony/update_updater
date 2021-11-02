@@ -247,7 +247,7 @@ static void HandleChildOutput(const std::string &buffer, int32_t bufferLen,
     } else if (outputHeader == "set_progress") {
         HandleProgressSet(output);
     } else {
-        LOG(WARNING) << "Child process returns unexpected message: " << outputHeader;
+        LOG(DEBUG) << "Child process returns unexpected message: " << outputHeader;
     }
 }
 
