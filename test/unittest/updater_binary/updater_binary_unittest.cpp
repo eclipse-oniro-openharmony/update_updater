@@ -112,11 +112,10 @@ protected:
     {
         int32_t ret;
         int32_t updateFileVersion = 1000;
-	int fileNameIndex = 3;
-	uint8_t componentType = 22;
+        int fileNameIndex = 3;
+        uint8_t componentType = 22;
         UpgradePkgInfoExt pkgInfo;
-
-	ComponentInfoExt *comp = (ComponentInfoExt*)malloc(
+        ComponentInfoExt *comp = (ComponentInfoExt*)malloc(
             sizeof(ComponentInfoExt) * (testFileNames_.size() + fileNameIndex));
         if (comp == nullptr) {
             return -1;
