@@ -302,7 +302,6 @@ bool HostUpdater::CheckMatchUpdate(const std::string &input,
 
 bool HostUpdater::ConfirmCommand(const string &commandIn)
 {
-    bool needConfirm = false;
     std::string tip = "";
     WRITE_LOG(LOG_DEBUG, "ConfirmCommand \"%s\" \n", commandIn.c_str());
 
