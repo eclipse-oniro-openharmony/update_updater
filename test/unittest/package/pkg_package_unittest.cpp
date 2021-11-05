@@ -38,6 +38,8 @@ namespace {
 constexpr uint32_t MAX_FILE_NAME = 256;
 constexpr uint32_t CENTRAL_SIGNATURE = 0x02014b50;
 constexpr uint32_t END_CENTRAL_SIGNATURE = 0x06054b50;
+constexpr uint32_t ZIP_NODE_ID = 100;
+constexpr size_t GIANT_NUMBER = 100000;
 
 class TestFile : public PkgFile {
 public:
@@ -127,7 +129,7 @@ public:
         std::unique_ptr<TestFile> file = std::make_unique<TestFile>(pkgManager_,
             PkgStreamImpl::ConvertPkgStream(stream));
         EXPECT_NE(file, nullptr);
-        std::unique_ptr<ZipFileEntry> entry = std::make_unique<ZipFileEntry>(file.get(), zipNodeId);
+        std::unique_ptr<ZipFileEntry> entry = std::make_unique<ZipFileEntry>(file.get(), ZIP_NODE_ID);
         EXPECT_NE(entry, nullptr);
 
         string name = "TestBigZip";
@@ -161,8 +163,7 @@ public:
         EXPECT_EQ(ret, 0);
         WriteLE16(buff.data() + sizeof(CentralDirEntry) + name.length(), 1);
         WriteLE16(buff.data() + sizeof(CentralDirEntry) + name.length() + offsetHalfWord, offset4Words);
-        size_t giantNumber = 100000;
-        size_t size = UINT_MAX + giantNumber;
+        size_t size = UINT_MAX + GIANT_NUMBER;
         WriteLE64(buff.data() + sizeof(CentralDirEntry) + name.length() + offsetWord, size);
         WriteLE64(buff.data() + sizeof(CentralDirEntry) + name.length() + offset3Words, size);
         size_t decodeLen = 0;
