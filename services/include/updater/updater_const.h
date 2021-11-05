@@ -75,5 +75,7 @@ constexpr unsigned int UI_SHOW_DURATION = 2000;
 constexpr unsigned int INTERVAL_TIME = 300;
 constexpr float EPSINON = 0.00001;
 constexpr float FULL_EPSINON = 1;
+constexpr int BOOT_FLASHD = 1;
+constexpr int BOOT_UPDATER = 2;
 } // namespace updater
 #endif

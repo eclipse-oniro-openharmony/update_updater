@@ -23,6 +23,7 @@
 #include "daemon_updater.h"
 #include "flash_service.h"
 #include "flashd/flashd.h"
+#include "fs_manager/mount.h"
 #include "serial_struct.h"
 #include "unittest_comm.h"
 
@@ -30,10 +31,11 @@ using namespace std;
 using namespace flashd;
 using namespace Hdc;
 using namespace testing::ext;
+
 namespace {
 static std::string TEST_PARTITION_NAME = "data";
-static std::string TEST_UPDATER_PACKAGE_PATH = "/home/axw/develop/updater.zip";
-static std::string TEST_FLASH_IMAGE_NAME = "/home/axw/develop/image/userdata.img";
+static std::string TEST_UPDATER_PACKAGE_PATH = "/data/updater/updater/updater.zip";
+static std::string TEST_FLASH_IMAGE_NAME = "/data/updater/updater/updater.zip";
 
 class FLashServiceUnitTest : public testing::Test {
 public:
@@ -49,6 +51,7 @@ public:
 public:
     int TestFindAllDevice()
     {
+        updater::LoadFstab();
         std::string errorMsg;
         std::shared_ptr<flashd::FlashService> flash = std::make_shared<flashd::FlashService>(errorMsg);
         if (flash == nullptr) {
@@ -69,6 +72,18 @@ public:
         return 0;
     }
 
+    int TestDoUpdater()
+    {
+        std::string errorMsg;
+        std::shared_ptr<flashd::FlashService> flash = std::make_shared<flashd::FlashService>(errorMsg);
+        if (flash == nullptr) {
+            return 1;
+        }
+        flash->DoUpdate(TEST_UPDATER_PACKAGE_PATH);
+        flash->PostProgress(UPDATEMOD_UPDATE, 1024 * 1024 * 4, nullptr); // 1024 * 1024 * 4 4M
+        return 0;
+    }
+
     int TestDoErasePartition()
     {
         std::string errorMsg;
@@ -80,14 +95,26 @@ public:
         return 0;
     }
 
-    int TestDoFormatPartition()
+    int TestDoFormatPartition(const std::string &part, const std::string &type)
     {
         std::string errorMsg;
         std::shared_ptr<flashd::FlashService> flash = std::make_shared<flashd::FlashService>(errorMsg);
         if (flash == nullptr) {
             return 1;
         }
-        flash->DoFormatPartition(TEST_PARTITION_NAME, "ext4");
+        flash->DoFormatPartition(part, type);
+        return 0;
+    }
+
+    int TestFlashServiceDoResizeParatiton()
+    {
+        std::string errorMsg;
+        std::shared_ptr<flashd::FlashService> flash = std::make_shared<flashd::FlashService>(errorMsg);
+        if (flash == nullptr) {
+            return 1;
+        }
+        flash->DoResizeParatiton("data", 4096); // 4096 partition size
+        flash->DoResizeParatiton("data", 1024); // 1024 partition size
         return 0;
     }
 
@@ -131,12 +158,18 @@ public:
 
         HTaskInfo hTaskInfo = nullptr;
         std::shared_ptr<TaskInformation> task = std::make_shared<TaskInformation>();
+        if (task == nullptr) {
+            return -1;
+        }
         hTaskInfo = task.get();
         hTaskInfo->channelId = 1;
         hTaskInfo->sessionId = 0;
         hTaskInfo->runLoop = &loopMain;
         hTaskInfo->serverOrDaemon = 1;
         std::shared_ptr<DaemonUpdater> hdcDamon = std::make_shared<DaemonUpdater>(hTaskInfo);
+        if (hdcDamon == nullptr) {
+            return -1;
+        }
 
         // cmd: hdc updater packagename
         // check
@@ -148,7 +181,6 @@ public:
         WRITE_LOG(LOG_DEBUG, "CheckMaster %s", transferConfig.functionName.c_str());
         transferConfig.optionalName = "updater.zip";
         std::string bufString = SerialStruct::SerializeToString(transferConfig);
-        // 当前升级包中总的文件的大小
         const uint64_t realSize = static_cast<uint64_t>(1024 * 1024 * 1024) * 5;
         std::vector<uint8_t> buffer(sizeof(realSize) + bufString.size());
         int ret = memcpy_s(buffer.data(), buffer.size(), &realSize, sizeof(realSize));
@@ -160,24 +192,58 @@ public:
         // begin
         hdcDamon->CommandDispatch(CMD_UPDATER_BEGIN, NULL, 0);
 
-        // data 写数据部分
-        const uint32_t dataSize = 1024;  // 1024 data size
-        HdcTransferBase::TransferPayload payloadHead {};
-        payloadHead.compressType = HdcTransferBase::COMPRESS_NONE;
-        payloadHead.uncompressSize = dataSize;
-        payloadHead.compressSize = dataSize;
-        payloadHead.index = 0;
-        std::string bufData = SerialStruct::SerializeToString(payloadHead);
-        hdcDamon->CommandDispatch(CMD_UPDATER_DATA, reinterpret_cast<uint8_t *>(bufData.data()), bufData.size());
-
-        payloadHead.compressType = HdcTransferBase::COMPRESS_NONE;
-        payloadHead.uncompressSize = dataSize;
-        payloadHead.compressSize = dataSize;
-        payloadHead.index = 1;
-        bufData = SerialStruct::SerializeToString(payloadHead);
-        hdcDamon->CommandDispatch(CMD_UPDATER_DATA, reinterpret_cast<uint8_t *>(bufData.data()), bufData.size());
+        for (int i = 0; i < 100; i++) { // 10 send time
+            HdcTransferBase::TransferPayload payloadHead {};
+            payloadHead.compressType = HdcTransferBase::COMPRESS_NONE;
+            payloadHead.uncompressSize = transferConfig.fileSize / 10; // 10 time
+            payloadHead.compressSize = transferConfig.fileSize / 10; // 10 time
+            payloadHead.index = 0;
+            std::string bufData = SerialStruct::SerializeToString(payloadHead);
+            hdcDamon->CommandDispatch(CMD_UPDATER_DATA, reinterpret_cast<uint8_t *>(bufData.data()), bufData.size());
+        }
         // end
         hdcDamon->DoTransferFinish();
+        return 0;
+    }
+
+    int TestHdcDaemonInvalid()
+    {
+        uv_loop_t loopMain;
+        uv_loop_init(&loopMain);
+
+        HTaskInfo hTaskInfo = nullptr;
+        std::shared_ptr<TaskInformation> task = std::make_shared<TaskInformation>();
+        if (task == nullptr) {
+            return -1;
+        }
+        hTaskInfo = task.get();
+        hTaskInfo->channelId = 2; // 2 channel id
+        hTaskInfo->sessionId = 0;
+        hTaskInfo->runLoop = &loopMain;
+        hTaskInfo->serverOrDaemon = 1;
+        std::shared_ptr<DaemonUpdater> hdcDamon = std::make_shared<DaemonUpdater>(hTaskInfo);
+        if (hdcDamon == nullptr) {
+            return -1;
+        }
+        // cmd: hdc flash partition packagename
+        // check
+        HdcTransferBase::TransferConfig transferConfig {};
+        transferConfig.functionName = "aaaa";
+        transferConfig.options = TEST_PARTITION_NAME;
+        transferConfig.options += "  ";
+        transferConfig.options += TEST_FLASH_IMAGE_NAME;
+        std::string localPath = TEST_FLASH_IMAGE_NAME;
+        transferConfig.fileSize = 1468006400; // 1468006400 file size
+        WRITE_LOG(LOG_DEBUG, "CheckMaster %s", transferConfig.functionName.c_str());
+        transferConfig.optionalName = "userdata.img";
+        std::string bufString = SerialStruct::SerializeToString(transferConfig);
+        const uint64_t realSize = static_cast<uint64_t>(1024 * 1024 * 1024) * 5;
+        std::vector<uint8_t> buffer(sizeof(realSize) + bufString.size());
+        int ret = memcpy_s(buffer.data(), buffer.size(), &realSize, sizeof(realSize));
+        EXPECT_EQ(0, ret);
+        ret = memcpy_s(buffer.data() + sizeof(realSize), buffer.size(), bufString.c_str(), bufString.size());
+        EXPECT_EQ(0, ret);
+        hdcDamon->CommandDispatch(CMD_UPDATER_CHECK, buffer.data(), buffer.size());
         return 0;
     }
 
@@ -188,13 +254,18 @@ public:
 
         HTaskInfo hTaskInfo = nullptr;
         std::shared_ptr<TaskInformation> task = std::make_shared<TaskInformation>();
+        if (task == nullptr) {
+            return -1;
+        }
         hTaskInfo = task.get();
         hTaskInfo->channelId = 2; // 2 channel id
         hTaskInfo->sessionId = 0;
         hTaskInfo->runLoop = &loopMain;
         hTaskInfo->serverOrDaemon = 1;
         std::shared_ptr<DaemonUpdater> hdcDamon = std::make_shared<DaemonUpdater>(hTaskInfo);
-
+        if (hdcDamon == nullptr) {
+            return -1;
+        }
         // cmd: hdc flash partition packagename
         // check
         HdcTransferBase::TransferConfig transferConfig {};
@@ -207,8 +278,7 @@ public:
         WRITE_LOG(LOG_DEBUG, "CheckMaster %s", transferConfig.functionName.c_str());
         transferConfig.optionalName = "userdata.img";
         std::string bufString = SerialStruct::SerializeToString(transferConfig);
-        // 当前升级包中总的文件的大小
-        const uint64_t realSize = static_cast<uint64_t>(1024 * 1024 * 1024) * 5;
+        const uint64_t realSize = transferConfig.fileSize;
         std::vector<uint8_t> buffer(sizeof(realSize) + bufString.size());
         int ret = memcpy_s(buffer.data(), buffer.size(), &realSize, sizeof(realSize));
         EXPECT_EQ(0, ret);
@@ -219,21 +289,20 @@ public:
         // begin
         hdcDamon->CommandDispatch(CMD_UPDATER_BEGIN, NULL, 0);
 
-        // data 写数据部分
-        const uint32_t dataSize = 1024;  // 1024 data size
         HdcTransferBase::TransferPayload payloadHead {};
+        for (int i = 0; i < 10; i++) { // 10 send data
+            payloadHead.compressType = HdcTransferBase::COMPRESS_NONE;
+            payloadHead.uncompressSize = transferConfig.fileSize / 10; // 10 time
+            payloadHead.compressSize = transferConfig.fileSize / 10; // 10 time
+            payloadHead.index = 0;
+            std::string bufData = SerialStruct::SerializeToString(payloadHead);
+            hdcDamon->CommandDispatch(CMD_UPDATER_DATA, reinterpret_cast<uint8_t *>(bufData.data()), bufData.size());
+        }
         payloadHead.compressType = HdcTransferBase::COMPRESS_NONE;
-        payloadHead.uncompressSize = dataSize;
-        payloadHead.compressSize = dataSize;
+        payloadHead.uncompressSize = transferConfig.fileSize / 10; // 10 time
+        payloadHead.compressSize = transferConfig.fileSize / 10; // 10 time
         payloadHead.index = 0;
         std::string bufData = SerialStruct::SerializeToString(payloadHead);
-        hdcDamon->CommandDispatch(CMD_UPDATER_DATA, reinterpret_cast<uint8_t *>(bufData.data()), bufData.size());
-
-        payloadHead.compressType = HdcTransferBase::COMPRESS_NONE;
-        payloadHead.uncompressSize = dataSize;
-        payloadHead.compressSize = dataSize;
-        payloadHead.index = 1;
-        bufData = SerialStruct::SerializeToString(payloadHead);
         hdcDamon->CommandDispatch(CMD_UPDATER_DATA, reinterpret_cast<uint8_t *>(bufData.data()), bufData.size());
         // end
         hdcDamon->DoTransferFinish();
@@ -247,20 +316,22 @@ public:
 
         HTaskInfo hTaskInfo = nullptr;
         std::shared_ptr<TaskInformation> task = std::make_shared<TaskInformation>();
+        if (task == nullptr) {
+            return -1;
+        }
         hTaskInfo = task.get();
         hTaskInfo->channelId = 2; // 2 channel id
         hTaskInfo->sessionId = 0;
         hTaskInfo->runLoop = &loopMain;
         hTaskInfo->serverOrDaemon = 1;
         std::shared_ptr<DaemonUpdater> hdcDamon = std::make_shared<DaemonUpdater>(hTaskInfo);
-
+        if (hdcDamon == nullptr) {
+            return -1;
+        }
         // cmd: hdc erase partition
         // check
-        HdcTransferBase::TransferConfig transferConfig {};
-        transferConfig.functionName = "erase";
-        transferConfig.options = "erase -f  ";
-        transferConfig.options += TEST_PARTITION_NAME;
-        std::string bufString = SerialStruct::SerializeToString(transferConfig);
+        std::string bufString = "erase -f ";
+        bufString += TEST_PARTITION_NAME;
         hdcDamon->CommandDispatch(CMD_UPDATER_ERASE, reinterpret_cast<uint8_t *>(bufString.data()), bufString.size());
         return 0;
     }
@@ -272,21 +343,24 @@ public:
 
         HTaskInfo hTaskInfo = nullptr;
         std::shared_ptr<TaskInformation> task = std::make_shared<TaskInformation>();
+        if (task == nullptr) {
+            return -1;
+        }
         hTaskInfo = task.get();
         hTaskInfo->channelId = 2; // 2 channel id
         hTaskInfo->sessionId = 0;
         hTaskInfo->runLoop = &loopMain;
         hTaskInfo->serverOrDaemon = 1;
         std::shared_ptr<DaemonUpdater> hdcDamon = std::make_shared<DaemonUpdater>(hTaskInfo);
-
+        if (hdcDamon == nullptr) {
+            return -1;
+        }
         // cmd: hdc format partition
         // check
-        HdcTransferBase::TransferConfig transferConfig {};
-        transferConfig.functionName = "format";
-        transferConfig.options = "format -f  ";
-        transferConfig.options += TEST_PARTITION_NAME;
-        std::string bufString = SerialStruct::SerializeToString(transferConfig);
-        hdcDamon->CommandDispatch(CMD_UPDATER_ERASE, reinterpret_cast<uint8_t *>(bufString.data()), bufString.size());
+        std::string bufString = "format -f ";
+        bufString += TEST_PARTITION_NAME + "  -t ext4";
+        hdcDamon->CommandDispatch(CMD_UPDATER_FORMAT, reinterpret_cast<uint8_t *>(bufString.data()), bufString.size());
+
         return 0;
     }
 };
@@ -303,10 +377,22 @@ HWTEST_F(FLashServiceUnitTest, TestDaemonUpdater, TestSize.Level1)
     EXPECT_EQ(0, test.TestDaemonUpdater());
 }
 
+HWTEST_F(FLashServiceUnitTest, TestDoUpdater, TestSize.Level1)
+{
+    FLashServiceUnitTest test;
+    EXPECT_EQ(0, test.TestDoUpdater());
+}
+
 HWTEST_F(FLashServiceUnitTest, TestHdcDaemonFlash, TestSize.Level1)
 {
     FLashServiceUnitTest test;
     EXPECT_EQ(0, test.TestHdcDaemonFlash());
+}
+
+HWTEST_F(FLashServiceUnitTest, TestHdcDaemonInvalid, TestSize.Level1)
+{
+    FLashServiceUnitTest test;
+    EXPECT_EQ(0, test.TestHdcDaemonInvalid());
 }
 
 HWTEST_F(FLashServiceUnitTest, TestHdcDaemonErase, TestSize.Level1)
@@ -336,13 +422,21 @@ HWTEST_F(FLashServiceUnitTest, TestDoFlashPartition, TestSize.Level1)
 HWTEST_F(FLashServiceUnitTest, TestDoFormatPartition, TestSize.Level1)
 {
     FLashServiceUnitTest test;
-    EXPECT_EQ(0, test.TestDoFormatPartition());
+    EXPECT_EQ(0, test.TestDoFormatPartition("data", "ext4"));
+    EXPECT_EQ(0, test.TestDoFormatPartition("data", "f2fs"));
+    EXPECT_EQ(0, test.TestDoFormatPartition("boot", "f2fs"));
 }
 
 HWTEST_F(FLashServiceUnitTest, TestDoErasePartition, TestSize.Level1)
 {
     FLashServiceUnitTest test;
     EXPECT_EQ(0, test.TestDoErasePartition());
+}
+
+HWTEST_F(FLashServiceUnitTest, TestFlashServiceDoResizeParatiton, TestSize.Level1)
+{
+    FLashServiceUnitTest test;
+    EXPECT_EQ(0, test.TestFlashServiceDoResizeParatiton());
 }
 
 HWTEST_F(FLashServiceUnitTest, TestFlashServiceDoPrepare, TestSize.Level1)
@@ -361,7 +455,7 @@ HWTEST_F(FLashServiceUnitTest, TestFlashServiceDoPrepare, TestSize.Level1)
     EXPECT_EQ(0, test.TestFlashServiceDoPrepare(flashd::UPDATEMOD_ERASE, cmdParam));
 
     cmdParam = "format -f ";
-    cmdParam += TEST_PARTITION_NAME + "  ";
+    cmdParam += TEST_PARTITION_NAME + "  -t ext4";
     EXPECT_EQ(0, test.TestFlashServiceDoPrepare(flashd::UPDATEMOD_FORMAT, cmdParam));
 
     EXPECT_EQ(0, test.TestFlashServiceDoPrepare(flashd::UPDATEMOD_MAX, cmdParam));
@@ -382,11 +476,11 @@ HWTEST_F(FLashServiceUnitTest, TestFlashServiceDoFlash, TestSize.Level1)
     cmdParam += TEST_PARTITION_NAME + "  ";
     EXPECT_EQ(0, test.TestFlashServiceDoFlash(flashd::UPDATEMOD_ERASE, cmdParam));
 
-    cmdParam = "format -f ext4 ";
+    cmdParam = "format -f -t ext4 ";
     cmdParam += TEST_PARTITION_NAME + "  ";
     EXPECT_EQ(0, test.TestFlashServiceDoFlash(flashd::UPDATEMOD_FORMAT, cmdParam));
 
-    cmdParam = "format -f f2fs ";
+    cmdParam = "format -f -t f2fs ";
     cmdParam += TEST_PARTITION_NAME + "  ";
     EXPECT_EQ(0, test.TestFlashServiceDoFlash(flashd::UPDATEMOD_FORMAT, cmdParam));
 

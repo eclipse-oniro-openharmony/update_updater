@@ -26,7 +26,6 @@ ohos_static_library("libflashd") {
   ]
 
   defines = [
-    "HDC_DEBUG",
     "HDC_SUPPORT_FLASHD",
     "HARMONY_PROJECT",
   ]
@@ -46,7 +45,6 @@ ohos_static_library("libflashd") {
     "//third_party/libuv:uv_static",
     "//third_party/lz4:liblz4_static",
     "//third_party/openssl:libcrypto_static",
-    "//third_party/openssl:ssl_source",
     "//third_party/zlib:libz",
     "//utils/native/base:utils",
   ]

@@ -18,12 +18,31 @@
 #include "transfer.h"
 
 namespace Hdc {
+#define FLASHHOST_CHECK(retCode, exper, ...) \
+    if (!(retCode)) { \
+        LogMsg(MSG_FAIL, __VA_ARGS__); \
+        exper; \
+    }
+#define FLASHHOST_ONLY_CHECK(retCode, exper) \
+    if (!(retCode)) { \
+        exper; \
+    }
+
 class HostUpdater : public HdcTransferBase {
 public:
     explicit HostUpdater(HTaskInfo hTaskInfo);
     virtual ~HostUpdater();
     bool CommandDispatch(const uint16_t command, uint8_t *payload, const int payloadSize) override;
 
+    static std::string GetFlashdHelp();
+    static bool CheckMatchUpdate(const std::string &input, std::string &stringError, uint16_t &cmdFlag, bool &bJumpDo);
+    static bool ConfirmCommand(const string &commandIn);
+#ifdef UPDATER_UT
+    void OpenFile()
+    {
+        CheckMaster(&ctxNow);
+    }
+#endif
 private:
     void CheckMaster(CtxFile *context) override;
 
@@ -36,20 +55,17 @@ private:
 #ifdef UPDATER_UT
     void LogMsg(MessageLevel level, const char *msg, ...)
     {
-        va_list vaArgs;
-        va_start(vaArgs, msg);
-        string log = Base::StringFormat(msg, vaArgs);
-        va_end(vaArgs);
-        WRITE_LOG(LOG_DEBUG, "LogMsg %d %s", level, log.c_str());
         return;
     }
     void SendRawData(uint8_t *bufPtr, const int size)
     {
-        WRITE_LOG(LOG_DEBUG, "SendRawData %d", size);
+        std::string s((char *)bufPtr, size);
+        WRITE_LOG(LOG_DEBUG, "SendRawData %d %s", size, s.c_str());
     }
     bool SendToAnother(const uint16_t command, uint8_t *bufPtr, const int size)
     {
-        WRITE_LOG(LOG_DEBUG, "SendToAnother command %d size %d", command, size);
+        std::string s((char *)bufPtr, size);
+        WRITE_LOG(LOG_DEBUG, "SendToAnother command %d size %d %s", command, size, s.c_str());
         return true;
     }
 #endif

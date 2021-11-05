@@ -56,7 +56,7 @@ void UpdaterMainUnitTest::SetUpTestCase(void)
     if (MountForPath("/data") != 0) {
         cout << "MountForPath failed" << endl;
     }
-    PostUpdater();
+    PostUpdater(true);
 }
 
 // end
@@ -89,7 +89,7 @@ HWTEST_F(UpdaterMainUnitTest, updater_main_test_001, TestSize.Level1)
     std::vector<std::string> args = ParseParams(argc, argv);
 
     EXPECT_EQ(args.size(), static_cast<unsigned int>(argc));
-    PostUpdater();
+    PostUpdater(true);
     delete argv[0];
     delete []argv;
 }
@@ -106,7 +106,7 @@ HWTEST_F(UpdaterMainUnitTest, updater_main_test_002, TestSize.Level1)
 
     int fRet = FactoryReset(USER_WIPE_DATA, "/misc/factory_test");
     EXPECT_EQ(fRet, 0);
-    PostUpdater();
+    PostUpdater(true);
 }
 
 HWTEST_F(UpdaterMainUnitTest, updater_main_test_003, TestSize.Level1)

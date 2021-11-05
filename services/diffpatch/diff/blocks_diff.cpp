@@ -237,7 +237,7 @@ void BlocksDiff::ComputeLength(const BlockBuffer &newInfo,
     int64_t i = 0;
     int64_t s = 0;
     int64_t tmp = 0;
-    for (; ((lastScan_ + i) < currentOffset_) && ((lastPos_ + i) < static_cast<int64_t>(oldInfo.length));) {
+    for (; ((lastScan_ + i) < currentOffset_) && ((lastPos_ + i) < static_cast<int64_t>(oldInfo.length)); ) {
         if (oldInfo.buffer[lastPos_ + i] == newInfo.buffer[lastScan_ + i]) {
             s++;
         }
@@ -413,7 +413,7 @@ void SuffixArray<DataType>::Init(const BlockBuffer &oldInfo)
     DataType len = 0;
     for (h = 1; suffixArray_[0] != -(static_cast<DataType>(oldInfo.length) + 1); h += h) {
         len = 0;
-        for (i = 0; i < (static_cast<DataType>(oldInfo.length) + 1);) {
+        for (i = 0; i < (static_cast<DataType>(oldInfo.length) + 1); ) {
             if (suffixArray_[i] < 0) {
                 len -= suffixArray_[i];
                 i -= suffixArray_[i];

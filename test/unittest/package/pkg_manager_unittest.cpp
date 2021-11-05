@@ -137,7 +137,7 @@ public:
         GetUpgradePkgInfo(pkgInfo, files);
         std::string packagePath = TEST_PATH_TO;
         packagePath += testPackageName;
-        int32_t ret = pkgManager_->CreatePackage(packagePath, GetTestPrivateKeyName(), &pkgInfo.pkgInfo, files);
+        int32_t ret = pkgManager_->CreatePackage(packagePath, GetTestPrivateKeyName(0), &pkgInfo.pkgInfo, files);
         EXPECT_EQ(ret, PKG_SUCCESS);
         return 0;
     }
@@ -153,7 +153,7 @@ public:
 
         // 修改成错误的路径
         files[0].first = "sssssssssss";
-        int32_t ret = pkgManager_->CreatePackage(packagePath, GetTestPrivateKeyName(), &pkgInfo.pkgInfo, files);
+        int32_t ret = pkgManager_->CreatePackage(packagePath, GetTestPrivateKeyName(0), &pkgInfo.pkgInfo, files);
         EXPECT_EQ(ret, PKG_INVALID_FILE);
         return 0;
     }
@@ -164,7 +164,7 @@ public:
         std::vector<std::pair<std::string, ComponentInfo>> files;
         std::string packagePath = TEST_PATH_TO;
         packagePath += testPackageName;
-        int32_t ret = pkgManager_->CreatePackage(packagePath, GetTestPrivateKeyName(), nullptr, files);
+        int32_t ret = pkgManager_->CreatePackage(packagePath, GetTestPrivateKeyName(0), nullptr, files);
         EXPECT_EQ(ret, PKG_INVALID_PARAM);
         return 0;
     }
@@ -177,7 +177,7 @@ public:
         }
         PKG_LOGI("\n\n ************* TestCombinePkgUNpack %s \r\n", testCombinePkgName.c_str());
         std::vector<std::string> components;
-        int32_t ret = pkgManager_->LoadPackage(TEST_PATH_TO + testCombinePkgName, GetTestCertName(), components);
+        int32_t ret = pkgManager_->LoadPackage(TEST_PATH_TO + testCombinePkgName, GetTestCertName(0), components);
         if (ret != PKG_SUCCESS) {
             PKG_LOGE("LoadPackage fail ret:%d", ret);
             return ret;
@@ -258,7 +258,7 @@ public:
         }
         PKG_LOGI("\n\n ************* TestCombinePkgUNpack %s \r\n", testCombinePkgName.c_str());
         std::vector<std::string> components;
-        int32_t ret = pkgManager_->LoadPackage(TEST_PATH_TO + testCombinePkgName, GetTestCertName(), components);
+        int32_t ret = pkgManager_->LoadPackage(TEST_PATH_TO + testCombinePkgName, GetTestCertName(0), components);
         if (ret != PKG_SUCCESS) {
             PKG_LOGI("LoadPackage fail ret:%d", ret);
             return ret;
@@ -297,7 +297,7 @@ public:
         }
         PKG_LOGI("\n\n ************* TestCombinePkgUNpack %s \r\n", testCombinePkgName.c_str());
         std::vector<std::string> components;
-        int32_t ret = pkgManager_->LoadPackage(TEST_PATH_TO + testCombinePkgName, GetTestCertName(), components);
+        int32_t ret = pkgManager_->LoadPackage(TEST_PATH_TO + testCombinePkgName, GetTestCertName(0), components);
         if (ret != PKG_SUCCESS) {
             PKG_LOGI("LoadPackage fail ret:%d", ret);
             return ret;
@@ -404,7 +404,7 @@ public:
         std::string packagePath = TEST_PATH_TO;
         packagePath += testPackageName;
         files.push_back(std::pair<std::string, ComponentInfo>("/qqqqqq", info));
-        int ret = pkgManager_->CreatePackage(packagePath, GetTestPrivateKeyName(), &pkgInfo.pkgInfo, files);
+        int ret = pkgManager_->CreatePackage(packagePath, GetTestPrivateKeyName(0), &pkgInfo.pkgInfo, files);
         EXPECT_EQ(ret, PKG_INVALID_FILE);
         return 0;
     }
@@ -418,7 +418,7 @@ public:
         packagePath += testPackageName;
         uint8_t signMethodIndex = 10;
         pkgInfo.pkgInfo.signMethod = PKG_SIGN_METHOD_RSA + signMethodIndex;
-        int ret = pkgManager_->CreatePackage(packagePath, GetTestPrivateKeyName(), &pkgInfo.pkgInfo, files);
+        int ret = pkgManager_->CreatePackage(packagePath, GetTestPrivateKeyName(0), &pkgInfo.pkgInfo, files);
         EXPECT_NE(ret, 0);
         return 0;
     }
@@ -440,7 +440,7 @@ public:
         pkgInfo.pkgType = PKG_PACK_TYPE_GZIP;
         std::string fileName = TEST_PATH_TO;
         fileName += testGZipPackageName;
-        int ret = pkgManager_->CreatePackage(fileName, GetTestPrivateKeyName(), &pkgInfo, files);
+        int ret = pkgManager_->CreatePackage(fileName, GetTestPrivateKeyName(0), &pkgInfo, files);
         EXPECT_EQ(ret, PKG_INVALID_FILE);
         return 0;
     }
@@ -463,7 +463,7 @@ public:
         pkgInfo.pkgType = PKG_PACK_TYPE_GZIP + pkgTypeIndex;
         std::string fileName = TEST_PATH_TO;
         fileName += testGZipPackageName;
-        int ret = pkgManager_->CreatePackage(fileName, GetTestPrivateKeyName(), &pkgInfo, files);
+        int ret = pkgManager_->CreatePackage(fileName, GetTestPrivateKeyName(0), &pkgInfo, files);
         EXPECT_EQ(ret, PKG_INVALID_FILE);
         return 0;
     }
@@ -487,7 +487,7 @@ public:
         pkgInfo.pkgType  = PKG_PACK_TYPE_ZIP;
         std::string fileName = TEST_PATH_TO;
         fileName += testZipPackageName;
-        int ret = pkgManager_->CreatePackage(fileName, GetTestPrivateKeyName(), &pkgInfo, files);
+        int ret = pkgManager_->CreatePackage(fileName, GetTestPrivateKeyName(0), &pkgInfo, files);
         EXPECT_EQ(ret, PKG_INVALID_FILE);
         return 0;
     }
@@ -499,7 +499,7 @@ public:
         std::vector<std::string> components;
         std::string fileName = TEST_PATH_TO;
         fileName += "testZipPackageName.aaa";
-        int32_t ret = pkgManager_->LoadPackage(fileName, GetTestCertName(), components);
+        int32_t ret = pkgManager_->LoadPackage(fileName, GetTestCertName(0), components);
         EXPECT_EQ(ret, PKG_INVALID_FILE);
         return 0;
     }

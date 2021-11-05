@@ -131,7 +131,7 @@ public:
         return 0;
     }
 
-    int TestSignVerify(int8_t signMethod, std::string privateKey, std::string certName)
+    int TestSignVerify(int8_t signMethod, std::string privateKey, std::string certName, uint8_t hashType)
     {
         PkgBuffer digest(DIGEST_LEN);
         std::string filePath = TEST_PATH_FROM;
@@ -141,7 +141,7 @@ public:
         // 签名
         filePath = TEST_PATH_FROM + privateKey;
         SignAlgorithm::SignAlgorithmPtr algorithm = PkgAlgorithmFactory::GetSignAlgorithm(filePath,
-            signMethod, PKG_DIGEST_TYPE_SHA256);
+            signMethod, hashType);
         EXPECT_NE(nullptr, algorithm);
         std::vector<uint8_t> signature;
         size_t signLen = 0;
@@ -152,7 +152,7 @@ public:
         EXPECT_EQ(ret, PKG_INVALID_SIGNATURE);
 
         filePath = TEST_PATH_FROM + certName;
-        algorithm = PkgAlgorithmFactory::GetVerifyAlgorithm(filePath, PKG_DIGEST_TYPE_SHA256);
+        algorithm = PkgAlgorithmFactory::GetVerifyAlgorithm(filePath, hashType);
         // 验证
         ret = algorithm->SignBuffer(digest, signature, signLen);
         EXPECT_EQ(ret, PKG_INVALID_SIGNATURE);
@@ -229,13 +229,22 @@ HWTEST_F(PkgAlgoUnitTest, TestHash256Digest, TestSize.Level1)
 HWTEST_F(PkgAlgoUnitTest, TestRsaSignVerify, TestSize.Level1)
 {
     PkgAlgoUnitTest test;
-    EXPECT_EQ(0, test.TestSignVerify(PKG_SIGN_METHOD_RSA, "rsa_private_key2048.pem", "signing_cert.crt"));
+    EXPECT_EQ(0, test.TestSignVerify(PKG_SIGN_METHOD_RSA,
+        "rsa_private_key2048.pem", "signing_cert.crt", PKG_DIGEST_TYPE_SHA256));
+}
+
+HWTEST_F(PkgAlgoUnitTest, TestRsaSignVerify384, TestSize.Level1)
+{
+    PkgAlgoUnitTest test;
+    EXPECT_EQ(0, test.TestSignVerify(PKG_SIGN_METHOD_RSA,
+        "rsa_private_key384.pem", "signing_cert384.crt", PKG_DIGEST_TYPE_SHA384));
 }
 
 HWTEST_F(PkgAlgoUnitTest, TestEccSignVerify, TestSize.Level1)
 {
     PkgAlgoUnitTest test;
-    EXPECT_EQ(0, test.TestSignVerify(PKG_SIGN_METHOD_ECDSA, "ecc/prime256v1-key.pem", "ecc/signing_cert.crt"));
+    EXPECT_EQ(0, test.TestSignVerify(PKG_SIGN_METHOD_ECDSA,
+        "ecc/prime256v1-key.pem", "ecc/signing_cert.crt", PKG_DIGEST_TYPE_SHA256));
 }
 
 HWTEST_F(PkgAlgoUnitTest, TestEccUserPackage, TestSize.Level1)

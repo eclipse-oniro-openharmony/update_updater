@@ -170,7 +170,8 @@ static UpdaterStatus InstallUpdaterPackage(UpdaterParams &upParams, const std::v
         status = DoInstallUpdaterPackage(manager, upParams.updatePackage, upParams.retryCount);
         if (status != UPDATE_SUCCESS) {
             std::this_thread::sleep_for(std::chrono::milliseconds(UI_SHOW_DURATION));
-            g_logLabel->SetText("update failed!");
+            std::string errMsg = ((status == UPDATE_SPACE_NOTENOUGH) ? "Free space is not enough" : "Update failed!");
+            g_logLabel->SetText(errMsg.c_str());
             STAGE(UPDATE_STAGE_FAIL) << "Install failed";
             if (status == UPDATE_RETRY && upParams.retryCount < MAX_RETRY_COUNT) {
                 upParams.retryCount += 1;
@@ -222,7 +223,7 @@ static UpdaterStatus StartUpdaterEntry(PkgManager::PkgManagerPtr manager,
             g_logResultLabel->SetText("Wipe data failed");
         } else {
             g_logResultLabel->SetText("Wipe data finished");
-            PostUpdater();
+            PostUpdater(true);
             std::this_thread::sleep_for(std::chrono::milliseconds(UI_SHOW_DURATION));
         }
     }
@@ -297,7 +298,7 @@ int UpdaterMain(int argc, char **argv)
         return 0;
     }
 #endif
-    PostUpdater();
+    PostUpdater(true);
     utils::DoReboot("");
     return 0;
 }

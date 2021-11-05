@@ -27,10 +27,8 @@ int flashd_main(int argc, char **argv)
     for (std::string arg : args) {
         if (arg.find("-l") != std::string::npos) {
             int logLevel = atoi(arg.c_str() + strlen("-l"));
-            if (logLevel < 0 || logLevel > LOG_LAST) {
-                WRITE_LOG(LOG_DEBUG, "Loglevel error!\n");
-                return -1;
-            }
+            FLASHDAEMON_CHECK(!(logLevel < 0 || logLevel > LOG_LAST),
+                logLevel = LOG_LAST, "Loglevel error %d", logLevel);
             Base::SetLogLevel(logLevel);
         } else if (arg.find("-t") != std::string::npos) {
             enableTcp = true;

@@ -162,7 +162,7 @@ void OnKeyEvent(int viewId)
     ClearText();
     if (viewId == g_textLabel0->GetViewId() && g_textLabel0->IsVisiable()) {
         HideDialog();
-        PostUpdater();
+        PostUpdater(true);
         utils::DoReboot("");
     } else if (viewId == g_textLabel2->GetViewId() && g_textLabel2->IsVisiable()) {
         ShowDialog();
@@ -174,7 +174,7 @@ void OnKeyEvent(int viewId)
             ShowMenu();
             return;
         }
-        PostUpdater();
+        PostUpdater(true);
         utils::DoReboot("");
     } else if (viewId == g_dialogCancalBtn->GetViewId() && g_dialogCancalBtn->IsVisiable()) {
         HideDialog();
@@ -439,6 +439,7 @@ void UpdaterUiInit()
     g_anmimationLabel->SetBackgroundColor(&bgColor);
     LoadImgs();
     g_progressBar = new ProgressBar(START_X3, START_Y3, WIDTH3, HEIGHT3, g_updateFrame);
+    g_progressBar->Hide();
 
     g_updateInfoLabel = new TextLabel(START_X5, START_Y5, screenW, HEIGHT5, g_updateFrame);
     g_updateInfoLabel->SetOutLineBold(false, false);

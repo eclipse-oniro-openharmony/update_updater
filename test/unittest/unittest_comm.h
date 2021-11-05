@@ -23,21 +23,30 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include "package/package.h"
+
 const std::string TEST_PATH_FROM = "/data/updater/src/";
 const std::string TEST_PATH_TO = "/data/updater/dst/";
 
-inline std::string GetTestPrivateKeyName()
+inline std::string GetTestPrivateKeyName(int type = 0)
 {
     std::string name = TEST_PATH_FROM;
-    name += "rsa_private_key2048.pem";
+    if (type != PKG_DIGEST_TYPE_SHA384) {
+        name += "rsa_private_key2048.pem";
+    } else {
+        name += "rsa_private_key384.pem";
+    }
     return name;
 }
 
-inline std::string GetTestCertName()
+inline std::string GetTestCertName(int type = 0)
 {
     std::string name = TEST_PATH_FROM;
-    name += "signing_cert.crt";
+    if (type != PKG_DIGEST_TYPE_SHA384) {
+        name += "signing_cert.crt";
+    } else {
+        name += "signing_cert384.crt";
+    }
     return name;
 }
-
 #endif // UNITTEST_COMM

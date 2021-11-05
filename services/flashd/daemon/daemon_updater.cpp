@@ -29,14 +29,6 @@ DaemonUpdater::~DaemonUpdater()
     WRITE_LOG(LOG_DEBUG, "~DaemonUpdater refCount %d", refCount);
 }
 
-bool DaemonUpdater::ReadyForRelease()
-{
-    if (!HdcTaskBase::ReadyForRelease()) {
-        return false;
-    }
-    return true;
-}
-
 bool DaemonUpdater::CommandDispatch(const uint16_t command, uint8_t *payload, const int payloadSize)
 {
 #ifndef UPDATER_UT
@@ -49,15 +41,17 @@ bool DaemonUpdater::CommandDispatch(const uint16_t command, uint8_t *payload, co
             [&](uint32_t type, size_t dataLen, const void *context) {
                 SendProgress(dataLen);
             });
-        if (ret != 0) {
-            return false;
-        }
+        FLASHDAEMON_CHECK(ret == 0, AsyncUpdateFinish(command, -1, errorMsg_);
+            return false, "Faild to create flashd");
     }
     switch (command) {
         case CMD_UPDATER_DATA: {
             string serialStrring((char *)payload, payloadPrefixReserve);
-            TransferPayload pld;
+            TransferPayload pld {};
             SerialStruct::ParseFromString(pld, serialStrring);
+#ifdef UPDATER_UT
+            pld.uncompressSize = pld.compressSize;
+#endif
             SendProgress(pld.uncompressSize);
             break;
         }
@@ -88,9 +82,7 @@ void DaemonUpdater::ProcessUpdateCheck(const uint8_t *payload, const int payload
 {
     uint64_t realSize = 0;
     int ret = memcpy_s(&realSize, sizeof(realSize), payload, sizeof(realSize));
-    if (ret != 0) {
-        return;
-    }
+    FLASHDAEMON_CHECK(ret == 0, return, "Faild to memcpy");
     string bufString((char *)payload + sizeof(realSize), payloadSize - sizeof(realSize));
     SerialStruct::ParseFromString(ctxNow.transferConfig, bufString);
     ctxNow.master = false;
@@ -117,6 +109,7 @@ void DaemonUpdater::ProcessUpdateCheck(const uint8_t *payload, const int payload
     } else {
         WRITE_LOG(LOG_FATAL, "ProcessUpdateCheck local function %s size %lu realSize %lu",
             ctxNow.transferConfig.functionName.c_str(), ctxNow.fileSize, realSize);
+        AsyncUpdateFinish(type, -1, "Invalid command");
         return;
     }
     ctxNow.localPath = ctxNow.transferConfig.optionalName;
@@ -124,34 +117,31 @@ void DaemonUpdater::ProcessUpdateCheck(const uint8_t *payload, const int payload
     if (ret == 0) {
         refCount++;
         WRITE_LOG(LOG_DEBUG, "ProcessUpdateCheck localPath %s", ctxNow.localPath.c_str());
+#ifndef UPDATER_UT
         uv_fs_open(loopTask, &ctxNow.fsOpenReq, ctxNow.localPath.c_str(),
             UV_FS_O_TRUNC | UV_FS_O_CREAT | UV_FS_O_WRONLY, S_IRUSR, OnFileOpen);
-    } else {
-        AsyncUpdateFinish(type, ret, errorMsg_);
+#endif
     }
+    FLASHDAEMON_CHECK(ret == 0, AsyncUpdateFinish(type, ret, errorMsg_), "Faild to prepare for %d", type);
 }
 
 void DaemonUpdater::RunUpdateShell(uint8_t type, const std::string &options, const std::string &package)
 {
     int ret = flashd::DoUpdaterFlash(flashHandle_, type, options, package);
-    if (ret != 0) {
-        WRITE_LOG(LOG_FATAL, errorMsg_.c_str());
-    }
     AsyncUpdateFinish(type, ret, errorMsg_);
 }
 
 void DaemonUpdater::SendProgress(size_t dataLen)
 {
     currSize_ += dataLen;
-    int32_t percentage = (int32_t)(currSize_ * (flashd::PERCENT_FINISH - 1) / totalSize_);
-    if (percentage >= flashd::PERCENT_FINISH) {
+    int32_t percentage = static_cast<int32_t>(currSize_ * (flashd::PERCENT_FINISH - 1) / totalSize_);
+    if (static_cast<uint32_t>(percentage) >= flashd::PERCENT_FINISH) {
         WRITE_LOG(LOG_DEBUG, "SendProgress %lf percentage %d", currSize_, percentage);
         return;
     }
     if (percentage_ < percentage) {
         percentage_ = percentage;
         WRITE_LOG(LOG_DEBUG, "SendProgress %lf percentage_ %d", currSize_, percentage_);
-        FLASHING_LOGI("SendProgress %lf percentage_ %d", currSize_, percentage_);
         SendToAnother(CMD_UPDATER_PROGRESS, (uint8_t *)&percentage, sizeof(uint32_t));
     }
 }
@@ -172,24 +162,21 @@ void DaemonUpdater::WhenTransferFinish(CtxFile *context)
         type = flashd::UPDATEMOD_FLASH;
     }
     AsyncUpdateFinish(type, ret, errorMsg_);
-    ret = flashd::DoUpdaterFinish(flashHandle_, type, ctxNow.localPath);
-    if (ret != 0) {
-        WRITE_LOG(LOG_FATAL, errorMsg_.c_str());
-    }
     TaskFinish();
 }
 
-void DaemonUpdater::AsyncUpdateFinish(uint8_t type, int32_t ret, const string &result)
+void DaemonUpdater::AsyncUpdateFinish(uint8_t type, int32_t retCode, const string &result)
 {
-    WRITE_LOG(LOG_DEBUG, "AsyncUpdateFinish ret %d result %s", ret, result.c_str());
-    uint32_t percentage = (ret != 0) ? flashd::PERCENT_CLEAR : flashd::PERCENT_FINISH;
+    WRITE_LOG(LOG_DEBUG, "AsyncUpdateFinish retCode %d result %s", retCode, result.c_str());
+    uint32_t percentage = (retCode != 0) ? flashd::PERCENT_CLEAR : flashd::PERCENT_FINISH;
     SendToAnother(CMD_UPDATER_PROGRESS, (uint8_t *)&percentage, sizeof(uint32_t));
+    (void)flashd::DoUpdaterFinish(flashHandle_, type, ctxNow.localPath);
 
     string echo = result;
     echo = Base::ReplaceAll(echo, "\n", " ");
     vector<uint8_t> vecBuf;
     vecBuf.push_back(type);
-    if (ret != 0) {
+    if (retCode != 0) {
         vecBuf.push_back(MSG_FAIL);
     } else {
         vecBuf.push_back(MSG_OK);
