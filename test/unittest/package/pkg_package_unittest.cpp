@@ -122,7 +122,6 @@ public:
         EXPECT_NE(pkgManager_, nullptr);
         PkgManager::StreamPtr stream = nullptr;
         std::string packagePath = TEST_PATH_TO;
-        uint32_t zipNodeId = 100;
         packagePath += testPackageName;
         pkgManager_->CreatePkgStream(stream, packagePath, 0, PkgStream::PkgStreamType_Read);
         EXPECT_NE(stream, nullptr);
