@@ -277,7 +277,7 @@ bool HostUpdater::CheckMatchUpdate(const std::string &input,
         bJumpDo = true;
         return true;
     }
-    int cmdLen = updateCmd.size();
+    size_t cmdLen = updateCmd.size();
     if (!strncmp(input.c_str(), updateCmd.c_str(), updateCmd.size())) {
         cmdFlag = CMD_UPDATER_UPDATE_INIT;
         cmdLen = updateCmd.size();

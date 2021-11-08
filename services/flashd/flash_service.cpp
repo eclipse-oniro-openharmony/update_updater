@@ -214,7 +214,7 @@ PartitionPtr FlashService::GetPartition(const std::string &partition) const
 {
     const std::string partName = GetPartNameByAlias(partition);
     for (auto part : partitions_) {
-        if (partName.compare(part->GetPartitionName()) == 0) {
+        if (strcmp(partName.c_str(), part->GetPartitionName().c_str()) == 0) {
             return part;
         }
     }
@@ -431,7 +431,7 @@ const std::string FlashService::GetPartNameByAlias(const std::string &alias)
     };
     for (auto iter = partNameMap.begin(); iter != partNameMap.end(); iter++) {
         for (auto iter2 = iter->second.begin(); iter2 != iter->second.end(); iter2++) {
-            if (*iter2 == alias) {
+            if (strcmp(alias.c_str(), (*iter2).c_str()) == 0) {
                 return iter->first;
             }
         }
@@ -461,7 +461,7 @@ static std::string GetValueFromParam(const std::vector<std::string> &params,
 {
     std::string ret = defValue;
     for (size_t i = 0; i < params.size(); i++) {
-        if (paramType.compare(params[i]) == 0) {
+        if (strcmp(paramType.c_str(), params[i].c_str()) == 0) {
             if (i < (params.size() - 1)) {
                 ret = params[i + 1];
             } else {
@@ -476,7 +476,7 @@ static bool FilterParam(const std::string &param, const std::vector<std::string>
 {
     auto iter = filter.begin();
     while (iter != filter.end()) {
-        if (param.compare(*iter) == 0) {
+        if (strcmp(param.c_str(), (*iter).c_str()) == 0) {
             return true;
         }
         iter++;
@@ -630,6 +630,15 @@ int DoUpdaterFinish(FlashHandle handle, uint8_t type, const std::string &partiti
             break;
     }
     g_flashdRunning = false;
+    return 0;
+}
+
+int SetParameter(const char *key, const char *value)
+{
+    std::string sKey = key;
+    std::string sValue = value;
+    std::string sBuf = "param set " + sKey + " " + value;
+    system(sBuf.c_str());
     return 0;
 }
 } // namespace flashd

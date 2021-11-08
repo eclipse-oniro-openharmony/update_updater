@@ -67,5 +67,17 @@ int CreateFlashInstance(FlashHandle *handle, std::string &errorMsg, ProgressFunc
 int DoUpdaterPrepare(FlashHandle handle, uint8_t type, const std::string &cmdParam, std::string &filePath);
 int DoUpdaterFlash(FlashHandle handle, uint8_t type, const std::string &cmdParam, const std::string &filePath);
 int DoUpdaterFinish(FlashHandle handle, uint8_t type, const std::string &partition);
+
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif
+#endif
+int SetParameter(const char *key, const char *value);
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif
+#endif
 } // namespace flashd
 #endif /* UPDATER_FLASHING_H */
