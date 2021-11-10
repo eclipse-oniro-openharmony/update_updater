@@ -48,7 +48,7 @@ bool HostUpdater::BeginTransfer(CtxFile &context,
 {
     int argc = 0;
     char **argv = Base::SplitCommandToArgs(payload, &argc);
-    FLASHHOST_CHECK(!(argv == nullptr || argc < minParam || fileIndex >= argc), delete[]((char *)argv);
+    HOSTUPDATER_CHECK(!(argv == nullptr || argc < minParam || fileIndex >= argc), delete[]((char *)argv);
         return false, "Invalid param for cmd \"%s\"", function.c_str());
 
     int maxParam = minParam;
@@ -56,7 +56,7 @@ bool HostUpdater::BeginTransfer(CtxFile &context,
     if (force) {
         maxParam += 1;
     }
-    FLASHHOST_CHECK(argc == maxParam, delete[]((char *)argv);
+    HOSTUPDATER_CHECK(argc == maxParam, delete[]((char *)argv);
         return false, "Invalid param for cmd \"%s\" %d", function.c_str(), maxParam);
 
     context.transferConfig.functionName = function;
@@ -71,11 +71,11 @@ bool HostUpdater::BeginTransfer(CtxFile &context,
         context.transferConfig.compressType = COMPRESS_NONE;
     } else if (MatchPackageExtendName(context.localPath, ".bin")) {
         const char *part = strstr(payload, "fastboot");
-        FLASHHOST_CHECK(part != nullptr, delete[]((char *)argv);
+        HOSTUPDATER_CHECK(part != nullptr, delete[]((char *)argv);
             return false, "Invalid image %s for cmd \"%s\"", context.localPath.c_str(), function.c_str());
         context.transferConfig.compressType = COMPRESS_NONE;
     } else {
-        FLASHHOST_CHECK((MatchPackageExtendName(context.localPath, ".zip") ||
+        HOSTUPDATER_CHECK((MatchPackageExtendName(context.localPath, ".zip") ||
             MatchPackageExtendName(context.localPath, ".lz4") ||
             MatchPackageExtendName(context.localPath, ".gz2")), delete[]((char *)argv);
             return false,
@@ -86,7 +86,7 @@ bool HostUpdater::BeginTransfer(CtxFile &context,
         context.transferConfig.functionName.c_str(), context.localPath.c_str(), payload);
     // check path
     bool ret = Base::CheckDirectoryOrPath(context.localPath.c_str(), true, true);
-    FLASHHOST_CHECK(ret, delete[]((char *)argv);
+    HOSTUPDATER_CHECK(ret, delete[]((char *)argv);
         return false,
         "Invaid path \"%s\" for cmd \"%s\"", context.localPath.c_str(), function.c_str());
     context.taskQueue.push_back(context.localPath);
@@ -134,9 +134,9 @@ bool HostUpdater::CheckCmd(const std::string &function, const char *payload, int
 {
     int argc = 0;
     char **argv = Base::SplitCommandToArgs(payload, &argc);
-    FLASHHOST_CHECK(argv != nullptr, return false, "Can not parser cmd \"%s\"", function.c_str());
+    HOSTUPDATER_CHECK(argv != nullptr, return false, "Can not parser cmd \"%s\"", function.c_str());
     delete[]((char *)argv);
-    FLASHHOST_CHECK(argc >= param, return false, "Invalid param for cmd \"%s\" %d", function.c_str(), argc);
+    HOSTUPDATER_CHECK(argc >= param, return false, "Invalid param for cmd \"%s\" %d", function.c_str(), argc);
     WRITE_LOG(LOG_DEBUG, "CheckCmd command: %s ", payload);
 
     int maxParam = param;
@@ -147,7 +147,7 @@ bool HostUpdater::CheckCmd(const std::string &function, const char *payload, int
         maxParam += 1;
         maxParam += 1;
     }
-    FLASHHOST_CHECK(argc == maxParam, return false,
+    HOSTUPDATER_CHECK(argc == maxParam, return false,
         "Invalid param for cmd \"%s\" %d %d", function.c_str(), argc, maxParam);
     return true;
 }
@@ -165,7 +165,7 @@ bool HostUpdater::CommandDispatch(const uint16_t command, uint8_t *payload, cons
     switch (command) {
         case CMD_UPDATER_BEGIN: {
             std::string s("  Processing:   0%%");
-            bSendProgress = true;
+            sendProgress = true;
             SendRawData(reinterpret_cast<uint8_t *>(s.data()), s.size());
             break;
         }
@@ -208,7 +208,7 @@ bool HostUpdater::CommandDispatch(const uint16_t command, uint8_t *payload, cons
 
 void HostUpdater::ProcessProgress(uint32_t percentage)
 {
-    if (!bSendProgress) {
+    if (!sendProgress) {
         return;
     }
     std::string backStr = "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b";
@@ -219,24 +219,24 @@ void HostUpdater::ProcessProgress(uint32_t percentage)
     if (percentage == PERCENT_CLEAR) { // clear
         SendRawData(reinterpret_cast<uint8_t *>(backStr.data()), backStr.size());
         SendRawData(reinterpret_cast<uint8_t *>(breakStr.data()), breakStr.size());
-        bSendProgress = false;
+        sendProgress = false;
         return;
     }
     int len = sprintf_s(buffer.data(), buffer.size() - 1, "%s  Processing:   %3d%%", backStr.c_str(), percentage);
-    FLASHHOST_CHECK(len > 0, return, "Failed to format progress info ");
+    HOSTUPDATER_CHECK(len > 0, return, "Failed to format progress info ");
     SendRawData(reinterpret_cast<uint8_t *>(buffer.data()), len);
     if (percentage == PERCENT_FINISH) {
         SendRawData(reinterpret_cast<uint8_t *>(breakStr.data()), breakStr.size());
-        bSendProgress = false;
+        sendProgress = false;
     }
 }
 
 bool HostUpdater::CheckUpdateContinue(const uint16_t command, const uint8_t *payload, int payloadSize)
 {
-    FLASHHOST_CHECK(static_cast<size_t>(payloadSize) >= sizeof(uint16_t),
+    HOSTUPDATER_CHECK(static_cast<size_t>(payloadSize) >= sizeof(uint16_t),
         return false, "Failed to check payload size %d ", payloadSize);
     MessageLevel level = (MessageLevel)payload[1];
-    if ((level == MSG_OK) && bSendProgress) {
+    if ((level == MSG_OK) && sendProgress) {
         ProcessProgress(PERCENT_FINISH);
     }
     std::string info((char*)(payload + sizeof(uint16_t)), payloadSize - sizeof(uint16_t));
@@ -256,8 +256,7 @@ bool HostUpdater::CheckUpdateContinue(const uint16_t command, const uint8_t *pay
 
 std::string HostUpdater::GetFlashdHelp()
 {
-    string help;
-    help = "\n---------------------------------flash commands:-------------------------------------\n"
+    string help = "\n---------------------------------flash commands:-------------------------------------\n"
            "flash commands:\n"
            " target boot [-flashd]                 - Reboot the device or boot into flashd\n"
            " update packagename                    - Update system by package\n"
@@ -300,13 +299,22 @@ bool HostUpdater::CheckMatchUpdate(const std::string &input,
     return true;
 }
 
-bool HostUpdater::ConfirmCommand(const string &commandIn)
+#ifdef UPDATER_UT
+static std::string g_input = "yes";
+void HostUpdater::SetInput(const std::string &input)
+{
+    g_input = input;
+}
+#endif
+bool HostUpdater::ConfirmCommand(const string &commandIn, bool &closeInput)
 {
     std::string tip = "";
     WRITE_LOG(LOG_DEBUG, "ConfirmCommand \"%s\" \n", commandIn.c_str());
-
-    if (!strncmp(commandIn.c_str(), flashCmd.c_str(), flashCmd.size())) {
+    if (!strncmp(commandIn.c_str(), updateCmd.c_str(), updateCmd.size())) {
+        closeInput = true;
+    } else if (!strncmp(commandIn.c_str(), flashCmd.c_str(), flashCmd.size())) {
         tip = "Confirm flash partition";
+        closeInput = true;
     } else if (!strncmp(commandIn.c_str(), eraseCmd.c_str(), eraseCmd.size())) {
         tip = "Confirm erase partition";
     } else if (!strncmp(commandIn.c_str(), formatCmd.c_str(), formatCmd.size())) {
@@ -320,13 +328,19 @@ bool HostUpdater::ConfirmCommand(const string &commandIn)
         return true;
     }
     const size_t minLen = strlen("yes");
+    int retryCount = 0;
     do {
         printf(" %s ? (Yes/No) ", tip.c_str());
         fflush(stdin);
         std::string info = {};
         size_t i = 0;
         while (1) {
+#ifndef UPDATER_UT
             char c = getchar();
+#else
+            char c = '\n';
+            info = g_input;
+#endif
             if (c == '\r' || c == '\n') {
                 break;
             }
@@ -344,7 +358,11 @@ bool HostUpdater::ConfirmCommand(const string &commandIn)
         if (info == "y" || info == "yes") {
             return true;
         }
-    } while (1);
+        retryCount++;
+    } while (retryCount < 3); // 3 retry max count
+    if (retryCount >= 3) { // 3 retry max count
+        return false;
+    }
     return true;
 }
 } // namespace Hdc

@@ -178,7 +178,7 @@ void DoReboot(const std::string& rebootTarget, const std::string &extData)
         if (rebootTarget == "updater" && strcmp(msg.command, "boot_updater") != 0) {
             result = strcpy_s(msg.command, maxCommandSize, "boot_updater");
             msg.command[maxCommandSize] = 0;
-        } else if (rebootTarget == "flash" && strcmp(msg.command, "flash") != 0) {
+        } else if (rebootTarget == "flashd" && strcmp(msg.command, "flashd") != 0) {
             result = strcpy_s(msg.command, maxCommandSize, "boot_flash");
             msg.command[maxCommandSize] = 0;
         } else if (rebootTarget == "bootloader" && strcmp(msg.command, "boot_loader") != 0) {

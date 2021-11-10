@@ -18,13 +18,9 @@
 #include "transfer.h"
 
 namespace Hdc {
-#define FLASHHOST_CHECK(retCode, exper, ...) \
+#define HOSTUPDATER_CHECK(retCode, exper, ...) \
     if (!(retCode)) { \
         LogMsg(MSG_FAIL, __VA_ARGS__); \
-        exper; \
-    }
-#define FLASHHOST_ONLY_CHECK(retCode, exper) \
-    if (!(retCode)) { \
         exper; \
     }
 
@@ -36,16 +32,16 @@ public:
 
     static std::string GetFlashdHelp();
     static bool CheckMatchUpdate(const std::string &input, std::string &stringError, uint16_t &cmdFlag, bool &bJumpDo);
-    static bool ConfirmCommand(const string &commandIn);
+    static bool ConfirmCommand(const string &commandIn, bool &closeInput);
 #ifdef UPDATER_UT
     void OpenFile()
     {
         CheckMaster(&ctxNow);
     }
+    static void SetInput(const std::string &input);
 #endif
 private:
     void CheckMaster(CtxFile *context) override;
-
     bool BeginTransfer(CtxFile &context,
         const std::string &function, const char *payload, int minParam, int fileIndex);
     bool CheckUpdateContinue(const uint16_t command, const uint8_t *payload, int payloadSize);
@@ -71,8 +67,7 @@ private:
 #endif
 private:
     bool CheckCmd(const std::string &function, const char *payload, int param);
-
-    bool bSendProgress = false;
+    bool sendProgress = false;
 };
 }
 #endif

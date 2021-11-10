@@ -192,7 +192,7 @@ public:
         // begin
         hdcDamon->CommandDispatch(CMD_UPDATER_BEGIN, NULL, 0);
 
-        for (int i = 0; i < 100; i++) { // 10 send time
+        for (int i = 0; i < 10; i++) { // 10 send time
             HdcTransferBase::TransferPayload payloadHead {};
             payloadHead.compressType = HdcTransferBase::COMPRESS_NONE;
             payloadHead.uncompressSize = transferConfig.fileSize / 10; // 10 time
@@ -298,10 +298,6 @@ public:
             std::string bufData = SerialStruct::SerializeToString(payloadHead);
             hdcDamon->CommandDispatch(CMD_UPDATER_DATA, reinterpret_cast<uint8_t *>(bufData.data()), bufData.size());
         }
-        payloadHead.compressType = HdcTransferBase::COMPRESS_NONE;
-        payloadHead.uncompressSize = transferConfig.fileSize / 10; // 10 time
-        payloadHead.compressSize = transferConfig.fileSize / 10; // 10 time
-        payloadHead.index = 0;
         std::string bufData = SerialStruct::SerializeToString(payloadHead);
         hdcDamon->CommandDispatch(CMD_UPDATER_DATA, reinterpret_cast<uint8_t *>(bufData.data()), bufData.size());
         // end

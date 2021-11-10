@@ -112,25 +112,26 @@ protected:
     {
         int32_t ret;
         int32_t updateFileVersion = 1000;
-        int fileNameIndex = 3;
-        uint8_t componentType = 22;
+        PKG_LOGI("\n\n ************* CreatePackageBin %s \r\n", testPackageName.c_str());
         UpgradePkgInfoExt pkgInfo;
-        ComponentInfoExt *comp = (ComponentInfoExt*)malloc(
-            sizeof(ComponentInfoExt) * (testFileNames_.size() + fileNameIndex));
-        if (comp == nullptr) {
-            return -1;
-        }
         // C API, Cannot use c++ string class.
         pkgInfo.softwareVersion = strdup("100.100.100.100");
         pkgInfo.date = strdup("2021-02-02");
         pkgInfo.time = strdup("21:23:49");
         pkgInfo.productUpdateId = strdup("555.555.100.555");
+        int fileNameIndex = 3;
+        uint8_t componentType = 22;
         pkgInfo.entryCount = testFileNames_.size() + fileNameIndex;
         pkgInfo.updateFileVersion = updateFileVersion;
         pkgInfo.digestMethod = PKG_DIGEST_TYPE_SHA256;
         pkgInfo.signMethod = PKG_SIGN_METHOD_RSA;
         pkgInfo.pkgType = PKG_PACK_TYPE_UPGRADE;
 
+        ComponentInfoExt *comp = (ComponentInfoExt*)malloc(
+            sizeof(ComponentInfoExt) * (testFileNames_.size() + fileNameIndex));
+        if (comp == nullptr) {
+            return -1;
+        }
         for (size_t i = 0; i < testFileNames_.size(); i++) {
             BuildCompnentInfo(comp[i], testFileNames_[i], testFileNames_[i], componentType);
         }
@@ -143,9 +144,6 @@ protected:
         std::string packagePath = TEST_PATH_TO;
         packagePath += testPackageName;
         ret = CreatePackage(&pkgInfo, comp, packagePath.c_str(), GetTestPrivateKeyName().c_str());
-        if (ret == 0) {
-            PKG_LOGI("CreatePackage success offset");
-        }
         for (size_t i = 0; i < index; i++) {
             free(comp[i].componentAddr);
             free(comp[i].filePath);
