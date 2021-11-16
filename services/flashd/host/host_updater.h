@@ -30,7 +30,6 @@ public:
     virtual ~HostUpdater();
     bool CommandDispatch(const uint16_t command, uint8_t *payload, const int payloadSize) override;
 
-    static std::string GetFlashdHelp();
     static bool CheckMatchUpdate(const std::string &input, std::string &stringError, uint16_t &cmdFlag, bool &bJumpDo);
     static bool ConfirmCommand(const string &commandIn, bool &closeInput);
 #ifdef UPDATER_UT

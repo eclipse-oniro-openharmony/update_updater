@@ -172,12 +172,6 @@ HWTEST_F(FLashHostUnitTest, TestFlashHostFlash, TestSize.Level1)
     EXPECT_EQ(0, test.TestFlashProgress(CMD_UPDATER_FLASH_INIT, cmdParam, 100));
 }
 
-HWTEST_F(FLashHostUnitTest, TestFlashHostHelp, TestSize.Level1)
-{
-    std::string help = HostUpdater::GetFlashdHelp();
-    printf("%s", help.c_str());
-}
-
 HWTEST_F(FLashHostUnitTest, TestFlashHostMatch, TestSize.Level1)
 {
     std::string stringError;

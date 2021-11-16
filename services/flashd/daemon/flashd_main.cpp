@@ -24,13 +24,18 @@ int flashd_main(int argc, char **argv)
     std::vector<std::string> args = updater::ParseParams(argc, argv);
     bool enableUsb = false;
     bool enableTcp = false;
+    WRITE_LOG(LOG_DEBUG, "flashd main run %d", argc);
+    const int size = 64;
+    char modeSet[size] = "";
+    Base::GetHdcProperty("persist.hdc.mode", modeSet, size);
+    WRITE_LOG(LOG_DEBUG, "Background mode, persist.hdc.mode %s", modeSet);
     for (std::string arg : args) {
         if (arg.find("-l") != std::string::npos) {
             int logLevel = atoi(arg.c_str() + strlen("-l"));
             FLASHDAEMON_CHECK(!(logLevel < 0 || logLevel > LOG_LAST),
                 logLevel = LOG_LAST, "Loglevel error %d", logLevel);
             Base::SetLogLevel(logLevel);
-        } else if (arg.find("-t") != std::string::npos) {
+        } else if (arg.find("-t") != std::string::npos || strncmp(modeSet, "tcp", 3) == 0) { // 3 tcp
             enableTcp = true;
         } else if (arg.find("-u") != std::string::npos) {
             enableUsb = true;
@@ -41,8 +46,6 @@ int flashd_main(int argc, char **argv)
         Base::PrintMessage("Both TCP and USB are disable, default enable usb");
         enableUsb = true;
     }
-
-    WRITE_LOG(LOG_DEBUG, "flashd main run");
     HdcDaemon daemon(false);
     daemon.InitMod(enableTcp, enableUsb);
 #ifndef UPDATER_UT

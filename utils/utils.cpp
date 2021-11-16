@@ -190,6 +190,8 @@ void DoReboot(const std::string& rebootTarget, const std::string &extData)
             result = strcpy_s(msg.update, MAX_UPDATE_SIZE - 1, extData.c_str());
             UPDATER_ERROR_CHECK(result == 0, "Failed to copy update", return);
             msg.update[MAX_UPDATE_SIZE - 1] = 0;
+        } else {
+            UPDATER_ERROR_CHECK(!memset_s(msg.update, MAX_UPDATE_SIZE, 0, MAX_UPDATE_SIZE), "Memset_s failed", return);
         }
         if (WriteUpdaterMessage(miscBlockDevice, msg) != true) {
             LOG(INFO) << "DoReboot: WriteUpdaterMessage boot_updater error";

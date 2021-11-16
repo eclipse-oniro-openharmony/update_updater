@@ -254,28 +254,10 @@ bool HostUpdater::CheckUpdateContinue(const uint16_t command, const uint8_t *pay
     return true;
 }
 
-std::string HostUpdater::GetFlashdHelp()
-{
-    string help = "\n---------------------------------flash commands:-------------------------------------\n"
-           "flash commands:\n"
-           " target boot [-flashd]                 - Reboot the device or boot into flashd\n"
-           " update packagename                    - Update system by package\n"
-           " flash [-f] partition imagename        - Flash partition by image\n"
-           " erase [-f] partition                  - Erase partition\n"
-           " format [-f] partition -t fs_type      - Format partition -t [ext4 | f2fs]\n";
-    return help;
-}
-
 bool HostUpdater::CheckMatchUpdate(const std::string &input,
     std::string &stringError, uint16_t &cmdFlag, bool &bJumpDo)
 {
     WRITE_LOG(LOG_DEBUG, "CheckMatchUpdate command:%s", input.c_str());
-    if (!strcmp(input.c_str(), helpCmd.c_str())) {
-        cmdFlag = CMD_KERNEL_HELP;
-        stringError = HostUpdater::GetFlashdHelp();
-        bJumpDo = true;
-        return true;
-    }
     size_t cmdLen = updateCmd.size();
     if (!strncmp(input.c_str(), updateCmd.c_str(), updateCmd.size())) {
         cmdFlag = CMD_UPDATER_UPDATE_INIT;
