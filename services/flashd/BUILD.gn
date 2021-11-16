@@ -172,12 +172,12 @@ ohos_executable("ohflash") {
     "${FLASHD_HDC_PATH}/host/host_forward.cpp",
     "${FLASHD_HDC_PATH}/host/host_tcp.cpp",
     "${FLASHD_HDC_PATH}/host/host_unity.cpp",
+    "${FLASHD_HDC_PATH}/host/host_updater.cpp",
     "${FLASHD_HDC_PATH}/host/host_usb.cpp",
     "${FLASHD_HDC_PATH}/host/main.cpp",
     "${FLASHD_HDC_PATH}/host/server.cpp",
     "${FLASHD_HDC_PATH}/host/server_for_client.cpp",
     "${FLASHD_HDC_PATH}/host/translate.cpp",
-    "${FLASHD_HDC_PATH}/host/host_updater.cpp",
   ]
   sources += common_sources
 
@@ -189,9 +189,7 @@ ohos_executable("ohflash") {
     "//utils/native/base:utilsecurec",
   ]
 
-  deps += [
-      "//third_party/libusb:libusb",
-  ]
+  deps += [ "//third_party/libusb:libusb" ]
 
   include_dirs = [
     "${FLASHD_HDC_PATH}/host",
@@ -201,14 +199,14 @@ ohos_executable("ohflash") {
     "//third_party/libuv",
   ]
 
-  if(is_mingw) {
+  if (is_mingw) {
     static_link = true
     defines += [ "_WIN32" ]
     defines += [ "WIN32_LEAN_AND_MEAN" ]
     libs += [ "setupapi" ]
   }
 
-  if(is_linux) {
+  if (is_linux) {
     static_link = true
     deps += [ "//third_party/openssl:libcrypto_static" ]
   }
@@ -217,23 +215,16 @@ ohos_executable("ohflash") {
   part_name = "updater"
 }
 
-
 group("flashhost_target_standard") {
-  deps = [
-    ":ohflash",
-  ]
+  deps = [ ":ohflash" ]
 }
 
 group("flashhost_target_standard_linux") {
-  deps = [
-    ":ohflash(//build/toolchain/linux:clang_x64)",
-  ]
+  deps = [ ":ohflash(//build/toolchain/linux:clang_x64)" ]
 }
 
 group("flashhost_target_standard_mingw") {
-  deps = [
-    ":ohflash(//build/toolchain/mingw:mingw_x86_64)",
-  ]
+  deps = [ ":ohflash(//build/toolchain/mingw:mingw_x86_64)" ]
 }
 
 group("flashhost_target_standard_all") {
