@@ -15,9 +15,7 @@
 #include "daemon_unity.h"
 #include <sys/mount.h>
 #ifdef __MUSL__
-extern "C" {
 #include "init_reboot.h"
-}
 #endif
 
 namespace Hdc {

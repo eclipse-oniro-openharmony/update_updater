@@ -168,7 +168,7 @@ int HdcClient::ExecuteCommand(const string &commandIn)
     ConnectServerForClient(ip, port);
     uv_timer_init(loopMain, &waitTimeDoCmd);
     waitTimeDoCmd.data = this;
-    uv_timer_start(&waitTimeDoCmd, CommandWorker, 10, 10);
+    uv_timer_start(&waitTimeDoCmd, CommandWorker, 10, 10); // 10 10 repeat
     WorkerPendding();
     return 0;
 }

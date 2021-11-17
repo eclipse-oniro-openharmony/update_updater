@@ -175,7 +175,7 @@ bool ParseServerListenString(string &serverListenString, char *optarg)
     }
     char *p = strchr(buf, ':');
     if (!p) {  // Only port
-        if (strlen(buf) > 5) { // port len
+        if (strlen(buf) > 5) { // 5 port len
             Base::PrintMessage("The port-string's length must < 5");
             return false;
         }
