@@ -16,6 +16,7 @@
 #include "daemon_common.h"
 #include "flashd/flashd.h"
 #include "flash_utils.h"
+#include "flash_define.h"
 
 namespace Hdc {
 DaemonUpdater::DaemonUpdater(HTaskInfo hTaskInfo) : HdcTransferBase(hTaskInfo)
@@ -46,6 +47,7 @@ bool DaemonUpdater::CommandDispatch(const uint16_t command, uint8_t *payload, co
     }
     switch (command) {
         case CMD_UPDATER_DATA: {
+            const uint8_t payloadPrefixReserve = 64;
             string serialStrring((char *)payload, payloadPrefixReserve);
             TransferPayload pld {};
             SerialStruct::ParseFromString(pld, serialStrring);

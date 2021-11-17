@@ -13,39 +13,40 @@
 
 import("//build/ohos.gni")
 
-FLASHD_HDC_PATH = "//base/update/updater/services/flashd"
+FLASHD_PATH = "//base/update/updater/services/flashd"
+HDC_PATH = "//developtools/hdc_standard/src"
 
 common_sources = [
-  "${FLASHD_HDC_PATH}/common/async_cmd.cpp",
-  "${FLASHD_HDC_PATH}/common/auth.cpp",
-  "${FLASHD_HDC_PATH}/common/base.cpp",
-  "${FLASHD_HDC_PATH}/common/channel.cpp",
-  "${FLASHD_HDC_PATH}/common/debug.cpp",
-  "${FLASHD_HDC_PATH}/common/file.cpp",
-  "${FLASHD_HDC_PATH}/common/file_descriptor.cpp",
-  "${FLASHD_HDC_PATH}/common/forward.cpp",
-  "${FLASHD_HDC_PATH}/common/session.cpp",
-  "${FLASHD_HDC_PATH}/common/task.cpp",
-  "${FLASHD_HDC_PATH}/common/tcp.cpp",
-  "${FLASHD_HDC_PATH}/common/transfer.cpp",
-  "${FLASHD_HDC_PATH}/common/usb.cpp",
+  "${FLASHD_PATH}/common/base.cpp",
+  "${HDC_PATH}/common/async_cmd.cpp",
+  "${HDC_PATH}/common/auth.cpp",
+  "${HDC_PATH}/common/channel.cpp",
+  "${HDC_PATH}/common/debug.cpp",
+  "${HDC_PATH}/common/file.cpp",
+  "${HDC_PATH}/common/file_descriptor.cpp",
+  "${HDC_PATH}/common/forward.cpp",
+  "${HDC_PATH}/common/session.cpp",
+  "${HDC_PATH}/common/task.cpp",
+  "${HDC_PATH}/common/tcp.cpp",
+  "${HDC_PATH}/common/transfer.cpp",
+  "${HDC_PATH}/common/usb.cpp",
 ]
 
 config("flashd_hdc_config") {
-  include_dirs = [ "${FLASHD_HDC_PATH}/common" ]
+  include_dirs = [ "${FLASHD_PATH}/common" ]
   cflags_cc = [ "-std=c++17" ]
 }
 
 ohos_source_set("flashd_deamon") {
   sources = [
-    "${FLASHD_HDC_PATH}/daemon/daemon.cpp",
-    "${FLASHD_HDC_PATH}/daemon/daemon_app.cpp",
-    "${FLASHD_HDC_PATH}/daemon/daemon_forward.cpp",
-    "${FLASHD_HDC_PATH}/daemon/daemon_tcp.cpp",
-    "${FLASHD_HDC_PATH}/daemon/daemon_unity.cpp",
-    "${FLASHD_HDC_PATH}/daemon/daemon_usb.cpp",
-    "${FLASHD_HDC_PATH}/daemon/jdwp.cpp",
-    "${FLASHD_HDC_PATH}/daemon/shell.cpp",
+    "${FLASHD_PATH}/daemon/daemon.cpp",
+    "${FLASHD_PATH}/daemon/daemon_unity.cpp",
+    "${HDC_PATH}/daemon/daemon_app.cpp",
+    "${HDC_PATH}/daemon/daemon_forward.cpp",
+    "${HDC_PATH}/daemon/daemon_tcp.cpp",
+    "${HDC_PATH}/daemon/daemon_usb.cpp",
+    "${HDC_PATH}/daemon/jdwp.cpp",
+    "${HDC_PATH}/daemon/shell.cpp",
   ]
 
   sources += common_sources
@@ -72,7 +73,8 @@ ohos_source_set("flashd_deamon") {
   }
 
   include_dirs = [
-    "${FLASHD_HDC_PATH}/daemon",
+    "${HDC_PATH}/daemon",
+    "${HDC_PATH}/common",
     "//base/update/updater/services/flashd",
     "//base/update/updater/services/flashd/daemon",
     "//base/update/updater/services/flashd/common",
@@ -128,11 +130,12 @@ ohos_static_library("libflashd") {
   ]
 
   include_dirs = [
-    "${FLASHD_HDC_PATH}/daemon",
-    "${FLASHD_HDC_PATH}/common",
+    "${HDC_PATH}/daemon",
+    "${HDC_PATH}/common",
     "//base/update/updater/services",
     "//base/update/updater/services/flashd",
     "//base/update/updater/services/flashd/daemon",
+    "//base/update/updater/services/flashd/common",
     "//base/update/updater/interfaces/kits/include",
     "//base/update/updater/services/include/package",
     "//base/update/updater/services/include/script",
@@ -167,17 +170,17 @@ ohos_executable("ohflash") {
     "-Wno-unused-variable",
   ]
   sources = [
-    "${FLASHD_HDC_PATH}/host/client.cpp",
-    "${FLASHD_HDC_PATH}/host/host_app.cpp",
-    "${FLASHD_HDC_PATH}/host/host_forward.cpp",
-    "${FLASHD_HDC_PATH}/host/host_tcp.cpp",
-    "${FLASHD_HDC_PATH}/host/host_unity.cpp",
-    "${FLASHD_HDC_PATH}/host/host_updater.cpp",
-    "${FLASHD_HDC_PATH}/host/host_usb.cpp",
-    "${FLASHD_HDC_PATH}/host/main.cpp",
-    "${FLASHD_HDC_PATH}/host/server.cpp",
-    "${FLASHD_HDC_PATH}/host/server_for_client.cpp",
-    "${FLASHD_HDC_PATH}/host/translate.cpp",
+    "${FLASHD_PATH}/host/client.cpp",
+    "${FLASHD_PATH}/host/host_updater.cpp",
+    "${FLASHD_PATH}/host/main.cpp",
+    "${FLASHD_PATH}/host/server.cpp",
+    "${FLASHD_PATH}/host/server_for_client.cpp",
+    "${FLASHD_PATH}/host/translate.cpp",
+    "${HDC_PATH}/host/host_app.cpp",
+    "${HDC_PATH}/host/host_forward.cpp",
+    "${HDC_PATH}/host/host_tcp.cpp",
+    "${HDC_PATH}/host/host_unity.cpp",
+    "${HDC_PATH}/host/host_usb.cpp",
   ]
   sources += common_sources
 
@@ -192,7 +195,10 @@ ohos_executable("ohflash") {
   deps += [ "//third_party/libusb:libusb" ]
 
   include_dirs = [
-    "${FLASHD_HDC_PATH}/host",
+    "${FLASHD_PATH}/host",
+    "${HDC_PATH}/host",
+    "${FLASHD_PATH}/common",
+    "${HDC_PATH}/common",
     "//utils/native/base/include",
     "//third_party/lz4/lib",
     "//third_party/openssl/include",
@@ -229,15 +235,7 @@ group("flashhost_target_standard_mingw") {
 
 group("flashhost_target_standard_all") {
   deps = [
-    ":flashhost_target_standard",
     ":flashhost_target_standard_linux",
-    ":flashhost_target_standard_mingw",
-  ]
-}
-
-group("flashhost_target_standard_windows") {
-  deps = [
-    ":flashhost_target_standard",
     ":flashhost_target_standard_mingw",
   ]
 }

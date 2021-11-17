@@ -18,10 +18,11 @@
 #include <memory>
 #include <sys/ioctl.h>
 
-#include "common/common.h"
-#include "common/transfer.h"
+#include "common.h"
+#include "flash_define.h"
 #include "host_updater.h"
 #include "serial_struct.h"
+#include "transfer.h"
 #include "unittest_comm.h"
 
 using namespace std;
@@ -196,11 +197,6 @@ HWTEST_F(FLashHostUnitTest, TestFlashHostMatch, TestSize.Level1)
     EXPECT_EQ(ret == true, 1);
     EXPECT_EQ(cmdFlag, CMD_UPDATER_FORMAT);
     EXPECT_EQ(bJumpDo == false, 1);
-
-    ret = HostUpdater::CheckMatchUpdate("flash", stringError, cmdFlag, bJumpDo);
-    EXPECT_EQ(ret == true, 1);
-    EXPECT_EQ(cmdFlag, CMD_KERNEL_HELP);
-    EXPECT_EQ(bJumpDo == true, 1);
 
     bJumpDo = false;
     ret = HostUpdater::CheckMatchUpdate("install aaa.hap", stringError, cmdFlag, bJumpDo);

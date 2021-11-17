@@ -14,6 +14,9 @@
  */
 #include "server.h"
 
+#include "host_updater.h"
+#include "flash_define.h"
+
 namespace Hdc {
 HdcServer::HdcServer(bool serverOrDaemonIn)
     : HdcSessionBase(serverOrDaemonIn)
@@ -141,7 +144,7 @@ bool HdcServer::PullupServer(const char *listenString)
             // close file pipe
             close(i);
         }
-        execl(path, "hdc", "-m", "-s", listenString, nullptr);
+        execl(path, "ohflash", "-m", "-s", listenString, nullptr);
         exit(0);
         return true;
     }

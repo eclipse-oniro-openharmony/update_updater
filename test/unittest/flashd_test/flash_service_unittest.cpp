@@ -18,13 +18,14 @@
 #include <memory>
 #include <sys/ioctl.h>
 
-#include "common/common.h"
-#include "common/transfer.h"
+#include "common.h"
 #include "daemon_updater.h"
+#include "flash_define.h"
 #include "flash_service.h"
 #include "flashd/flashd.h"
 #include "fs_manager/mount.h"
 #include "serial_struct.h"
+#include "transfer.h"
 #include "unittest_comm.h"
 
 using namespace std;

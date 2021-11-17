@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "flash_define.h"
 #include "server.h"
 #include "server_for_client.h"
 

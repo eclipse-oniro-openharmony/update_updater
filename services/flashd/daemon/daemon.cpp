@@ -13,8 +13,12 @@
  * limitations under the License.
  */
 #include "daemon.h"
-#include "../common/serial_struct.h"
+
 #include <openssl/sha.h>
+
+#include "daemon_updater.h"
+#include "flash_define.h"
+#include "serial_struct.h"
 
 namespace Hdc {
 HdcDaemon::HdcDaemon(bool serverOrDaemonIn)
@@ -91,13 +95,6 @@ void HdcDaemon::InitMod(bool bEnableTCP, bool bEnableUSB)
     enableSecure = (Base::Trim(secure) == "1");
 }
 
-void HdcDaemon::SendAndCloseChannel(HSession hSession, const uint32_t channelId, const std::string &info)
-{
-    Send(hSession->sessionId, channelId, CMD_KERNEL_ECHO_RAW, (uint8_t *)info.data(), info.size());
-    uint8_t count = 1;
-    Send(hSession->sessionId, channelId, CMD_KERNEL_CHANNEL_CLOSE, &count, 1);
-}
-
 // clang-format off
 #ifdef HDC_SUPPORT_FLASHD
 bool HdcDaemon::RedirectToTask(HTaskInfo hTaskInfo, HSession hSession, const uint32_t channelId,
@@ -122,7 +119,10 @@ bool HdcDaemon::RedirectToTask(HTaskInfo hTaskInfo, HSession hSession, const uin
             ret = TaskCommandDispatch<DaemonUpdater>(hTaskInfo, TASK_UPDATER, command, payload, payloadSize);
             break;
         default:
-            SendAndCloseChannel(hSession, channelId, "Command not support in flashd\n");
+            std::string info = "Command not support in flashd\n";
+            Send(hSession->sessionId, channelId, CMD_KERNEL_ECHO_RAW, (uint8_t *)info.data(), info.size());
+            uint8_t count = 1;
+            Send(hSession->sessionId, channelId, CMD_KERNEL_CHANNEL_CLOSE, &count, 1);
             break;
     }
     return ret;
@@ -131,55 +131,11 @@ bool HdcDaemon::RedirectToTask(HTaskInfo hTaskInfo, HSession hSession, const uin
 bool HdcDaemon::RedirectToTask(HTaskInfo hTaskInfo, HSession hSession, const uint32_t channelId,
                                const uint16_t command, uint8_t *payload, const int payloadSize)
 {
-    bool ret = true;
-    hTaskInfo->ownerSessionClass = this;
-    switch (command) {
-        case CMD_UNITY_EXECUTE:
-        case CMD_UNITY_REMOUNT:
-        case CMD_UNITY_REBOOT:
-        case CMD_UNITY_RUNMODE:
-        case CMD_UNITY_HILOG:
-        case CMD_UNITY_ROOTRUN:
-        case CMD_UNITY_TERMINATE:
-        case CMD_UNITY_BUGREPORT_INIT:
-        case CMD_UNITY_JPID:
-            ret = TaskCommandDispatch<HdcDaemonUnity>(hTaskInfo, TYPE_UNITY, command, payload, payloadSize);
-            break;
-        case CMD_SHELL_INIT:
-        case CMD_SHELL_DATA:
-            ret = TaskCommandDispatch<HdcShell>(hTaskInfo, TYPE_SHELL, command, payload, payloadSize);
-            break;
-        case CMD_FILE_CHECK:
-        case CMD_FILE_DATA:
-        case CMD_FILE_FINISH:
-        case CMD_FILE_INIT:
-        case CMD_FILE_BEGIN:
-            ret = TaskCommandDispatch<HdcFile>(hTaskInfo, TASK_FILE, command, payload, payloadSize);
-            break;
-        // One-way function, so fewer options
-        case CMD_APP_CHECK:
-        case CMD_APP_DATA:
-        case CMD_APP_UNINSTALL:
-            ret = TaskCommandDispatch<HdcDaemonApp>(hTaskInfo, TASK_APP, command, payload, payloadSize);
-            break;
-        case CMD_FORWARD_INIT:
-        case CMD_FORWARD_CHECK:
-        case CMD_FORWARD_ACTIVE_SLAVE:
-        case CMD_FORWARD_DATA:
-        case CMD_FORWARD_FREE_CONTEXT:
-        case CMD_FORWARD_CHECK_RESULT:
-            ret = TaskCommandDispatch<HdcDaemonForward>(hTaskInfo, TASK_FORWARD, command, payload, payloadSize);
-            break;
-        case CMD_UPDATER_CHECK:
-        case CMD_UPDATER_ERASE:
-        case CMD_UPDATER_FORMAT:
-            SendAndCloseChannel(hSession, channelId, "Command not support in hdcd\n");
-            break;
-        default:
-            ret = false;
-            break;
-    }
-    return ret;
+    std::string info = "Command not support in hdcd\n";
+    Send(hSession->sessionId, channelId, CMD_KERNEL_ECHO_RAW, (uint8_t *)info.data(), info.size());
+    uint8_t count = 1;
+    Send(hSession->sessionId, channelId, CMD_KERNEL_CHANNEL_CLOSE, &count, 1);
+    return true;
 }
 // clang-format on
 #endif

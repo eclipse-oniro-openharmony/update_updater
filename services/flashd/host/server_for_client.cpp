@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 #include "server_for_client.h"
+
+#include "flash_define.h"
 #include "server.h"
 
 namespace Hdc {

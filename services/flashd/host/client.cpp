@@ -13,9 +13,12 @@
  * limitations under the License.
  */
 #include "client.h"
+
+#include "host_updater.h"
 #include "server.h"
 
 namespace Hdc {
+bool terminalStateChange = false;
 HdcClient::HdcClient(const bool serverOrClient, const string &addrString, uv_loop_t *loopMainIn)
     : HdcChannelBase(serverOrClient, addrString, loopMainIn)
 {
@@ -26,9 +29,8 @@ HdcClient::HdcClient(const bool serverOrClient, const string &addrString, uv_loo
 HdcClient::~HdcClient()
 {
 #ifndef _WIN32
-    if (terminalChanged) {
+    if (terminalStateChange) {
         tcsetattr(STDIN_FILENO, TCSAFLUSH, &terminalState);
-        terminalChanged = false;
     }
 #endif
     Base::TryCloseLoop(loopMain, "ExecuteCommand finish");
@@ -217,8 +219,22 @@ void HdcClient::CommandWorker(uv_timer_t *handle)
         WRITE_LOG(LOG_DEBUG, "Cmd \'%s\' has been canceld", thisClass->command.c_str());
         return;
     }
-    if (closeInput) {
-        thisClass->CloseInput();
+    while (closeInput) {
+#ifndef _WIN32
+        if (tcgetattr(STDIN_FILENO, &thisClass->terminalState)) {
+            break;
+        }
+        termios tio;
+        if (tcgetattr(STDIN_FILENO, &tio)) {
+            break;
+        }
+        cfmakeraw(&tio);
+        tio.c_cc[VTIME] = 0;
+        tio.c_cc[VMIN] = 1;
+        tcsetattr(STDIN_FILENO, TCSAFLUSH, &tio);
+        terminalStateChange = true;
+#endif
+        break;
     }
     thisClass->Send(thisClass->channel->channelId, (uint8_t *)thisClass->command.c_str(),
                     thisClass->command.size() + 1);
@@ -253,12 +269,21 @@ void HdcClient::ModifyTty(bool setOrRestore, uv_tty_t *tty)
 #ifdef _WIN32
         uv_tty_set_mode(tty, UV_TTY_MODE_RAW);
 #else
-        CloseInput();
+        if (tcgetattr(STDIN_FILENO, &terminalState)) {
+            return;
+        }
+        termios tio;
+        if (tcgetattr(STDIN_FILENO, &tio)) {
+            return;
+        }
+        cfmakeraw(&tio);
+        tio.c_cc[VTIME] = 0;
+        tio.c_cc[VMIN] = 1;
+        tcsetattr(STDIN_FILENO, TCSAFLUSH, &tio);
 #endif
     } else {
 #ifndef _WIN32
         tcsetattr(STDIN_FILENO, TCSAFLUSH, &terminalState);
-        terminalChanged = false;
 #endif
     }
 }
@@ -351,21 +376,5 @@ int HdcClient::ReadChannel(HChannel hChannel, uint8_t *buf, const int bytesIO)
     fprintf(stdout, "%s", s.c_str());
     fflush(stdout);
     return 0;
-}
-
-void HdcClient::CloseInput()
-{
-#ifndef _WIN32
-    if (tcgetattr(STDIN_FILENO, &terminalState))
-        return;
-    termios tio;
-    if (tcgetattr(STDIN_FILENO, &tio))
-        return;
-    cfmakeraw(&tio);
-    tio.c_cc[VTIME] = 0;
-    tio.c_cc[VMIN] = 1;
-    tcsetattr(STDIN_FILENO, TCSAFLUSH, &tio);
-    terminalChanged = true;
-#endif
 }
 }  // namespace Hdc

@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "daemon_common.h"
+#include "daemon_updater.h"
 #include "flashd/flashd.h"
 #include "updater/updater.h"
 

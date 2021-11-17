@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "translate.h"
+#include "host_updater.h"
 
 namespace Hdc {
 namespace TranslateCommand {

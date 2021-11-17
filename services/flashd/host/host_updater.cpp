@@ -16,6 +16,7 @@
 
 #include <cstring>
 #include "common.h"
+#include "flash_define.h"
 #include "transfer.h"
 #include "serial_struct.h"
 
@@ -164,7 +165,7 @@ bool HostUpdater::CommandDispatch(const uint16_t command, uint8_t *payload, cons
     bool ret = true;
     switch (command) {
         case CMD_UPDATER_BEGIN: {
-            std::string s("  Processing:   0%%");
+            std::string s("Processing:    0%%");
             sendProgress = true;
             SendRawData(reinterpret_cast<uint8_t *>(s.data()), s.size());
             break;
@@ -211,7 +212,7 @@ void HostUpdater::ProcessProgress(uint32_t percentage)
     if (!sendProgress) {
         return;
     }
-    std::string backStr = "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b";
+    std::string backStr = "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b";
     std::string breakStr = "\n";
     WRITE_LOG(LOG_INFO, "ProcessProgress %d", percentage);
     const int bufferSize = 128;
@@ -222,7 +223,7 @@ void HostUpdater::ProcessProgress(uint32_t percentage)
         sendProgress = false;
         return;
     }
-    int len = sprintf_s(buffer.data(), buffer.size() - 1, "%s  Processing:   %3d%%", backStr.c_str(), percentage);
+    int len = sprintf_s(buffer.data(), buffer.size() - 1, "%sProcessing:   %3d%%", backStr.c_str(), percentage);
     HOSTUPDATER_CHECK(len > 0, return, "Failed to format progress info ");
     SendRawData(reinterpret_cast<uint8_t *>(buffer.data()), len);
     if (percentage == PERCENT_FINISH) {
@@ -312,7 +313,7 @@ bool HostUpdater::ConfirmCommand(const string &commandIn, bool &closeInput)
     const size_t minLen = strlen("yes");
     int retryCount = 0;
     do {
-        printf(" %s ? (Yes/No) ", tip.c_str());
+        printf("%s ? (Yes/No) ", tip.c_str());
         fflush(stdin);
         std::string info = {};
         size_t i = 0;
@@ -346,5 +347,14 @@ bool HostUpdater::ConfirmCommand(const string &commandIn, bool &closeInput)
         return false;
     }
     return true;
+}
+
+void HostUpdater::SendRawData(uint8_t *bufPtr, const int size)
+{
+#ifndef UPDATER_UT
+    HdcSessionBase *sessionBase = (HdcSessionBase *)clsSession;
+    sessionBase->ServerCommand(taskInfo->sessionId,
+        taskInfo->channelId, CMD_KERNEL_ECHO_RAW, bufPtr, size);
+#endif
 }
 } // namespace Hdc

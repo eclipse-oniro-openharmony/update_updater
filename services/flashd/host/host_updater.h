@@ -47,15 +47,11 @@ private:
     void RunQueue(CtxFile &context);
     std::string GetFileName(const std::string &fileName) const;
     void ProcessProgress(uint32_t percentage);
+    void SendRawData(uint8_t *bufPtr, const int size);
 #ifdef UPDATER_UT
     void LogMsg(MessageLevel level, const char *msg, ...)
     {
         return;
-    }
-    void SendRawData(uint8_t *bufPtr, const int size)
-    {
-        std::string s((char *)bufPtr, size);
-        WRITE_LOG(LOG_DEBUG, "SendRawData %d %s", size, s.c_str());
     }
     bool SendToAnother(const uint16_t command, uint8_t *bufPtr, const int size)
     {
