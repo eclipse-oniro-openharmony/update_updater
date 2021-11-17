@@ -81,7 +81,7 @@ void HdcServerForClient::SetTCPListen()
     uv_tcp_init(loopMain, &tcpListen);
     uv_ip4_addr(channelHost.c_str(), channelPort, &addr);
     uv_tcp_bind(&tcpListen, (const struct sockaddr *)&addr, 0);
-    uv_listen((uv_stream_t *)&tcpListen, 128, (uv_connection_cb)AcceptClient);
+    uv_listen((uv_stream_t *)&tcpListen, 128, (uv_connection_cb)AcceptClient); // 128 client
 }
 
 int HdcServerForClient::Initial()
@@ -92,7 +92,7 @@ int HdcServerForClient::Initial()
     }
     if (!channelHostPort.size() || !channelHost.size() || !channelPort) {
         WRITE_LOG(LOG_FATAL, "Listen string initial failed");
-        return -2;
+        return -2; // 2 error code
     }
     SetTCPListen();
     return 0;
@@ -206,8 +206,7 @@ void HdcServerForClient::OrderConnecTargetResult(uv_timer_t *req)
         } else {
             uint16_t *bRetryCount = (uint16_t *)hChannel->bufStd;
             ++(*bRetryCount);
-            if (*bRetryCount > 500) {
-                // 5s
+            if (*bRetryCount > 500) { // 500 ms
                 bExitRepet = true;
                 sRet = "Connect failed";
                 thisClass->EchoClient(hChannel, MSG_FAIL, (char *)sRet.c_str());
@@ -228,15 +227,15 @@ bool HdcServerForClient::NewConnectTry(void *ptrServer, HChannel hChannel, const
     bool ret = false;
     if (-1 == childRet) {
         EchoClient(hChannel, MSG_INFO, "Target is connected, repeat operation");
-    } else if (-2 == childRet) {
+    } else if (-2 == childRet) { // 2 error code
         EchoClient(hChannel, MSG_FAIL, "CreateConnect failed");
         WRITE_LOG(LOG_FATAL, "CreateConnect failed");
     } else {
-        Base::ZeroBuf(hChannel->bufStd, 2);
-        childRet = snprintf_s(hChannel->bufStd + 2, sizeof(hChannel->bufStd) - 2, sizeof(hChannel->bufStd) - 3, "%s",
-                              (char *)connectKey.c_str());
+        Base::ZeroBuf(hChannel->bufStd, 2); // 2 len
+        childRet = snprintf_s(hChannel->bufStd + 2, sizeof(hChannel->bufStd) - 2, // 2 len
+            sizeof(hChannel->bufStd) - 3, "%s", (char *)connectKey.c_str()); // 3 len
         if (childRet > 0) {
-            Base::TimerUvTask(loopMain, hChannel, OrderConnecTargetResult, 10);
+            Base::TimerUvTask(loopMain, hChannel, OrderConnecTargetResult, 10); // 10 repeat
             ret = true;
         }
     }
@@ -639,7 +638,7 @@ int HdcServerForClient::ReadChannel(HChannel hChannel, uint8_t *bufPtr, const in
             }
         }
         if (formatCommand.bJumpDo) {
-            ret = -10;
+            ret = -10; // 10 error code
             return ret;
         }
     } else {

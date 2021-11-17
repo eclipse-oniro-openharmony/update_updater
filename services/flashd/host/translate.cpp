@@ -57,7 +57,7 @@ namespace TranslateCommand {
     {
         string stringError;
         if (Base::StringEndsWith(outCmd->parameters, " -remove")) {
-            outCmd->parameters = outCmd->parameters.substr(0, outCmd->parameters.size() - 8);
+            outCmd->parameters = outCmd->parameters.substr(0, outCmd->parameters.size() - 8); // 8 leng
             outCmd->cmdFlag = CMD_KERNEL_TARGET_DISCONNECT;
         } else {
             outCmd->cmdFlag = CMD_KERNEL_TARGET_CONNECT;
@@ -92,10 +92,14 @@ namespace TranslateCommand {
                 outCmd->parameters = input + 9; // 9 rm extra size
             }
         } else {
-            const char *p = input + 6;
+            const char *p = input + 6; // 6 length
             // clang-format off
-            if (strncmp(p, "tcp:", 4) && strncmp(p, "localabstract:", 14) && strncmp(p, "localreserved:", 14) &&
-                strncmp(p, "localfilesystem:", 16) && strncmp(p, "dev:", 4) && strncmp(p, "jdwp:", 5)) {
+            if (strncmp(p, "tcp:", 4) && // 4 legnth of tcp
+                strncmp(p, "localabstract:", 14) && // 14 legnth of localabstract
+                strncmp(p, "localreserved:", 14) && // 14 legnth of localreserved
+                strncmp(p, "localfilesystem:", 16) && // 14 legnth of localfilesystem
+                strncmp(p, "dev:", 4) && // 4 legnth of dev
+                strncmp(p, "jdwp:", 5)) { // 14 legnth of jdwp
                 stringError = "Incorrect forward command";
                 outCmd->bJumpDo = true;
             }
@@ -111,12 +115,12 @@ namespace TranslateCommand {
         string stringError;
         outCmd->cmdFlag = CMD_UNITY_RUNMODE;
         outCmd->parameters = input + CMDSTR_TARGET_MODE.size() + 1;  // with  ' '
-        if (!strncmp(outCmd->parameters.c_str(), "port", 4)
+        if (!strncmp(outCmd->parameters.c_str(), "port", 4) // 4 port len
             && !strcmp(outCmd->parameters.c_str(), CMDSTR_TMODE_USB.c_str())) {
             stringError = "Error tmode command";
             outCmd->bJumpDo = true;
-        } else if (!strncmp(outCmd->parameters.c_str(), "port ", 5)) {
-            int port = atoi(input + 4);
+        } else if (!strncmp(outCmd->parameters.c_str(), "port ", 5)) { // 5 port len
+            int port = atoi(input + 4); // 4 port len
             if (port > MAX_IP_PORT || port <= 0) {
                 stringError = "Incorrect port range";
                 outCmd->bJumpDo = true;
@@ -130,7 +134,7 @@ namespace TranslateCommand {
         string stringError;
         outCmd->cmdFlag = CMD_UNITY_REBOOT;
         if (strcmp(input, CMDSTR_TARGET_REBOOT.c_str())) {
-            outCmd->parameters = input + 12;
+            outCmd->parameters = input + 12; // 12 length of target boot
             if (outCmd->parameters != "-bootloader"
                 && outCmd->parameters != "-recovery" && outCmd->parameters != "-flashd") {
                 stringError = "Error reboot paramenter";
@@ -192,7 +196,7 @@ namespace TranslateCommand {
         } else if (!strncmp(input.c_str(), CMDSTR_APP_UNINSTALL.c_str(), CMDSTR_APP_UNINSTALL.size())) {
             outCmd->cmdFlag = CMD_APP_UNINSTALL;
             outCmd->parameters = input;
-            if (outCmd->parameters.size() > 512 || outCmd->parameters.size() < 4) {
+            if (outCmd->parameters.size() > 512 || outCmd->parameters.size() < 4) { // 512 4 max and min name length
                 stringError = "Package's path incorrect";
                 outCmd->bJumpDo = true;
             }
@@ -229,9 +233,7 @@ namespace TranslateCommand {
             if (outCmd->parameters.size() == CMDSTR_BUGREPORT.size()) {
                 outCmd->parameters += " ";
             }
-        }
-        // Inner command, protocol uses only
-        else if (input == CMDSTR_INNER_ENABLE_KEEPALIVE) {
+        } else if (input == CMDSTR_INNER_ENABLE_KEEPALIVE) { // Inner command, protocol uses only
             outCmd->cmdFlag = CMD_KERNEL_ENABLE_KEEPALIVE;
         } else if (HostUpdater::CheckMatchUpdate(input, stringError, outCmd->cmdFlag, outCmd->bJumpDo)) {
             outCmd->parameters = input;

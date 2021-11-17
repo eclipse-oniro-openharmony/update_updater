@@ -292,7 +292,6 @@ void HostUpdater::SetInput(const std::string &input)
 bool HostUpdater::ConfirmCommand(const string &commandIn, bool &closeInput)
 {
     std::string tip = "";
-    WRITE_LOG(LOG_DEBUG, "ConfirmCommand \"%s\" \n", commandIn.c_str());
     if (!strncmp(commandIn.c_str(), updateCmd.c_str(), updateCmd.size())) {
         closeInput = true;
     } else if (!strncmp(commandIn.c_str(), flashCmd.c_str(), flashCmd.size())) {
@@ -303,11 +302,7 @@ bool HostUpdater::ConfirmCommand(const string &commandIn, bool &closeInput)
     } else if (!strncmp(commandIn.c_str(), formatCmd.c_str(), formatCmd.size())) {
         tip = "Confirm format partition";
     }
-    if (tip.empty()) {
-        return true;
-    }
-    // check if -f
-    if (strstr(commandIn.c_str(), " -f") != nullptr) {
+    if (tip.empty() || strstr(commandIn.c_str(), " -f") != nullptr) { // check if -f
         return true;
     }
     const size_t minLen = strlen("yes");
@@ -343,10 +338,7 @@ bool HostUpdater::ConfirmCommand(const string &commandIn, bool &closeInput)
         }
         retryCount++;
     } while (retryCount < 3); // 3 retry max count
-    if (retryCount >= 3) { // 3 retry max count
-        return false;
-    }
-    return true;
+    return (retryCount >= 3) ? false : true; // 3 retry max count
 }
 
 void HostUpdater::SendRawData(uint8_t *bufPtr, const int size)

@@ -64,13 +64,11 @@ public:
         }
         flashHost->CommandDispatch(command,
             const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(cmd.data())), cmd.size());
-
         return 0;
     }
 
     int TestFlashProgress(uint16_t command, const std::string &cmd, uint32_t progress)
     {
-
         HTaskInfo hTaskInfo = nullptr;
         std::shared_ptr<TaskInformation> task = std::make_shared<TaskInformation>();
         if (task == nullptr) {
@@ -114,7 +112,6 @@ public:
         (void)memcpy_s(cmdInfo.data(), cmdInfo.size(), &percentage, sizeof(percentage));
         flashHost->CommandDispatch(CMD_UPDATER_PROGRESS,
             const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(cmdInfo.data())), cmdInfo.size());
-
         return 0;
     }
 };
@@ -138,7 +135,6 @@ HWTEST_F(FLashHostUnitTest, TestFlashHostFormat, TestSize.Level1)
     cmdParam += TEST_PARTITION_NAME;
     cmdParam += "  -t ext4";
     EXPECT_EQ(0, test.TestFlashHost(CMD_UPDATER_FORMAT, cmdParam));
-
 
     cmdParam = "format ";
     cmdParam += TEST_PARTITION_NAME;

@@ -373,7 +373,7 @@ int HdcClient::ReadChannel(HChannel hChannel, uint8_t *buf, const int bytesIO)
 #endif
     WRITE_LOG(LOG_DEBUG, "Client ReadChannel :%d", bytesIO);
     string s(reinterpret_cast<char *>(buf), bytesIO);
-    fprintf(stdout, "%s", s.c_str());
+    (void)fprintf(stdout, "%s", s.c_str());
     fflush(stdout);
     return 0;
 }

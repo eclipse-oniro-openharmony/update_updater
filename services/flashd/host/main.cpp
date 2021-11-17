@@ -16,13 +16,6 @@
 #include "server.h"
 #include "server_for_client.h"
 
-#ifndef HARMONY_PROJECT
-#include "../test/ut_command.h"
-using namespace HdcTest;
-#endif
-
-#include "server.h"
-#include "server_for_client.h"
 using namespace Hdc;
 
 static bool g_isServerMode = false;
@@ -60,7 +53,7 @@ int IsRegisterCommand(string &outCommand, const char *cmd, const char *cmdnext)
     for (string v : registerCommand) {
         if (doubleCommand == v) {
             outCommand = doubleCommand;
-            return 2;
+            return 2; // 2 error code
         }
         if (cmd == v) {
             outCommand = cmd;
@@ -97,7 +90,7 @@ int SplitOptionAndCommand(int argc, const char **argv, string &outOption, string
             resultChild = IsRegisterCommand(outCommand, argv[i], (i == argc - 1) ? nullptr : argv[i + 1]);
             if (resultChild > 0) {
                 foundCommand = true;
-                if (resultChild == 2) {
+                if (resultChild == 2) { // 2 error code
                     ++i;
                 }
                 AppendCwdWhenTransfer(outCommand);
@@ -130,9 +123,6 @@ int RunServerMode(string &serverListenString)
 
 int RunPcDebugMode(bool isPullServer, bool isTCPorUSB, int isTestMethod)
 {
-#ifdef HARMONY_PROJECT
-    Base::PrintMessage("Not support command...");
-#else
     pthread_t pt;
     if (isPullServer) {
         pthread_create(&pt, nullptr, TestBackgroundServerForClient, nullptr);
@@ -143,7 +133,6 @@ int RunPcDebugMode(bool isPullServer, bool isTCPorUSB, int isTestMethod)
         pthread_join(pt, nullptr);
         WRITE_LOG(LOG_DEBUG, "!!!!!!!!!Server finish");
     }
-#endif
     return 0;
 }
 
@@ -167,7 +156,7 @@ int RunClientMode(string &commands, string &serverListenString, string &connectK
         && Base::ProgramMutex(SERVER_NAME.c_str(), true) == 0) {
         // default pullup, just default listenstr.If want to customer listen-string, please use 'hdc -m -s lanip:port'
         HdcServer::PullupServer(DEFAULT_SERVER_ADDR.c_str());
-        uv_sleep(300);  // give time to start serverForClient,at least 200ms
+        uv_sleep(300);  // give time to start serverForClient,at least 300ms
     }
     client.Initial(connectKey);
     client.ExecuteCommand(commands.c_str());
@@ -176,7 +165,7 @@ int RunClientMode(string &commands, string &serverListenString, string &connectK
 
 bool ParseServerListenString(string &serverListenString, char *optarg)
 {
-    if (strlen(optarg) > 24) {
+    if (strlen(optarg) > 24) { // 24 min len
         Base::PrintMessage("Unknow content of parament '-s'");
         return false;
     }
@@ -186,7 +175,7 @@ bool ParseServerListenString(string &serverListenString, char *optarg)
     }
     char *p = strchr(buf, ':');
     if (!p) {  // Only port
-        if (strlen(buf) > 5) {
+        if (strlen(buf) > 5) { // port len
             Base::PrintMessage("The port-string's length must < 5");
             return false;
         }

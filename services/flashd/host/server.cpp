@@ -490,7 +490,7 @@ bool HdcServer::FetchCommand(HSession hSession, const uint32_t channelId, const 
             pdiNew->channelId = channelId;
             pdiNew->sessionId = hSession->sessionId;
             pdiNew->forwardDirection = ((char *)payload)[0] == '1';
-            pdiNew->taskString = (char *)payload + 2;
+            pdiNew->taskString = (char *)payload + 2; // 2 len
             AdminForwardMap(OP_ADD, STRING_EMPTY, pdiNew);
             Base::TryCloseHandle((uv_handle_t *)&hChannel->hChildWorkTCP);  // detch client channel
             break;
@@ -637,7 +637,7 @@ int HdcServer::CreateConnect(const string &connectKey)
         uv_timer_t *waitTimeDoCmd = new uv_timer_t;
         uv_timer_init(&loopMain, waitTimeDoCmd);
         waitTimeDoCmd->data = hSession;
-        uv_timer_start(waitTimeDoCmd, UsbPreConnect, 10, 100);
+        uv_timer_start(waitTimeDoCmd, UsbPreConnect, 10, 100); // 10 100 repeat
     }
     if (!hSession) {
         return ERR_BUF_ALLOC;

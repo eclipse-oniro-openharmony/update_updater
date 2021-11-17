@@ -17,7 +17,7 @@ FLASHD_PATH = "//base/update/updater/services/flashd"
 HDC_PATH = "//developtools/hdc_standard/src"
 
 common_sources = [
-  "${FLASHD_PATH}/common/base.cpp",
+  "${HDC_PATH}/common/base.cpp",
   "${HDC_PATH}/common/async_cmd.cpp",
   "${HDC_PATH}/common/auth.cpp",
   "${HDC_PATH}/common/channel.cpp",
