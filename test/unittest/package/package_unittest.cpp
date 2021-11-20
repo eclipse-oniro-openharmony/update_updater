@@ -38,7 +38,7 @@ public:
     PackageUnitTest() {}
     ~PackageUnitTest() override {}
 public:
-    int TestPackagePack()
+    int TestPackagePack(int type = PKG_DIGEST_TYPE_SHA256)
     {
         int32_t ret;
         uint32_t updateFileVersion = 1000;
@@ -48,7 +48,7 @@ public:
         pkgInfo.time = strdup("21:23:49");
         pkgInfo.productUpdateId = strdup("555.555.100.555");
         pkgInfo.entryCount = testFileNames_.size();
-        pkgInfo.digestMethod = PKG_DIGEST_TYPE_SHA256;
+        pkgInfo.digestMethod = type;
         pkgInfo.signMethod = PKG_SIGN_METHOD_RSA;
         pkgInfo.pkgType = PKG_PACK_TYPE_UPGRADE;
         pkgInfo.updateFileVersion = updateFileVersion;
@@ -74,7 +74,8 @@ public:
         }
         std::string packagePath = TEST_PATH_TO;
         packagePath += testPackageName;
-        ret = CreatePackage(&pkgInfo, comp, packagePath.c_str(), GetTestPrivateKeyName().c_str());
+        ret = CreatePackage(&pkgInfo, comp, packagePath.c_str(),
+            GetTestPrivateKeyName(pkgInfo.digestMethod).c_str());
         EXPECT_EQ(ret, PKG_SUCCESS);
         for (size_t i = 0; i < testFileNames_.size(); i++) {
             free(comp[i].componentAddr);
@@ -88,13 +89,13 @@ public:
         return ret;
     }
 
-    int TestPackageUnpack()
+    int TestPackageUnpack(int type)
     {
         pkgManager_ = static_cast<PkgManagerImpl*>(PkgManager::GetPackageInstance());
         EXPECT_NE(pkgManager_, nullptr);
         std::vector<std::string> components;
         // 使用上面打包的包进行解析
-        int32_t ret = pkgManager_->LoadPackage(TEST_PATH_TO + testPackageName, GetTestCertName(), components);
+        int32_t ret = pkgManager_->LoadPackage(TEST_PATH_TO + testPackageName, GetTestCertName(type), components);
         EXPECT_EQ(ret, PKG_SUCCESS);
 
         for (size_t i = 0; i < components.size(); i++) {
@@ -104,17 +105,18 @@ public:
         return PKG_SUCCESS;
     }
 
-    int TestZipPkgCompress()
+    int TestZipPkgCompress(int digestMethod)
     {
-        return CreateZipPackage(testFileNames_, TEST_PATH_TO + testZipPackageName, TEST_PATH_FROM);
+        return CreateZipPackage(testFileNames_, TEST_PATH_TO + testZipPackageName, TEST_PATH_FROM, digestMethod);
     }
 
-    int TestZipPkgDecompress()
+    int TestZipPkgDecompress(int digestMethod)
     {
         pkgManager_ = static_cast<PkgManagerImpl*>(PkgManager::GetPackageInstance());
         EXPECT_NE(pkgManager_, nullptr);
         std::vector<std::string> components;
-        int32_t ret = pkgManager_->LoadPackage(TEST_PATH_TO + testZipPackageName, GetTestCertName(), components);
+        int32_t ret = pkgManager_->LoadPackage(TEST_PATH_TO + testZipPackageName,
+            GetTestCertName(digestMethod), components);
         EXPECT_EQ(ret, PKG_SUCCESS);
 
         for (size_t i = 0; i < components.size(); i++) {
@@ -146,7 +148,8 @@ public:
         pkgInfo.pkgType = PKG_PACK_TYPE_LZ4;
         pkgInfo.signMethod = PKG_SIGN_METHOD_RSA;
         pkgInfo.digestMethod  = PKG_DIGEST_TYPE_SHA256;
-        return pkgManager_->CreatePackage(TEST_PATH_TO + testLz4PackageName, GetTestPrivateKeyName(), &pkgInfo, files);
+        return pkgManager_->CreatePackage(TEST_PATH_TO + testLz4PackageName,
+            GetTestPrivateKeyName(pkgInfo.digestMethod), &pkgInfo, files);
     }
 
     int TestLz4PkgCompressBlock()
@@ -170,7 +173,8 @@ public:
         pkgInfo.signMethod = PKG_SIGN_METHOD_RSA;
         pkgInfo.digestMethod  = PKG_DIGEST_TYPE_SHA256;
         pkgInfo.pkgType = PKG_PACK_TYPE_LZ4;
-        return pkgManager_->CreatePackage(TEST_PATH_TO + testLz4PackageName, GetTestPrivateKeyName(), &pkgInfo, files);
+        return pkgManager_->CreatePackage(TEST_PATH_TO + testLz4PackageName,
+            GetTestPrivateKeyName(pkgInfo.digestMethod), &pkgInfo, files);
     }
 
     int TestLz4PkgDecompress()
@@ -178,7 +182,7 @@ public:
         pkgManager_ = static_cast<PkgManagerImpl*>(PkgManager::GetPackageInstance());
         EXPECT_NE(pkgManager_, nullptr);
         std::vector<std::string> components;
-        int32_t ret = pkgManager_->LoadPackage(TEST_PATH_TO + testLz4PackageName, GetTestCertName(), components);
+        int32_t ret = pkgManager_->LoadPackage(TEST_PATH_TO + testLz4PackageName, GetTestCertName(0), components);
         EXPECT_EQ(ret, PKG_SUCCESS);
 
         for (size_t i = 0; i < components.size(); i++) {
@@ -197,7 +201,7 @@ public:
         std::vector<std::string> fileNames;
         fileNames.push_back(testZipPackageName);
         fileNames.push_back(testPackageName);
-        ret = CreateZipPackage(fileNames, TEST_PATH_TO + testCombinePkgName, TEST_PATH_TO);
+        ret = CreateZipPackage(fileNames, TEST_PATH_TO + testCombinePkgName, TEST_PATH_TO, PKG_DIGEST_TYPE_SHA256);
         EXPECT_EQ(ret, PKG_SUCCESS);
         return 0;
     }
@@ -208,7 +212,7 @@ public:
         pkgManager_ = static_cast<PkgManagerImpl*>(PkgManager::GetPackageInstance());
         EXPECT_NE(pkgManager_, nullptr);
         std::vector<std::string> components;
-        int32_t ret = pkgManager_->LoadPackage(TEST_PATH_TO + testCombinePkgName, GetTestCertName(), components);
+        int32_t ret = pkgManager_->LoadPackage(TEST_PATH_TO + testCombinePkgName, GetTestCertName(0), components);
         EXPECT_EQ(ret, PKG_SUCCESS);
 
         for (size_t i = 0; i < components.size(); i++) {
@@ -228,30 +232,30 @@ public:
         std::vector<uint8_t> digest(digestSize);
         BuildFileDigest(*digest.data(), digest.capacity(), TEST_PATH_TO + testPackageName);
         std::string path = TEST_PATH_TO + testPackageName;
-        ret = VerifyPackage(path.c_str(), GetTestCertName().c_str(), "", digest.data(), digest.capacity());
+        ret = VerifyPackage(path.c_str(), GetTestCertName(0).c_str(), "", digest.data(), digest.capacity());
         EXPECT_EQ(0, ret);
         constexpr uint32_t digestLen = 10;
         digest[digestLen] = digestValue;
-        ret = VerifyPackage(path.c_str(), GetTestCertName().c_str(), "", digest.data(), digest.capacity());
+        ret = VerifyPackage(path.c_str(), GetTestCertName(0).c_str(), "", digest.data(), digest.capacity());
         EXPECT_EQ(PKG_INVALID_SIGNATURE, ret);
         return 0;
     }
 
     int TestVerifyZipWithCallback()
     {
-        int32_t ret = TestVerifyZip();
+        int32_t ret = TestVerifyZip(PKG_DIGEST_TYPE_SHA256);
         EXPECT_EQ(ret, 0);
         std::string path = GetCurrPath();
         path = TEST_PATH_TO + testZipPackageName;
-        ret = VerifyPackageWithCallback(path.c_str(), GetTestCertName().c_str(),
+        ret = VerifyPackageWithCallback(path.c_str(), GetTestCertName(0).c_str(),
             [](int32_t result, uint32_t percent) { PKG_LOGI("current progress: %u\n", percent); });
         EXPECT_EQ(PKG_INVALID_PARAM, ret);
         return 0;
     }
 
-    int TestVerifyZip()
+    int TestVerifyZip(int digestMethod)
     {
-        int32_t ret = TestZipPkgCompress();
+        int32_t ret = TestZipPkgCompress(digestMethod);
         EXPECT_EQ(ret, 0);
         constexpr size_t digestSize = 32;
         uint8_t digestValue = 33;
@@ -260,10 +264,12 @@ public:
         path = TEST_PATH_TO + testZipPackageName;
         std::vector<uint8_t> digest(digestSize);
         BuildFileDigest(*digest.data(), digest.capacity(), path);
-        ret = VerifyPackage(path.c_str(), GetTestCertName().c_str(), "", digest.data(), digest.capacity());
+        ret = VerifyPackage(path.c_str(), GetTestCertName(digestMethod).c_str(),
+            std::to_string(digestMethod).c_str(), digest.data(), digest.capacity());
         EXPECT_EQ(ret, 0);
         digest[index] = digestValue;
-        ret = VerifyPackage(path.c_str(), GetTestCertName().c_str(), "", digest.data(), digest.capacity());
+        ret = VerifyPackage(path.c_str(), GetTestCertName(0).c_str(),
+            std::to_string(digestMethod).c_str(), digest.data(), digest.capacity());
         EXPECT_EQ(PKG_INVALID_SIGNATURE, ret);
         return 0;
     }
@@ -279,10 +285,10 @@ public:
         path = TEST_PATH_TO + testLz4PackageName;
         std::vector<uint8_t> digest(digestSize);
         BuildFileDigest(*digest.data(), digest.capacity(), path);
-        ret = VerifyPackage(path.c_str(), GetTestCertName().c_str(), "", digest.data(), digest.capacity());
+        ret = VerifyPackage(path.c_str(), GetTestCertName(0).c_str(), "", digest.data(), digest.capacity());
         EXPECT_EQ(0, ret);
         digest[index] = digestValue;
-        ret = VerifyPackage(path.c_str(), GetTestCertName().c_str(), "", digest.data(), digest.capacity());
+        ret = VerifyPackage(path.c_str(), GetTestCertName(0).c_str(), "", digest.data(), digest.capacity());
         EXPECT_EQ(PKG_INVALID_SIGNATURE, ret);
         return 0;
     }
@@ -309,7 +315,8 @@ public:
         }
         std::string packagePath = TEST_PATH_TO;
         packagePath += testPackageName;
-        int32_t ret = CreatePackage(&pkgInfo, comp, packagePath.c_str(), GetTestPrivateKeyName().c_str());
+        int32_t ret = CreatePackage(&pkgInfo, comp, packagePath.c_str(),
+            GetTestPrivateKeyName(pkgInfo.digestMethod).c_str());
         for (size_t i = 0; i < testFileNames_.size(); i++) {
             free(comp[i].componentAddr);
             free(comp[i].filePath);
@@ -319,7 +326,7 @@ public:
         uint8_t digest[digestSize] = {0};
         ret = BuildFileDigest(*digest, sizeof(digest), packagePath);
         EXPECT_EQ(ret, PKG_SUCCESS);
-        ret = VerifyPackage(packagePath.c_str(), GetTestCertName().c_str(), "", digest, digestSize);
+        ret = VerifyPackage(packagePath.c_str(), GetTestCertName(0).c_str(), "", digest, digestSize);
         return ret;
     }
 
@@ -355,30 +362,30 @@ public:
         std::vector<uint8_t> digest(digestSize);
         ret = BuildFileDigest(*digest.data(), digest.size(), packagePath.c_str());
         EXPECT_EQ(ret, PKG_SUCCESS);
-        return VerifyPackage(packagePath.c_str(), GetTestCertName().c_str(), "", digest.data(), digest.size());
+        return VerifyPackage(packagePath.c_str(), GetTestCertName(0).c_str(), "", digest.data(), digest.size());
     }
 
     int TestInvalidCreatePackage() const
     {
         ComponentInfoExt compInfo;
         uint8_t pkgType = 5;
-        int ret = CreatePackage(nullptr, &compInfo, nullptr, GetTestPrivateKeyName().c_str());
+        int ret = CreatePackage(nullptr, &compInfo, nullptr, GetTestPrivateKeyName(0).c_str());
         EXPECT_EQ(ret, PKG_INVALID_PARAM);
 
         UpgradePkgInfoExt pkgInfoExt;
         pkgInfoExt.pkgType = pkgType;
-        ret = CreatePackage(&pkgInfoExt, &compInfo, nullptr, GetTestPrivateKeyName().c_str());
+        ret = CreatePackage(&pkgInfoExt, &compInfo, nullptr, GetTestPrivateKeyName(0).c_str());
         EXPECT_EQ(ret, PKG_INVALID_PARAM);
 
         constexpr uint32_t digestLen = 32;
-        ret = VerifyPackage(nullptr, GetTestCertName().c_str(), nullptr, nullptr, digestLen);
+        ret = VerifyPackage(nullptr, GetTestCertName(0).c_str(), nullptr, nullptr, digestLen);
         EXPECT_EQ(ret, PKG_INVALID_PARAM);
 
         // 无效的类型
         std::string packagePath = TEST_PATH_TO;
         packagePath += testPackageName;
         pkgInfoExt.pkgType = pkgType;
-        ret = CreatePackage(&pkgInfoExt, &compInfo, packagePath.c_str(), GetTestPrivateKeyName().c_str());
+        ret = CreatePackage(&pkgInfoExt, &compInfo, packagePath.c_str(), GetTestPrivateKeyName(0).c_str());
         EXPECT_EQ(ret, PKG_INVALID_PARAM);
         return 0;
     }
@@ -403,7 +410,8 @@ public:
         pkgInfo.signMethod = PKG_SIGN_METHOD_RSA;
         pkgInfo.digestMethod  = PKG_DIGEST_TYPE_SHA256;
         pkgInfo.pkgType = PKG_PACK_TYPE_GZIP;
-        return pkgManager_->CreatePackage(TEST_PATH_TO + testGZipPackageName, GetTestPrivateKeyName(), &pkgInfo, files);
+        return pkgManager_->CreatePackage(TEST_PATH_TO + testGZipPackageName,
+            GetTestPrivateKeyName(pkgInfo.digestMethod), &pkgInfo, files);
     }
 
     int TestGZipPkgDecompress(const std::string& gzipPackageName)
@@ -411,7 +419,7 @@ public:
         pkgManager_ = static_cast<PkgManagerImpl*>(PkgManager::GetPackageInstance());
         EXPECT_NE(nullptr, pkgManager_);
         std::vector<std::string> components;
-        int32_t ret = pkgManager_->LoadPackage(gzipPackageName, GetTestCertName(), components);
+        int32_t ret = pkgManager_->LoadPackage(gzipPackageName, GetTestCertName(0), components);
         EXPECT_EQ(ret, PKG_SUCCESS);
 
         for (size_t i = 0; i < components.size(); i++) {
@@ -440,7 +448,7 @@ public:
         pkgManager_ = static_cast<PkgManagerImpl*>(PkgManager::GetPackageInstance());
         EXPECT_NE(nullptr, pkgManager_);
         std::vector<std::string> fileIds;
-        int32_t ret = pkgManager_->LoadPackage(TEST_PATH_TO + testPackageName, GetTestCertName(), fileIds);
+        int32_t ret = pkgManager_->LoadPackage(TEST_PATH_TO + testPackageName, GetTestCertName(0), fileIds);
         EXPECT_EQ(0, ret);
         // 在load其中的一个zip包
         PkgManager::StreamPtr outStream = nullptr;
@@ -451,7 +459,7 @@ public:
         EXPECT_EQ(ret, 0);
         pkgManager_->ClosePkgStream(outStream);
         std::vector<std::string> secondFileIds;
-        ret = pkgManager_->LoadPackage(TEST_PATH_TO + secondFile, GetTestCertName(), secondFileIds);
+        ret = pkgManager_->LoadPackage(TEST_PATH_TO + secondFile, GetTestCertName(0), secondFileIds);
         EXPECT_EQ(0, ret);
         if (secondFileIds.size() != 1) {
             EXPECT_EQ(1, ret);
@@ -563,15 +571,29 @@ public:
 HWTEST_F(PackageUnitTest, TestPackage, TestSize.Level1)
 {
     PackageUnitTest test;
-    EXPECT_EQ(0, test.TestPackagePack());
-    EXPECT_EQ(0, test.TestPackageUnpack());
+    EXPECT_EQ(0, test.TestPackagePack(PKG_DIGEST_TYPE_SHA256));
+    EXPECT_EQ(0, test.TestPackageUnpack(PKG_DIGEST_TYPE_SHA256));
+}
+
+HWTEST_F(PackageUnitTest, TestPackage384, TestSize.Level1)
+{
+    PackageUnitTest test;
+    EXPECT_EQ(0, test.TestPackagePack(PKG_DIGEST_TYPE_SHA384));
+    EXPECT_EQ(0, test.TestPackageUnpack(PKG_DIGEST_TYPE_SHA384));
 }
 
 HWTEST_F(PackageUnitTest, TestZipPackage, TestSize.Level1)
 {
     PackageUnitTest test;
-    EXPECT_EQ(0, test.TestZipPkgCompress());
-    EXPECT_EQ(0, test.TestZipPkgDecompress());
+    EXPECT_EQ(0, test.TestZipPkgCompress(PKG_DIGEST_TYPE_SHA256));
+    EXPECT_EQ(0, test.TestZipPkgDecompress(PKG_DIGEST_TYPE_SHA256));
+}
+
+HWTEST_F(PackageUnitTest, TestZipPackage384, TestSize.Level1)
+{
+    PackageUnitTest test;
+    EXPECT_EQ(0, test.TestZipPkgCompress(PKG_DIGEST_TYPE_SHA384));
+    EXPECT_EQ(0, test.TestZipPkgDecompress(PKG_DIGEST_TYPE_SHA384));
 }
 
 HWTEST_F(PackageUnitTest, TestLz4Package, TestSize.Level1)
@@ -609,7 +631,8 @@ HWTEST_F(PackageUnitTest, TestVerifyZipWithCallback, TestSize.Level1)
 HWTEST_F(PackageUnitTest, TestVerifyZip, TestSize.Level1)
 {
     PackageUnitTest test;
-    EXPECT_EQ(0, test.TestVerifyZip());
+    EXPECT_EQ(0, test.TestVerifyZip(PKG_DIGEST_TYPE_SHA384));
+    EXPECT_EQ(0, test.TestVerifyZip(PKG_DIGEST_TYPE_SHA256));
 }
 
 HWTEST_F(PackageUnitTest, TestVerifyLz4, TestSize.Level1) {

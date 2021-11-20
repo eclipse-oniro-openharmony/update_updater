@@ -13,11 +13,19 @@
  * limitations under the License.
  */
 #include "host_updater.h"
+
+#include <cstring>
 #include "common.h"
+#include "flash_define.h"
 #include "transfer.h"
 #include "serial_struct.h"
 
 namespace Hdc {
+static const std::string helpCmd = "flash";
+static const std::string updateCmd = "update ";
+static const std::string flashCmd = "flash ";
+static const std::string eraseCmd = "erase ";
+static const std::string formatCmd = "format ";
 static const int PERCENT_FINISH = 100;
 static const uint32_t PERCENT_CLEAR = ((uint32_t)-1);
 HostUpdater::HostUpdater(HTaskInfo hTaskInfo) : HdcTransferBase(hTaskInfo)
@@ -41,24 +49,20 @@ bool HostUpdater::BeginTransfer(CtxFile &context,
 {
     int argc = 0;
     char **argv = Base::SplitCommandToArgs(payload, &argc);
-    if (argv == nullptr || argc < minParam || fileIndex >= argc) {
-        LogMsg(MSG_FAIL, "Invalid param for cmd \"%s\"", function.c_str());
-        delete[]((char *)argv);
-        return false;
-    }
+    HOSTUPDATER_CHECK(!(argv == nullptr || argc < minParam || fileIndex >= argc), delete[]((char *)argv);
+        return false, "Invalid param for cmd \"%s\"", function.c_str());
+
     int maxParam = minParam;
-    if (strstr(payload, "-f") != nullptr) {
+    bool force = strstr(payload, "-f") != nullptr;
+    if (force) {
         maxParam += 1;
     }
-    if (argc != maxParam) {
-        LogMsg(MSG_FAIL, "Invalid param for cmd \"%s\"", function.c_str());
-        delete[]((char *)argv);
-        return false;
-    }
+    HOSTUPDATER_CHECK(argc == maxParam, delete[]((char *)argv);
+        return false, "Invalid param for cmd \"%s\" %d", function.c_str(), maxParam);
 
     context.transferConfig.functionName = function;
     context.transferConfig.options = payload;
-    if (strcmp(argv[fileIndex], "-f") == 0) {
+    if (force && (fileIndex + 1 < argc) && strcmp(argv[fileIndex + 1], "-f") != 0) {
         context.localPath = argv[fileIndex + 1];
     } else {
         context.localPath = argv[fileIndex];
@@ -66,27 +70,26 @@ bool HostUpdater::BeginTransfer(CtxFile &context,
 
     if (MatchPackageExtendName(context.localPath, ".img")) {
         context.transferConfig.compressType = COMPRESS_NONE;
-    } else if (function == CMDSTR_FLASH_PARTITION) {
-        context.transferConfig.compressType = COMPRESS_NONE;
     } else if (MatchPackageExtendName(context.localPath, ".bin")) {
+        const char *part = strstr(payload, "fastboot");
+        HOSTUPDATER_CHECK(part != nullptr, delete[]((char *)argv);
+            return false, "Invalid image %s for cmd \"%s\"", context.localPath.c_str(), function.c_str());
         context.transferConfig.compressType = COMPRESS_NONE;
-    } else if (!(MatchPackageExtendName(context.localPath, ".zip") ||
-        MatchPackageExtendName(context.localPath, ".lz4") ||
-        MatchPackageExtendName(context.localPath, ".gz2"))) {
-        LogMsg(MSG_FAIL, "Invaid file \"%s\" for cmd \"%s\"", context.localPath.c_str(), function.c_str());
-        delete[]((char *)argv);
-        return false;
+    } else {
+        HOSTUPDATER_CHECK((MatchPackageExtendName(context.localPath, ".zip") ||
+            MatchPackageExtendName(context.localPath, ".lz4") ||
+            MatchPackageExtendName(context.localPath, ".gz2")), delete[]((char *)argv);
+            return false,
+            "Invaid extend name \"%s\" for cmd \"%s\"", context.localPath.c_str(), function.c_str());
     }
 
     WRITE_LOG(LOG_DEBUG, "BeginTransfer function: %s localPath: %s command: %s ",
         context.transferConfig.functionName.c_str(), context.localPath.c_str(), payload);
     // check path
     bool ret = Base::CheckDirectoryOrPath(context.localPath.c_str(), true, true);
-    if (!ret) {
-        LogMsg(MSG_FAIL, "Invaid file \"%s\" for cmd \"%s\"", context.localPath.c_str(), function.c_str());
-        delete[]((char *)argv);
-        return false;
-    }
+    HOSTUPDATER_CHECK(ret, delete[]((char *)argv);
+        return false,
+        "Invaid path \"%s\" for cmd \"%s\"", context.localPath.c_str(), function.c_str());
     context.taskQueue.push_back(context.localPath);
     RunQueue(context);
     return true;
@@ -95,7 +98,7 @@ bool HostUpdater::BeginTransfer(CtxFile &context,
 std::string HostUpdater::GetFileName(const std::string &fileName) const
 {
     int32_t pos = fileName.find_last_of('/');
-    if (pos < 0) {
+    if (pos < 0) { // win32
         pos = fileName.find_last_of('\\');
     }
     return fileName.substr(pos + 1, fileName.size());
@@ -132,15 +135,10 @@ bool HostUpdater::CheckCmd(const std::string &function, const char *payload, int
 {
     int argc = 0;
     char **argv = Base::SplitCommandToArgs(payload, &argc);
-    if (argv == nullptr) {
-        LogMsg(MSG_FAIL, "Can not parser cmd \"%s\"", function.c_str());
-        return false;
-    }
+    HOSTUPDATER_CHECK(argv != nullptr, return false, "Can not parser cmd \"%s\"", function.c_str());
     delete[]((char *)argv);
-    if (argc < param) {
-        LogMsg(MSG_FAIL, "Invalid param for cmd \"%s\"", function.c_str());
-        return false;
-    }
+    HOSTUPDATER_CHECK(argc >= param, return false, "Invalid param for cmd \"%s\" %d", function.c_str(), argc);
+    WRITE_LOG(LOG_DEBUG, "CheckCmd command: %s ", payload);
 
     int maxParam = param;
     if (strstr(payload, "-f") != nullptr) {
@@ -150,10 +148,8 @@ bool HostUpdater::CheckCmd(const std::string &function, const char *payload, int
         maxParam += 1;
         maxParam += 1;
     }
-    if (argc != maxParam) {
-        LogMsg(MSG_FAIL, "Invalid param for cmd \"%s\"", function.c_str());
-        return false;
-    }
+    HOSTUPDATER_CHECK(argc == maxParam, return false,
+        "Invalid param for cmd \"%s\" %d %d", function.c_str(), argc, maxParam);
     return true;
 }
 
@@ -161,14 +157,16 @@ bool HostUpdater::CommandDispatch(const uint16_t command, uint8_t *payload, cons
 {
     const int cmdFroErase = 2;
     const int cmdFroFormat = 2;
+#ifndef UPDATER_UT
     if (!HdcTransferBase::CommandDispatch(command, payload, payloadSize)) {
         return false;
     }
+#endif
     bool ret = true;
     switch (command) {
         case CMD_UPDATER_BEGIN: {
-            std::string s("  Processing:   0%%");
-            bSendProgress = true;
+            std::string s("Processing:    0%%");
+            sendProgress = true;
             SendRawData(reinterpret_cast<uint8_t *>(s.data()), s.size());
             break;
         }
@@ -211,10 +209,10 @@ bool HostUpdater::CommandDispatch(const uint16_t command, uint8_t *payload, cons
 
 void HostUpdater::ProcessProgress(uint32_t percentage)
 {
-    if (!bSendProgress) {
+    if (!sendProgress) {
         return;
     }
-    std::string backStr = "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b";
+    std::string backStr = "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b";
     std::string breakStr = "\n";
     WRITE_LOG(LOG_INFO, "ProcessProgress %d", percentage);
     const int bufferSize = 128;
@@ -222,39 +220,133 @@ void HostUpdater::ProcessProgress(uint32_t percentage)
     if (percentage == PERCENT_CLEAR) { // clear
         SendRawData(reinterpret_cast<uint8_t *>(backStr.data()), backStr.size());
         SendRawData(reinterpret_cast<uint8_t *>(breakStr.data()), breakStr.size());
-        bSendProgress = false;
+        sendProgress = false;
         return;
     }
-    int len = sprintf_s(buffer.data(), buffer.size() - 1, "%s  Processing:   %3d%%", backStr.c_str(), percentage);
-    if (len <= 0) {
-        return;
-    }
+    int len = sprintf_s(buffer.data(), buffer.size() - 1, "%sProcessing:   %3d%%", backStr.c_str(), percentage);
+    HOSTUPDATER_CHECK(len > 0, return, "Failed to format progress info ");
     SendRawData(reinterpret_cast<uint8_t *>(buffer.data()), len);
     if (percentage == PERCENT_FINISH) {
         SendRawData(reinterpret_cast<uint8_t *>(breakStr.data()), breakStr.size());
-        bSendProgress = false;
+        sendProgress = false;
     }
 }
 
 bool HostUpdater::CheckUpdateContinue(const uint16_t command, const uint8_t *payload, int payloadSize)
 {
-    if (static_cast<size_t>(payloadSize) < sizeof(uint16_t)) {
-        return false;
-    }
+    HOSTUPDATER_CHECK(static_cast<size_t>(payloadSize) >= sizeof(uint16_t),
+        return false, "Failed to check payload size %d ", payloadSize);
     MessageLevel level = (MessageLevel)payload[1];
-    if ((level == MSG_OK) && bSendProgress) {
+    if ((level == MSG_OK) && sendProgress) {
         ProcessProgress(PERCENT_FINISH);
     }
     std::string info((char*)(payload + sizeof(uint16_t)), payloadSize - sizeof(uint16_t));
     if (!info.empty()) {
         LogMsg(level, "%s", info.c_str());
     }
-    WRITE_LOG(LOG_DEBUG, "CheckUpdateContinue %d %s", level, info.c_str());
-    ctxNow.taskQueue.pop_back();
+    WRITE_LOG(LOG_DEBUG, "CheckUpdateContinue payloadSize %d %d %s", payloadSize, level, info.c_str());
+    if (ctxNow.taskQueue.size() != 0) {
+        ctxNow.taskQueue.pop_back();
+    }
     if (singalStop || !ctxNow.taskQueue.size()) {
         return false;
     }
     RunQueue(ctxNow);
     return true;
+}
+
+bool HostUpdater::CheckMatchUpdate(const std::string &input,
+    std::string &stringError, uint16_t &cmdFlag, bool &bJumpDo)
+{
+    WRITE_LOG(LOG_DEBUG, "CheckMatchUpdate command:%s", input.c_str());
+    size_t cmdLen = updateCmd.size();
+    if (!strncmp(input.c_str(), updateCmd.c_str(), updateCmd.size())) {
+        cmdFlag = CMD_UPDATER_UPDATE_INIT;
+        cmdLen = updateCmd.size();
+    } else if (!strncmp(input.c_str(), flashCmd.c_str(), flashCmd.size())) {
+        cmdFlag = CMD_UPDATER_FLASH_INIT;
+        cmdLen = flashCmd.size();
+    } else if (!strncmp(input.c_str(), eraseCmd.c_str(), eraseCmd.size())) {
+        cmdFlag = CMD_UPDATER_ERASE;
+        cmdLen = eraseCmd.size();
+    } else if (!strncmp(input.c_str(), formatCmd.c_str(), formatCmd.size())) {
+        cmdFlag = CMD_UPDATER_FORMAT;
+        cmdLen = formatCmd.size();
+    } else {
+        return false;
+    }
+    if (input.size() <= cmdLen) {
+        stringError = "Incorrect command";
+        bJumpDo = true;
+    }
+    return true;
+}
+
+#ifdef UPDATER_UT
+static std::string g_input = "yes";
+void HostUpdater::SetInput(const std::string &input)
+{
+    g_input = input;
+}
+#endif
+bool HostUpdater::ConfirmCommand(const string &commandIn, bool &closeInput)
+{
+    std::string tip = "";
+    if (!strncmp(commandIn.c_str(), updateCmd.c_str(), updateCmd.size())) {
+        closeInput = true;
+    } else if (!strncmp(commandIn.c_str(), flashCmd.c_str(), flashCmd.size())) {
+        tip = "Confirm flash partition";
+        closeInput = true;
+    } else if (!strncmp(commandIn.c_str(), eraseCmd.c_str(), eraseCmd.size())) {
+        tip = "Confirm erase partition";
+    } else if (!strncmp(commandIn.c_str(), formatCmd.c_str(), formatCmd.size())) {
+        tip = "Confirm format partition";
+    }
+    if (tip.empty() || strstr(commandIn.c_str(), " -f") != nullptr) { // check if -f
+        return true;
+    }
+    const size_t minLen = strlen("yes");
+    int retryCount = 0;
+    do {
+        printf("%s ? (Yes/No) ", tip.c_str());
+        fflush(stdin);
+        std::string info = {};
+        size_t i = 0;
+        while (1) {
+#ifndef UPDATER_UT
+            char c = getchar();
+#else
+            char c = '\n';
+            info = g_input;
+#endif
+            if (c == '\r' || c == '\n') {
+                break;
+            }
+            if (c == ' ') {
+                continue;
+            }
+            if (i < minLen && isprint(c)) {
+                info.append(1, std::tolower(c));
+                i++;
+            }
+        }
+        if (info == "n" || info == "no") {
+            return false;
+        }
+        if (info == "y" || info == "yes") {
+            return true;
+        }
+        retryCount++;
+    } while (retryCount < 3); // 3 retry max count
+    return (retryCount >= 3) ? false : true; // 3 retry max count
+}
+
+void HostUpdater::SendRawData(uint8_t *bufPtr, const int size)
+{
+#ifndef UPDATER_UT
+    HdcSessionBase *sessionBase = (HdcSessionBase *)clsSession;
+    sessionBase->ServerCommand(taskInfo->sessionId,
+        taskInfo->channelId, CMD_KERNEL_ECHO_RAW, bufPtr, size);
+#endif
 }
 } // namespace Hdc

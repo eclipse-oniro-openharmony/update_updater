@@ -18,45 +18,51 @@
 #include "transfer.h"
 
 namespace Hdc {
+#define HOSTUPDATER_CHECK(retCode, exper, ...) \
+    if (!(retCode)) { \
+        LogMsg(MSG_FAIL, __VA_ARGS__); \
+        exper; \
+    }
+
 class HostUpdater : public HdcTransferBase {
 public:
     explicit HostUpdater(HTaskInfo hTaskInfo);
     virtual ~HostUpdater();
     bool CommandDispatch(const uint16_t command, uint8_t *payload, const int payloadSize) override;
 
+    static bool CheckMatchUpdate(const std::string &input, std::string &stringError, uint16_t &cmdFlag, bool &bJumpDo);
+    static bool ConfirmCommand(const string &commandIn, bool &closeInput);
+#ifdef UPDATER_UT
+    void OpenFile()
+    {
+        CheckMaster(&ctxNow);
+    }
+    static void SetInput(const std::string &input);
+#endif
 private:
     void CheckMaster(CtxFile *context) override;
-
     bool BeginTransfer(CtxFile &context,
         const std::string &function, const char *payload, int minParam, int fileIndex);
     bool CheckUpdateContinue(const uint16_t command, const uint8_t *payload, int payloadSize);
     void RunQueue(CtxFile &context);
     std::string GetFileName(const std::string &fileName) const;
     void ProcessProgress(uint32_t percentage);
+    void SendRawData(uint8_t *bufPtr, const int size);
 #ifdef UPDATER_UT
     void LogMsg(MessageLevel level, const char *msg, ...)
     {
-        va_list vaArgs;
-        va_start(vaArgs, msg);
-        string log = Base::StringFormat(msg, vaArgs);
-        va_end(vaArgs);
-        WRITE_LOG(LOG_DEBUG, "LogMsg %d %s", level, log.c_str());
         return;
-    }
-    void SendRawData(uint8_t *bufPtr, const int size)
-    {
-        WRITE_LOG(LOG_DEBUG, "SendRawData %d", size);
     }
     bool SendToAnother(const uint16_t command, uint8_t *bufPtr, const int size)
     {
-        WRITE_LOG(LOG_DEBUG, "SendToAnother command %d size %d", command, size);
+        std::string s((char *)bufPtr, size);
+        WRITE_LOG(LOG_DEBUG, "SendToAnother command %d size %d %s", command, size, s.c_str());
         return true;
     }
 #endif
 private:
     bool CheckCmd(const std::string &function, const char *payload, int param);
-
-    bool bSendProgress = false;
+    bool sendProgress = false;
 };
 }
 #endif

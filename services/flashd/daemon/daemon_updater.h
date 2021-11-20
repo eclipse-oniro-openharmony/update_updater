@@ -20,12 +20,17 @@
 #include "transfer.h"
 
 namespace Hdc {
+#define FLASHDAEMON_CHECK(retCode, exper, ...) \
+    if (!(retCode)) { \
+        WRITE_LOG(LOG_FATAL, __VA_ARGS__); \
+        exper; \
+    }
+
 class DaemonUpdater : public HdcTransferBase {
 public:
     explicit DaemonUpdater(HTaskInfo hTaskInfo);
     virtual ~DaemonUpdater();
     bool CommandDispatch(const uint16_t command, uint8_t *payload, const int payloadSize) override;
-    bool ReadyForRelease();
 #ifdef UPDATER_UT
     void DoTransferFinish();
 #endif
@@ -33,7 +38,7 @@ private:
     virtual void WhenTransferFinish(CtxFile *context) override;
     void ProcessUpdateCheck(const uint8_t *payload, const int payloadSize);
     void RunUpdateShell(uint8_t type, const std::string &options, const std::string &package);
-    void AsyncUpdateFinish(uint8_t type, int32_t ret, const string &result);
+    void AsyncUpdateFinish(uint8_t type, int32_t retCode, const string &result);
     void SendProgress(size_t dataLen);
 #ifdef UPDATER_UT
     bool SendToAnother(const uint16_t command, uint8_t *bufPtr, const int size)

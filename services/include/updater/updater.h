@@ -52,8 +52,10 @@ int IsSpaceCapacitySufficient(const std::string &packagePath);
 
 bool IsSDCardExist(const std::string &sdcard_path);
 
-void PostUpdater();
+void PostUpdater(bool clearMisc);
 
 std::vector<std::string> ParseParams(int argc, char **argv);
+
+int GetBootMode(int &mode);
 } // updater
 #endif /* UPDATER_UPDATER_H */

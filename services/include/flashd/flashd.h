@@ -44,21 +44,19 @@ static constexpr uint16_t MAX_SIZE_BUF = 1024;
 static constexpr uint32_t PERCENT_FINISH = 100;
 static constexpr uint32_t PERCENT_CLEAR = (uint32_t)-1;
 
-#ifndef LOCAL_SUPPORT
 const std::string FORMAT_TOOL_FOR_EXT4 = "/bin/mke2fs";
 const std::string FORMAT_TOOL_FOR_F2FS = "/bin/make_f2fs";
 const std::string RESIZE_TOOL = "/bin/resize2fs";
+
+#ifndef UPDATER_UT
 const std::string FLASHD_FILE_PATH = "/data/updater/";
 const std::string FLASHD_HDC_LOG_PATH = "/tmp/flashd_hdc.log";
 #else
-const std::string FORMAT_TOOL_FOR_EXT4 = "/usr/sbin/mke2fs";
-const std::string FORMAT_TOOL_FOR_F2FS = "/system/bin/make_f2fs";
-const std::string RESIZE_TOOL = "/bin/resize2fs";
-const std::string FLASHD_FILE_PATH = "/home/axw/develop/build/";
-const std::string FLASHD_HDC_LOG_PATH = "/home/axw/develop/build/hdc.log";
+const std::string FLASHD_FILE_PATH = "/data/updater/updater/";
+const std::string FLASHD_HDC_LOG_PATH = "/data/updater/flashd_hdc.log";
 #endif
 static constexpr uint32_t MIN_BLOCKS_FOR_UPDATE = 1024 * 1024;
-static constexpr uint32_t DEFAULT_BLOCK_SIZE = 4096;
+static constexpr uint32_t DEFAULT_BLOCK_SIZE = 2048;
 static constexpr uint32_t DEFAULT_SIZE_UNIT = 1024 * 1024;
 
 using FlashHandle = void *;
@@ -69,5 +67,17 @@ int CreateFlashInstance(FlashHandle *handle, std::string &errorMsg, ProgressFunc
 int DoUpdaterPrepare(FlashHandle handle, uint8_t type, const std::string &cmdParam, std::string &filePath);
 int DoUpdaterFlash(FlashHandle handle, uint8_t type, const std::string &cmdParam, const std::string &filePath);
 int DoUpdaterFinish(FlashHandle handle, uint8_t type, const std::string &partition);
+
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif
+#endif
+int SetParameter(const char *key, const char *value);
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif
+#endif
 } // namespace flashd
 #endif /* UPDATER_FLASHING_H */

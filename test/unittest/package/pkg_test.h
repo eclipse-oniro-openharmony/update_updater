@@ -142,7 +142,7 @@ protected:
     }
 
     int CreateZipPackage(const std::vector<std::string> &testFileNames,
-        const std::string packageName, const std::string &base)
+        const std::string packageName, const std::string &base, int digestMethod)
     {
         PkgManager::PkgManagerPtr pkgManager = PkgManager::GetPackageInstance();
         EXPECT_NE(pkgManager, nullptr);
@@ -159,9 +159,9 @@ protected:
 
         PkgInfo pkgInfo;
         pkgInfo.signMethod = PKG_SIGN_METHOD_RSA;
-        pkgInfo.digestMethod = PKG_DIGEST_TYPE_SHA256;
+        pkgInfo.digestMethod = digestMethod;
         pkgInfo.pkgType = PKG_PACK_TYPE_ZIP;
-        int32_t ret = pkgManager->CreatePackage(packageName, GetTestPrivateKeyName(), &pkgInfo, files);
+        int32_t ret = pkgManager->CreatePackage(packageName, GetTestPrivateKeyName(digestMethod), &pkgInfo, files);
         EXPECT_EQ(ret, 0);
         return ret;
     }

@@ -104,6 +104,7 @@ int32_t PkgManagerImpl::CreatePackage(const std::string &path, const std::string
     if (pkgFile == nullptr) {
         return PKG_INVALID_FILE;
     }
+    offset = (header->digestMethod == PKG_DIGEST_TYPE_SHA384) ? (offset + SIGN_SHA256_LEN) : offset;
     ret = Sign(pkgFile->GetPkgStream(), offset, header);
     delete pkgFile;
     return ret;
@@ -120,6 +121,7 @@ int32_t PkgManagerImpl::CreatePackage(const std::string &path, const std::string
     if (pkgFile == nullptr) {
         return PKG_INVALID_FILE;
     }
+    offset = (header->digestMethod == PKG_DIGEST_TYPE_SHA384) ? (offset + SIGN_SHA256_LEN) : offset;
     ret = Sign(pkgFile->GetPkgStream(), offset, header);
     delete pkgFile;
     return ret;
@@ -136,6 +138,7 @@ int32_t PkgManagerImpl::CreatePackage(const std::string &path, const std::string
     if (pkgFile == nullptr) {
         return PKG_INVALID_FILE;
     }
+    offset = (header->digestMethod == PKG_DIGEST_TYPE_SHA384) ? (offset + SIGN_SHA256_LEN) : offset;
     ret = Sign(pkgFile->GetPkgStream(), offset, header);
     delete pkgFile;
     return ret;

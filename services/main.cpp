@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 #include "fs_manager/mount.h"
+#include "fs_manager/fs_manager_log.h"
+#include "flashd/flashd.h"
 #include "log/log.h"
 #include "misc_info/misc_info.h"
 #include "updater/updater_const.h"
@@ -22,27 +24,20 @@ using namespace updater;
 
 int main(int argc, char **argv)
 {
-    struct UpdateMessage boot {};
-    // read from misc
-    bool ret = ReadUpdaterMessage(MISC_FILE, boot);
-    if (!ret) {
-        printf("ReadUpdaterMessage MISC_FILE failed!\n");
+    int mode = BOOT_UPDATER;
+    int ret = GetBootMode(mode);
+    if (ret != 0) {
+        printf("Failed to get boot mode, start updater mode \n");
+        mode = BOOT_UPDATER;
     }
-    // if boot.update is empty, read from command.The Misc partition may have dirty data,
-    // so strlen(boot.update) is not used, which can cause system exceptions.
-    if (boot.update[0] == '\0' && !access(COMMAND_FILE.c_str(), 0)) {
-        ret = ReadUpdaterMessage(COMMAND_FILE, boot);
-        if (!ret) {
-            printf("ReadUpdaterMessage COMMAND_FILE failed!\n");
-        }
-    }
-    const int flashBootLength = 10;
-    bool useFlash = memcmp(boot.command, "boot_flash", flashBootLength) == 0;
-    InitUpdaterLogger(useFlash ? "FLASHD" : "UPDATER", TMP_LOG, TMP_STAGE_LOG, TMP_ERROR_CODE_PATH);
+
+    InitUpdaterLogger((mode == BOOT_FLASHD) ? "FLASHD" : "UPDATER", TMP_LOG, TMP_STAGE_LOG, TMP_ERROR_CODE_PATH);
     SetLogLevel(INFO);
+    FsManagerLogInit(LOG_TO_FILE, TMP_LOG.c_str());
     LoadFstab();
-    STAGE(UPDATE_STAGE_OUT) << "Init Params: " << boot.update;
-    LOG(INFO) << "boot.command " << boot.command;
-    LOG(INFO) << "boot.update " << boot.update;
+    STAGE(UPDATE_STAGE_OUT) << "Start " << ((mode == BOOT_FLASHD) ? "flashd" : "updater");
+    if (mode == BOOT_FLASHD) {
+        return flashd::flashd_main(argc, argv);
+    }
     return updater::UpdaterMain(argc, argv);
 }

@@ -106,12 +106,16 @@ int Partition::DoErase()
     if (ret < 0) {
         range[0] = 0;
         range[1] = size;
+#ifndef UPDATER_UT
         ret = ioctl(fd_, BLKDISCARD, &range);
+#endif
         FLASHING_CHECK(ret >= 0,
             flash_->RecordMsg(updater::ERROR, "Failed to erase \"%s\" error: %s", partName_.c_str(), strerror(errno));
             return ret, "Failed to erase %s error: %s", partName_.c_str(), strerror(errno));
         std::vector<char> buffer(BLOCK_SIZE, 0);
+#ifndef UPDATER_UT
         ret = updater::utils::WriteFully(fd_, buffer.data(), buffer.size());
+#endif
         FLASHING_CHECK(ret == 0, return FLASHING_PART_WRITE_ERROR, "Failed to flash data errno %d", errno);
         fsync(fd_);
     }
@@ -121,11 +125,9 @@ int Partition::DoErase()
 
 int Partition::DoFormat(const std::string &fsType)
 {
-    if (mountPoint_ == "/") { /* Can not format root */
-        return 0;
-    }
     int ret = DoUmount();
     FLASHING_CHECK(ret == 0, return FLASHING_PART_WRITE_ERROR, "Failed to umount partition");
+    FLASHING_LOGI("DoFormat partition %s format %s", partName_.c_str(), fsType_.c_str());
 
     std::vector<std::string> formatCmds {};
     ret = BuildCommandParam(fsType, formatCmds);
@@ -150,15 +152,6 @@ int Partition::DoResize(uint32_t blocks)
     bool needResize = false;
     if (!mountPoint_.empty()) {
         needResize = FlashService::CheckFreeSpace(mountPoint_, blocks);
-    } else {
-        ret = Open();
-        FLASHING_CHECK(ret == 0, return ret, "Can not open partiton %s for erase", partName_.c_str());
-        uint64_t size = GetBlockDeviceSize(fd_);
-        FLASHING_LOGI("DoResise partition %s size %lu", partName_.c_str(), size);
-        close(fd_);
-        fd_ = -1;
-        uint64_t min = static_cast<uint64_t>(DEFAULT_BLOCK_SIZE) * static_cast<uint64_t>(blocks);
-        needResize = size < min;
     }
     if (!needResize) {
         FLASHING_LOGI("No need to resize partition %s", partName_.c_str());
@@ -184,10 +177,9 @@ int Partition::DoResize(uint32_t blocks)
 
 int Partition::Open()
 {
-    if (fd_ != -1) {
-        return 0;
+    if (fd_ <= 0) {
+        fd_ = open(partPath_.c_str(), O_RDWR);
     }
-    fd_ = open(partPath_.c_str(), O_RDWR);
     FLASHING_CHECK(fd_ > 0,
         flash_->RecordMsg(updater::ERROR,
         "Can not open partiton \"%s\" error: %s", partName_.c_str(), strerror(errno));
@@ -211,12 +203,9 @@ int Partition::WriteRowData(int inputFd, size_t fileSize, std::vector<uint8_t> &
         totalWrite += writeLen;
 
         // continue read and write
-        ssize_t ret = read(inputFd, buffer.data(), buffer.size());
-        if (ret <= 0) {
-            break;
-        }
-
-        flash_->PostProgress(UPDATEMOD_FLASH, dataSize, nullptr);
+        ssize_t ret = read(inputFd, buffer.data(), dataSize);
+        FLASHING_CHECK(ret > 0, return -1, "Failed to read data %d %d", errno, buffer.size());
+        flash_->PostProgress(UPDATEMOD_FLASH, writeLen, nullptr);
         dataLen = ret;
     } while (1);
     fsync(fd_);
@@ -227,9 +216,7 @@ int Partition::IsBlockDevice(int fd) const
 {
     struct stat st {};
     int ret = fstat(fd, &st);
-    if (ret < 0) {
-        return 0;
-    }
+    FLASHING_CHECK(ret >= 0, return 0, "Invalid get fstate %d", errno);
     return S_ISBLK(st.st_mode);
 }
 
@@ -299,11 +286,13 @@ int Partition::DoUmount()
     if (mountPoint_.empty()) {
         return 0;
     }
+#ifndef UPDATER_UT
     int ret = umount2(mountPoint_.c_str(), MNT_FORCE);
     FLASHING_CHECK(ret == 0,
         flash_->RecordMsg(updater::ERROR, "Failed to umount \"%s\" error: %s", partName_.c_str(), strerror(errno));
         return FLASHING_PART_WRITE_ERROR, "Failed to umount \"%s\" error: %s", partName_.c_str(), strerror(errno));
-    return ret;
+#endif
+    return 0;
 }
 
 int Partition::DoMount()
@@ -324,7 +313,11 @@ int Partition::DoMount()
     std::string data;
     uint32_t flags = GetMountFlags(mountFlags_, data);
     errno = 0;
+
     while ((ret = mount(partPath_.c_str(), mountPoint_.c_str(), fsType_.c_str(), flags, data.c_str()) != 0)) {
+#ifdef UPDATER_UT
+        ret = 0;
+#endif
         if (errno == EAGAIN) {
             continue;
         } else {

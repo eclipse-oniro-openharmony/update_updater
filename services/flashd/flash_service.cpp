@@ -38,6 +38,7 @@ using namespace hpackage;
 using namespace updater;
 
 namespace flashd {
+static std::atomic<bool> g_flashdRunning { false };
 FlashService::~FlashService()
 {
     for (auto part : partitions_) {
@@ -84,7 +85,12 @@ int FlashService::DoUpdate(const std::string &packageName)
     FLASHING_CHECK(ret == PKG_SUCCESS, PkgManager::ReleasePackageInstance(pkgManager);
         RecordMsg(updater::ERROR, "Can not load package %s", packageName.c_str());
         return FLASHING_PACKAGE_INVALID, "Failed to load package %s", packageName.c_str());
-#ifndef LOCAL_SUPPORT
+
+    ret = UpdatePreProcess(pkgManager, packageName);
+    FLASHING_CHECK(ret == PKG_SUCCESS, PkgManager::ReleasePackageInstance(pkgManager);
+        RecordMsg(updater::ERROR, "Invalid package %s", packageName.c_str());
+        return FLASHING_PACKAGE_INVALID, "Invalid package %s", packageName.c_str());
+#ifndef UPDATER_UT
     ret = updater::ExecUpdate(pkgManager, 0,
         [&](const char *cmd, const char *content) {
             if (strncmp(cmd, "data", strlen(cmd)) == 0) {
@@ -93,6 +99,9 @@ int FlashService::DoUpdate(const std::string &packageName)
             }
         });
 #endif
+    FLASHING_CHECK(ret == PKG_SUCCESS, PkgManager::ReleasePackageInstance(pkgManager);
+        RecordMsg(updater::ERROR, "Failed to update package %s", packageName.c_str());
+        return FLASHING_PACKAGE_INVALID, "Failed to update package %s", packageName.c_str());
     FLASHING_LOGI("Load packageName %s success %llu", packageName.c_str(), pkgLen);
     PkgManager::ReleasePackageInstance(pkgManager);
     return ret;
@@ -205,7 +214,7 @@ PartitionPtr FlashService::GetPartition(const std::string &partition) const
 {
     const std::string partName = GetPartNameByAlias(partition);
     for (auto part : partitions_) {
-        if (partName.compare(part->GetPartitionName()) == 0) {
+        if (strcmp(partName.c_str(), part->GetPartitionName().c_str()) == 0) {
             return part;
         }
     }
@@ -227,7 +236,7 @@ int FlashService::LoadBlockDevice(const std::string &fileDir)
             continue;
         }
         std::string devPath = fileDir + "/" + entry->d_name;
-        if (entry->d_type == 10) { // 10 link 文件
+        if (entry->d_type == 10) { // 10 link file
             readlink(devPath.c_str(), buffer.data(), DEVICE_PATH_SIZE);
             devPath = fileDir + "/" + buffer.data();
             memset_s(buffer.data(), DEVICE_PATH_SIZE, 0, DEVICE_PATH_SIZE);
@@ -241,13 +250,13 @@ int FlashService::LoadBlockDevice(const std::string &fileDir)
         }
         ret = 0;
         if (SCSI_BLK_MAJOR(devMajor)) {
-            if ((devMinor % 0x10) == 0) {
+            if ((devMinor % 0x10) == 0) { // 0x10 scsi device
                 ret = AddNewBlockDevice(DeviceType::DEVICE_SCSI, devPath);
             } else {
                 partitionsName.push_back(devPath);
             }
         } else if (devMajor == SDMMC_MAJOR) {
-            if (devMinor % 0x08 == 0) {
+            if (devMinor % 0x08 == 0) { // 0x08 emmc
                 ret = AddNewBlockDevice(DeviceType::DEVICE_EMMC, devPath);
             } else {
                 partitionsName.push_back(devPath);
@@ -343,19 +352,20 @@ int FlashService::ExecCommand(const std::vector<std::string> &cmds)
     }
     extractedCmds.push_back(nullptr);
     pid_t pid = fork();
-    if (pid < 0) {
-        FLASHING_CHECK(0, return -1, "Failed to fork %d error:%d", pid, errno);
-        return errno;
-    }
     if (pid == 0) {
+#ifndef UPDATER_UT
         execv(extractedCmds[0], extractedCmds.data());
+#endif
         exit(0x7f); // 0x7f exit code
     }
+    FLASHING_CHECK(pid > 0, return -1, "Failed to fork %d error:%d", pid, errno);
+#ifndef UPDATER_UT
     int status;
     waitpid(pid, &status, 0);
     if (WEXITSTATUS(status) != 0 || !WIFEXITED(status)) {
         return WEXITSTATUS(status);
     }
+#endif
     return 0;
 }
 
@@ -381,9 +391,7 @@ void FlashService::PostProgress(uint32_t type, size_t dataLen, const void *conte
 
 int FlashService::CheckOperationPermission(int type, const std::string &partition) const
 {
-    if (type >= UPDATEMOD_MAX) {
-        return 1;
-    }
+    FLASHING_CHECK(type < UPDATEMOD_MAX, return 1, "Invalid type %d", type);
     std::vector<std::string> forbitPartName[] = {
         {}, // updater
         {"updater"}, // flash
@@ -423,7 +431,7 @@ const std::string FlashService::GetPartNameByAlias(const std::string &alias)
     };
     for (auto iter = partNameMap.begin(); iter != partNameMap.end(); iter++) {
         for (auto iter2 = iter->second.begin(); iter2 != iter->second.end(); iter2++) {
-            if (*iter2 == alias) {
+            if (strcmp(alias.c_str(), (*iter2).c_str()) == 0) {
                 return iter->first;
             }
         }
@@ -453,7 +461,7 @@ static std::string GetValueFromParam(const std::vector<std::string> &params,
 {
     std::string ret = defValue;
     for (size_t i = 0; i < params.size(); i++) {
-        if (paramType.compare(params[i]) == 0) {
+        if (strcmp(paramType.c_str(), params[i].c_str()) == 0) {
             if (i < (params.size() - 1)) {
                 ret = params[i + 1];
             } else {
@@ -468,7 +476,7 @@ static bool FilterParam(const std::string &param, const std::vector<std::string>
 {
     auto iter = filter.begin();
     while (iter != filter.end()) {
-        if (param.compare(*iter) == 0) {
+        if (strcmp(param.c_str(), (*iter).c_str()) == 0) {
             return true;
         }
         iter++;
@@ -511,13 +519,19 @@ static int GetCmdParam(uint8_t type, const std::string &origString,
 
 int CreateFlashInstance(FlashHandle *handle, std::string &errorMsg, ProgressFunction progressor)
 {
+    int mode = BOOT_UPDATER;
+    int ret = updater::GetBootMode(mode);
+    FLASHING_CHECK(ret == 0 && mode == BOOT_FLASHD, errorMsg = "Boot mode is not in flashd";
+        return FLASHING_SYSTEM_ERROR, "Boot mode error");
+
+    FLASHING_CHECK(!g_flashdRunning, errorMsg = "Flashd has been running";
+        return FLASHING_SYSTEM_ERROR, "Flashd has been running");
+    g_flashdRunning = true;
+
     FLASHING_CHECK(handle != nullptr, return FLASHING_ARG_INVALID, "Invalid handle");
     flashd::FlashService *flash = new flashd::FlashService(errorMsg, progressor);
-    if (flash == nullptr) {
-        FLASHING_LOGE("Failed to create flash service");
-        errorMsg = "Create instance fail";
-        return FLASHING_SYSTEM_ERROR;
-    }
+    FLASHING_CHECK(flash != nullptr, errorMsg = "Failed to create flash service";
+        return FLASHING_SYSTEM_ERROR, "Failed to create flash service");
     *handle = static_cast<FlashHandle>(flash);
     return 0;
 }
@@ -538,12 +552,13 @@ int DoUpdaterPrepare(FlashHandle handle, uint8_t type, const std::string &cmdPar
             // 检查剩余分区大小，扩展分区
             const std::string root = flashd::FlashService::GetPathRoot(FLASHD_FILE_PATH);
             ret = MountForPath(root);
-            FLASHING_CHECK(ret == 0,
+            FLASHING_CHECK(ret == 0, g_flashdRunning = false;
                 flash->RecordMsg(updater::ERROR, "Failed to mount data paratition for %s", filePath.c_str());
                 return FLASHING_INVALID_SPACE, "Failed to mount data paratition for %s", filePath.c_str());
 
             ret = flash->DoResizeParatiton(root, MIN_BLOCKS_FOR_UPDATE);
-            FLASHING_CHECK(ret == 0, return ret, "Failed to resize partition");
+            FLASHING_CHECK(ret == 0, g_flashdRunning = false;
+                return ret, "Failed to resize partition");
             if (access(FLASHD_FILE_PATH.c_str(), F_OK) == -1) {
                 mkdir(FLASHD_FILE_PATH.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
             }
@@ -567,23 +582,24 @@ int DoUpdaterFlash(FlashHandle handle, uint8_t type, const std::string &cmdParam
 
     std::vector<std::string> params {};
     int ret = GetCmdParam(type, cmdParam, {"-f"}, params);
-    FLASHING_CHECK(ret == 0,
+    FLASHING_CHECK(ret == 0, g_flashdRunning = false;
         flash->RecordMsg(updater::ERROR, "Invalid param for %d", type);
         return FLASHING_ARG_INVALID, "Invalid param for %d", type);
     FLASHING_DEBUG("DoUpdaterFlash type: %d param %s filePath %s", type, cmdParam.c_str(), filePath.c_str());
     switch (type) {
         case flashd::UPDATEMOD_UPDATE: {
             ret = flash->DoUpdate(filePath);
-            unlink(filePath.c_str());
             break;
         }
         case flashd::UPDATEMOD_ERASE:
-            FLASHING_CHECK(params.size() > 1, return FLASHING_ARG_INVALID, "Invalid param size for erase");
+            FLASHING_CHECK(params.size() > 1, g_flashdRunning = false;
+                return FLASHING_ARG_INVALID, "Invalid param size for erase");
             ret = flash->DoErasePartition(params[1]);
             break;
         case flashd::UPDATEMOD_FORMAT: {
             std::string fsType = GetValueFromParam(params, "-t", "ext4");
-            FLASHING_CHECK(params.size() > 1, return FLASHING_ARG_INVALID, "Invalid param size for format");
+            FLASHING_CHECK(params.size() > 1, g_flashdRunning = false;
+                return FLASHING_ARG_INVALID, "Invalid param size for format");
             ret = flash->DoFormatPartition(params[1], fsType);
             break;
         }
@@ -598,15 +614,32 @@ int DoUpdaterFinish(FlashHandle handle, uint8_t type, const std::string &partiti
 {
     FLASHING_CHECK(handle != nullptr, return FLASHING_ARG_INVALID, "Invalid handle for %d", type);
     FLASHING_DEBUG("DoUpdaterFinish type: %d %s", type, partition.c_str());
-    updater::PostUpdater();
     switch (type) {
         case flashd::UPDATEMOD_UPDATE: {
+#ifndef UPDATER_UT
+            unlink(partition.c_str());
+#endif
+            updater::PostUpdater(true);
             utils::DoReboot("");
+            break;
+        }
+        case flashd::UPDATEMOD_FLASH: {
+            updater::PostUpdater(false);
             break;
         }
         default:
             break;
     }
+    g_flashdRunning = false;
+    return 0;
+}
+
+int SetParameter(const char *key, const char *value)
+{
+    std::string sKey = key;
+    std::string sValue = value;
+    std::string sBuf = "param set " + sKey + " " + value;
+    system(sBuf.c_str());
     return 0;
 }
 } // namespace flashd

@@ -153,9 +153,7 @@ UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, cons
         // Only handle UPATE_ERROR and UPDATE_SUCCESS here.
         // If it returns UPDATE_CORRUPT, which means something wrong with package manager.
         // Let package verify handle this.
-        if (ret == UPDATE_SPACE_NOTENOUGH) {
-            ShowText(GetUpdateInfoLabel(), "Free space is not enough");
-        } else if (ret == UPDATE_ERROR) {
+        if (ret == UPDATE_SPACE_NOTENOUGH || ret == UPDATE_ERROR) {
             return ret;
         } else if (ret == UPDATE_SUCCESS) {
             pkgManager = PkgManager::GetPackageInstance();

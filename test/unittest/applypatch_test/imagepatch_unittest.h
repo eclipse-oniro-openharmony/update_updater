@@ -77,7 +77,9 @@ public:
         int fd = open(target.c_str(), O_WRONLY | O_CREAT | O_TRUNC | O_CLOEXEC | O_BINARY, mode);
         EXPECT_GE(fd, 0);
         BlockSet targetBlk;
-        targetBlk.ParserAndInsert({"2", "0", "1"});
+        targetBlk.ParserAndInsert({
+            "2", "0", "1"
+        });
         std::unique_ptr<FileWriter> writer = std::make_unique<FileWriter>(fd, targetBlk);
         std::vector<uint8_t> empty;
         int32_t ret = updatepatch::UpdatePatch::ApplyImagePatch(param, empty,

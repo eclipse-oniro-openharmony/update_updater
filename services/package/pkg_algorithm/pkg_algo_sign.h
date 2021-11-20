@@ -75,7 +75,7 @@ public:
 private:
     bool CheckEccKey(const EC_KEY *eccKey) const;
 
-    bool CheckRsaKey(const RSA *rsakey) const;
+    bool CheckRsaKey(const RSA *rsakey, int &hashLen) const;
 
     bool LoadPubKey(const std::string &filename, struct CertKeySt &certs) const;
 };

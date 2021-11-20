@@ -196,7 +196,7 @@ void PostUpdaterForSdcard(std::string &updaterLogPath, std::string &stageLogPath
     return;
 }
 
-void PostUpdater()
+void PostUpdater(bool clearMisc)
 {
     STAGE(UPDATE_STAGE_BEGIN) << "PostUpdater";
     std::string updaterLogPath = "/data/updater/log/updater_log";
@@ -204,7 +204,9 @@ void PostUpdater()
     std::string errorCodePath = "/data/updater/log/error_code.log";
     PostUpdaterForSdcard(updaterLogPath, stageLogPath, errorCodePath);
     // clear update misc partition.
-    UPDATER_ERROR_CHECK_NOT_RETURN(ClearMisc() == true, "PostUpdater clear misc failed");
+    if (clearMisc) {
+        UPDATER_ERROR_CHECK_NOT_RETURN(ClearMisc() == true, "PostUpdater clear misc failed");
+    }
     if (!access(COMMAND_FILE.c_str(), 0)) {
         UPDATER_ERROR_CHECK_NOT_RETURN(unlink(COMMAND_FILE.c_str()) == 0, "Delete command failed");
     }
@@ -286,5 +288,32 @@ std::vector<std::string> ParseParams(int argc, char **argv)
     std::vector<std::string> parseParams1 = utils::SplitString(boot.update, "\n");
     parseParams.insert(parseParams.end(), parseParams1.begin(), parseParams1.end());
     return parseParams;
+}
+
+int GetBootMode(int &mode)
+{
+#ifndef UPDATER_UT
+    mode = BOOT_UPDATER;
+#else
+    mode = BOOT_FLASHD;
+#endif
+    struct UpdateMessage boot {};
+    // read from misc
+    bool ret = ReadUpdaterMessage(MISC_FILE, boot);
+    if (!ret) {
+        return -1;
+    }
+    // if boot.update is empty, read from command.The Misc partition may have dirty data,
+    // so strlen(boot.update) is not used, which can cause system exceptions.
+    if (boot.update[0] == '\0' && !access(COMMAND_FILE.c_str(), 0)) {
+        ret = ReadUpdaterMessage(COMMAND_FILE, boot);
+        if (!ret) {
+            return -1;
+        }
+    }
+    if (memcmp(boot.command, "boot_flash", strlen("boot_flash")) == 0) {
+        mode = BOOT_FLASHD;
+    }
+    return 0;
 }
 } // namespace updater

@@ -85,14 +85,20 @@ int32_t SignAlgorithmEcc::SignBuffer(const PkgBuffer &buffer, std::vector<uint8_
     return ((ret == 1) ? PKG_SUCCESS : PKG_INVALID_SIGNATURE);
 }
 
-bool VerifyAlgorithm::CheckRsaKey(const RSA *rsakey) const
+bool VerifyAlgorithm::CheckRsaKey(const RSA *rsakey, int &hashLen) const
 {
     const BIGNUM *rsaN = nullptr;
     const BIGNUM *rsaE = nullptr;
     RSA_get0_key(rsakey, &rsaN, &rsaE, nullptr);
     auto modulusbits = BN_num_bits(rsaN);
-    PKG_CHECK(!(modulusbits != 2048), return false,
-        "Modulus should be 2048 bits long, actual:%d\n ", modulusbits);
+    if (modulusbits == 2048) { // 2048 hash leng
+        hashLen = SHA256_DIGEST_LENGTH;
+    } else if (modulusbits == 3072) { // 3072 hash leng
+        hashLen = SHA384_DIGEST_LENGTH;
+    } else {
+        PKG_LOGE("Modulus should be 2048 bits long, actual:%d ", modulusbits);
+        return false;
+    }
     BN_ULONG exponent = BN_get_word(rsaE);
     PKG_CHECK(!(exponent != 3 && exponent != 65537),
         return false, "Public exponent should be 3 or 65537, actual:%d \n", exponent);
@@ -132,7 +138,7 @@ bool VerifyAlgorithm::LoadPubKey(const std::string &keyfile, struct CertKeySt &c
         certs.keyType = KEY_TYPE_RSA;
         certs.rsa = EVP_PKEY_get1_RSA(pubKey);
         PKG_CHECK(certs.rsa != nullptr, X509_free(rcert); return false, "Failed to get rsa");
-        ret = CheckRsaKey(certs.rsa);
+        ret = CheckRsaKey(certs.rsa, certs.hashLen);
         PKG_CHECK(ret == true, RSA_free(certs.rsa); X509_free(rcert); return false, "Check rsa key failed");
     }
     if (keyType == EVP_PKEY_EC) {
@@ -156,6 +162,8 @@ int32_t VerifyAlgorithm::VerifyBuffer(const std::vector<uint8_t> &digest, const 
     int hashNid = NID_sha1;
     if (certs.hashLen == SHA256_DIGEST_LENGTH) {
         hashNid = NID_sha256;
+    } else if (certs.hashLen == SHA384_DIGEST_LENGTH) {
+        hashNid = NID_sha384;
     }
     int ret = 0;
     if (certs.keyType == KEY_TYPE_RSA) {
