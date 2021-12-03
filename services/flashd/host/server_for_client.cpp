@@ -188,7 +188,7 @@ void HdcServerForClient::OrderConnecTargetResult(uv_timer_t *req)
     bool bExitRepet = false;
     HDaemonInfo hdi = nullptr;
     string sRet;
-    string target = std::string(hChannel->bufStd + 2);
+    string target = std::string(hChannel->bufStd + 2); // 2 len
     if (target == "any") {
         ptrServer->AdminDaemonMap(OP_GET_ANY, target, hdi);
     } else {
@@ -466,8 +466,7 @@ bool HdcServerForClient::DoCommandRemote(HChannel hChannel, void *formatCommandI
         case CMD_UNITY_ROOTRUN:
         case CMD_UNITY_JPID: {
             if (!SendToDaemon(hChannel, formatCommand->cmdFlag,
-                              reinterpret_cast<uint8_t *>(const_cast<char *>(formatCommand->parameters.c_str())),
-                              sizeSend)) {
+                reinterpret_cast<uint8_t *>(const_cast<char *>(formatCommand->parameters.c_str())), sizeSend)) {
                 break;
             }
             ret = true;

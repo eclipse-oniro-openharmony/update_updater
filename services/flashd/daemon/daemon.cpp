@@ -161,8 +161,8 @@ bool HdcDaemon::HandDaemonAuth(HSession hSession, const uint32_t channelId, Sess
             // jump out dialog, and click the system, the system will store the Host public key certificate in the
             // device locally, and the signature authentication will be correct when the subsequent connection is
             // connected.
-            if (!HdcAuth::AuthVerify((uint8_t *)hSession->tokenRSA.c_str(), (uint8_t *)handshake.buf.c_str(),
-                                     handshake.buf.size())) {
+            if (!HdcAuth::AuthVerify((uint8_t *)hSession->tokenRSA.c_str(),
+                (uint8_t *)handshake.buf.c_str(), handshake.buf.size())) {
                 // Next auth
                 handshake.authType = AUTH_TOKEN;
                 handshake.buf = hSession->tokenRSA;

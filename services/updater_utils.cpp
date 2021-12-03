@@ -30,12 +30,13 @@
 #include "updater_ui.h"
 #include "utils.h"
 
+namespace {
+static constexpr int USER_ROOT_AUTHORITY = 0;
+static constexpr int GROUP_SYS_AUTHORITY = 1000;
+}
 namespace updater {
 using namespace hpackage;
 using namespace updater::utils;
-static constexpr int USER_ROOT_AUTHORITY = 0;
-static constexpr int GROUP_SYS_AUTHORITY = 1000;
-
 void CompressLogs(const std::string &name)
 {
     PkgManager::PkgManagerPtr pkgManager = PkgManager::GetPackageInstance();

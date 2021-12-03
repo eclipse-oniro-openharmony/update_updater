@@ -25,8 +25,9 @@
 #include "updater_main.h"
 
 using namespace updater;
+namespace {
 static constexpr int FSTAB_NAME_LENGTH = 20;
-
+}
 namespace OHOS {
     bool FuzzFactoryReset(const uint8_t* data, size_t size)
     {

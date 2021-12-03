@@ -26,8 +26,9 @@
 #include "securec.h"
 
 using namespace updater;
+namespace {
 static constexpr int FSTAB_NAME_LENGTH = 20;
-
+}
 static void InitEmmcPartition(struct Partition &part, const std::string &partName, size_t start, size_t length)
 {
     part.partName = partName;

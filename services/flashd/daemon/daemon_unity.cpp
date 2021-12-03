@@ -72,11 +72,10 @@ bool HdcDaemonUnity::AsyncCmdOut(bool finish, int64_t exitStatus, const string r
 int HdcDaemonUnity::ExecuteShell(const char *shellCommand)
 {
     do {
-        AsyncCmd::CmdResultCallback funcResultOutput;
-        funcResultOutput = std::bind(&HdcDaemonUnity::AsyncCmdOut, this, std::placeholders::_1, std::placeholders::_2,
-                                     std::placeholders::_3);
+        AsyncCmd::CmdResultCallback funcResultOutput = std::bind(&HdcDaemonUnity::AsyncCmdOut,
+            this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
         if (!asyncCommand.Initial(loopTask, funcResultOutput,
-                                  asyncCommand.GetDefaultOption() | asyncCommand.OPTION_READBACK_OUT)) {
+                asyncCommand.GetDefaultOption() | asyncCommand.OPTION_READBACK_OUT)) {
             break;
         }
         asyncCommand.ExecuteCommand(shellCommand);

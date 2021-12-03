@@ -182,8 +182,8 @@ namespace TranslateCommand {
             outCmd->cmdFlag = CMD_FILE_INIT;
             outCmd->parameters = input.c_str() + 5;  // 5: CMDSTR_FORWARD_FPORT CMDSTR_FORWARD_RPORT size
         } else if (!strncmp(input.c_str(), string(CMDSTR_FORWARD_FPORT + " ").c_str(), CMDSTR_FORWARD_FPORT.size() + 1)
-                   || !strncmp(input.c_str(), string(CMDSTR_FORWARD_RPORT + " ").c_str(),
-                               CMDSTR_FORWARD_RPORT.size() + 1)) {
+                    || !strncmp(input.c_str(), string(CMDSTR_FORWARD_RPORT + " ").c_str(),
+                        CMDSTR_FORWARD_RPORT.size() + 1)) {
             stringError = ForwardPort(input.c_str(), outCmd);
         } else if (!strcmp(input.c_str(), CMDSTR_KILL_SERVER.c_str())) {
             outCmd->cmdFlag = CMD_KERNEL_SERVER_KILL;
