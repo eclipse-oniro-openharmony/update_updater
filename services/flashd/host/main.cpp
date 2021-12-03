@@ -190,7 +190,7 @@ bool GetCommandlineOptions(int optArgc, const char *optArgv[])
     bool needExit = false;
     opterr = 0;
     // get option parameters first
-    while ((ch = getopt(optArgc, (char* const *)optArgv, "hvpfms:d:t:l:")) != -1) {
+    while ((ch = getopt(optArgc, (char * const *)optArgv, "hvpfms:d:t:l:")) != -1) {
         switch (ch) {
             case 'h': {
                 string usage = Hdc::TranslateCommand::Usage();
