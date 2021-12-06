@@ -157,9 +157,8 @@ bool HdcServer::PullupServer(const char *listenString)
 
 void HdcServer::ClearMapDaemonInfo()
 {
-    map<string, HDaemonInfo>::iterator iter;
     uv_rwlock_rdlock(&daemonAdmin);
-    for (iter = mapDaemon.begin(); iter != mapDaemon.end();) {
+    for (auto iter = mapDaemon.begin(); iter != mapDaemon.end();) {
         string sKey = iter->first;
         HDaemonInfo hDi = iter->second;
         delete hDi;

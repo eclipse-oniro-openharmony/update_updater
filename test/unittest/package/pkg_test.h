@@ -70,7 +70,6 @@ protected:
 
     int32_t BuildFileDigest(uint8_t &digest, size_t size, const std::string &packagePath)
     {
-        pkgManager_ = static_cast<PkgManagerImpl*>(PkgManager::GetPackageInstance());
         PkgManager::StreamPtr stream = nullptr;
         int32_t ret = pkgManager_->CreatePkgStream(stream, packagePath, 0, PkgStream::PkgStreamType_Read);
         PKG_CHECK(ret == 0, return ret, "Create input stream fail %s", packagePath.c_str());

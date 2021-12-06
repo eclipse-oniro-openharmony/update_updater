@@ -31,7 +31,7 @@ namespace Hdc {
 // return value: 0 == not command, 1 == one command, 2 == double command
 int IsRegisterCommand(string &outCommand, const char *cmd, const char *cmdnext)
 {
-    string sCmdNext = cmdnext == nullptr ? string("") : string(cmdnext);
+    string sCmdNext = (cmdnext == nullptr) ? string("") : string(cmdnext);
     string doubleCommand = cmd + string(" ") + sCmdNext;
     vector<string> registerCommand;
     registerCommand.push_back(CMDSTR_SOFTWARE_VERSION);
@@ -76,7 +76,7 @@ void AppendCwdWhenTransfer(string &outCommand)
     if (path[strlen(path) - 1] != Base::GetPathSep()) {
         path[strlen(path)] = Base::GetPathSep();
     }
-    outCommand += outCommand.size() ? " -cwd " : "-cwd ";
+    outCommand = outCommand + (outCommand.size() ? " -cwd " : "-cwd ");
     outCommand += path;
 }
 
@@ -118,21 +118,6 @@ int RunServerMode(string &serverListenString)
         return -1;
     }
     server.WorkerPendding();
-    return 0;
-}
-
-int RunPcDebugMode(bool isPullServer, bool isTCPorUSB, int isTestMethod)
-{
-    pthread_t pt;
-    if (isPullServer) {
-        pthread_create(&pt, nullptr, TestBackgroundServerForClient, nullptr);
-        uv_sleep(200);  // give time to start serverForClient,at least 200ms
-    }
-    TestRuntimeCommandSimple(isTCPorUSB, isTestMethod, true);
-    if (isPullServer) {
-        pthread_join(pt, nullptr);
-        WRITE_LOG(LOG_DEBUG, "!!!!!!!!!Server finish");
-    }
     return 0;
 }
 
@@ -205,7 +190,7 @@ bool GetCommandlineOptions(int optArgc, const char *optArgv[])
     bool needExit = false;
     opterr = 0;
     // get option parameters first
-    while ((ch = getopt(optArgc, (char *const *)optArgv, "hvpfms:d:t:l:")) != -1) {
+    while ((ch = getopt(optArgc, (char * const *)optArgv, "hvpfms:d:t:l:")) != -1) {
         switch (ch) {
             case 'h': {
                 string usage = Hdc::TranslateCommand::Usage();
@@ -302,9 +287,7 @@ int main(int argc, const char *argv[])
         // -m server.Run alone in the background, no -s will be listen loopback address,
         Base::SetLogLevel(g_logLevel); // default level LOG_LEVEL_FULL
         Hdc::RunServerMode(g_serverListenString);
-    } else if (g_isPcDebugRun) {
-        Hdc::RunPcDebugMode(g_isPullServer, g_isTCPorUSB, g_isTestMethod);
-    } else {
+    } else if (!g_isPcDebugRun) {
         Hdc::RunClientMode(commands, g_serverListenString, g_connectKey, g_isPullServer);
     }
     WRITE_LOG(LOG_DEBUG, "!!!!!!!!!Main finish main");

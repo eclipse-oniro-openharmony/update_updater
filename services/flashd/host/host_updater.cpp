@@ -20,7 +20,7 @@
 #include "transfer.h"
 #include "serial_struct.h"
 
-namespace Hdc {
+namespace {
 static const std::string helpCmd = "flash";
 static const std::string updateCmd = "update ";
 static const std::string flashCmd = "flash ";
@@ -28,6 +28,8 @@ static const std::string eraseCmd = "erase ";
 static const std::string formatCmd = "format ";
 static const int PERCENT_FINISH = 100;
 static const uint32_t PERCENT_CLEAR = ((uint32_t)-1);
+}
+namespace Hdc {
 HostUpdater::HostUpdater(HTaskInfo hTaskInfo) : HdcTransferBase(hTaskInfo)
 {
     commandBegin = CMD_UPDATER_BEGIN;
