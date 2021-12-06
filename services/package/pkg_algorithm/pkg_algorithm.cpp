@@ -78,7 +78,7 @@ int32_t PkgAlgorithm::Pack(const PkgStreamPtr inStream, const PkgStreamPtr outSt
 
     ret = FinalDigest(algorithm, context, true);
     PKG_CHECK(ret == 0, return ret, "Check digest fail");
-    PKG_CHECK(srcOffset - context.srcOffset == context.unpackedSize, return ret,
+    PKG_CHECK(srcOffset - context.srcOffset == context.unpackedSize, return PKG_INVALID_STREAM,
         "original size error %zu %zu", srcOffset, context.unpackedSize);
     context.packedSize = destOffset - context.destOffset;
     return ret;
