@@ -75,7 +75,7 @@ Note:If the text contains special characters, please escape them according to th
                 <filteritem type="filepath" name="resources/.*.png" desc="升级服务应用的资源文件"/>
                 <filteritem type="filepath" name="test/fuzztest/fuzz_src_data/.*" desc="升级功能Fuzz测试的资源文件"/>
 		<filteritem type="filepath" name="test/unittest/test_data/.*" desc="升级功能UT测试的资源文件"/>
-		<filteritem type="filepath" name="prebuild/ohos-sdk/windows/toolchains/*" desc="HDC flashd 功能客户端可执行文件"/>
+		<filteritem type="filepath" name="prebuild/ohos-sdk/windows/toolchains/ohflash.exe" desc="HDC flashd 功能客户端可执行文件"/>
             </filefilter>
             <filefilter name="defaultFilter" desc="Files not to check">
                 <filteritem type="filepath" name="test/fuzztest/.*" desc="升级功能Fuzz测试的资源文件"/>
