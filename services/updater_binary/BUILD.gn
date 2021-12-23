@@ -27,7 +27,6 @@ config("updater_config") {
     "//third_party/openssl/include",
     "//third_party/bounds_checking_function/include",
     "//drivers/hdf/frameworks/include/utils",
-    "//base/startup/init_lite/interfaces/innerkits/include",
   ]
 }
 
@@ -58,6 +57,8 @@ ohos_executable("updater_binary") {
     "//third_party/openssl:ssl_source",
     "//third_party/zlib:libz",
   ]
+
+  external_deps = [ "init:libbegetutil" ]
 
   install_enable = true
   part_name = "updater"

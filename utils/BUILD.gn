@@ -21,10 +21,10 @@ ohos_static_library("libutils") {
     "//base/update/updater/interfaces/kits/include/",
     "//base/update/updater/services/include/",
     "//third_party/bounds_checking_function/include",
-    "//base/startup/init_lite/interfaces/innerkits/include",
   ]
 
   deps = [ "//third_party/bounds_checking_function:libsec_static" ]
+  external_deps = [ "init:libbegetutil" ]
 }
 
 ohos_executable("updater_reboot") {
@@ -54,7 +54,6 @@ ohos_executable("write_updater") {
     "//base/update/updater/interfaces/kits/include/",
     "//base/update/updater/services/include/",
     "//third_party/bounds_checking_function/include",
-    "//base/startup/init_lite/interfaces/innerkits/include",
   ]
 
   deps = [
@@ -64,6 +63,7 @@ ohos_executable("write_updater") {
     "//base/update/updater/utils:libutils",
     "//third_party/bounds_checking_function:libsec_static",
   ]
+  external_deps = [ "init:libbegetutil" ]
 
   install_enable = true
   part_name = "updater"

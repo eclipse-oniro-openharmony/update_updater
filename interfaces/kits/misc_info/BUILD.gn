@@ -21,7 +21,6 @@ ohos_static_library("libmiscinfo") {
     "//base/update/updater/services/include",
     "//base/update/updater/utils/include",
     "//third_party/bounds_checking_function/include",
-    "//base/startup/init_lite/interfaces/innerkits/include",
   ]
 
   deps = [
@@ -29,4 +28,6 @@ ohos_static_library("libmiscinfo") {
     "//base/update/updater/services/log:libupdaterlog",
     "//third_party/bounds_checking_function:libsec_static",
   ]
+
+  external_deps = [ "init:libbegetutil" ]
 }

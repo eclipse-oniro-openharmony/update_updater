@@ -26,12 +26,12 @@ ohos_static_library("libfsmanager") {
     "//base/update/updater/interfaces/kits/include",
     "//base/update/updater/utils/include",
     "//third_party/bounds_checking_function/include",
-    "//base/startup/init_lite/interfaces/innerkits/include",
   ]
 
   deps = [
-    "//base/startup/init_lite/interfaces/innerkits/fs_manager:libfsmanager_static",
     "//base/update/updater/utils:libutils",
     "//third_party/bounds_checking_function:libsec_static",
   ]
+
+  external_deps = [ "init:libbegetutil" ]
 }
