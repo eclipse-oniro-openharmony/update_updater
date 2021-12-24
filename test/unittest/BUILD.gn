@@ -144,7 +144,6 @@ ohos_unittest("updater_unittest") {
   ]
 
   include_dirs = [
-    "//base/startup/init_lite/interfaces/innerkits/include",
     "//base/update/updater/interfaces/kits/include/",
     "//base/update/updater/interfaces/kits/include/package",
     "//base/update/updater/services/include/",
@@ -200,11 +199,8 @@ ohos_unittest("updater_unittest") {
     "//drivers/peripheral/input/hal/include",
     "//drivers/peripheral/input/interfaces/include",
     "//third_party/bounds_checking_function/include",
-    "//base/startup/init_lite/interfaces/innerkits/include",
   ]
   deps = [
-    "//base/startup/init_lite/interfaces/innerkits/fs_manager:libfsmanager_static",
-    "//base/startup/syspara_lite/interfaces/innerkits/native/syspara:syspara",
     "//base/update/updater/interfaces/kits/misc_info:libmiscinfo",
     "//base/update/updater/services/applypatch:libapplypatch",
     "//base/update/updater/services/diffpatch/diff:libdiff",
@@ -230,6 +226,11 @@ ohos_unittest("updater_unittest") {
   deps += [
     "//base/update/updater/test/unittest:test_update_binary",
     "//base/update/updater/test/unittest:test_update_binary_abnormal",
+  ]
+
+  external_deps = [
+    "init:libbegetutil",
+    "startup_l2:syspara",
   ]
 
   cflags_cc = [ "-fexceptions" ]

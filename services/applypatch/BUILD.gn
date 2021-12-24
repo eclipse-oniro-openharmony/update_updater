@@ -39,7 +39,6 @@ ohos_static_library("libapplypatch") {
     "//base/update/updater/services/include/package",
     "//base/update/updater/services/include/log",
     "//third_party/bounds_checking_function/include",
-    "//base/startup/init_lite/interfaces/innerkits/include",
   ]
 
   deps = [
@@ -48,4 +47,5 @@ ohos_static_library("libapplypatch") {
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/bzip2:libbz2",
   ]
+  external_deps = [ "init:libbegetutil" ]
 }
