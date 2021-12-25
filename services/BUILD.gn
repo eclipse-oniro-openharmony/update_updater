@@ -34,8 +34,7 @@ ohos_prebuilt_etc("updater_init_usb_configfs.cfg") {
 }
 
 ohos_prebuilt_etc("signing_cert.crt") {
-  source =
-      "//device/board/hisilicon/hispark_taurus/linux/updater/config/signing_cert.crt"
+  source = "//device/board/hisilicon/hispark_taurus/linux/updater/config/signing_cert.crt"
   module_install_dir = "certificate"
   install_images = [ "updater" ]
   part_name = "updater"
