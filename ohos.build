@@ -21,7 +21,7 @@
          "//base/update/updater/interfaces/kits/misc_info:libmiscinfo",
          "//base/update/updater/interfaces/kits/packages:libpackageExt",
          "//base/update/updater/interfaces/kits/updaterkits:libupdaterkits",
-         "//base/update/updateservice/client:update",
+         "//base/update/updateservice:update_client_jsapi",
          "//base/update/updateservice/engine:updateservice",
          "//base/update/updateservice/engine:updater_sa.rc",
          "//base/update/updateservice/engine/sa_profile:updater_sa_profile",
