@@ -18,7 +18,6 @@
 #include <unistd.h>
 #include <vector>
 #include "fs_manager/mount.h"
-#include "fs_manager/fs_manager_log.h"
 #include "log.h"
 #include "updater/updater_const.h"
 #include "update_processor.h"
@@ -33,7 +32,6 @@ int main(int argc, char **argv)
         LOG(ERROR) << "Invalid arguments.";
         return EXIT_INVALID_ARGS;
     }
-    FsManagerLogInit(LOG_TO_FILE, TMP_LOG.c_str());
     bool retry = false;
     int pipeFd = static_cast<int>(std::strtol(argv[1], nullptr, DECIMAL));
     if (argc >= BINARY_MAX_ARGS && strcmp(argv[BINARY_SECOND_ARG], "retry") == 0) {

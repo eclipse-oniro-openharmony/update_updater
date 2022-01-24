@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 #include "fs_manager/mount.h"
-#include "fs_manager/fs_manager_log.h"
 #include "flashd/flashd.h"
 #include "log/log.h"
 #include "misc_info/misc_info.h"
@@ -33,7 +32,6 @@ int main(int argc, char **argv)
 
     InitUpdaterLogger((mode == BOOT_FLASHD) ? "FLASHD" : "UPDATER", TMP_LOG, TMP_STAGE_LOG, TMP_ERROR_CODE_PATH);
     SetLogLevel(INFO);
-    FsManagerLogInit(LOG_TO_FILE, TMP_LOG.c_str());
     LoadFstab();
     STAGE(UPDATE_STAGE_OUT) << "Start " << ((mode == BOOT_FLASHD) ? "flashd" : "updater");
     if (mode == BOOT_FLASHD) {
