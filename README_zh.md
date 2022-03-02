@@ -9,7 +9,7 @@
 
 ## 简介<a name="section184mcpsimp"></a>
 
-升级包安装组件运行在recovery分区，其功能主要包括读取misc分区信息获取升级包状态，对升级包进行校验，确保升级包合法有效；然后从升级包中解析出升级的可执行程序，创建子进程并启动升级程序。具体升级的动作由升级脚本控制。
+升级包安装组件运行在updater分区，其功能主要包括读取misc分区信息获取升级包状态，对升级包进行校验，确保升级包合法有效；然后从升级包中解析出升级的可执行程序，创建子进程并启动升级程序。具体升级的动作由升级脚本控制。
 
 ## 目录<a name="section198mcpsimp"></a>
 
@@ -37,11 +37,11 @@ base/update/updater/
 
 ### 使用说明<a name="section220mcpsimp"></a>
 
-升级包安装组件运行在recovery分区里，需要如下的操作
+升级包安装组件运行在updater分区里，需要如下的操作
 
-1、创建recovery分区
+1、创建updater分区
 
-recovery是一个独立的分区，分区大小建议不小于20MB。recovery分区镜像是ext4 格式文件系统。确保系统内核ext4 文件系统的config 是打开状态。
+updater是一个独立的分区，分区大小建议不小于20MB。updater分区镜像是ext4 格式文件系统。确保系统内核ext4 文件系统的config 是打开状态。
 
 2、创建misc分区
 
@@ -53,7 +53,7 @@ misc 分区中存储了升级子系统在升级过程中需要的元数据\(meta
 
 4、升级包安装组件启动
 
-recovery分区的init 进程有单独的配置文件 init.cfg，升级包安装进程启动配置在该文件中。
+updater分区的init 进程有单独的配置文件 init.cfg，升级包安装进程启动配置在该文件中。
 
 5、升级包安装组件编译
 
@@ -78,7 +78,7 @@ b、 产品中添加需要编译的组件
      "updater:updater":{},
 ```
 
-6、recovery分区镜像编译
+6、updater分区镜像编译
 
 编译配置在build仓下，build\_updater\_image.sh 脚本中，该脚本由OHOS 编译系统调用。
 

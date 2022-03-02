@@ -9,7 +9,7 @@
 
 ## Introduction<a name="section184mcpsimp"></a>
 
-The updater runs in the recovery partition. It reads the misc partition information to obtain the update package status and verifies the update package to ensure that the update package is valid. Then, the updater parses the executable program from the update package, creates a subprocess, and starts the update program. After that, update operations will be automatically implemented by the update script.
+The updater runs in the updater partition. It reads the misc partition information to obtain the update package status and verifies the update package to ensure that the update package is valid. Then, the updater parses the executable program from the update package, creates a subprocess, and starts the update program. After that, update operations will be automatically implemented by the update script.
 
 ## Directory Structure<a name="section198mcpsimp"></a>
 
@@ -37,11 +37,11 @@ base/update/updater/
 
 ### Usage Guidelines<a name="section220mcpsimp"></a>
 
-The updater runs in the recovery partition. To ensure proper functioning of the updater, perform the following operations:
+The updater runs in the updater partition. To ensure proper functioning of the updater, perform the following operations:
 
-1. Create a recovery partition. 
+1. Create a updater partition. 
 
-The recovery partition is independent of other partitions. It is recommended that the size of the recovery partition be greater than or equal to 20 MB. The recovery partition image is an ext4 file system. Ensure that the  **config**  option of the ext4 file system in the system kernel is enabled.
+The updater partition is independent of other partitions. It is recommended that the size of the updater partition be greater than or equal to 20 MB. The updater partition image is an ext4 file system. Ensure that the  **config**  option of the ext4 file system in the system kernel is enabled.
 
 2. Create the misc partition.
 
@@ -53,7 +53,7 @@ During the update process, the updater needs to operate the partitions through t
 
 4. Start the updater.
 
-The init process in the recovery partition has an independent configuration file named  **init.cfg**. The startup configuration of the updater is stored in this file.
+The init process in the updater partition has an independent configuration file named  **init.cfg**. The startup configuration of the updater is stored in this file.
 
 5. Compile the updater.
 
@@ -78,7 +78,7 @@ For example, to add the updater for Hi3516D V300, add the following code to the 
      "updater:updater":{},
 ```
 
-6. Compile the recovery partition image.
+6. Compile the updater partition image.
 
 Add the compilation configuration to the  **build\_updater\_image.sh**  script, which is stored in the  **build**  repository and called by the OpenHarmony compilation system.
 
