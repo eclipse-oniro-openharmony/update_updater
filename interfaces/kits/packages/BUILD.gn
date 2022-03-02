@@ -33,4 +33,6 @@ ohos_static_library("libpackageExt") {
     "//third_party/openssl:ssl_source",
     "//third_party/zlib:libz",
   ]
+  subsystem_name = "updater"
+  part_name = "updater"
 }

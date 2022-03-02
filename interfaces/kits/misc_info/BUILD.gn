@@ -30,4 +30,7 @@ ohos_static_library("libmiscinfo") {
   ]
 
   external_deps = [ "init:libbegetutil" ]
+
+  subsystem_name = "updater"
+  part_name = "updater"
 }

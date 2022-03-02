@@ -55,4 +55,7 @@ ohos_static_library("libui") {
     "//third_party/libdrm:libdrm",
     "//third_party/libpng:libpng",
   ]
+
+  subsystem_name = "updater"
+  part_name = "updater"
 }

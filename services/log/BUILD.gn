@@ -23,4 +23,6 @@ ohos_static_library("libupdaterlog") {
   ]
 
   deps = [ "//third_party/bounds_checking_function:libsec_static" ]
+  subsystem_name = "updater"
+  part_name = "updater"
 }
