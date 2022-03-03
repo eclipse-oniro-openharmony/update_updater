@@ -109,7 +109,7 @@ int32_t ZipPkgFile::LoadPackage(std::vector<std::string> &fileNames, const PkgBu
         (endDir.startDiskOfCentralDir != 0)
 #ifndef UPDATER_UT
         || (endDir.offset >= fileLen) || (endDir.totalEntriesInThisDisk != endDir.totalEntries) ||
-        (endDir.commentLen = 0) || ((endDir.offset + endDir.sizeOfCentralDir + endDirLen) > fileLen)
+        ((endDir.offset + endDir.sizeOfCentralDir + endDirLen) > fileLen)
 #endif
         ) {
         PKG_LOGE("end dir format error %s", pkgStream_->GetFileName().c_str());
