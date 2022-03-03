@@ -29,4 +29,7 @@ ohos_static_library("libupdaterkits") {
     "//base/update/updater/utils:libutils",
     "//third_party/bounds_checking_function:libsec_static",
   ]
+
+  subsystem_name = "updater"
+  part_name = "updater"
 }

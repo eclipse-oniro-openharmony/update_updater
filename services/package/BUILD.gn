@@ -58,4 +58,6 @@ ohos_static_library("libupdaterpackage") {
   deps = [ "//third_party/bounds_checking_function:libsec_static" ]
 
   configs = [ ":package_config" ]
+  subsystem_name = "updater"
+  part_name = "updater"
 }

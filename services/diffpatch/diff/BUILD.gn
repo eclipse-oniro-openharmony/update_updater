@@ -46,4 +46,7 @@ ohos_static_library("libdiff") {
     "//third_party/bzip2:libbz2",
   ]
   configs = [ ":diff_config" ]
+
+  subsystem_name = "updater"
+  part_name = "updater"
 }

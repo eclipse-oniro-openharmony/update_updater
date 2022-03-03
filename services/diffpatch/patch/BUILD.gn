@@ -52,4 +52,6 @@ ohos_static_library("libpatch") {
   ]
 
   configs = [ ":patch_config" ]
+  subsystem_name = "updater"
+  part_name = "updater"
 }

@@ -34,4 +34,6 @@ ohos_static_library("libfsmanager") {
   ]
 
   external_deps = [ "init:libbegetutil" ]
+  subsystem_name = "updater"
+  part_name = "updater"
 }

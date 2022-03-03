@@ -48,4 +48,6 @@ ohos_static_library("libapplypatch") {
     "//third_party/bzip2:libbz2",
   ]
   external_deps = [ "init:libbegetutil" ]
+  subsystem_name = "updater"
+  part_name = "updater"
 }
