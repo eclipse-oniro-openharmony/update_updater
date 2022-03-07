@@ -84,6 +84,9 @@ ohos_source_set("flashd_deamon") {
     "//third_party/openssl/include",
     "//third_party/libuv",
   ]
+
+  subsystem_name = "updater"
+  part_name = "updater"
 }
 
 ohos_static_library("libflashd") {
