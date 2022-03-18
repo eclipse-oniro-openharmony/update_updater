@@ -79,7 +79,7 @@ ohos_source_set("flashd_deamon") {
     "//base/update/updater/services/flashd/daemon",
     "//base/update/updater/services/flashd/common",
     "//base/update/updater/services/flashd/host",
-    "//utils/native/base/include",
+    "//third_party/bounds_checking_function/include",
     "//third_party/lz4/lib",
     "//third_party/openssl/include",
     "//third_party/libuv",
@@ -141,7 +141,6 @@ ohos_static_library("libflashd") {
     "//third_party/bounds_checking_function/include",
     "//third_party/cJSON",
     "//third_party/openssl/include",
-    "//utils/native/base/include",
     "//third_party/lz4/lib",
     "//third_party/libuv",
   ]
@@ -182,11 +181,11 @@ ohos_executable("ohflash") {
   sources += common_sources
 
   deps = [
+    "//third_party/bounds_checking_function:libsec_static",
     "//third_party/libusb:libusb",
     "//third_party/libuv:uv_static",
     "//third_party/lz4:liblz4_static",
     "//third_party/openssl:libcrypto_static",
-    "//utils/native/base:utilsecurec",
   ]
 
   deps += [ "//third_party/libusb:libusb" ]
@@ -196,7 +195,7 @@ ohos_executable("ohflash") {
     "${HDC_PATH}/host",
     "${FLASHD_PATH}/common",
     "${HDC_PATH}/common",
-    "//utils/native/base/include",
+    "//third_party/bounds_checking_function/include",
     "//third_party/lz4/lib",
     "//third_party/openssl/include",
     "//third_party/libuv",
