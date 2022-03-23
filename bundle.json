@@ -111,9 +111,7 @@
                     }
                 }
             ],
-            "test": [
-                "//base/update/updater:unittest"
-            ]
+            "test": []
         }
     }
 }
