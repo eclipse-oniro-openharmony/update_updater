@@ -129,10 +129,10 @@ int32_t UpgradePkgFile::SavePackage(size_t &signOffset)
     WriteLE32(reinterpret_cast<uint8_t *>(&header->updateFileVersion), pkgInfo_.updateFileVersion);
     int32_t ret = memcpy_s(header->softwareVersion, sizeof(header->softwareVersion), pkgInfo_.softwareVersion.data(),
         pkgInfo_.softwareVersion.size());
-    PKG_CHECK(ret == EOK, return ret, "Fail to memcpy_s %s ret：%d", pkgStream_->GetFileName().c_str(), ret);
+    PKG_CHECK(ret == EOK, return ret, "Fail to memcpy_s %s ret: %d", pkgStream_->GetFileName().c_str(), ret);
     ret = memcpy_s(header->productUpdateId, sizeof(header->productUpdateId), pkgInfo_.productUpdateId.data(),
         pkgInfo_.productUpdateId.size());
-    PKG_CHECK(ret == EOK, return ret, "Fail to memcpy_s %s ret：%d", pkgStream_->GetFileName().c_str(), ret);
+    PKG_CHECK(ret == EOK, return ret, "Fail to memcpy_s %s ret: %d", pkgStream_->GetFileName().c_str(), ret);
     offset += sizeof(UpgradePkgHeader);
     // 时间tlv
     WriteLE16(buffer.data() + offset, 0x02); // Type is 2 for time in TLV format
@@ -140,16 +140,16 @@ int32_t UpgradePkgFile::SavePackage(size_t &signOffset)
     offset += sizeof(PkgTlv);
     UpgradePkgTime *time = reinterpret_cast<UpgradePkgTime *>(buffer.data() + offset);
     ret = memcpy_s(time->date, sizeof(time->date), pkgInfo_.date.data(), pkgInfo_.date.size());
-    PKG_CHECK(ret == EOK, return ret, "Fail to memcpy_s %s ret：%d", pkgStream_->GetFileName().c_str(), ret);
+    PKG_CHECK(ret == EOK, return ret, "Fail to memcpy_s %s ret: %d", pkgStream_->GetFileName().c_str(), ret);
     ret = memcpy_s(time->time, sizeof(time->time), pkgInfo_.time.data(), pkgInfo_.time.size());
-    PKG_CHECK(ret == EOK, return ret, "Fail to memcpy_s %s ret：%d", pkgStream_->GetFileName().c_str(), ret);
+    PKG_CHECK(ret == EOK, return ret, "Fail to memcpy_s %s ret: %d", pkgStream_->GetFileName().c_str(), ret);
     offset += sizeof(UpgradePkgTime);
     // 组件的tlv
     WriteLE16(buffer.data() + offset, 0x05); // Type is 5 for component in TLV format
     WriteLE16(buffer.data() + offset + sizeof(uint16_t), pkgInfo_.pkgInfo.entryCount * sizeof(UpgradeCompInfo));
     offset += sizeof(PkgTlv);
     ret = pkgStream_->Write(buffer, UPGRADE_FILE_HEADER_LEN, 0);
-    PKG_CHECK(ret == PKG_SUCCESS, return ret, "Fail write upgrade file header for %s ret：%d",
+    PKG_CHECK(ret == PKG_SUCCESS, return ret, "Fail write upgrade file header for %s ret: %d",
         pkgStream_->GetFileName().c_str(), ret);
 
     // Clear buffer and save signature information
@@ -374,7 +374,7 @@ int32_t UpgradeFileEntry::EncodeHeader(PkgStreamPtr inStream, size_t startOffset
     PKG_CHECK(ret == PKG_SUCCESS, return PKG_INVALID_PARAM, "outStream or inStream null for %s", fileName_.c_str());
 
     ret = memcpy_s(comp.digest, sizeof(comp.digest), fileInfo_.digest, sizeof(fileInfo_.digest));
-    PKG_CHECK(ret == EOK, return ret, "Fail to memcpy_s ret：%d", ret);
+    PKG_CHECK(ret == EOK, return ret, "Fail to memcpy_s ret: %d", ret);
     WriteLE32(reinterpret_cast<uint8_t *>(&comp.size), fileInfo_.fileInfo.unpackedSize);
     WriteLE16(reinterpret_cast<uint8_t *>(&comp.id), fileInfo_.id);
     WriteLE32(reinterpret_cast<uint8_t *>(&comp.originalSize), fileInfo_.originalSize);
@@ -436,7 +436,7 @@ int32_t UpgradeFileEntry::DecodeHeader(const PkgBuffer &buffer, size_t headerOff
     fileInfo_.fileInfo.packMethod = PKG_COMPRESS_METHOD_NONE;
     fileInfo_.fileInfo.digestMethod = PKG_DIGEST_TYPE_NONE;
     int32_t ret = memcpy_s(fileInfo_.digest, sizeof(fileInfo_.digest), info->digest, sizeof(info->digest));
-    PKG_CHECK(ret == EOK, return ret, "Fail to memcpy_s ret：%d", ret);
+    PKG_CHECK(ret == EOK, return ret, "Fail to memcpy_s ret: %d", ret);
     PkgFile::ConvertBufferToString(fileInfo_.fileInfo.identity, {info->address, sizeof(info->address)});
     PkgFile::ConvertBufferToString(fileInfo_.version, {info->version, sizeof(info->version)});
     fileName_ = fileInfo_.fileInfo.identity;
@@ -468,7 +468,7 @@ int32_t UpgradeFileEntry::Unpack(PkgStreamPtr outStream)
         0, fileInfo_.fileInfo.digestMethod
     };
     int32_t ret = memcpy_s(context.digest, sizeof(context.digest), fileInfo_.digest, sizeof(fileInfo_.digest));
-    PKG_CHECK(ret == EOK, return ret, "Fail to memcpy_s ret：%d", ret);
+    PKG_CHECK(ret == EOK, return ret, "Fail to memcpy_s ret: %d", ret);
     ret = algorithm->Unpack(inStream, outStream, context);
     PKG_CHECK(ret == PKG_SUCCESS, return ret, "Fail Decompress for %s", fileName_.c_str());
     PKG_LOGI("Unpack %s data offset:%zu packedSize:%zu unpackedSize:%zu", fileName_.c_str(), dataOffset_,

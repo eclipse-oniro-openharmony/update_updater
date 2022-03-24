@@ -345,11 +345,11 @@ int32_t UScriptInstructionBlockCheck::Execute(uscript::UScriptEnv &env, uscript:
         LOG(INFO) << "BlockSet::ReadDataFromBlock lseek64";
         ret = lseek64(fd, static_cast<off64_t>(it->first * H_BLOCK_SIZE), SEEK_SET);
         UPDATER_ERROR_CHECK(ret != -1, "Failed to seek",
-            return ReturnAndPushParam(USCRIPT_ERROR_EXECUTE, context));
+            close(fd); return ReturnAndPushParam(USCRIPT_ERROR_EXECUTE, context));
         size_t size = (it->second - it->first) * H_BLOCK_SIZE;
         LOG(INFO) << "BlockSet::ReadDataFromBlock Read " << size << " from block";
         UPDATER_ERROR_CHECK(utils::ReadFully(fd, block_buff.data() + pos, size), "Failed to read",
-            return ReturnAndPushParam(USCRIPT_ERROR_EXECUTE, context));
+            close(fd); return ReturnAndPushParam(USCRIPT_ERROR_EXECUTE, context));
         pos += size;
     }
 
@@ -365,6 +365,7 @@ int32_t UScriptInstructionBlockCheck::Execute(uscript::UScriptEnv &env, uscript:
     }
     LOG(INFO) << "UScriptInstructionBlockCheck::Execute Success";
     context.PushParam(USCRIPT_SUCCESS);
+    close(fd);
     return USCRIPT_SUCCESS;
 }
 
@@ -405,11 +406,11 @@ int32_t UScriptInstructionShaCheck::Execute(uscript::UScriptEnv &env, uscript::U
     for (; it != blk.End(); ++it) {
         ret = lseek64(fd, static_cast<off64_t>(it->first * H_BLOCK_SIZE), SEEK_SET);
         UPDATER_ERROR_CHECK(ret != -1, "Failed to seek",
-            return ReturnAndPushParam(USCRIPT_ERROR_EXECUTE, context));
+            close(fd); return ReturnAndPushParam(USCRIPT_ERROR_EXECUTE, context));
 
         for (size_t i = it->first; i < it->second; ++i) {
             UPDATER_ERROR_CHECK(utils::ReadFully(fd, block_buff.data(), H_BLOCK_SIZE), "Failed to read",
-                return ReturnAndPushParam(USCRIPT_ERROR_EXECUTE, context));
+                close(fd); return ReturnAndPushParam(USCRIPT_ERROR_EXECUTE, context));
             SHA256_Update(&ctx, block_buff.data(), H_BLOCK_SIZE);
         }
     }
@@ -417,9 +418,10 @@ int32_t UScriptInstructionShaCheck::Execute(uscript::UScriptEnv &env, uscript::U
     SHA256_Final(digest, &ctx);
     std::string resultSha = utils::ConvertSha256Hex(digest, SHA256_DIGEST_LENGTH);
     UPDATER_ERROR_CHECK(resultSha == contrastSha, "Different sha256, cannot continue",
-                        return ReturnAndPushParam(USCRIPT_ERROR_EXECUTE, context));
+        close(fd); return ReturnAndPushParam(USCRIPT_ERROR_EXECUTE, context));
     LOG(INFO) << "UScriptInstructionShaCheck::Execute Success";
     context.PushParam(USCRIPT_SUCCESS);
+    close(fd);
     return USCRIPT_SUCCESS;
 }
 }

@@ -151,7 +151,6 @@ DigestAlgorithm::DigestAlgorithmPtr PkgAlgorithmFactory::GetDigestAlgorithm(uint
             return std::make_shared<Sha256Algorithm>();
         default:
             return std::make_shared<DigestAlgorithm>();
-            break;
     }
     return nullptr;
 }

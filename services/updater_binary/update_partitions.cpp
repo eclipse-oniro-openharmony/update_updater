@@ -117,7 +117,8 @@ int32_t UpdatePartitions::Execute(uscript::UScriptEnv &env, uscript::UScriptCont
     std::string tmpPath1 = tmpPath + filePath;
     ret = env.GetPkgManager()->CreatePkgStream(outStream,
         tmpPath1, info->unpackedSize, PkgStream::PkgStreamType_Write);
-    UPDATER_ERROR_CHECK(outStream != nullptr, "Error to create output stream", return USCRIPT_ERROR_EXECUTE);
+    UPDATER_ERROR_CHECK(ret == USCRIPT_SUCCESS && outStream != nullptr, "Error to create output stream",
+        return USCRIPT_ERROR_EXECUTE);
     ret = env.GetPkgManager()->ExtractFile(filePath, outStream);
     UPDATER_ERROR_CHECK(ret == USCRIPT_SUCCESS, "Error to extract file",
         env.GetPkgManager()->ClosePkgStream(outStream); return USCRIPT_ERROR_EXECUTE);
