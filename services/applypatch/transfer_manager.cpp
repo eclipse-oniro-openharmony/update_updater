@@ -156,12 +156,10 @@ bool TransferManager::CheckResult(const CommandResult result, const std::string 
             LOG(INFO) << "Running command need retry!";
             UPDATER_CHECK_ONLY_RETURN(!globalParams->env, globalParams->env->PostMessage("retry_update", cmd));
             return false;
-            break;
         case FAILED:
         default:
             LOG(ERROR) << "Running command failed";
             return false;
-            break;
     }
     return true;
 }

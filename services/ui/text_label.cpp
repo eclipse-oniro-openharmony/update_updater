@@ -37,7 +37,6 @@ TextLabel::TextLabel(int mStartX, int mStartY, int w, int h, Frame *mparent)
     outlineColor_.b = 0x00;
     outlineColor_.a = 0x00;
     boldTopLine_ = false;
-    boldTopLine_ = false;
 
     const char midAlpha = 0xAA;
     actionBgColor_.r = 0x00;
