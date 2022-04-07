@@ -48,6 +48,8 @@ private:
     int ModesetCreateFb(struct BufferObject *bo);
     void ModesetDestroyFb(struct BufferObject *bo);
     int DrmInit();
+    bool GetConnector(const drmModeRes &res, const int fd, uint32_t &connId);
+    bool GetCrtc(const drmModeRes &res, const int fd, const drmModeConnector &conn, uint32_t &crtcId);
     int fd_;
     drmModeConnector *conn_;
     drmModeRes *res_;

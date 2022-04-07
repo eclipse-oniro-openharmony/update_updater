@@ -72,6 +72,46 @@ int DrmDriver::ModesetCreateFb(struct BufferObject *bo)
     return 0;
 }
 
+bool DrmDriver::GetCrtc(const drmModeRes &res, const int fd, const drmModeConnector &conn, uint32_t &crtcId)
+{
+    // get possible crtc
+    drmModeEncoder *encoder = nullptr;
+    for (int i = 0; i < conn.count_encoders; i++) {
+    	encoder = drmModeGetEncoder(fd, conn.encoders[i]);
+	if (encoder == nullptr) {
+		continue;
+	}
+
+	for (int j = 0; j < res.count_crtc; j++) {
+	    if ((encoder->possible_crtcs & (1u << (uint32_t)j)) != 0) {
+	    	crtcId = res.crtcs[j];
+		drmModeFreeEncoder(encoder);
+		return true;
+	    }
+	}
+	drmModeFreeEncoder(encoder);
+	encoder = nullptr;
+    }
+    return false;
+}
+
+int DrmDriver::GetConnector(const drmModeRes &res, const int fd, uint32_t &connId)
+{
+    // get connected connector
+    for (int i = 0; i < res.count_connectors; i++) {
+    	conn_ = drmModeGetConnector(fd, res.connectors[i]);
+	if (conn_ != nullptr &&
+	    conn_->connection == DRM_MODE_CONNECTED) {
+	    connId = conn_->connector_id;
+	    return true;
+	}
+	drmModeFreeConnector(conn_);
+	conn_ = nullptr;
+    }
+
+    return false;
+}
+
 int DrmDriver::DrmInit(void)
 {
     fd_ = open("/dev/dri/card0", O_RDWR | O_CLOEXEC);
@@ -86,13 +126,17 @@ int DrmDriver::DrmInit(void)
         return -1;
     }
 
-    uint32_t crtcId = res_->crtcs[0];
-    uint32_t connId = res_->connectors[1];
-    conn_ = drmModeGetConnector(fd_, connId);
-    if (conn_ == nullptr) {
-        LOG(ERROR) << "drmModeGetConnector";
-        return -1;
+    uint32_t crtcId;
+    uint32_t connId;
+    if (!GetConnector(*res_, fd_, connId)) {
+        LOG(ERROR) << "DrmInit cannot get drm connector";
+	return -1;
     }
+    if (GetCrtc(*res_, fd_, *conn_, crtcId)) {
+        LOG(ERROR) << "DrmInit cannot get drm crtc";
+	return -1;
+    }
+
     buff_.width = conn_->modes[0].hdisplay;
     buff_.height = conn_->modes[0].vdisplay;
 
