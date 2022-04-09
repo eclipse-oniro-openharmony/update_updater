@@ -269,8 +269,8 @@ int DrmDriver::DrmInit(void)
 
     // 5: bind ctrc and connector
     drmModeSetCrtc(fd_, crtc_->crtc_id, buff_.fbId, 0, 0, &conn_->connector_id, 1, &conn_->modes[modeId]);
-    LOG(ERROR) << "DrmInit: buff_.width:" << buff_.width << " buff_.height:" << buff_.height;
-    LOG(ERROR) << "DrmInit: crtc_id:" << crtc_->crtc_id << " connector_id:" << conn_->connector_id;
+    LOG(INFO) << "DrmInit: buff_.width:" << buff_.width << " buff_.height:" << buff_.height;
+    LOG(INFO) << "DrmInit: crtc_id:" << crtc_->crtc_id << " connector_id:" << conn_->connector_id;
     LOG(INFO) << " drm init success.";
     return 0;
 }
