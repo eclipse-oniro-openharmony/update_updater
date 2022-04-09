@@ -98,11 +98,8 @@ drmModeCrtc *DrmDriver::GetCrtc(const drmModeRes &res, const int fd, const drmMo
 
         for (int j = 0; j < res.count_crtcs; j++) {
             if ((encoder->possible_crtcs & (1u << (uint32_t)j)) != 0) {
-                if (res.crtcs[j] != 0) {
-                    uint32_t crtcId = res.crtcs[j];
-                    drmModeFreeEncoder(encoder);
-                    return drmModeGetCrtc(fd, crtcId);
-                }
+                drmModeFreeEncoder(encoder);
+                return drmModeGetCrtc(fd, res.crtcs[j]);
             }
         }
         drmModeFreeEncoder(encoder);
@@ -272,8 +269,8 @@ int DrmDriver::DrmInit(void)
 
     // 5: bind ctrc and connector
     drmModeSetCrtc(fd_, crtc_->crtc_id, buff_.fbId, 0, 0, &conn_->connector_id, 1, &conn_->modes[modeId]);
-    LOG(INFO) << "DrmInit: buff_.width:" << buff_.width << " buff_.height:" << buff_.height;
-    LOG(INFO) << "DrmInit: crtc_id:" << crtc_->crtc_id << " connector_id:" << conn_->connector_id;
+    LOG(ERROR) << "DrmInit: buff_.width:" << buff_.width << " buff_.height:" << buff_.height;
+    LOG(ERROR) << "DrmInit: crtc_id:" << crtc_->crtc_id << " connector_id:" << conn_->connector_id;
     LOG(INFO) << " drm init success.";
     return 0;
 }
