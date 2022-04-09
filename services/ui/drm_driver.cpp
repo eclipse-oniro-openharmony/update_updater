@@ -72,10 +72,24 @@ int DrmDriver::ModesetCreateFb(struct BufferObject *bo)
     return 0;
 }
 
-bool DrmDriver::GetCrtc(const drmModeRes &res, const int fd, const drmModeConnector &conn, uint32_t &crtcId)
+drmModeGetCrtc * DrmDriver::GetCrtc(const drmModeRes &res, const int fd, const drmModeConnector &conn)
 {
-    // get possible crtc
+    // if connector has one encoder, use it
     drmModeEncoder *encoder = nullptr;
+    if (conn->encoder_id != 0) {
+        encoder = drmModeGetEncoder(fd, conn->encoder_id);
+    }
+    if (encoder != nullptr && encoder->crtc_id != 0) {
+        uint32_t crtcId = encoder->crtc_id;
+        drmModeFreeEncoder(encoder);
+        return drmModeGetCrtc(fd, crtcId);
+    }
+    
+    if (encoder != nullptr) {
+        drmModeFreeEncoder(encoder);
+    }
+
+    // try get a vaild encoder and crtc
     for (int i = 0; i < conn.count_encoders; i++) {
         encoder = drmModeGetEncoder(fd, conn.encoders[i]);
         if (encoder == nullptr) {
@@ -84,64 +98,180 @@ bool DrmDriver::GetCrtc(const drmModeRes &res, const int fd, const drmModeConnec
 
         for (int j = 0; j < res.count_crtcs; j++) {
             if ((encoder->possible_crtcs & (1u << (uint32_t)j)) != 0) {
-                crtcId = res.crtcs[j];
-                drmModeFreeEncoder(encoder);
-                return true;
+                if (res.crtcs[j] != 0) {
+                    uint32_t crtcId = res.crtcs[j];
+                    drmModeFreeEncoder(encoder);
+                    return drmModeGetCrtc(fd, crtcId);
+                }
             }
         }
         drmModeFreeEncoder(encoder);
-        encoder = nullptr;
     }
-    return false;
+    return nullptr;
 }
 
-bool DrmDriver::GetConnector(const drmModeRes &res, const int fd, uint32_t &connId)
+drmModeConnector * DrmDriver::GetFirstConnector(const drmModeRes &res, const int fd)
 {
     // get connected connector
     for (int i = 0; i < res.count_connectors; i++) {
-        conn_ = drmModeGetConnector(fd, res.connectors[i]);
-        if (conn_ != nullptr &&
-            conn_->connection == DRM_MODE_CONNECTED) {
-            connId = conn_->connector_id;
-            return true;
+        drmModeConnector *conn = drmModeGetConnector(fd, res.connectors[i]);
+        if (conn == nullptr) {
+            continue;
         }
-        drmModeFreeConnector(conn_);
-        conn_ = nullptr;
+        if (conn->count_modes > 0 &&
+            conn->connection == DRM_MODE_CONNECTED) {
+            return conn;
+        }
+        drmModeFreeConnector(conn);
+    }
+    return nullptr;
+}
+
+drmModeConnector * DrmDriver::GetConnectorByType(const drmModeRes &res, const int fd, const uint32_t type)
+{
+    // get connected connector
+    for (int i = 0; i < res.count_connectors; i++) {
+        drmModeConnector *conn = drmModeGetConnector(fd, res.connectors[i]);
+        if (conn == nullptr) {
+            continue;
+        }
+        if (conn->connector_type == type &&
+            conn->count_modes > 0 &&
+            conn->connection == DRM_MODE_CONNECTED) {
+            return conn;
+        }
+        drmModeFreeConnector(conn);
+    }
+    return nullptr;
+}
+
+
+drmModeConnector * DrmDriver::GetConnector(const drmModeRes &res, const int fd, uint32_t &modeId)
+{
+    // get main connector : lvds edp and dsi
+    uint32_t mainConnector[] = {
+        DRM_MODE_CONNECTOR_LVDS,
+        DRM_MODE_CONNECTOR_eDP,
+        DRM_MODE_CONNECTOR_DSI,
+    };
+
+    drmModeConnector *conn = nullptr;
+    for (int i = 0; i < sizeof(mainConnector) / sizeof(mainConnector[0]); i++) {
+        drmModeConnector *conn = GetConnectorByType(res, fd, mainConnector[i]);
+        if (conn != nullptr)
+            break;
+        }
     }
 
-    return false;
+    if (conn == nullptr) {
+        conn = GetFirstConnector(res, fd);
+    }
+
+    if (conn == nullptr) {
+        LOG(ERROR) << "DrmDriver cannot get vaild connector";
+        return nullptr;
+    }
+
+    // get preferred mode index
+    modeId = 0;
+    for (int i = 0; i < conn->count_modes; i++) {
+        if ((conn->modes[i].type & DRM_MODE_TYPE_PREFERRED) != 0)
+            modeId = i;
+            break;
+        }
+    } 
+
+    return conn;
+}
+
+drmModeRes * DrmDriver::GetResources(int &fd)
+{
+    // 1: open drm resource
+    drmModeRes res = nullptr;
+    for (int i = 0; i < DRM_MAX_MINOR; i++) {
+        res = GetOneResources(i, fd);
+        if (res != nullptr) {
+            break;
+        }
+    }
+    return res;
+}
+
+drmModeRes * DrmDriver::GetOneResources(const int devIndex, int &fd)
+{
+    // 1: open drm device
+    std::string devName = DRM_DEV_NAME + "/card" + std::string(devIndex);
+    fd = open(devName, O_RDWR | O_CLOEXEC);
+    if (fd < 0) {
+        LOG(ERROR) << "open failed " << devName;
+        return nullptr;
+    }
+    // 2: check drm capacity
+    uint64_t cap = 0;
+    int ret = drmGetCap(fd, DRM_CAP_DUMB_BUFFER, &cap);
+    if (ret != 0 || cap == 0) {
+        LOG(ERROR) << "drmGetCap failed";
+        close(fd);
+        fd = -1;
+        return nullptr;
+    }
+    
+    // 3: get drm resources
+    drmModeRes *res = drmModeGetResources(fd);
+    if (res == nullptr) {
+        LOG(ERROR) << "drmModeGetResources failed";
+        close(fd);
+        fd = -1;
+        return nullptr;
+    }
+
+    // 4: check it has connected connector and crtc
+    if (res->count_crtcs > 0 && res->count_connectors > 0 && res->count_encoders > 0) {
+        drmModeConnector *conn = GetFirstConnector(res, fd);
+        if (conn != nullptr) {
+            // don't close fd
+            LOG(INFO) << "drm dev:" << devName;
+            drmModeFreeConnector(conn);
+            return res;
+        }
+    }
+    close(fd);
+    fd = -1;
+    drmModeFreeResources(res);
+    return nullptr;
 }
 
 int DrmDriver::DrmInit(void)
 {
-    fd_ = open("/dev/dri/card0", O_RDWR | O_CLOEXEC);
-    if (fd_ < 0) {
-        LOG(ERROR) << "open failed";
+    // 1: open drm resource
+    res_ = GetResources(fd_);
+    if (fd_ < 0 || res_ == nullptr) {
+        LOG(ERROR) << "DrmInit: GetResources failed";
         return -1;
     }
 
-    res_ = drmModeGetResources(fd_);
-    if (res_ == nullptr) {
-        LOG(ERROR) << "drmModeGetResources";
+    // 2 : get connected connector
+    uint32_t modeId;
+    conn_ = GetConnector(*res_, fd_, modeId);
+    if (conn_ == nullptr) {
+        LOG(ERROR) << "DrmInit: GetConnector failed";
         return -1;
     }
 
-    uint32_t crtcId;
-    uint32_t connId;
-    if (!GetConnector(*res_, fd_, connId)) {
-        LOG(ERROR) << "DrmInit cannot get drm connector";
-        return -1;
-    }
-    if (GetCrtc(*res_, fd_, *conn_, crtcId)) {
-        LOG(ERROR) << "DrmInit cannot get drm crtc";
+    // 3: get vaild encoder and crtc
+    crtc_ = GetCrtc(*res_, fd_, *conn_);
+    if (crtc_ == nullptr) {
+        LOG(ERROR) << "DrmInit: GetCrtc failed";
         return -1;
     }
 
-    buff_.width = conn_->modes[0].hdisplay;
-    buff_.height = conn_->modes[0].vdisplay;
-
+    // 4: create userspace buffer
+    buff_.width = conn_->modes[modeId].hdisplay;
+    buff_.height = conn_->modes[modeId].vdisplay;
     ModesetCreateFb(&buff_);
-    drmModeSetCrtc(fd_, crtcId, buff_.fbId, 0, 0, &connId, 1, &conn_->modes[0]);
+    
+    // 5: bind ctrc and connector
+    drmModeSetCrtc(fd_, crtc_->crtc_id, buff_.fbId, 0, 0, &conn_->connector_id, 1, &conn_->modes[modeId]);
     LOG(INFO) << " drm init success.";
     return 0;
 }
@@ -155,14 +285,32 @@ void DrmDriver::LoadDrmDriver()
 
 void DrmDriver::ModesetDestroyFb(struct BufferObject *bo)
 {
-    struct drm_mode_destroy_dumb destroy = {};
-    drmModeRmFB(fd_, bo->fbId);
-    munmap(bo->vaddr, bo->size);
-    destroy.handle = bo->handle;
-    drmIoctl(fd_, DRM_IOCTL_MODE_DESTROY_DUMB, &destroy);
-    drmModeFreeConnector(conn_);
-    drmModeFreeResources(res_);
-    close(fd_);
+    if (bo == nullptr) {
+        return;
+    }
+    if (fd_ > 0 && bo->fbId) {
+        drmModeRmFB(fd_, bo->fbId);
+    }
+    if (bo->vaddr != nullptr) {
+        munmap(bo->vaddr, bo->size);
+    }
+    if (bo->handle) {
+        struct drm_mode_destroy_dumb destroy = {};
+        destroy.handle = bo->handle;
+        drmIoctl(fd_, DRM_IOCTL_GEM_CLOSE, &destroy);
+    }
+    if (crtc_ != nullptr) {
+        drmModeFreeCrtc(crtc_);
+    }
+    if (conn_ != nullptr) {
+        drmModeFreeConnector(conn_);
+    }
+    if (res_ != nullptr) {
+        drmModeFreeResources(res_);
+    }
+    if (fd_ > 0) {
+        close(fd_);
+    }
 }
 
 DrmDriver::~DrmDriver()

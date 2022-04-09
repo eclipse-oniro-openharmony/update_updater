@@ -40,7 +40,7 @@ struct BufferObject {
 
 class DrmDriver {
 protected:
-    DrmDriver() : fd_(-1), conn_(nullptr), res_(nullptr) {}
+    DrmDriver() : fd_(-1), conn_(nullptr), res_(nullptr), crtc_(nullptr) {}
     virtual ~DrmDriver();
     void FlipBuffer(const void* buf);
     void LoadDrmDriver();
@@ -48,11 +48,16 @@ private:
     int ModesetCreateFb(struct BufferObject *bo);
     void ModesetDestroyFb(struct BufferObject *bo);
     int DrmInit();
-    bool GetConnector(const drmModeRes &res, const int fd, uint32_t &connId);
-    bool GetCrtc(const drmModeRes &res, const int fd, const drmModeConnector &conn, uint32_t &crtcId);
+    drmModeGetCrtc *GetCrtc(const drmModeRes &res, const int fd, const drmModeConnector &conn);
+    drmModeConnector *GetFirstConnector(const drmModeRes &res, const int fd);
+    drmModeConnector *GetConnectorByType(const drmModeRes &res, const int fd, const uint32_t type);
+    drmModeConnector *GetConnector(const drmModeRes &res, const int fd, uint32_t &modeId);
+    drmModeRes *GetResources(int &fd);
+    drmModeRes *GetOneResources(const int devIndex, int &fd);
     int fd_;
     drmModeConnector *conn_;
     drmModeRes *res_;
+    drmModeRes *crtc_;
     struct BufferObject buff_ {};
 };
 } // namespace updater
