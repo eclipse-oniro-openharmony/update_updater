@@ -48,16 +48,16 @@ private:
     int ModesetCreateFb(struct BufferObject *bo);
     void ModesetDestroyFb(struct BufferObject *bo);
     int DrmInit();
-    drmModeGetCrtc *GetCrtc(const drmModeRes &res, const int fd, const drmModeConnector &conn);
-    drmModeConnector *GetFirstConnector(const drmModeRes &res, const int fd);
-    drmModeConnector *GetConnectorByType(const drmModeRes &res, const int fd, const uint32_t type);
-    drmModeConnector *GetConnector(const drmModeRes &res, const int fd, uint32_t &modeId);
-    drmModeRes *GetResources(int &fd);
-    drmModeRes *GetOneResources(const int devIndex, int &fd);
+    drmModeCrtc *GetCrtc(const drmModeRes &res, const int fd, const drmModeConnector &conn) const;
+    drmModeConnector *GetFirstConnector(const drmModeRes &res, const int fd) const;
+    drmModeConnector *GetConnectorByType(const drmModeRes &res, const int fd, const uint32_t type) const;
+    drmModeConnector *GetConnector(const drmModeRes &res, const int fd, uint32_t &modeId) const;
+    drmModeRes *GetResources(int &fd) const;
+    drmModeRes *GetOneResources(const int devIndex, int &fd) const;
     int fd_;
     drmModeConnector *conn_;
     drmModeRes *res_;
-    drmModeRes *crtc_;
+    drmModeCrtcl *crtc_;
     struct BufferObject buff_ {};
 };
 } // namespace updater
