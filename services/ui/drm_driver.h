@@ -57,7 +57,7 @@ private:
     int fd_;
     drmModeConnector *conn_;
     drmModeRes *res_;
-    drmModeCrtcl *crtc_;
+    drmModeCrtc *crtc_;
     struct BufferObject buff_ {};
 };
 } // namespace updater
