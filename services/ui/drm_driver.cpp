@@ -284,16 +284,13 @@ void DrmDriver::LoadDrmDriver()
 
 void DrmDriver::ModesetDestroyFb(struct BufferObject *bo)
 {
-    if (bo == nullptr) {
-        return;
-    }
-    if (fd_ > 0 && bo->fbId) {
+    if (fd_ > 0 && bo->fbId != 0) {
         drmModeRmFB(fd_, bo->fbId);
     }
     if (bo->vaddr != nullptr) {
         munmap(bo->vaddr, bo->size);
     }
-    if (bo->handle) {
+    if (fd_ > 0) {
         struct drm_mode_destroy_dumb destroy = {};
         destroy.handle = bo->handle;
         drmIoctl(fd_, DRM_IOCTL_GEM_CLOSE, &destroy);
