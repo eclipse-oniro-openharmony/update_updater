@@ -97,7 +97,7 @@ drmModeCrtc *DrmDriver::GetCrtc(const drmModeRes &res, const int fd, const drmMo
         }
 
         for (int j = 0; j < res.count_crtcs; j++) {
-            if ((encoder->possible_crtcs & (1u << (uint32_t)j)) != 0) {
+            if ((encoder->possible_crtcs & (1u << static_cast<uint32_t>(j))) != 0) {
                 drmModeFreeEncoder(encoder);
                 return drmModeGetCrtc(fd, res.crtcs[j]);
             }
