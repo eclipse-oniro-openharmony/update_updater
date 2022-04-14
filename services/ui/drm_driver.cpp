@@ -197,43 +197,42 @@ drmModeRes *DrmDriver::GetResources(int &fd) const
 drmModeRes *DrmDriver::GetOneResources(const int devIndex, int &fd) const
 {
     // 1: open drm device
+    fd = -1;
     std::string devName = std::string("/dev/dri/card") + std::to_string(devIndex);
-    fd = open(devName.c_str(), O_RDWR | O_CLOEXEC);
-    if (fd < 0) {
+    int tmpFd = open(devName.c_str(), O_RDWR | O_CLOEXEC);
+    if (tmpFd < 0) {
         LOG(ERROR) << "open failed " << devName;
         return nullptr;
     }
     // 2: check drm capacity
     uint64_t cap = 0;
-    int ret = drmGetCap(fd, DRM_CAP_DUMB_BUFFER, &cap);
+    int ret = drmGetCap(tmpFd, DRM_CAP_DUMB_BUFFER, &cap);
     if (ret != 0 || cap == 0) {
         LOG(ERROR) << "drmGetCap failed";
-        close(fd);
-        fd = -1;
+        close(tmpFd);
         return nullptr;
     }
 
     // 3: get drm resources
-    drmModeRes *res = drmModeGetResources(fd);
+    drmModeRes *res = drmModeGetResources(tmpFd);
     if (res == nullptr) {
         LOG(ERROR) << "drmModeGetResources failed";
-        close(fd);
-        fd = -1;
+        close(tmpFd);
         return nullptr;
     }
 
     // 4: check it has connected connector and crtc
     if (res->count_crtcs > 0 && res->count_connectors > 0 && res->count_encoders > 0) {
-        drmModeConnector *conn = GetFirstConnector(*res, fd);
+        drmModeConnector *conn = GetFirstConnector(*res, tmpFd);
         if (conn != nullptr) {
             // don't close fd
             LOG(INFO) << "drm dev:" << devName;
             drmModeFreeConnector(conn);
+            fd = tmpFd;
             return res;
         }
     }
-    close(fd);
-    fd = -1;
+    close(tmpFd);
     drmModeFreeResources(res);
     return nullptr;
 }
