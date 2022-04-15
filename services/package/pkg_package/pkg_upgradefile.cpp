@@ -325,6 +325,11 @@ int32_t UpgradePkgFile::ReadUpgradePkgHeader(const PkgBuffer &buffer, size_t &re
     PkgFile::ConvertBufferToString(pkgInfo_.productUpdateId, {header->productUpdateId,
         sizeof(header->productUpdateId)});
 
+    algorithm = PkgAlgorithmFactory::GetDigestAlgorithm(pkgInfo_.pkgInfo.digestMethod);
+    PKG_CHECK(algorithm != nullptr, return PKG_NOT_EXIST_ALGORITHM,
+        "Invalid file %s", pkgStream_->GetFileName().c_str());
+    algorithm->Init();
+
     if (currLen + tlv.length >= readLen) { // Extra TLV information, read it.
         realLen = currLen + tlv.length;
         algorithm->Update(buffer, realLen);
@@ -347,10 +352,6 @@ int32_t UpgradePkgFile::ReadUpgradePkgHeader(const PkgBuffer &buffer, size_t &re
     realLen += currLen;
 
     // Parser header to get compressional algorithm
-    algorithm = PkgAlgorithmFactory::GetDigestAlgorithm(pkgInfo_.pkgInfo.digestMethod);
-    PKG_CHECK(algorithm != nullptr, return PKG_NOT_EXIST_ALGORITHM,
-        "Invalid file %s", pkgStream_->GetFileName().c_str());
-    algorithm->Init();
     algorithm->Update(buffer, currLen); // Generate digest
     return PKG_SUCCESS;
 }
