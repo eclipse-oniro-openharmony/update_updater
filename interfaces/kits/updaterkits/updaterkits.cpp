@@ -18,6 +18,7 @@
 #include <sys/syscall.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <init_reboot.h>
 #include "misc_info/misc_info.h"
 #include "parameters.h"
 #include "securec.h"
@@ -38,12 +39,8 @@ static bool WriteToMiscAndRebootToUpdater(const std::string &miscFile,
 #ifndef UPDATER_UT
     int32_t propertyMaxSize = 92;
     char updateCmd[propertyMaxSize];
-    void(snprintf_s(updateCmd, propertyMaxSize, propertyMaxSize - 1, "reboot,updater:%s", updateMsg.update));
-    bool bRet = OHOS::system::SetParameter("ohos.startup.powerctrl", updateCmd);
-    if (!bRet) {
-        std::cout << "WriteToMiscAndRebootToUpdater SetParameter failed, errno: " << errno << std::endl;
-        return false;
-    }
+    void(snprintf_s(updateCmd, propertyMaxSize, propertyMaxSize - 1, "updater:%s", updateMsg.update));
+    DoReboot(updateCmd);
     while (true) {
         pause();
     }
