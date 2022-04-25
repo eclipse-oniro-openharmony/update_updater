@@ -43,12 +43,6 @@ BlockSet::BlockSet(std::vector<BlockPair> &&pairs)
     }
 }
 
-BlockSet::~BlockSet()
-{
-    blockSize_ = 0;
-    blocks_.clear();
-}
-
 bool BlockSet::CheckReliablePair(BlockPair pair)
 {
     UPDATER_ERROR_CHECK(pair.first < pair.second, "Invalid number of block size", return false);

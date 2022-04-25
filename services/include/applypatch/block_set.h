@@ -42,7 +42,7 @@ public:
 
     explicit BlockSet(std::vector<BlockPair> &&pairs);
 	
-    ~BlockSet();
+    ~BlockSet() {}
 
     // Insert block to set after parsing from a string type or vector type
     bool ParserAndInsert(const std::string &blockStr);
