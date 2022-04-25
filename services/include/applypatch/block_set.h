@@ -35,11 +35,6 @@ class Command;
 
 class BlockSet {
 public:
-    BlockSet()
-    {
-        blockSize_ = 0;
-    }
-
     explicit BlockSet(std::vector<BlockPair> &&pairs);
 	
     ~BlockSet();
@@ -98,7 +93,7 @@ public:
     // write data to block
     size_t WriteDataToBlock(int fd, std::vector<uint8_t> &buffer);
 protected:
-    size_t blockSize_;
+    size_t blockSize_ = 0;
     std::vector<BlockPair> blocks_;
 private:
     void PushBack(BlockPair block_pair);
