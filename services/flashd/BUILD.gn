@@ -14,7 +14,7 @@
 import("//build/ohos.gni")
 
 FLASHD_PATH = "//base/update/updater/services/flashd"
-HDC_PATH = "//developtools/hdc_standard/src"
+HDC_PATH = "//developtools/hdc/src"
 
 common_sources = [
   "${HDC_PATH}/common/async_cmd.cpp",

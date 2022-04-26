@@ -46,7 +46,7 @@
             "components": [
                 "startup_init_lite",
                 "startup_syspara_lite",
-                "developtools_hdc_standard",
+                "developtools_hdc",
                 "utils_native",
                 "drivers_peripheral"
             ],
