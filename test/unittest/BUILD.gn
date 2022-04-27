@@ -181,7 +181,7 @@ ohos_unittest("updater_unittest") {
     "//third_party/zlib",
     "//third_party/lz4/lib",
     "//third_party/bounds_checking_function/include",
-    "//foundation/ace/napi/interfaces/kits",
+    "//foundation/arkui/napi/interfaces/kits",
     "//third_party/cJSON",
     "//third_party/curl/include",
     "//third_party/openssl/include",
