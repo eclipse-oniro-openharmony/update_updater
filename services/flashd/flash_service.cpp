@@ -512,7 +512,7 @@ static int GetCmdParam(uint8_t type, const std::string &origString,
             resultStrings.push_back(param);
         }
     }
-    FLASHING_CHECK((resultStrings.size() >= paramMinNumber[type]) && (type <= flashd::UPDATEMOD_MAX),
+    FLASHING_CHECK((type <= flashd::UPDATEMOD_MAX) && (resultStrings.size() >= paramMinNumber[type]),
         return FLASHING_ARG_INVALID, "Invalid param for %d cmd %s", type, origString.c_str());
     return 0;
 }
