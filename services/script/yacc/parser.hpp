@@ -803,6 +803,7 @@ private:
         semantic_type value;
         /// The location.
         location_type location;
+
     private:
 #if YY_CPLUSPLUS < 201103L
         /// Assignment operator.
@@ -1383,6 +1384,7 @@ private:
         const  Parser &yyparser_;
         const symbol_type &yyla_;
     };
+
 private:
 #if YY_CPLUSPLUS < 201103L
     /// Non copyable.
@@ -1592,10 +1594,12 @@ private:
             {
                 return stack_[range_ - i];
             }
+
         private:
             const stack& stack_;
             index_type range_;
         };
+
     private:
 #if YY_CPLUSPLUS < 201103L
         /// Non copyable.

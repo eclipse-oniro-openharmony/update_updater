@@ -28,6 +28,7 @@ config("package_config") {
     "pkg_algorithm",
     "pkg_manager",
     "pkg_package",
+    "pkg_verify",
     "//third_party/bounds_checking_function/include",
   ]
   if (current_cpu == "arm" && host_os != "mac") {
@@ -53,6 +54,9 @@ ohos_static_library("libupdaterpackage") {
     "$SUBSYSTEM_DIR/pkg_package/pkg_pkgfile.cpp",
     "$SUBSYSTEM_DIR/pkg_package/pkg_upgradefile.cpp",
     "$SUBSYSTEM_DIR/pkg_package/pkg_zipfile.cpp",
+    "$SUBSYSTEM_DIR/pkg_verify/pkcs7_signed_data.cpp",
+    "$SUBSYSTEM_DIR/pkg_verify/pkg_verify_util.cpp",
+    "$SUBSYSTEM_DIR/pkg_verify/zip_pkg_parse.cpp",
   ]
 
   deps = [ "//third_party/bounds_checking_function:libsec_static" ]

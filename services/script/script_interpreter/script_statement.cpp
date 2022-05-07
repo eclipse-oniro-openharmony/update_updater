@@ -87,7 +87,7 @@ UScriptStatement* UScriptStatement::CreateIfStatement(UScriptExpression *conditi
     UScriptStatementList *list2,
     UScriptStatement *nextIfState)
 {
-    auto ifStatement = new UScriptIfStatement(condition, list1);
+    auto ifStatement = new(std::nothrow) UScriptIfStatement(condition, list1);
     USCRIPT_CHECK(ifStatement != nullptr, return nullptr, "Create if statement failed ");
     ifStatement->AddFalseStatementList(list2);
     ifStatement->AddNextStatement(reinterpret_cast<UScriptIfStatement*>(nextIfState));
@@ -111,7 +111,7 @@ UScriptStatement* UScriptStatement::CreateWhileStatement(UScriptExpression *cond
 
 UScriptStatementList* UScriptStatementList::CreateInstance(UScriptStatement *statement)
 {
-    auto list = new UScriptStatementList();
+    auto list = new(std::nothrow) UScriptStatementList();
     USCRIPT_CHECK(list != nullptr, return nullptr, "Failed to create statement list ");
     list->AddScriptStatement(statement);
     return list;
@@ -319,7 +319,8 @@ UScriptReturnStatement::~UScriptReturnStatement()
 
 UScriptReturnStatement* UScriptReturnStatement::CreateStatement(ScriptParams *params)
 {
-    auto statement = new UScriptReturnStatement();
+    auto statement = new(std::nothrow) UScriptReturnStatement();
+    USCRIPT_CHECK(statement != nullptr, return nullptr, "Create statement failed");
     if (params != nullptr) {
         statement->AddParams(params);
     }

@@ -20,7 +20,7 @@
 #include "log/log.h"
 
 namespace updater {
-bool RawWriter::Write(const uint8_t *addr, size_t len, WriteMode mode, const std::string &partitionName)
+bool RawWriter::Write(const uint8_t *addr, size_t len, [[maybe_unused]] const void *context)
 {
     if (addr == nullptr) {
         LOG(ERROR) << "RawWriter: invalid address.";
@@ -33,7 +33,7 @@ bool RawWriter::Write(const uint8_t *addr, size_t len, WriteMode mode, const std
     }
 
     if (fd_ < 0) {
-        fd_ = OpenPartition(partitionName_);
+        fd_ = OpenPath(path_);
         if (fd_ < 0) {
             return false;
         }
@@ -55,9 +55,9 @@ int RawWriter::WriteInternal(int fd, const uint8_t *data, size_t len)
         written = write(fd, data, rest);
         UPDATER_FILE_CHECK(written >= 0, "RawWriter: failed to write data of len " << len, return -1);
         data += written;
-        rest -= written;
+        rest -= static_cast<size_t>(written);
     }
-    offset_ += len;
+    offset_ += static_cast<off64_t>(len);
     return 0;
 }
 } // namespace updater

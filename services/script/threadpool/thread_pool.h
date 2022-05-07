@@ -46,6 +46,7 @@ public:
     {
         return threadNumber_;
     }
+
 private:
     void ThreadRun(int32_t threadIndex);
     void RunTask(Task &&task, int32_t index);

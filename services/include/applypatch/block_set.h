@@ -97,9 +97,11 @@ public:
 
     // write data to block
     size_t WriteDataToBlock(int fd, std::vector<uint8_t> &buffer);
+
 protected:
     size_t blockSize_;
     std::vector<BlockPair> blocks_;
+
 private:
     void PushBack(BlockPair block_pair);
     void ClearBlocks();

@@ -39,6 +39,10 @@ using namespace hpackage;
 namespace utils {
 constexpr uint32_t MAX_PATH_LEN = 256;
 constexpr uint8_t SHIFT_RIGHT_FOUR_BITS = 4;
+constexpr int USER_ROOT_AUTHORITY = 0;
+constexpr int GROUP_SYS_AUTHORITY = 1000;
+constexpr int USECONDS_PER_SECONDS = 1000000; // 1s = 1000000us
+constexpr int NANOSECS_PER_USECONDS = 1000; // 1us = 1000ns
 int32_t DeleteFile(const std::string& filename)
 {
     UPDATER_ERROR_CHECK (!filename.empty(), "Invalid filename", return -1);
@@ -162,18 +166,17 @@ void DoReboot(const std::string& rebootTarget, const std::string &extData)
     LOG(INFO) << ", rebootTarget: " << rebootTarget;
     static const int32_t maxCommandSize = 16;
     LoadFstab();
-    auto miscBlockDevice = GetBlockDeviceByMountPoint("/misc");
     struct UpdateMessage msg;
     if (rebootTarget.empty()) {
         UPDATER_ERROR_CHECK(!memset_s(msg.command, MAX_COMMAND_SIZE, 0, MAX_COMMAND_SIZE), "Memset_s failed", return);
-        if (WriteUpdaterMessage(miscBlockDevice, msg) != true) {
+        if (WriteUpdaterMiscMsg(msg) != true) {
             LOG(INFO) << "DoReboot: WriteUpdaterMessage empty error";
             return;
         }
         sync();
     } else {
         int result = 0;
-        bool ret = ReadUpdaterMessage(miscBlockDevice, msg);
+        bool ret = ReadUpdaterMiscMsg(msg);
         UPDATER_ERROR_CHECK(ret == true, "DoReboot read misc failed", return);
         if (rebootTarget == "updater" && strcmp(msg.command, "boot_updater") != 0) {
             result = strcpy_s(msg.command, maxCommandSize, "boot_updater");
@@ -193,8 +196,9 @@ void DoReboot(const std::string& rebootTarget, const std::string &extData)
         } else {
             UPDATER_ERROR_CHECK(!memset_s(msg.update, MAX_UPDATE_SIZE, 0, MAX_UPDATE_SIZE), "Memset_s failed", return);
         }
-        if (WriteUpdaterMessage(miscBlockDevice, msg) != true) {
-            LOG(INFO) << "DoReboot: WriteUpdaterMessage boot_updater error";
+        ret = WriteUpdaterMiscMsg(msg);
+        if (!ret) {
+            LOG(INFO) << "DoReboot: WriteUpdaterMiscMsg empty error";
             return;
         }
         sync();
@@ -234,7 +238,7 @@ bool WriteFully(int fd, const void *data, size_t size)
             return false;
         }
         p += written;
-        rest -= written;
+        rest -= static_cast<size_t>(written);
     }
     return true;
 }
@@ -247,7 +251,7 @@ bool ReadFully(int fd, void *data, size_t size)
         ssize_t sread = read(fd, p, remaining);
         UPDATER_ERROR_CHECK (sread > 0, "Utils::ReadFully run error", return false);
         p += sread;
-        remaining -= sread;
+        remaining -= static_cast<size_t>(sread);
     }
     return true;
 }
@@ -256,16 +260,16 @@ bool ReadFileToString(int fd, std::string &content)
 {
     struct stat sb {};
     if (fstat(fd, &sb) != -1 && sb.st_size > 0) {
-        content.resize(sb.st_size);
+        content.resize(static_cast<size_t>(sb.st_size));
     }
     ssize_t n;
-    size_t remaining = sb.st_size;
+    auto remaining = static_cast<size_t>(sb.st_size);
     auto p = reinterpret_cast<char *>(content.data());
     while (remaining > 0) {
         n = read(fd, p, remaining);
         UPDATER_CHECK_ONLY_RETURN (n > 0, return false);
         p += n;
-        remaining -= n;
+        remaining -= static_cast<size_t>(n);
     }
     return true;
 }
@@ -278,7 +282,7 @@ bool WriteStringToFile(int fd, const std::string& content)
         ssize_t n = write(fd, p, remaining);
         UPDATER_CHECK_ONLY_RETURN (n != -1, return false);
         p += n;
-        remaining -= n;
+        remaining -= static_cast<size_t>(n);
     }
     return true;
 }
@@ -286,6 +290,118 @@ bool WriteStringToFile(int fd, const std::string& content)
 std::string GetLocalBoardId()
 {
     return "HI3516";
+}
+
+void CompressLogs(const std::string &name)
+{
+    PkgManager::PkgManagerPtr pkgManager = PkgManager::GetPackageInstance();
+    UPDATER_ERROR_CHECK(pkgManager != nullptr, "pkgManager is nullptr", return);
+    std::vector<std::pair<std::string, ZipFileInfo>> files;
+    // Build the zip file to be packaged
+    std::vector<std::string> testFileNames;
+    std::string realName = name.substr(name.find_last_of("/") + 1);
+    testFileNames.push_back(realName);
+    for (auto name : testFileNames) {
+        ZipFileInfo file;
+        file.fileInfo.identity = name;
+        file.fileInfo.packMethod = PKG_COMPRESS_METHOD_ZIP;
+        file.fileInfo.digestMethod = PKG_DIGEST_TYPE_CRC;
+        std::string fileName = "/data/updater/log/" + name;
+        files.push_back(std::pair<std::string, ZipFileInfo>(fileName, file));
+    }
+
+    PkgInfo pkgInfo;
+    pkgInfo.signMethod = PKG_SIGN_METHOD_RSA;
+    pkgInfo.digestMethod = PKG_DIGEST_TYPE_SHA256;
+    pkgInfo.pkgType = PKG_PACK_TYPE_ZIP;
+
+    char realTime[MAX_TIME_SIZE] = {0};
+    auto sysTime = std::chrono::system_clock::now();
+    auto currentTime = std::chrono::system_clock::to_time_t(sysTime);
+    struct tm *localTime = std::localtime(&currentTime);
+    if (localTime != nullptr) {
+        std::strftime(realTime, sizeof(realTime), "%H_%M_%S", localTime);
+    }
+    char pkgName[MAX_LOG_NAME_SIZE];
+    UPDATER_CHECK_ONLY_RETURN(snprintf_s(pkgName, MAX_LOG_NAME_SIZE, MAX_LOG_NAME_SIZE - 1,
+        "/data/updater/log/%s_%s.zip", realName.c_str(), realTime) != -1, return);
+    int32_t ret = pkgManager->CreatePackage(pkgName, GetCertName(), &pkgInfo, files);
+    UPDATER_CHECK_ONLY_RETURN(ret != 0, return);
+    UPDATER_CHECK_ONLY_RETURN(DeleteFile(name) == 0, return);
+}
+
+bool CopyUpdaterLogs(const std::string &sLog, const std::string &dLog)
+{
+    UPDATER_WARING_CHECK(MountForPath(UPDATER_LOG_DIR) == 0, "MountForPath /data/log failed!", return false);
+    if (access(UPDATER_LOG_DIR.c_str(), 0) != 0) {
+        UPDATER_ERROR_CHECK(!MkdirRecursive(UPDATER_LOG_DIR, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH),
+            "MkdirRecursive error!", return false);
+        UPDATER_ERROR_CHECK(chown(UPDATER_PATH.c_str(), USER_ROOT_AUTHORITY, GROUP_SYS_AUTHORITY) == 0,
+            "Chown failed!", return false);
+        UPDATER_ERROR_CHECK(chmod(UPDATER_PATH.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) == 0,
+            "Chmod failed!", return false);
+    }
+
+    FILE* dFp = fopen(dLog.c_str(), "ab+");
+    UPDATER_ERROR_CHECK(dFp != nullptr, "open log failed", return false);
+
+    FILE* sFp = fopen(sLog.c_str(), "r");
+    UPDATER_ERROR_CHECK(sFp != nullptr, "open log failed", fclose(dFp); return false);
+
+    char buf[MAX_LOG_BUF_SIZE];
+    size_t bytes;
+    while ((bytes = fread(buf, 1, sizeof(buf), sFp)) != 0) {
+        if (fwrite(buf, 1, bytes, dFp) <= 0) {
+            LOG(WARNING) << "CopyUpdaterLogs write failed, err:" << errno;
+        }
+    }
+    fseek(dFp, 0, SEEK_END);
+    UPDATER_INFO_CHECK(ftell(dFp) < MAX_LOG_SIZE, "log size greater than 5M!", CompressLogs(dLog));
+    sync();
+    fclose(sFp);
+    fclose(dFp);
+    return true;
+}
+
+void WriteOtaResult(const int status)
+{
+    if (access(UPDATER_PATH.c_str(), 0) != 0) {
+        UPDATER_ERROR_CHECK(!MkdirRecursive(UPDATER_PATH, 0644),
+            "MkdirRecursive error!", return);
+    }
+
+    const std::string resultPath = UPDATER_PATH + "/" + UPDATER_RESULT_FILE;
+    FILE *fp = fopen(resultPath.c_str(), "w+");
+    if (fp == nullptr) {
+        LOG(ERROR) << "open result file failed";
+        return;
+    }
+    char buf[MAX_RESULT_SIZE] = "pass\n";
+    if (status != 0) {
+        if (sprintf_s(buf, MAX_RESULT_SIZE - 1, "fail:%d\n", status) < 0) {
+            LOG(WARNING) << "sprintf status fialed";
+        }
+    }
+
+    if (fwrite(buf, 1, strlen(buf) + 1, fp) <= 0) {
+        LOG(WARNING) << "write result file failed, err:" << errno;
+    }
+
+    if (fclose(fp) != 0) {
+        LOG(WARNING) << "close result file failed";
+    }
+
+    (void)chown(resultPath.c_str(), USER_ROOT_AUTHORITY, GROUP_SYS_AUTHORITY);
+    (void)chmod(resultPath.c_str(), 0640); // 0640: -rw-r-----
+}
+
+void UsSleep(int usec)
+{
+    auto seconds = usec / USECONDS_PER_SECONDS;
+    long nanoSeconds = static_cast<long>(usec) % USECONDS_PER_SECONDS * NANOSECS_PER_USECONDS;
+    struct timespec ts = { static_cast<time_t>(seconds), nanoSeconds };
+    while (nanosleep(&ts, &ts) < 0 && errno == EINTR) {
+    }
 }
 } // utils
 } // namespace updater

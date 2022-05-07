@@ -28,7 +28,9 @@
 namespace updater {
 using updater::utils::SplitString;
 static std::string g_defaultUpdaterFstab = "";
-static Fstab *g_fstab;
+static Fstab *g_fstab = nullptr;
+static const std::string PARTITION_PATH = "/dev/block/by-name";
+
 static std::string GetFstabFile()
 {
     /* check vendor fstab files from specific directory */
@@ -156,7 +158,7 @@ int FormatPartition(const std::string &path)
     return ((ret != 0) ? -1 : 0);
 }
 
-int SetupPartitions()
+int SetupPartitions(PackageUpdateMode mode)
 {
     if (g_fstab == NULL || g_fstab->head == NULL) {
         LOG(ERROR) << "Fstab is invalid";
@@ -170,7 +172,7 @@ int SetupPartitions()
             continue;
         }
 
-        if (mountPoint == "/data") {
+        if (mountPoint == "/data" && mode != SDCARD_UPDATE) {
             if (MountForPath(mountPoint) != 0) {
                 LOG(ERROR) << "Expected partition " << mountPoint << " is not mounted.";
                 return -1;
@@ -187,8 +189,12 @@ int SetupPartitions()
 
 const std::string GetBlockDeviceByMountPoint(const std::string &mountPoint)
 {
-    std::string blockDevice = "";
-    if (!mountPoint.empty()) {
+    if (mountPoint.empty()) {
+        LOG(ERROR) << "mountPoint empty error.";
+        return "";
+    }
+    std::string blockDevice = PARTITION_PATH + mountPoint;
+    if (g_fstab != nullptr) {
         FstabItem *item = FindFstabItemForMountPoint(*g_fstab, mountPoint.c_str());
         if (item != NULL) {
             blockDevice = item->deviceName;

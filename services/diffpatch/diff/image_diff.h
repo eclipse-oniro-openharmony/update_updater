@@ -46,6 +46,7 @@ public:
     virtual int32_t MakePatch(const std::string &patchName);
     virtual int32_t WriteHeader(std::ofstream &patchFile,
         std::fstream &blockPatchFile, size_t &offset, ImageBlock &block) const;
+
 protected:
     int32_t SplitImage(const PatchBuffer &oldInfo, const PatchBuffer &newInfo);
     int32_t DiffImage(const std::string &patchName);
@@ -68,6 +69,7 @@ public:
     ~CompressedImageDiff() override {}
 
     int32_t MakePatch(const std::string &patchName) override;
+
 protected:
     virtual int32_t TestAndSetConfig(const BlockBuffer &buffer, const std::string &fileName) = 0;
     int32_t DiffFile(const std::string &fileName, size_t &oldOffset, size_t &newOffset);
@@ -84,6 +86,7 @@ public:
 
     int32_t WriteHeader(std::ofstream &patchFile,
         std::fstream &blockPatchFile, size_t &offset, ImageBlock &block) const override;
+
 protected:
     int32_t TestAndSetConfig(const BlockBuffer &buffer, const std::string &fileName) override;
 
@@ -102,8 +105,10 @@ public:
 
     int32_t WriteHeader(std::ofstream &patchFile,
         std::fstream &blockPatchFile, size_t &offset, ImageBlock &block) const override;
+
 protected:
     int32_t TestAndSetConfig(const BlockBuffer &buffer, const std::string &fileName) override;
+
 private:
     int32_t method_ {0};
     int32_t compressionLevel_ {0};

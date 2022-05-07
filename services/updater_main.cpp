@@ -77,7 +77,7 @@ static void SetRetryCountToMisc(int retryCount, const std::vector<std::string> a
         "SetRetryCountToMisc snprintf_s failed", return);
     UPDATER_ERROR_CHECK(!strncat_s(msg.update, sizeof(msg.update), buffer, strlen(buffer) + 1),
         "SetRetryCountToMisc strncat_s failed", return);
-    UPDATER_ERROR_CHECK_NOT_RETURN(WriteUpdaterMessage(MISC_FILE, msg) == true, "Write command to misc failed.");
+    UPDATER_ERROR_CHECK_NOT_RETURN(WriteUpdaterMiscMsg(msg) == true, "Write command to misc failed.");
 }
 
 static int DoFactoryReset(FactoryResetMode mode, const std::string &path)
@@ -130,8 +130,8 @@ UpdaterStatus UpdaterFromSdcard()
     LOG(INFO) << "UpdaterFromSdcard start, sdcard updaterPath : " << SDCARD_CARD_PKG_PATH;
 
     g_logLabel->SetText("Don't remove SD Card!");
-    usleep(DISPLAY_TIME);
-    UpdaterStatus updateRet = DoInstallUpdaterPackage(pkgManager, SDCARD_CARD_PKG_PATH.c_str(), 0);
+    utils::UsSleep(DISPLAY_TIME);
+    UpdaterStatus updateRet = DoInstallUpdaterPackage(pkgManager, SDCARD_CARD_PKG_PATH.c_str(), 0, SDCARD_UPDATE);
     if (updateRet != UPDATE_SUCCESS) {
         std::this_thread::sleep_for(std::chrono::milliseconds(UI_SHOW_DURATION));
         g_logLabel->SetText("SD Card update failed!");
@@ -167,7 +167,7 @@ static UpdaterStatus InstallUpdaterPackage(UpdaterParams &upParams, const std::v
         }
         UPDATER_CHECK_ONLY_RETURN(SetupPartitions() == 0, ShowText(GetUpdateInfoLabel(), "Setup partitions failed");
             return UPDATE_ERROR);
-        status = DoInstallUpdaterPackage(manager, upParams.updatePackage, upParams.retryCount);
+        status = DoInstallUpdaterPackage(manager, upParams.updatePackage, upParams.retryCount, HOTA_UPDATE);
         if (status != UPDATE_SUCCESS) {
             std::this_thread::sleep_for(std::chrono::milliseconds(UI_SHOW_DURATION));
             std::string errMsg = ((status == UPDATE_SPACE_NOTENOUGH) ? "Free space is not enough" : "Update failed!");
@@ -194,6 +194,7 @@ static UpdaterStatus StartUpdaterEntry(PkgManager::PkgManagerPtr manager,
     if (upParams.updatePackage != "") {
         ShowUpdateFrame(true);
         status = InstallUpdaterPackage(upParams, args, manager);
+        WriteOtaResult(status);
         UPDATER_CHECK_ONLY_RETURN(status == UPDATE_SUCCESS, return status);
     } else if (upParams.factoryWipeData) {
         LOG(INFO) << "Factory level FactoryReset begin";
@@ -231,7 +232,7 @@ static UpdaterStatus StartUpdaterEntry(PkgManager::PkgManagerPtr manager,
 }
 
 static UpdaterStatus StartUpdater(PkgManager::PkgManagerPtr manager, const std::vector<std::string> &args,
-    char **argv)
+    char **argv, PackageUpdateMode &mode)
 {
     UpdaterParams upParams {
         false, false, 0, ""
@@ -251,8 +252,10 @@ static UpdaterStatus StartUpdater(PkgManager::PkgManagerPtr manager, const std::
                 std::string option = OPTIONS[optionIndex].name;
                 if (option == "update_package") {
                     upParams.updatePackage = optarg;
+                    mode = HOTA_UPDATE;
                 } else if (option == "retry_count") {
                     upParams.retryCount = atoi(optarg);
+                    mode = HOTA_UPDATE;
                 } else if (option == "factory_wipe_data") {
                     upParams.factoryWipeData = true;
                 } else if (option == "user_wipe_data") {
@@ -280,13 +283,16 @@ int UpdaterMain(int argc, char **argv)
 {
     UpdaterStatus status = UPDATE_UNKNOWN;
     PkgManager::PkgManagerPtr manager = PkgManager::GetPackageInstance();
+    UpdaterInit::GetInstance().InvokeEvent(UPDATER_PRE_INIT_EVENT);
     std::vector<std::string> args = ParseParams(argc, argv);
 
     LOG(INFO) << "Ready to start";
 #ifndef UPDATER_UT
     UpdaterUiInit();
 #endif
-    status = StartUpdater(manager, args, argv);
+    UpdaterInit::GetInstance().InvokeEvent(UPDATER_INIT_EVENT);
+    PackageUpdateMode mode = UNKNOWN_UPDATE;
+    status = StartUpdater(manager, args, argv, mode);
     std::this_thread::sleep_for(std::chrono::milliseconds(UI_SHOW_DURATION));
 #ifndef UPDATER_UT
     if (status != UPDATE_SUCCESS && status != UPDATE_SKIP) {

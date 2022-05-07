@@ -35,11 +35,8 @@ size_t BlockWriter::GetTotalWritten() const
     return totalWritten_;
 }
 
-bool BlockWriter::Write(const uint8_t *addr, size_t len, WriteMode mode, const std::string &partitionName)
+bool BlockWriter::Write(const uint8_t *addr, size_t len, [[maybe_unused]] const void *context)
 {
-    (void)(partitionName);
-    (void)(mode);
-
     if (IsWriteDone()) {
         LOG(WARNING) << "BlockWriter: call writer while no more blocks need to write. skip " << len << " byte(s)";
         return false;

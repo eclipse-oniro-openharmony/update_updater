@@ -13,12 +13,14 @@
  * limitations under the License.
  */
 #include "updaterkits/updaterkits.h"
+
 #include <string>
 #include <sys/reboot.h>
 #include <sys/syscall.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include <init_reboot.h>
+
+#include "init_reboot.h"
 #include "misc_info/misc_info.h"
 #include "parameters.h"
 #include "securec.h"
@@ -37,10 +39,8 @@ static bool WriteToMiscAndRebootToUpdater(const std::string &miscFile,
         return false;
     }
 #ifndef UPDATER_UT
-    int32_t propertyMaxSize = 92;
-    char updateCmd[propertyMaxSize];
-    void(snprintf_s(updateCmd, propertyMaxSize, propertyMaxSize - 1, "updater:%s", updateMsg.update));
-    DoReboot(updateCmd);
+    WriteUpdaterMiscMsg(updateMsg);
+    DoReboot("updater");
     while (true) {
         pause();
     }

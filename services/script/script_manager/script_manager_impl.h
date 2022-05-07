@@ -33,7 +33,7 @@ public:
     explicit ScriptManagerImpl(UScriptEnv *env) : scriptEnv_(env) {}
     virtual ~ScriptManagerImpl();
     int32_t Init();
-    virtual int32_t ExecuteScript(int32_t priority) override;
+    int32_t ExecuteScript(int32_t priority) override;
 
 private:
     int32_t ExtractAndExecuteScript(hpackage::PkgManager::PkgManagerPtr manager,

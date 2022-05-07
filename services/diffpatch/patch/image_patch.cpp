@@ -232,11 +232,11 @@ std::unique_ptr<hpackage::FileInfo> Lz4ImagePatch::GetFileInfo() const
     fileInfo->fileInfo.packedSize = 0;
     fileInfo->fileInfo.unpackedSize = 0;
     fileInfo->fileInfo.identity = std::to_string(g_tmpFileId++);
-    fileInfo->compressionLevel = static_cast<uint8_t>(compressionLevel_);
-    fileInfo->blockIndependence = static_cast<uint8_t>(blockIndependence_);
-    fileInfo->contentChecksumFlag = static_cast<uint8_t>(contentChecksumFlag_);
-    fileInfo->blockSizeID = static_cast<uint8_t>(blockSizeID_);
-    fileInfo->autoFlush = static_cast<uint8_t>(autoFlush_);
+    fileInfo->compressionLevel = static_cast<int8_t>(compressionLevel_);
+    fileInfo->blockIndependence = static_cast<int8_t>(blockIndependence_);
+    fileInfo->contentChecksumFlag = static_cast<int8_t>(contentChecksumFlag_);
+    fileInfo->blockSizeID = static_cast<int8_t>(blockSizeID_);
+    fileInfo->autoFlush = static_cast<int8_t>(autoFlush_);
     return std::unique_ptr<hpackage::FileInfo>((FileInfo *)fileInfo);
 }
 

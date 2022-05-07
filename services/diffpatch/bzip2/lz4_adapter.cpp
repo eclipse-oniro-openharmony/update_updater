@@ -49,7 +49,7 @@ int32_t Lz4FrameAdapter::Open()
     PATCH_CHECK(!LZ4F_isError(errorCode), return -1,
         "Failed to create compress context %s", LZ4F_getErrorName(errorCode));
     PATCH_CHECK(!memset_s(&preferences, sizeof(preferences), 0, sizeof(preferences)), return -1, "Memset failed");
-    preferences.autoFlush = autoFlush_;
+    preferences.autoFlush = static_cast<uint32_t>(autoFlush_);
     preferences.compressionLevel = compressionLevel_;
     preferences.frameInfo.blockMode = ((blockIndependence_ == 0) ? LZ4F_blockLinked : LZ4F_blockIndependent);
     preferences.frameInfo.blockSizeID = (LZ4F_blockSizeID_t)blockSizeID_;
@@ -167,8 +167,9 @@ int32_t Lz4BlockAdapter::Open()
         blockSize, LZ4_BLOCK_SIZE(blockSizeID_), LZ4B_BLOCK_SIZE);
 
     /* write package */
-    size_t bufferSize = LZ4_compressBound(LZ4_BLOCK_SIZE(blockSizeID_));
-    buffer_.resize(bufferSize);
+    int bufferSize = LZ4_compressBound(LZ4_BLOCK_SIZE(blockSizeID_));
+    PATCH_CHECK(bufferSize >= 0, return -1, "Buffer size should >= 0");
+    buffer_.resize(static_cast<size_t>(bufferSize));
     int32_t ret = memcpy_s(buffer_.data(), buffer_.size(), &LZ4B_MAGIC_NUMBER, sizeof(int32_t));
     PATCH_CHECK(ret == 0, return -1, "Failed to memcpy ");
     ret = outStream_->Write(offset_, {buffer_.data(), sizeof(int32_t)}, sizeof(int32_t));

@@ -33,7 +33,8 @@ ScriptManager* ScriptManager::GetScriptManager(UScriptEnv *env)
     USCRIPT_CHECK(env != nullptr, return nullptr, "Env null");
 
     if (g_scriptManager == nullptr) {
-        g_scriptManager = new ScriptManagerImpl(env);
+        g_scriptManager = new(std::nothrow) ScriptManagerImpl(env);
+        USCRIPT_CHECK(g_scriptManager != nullptr, return nullptr, "Create g_scriptManager failed");
         (void)g_scriptManager->Init();
     }
     return g_scriptManager;
@@ -84,14 +85,16 @@ int32_t ScriptManagerImpl::Init()
     PkgManager::PkgManagerPtr manager = scriptEnv_->GetPkgManager();
     USCRIPT_CHECK(manager != nullptr, return USCRIPT_INVALID_PARAM, "Failed to get pkg manager");
 
-    // Register other instructions from scripts 
+    // Register other instructions from scripts
     int32_t ret = USCRIPT_SUCCESS;
     const FileInfo *info = manager->GetFileInfo(REGISTER_CMD_SCRIPT_NAME);
     if (info != nullptr) {
         ret = ExtractAndExecuteScript(manager, REGISTER_CMD_SCRIPT_NAME);
     }
+    USCRIPT_CHECK(ret == USCRIPT_SUCCESS, return ret, "Failed to extract and execute script ");
+
     // Collect scripts
-    ret |= ExtractAndExecuteScript(manager, LOAD_SCRIPT_NAME);
+    ret = ExtractAndExecuteScript(manager, LOAD_SCRIPT_NAME);
     USCRIPT_CHECK(ret == USCRIPT_SUCCESS, return ret, "Failed to extract and execute script ");
     return USCRIPT_SUCCESS;
 }
@@ -144,7 +147,7 @@ int32_t ScriptManagerImpl::ExecuteScript(int32_t priority)
     int32_t retCode = USCRIPT_SUCCESS;
     task.workSize = threadNumber;
     task.processor = [&](int iter) {
-        for (size_t i = iter; i < scriptFiles_[priority].size(); i += threadNumber) {
+        for (size_t i = iter; i < scriptFiles_[priority].size(); i += static_cast<size_t>(threadNumber)) {
             ret = ExtractAndExecuteScript(manager, scriptFiles_[priority][i]);
             if (ret != USCRIPT_SUCCESS) {
                 USCRIPT_LOGE("Failed to execute script %s", scriptFiles_[priority][i].c_str());

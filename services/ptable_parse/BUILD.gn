@@ -1,0 +1,52 @@
+# Copyright (c) 2022 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/ohos.gni")
+SUBSYSTEM_DIR = "//base/update/updater/services/ptable_parse"
+
+config("updater_config") {
+  visibility = [ ":*" ]
+  include_dirs = [
+    "//base/update/updater/services/include",
+    "//base/update/updater/utils/include",
+    "//base/update/updater/utils/json",
+    "//third_party/bounds_checking_function/include",
+    "//drivers/hdf/frameworks/include/utils",
+    "//base/update/updater/interfaces/kits/include/",
+    "//base/update/updater/services/include/script",
+    "//base/update/updater/services/include/package",
+    "//base/update/updater/services/include/applypatch",
+    "//base/update/updater/services/include/log",
+  ]
+}
+
+ohos_static_library("libptableparse") {
+  sources = [
+    "${SUBSYSTEM_DIR}/ptable.cpp",
+    "${SUBSYSTEM_DIR}/ptable_manager.cpp",
+    "${SUBSYSTEM_DIR}/ufs_ptable.cpp",
+  ]
+  configs = [ ":updater_config" ]
+
+  ldflags = [ "-Wl -std=c++11" ]
+
+  deps = [
+    "//base/update/updater/services/log:libupdaterlog",
+    "//base/update/updater/utils:libutils",
+    "//third_party/bzip2:libbz2",
+    "//third_party/cJSON:cjson_static",
+    "//third_party/zlib:libz",
+  ]
+
+  part_name = "updater"
+}

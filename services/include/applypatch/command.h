@@ -58,10 +58,10 @@ public:
 private:
     CommandType ParseCommandType(const std::string &first_cmd);
 
-    CommandType type_;
-    std::string cmdLine_;
-    std::vector<std::string> tokens_;
-    std::unique_ptr<int> fd_;
+    CommandType type_ {LAST};
+    std::string cmdLine_ {};
+    std::vector<std::string> tokens_ {};
+    std::unique_ptr<int> fd_ {};
 };
 } // namespace updater
 #endif

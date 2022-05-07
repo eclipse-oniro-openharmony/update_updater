@@ -47,7 +47,7 @@ int32_t SignAlgorithmRsa::SignBuffer(const PkgBuffer &buffer, std::vector<uint8_
     PKG_CHECK(rsa != nullptr, return PKG_INVALID_SIGNATURE, "Failed to PEM_read_bio_RSAPrivateKey ");
 
     // Adjust key size
-    uint32_t size = RSA_size(rsa);
+    uint32_t size = static_cast<uint32_t>(RSA_size(rsa));
     signedData.resize(size);
     ret = 0;
     if (digestMethod_ == PKG_DIGEST_TYPE_SHA256) {
@@ -76,7 +76,7 @@ int32_t SignAlgorithmEcc::SignBuffer(const PkgBuffer &buffer, std::vector<uint8_
     PKG_CHECK(ecKey != nullptr, return PKG_INVALID_PARAM, "Failed to PEM_read_bio_ECPrivateKey %s", keyName_.c_str());
 
     // Adjust key size
-    uint32_t size = ECDSA_size(ecKey);
+    uint32_t size = static_cast<uint32_t>(ECDSA_size(ecKey));
     signedData.resize(size + sizeof(uint32_t));
     ret = ECDSA_sign(0, buffer.buffer, buffer.length, signedData.data() + sizeof(uint32_t), &size, ecKey);
     WriteLE32(signedData.data(), size);
@@ -170,7 +170,7 @@ int32_t VerifyAlgorithm::VerifyBuffer(const std::vector<uint8_t> &digest, const 
         ret = RSA_verify(hashNid, digest.data(), digest.size(), signature.data(), signature.size(), certs.rsa);
         RSA_free(certs.rsa);
     } else if (certs.keyType == KEY_TYPE_EC && certs.hashLen == SHA256_DIGEST_LENGTH) {
-        int dataLen = ReadLE32(signature.data());
+        uint32_t dataLen = ReadLE32(signature.data());
         ret = ECDSA_verify(0, digest.data(), digest.size(), signature.data() + sizeof(uint32_t), dataLen, certs.ecKey);
         EC_KEY_free(certs.ecKey);
     }

@@ -46,6 +46,7 @@ public:
     int32_t Unpack(PkgStreamPtr outStream) override;
 
     int32_t DecodeHeader(const PkgBuffer &buffer, size_t, size_t, size_t &decodeLen) override;
+
 private:
     Lz4FileInfo fileInfo_ {};
 };
@@ -65,6 +66,7 @@ public:
     int32_t SavePackage(size_t &offset) override;
 
     int32_t LoadPackage(std::vector<std::string> &fileNames, VerifyFunction verifier = nullptr) override;
+
 private:
     PkgInfo pkgInfo_ {};
     size_t currentOffset_ {0};

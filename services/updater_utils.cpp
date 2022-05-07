@@ -30,86 +30,9 @@
 #include "updater_ui.h"
 #include "utils.h"
 
-namespace {
-static constexpr int USER_ROOT_AUTHORITY = 0;
-static constexpr int GROUP_SYS_AUTHORITY = 1000;
-}
 namespace updater {
 using namespace hpackage;
 using namespace updater::utils;
-void CompressLogs(const std::string &name)
-{
-    PkgManager::PkgManagerPtr pkgManager = PkgManager::GetPackageInstance();
-    UPDATER_ERROR_CHECK(pkgManager != nullptr, "pkgManager is nullptr", return);
-    std::vector<std::pair<std::string, ZipFileInfo>> files;
-    // Build the zip file to be packaged
-    std::vector<std::string> testFileNames;
-    std::string realName = name.substr(name.find_last_of("/") + 1);
-    testFileNames.push_back(realName);
-    for (auto name : testFileNames) {
-        ZipFileInfo file;
-        file.fileInfo.identity = name;
-        file.fileInfo.packMethod = PKG_COMPRESS_METHOD_ZIP;
-        file.fileInfo.digestMethod = PKG_DIGEST_TYPE_CRC;
-        std::string fileName = "/data/updater/log/" + name;
-        files.push_back(std::pair<std::string, ZipFileInfo>(fileName, file));
-    }
-
-    PkgInfo pkgInfo;
-    pkgInfo.signMethod = PKG_SIGN_METHOD_RSA;
-    pkgInfo.digestMethod = PKG_DIGEST_TYPE_SHA256;
-    pkgInfo.pkgType = PKG_PACK_TYPE_ZIP;
-
-    char realTime[MAX_TIME_SIZE] = { 0 };
-    auto sysTime = std::chrono::system_clock::now();
-    auto currentTime = std::chrono::system_clock::to_time_t(sysTime);
-    struct tm *localTime = std::localtime(&currentTime);
-    if (localTime != nullptr) {
-        std::strftime(realTime, sizeof(realTime), "%H_%M_%S", localTime);
-    }
-    char pkgName[MAX_LOG_NAME_SIZE];
-    UPDATER_CHECK_ONLY_RETURN(snprintf_s(pkgName, MAX_LOG_NAME_SIZE, MAX_LOG_NAME_SIZE - 1,
-        "/data/updater/log/%s_%s.zip", realName.c_str(), realTime) != -1, return);
-    int32_t ret = pkgManager->CreatePackage(pkgName, GetCertName(), &pkgInfo, files);
-    UPDATER_CHECK_ONLY_RETURN(ret != 0, return);
-    UPDATER_CHECK_ONLY_RETURN(DeleteFile(name) == 0, return);
-}
-
-bool CopyUpdaterLogs(const std::string &sLog, const std::string &dLog)
-{
-    UPDATER_WARING_CHECK(MountForPath(UPDATER_LOG_DIR) == 0, "MountForPath /data/log failed!", return false);
-    if (access(UPDATER_LOG_DIR.c_str(), 0) != 0) {
-        UPDATER_ERROR_CHECK(!MkdirRecursive(UPDATER_LOG_DIR, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH),
-            "MkdirRecursive error!", return false);
-        UPDATER_ERROR_CHECK(chown(UPDATER_PATH.c_str(), USER_ROOT_AUTHORITY, GROUP_SYS_AUTHORITY) == 0,
-            "Chown failed!", return false);
-        UPDATER_ERROR_CHECK(chmod(UPDATER_PATH.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) == 0,
-            "Chmod failed!", return false);
-    }
-
-    FILE *dFp = fopen(dLog.c_str(), "ab+");
-    UPDATER_ERROR_CHECK(dFp != nullptr, "open log failed", return false);
-
-    FILE *sFp = fopen(sLog.c_str(), "r");
-    UPDATER_ERROR_CHECK(sFp != nullptr, "open log failed", fclose(dFp);
-        return false);
-
-    char buf[MAX_LOG_BUF_SIZE];
-    size_t bytes;
-    while ((bytes = fread(buf, 1, sizeof(buf), sFp)) != 0) {
-        int ret = fwrite(buf, 1, bytes, dFp);
-        if (ret < 0) {
-            break;
-        }
-    }
-    (void)fseek(dFp, 0, SEEK_END);
-    UPDATER_INFO_CHECK(ftell(dFp) < MAX_LOG_SIZE, "log size greater than 5M!", CompressLogs(dLog));
-    sync();
-    (void)fclose(sFp);
-    (void)fclose(dFp);
-    return true;
-}
-
 static bool IsDir(const std::string &path)
 {
     struct stat st {};
@@ -129,7 +52,8 @@ static bool DeleteUpdaterPath(const std::string &path)
     struct dirent *dp = nullptr;
     while ((dp = readdir(pDir.get())) != nullptr) {
         std::string currentName(dp->d_name);
-        if (currentName[0] != '.' && (currentName.compare("log") != 0)) {
+        if (currentName[0] != '.' && (currentName.compare("log") != 0) &&
+            (currentName.compare(UPDATER_RESULT_FILE) != 0)) {
             std::string tmpName(path);
             tmpName.append("/" + currentName);
             if (IsDir(tmpName)) {
@@ -146,9 +70,12 @@ static bool DeleteUpdaterPath(const std::string &path)
 static bool ClearMisc()
 {
     struct UpdateMessage cleanBoot {};
-    UPDATER_ERROR_CHECK(WriteUpdaterMessage(MISC_FILE, cleanBoot) == true,
+    UPDATER_ERROR_CHECK(WriteUpdaterMiscMsg(cleanBoot) == true,
         "ClearMisc clear boot message to misc failed", return false);
-    auto fp = std::unique_ptr<FILE, decltype(&fclose)>(fopen(MISC_FILE.c_str(), "rb+"), fclose);
+    auto miscBlockDev = GetBlockDeviceByMountPoint(MISC_PATH);
+    UPDATER_INFO_CHECK(!miscBlockDev.empty(), "cannot get block device of partition", miscBlockDev = MISC_FILE);
+    LOG(INFO) << "ClearMisc::misc path : " << miscBlockDev;
+    auto fp = std::unique_ptr<FILE, decltype(&fclose)>(fopen(miscBlockDev.c_str(), "rb+"), fclose);
     UPDATER_FILE_CHECK(fp != nullptr, "WriteVersionCode fopen failed", return false);
     (void)fseek(fp.get(), PARTITION_RECORD_OFFSET, SEEK_SET);
     off_t clearOffset = 0;
@@ -178,32 +105,14 @@ bool IsSDCardExist(const std::string &sdcardPath)
     }
 }
 
-void PostUpdaterForSdcard(std::string &updaterLogPath, std::string &stageLogPath, std::string &errorCodePath)
-{
-    if (SetupPartitions() != 0) {
-        ShowText(GetUpdateInfoLabel(), "Mount data failed.");
-        LOG(ERROR) << "Mount for /data failed.";
-        std::string sdcardPath = GetBlockDeviceByMountPoint(SDCARD_PATH);
-        if (IsSDCardExist(sdcardPath)) {
-            if (MountForPath(SDCARD_PATH) != 0) {
-                int ret = mount(sdcardPath.c_str(), SDCARD_PATH.c_str(), "vfat", 0, NULL);
-                UPDATER_WARING_CHECK(ret == 0, "Mount for /sdcard failed!", return);
-            }
-            updaterLogPath = "/sdcard/updater/log/updater_log";
-            stageLogPath = "/sdcard/updater/log/updater_stage_log";
-            errorCodePath = "/sdcard/updater/log/error_code.log";
-        }
-    }
-    return;
-}
-
 void PostUpdater(bool clearMisc)
 {
     STAGE(UPDATE_STAGE_BEGIN) << "PostUpdater";
-    std::string updaterLogPath = "/data/updater/log/updater_log";
-    std::string stageLogPath = "/data/updater/log/updater_stage_log";
-    std::string errorCodePath = "/data/updater/log/error_code.log";
-    PostUpdaterForSdcard(updaterLogPath, stageLogPath, errorCodePath);
+    std::string updaterLogPath = UPDATER_LOG;
+    std::string stageLogPath = UPDATER_STAGE_LOG;
+    std::string errorCodePath = ERROR_CODE_PATH;
+
+    (void)SetupPartitions();
     // clear update misc partition.
     if (clearMisc) {
         UPDATER_ERROR_CHECK_NOT_RETURN(ClearMisc() == true, "PostUpdater clear misc failed");
@@ -231,51 +140,21 @@ void PostUpdater(bool clearMisc)
     ret = CopyUpdaterLogs(flashd::FLASHD_HDC_LOG_PATH, UPDATER_HDC_LOG);
     UPDATER_ERROR_CHECK_NOT_RETURN(ret, "Copy error hdc log failed!");
 
-    mode_t mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
+    mode_t mode = 0640;
     chmod(updaterLogPath.c_str(), mode);
-    chmod(stageLogPath.c_str(), mode);
+    chmod(UPDATER_HDC_LOG.c_str(), mode);
     chmod(errorCodePath.c_str(), mode);
     STAGE(UPDATE_STAGE_SUCCESS) << "PostUpdater";
     ret = CopyUpdaterLogs(TMP_STAGE_LOG, stageLogPath);
+    chmod(stageLogPath.c_str(), mode);
     UPDATER_ERROR_CHECK_NOT_RETURN(ret, "Copy stage log failed!");
-}
-
-int IsSpaceCapacitySufficient(const std::string &packagePath)
-{
-    hpackage::PkgManager::PkgManagerPtr pkgManager = PkgManager::CreatePackageInstance();
-    UPDATER_ERROR_CHECK(pkgManager != nullptr, "pkgManager is nullptr", return UPDATE_CORRUPT);
-    std::vector<std::string> fileIds;
-    int ret = pkgManager->LoadPackageWithoutUnPack(packagePath, fileIds);
-    UPDATER_ERROR_CHECK(ret == PKG_SUCCESS, "LoadPackageWithoutUnPack failed",
-        PkgManager::ReleasePackageInstance(pkgManager); return UPDATE_CORRUPT);
-    const FileInfo *info = pkgManager->GetFileInfo("update.bin");
-    UPDATER_ERROR_CHECK(info != nullptr, "update.bin is not exist",
-        PkgManager::ReleasePackageInstance(pkgManager); return UPDATE_CORRUPT);
-    uint64_t needSpace = static_cast<uint64_t>(info->unpackedSize);
-    PkgManager::ReleasePackageInstance(pkgManager);
-
-    struct statvfs64 updaterVfs {};
-    if (strncmp(packagePath.c_str(), SDCARD_CARD_PATH.c_str(), SDCARD_CARD_PATH.size()) == 0) { // for sdcard
-        ret = statvfs64(SDCARD_PATH.c_str(), &updaterVfs);
-        UPDATER_ERROR_CHECK(ret >= 0, "Statvfs read /sdcard error!", return UPDATE_ERROR);
-    } else {
-        needSpace += MAX_LOG_SPACE;
-        ret = statvfs64(UPDATER_PATH.c_str(), &updaterVfs);
-        UPDATER_ERROR_CHECK(ret >= 0, "Statvfs read /data error!", return UPDATE_ERROR);
-    }
-    auto freeSpaceSize = static_cast<uint64_t>(updaterVfs.f_bfree);
-    auto blockSize = static_cast<uint64_t>(updaterVfs.f_bsize);
-    uint64_t totalFreeSize = freeSpaceSize * blockSize;
-    UPDATER_ERROR_CHECK(totalFreeSize > needSpace,
-        "Can not update, free space is not enough", return UPDATE_SPACE_NOTENOUGH);
-    return UPDATE_SUCCESS;
 }
 
 std::vector<std::string> ParseParams(int argc, char **argv)
 {
     struct UpdateMessage boot {};
     // read from misc
-    UPDATER_ERROR_CHECK_NOT_RETURN(ReadUpdaterMessage(MISC_FILE, boot) == true,
+    UPDATER_ERROR_CHECK_NOT_RETURN(ReadUpdaterMiscMsg(boot) == true,
         "ReadUpdaterMessage MISC_FILE failed!");
     // if boot.update is empty, read from command.The Misc partition may have dirty data,
     // so strlen(boot.update) is not used, which can cause system exceptions.
@@ -300,7 +179,7 @@ int GetBootMode(int &mode)
 #endif
     struct UpdateMessage boot {};
     // read from misc
-    bool ret = ReadUpdaterMessage(MISC_FILE, boot);
+    bool ret = ReadUpdaterMiscMsg(boot);
     if (!ret) {
         return -1;
     }

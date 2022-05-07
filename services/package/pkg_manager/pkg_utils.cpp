@@ -39,8 +39,8 @@ using namespace updater::utils;
 
 std::string GetFilePath(const std::string &fileName)
 {
-    int32_t pos = fileName.find_last_of('/');
-    if (pos < 0) {
+    std::size_t pos = fileName.find_last_of('/');
+    if (pos == std::string::npos) {
         pos = fileName.find_last_of('\\');
     }
     return fileName.substr(0, pos + 1);
@@ -55,10 +55,15 @@ size_t GetFileSize(const std::string &fileName)
     PKG_CHECK(fp != nullptr, return 0, "Invalid file %s", fileName.c_str());
 
     fseek(fp, 0, SEEK_END);
-    size_t size = ftell(fp);
+    long size = ftell(fp);
+    if (size < 0) {
+        PKG_LOGE("return value of ftell < 0");
+        fclose(fp);
+        return 0;
+    }
     fclose(fp);
     // return file size in bytes
-    return size;
+    return static_cast<size_t>(size);
 }
 
 std::string GetName(const std::string &filePath)
@@ -120,8 +125,12 @@ void ExtraTimeAndDate(time_t when, uint16_t &date, uint16_t &time)
     if (year < MIN_YEAR) {
         year = MIN_YEAR;
     }
-    date = ((year - MIN_YEAR) << TM_YEAR_BITS) | ((nowTime.tm_mon + 1) << TM_MON_BITS) | nowTime.tm_mday;
-    time = (nowTime.tm_hour << TM_HOUR_BITS) | (nowTime.tm_min << TM_MIN_BITS) | (nowTime.tm_sec >> 1);
+    date = static_cast<uint16_t>(static_cast<uint16_t>(year - MIN_YEAR) << TM_YEAR_BITS);
+    date |= static_cast<uint16_t>(static_cast<uint16_t>(nowTime.tm_mon + 1) << TM_MON_BITS);
+    date |= static_cast<uint16_t>(nowTime.tm_mday);
+    time = static_cast<uint16_t>(static_cast<uint16_t>(nowTime.tm_hour) << TM_HOUR_BITS);
+    time |= static_cast<uint16_t>(static_cast<uint16_t>(nowTime.tm_min) << TM_MIN_BITS);
+    time |= static_cast<uint16_t>(static_cast<uint16_t>(nowTime.tm_sec) >> 1);
 }
 
 uint32_t ReadLE32(const uint8_t *buff)
@@ -130,11 +139,11 @@ uint32_t ReadLE32(const uint8_t *buff)
     size_t offset = 0;
     uint32_t value32 = buff[0];
     offset += BYTE_SIZE;
-    value32 += (buff[1] << offset);
+    value32 += static_cast<uint32_t>(static_cast<uint32_t>(buff[1]) << offset);
     offset +=  BYTE_SIZE;
-    value32 += (buff[SECOND_BUFFER] << offset);
+    value32 += static_cast<uint32_t>(static_cast<uint32_t>(buff[SECOND_BUFFER]) << offset);
     offset += BYTE_SIZE;
-    value32 += (buff[THIRD_BUFFER] << offset);
+    value32 += static_cast<uint32_t>(static_cast<uint32_t>(buff[THIRD_BUFFER]) << offset);
     return value32;
 }
 
@@ -164,7 +173,7 @@ uint16_t ReadLE16(const uint8_t *buff)
 {
     PKG_CHECK(buff != nullptr, return 0, "buff is null");
     uint16_t value16 = buff[0];
-    value16 += (buff[1] << BYTE_SIZE);
+    value16 += static_cast<uint16_t>(buff[1] << BYTE_SIZE);
     return value16;
 }
 

@@ -40,7 +40,7 @@ struct __attribute__((packed)) UpgradePkgTime {
 };
 
 struct __attribute__((packed)) UpgradeCompInfo {
-    uint8_t address[16]; // L1 16
+    uint8_t address[32]; // L1 16
     uint16_t id;
     uint8_t resType;
     uint8_t flags;
@@ -72,6 +72,7 @@ public:
     {
         return &fileInfo_.fileInfo;
     }
+
 private:
     ComponentInfo fileInfo_ {};
 };
@@ -92,7 +93,7 @@ public:
 
     int32_t AddEntry(const PkgManager::FileInfoPtr file, const PkgStreamPtr input) override;
 
-    int32_t SavePackage(size_t &signOffset) override;
+    int32_t SavePackage(size_t &offset) override;
 
     int32_t LoadPackage(std::vector<std::string> &fileNames, VerifyFunction verify = nullptr) override;
 
@@ -104,6 +105,7 @@ public:
     {
         return &pkgInfo_.pkgInfo;
     }
+
 private:
     int16_t GetPackageTlvType();
     int32_t ReadComponents(const PkgBuffer &buffer, size_t &parsedLen,
@@ -114,6 +116,7 @@ private:
 
     int32_t Verify(size_t start, DigestAlgorithm::DigestAlgorithmPtr algorithm,
         VerifyFunction verifier, const std::vector<uint8_t> &signData);
+
 private:
     UpgradePkgInfo pkgInfo_ {};
     size_t packedFileSize_ {0};

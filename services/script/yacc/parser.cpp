@@ -36,8 +36,6 @@ void Parser::error(const location_type& loc, const std::string& msg)
     LOG(updater::ERROR) << "error " << msg << "  loc " << loc << std::endl;
 }
 
-#include "parser.hpp"
-
 #ifndef YY_
     #if defined YYENABLE_NLS && YYENABLE_NLS
         #if ENABLE_NLS
@@ -414,7 +412,7 @@ Parser::Parser(uscript::Scanner* scanner_yyarg, uscript::ScriptInterpreter* inte
             case symbol_kind::S_LT: // LT
                 /* fallthrough */
             case symbol_kind::S_LE: // LE
-                /* fallthrough */ 
+                /* fallthrough */
             case symbol_kind::S_LP: // LP
                 /* fallthrough */
             case symbol_kind::S_RP: // RP
@@ -1286,11 +1284,11 @@ yyreduce:
                             break;
                         }
                         case 37: { // primary_expression: SUB primary_expression
-                            yylhs.value.as<UScriptExpression*>() =yystack_[0].value.as<UScriptExpression*>();
+                            yylhs.value.as<UScriptExpression*>() = yystack_[0].value.as<UScriptExpression*>();
                             break;
                         }
                         case 38: { // primary_expression: LP expression RP
-                            yylhs.value.as<UScriptExpression*>() =yystack_[1].value.as<UScriptExpression*>();
+                            yylhs.value.as<UScriptExpression*>() = yystack_[1].value.as<UScriptExpression*>();
                             break;
                         }
                         case 39: { // primary_expression: IDENTIFIER

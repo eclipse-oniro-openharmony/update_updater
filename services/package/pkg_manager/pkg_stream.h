@@ -68,6 +68,7 @@ public:
     bool IsRef() const;
 
     static PkgStreamPtr ConvertPkgStream(PkgManager::StreamPtr stream);
+
 protected:
     void PostDecodeProgress(int type, size_t writeDataLen, const void *context);
     std::string fileName_;
@@ -98,6 +99,7 @@ public:
     {
         return streamType_;
     }
+
 private:
     FILE *stream_;
     size_t fileLength_;
@@ -145,6 +147,7 @@ public:
         buffer.length = memSize_;
         return PKG_SUCCESS;
     }
+
 private:
     uint8_t *memMap_;
     size_t memSize_;
@@ -201,6 +204,7 @@ public:
         PkgBuffer data = {};
         return processor_(data, 0, 0, true, context_);
     }
+
 private:
     ExtractFileProcessor processor_ = nullptr;
     const void *context_;

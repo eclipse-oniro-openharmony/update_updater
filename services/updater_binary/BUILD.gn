@@ -22,6 +22,7 @@ config("updater_config") {
     "//base/update/updater/services/include/log",
     "//base/update/updater/services/include",
     "//base/update/updater/utils/include",
+    "//base/update/updater/utils/json",
     "//base/update/updater/services/include/applypatch",
     "//third_party/cJSON",
     "//third_party/openssl/include",
@@ -58,8 +59,22 @@ ohos_executable("updater_binary") {
     "//third_party/zlib:libz",
   ]
 
+  if (defined(binary_custom_lib)) {
+    deps += binary_custom_lib
+  }
+
+  if (defined(use_ptable)) {
+    include_dirs = [ "//base/update/updater/services/ptable_parse" ]
+    deps += [ "//base/update/updater/services/ptable_parse:libptableparse" ]
+    defines = [ "UPDATER_USE_PTABLE" ]
+  }
+
   external_deps = [ "init:libbegetutil" ]
 
   install_enable = true
+  install_images = [
+    "system",
+    "updater",
+  ]
   part_name = "updater"
 }

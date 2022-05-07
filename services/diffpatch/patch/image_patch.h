@@ -35,7 +35,11 @@ public:
     static T ReadLE(const uint8_t *address)
     {
         T result;
-        memcpy_s(&result, sizeof(result), address, sizeof(T));
+        errno_t ret = memcpy_s(&result, sizeof(result), address, sizeof(T));
+        if (ret != EOK) {
+            // only warning no need to return invalid value
+            PATCH_LOGE("Failed to memcpy");
+        }
         return result;
     }
 protected:

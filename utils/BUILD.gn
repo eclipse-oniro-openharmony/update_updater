@@ -14,16 +14,23 @@
 import("//build/ohos.gni")
 
 ohos_static_library("libutils") {
-  sources = [ "utils.cpp" ]
+  sources = [
+    "json/json_node.cpp",
+    "utils.cpp",
+  ]
 
   include_dirs = [
     "include",
     "//base/update/updater/interfaces/kits/include/",
     "//base/update/updater/services/include/",
     "//third_party/bounds_checking_function/include",
+    "//third_party/cJSON",
   ]
 
-  deps = [ "//third_party/bounds_checking_function:libsec_static" ]
+  deps = [
+    "//third_party/bounds_checking_function:libsec_static",
+    "//third_party/cJSON:cjson_static",
+  ]
   external_deps = [ "init:libbegetutil" ]
 
   subsystem_name = "updater"

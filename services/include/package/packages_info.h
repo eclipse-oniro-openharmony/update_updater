@@ -32,7 +32,7 @@ class PackagesInfo;
 using PackagesInfoPtr = PackagesInfo *;
 class PackagesInfo {
 public:
-    ~PackagesInfo() {};
+    ~PackagesInfo() {}
 
     static PackagesInfoPtr GetPackagesInfoInstance();
 
@@ -57,15 +57,16 @@ public:
         const std::string &boardListPath);
 
     /**
-     * Gets information about files in the package. For an update package, 
+     * Gets information about files in the package. For an update package,
      * you can convert the information into updater information for viewing.
      *
      * @param fileId            file ID
      * @return                  information about files in the package
      */
     bool IsAllowRollback();
+
 private:
-    PackagesInfo() {};
+    PackagesInfo() {}
 };
 }
 #endif // PACKAGESINFO_H

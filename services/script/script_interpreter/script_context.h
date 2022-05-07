@@ -61,6 +61,7 @@ public:
     static std::string ScriptToString(UScriptValuePtr value);
 
     static UScriptValuePtr GetRightCompluteValue(UScriptValuePtr rightValue);
+
 private:
     UScriptValueType type_;
 };
@@ -131,6 +132,7 @@ public:
     UScriptValuePtr ComputerReturn(int32_t action, UScriptValuePtr rightValue, UScriptValuePtr defReturn) const;
 
     std::string ToString() override;
+
 private:
     int32_t ComputerLogic(UScriptValuePtr rightValue) const;
     std::string value_;
@@ -200,14 +202,14 @@ public:
 
     virtual ~UScriptInstructionContext() {}
 
-    virtual int32_t PushParam(int32_t value) override;
-    virtual int32_t PushParam(float value) override;
-    virtual int32_t PushParam(const std::string &value) override;
-    virtual int32_t GetParamCount() override;
-    virtual ParamType GetParamType(int32_t index) override;
-    virtual int32_t GetParam(int32_t index, int32_t &value) override;
-    virtual int32_t GetParam(int32_t index, float &value) override;
-    virtual int32_t GetParam(int32_t index, std::string &value) override;
+    int32_t PushParam(int32_t value) override;
+    int32_t PushParam(float value) override;
+    int32_t PushParam(const std::string &value) override;
+    int32_t GetParamCount() override;
+    ParamType GetParamType(int32_t index) override;
+    int32_t GetParam(int32_t index, int32_t &value) override;
+    int32_t GetParam(int32_t index, float &value) override;
+    int32_t GetParam(int32_t index, std::string &value) override;
 
     int32_t AddInputParam(UScriptValuePtr value);
 

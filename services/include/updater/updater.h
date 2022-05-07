@@ -32,8 +32,14 @@ enum UpdaterStatus {
 
 using PostMessageFunction = std::function<void(const char *cmd, const char *content)>;
 
+enum PackageUpdateMode {
+    HOTA_UPDATE = 0,
+    SDCARD_UPDATE,
+    UNKNOWN_UPDATE,
+};
+
 UpdaterStatus DoInstallUpdaterPackage(hpackage::PkgManager::PkgManagerPtr pkgManager,
-    const std::string &packagePath, int retryCount);
+    const std::string &packagePath, int retryCount, PackageUpdateMode updateMode);
 
 UpdaterStatus StartUpdaterProc(hpackage::PkgManager::PkgManagerPtr pkgManager, const std::string &packagePath,
     int retryCount, int &maxTemperature);
@@ -41,14 +47,13 @@ UpdaterStatus StartUpdaterProc(hpackage::PkgManager::PkgManagerPtr pkgManager, c
 int GetUpdatePackageInfo(hpackage::PkgManager::PkgManagerPtr pkgManager, const std::string& path);
 
 int UpdatePreProcess(hpackage::PkgManager::PkgManagerPtr pkgManager, const std::string& path);
+#ifdef UPDATER_USE_PTABLE
+bool PtableProcess(hpackage::PkgManager::PkgManagerPtr pkgManager, PackageUpdateMode updateMode);
+#endif
 
 int ExecUpdate(hpackage::PkgManager::PkgManagerPtr pkgManager, int retry, PostMessageFunction postMessage);
 
-bool CopyUpdaterLogs(const std::string &sLog, const std::string &dLog);
-
-void CompressLogs(const std::string &name);
-
-int IsSpaceCapacitySufficient(const std::string &packagePath);
+UpdaterStatus IsSpaceCapacitySufficient(const std::string &packagePath);
 
 bool IsSDCardExist(const std::string &sdcard_path);
 

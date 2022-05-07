@@ -150,9 +150,11 @@ public:
 
     int32_t DecodeCentralDirEntry(PkgStreamPtr inStream, PkgBuffer &buffer, size_t currentPos,
         size_t &decodeLen);
+
 protected:
     ZipFileInfo fileInfo_ {};
     uint32_t crc32_ {0};
+
 private:
     int32_t DecodeLocalFileHeaderCheck(PkgStreamPtr inStream, const PkgBuffer &data, size_t currentPos);
 
@@ -181,11 +183,13 @@ public:
     int32_t SavePackage(size_t &offset) override;
 
     int32_t LoadPackage(std::vector<std::string> &fileNames, VerifyFunction verifier = nullptr) override;
+
 private:
     int32_t LoadPackage(std::vector<std::string> &fileNames, const PkgBuffer &buff,
         uint32_t endDirLen, size_t endDirPos, size_t &readLen);
     int32_t ParseFileEntries(std::vector<std::string> &fileNames, const EndCentralDir &endDir,
         size_t currentPos, size_t fileLen);
+
 private:
     PkgInfo pkgInfo_ {};
     size_t currentOffset_ = 0;

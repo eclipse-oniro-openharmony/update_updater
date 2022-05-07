@@ -36,6 +36,7 @@ int32_t ScriptInterpreter::ExecuteScript(ScriptManagerImpl *manager, hpackage::P
     USCRIPT_CHECK(ret == USCRIPT_SUCCESS, return ret, "Fail to loadScript script %s", pkgStream->GetFileName().c_str());
     ret = inter->Execute();
     delete inter;
+    inter = nullptr;
     USCRIPT_LOGI("ExecuteScript finish ret: %d  script: %s ",
         ret, pkgStream->GetFileName().c_str());
     return ret;
@@ -59,20 +60,12 @@ ScriptInterpreter::~ScriptInterpreter()
     }
     functions_.clear();
     contextStack_.clear();
-    delete scanner_;
-    delete parser_;
 }
 
 int32_t ScriptInterpreter::LoadScript(hpackage::PkgManager::StreamPtr pkgStream)
 {
-    scanner_ = new Scanner(this);
-    parser_ = new Parser(scanner_, this);
-    if (scanner_ == nullptr || parser_ == nullptr) {
-        USCRIPT_LOGE("Fail to open fstream %s", pkgStream->GetFileName().c_str());
-        delete parser_;
-        delete scanner_;
-        return USCRIPT_ERROR_CREATE_OBJ;
-    }
+    scanner_ = std::make_unique<Scanner>(this);
+    parser_ = std::make_unique<Parser>(scanner_.get(), this);
     scanner_->set_debug(0);
     scanner_->SetPkgStream(pkgStream);
     int32_t ret = parser_->parse();

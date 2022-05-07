@@ -124,7 +124,7 @@ int32_t Sha384Algorithm::Update(const PkgBuffer &buffer, size_t size)
 
 int32_t Sha384Algorithm::Final(PkgBuffer &result)
 {
-    PKG_CHECK(result.buffer != nullptr && result.length == 64, // 64 length
+    PKG_CHECK(result.buffer != nullptr && result.length == DIGEST_SHA384_LEN,
         return PKG_INVALID_PARAM, "Param context null!");
     SHA384_Final(result.buffer, &shaCtx_);
     return PKG_SUCCESS;
@@ -132,7 +132,7 @@ int32_t Sha384Algorithm::Final(PkgBuffer &result)
 
 int32_t Sha384Algorithm::Calculate(PkgBuffer &result, const PkgBuffer &buffer, size_t size)
 {
-    PKG_CHECK(result.buffer != nullptr && result.length == 64, // 64 length
+    PKG_CHECK(result.buffer != nullptr && result.length == DIGEST_SHA384_LEN,
         return PKG_INVALID_PARAM, "Param context null!");
     PKG_CHECK(buffer.buffer != nullptr, return PKG_INVALID_PARAM, "Param null!");
     SHA512_Init(&shaCtx_);

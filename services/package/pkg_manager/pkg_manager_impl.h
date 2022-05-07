@@ -27,7 +27,7 @@
 namespace hpackage {
 class PkgManagerImpl : public PkgManager {
 public:
-    PkgManagerImpl() {};
+    PkgManagerImpl() {}
 
     ~PkgManagerImpl() override;
 
@@ -74,12 +74,18 @@ public:
 
     int32_t CreatePkgStream(StreamPtr &stream, const std::string &fileName, const PkgBuffer &buffer) override;
 
+    int32_t VerifyOtaPackage(const std::string &packagePath, const std::string &keyPath) override;
+
+    int32_t CreateSignContent(const std::string &packagePath, const std::string &signedPackage,
+        const std::string &keyPath, PkgInfoPtr header) override;
+
     void SetPkgDecodeProgress(PkgDecodeProgress decodeProgress) override
     {
         decodeProgress_ = decodeProgress;
     }
 
     void PostDecodeProgress(int type, size_t writeDataLen, const void *context) override;
+
 private:
     PkgFilePtr CreatePackage(PkgStreamPtr stream, PkgFile::PkgType type, PkgInfoPtr header = nullptr);
 
@@ -113,6 +119,7 @@ private:
         PkgStream::ExtractFileProcessor processor, const void *context);
 
     void ClosePkgStream(PkgStreamPtr &stream);
+
 private:
     bool unzipToFile_ {true};
     std::vector<PkgFilePtr> pkgFiles_ {};

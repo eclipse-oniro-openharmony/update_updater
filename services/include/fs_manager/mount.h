@@ -17,6 +17,7 @@
 
 #include <string>
 #include "fs_manager/fs_manager.h"
+#include "updater/updater.h"
 
 namespace updater {
 void LoadFstab(); /* Load fstab */
@@ -24,7 +25,7 @@ void LoadSpecificFstab(const std::string &fstabName);
 int FormatPartition(const std::string &path);
 int UmountForPath(const std::string &path);
 int MountForPath(const std::string &path);
-int SetupPartitions();
+int SetupPartitions(PackageUpdateMode mode = HOTA_UPDATE);
 const std::string GetBlockDeviceByMountPoint(const std::string &mountPoint);
 MountStatus GetMountStatusForPath(const std::string &path);
 } // updater

@@ -226,3 +226,42 @@ int32_t CreatePackageL1(const UpgradePkgInfoExt *pkgInfo, ComponentInfoExt comp[
     PkgManager::ReleasePackageInstance(manager);
     return ret;
 }
+
+static void GetSignContentInfo(PkgManager::PkgInfoPtr pkgInfo, const UpgradePkgInfoExt *pkgInfoExt)
+{
+    pkgInfo->signMethod = pkgInfoExt->signMethod;
+    pkgInfo->digestMethod  = pkgInfoExt->digestMethod;
+    pkgInfo->entryCount = pkgInfoExt->entryCount;
+    pkgInfo->pkgType = pkgInfoExt->pkgType;
+
+    return;
+}
+
+int32_t CreateSignContent(const UpgradePkgInfoExt *pkgInfoExt, const char *packagePath,
+    const char *signedPackage, const char *keyPath)
+{
+    if (pkgInfoExt == nullptr || packagePath == nullptr || signedPackage == nullptr ||
+        keyPath == nullptr) {
+        LOG(ERROR) << "Check param fail ";
+        return PKG_INVALID_PARAM;
+    }
+    PkgManager::PkgManagerPtr manager = PkgManager::GetPackageInstance();
+    if (manager == nullptr) {
+        LOG(ERROR) << "Get package instance fail ";
+        return PKG_INVALID_PARAM;
+    }
+
+    PkgInfo info;
+    GetSignContentInfo(&info, pkgInfoExt);
+
+    int32_t ret = manager->CreateSignContent(packagePath, signedPackage, keyPath, &info);
+    if (ret != PKG_SUCCESS) {
+        LOG(ERROR) << "Sign Package fail ";
+        PkgManager::ReleasePackageInstance(manager);
+        return ret;
+    }
+
+    PkgManager::ReleasePackageInstance(manager);
+    return ret;
+}
+

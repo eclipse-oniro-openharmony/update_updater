@@ -39,6 +39,7 @@ public:
 
     int32_t Unpack(const PkgStreamPtr inStream,
         const PkgStreamPtr outStream, PkgAlgorithmContext &context) override;
+
 private:
     int32_t UnpackCalculate(PkgAlgorithmContext &context, const PkgStreamPtr inStream,
         const PkgStreamPtr outStream, DigestAlgorithm::DigestAlgorithmPtr algorithm);
@@ -49,6 +50,7 @@ private:
 
     int32_t DeflateData(const PkgStreamPtr outStream,
         z_stream &zstream, int32_t flush, PkgBuffer &outBuffer, size_t &destOffset) const;
+
 private:
     int32_t level_ {0};
     int32_t method_ {0};

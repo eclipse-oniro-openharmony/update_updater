@@ -24,23 +24,26 @@
 
 namespace updater {
 enum WriteMode : int {
-    WRITE_SPARSE = 1,
-    WRITE_RAW = 2,
-    WRITE_DECRYPT = 3,
-    WRITE_BLOCK = 4,
+    WRITE_RAW = 1,
+    WRITE_DECRYPT = 2,
+    WRITE_BLOCK = 3,
 };
 
 class DataWriter {
 public:
     using DataWriterPtr = DataWriter *;
-    virtual bool Write(const uint8_t *addr, size_t len, WriteMode mode, const std::string &partitionName) = 0;
-    virtual int OpenPartition(const std::string &partitionName);
+    virtual bool Write(const uint8_t *addr, size_t len, const void *context = nullptr) = 0;
     virtual ~DataWriter() {}
-    static std::unique_ptr<DataWriter> CreateDataWriter(WriteMode mode, const std::string &partitionName,
-        UpdaterEnv *env);
-    static std::unique_ptr<DataWriter> CreateDataWriter(WriteMode mode, const std::string &partitionName);
+    static std::unique_ptr<DataWriter> CreateDataWriter(WriteMode mode, const std::string &path, UpdaterEnv *env,
+        uint64_t offset = 0);
+    static std::unique_ptr<DataWriter> CreateDataWriter(WriteMode mode, const std::string &path, uint64_t offset = 0);
     static UpdaterEnv *GetUpdaterEnv();
+    void SetUpdaterEnv(UpdaterEnv *env);
     static void ReleaseDataWriter(std::unique_ptr<DataWriter> &writer);
+
+protected:
+    virtual int OpenPath(const std::string &path);
+
 private:
     static UpdaterEnv *env_;
 };

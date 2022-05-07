@@ -18,9 +18,46 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include "macros.h"
 #include "updater/updater.h"
 
 namespace updater {
+enum UpdaterInitEvent {
+    UPDATER_PRE_INIT_EVENT = 0,
+    UPDATER_INIT_EVENT,
+    UPDATER_POST_INIT_EVENT,
+
+    UPDATER_INIT_EVENT_BUTT
+};
+
+using InitHandler = void (*)(void);
+
+class UpdaterInit {
+    DEFINE_COMMON_FOR_SINGLETON(UpdaterInit)
+public:
+    void InvokeEvent(enum UpdaterInitEvent eventId)
+    {
+        if (eventId >= UPDATER_INIT_EVENT_BUTT) {
+            return;
+        }
+        for (const auto &handler : initEvent_[eventId]) {
+            if (handler != nullptr) {
+                handler();
+            }
+        }
+    }
+    void SubscribeEvent(enum UpdaterInitEvent eventId, InitHandler handler)
+    {
+        if (eventId < UPDATER_INIT_EVENT_BUTT) {
+            initEvent_[eventId].push_back(handler);
+        }
+    }
+private:
+    UpdaterInit() = default;
+    ~UpdaterInit() = default;
+    std::vector<InitHandler> initEvent_[UPDATER_INIT_EVENT_BUTT];
+};
+
 enum FactoryResetMode {
     USER_WIPE_DATA = 0,
     FACTORY_WIPE_DATA,

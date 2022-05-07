@@ -44,6 +44,7 @@ public:
     {
         return 0;
     };
+
 protected:
     bool init_ = false;
 };

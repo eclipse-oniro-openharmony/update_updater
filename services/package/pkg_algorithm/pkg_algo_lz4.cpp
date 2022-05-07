@@ -61,7 +61,7 @@ int32_t PkgAlgorithmBlockLz4::Pack(const PkgStreamPtr inStream, const PkgStreamP
     PkgAlgorithmContext &context)
 {
     PKG_CHECK(inStream != nullptr && outStream != nullptr, return PKG_INVALID_PARAM, "Param context null!");
-    size_t blockSize = GetBlockSizeFromBlockId(blockSizeID_);
+    size_t blockSize = static_cast<size_t>(GetBlockSizeFromBlockId(blockSizeID_));
     blockSize = (blockSize > LZ4B_BLOCK_SIZE) ? LZ4B_BLOCK_SIZE : blockSize;
     PkgBuffer inBuffer = {blockSize};
     PkgBuffer outBuffer = {LZ4_compressBound(blockSize)};
@@ -98,7 +98,7 @@ int32_t PkgAlgorithmBlockLz4::Pack(const PkgStreamPtr inStream, const PkgStreamP
         PKG_CHECK(ret == PKG_SUCCESS, break, "Fail write data ");
 
         srcOffset += readLen;
-        destOffset += outSize + LZ4B_REVERSED_LEN;
+        destOffset += static_cast<size_t>(outSize) + LZ4B_REVERSED_LEN;
     }
     PKG_CHECK(srcOffset - context.srcOffset == context.unpackedSize,
         return ret, "original size error %zu %zu", srcOffset, context.unpackedSize);
@@ -111,9 +111,9 @@ int32_t PkgAlgorithmBlockLz4::Unpack(const PkgStreamPtr inStream, const PkgStrea
     PkgAlgorithmContext &context)
 {
     PKG_CHECK(inStream != nullptr && outStream != nullptr, return PKG_INVALID_PARAM, "Param context null!");
-    size_t inBuffSize = LZ4_compressBound(LZ4B_BLOCK_SIZE);
+    int inBuffSize = LZ4_compressBound(LZ4B_BLOCK_SIZE);
     PKG_CHECK(inBuffSize > 0, return PKG_NONE_MEMORY, "BufferSize must > 0");
-    PkgBuffer inBuffer(inBuffSize);
+    PkgBuffer inBuffer(static_cast<size_t>(inBuffSize));
     PkgBuffer outBuffer(LZ4B_BLOCK_SIZE);
     PKG_CHECK(inBuffer.buffer != nullptr && outBuffer.buffer != nullptr, return PKG_NONE_MEMORY,
         "Fail to alloc buffer ");
@@ -133,8 +133,8 @@ int32_t PkgAlgorithmBlockLz4::Unpack(const PkgStreamPtr inStream, const PkgStrea
             break;
         }
         uint32_t blockSize = ReadLE32(inBuffer.buffer);
-        PKG_CHECK(!(blockSize > LZ4_COMPRESSBOUND(LZ4B_BLOCK_SIZE) || blockSize > inBuffSize), break,
-            "Fail to get block size %u  %u", blockSize, LZ4_COMPRESSBOUND(LZ4B_BLOCK_SIZE));
+        PKG_CHECK(!(blockSize > static_cast<uint32_t>(inBuffSize)), break,
+            "Fail to get block size %u  %d", blockSize, inBuffSize);
         srcOffset += sizeof(uint32_t);
 
         /* Read Block */
@@ -150,7 +150,7 @@ int32_t PkgAlgorithmBlockLz4::Unpack(const PkgStreamPtr inStream, const PkgStrea
         /* Write Block */
         ret = outStream->Write(outBuffer, decodeSize, destOffset);
         PKG_CHECK(ret == PKG_SUCCESS, break, "Fail write data ");
-        destOffset += decodeSize;
+        destOffset += static_cast<size_t>(decodeSize);
         srcOffset += readLen;
     }
     context.packedSize = srcOffset - context.srcOffset;
@@ -165,7 +165,7 @@ int32_t PkgAlgorithmLz4::GetPackParam(LZ4F_compressionContext_t &ctx, LZ4F_prefe
     errorCode = LZ4F_createCompressionContext(&ctx, LZ4F_VERSION);
     PKG_CHECK(!LZ4F_isError(errorCode), return PKG_NONE_MEMORY,
         "Fail to create compress context %s", LZ4F_getErrorName(errorCode));
-    size_t blockSize = GetBlockSizeFromBlockId(blockSizeID_);
+    size_t blockSize = static_cast<size_t>(GetBlockSizeFromBlockId(blockSizeID_));
     PKG_CHECK(!memset_s(&preferences, sizeof(preferences), 0, sizeof(preferences)),
         return PKG_NONE_MEMORY, "Memset failed");
     preferences.autoFlush = autoFlush_;
@@ -304,21 +304,22 @@ int32_t PkgAlgorithmLz4::Unpack(const PkgStreamPtr inStream, const PkgStreamPtr 
     int32_t ret = GetUnpackParam(ctx, inStream, nextToRead, srcOffset);
     PKG_CHECK(ret == PKG_SUCCESS, return PKG_INVALID_LZ4, "Fail to get param ");
 
-    size_t outBuffSize = GetBlockSizeFromBlockId(blockSizeID_);
-    PKG_LOGI("Block size ID %d outBuffSize:%zu", blockSizeID_, outBuffSize);
-    size_t inBuffSize = outBuffSize + sizeof(uint32_t);
+    int32_t outBuffSize = GetBlockSizeFromBlockId(blockSizeID_);
+    PKG_LOGI("Block size ID %d outBuffSize:%d", blockSizeID_, outBuffSize);
+    int32_t inBuffSize = outBuffSize + static_cast<int32_t>(sizeof(uint32_t));
     PKG_CHECK(inBuffSize > 0 && outBuffSize > 0, return PKG_NONE_MEMORY, "Buffer size must > 0");
 
-    PkgBuffer inBuffer(inBuffSize);
-    PkgBuffer outBuffer(outBuffSize);
+    PkgBuffer inBuffer(static_cast<size_t>(inBuffSize));
+    PkgBuffer outBuffer(static_cast<size_t>(outBuffSize));
     PKG_CHECK(inBuffer.buffer != nullptr && outBuffer.buffer != nullptr,
         (void)LZ4F_freeDecompressionContext(ctx); return PKG_NONE_MEMORY, "Fail to alloc buffer ");
 
     /* Main Loop */
     while (nextToRead != 0) {
         size_t readLen = 0;
-        size_t decodedBytes = outBuffSize;
-        PKG_CHECK(nextToRead <= inBuffSize, break, "Error next read %zu %zu ", nextToRead, inBuffSize);
+        size_t decodedBytes = static_cast<size_t>(outBuffSize);
+        PKG_CHECK(nextToRead <= static_cast<size_t>(inBuffSize), break,
+            "Error next read %zu %d ", nextToRead, inBuffSize);
 
         /* Read Block */
         inBuffer.length = nextToRead;

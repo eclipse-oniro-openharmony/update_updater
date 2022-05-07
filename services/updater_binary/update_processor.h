@@ -37,21 +37,17 @@ public:
     virtual ~UpdaterInstructionFactory() {}
 };
 
-class UScriptInstructionSparseImageWrite : public uscript::UScriptInstruction {
-public:
-    UScriptInstructionSparseImageWrite() {}
-    virtual ~UScriptInstructionSparseImageWrite() {}
-    int32_t Execute(uscript::UScriptEnv &env, uscript::UScriptContext &context) override;
-};
-
 class UScriptInstructionRawImageWrite : public uscript::UScriptInstruction {
 public:
     UScriptInstructionRawImageWrite() {}
     virtual ~UScriptInstructionRawImageWrite() {}
     int32_t Execute(uscript::UScriptEnv &env, uscript::UScriptContext &context) override;
+
 private:
     static int RawImageWriteProcessor(const hpackage::PkgBuffer &buffer, size_t size, size_t start, bool isFinish,
         const void* context);
+    int GetWritePathAndOffset(const std::string &partitionName, std::string &writePath, uint64_t &offset,
+        uint64_t &partitionSize);
     static size_t totalSize_;
     static size_t readSize_;
 };
@@ -66,5 +62,6 @@ enum EXIT_CODES {
 };
 
 int ProcessUpdater(bool retry, int pipeFd, const std::string &packagePath, const std::string &keyPath);
+void GetPartitionPathFromName(const std::string &partitionName, std::string &partitionPath);
 
 #endif /* UPDATE_PROCESSOR_H */

@@ -27,7 +27,7 @@ extern "C" {
 
 constexpr uint32_t DIGEST_MAX_LEN = 32;
 constexpr int8_t MID_COMPRESS_LEVEL = 2;
-constexpr int8_t PKG_SUPPORT_L1 = 0x01;
+constexpr uint8_t PKG_SUPPORT_L1 = 0x01;
 
 enum PkgPackType {
     PKG_PACK_TYPE_NONE = 0,
@@ -146,6 +146,9 @@ int32_t VerifyPackage(const char *packagePath, const char *keyPath,
  */
 int32_t VerifyPackageWithCallback(const std::string &packagePath, const std::string &keyPath,
     std::function<void(int32_t result, uint32_t percent)> cb);
+
+int32_t CreateSignContent(const UpgradePkgInfoExt *pkgInfoExt, const char *packagePath,
+    const char *signedPackage, const char *keyPath);
 
 #ifdef __cplusplus
 }

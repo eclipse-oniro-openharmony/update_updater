@@ -1,7 +1,7 @@
 {
     "name": "@ohos/update_updater",
     "version": "3.1",
-    "description": "升级包安装组件运行在recovery分区，其功能主要包括读取misc分区信息获取升级包状态，对升级包进行校验，确保升级包合法有效；然后从升级包中解析出升级的可执行程序，创建子进程并启动升级程序。具体升级的动作由升级脚本控制。",
+    "description": "升级包安装组件运行在updater分区，其功能主要包括读取misc分区信息获取升级包状态，对升级包进行校验，确保升级包合法有效；然后从升级包中解析出升级的可执行程序，创建子进程并启动升级程序。具体升级的动作由升级脚本控制。",
     "homePage": "https://gitee.com/openharmony",
     "license": "Apache License 2.0",
     "repository": "https://gitee.com/openharmony/update_updater",
@@ -66,7 +66,6 @@
         "build": {
             "sub_component": [
                 "//base/update/updater/resources:updater_resources",
-                "//base/update/updater/services:updater_etc",
                 "//base/update/updater/services/package:libupdaterpackage",
                 "//base/update/updater/services/script:libupdaterscript",
                 "//base/update/updater/services/log:libupdaterlog",

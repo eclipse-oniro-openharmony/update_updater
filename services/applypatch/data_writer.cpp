@@ -26,38 +26,34 @@
 
 namespace updater {
 UpdaterEnv *DataWriter::env_ = nullptr;
-int DataWriter::OpenPartition(const std::string &partitionName)
+int DataWriter::OpenPath(const std::string &path)
 {
-    if (partitionName.empty()) {
+    if (path.empty()) {
         LOG(ERROR) << "Datawriter: partition name is empty.";
         return -1;
     }
-    auto devPath = GetBlockDeviceByMountPoint(partitionName);
-    if (devPath.empty()) {
-        LOG(ERROR) << "Datawriter: cannot find device path for partition \'" <<
-            partitionName.substr(1, partitionName.size()) << "\'.";
-        return -1;
-    }
 
-    if (access(devPath.c_str(), W_OK) < 0) {
-        LOG(ERROR) << "Datawriter: " << devPath << " is not writable.";
+    if (access(path.c_str(), W_OK) < 0) {
+        LOG(ERROR) << "Datawriter: " << path << " is not writable.";
         return -1;
     }
-    char *realPath = realpath(devPath.c_str(), NULL);
-    UPDATER_FILE_CHECK(realPath != nullptr, "realPath is NULL", return -1);
-    int fd = open(realPath, O_WRONLY | O_EXCL);
+    char realPath[PATH_MAX] = {0x00};
+    char *get = realpath(path.c_str(), realPath);
+    UPDATER_FILE_CHECK(get != nullptr, "realPath is NULL", return -1);
+    int fd = open(realPath, O_RDWR | O_LARGEFILE);
     free(realPath);
-    UPDATER_FILE_CHECK(fd >= 0, "Datawriter: open block device " << devPath << " failed ", return fd);
-    UPDATER_CHECK_FILE_OP(lseek(fd, 0, SEEK_SET) != -1, "Datawriter: seek " << devPath << "failed ", fd, fd = -1);
+    UPDATER_FILE_CHECK(fd >= 0, "Datawriter: open block device " << path << " failed ", return fd);
+    UPDATER_CHECK_FILE_OP(lseek(fd, 0, SEEK_SET) != -1, "Datawriter: seek " << path << "failed ", fd, fd = -1);
     return fd;
 }
 
-std::unique_ptr<DataWriter> DataWriter::CreateDataWriter(WriteMode mode, const std::string &partitionName)
+std::unique_ptr<DataWriter> DataWriter::CreateDataWriter(WriteMode mode, const std::string &path,
+    uint64_t offset)
 {
     switch (mode) {
         case WRITE_RAW:
         {
-            std::unique_ptr<RawWriter> writer(std::make_unique<RawWriter>(partitionName));
+            std::unique_ptr<RawWriter> writer(std::make_unique<RawWriter>(path, offset));
             return std::move(writer);
         }
         case WRITE_DECRYPT:
@@ -74,11 +70,16 @@ UpdaterEnv *DataWriter::GetUpdaterEnv()
     return env_;
 }
 
-std::unique_ptr<DataWriter> DataWriter::CreateDataWriter(WriteMode mode, const std::string &partitionName,
-    UpdaterEnv *env)
+void DataWriter::SetUpdaterEnv(UpdaterEnv *env)
 {
     env_ = env;
-    return CreateDataWriter(mode, partitionName);
+}
+
+std::unique_ptr<DataWriter> DataWriter::CreateDataWriter(WriteMode mode, const std::string &path,
+    UpdaterEnv *env, uint64_t offset)
+{
+    env_ = env;
+    return CreateDataWriter(mode, path, offset);
 }
 
 void DataWriter::ReleaseDataWriter(std::unique_ptr<DataWriter> &writer)

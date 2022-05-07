@@ -26,7 +26,7 @@ namespace updatepatch {
 #define SWAP(a, b) auto swapTmp = (a); (a) = (b); (b) = swapTmp
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
 #define SET_BUFFER(y, buffer, index) \
-    (buffer)[index] = (y) % 256;  (y) -= (buffer)[index];  (y) =  (y) / 256
+    (buffer)[index] = static_cast<uint8_t>((y) % 256); (y) -= (buffer)[index]; (y) = (y) / 256
 
 constexpr uint32_t BUCKET_SIZE = 256;
 constexpr uint32_t MULTIPLE_TWO = 2;
@@ -36,7 +36,7 @@ constexpr int64_t MIN_LENGTH = 16;
 static void WriteLE64(const BlockBuffer &buffer, int64_t value)
 {
     int32_t index = 0;
-    int64_t y = (value < 0) ? -value : value;
+    auto y = static_cast<uint64_t>((value < 0) ? -value : value);
     SET_BUFFER(y, buffer.buffer, index);
     index++;
     SET_BUFFER(y, buffer.buffer, index);
@@ -237,7 +237,7 @@ void BlocksDiff::ComputeLength(const BlockBuffer &newInfo,
     int64_t i = 0;
     int64_t s = 0;
     int64_t tmp = 0;
-    for (; ((lastScan_ + i) < currentOffset_) && ((lastPos_ + i) < static_cast<int64_t>(oldInfo.length));) {
+    while (((lastScan_ + i) < currentOffset_) && ((lastPos_ + i) < static_cast<int64_t>(oldInfo.length))) {
         if (oldInfo.buffer[lastPos_ + i] == newInfo.buffer[lastScan_ + i]) {
             s++;
         }
@@ -413,7 +413,8 @@ void SuffixArray<DataType>::Init(const BlockBuffer &oldInfo)
     DataType len = 0;
     for (h = 1; suffixArray_[0] != -(static_cast<DataType>(oldInfo.length) + 1); h += h) {
         len = 0;
-        for (i = 0; i < (static_cast<DataType>(oldInfo.length) + 1);) {
+        i = 0;
+        while (i < (static_cast<DataType>(oldInfo.length) + 1)) {
             if (suffixArray_[i] < 0) {
                 len -= suffixArray_[i];
                 i -= suffixArray_[i];
