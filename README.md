@@ -86,9 +86,9 @@ Add the compilation configuration to the  **build\_updater\_image.sh**  script, 
 
 Update subsystem
 
-**update\_updater**
+[**update\_updater**](https://gitee.com/openharmony/update_updater)
 
-build
+[build](https://gitee.com/openharmony/build)
 
-productdefine\_common
+[productdefine\_common](https://gitee.com/openharmony/productdefine_common)
 
