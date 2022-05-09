@@ -40,6 +40,8 @@ public:
         blockSize_ = 0;
     }
 
+    ~BlockSet() {}
+
     explicit BlockSet(std::vector<BlockPair> &&pairs);
 
     // Insert block to set after parsing from a string type or vector type
