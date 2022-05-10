@@ -48,8 +48,10 @@ static int DeviceProbeType(BlockDevice &dev)
 
     UPDATER_CHECK_ONLY_RETURN(DeviceStat(dev, devStat), return 0);
 
-    specific->major = devMajor = major (devStat.st_rdev);
-    specific->minor = devMinor = minor (devStat.st_rdev);
+    devMajor = static_cast<int>(major (devStat.st_rdev));
+    specific->major = devMajor;
+    devMinor = static_cast<int>(minor (devStat.st_rdev));
+    specific->minor = devMinor;
     bool a1 = SCSI_BLK_MAJOR(devMajor) && (devMinor % 0x10 == 0);
     bool a2 = devMajor == SDMMC_MAJOR && (devMinor % 0x08 == 0);
     UPDATER_CHECK_ONLY_RETURN(!a1, dev.type = DEVICE_SCSI);
@@ -290,10 +292,10 @@ static struct Partition* NewPartition(const BlockDevice &dev, int partn)
         free(part);
         return nullptr;
     }
-    part->start = atoi(strstart.c_str());
+    part->start = static_cast<size_t>(atoi(strstart.c_str()));
     std::string strsize = ReadPartitionFromSys(devName, partName, "size", "");
     UPDATER_CHECK_ONLY_RETURN(!strsize.empty(), free(part); return nullptr);
-    part->length = atoi(strsize.c_str());
+    part->length = static_cast<size_t>(atoi(strsize.c_str()));
 
     std::string strdevname = ReadPartitionFromSys(devName, partName, "uevent", "DEVNAME=");
     part->devName = partName;

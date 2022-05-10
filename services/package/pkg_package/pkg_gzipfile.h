@@ -25,7 +25,7 @@ struct __attribute__((packed)) GZipHeader {
     uint16_t magic = 0;
     uint8_t method = 0;
     uint8_t flags = 0;
-    uint32_t mtime = 0;
+    time_t mtime = 0;
     uint8_t xfl = 0;
     uint8_t osFile = 0;
 };
@@ -49,6 +49,7 @@ public:
     int32_t Unpack(PkgStreamPtr outStream) override;
 
     int32_t DecodeHeader(const PkgBuffer &buffer, size_t, size_t, size_t &decodeLen) override;
+
 private:
     void DecodeHeaderCalOffset(uint8_t flags, const PkgBuffer &buffer, size_t &offset,
         std::string &fileName) const;
@@ -70,6 +71,7 @@ public:
     int32_t SavePackage(size_t &offset) override;
 
     int32_t LoadPackage(std::vector<std::string> &fileNames, VerifyFunction verifier = nullptr) override;
+
 private:
     PkgInfo pkgInfo_ {};
     size_t currentOffset_ = 0;

@@ -69,24 +69,24 @@ bool PartitionRecord::RecordPartitionUpdateStatus(const std::string &partitionNa
         off_t newOffset = 0;
         UPDATER_CHECK_FILE_OP(lseek(fd, PARTITION_RECORD_OFFSET, SEEK_SET) >= 0,
                 "PartitionRecord: Seek misc to record offset failed", fd, return false);
-        UPDATER_CHECK_FILE_OP(read(fd, &newOffset, sizeof(off_t)) == sizeof(off_t),
+        UPDATER_CHECK_FILE_OP(read(fd, &newOffset, sizeof(off_t)) == static_cast<ssize_t>(sizeof(off_t)),
             "PartitionRecord: Read offset failed", fd, return false);
 
         offset_ = newOffset;
         UPDATER_CHECK_FILE_OP(lseek(fd, PARTITION_RECORD_START + offset_, SEEK_SET) >= 0,
             "PartitionRecord: Seek misc to specific offset failed", fd, return false);
-        if (offset_ + sizeof(PartitionRecordInfo) < PARTITION_UPDATER_RECORD_SIZE) {
+        if (offset_ + static_cast<off_t>(sizeof(PartitionRecordInfo)) < PARTITION_UPDATER_RECORD_SIZE) {
             UPDATER_CHECK_FILE_OP(memset_s(&info_, sizeof(info_), 0, sizeof(info_)) == 0,
                 "PartitionRecord: clear partition info failed", fd, return false);
             UPDATER_CHECK_FILE_OP(!strncpy_s(info_.partitionName, PARTITION_NAME_LEN, partitionName.c_str(),
                 PARTITION_NAME_LEN - 1), "PartitionRecord: strncpy_s failed", fd, return false);
             info_.updated = updated;
-            UPDATER_CHECK_FILE_OP(write(fd, &info_, sizeof(PartitionRecordInfo)) == sizeof(PartitionRecordInfo),
-                "PartitionRecord: write failed", fd, return false);
-            offset_ += sizeof(PartitionRecordInfo);
+            UPDATER_CHECK_FILE_OP(write(fd, &info_, sizeof(PartitionRecordInfo)) ==
+                static_cast<ssize_t>(sizeof(PartitionRecordInfo)), "PartitionRecord: write failed", fd, return false);
+            offset_ += static_cast<off_t>(sizeof(PartitionRecordInfo));
             UPDATER_CHECK_FILE_OP(lseek(fd, PARTITION_RECORD_OFFSET, SEEK_SET) >= 0,
                 "PartitionRecord: Seek misc to record offset failed", fd, return false);
-            UPDATER_CHECK_FILE_OP(write(fd, &offset_, sizeof(off_t)) == sizeof(off_t),
+            UPDATER_CHECK_FILE_OP(write(fd, &offset_, sizeof(off_t)) == static_cast<ssize_t>(sizeof(off_t)),
                 "PartitionRecord: write  misc to record offset failed", fd, return false);
             LOG(DEBUG) << "PartitionRecord: offset is " << offset_;
         } else {
@@ -111,7 +111,7 @@ bool PartitionRecord::ClearRecordPartitionOffset()
             "Seek misc to specific offset failed", fd, return false);
 
         off_t initOffset = 0;
-        UPDATER_CHECK_FILE_OP(write(fd, &initOffset, sizeof(off_t)) == sizeof(off_t),
+        UPDATER_CHECK_FILE_OP(write(fd, &initOffset, sizeof(off_t)) == static_cast<ssize_t>(sizeof(off_t)),
             "StartUpdater: Write misc initOffset 0 failed", fd, return false);
         fsync(fd);
         close(fd);

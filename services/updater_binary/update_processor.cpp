@@ -21,6 +21,9 @@
 #include "applypatch/partition_record.h"
 #include "log.h"
 #include "pkg_manager.h"
+#ifdef UPDATER_USE_PTABLE
+#include "ptable_manager.h"
+#endif
 #include "script_instruction.h"
 #include "script_manager.h"
 #include "update_image_block.h"
@@ -33,6 +36,8 @@ using namespace updater;
 namespace updater {
 size_t UScriptInstructionRawImageWrite::totalSize_ = 0;
 size_t UScriptInstructionRawImageWrite::readSize_ = 0;
+const std::string PREFIX_PARTITION_NODE = "/dev/block/by-name/";
+const std::string PREFIX_UFS_NODE = "/dev/block/sd";
 UpdaterEnv::~UpdaterEnv()
 {
     if (factory_ != nullptr) {
@@ -59,7 +64,7 @@ UScriptInstructionFactoryPtr UpdaterEnv::GetInstructionFactory()
 const std::vector<std::string> UpdaterEnv::GetInstructionNames() const
 {
     static std::vector<std::string> updaterCmds = {
-        "sparse_image_write", "sha_check", "first_block_check", "block_update",
+        "sha_check", "first_block_check", "block_update",
         "raw_image_write", "update_partitions"
     };
     return updaterCmds;
@@ -68,9 +73,7 @@ const std::vector<std::string> UpdaterEnv::GetInstructionNames() const
 int32_t UpdaterInstructionFactory::CreateInstructionInstance(UScriptInstructionPtr& instr,
     const std::string& name)
 {
-    if (name == "sparse_image_write") {
-        instr = new UScriptInstructionSparseImageWrite();
-    } else if (name == "sha_check") {
+    if (name == "sha_check") {
         instr = new UScriptInstructionShaCheck();
     } else if (name == "first_block_check") {
         instr = new UScriptInstructionBlockCheck();
@@ -99,7 +102,7 @@ int UScriptInstructionRawImageWrite::RawImageWriteProcessor(const PkgBuffer &buf
         return PKG_SUCCESS;
     }
 
-    bool ret = writer->Write(const_cast<uint8_t*>(buffer.buffer), size, WRITE_RAW, "");
+    bool ret = writer->Write(const_cast<uint8_t*>(buffer.buffer), size);
     if (!ret) {
         LOG(ERROR) << "Write " << size << " byte(s) failed";
         return PKG_INVALID_STREAM;
@@ -108,7 +111,6 @@ int UScriptInstructionRawImageWrite::RawImageWriteProcessor(const PkgBuffer &buf
     if (totalSize_ != 0) {
         readSize_ += size;
         writer->GetUpdaterEnv()->PostMessage("set_progress", std::to_string((float)readSize_ / totalSize_));
-        writer->GetUpdaterEnv()->PostMessage("data", std::to_string(size));
     }
 
     return PKG_SUCCESS;
@@ -119,9 +121,6 @@ int32_t UScriptInstructionRawImageWrite::Execute(uscript::UScriptEnv &env, uscri
     std::string partitionName;
     int32_t ret = context.GetParam(0, partitionName);
     UPDATER_ERROR_CHECK(ret == USCRIPT_SUCCESS, "Error to get partitionName", return ret);
-    std::string imageFilename;
-    ret = context.GetParam(1, imageFilename);
-    UPDATER_ERROR_CHECK(ret == USCRIPT_SUCCESS, "Error to get imageFilename", return ret);
 
     if (env.IsRetry()) {
         LOG(DEBUG) << "Retry updater, check if current partition updated already during last time";
@@ -134,22 +133,37 @@ int32_t UScriptInstructionRawImageWrite::Execute(uscript::UScriptEnv &env, uscri
     LOG(INFO) << "UScriptInstructionRawImageWrite::Execute " << partitionName;
     UPDATER_ERROR_CHECK(env.GetPkgManager() != nullptr, "Error to get pkg manager", return USCRIPT_ERROR_EXECUTE);
 
-    std::unique_ptr<DataWriter> writer = DataWriter::CreateDataWriter(WRITE_RAW, partitionName,
-        static_cast<UpdaterEnv *>(&env));
+    std::string writePath;
+    uint64_t offset = 0;
+    uint64_t partitionSize = 0;
+    if (GetWritePathAndOffset(partitionName, writePath, offset, partitionSize) != USCRIPT_SUCCESS) {
+        LOG(ERROR) << "Get partition:%s WritePathAndOffset fail \'" <<
+            partitionName.substr(1, partitionName.size()) << "\'.";
+        return USCRIPT_ERROR_EXECUTE;
+    }
+
+    std::unique_ptr<DataWriter> writer = DataWriter::CreateDataWriter(WRITE_RAW, writePath,
+        static_cast<UpdaterEnv *>(&env), offset);
     UPDATER_ERROR_CHECK(writer != nullptr, "Error to create writer", return USCRIPT_ERROR_EXECUTE);
 
     // Extract partition information
     hpackage::PkgManager::StreamPtr outStream = nullptr;
-    const FileInfo *info = env.GetPkgManager()->GetFileInfo(imageFilename);
+    const FileInfo *info = env.GetPkgManager()->GetFileInfo(partitionName);
     UPDATER_ERROR_CHECK(info != nullptr, "Error to get file info",
         DataWriter::ReleaseDataWriter(writer); return USCRIPT_ERROR_EXECUTE);
     totalSize_ = info->unpackedSize;
+#ifdef UPDATER_USE_PTABLE
+    UPDATER_ERROR_CHECK(partitionSize >= totalSize_,
+        "partition size: " << partitionSize << " is short than image size: " << totalSize_,
+        DataWriter::ReleaseDataWriter(writer); return USCRIPT_ERROR_EXECUTE);
+#endif
+
     ret = env.GetPkgManager()->CreatePkgStream(outStream,
-        imageFilename, RawImageWriteProcessor, writer.get());
+        partitionName, RawImageWriteProcessor, writer.get());
     UPDATER_ERROR_CHECK(ret == USCRIPT_SUCCESS && outStream != nullptr, "Error to create output stream",
         DataWriter::ReleaseDataWriter(writer); return USCRIPT_ERROR_EXECUTE);
 
-    ret = env.GetPkgManager()->ExtractFile(imageFilename, outStream);
+    ret = env.GetPkgManager()->ExtractFile(partitionName, outStream);
     UPDATER_ERROR_CHECK(ret == USCRIPT_SUCCESS, "Error to extract file",
         env.GetPkgManager()->ClosePkgStream(outStream);
         DataWriter::ReleaseDataWriter(writer); return USCRIPT_ERROR_EXECUTE);
@@ -161,57 +175,6 @@ int32_t UScriptInstructionRawImageWrite::Execute(uscript::UScriptEnv &env, uscri
     totalSize_ = 0;
     readSize_ = 0;
     LOG(INFO)<<"UScriptInstructionRawImageWrite  finish";
-    return ret;
-}
-
-int32_t UScriptInstructionSparseImageWrite::Execute(uscript::UScriptEnv &env, uscript::UScriptContext &context)
-{
-    std::string partitionName;
-    int32_t ret = context.GetParam(0, partitionName);
-    UPDATER_ERROR_CHECK(ret == USCRIPT_SUCCESS, "Error to get param", return ret);
-
-    if (env.IsRetry()) {
-        LOG(DEBUG) << "Retry updater, check if current partition updated already during last time.";
-        bool isUpdated = PartitionRecord::GetInstance().IsPartitionUpdated(partitionName);
-        if (isUpdated) {
-            LOG(INFO) << partitionName << " already updated, skip";
-            return USCRIPT_SUCCESS;
-        }
-    }
-    LOG(INFO) << "UScriptInstructionSparseImageWrite::Execute " << partitionName;
-    UPDATER_ERROR_CHECK(env.GetPkgManager() != nullptr, "Error to get pkg manager", return USCRIPT_ERROR_EXECUTE);
-
-    hpackage::PkgManager::StreamPtr outStream = nullptr;
-    const FileInfo *info = env.GetPkgManager()->GetFileInfo(partitionName);
-    UPDATER_ERROR_CHECK(info != nullptr, "Error to get file info", return USCRIPT_ERROR_EXECUTE);
-
-    ret = env.GetPkgManager()->CreatePkgStream(outStream,
-        partitionName, info->unpackedSize, PkgStream::PkgStreamType_MemoryMap);
-    UPDATER_ERROR_CHECK(ret == USCRIPT_SUCCESS && outStream != nullptr, "Error to create output stream",
-        return USCRIPT_ERROR_EXECUTE);
-
-    ret = env.GetPkgManager()->ExtractFile(partitionName, outStream);
-    UPDATER_ERROR_CHECK(ret == USCRIPT_SUCCESS, "Error to extract file",
-        env.GetPkgManager()->ClosePkgStream(outStream); return USCRIPT_ERROR_EXECUTE);
-    std::unique_ptr<DataWriter> writer = DataWriter::CreateDataWriter(WRITE_SPARSE, partitionName);
-    UPDATER_ERROR_CHECK(writer != nullptr, "Error to create writer",
-        env.GetPkgManager()->ClosePkgStream(outStream); return USCRIPT_ERROR_EXECUTE);
-
-    size_t size = 0;
-    uint8_t* buffer = nullptr;
-    outStream->GetBuffer(buffer, size);
-
-    ret = writer->Write(buffer, size, WRITE_SPARSE, partitionName);
-    if (ret != true) {
-        LOG(ERROR) << "writer " << partitionName.substr(1, partitionName.size()) << " failed ";
-        ret = USCRIPT_ERROR_EXECUTE;
-    } else {
-        PartitionRecord::GetInstance().RecordPartitionUpdateStatus(partitionName, true);
-        ret = USCRIPT_SUCCESS;
-    }
-
-    env.GetPkgManager()->ClosePkgStream(outStream);
-    DataWriter::ReleaseDataWriter(writer);
     return ret;
 }
 
@@ -233,6 +196,32 @@ int ExecUpdate(PkgManager::PkgManagerPtr pkgManager, int retry, PostMessageFunct
     delete env;
     return ret;
 }
+
+int UScriptInstructionRawImageWrite::GetWritePathAndOffset(const std::string &partitionName, std::string &writePath,
+    uint64_t &offset, uint64_t &partitionSize)
+{
+#ifdef UPDATER_USE_PTABLE
+    PackagePtable& packagePtb = PackagePtable::GetInstance();
+    Ptable::PtnInfo ptnInfo;
+    if (!packagePtb.GetPartionInfoByName(partitionName, ptnInfo)) {
+        LOG(ERROR) << "Datawriter: cannot find device path for partition \'" <<
+                partitionName.substr(1, partitionName.size()) << "\'.";
+        return USCRIPT_ERROR_EXECUTE;
+    }
+    char lunIndexName = 'a' + ptnInfo.lun;
+    writePath = PREFIX_UFS_NODE + lunIndexName;
+    offset = ptnInfo.startAddr;
+    partitionSize = ptnInfo.partitionSize;
+#else
+    writePath = GetBlockDeviceByMountPoint(partitionName);
+    if (writePath.empty()) {
+        LOG(ERROR) << "Datawriter: cannot find device path for partition \'" <<
+            partitionName.substr(1, partitionName.size()) << "\'.";
+        return USCRIPT_ERROR_EXECUTE;
+    }
+#endif
+    return USCRIPT_SUCCESS;
+}
 } // updater
 
 int ProcessUpdater(bool retry, int pipeFd, const std::string &packagePath, const std::string &keyPath)
@@ -248,8 +237,14 @@ int ProcessUpdater(bool retry, int pipeFd, const std::string &packagePath, const
     std::vector<std::string> components;
     int32_t ret = pkgManager->LoadPackage(packagePath, keyPath, components);
     UPDATER_ERROR_CHECK(ret == PKG_SUCCESS, "Fail to load package",
+        fclose(pipeWrite);
+        pipeWrite = nullptr;
         PkgManager::ReleasePackageInstance(pkgManager);
         return EXIT_INVALID_ARGS);
+#ifdef UPDATER_USE_PTABLE
+    PackagePtable& packagePtb = PackagePtable::GetInstance();
+    packagePtb.LoadPartitionInfo(pkgManager);
+#endif
 
     ret = updater::ExecUpdate(pkgManager, retry,
         [&pipeWrite](const char *cmd, const char *content) {

@@ -22,7 +22,7 @@ namespace updater {
 constexpr int TOUCH_LOW_TH = 50;
 constexpr int TOUCH_HIGH_TH = 90;
 constexpr int INIT_DEFAULT_VALUE = 255;
-constexpr int LABEL_HEIGHT = 64;
+constexpr int LABEL_HEIGHT = 80;
 constexpr int LABEL_OFFSET_2 = 2;
 constexpr int LABEL_OFFSET_3 = 3;
 constexpr int DIALOG_START_Y = 550;

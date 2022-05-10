@@ -40,7 +40,7 @@ static int BlkpgPartCommand(const Partition &part, struct blkpg_partition &pg, i
     struct blkpg_ioctl_arg args {};
     args.op = op;
     args.flags = 0;
-    args.datalen = sizeof(struct blkpg_partition);
+    args.datalen = static_cast<int>(sizeof(struct blkpg_partition));
     args.data = static_cast<void *>(&pg);
 
     int ret = 0;
@@ -84,7 +84,7 @@ static int BlockSync(const Disk &disk)
 static int BlkpgRemovePartition(const Partition &part)
 {
     struct blkpg_partition blkPart {};
-    UPDATER_CHECK_ONLY_RETURN(memset_s(&blkPart, sizeof(blkPart), 0, sizeof(blkPart))==0, return -1);
+    UPDATER_CHECK_ONLY_RETURN(memset_s(&blkPart, sizeof(blkPart), 0, sizeof(blkPart)) == 0, return -1);
     blkPart.pno = part.partNum;
     return BlkpgPartCommand(part, blkPart, BLKPG_DEL_PARTITION);
 }
@@ -124,9 +124,9 @@ static int BlkpgAddPartition(Partition &part)
 {
     struct blkpg_partition blkPart {};
     UPDATER_CHECK_ONLY_RETURN(!memset_s(&blkPart, sizeof(blkPart), 0, sizeof(blkPart)), return 0);
-    blkPart.start = part.start * SECTOR_SIZE_DEFAULT;
+    blkPart.start = static_cast<long long>(part.start * SECTOR_SIZE_DEFAULT);
     LOG(INFO) << "blkPart.start " << blkPart.start;
-    blkPart.length = part.length * SECTOR_SIZE_DEFAULT;
+    blkPart.length = static_cast<long long>(part.length * SECTOR_SIZE_DEFAULT);
     LOG(INFO) << "blkPart.length " << blkPart.length;
     blkPart.pno = part.partNum;
     LOG(INFO) << "blkPart.pno " << blkPart.pno;
@@ -175,7 +175,7 @@ static void DestroyDiskDevices(const Disk &disk)
 
 static bool WriteDiskPartitionToMisc(PartitonList &nlist)
 {
-    UPDATER_CHECK_ONLY_RETURN(nlist.empty()==0, return false);
+    UPDATER_CHECK_ONLY_RETURN(nlist.empty() == 0, return false);
     char blkdevparts[MISC_RECORD_UPDATE_PARTITIONS_SIZE] = "mmcblk0:";
     std::sort(nlist.begin(), nlist.end(), [](const struct Partition *a, const struct Partition *b) {
             return (a->start < b->start);

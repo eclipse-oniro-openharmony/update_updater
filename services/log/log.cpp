@@ -118,6 +118,10 @@ void Logger(int level, const char* fileName, int32_t line, const char* format, .
     va_start(list, format);
     int size = vsnprintf_s(reinterpret_cast<char*>(buff.data()), buff.capacity(), buff.capacity(), format, list);
     va_end(list);
+    if (size < EOK) {
+        UpdaterLogger(level).OutputUpdaterLog(fileName, line) << "vsnprintf_s failed";
+        return;
+    }
     std::string str(buff.data(), size);
     UpdaterLogger(level).OutputUpdaterLog(fileName, line) << str;
 }

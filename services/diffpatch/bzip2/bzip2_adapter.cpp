@@ -23,7 +23,7 @@ using namespace hpackage;
 namespace updatepatch {
 int32_t BZip2Adapter::Open()
 {
-    memset_s(&stream_, sizeof(bz_stream), 0, sizeof(bz_stream));
+    (void)memset_s(&stream_, sizeof(bz_stream), 0, sizeof(bz_stream));
     int32_t ret = BZ2_bzCompressInit(&stream_, BLOCK_SIZE_BEST, 0, 0);
     PATCH_CHECK(ret == BZ_OK, return ret, "Failed to bzcompressinit %d", ret);
     init_ = true;

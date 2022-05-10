@@ -54,7 +54,7 @@ static int ExtractNewData(const PkgBuffer &buffer, size_t size, size_t start, bo
         size_t toWrite = std::min(size, info->writer->GetBlocksSize() - info->writer->GetTotalWritten());
         // No more data to write.
         UPDATER_CHECK_ONLY_RETURN(toWrite != 0, break);
-        bool ret = info->writer->Write(const_cast<uint8_t *>(addr), toWrite, WRITE_BLOCK, "");
+        bool ret = info->writer->Write(const_cast<uint8_t *>(addr), toWrite);
         std::ostringstream logMessage;
         logMessage << "Write " << toWrite << " byte(s) failed";
         UPDATER_ERROR_CHECK(ret == true, logMessage.str(), return hpackage::PKG_INVALID_STREAM);
@@ -192,7 +192,7 @@ static int32_t ExecuteTransferCommand(int fd, const std::vector<std::string> &li
     pthread_mutex_unlock(&writerThreadInfo->mutex);
     ret = pthread_join(globalParams->thread, nullptr);
     std::ostringstream logMessage;
-    logMessage << "pthread join returned with " << strerror(ret);
+    logMessage << "pthread join returned with " << ret;
     UPDATER_WARNING_CHECK_NOT_RETURN(ret == 0, logMessage.str());
     if (globalParams->storeCreated != -1) {
         Store::DoFreeSpace(globalParams->storeBase);

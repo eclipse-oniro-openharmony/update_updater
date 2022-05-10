@@ -34,7 +34,7 @@ static int64_t ReadLE64(const uint8_t *buffer)
     }
     int64_t y = 0;
     int32_t index = static_cast<int32_t>(sizeof(int64_t)) - 1;
-    y = buffer[index] & (~BUFFER_MASK);
+    y = buffer[index] & static_cast<uint8_t>(~BUFFER_MASK);
     index--;
     GET_BYTE_FROM_BUFFER(y, index, buffer);
     index--;
@@ -94,7 +94,7 @@ int32_t BlocksPatch::ApplyPatch()
 
 int32_t BlocksPatch::ReadHeader(int64_t &controlDataSize, int64_t &diffDataSize, int64_t &newSize)
 {
-    PATCH_LOGI("BlocksPatch::ApplyPatch %p %zu %zu", patchInfo_.buffer, patchInfo_.start, patchInfo_.length);
+    PATCH_LOGI("BlocksPatch::ApplyPatch %zu %zu", patchInfo_.start, patchInfo_.length);
     PATCH_CHECK(patchInfo_.buffer != nullptr && patchInfo_.length > PATCH_MIN, return -1, "Invalid parm");
     BlockBuffer patchData = {patchInfo_.buffer + patchInfo_.start, patchInfo_.length - patchInfo_.start};
     PATCH_LOGI("Restore patch hash %zu %s",
@@ -120,9 +120,9 @@ int32_t BlocksPatch::ReadHeader(int64_t &controlDataSize, int64_t &diffDataSize,
 
     BlockBuffer patchBuffer = {header, patchInfo_.length - patchInfo_.start};
     controlDataReader_.reset(new BZip2BufferReadAdapter(offset, static_cast<size_t>(controlDataSize), patchBuffer));
-    offset += controlDataSize;
+    offset += static_cast<size_t>(controlDataSize);
     diffDataReader_.reset(new BZip2BufferReadAdapter(offset, static_cast<size_t>(diffDataSize), patchBuffer));
-    offset += diffDataSize;
+    offset += static_cast<size_t>(diffDataSize);
     extraDataReader_.reset(new BZip2BufferReadAdapter(offset,
         patchInfo_.length - patchInfo_.start - offset, patchBuffer));
     PATCH_CHECK(controlDataReader_ != nullptr && diffDataReader_ != nullptr && extraDataReader_ != nullptr,
@@ -196,7 +196,7 @@ int32_t BlocksStreamPatch::RestoreDiffData(const ControlData &ctrlData)
     int32_t ret = diffDataReader_->ReadData(diffBuffer);
     PATCH_CHECK(ret == 0, return ret, "Failed to read diff data");
 
-    size_t oldOffset = oldOffset_;
+    size_t oldOffset = static_cast<size_t>(oldOffset_);
     size_t oldLength = stream_->GetFileLength();
     PkgBuffer buffer {};
     if (stream_->GetStreamType() == PkgStream::PkgStreamType_MemoryMap ||
@@ -213,7 +213,7 @@ int32_t BlocksStreamPatch::RestoreDiffData(const ControlData &ctrlData)
     }
     for (int64_t i = 0; i < ctrlData.diffLength; i++) {
         if ((oldOffset_ + i >= 0) && (static_cast<size_t>(oldOffset_ + i) < oldLength)) {
-            diffData[i] += buffer.buffer[oldOffset + i];
+            diffData[i] += buffer.buffer[static_cast<int64_t>(oldOffset) + i];
         }
     }
     // write

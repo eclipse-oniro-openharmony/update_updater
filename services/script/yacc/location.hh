@@ -73,6 +73,7 @@ namespace uscript {
         counter_type line;
         /// Current column number.
         counter_type column;
+
     private:
         /// Compute max (min, lhs+rhs).
         static counter_type add_ (counter_type lhs, counter_type rhs, counter_type min)

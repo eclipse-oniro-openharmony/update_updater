@@ -25,9 +25,9 @@
 namespace updater {
 class RawWriter : public DataWriter {
 public:
-    virtual bool Write(const uint8_t *addr, size_t len, WriteMode mode, const std::string &partitionName);
+    bool Write(const uint8_t *addr, size_t len, const void *context = nullptr) override;
 
-    explicit RawWriter(const std::string partitionName) : offset_(0), fd_(-1), partitionName_(partitionName) {}
+    explicit RawWriter(const std::string path, uint64_t offset) : fd_(-1), path_(path), offset_(offset) {}
 
     virtual ~RawWriter()
     {
@@ -44,9 +44,9 @@ private:
     RawWriter(const RawWriter&) = delete;
 
     const RawWriter& operator=(const RawWriter&) = delete;
-    off64_t offset_;
     int fd_;
-    std::string partitionName_;
+    std::string path_;
+    off64_t offset_;
 };
 } // namespace updater
 #endif /* UPDATER_RAW_WRITER_H */

@@ -30,7 +30,8 @@ ScriptParams::~ScriptParams()
 
 ScriptParams* ScriptParams::CreateParams(UScriptExpression *expression)
 {
-    auto params = new ScriptParams();
+    auto params = new(std::nothrow) ScriptParams();
+    USCRIPT_CHECK(params != nullptr, return nullptr, "Create params failed");
     params->AddParams(expression);
     return params;
 }
@@ -38,7 +39,8 @@ ScriptParams* ScriptParams::CreateParams(UScriptExpression *expression)
 ScriptParams* ScriptParams::AddParams(ScriptParams *params, UScriptExpression *expression)
 {
     if (params == nullptr) {
-        params = new ScriptParams();
+        params = new(std::nothrow) ScriptParams();
+        USCRIPT_CHECK(params != nullptr, return nullptr, "Create params failed");
     }
     params->AddParams(expression);
     return params;

@@ -152,7 +152,7 @@ void ThreadPool::RunTask(Task &&task, int32_t index)
         *taskQueue_[index].subTaskFlag[i] = true;
     }
 
-    // Execute first task 
+    // Execute first task
     taskQueue_[index].task.processor(0);
     bool complete = true;
     do {

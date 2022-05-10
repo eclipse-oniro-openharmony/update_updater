@@ -34,7 +34,10 @@ int32_t WriteDataToFile(const std::string &fileName, const std::vector<uint8_t> 
 
 int32_t PatchMapFile(const std::string &fileName, MemMapInfo &info)
 {
-    int32_t file = open(fileName.c_str(), O_RDONLY);
+    char realPath[PATH_MAX] = {0x00};
+    char *get = realpath(fileName.c_str(), realPath);
+    PATCH_CHECK(get != nullptr, return -1, "Failed to get realpath %s", fileName.c_str());
+    int32_t file = open(realPath, O_RDONLY);
     PATCH_CHECK(file >= 0, return -1, "Failed to open file %s", fileName.c_str());
     struct stat st {};
     int32_t ret = fstat(file, &st);
@@ -42,7 +45,7 @@ int32_t PatchMapFile(const std::string &fileName, MemMapInfo &info)
 
     info.memory = static_cast<uint8_t*>(mmap(nullptr, st.st_size, PROT_READ, MAP_PRIVATE, file, 0));
     PATCH_CHECK(info.memory != nullptr, close(file); return -1, "Failed to memory map");
-    info.length = st.st_size;
+    info.length = static_cast<size_t>(st.st_size);
     close(file);
     return PATCH_SUCCESS;
 }

@@ -52,7 +52,7 @@ void ScriptInstructionHelper::ReleaseBasicInstructionHelper()
     g_instructionHelper = nullptr;
 }
 
-ScriptInstructionHelper::~ScriptInstructionHelper() 
+ScriptInstructionHelper::~ScriptInstructionHelper()
 {
     if (instrLib_ != nullptr) {
         dlclose(instrLib_);

@@ -53,11 +53,11 @@ int UpdatePartitions::ParsePartitionInfo(const std::string &partitionInfo, Parti
 
         cJSON* item = cJSON_GetObjectItem(thisPartition, "start");
         UPDATER_ERROR_CHECK(item != nullptr, "Error get start", free(myPartition); myPartition = nullptr; break);
-        myPartition->start = item->valueint;
+        myPartition->start = static_cast<size_t>(item->valueint);
 
         item = cJSON_GetObjectItem(thisPartition, "length");
         UPDATER_ERROR_CHECK(item != nullptr, "Error get length", free(myPartition); myPartition = nullptr; break);
-        myPartition->length = item->valueint;
+        myPartition->length = static_cast<size_t>(item->valueint);
         myPartition->partNum = 0;
         myPartition->devName = "mmcblk0px";
 
@@ -85,7 +85,7 @@ int UpdatePartitions::DoNewPartitions(PartitonList &newPartList)
     if (ret <= 0) {
         LOG(INFO) << "do_partitions FAIL ";
     } else if (ret == 1) {
-        LOG(INFO) << "partitions not changed, Skip";
+        LOG(INFO) << "partitions not changed,Skip.";
     } else if (ret > 1) {
         LOG(INFO) << "do_partitions success reboot";
 #ifndef UPDATER_UT
@@ -115,6 +115,9 @@ int32_t UpdatePartitions::Execute(uscript::UScriptEnv &env, uscript::UScriptCont
     UPDATER_ERROR_CHECK(info != nullptr, "Error to get file info", return USCRIPT_ERROR_EXECUTE);
     std::string tmpPath = "/data/updater";
     std::string tmpPath1 = tmpPath + filePath;
+    char realPath[PATH_MAX + 1] = {};
+    UPDATER_ERROR_CHECK(realpath(tmpPath1.c_str(), realPath) != nullptr,
+        "Error to create tmpPath1", return USCRIPT_ERROR_EXECUTE);
     ret = env.GetPkgManager()->CreatePkgStream(outStream,
         tmpPath1, info->unpackedSize, PkgStream::PkgStreamType_Write);
     UPDATER_ERROR_CHECK(ret == USCRIPT_SUCCESS && outStream != nullptr, "Error to create output stream",
@@ -122,14 +125,14 @@ int32_t UpdatePartitions::Execute(uscript::UScriptEnv &env, uscript::UScriptCont
     ret = env.GetPkgManager()->ExtractFile(filePath, outStream);
     UPDATER_ERROR_CHECK(ret == USCRIPT_SUCCESS, "Error to extract file",
         env.GetPkgManager()->ClosePkgStream(outStream); return USCRIPT_ERROR_EXECUTE);
-    FILE *fp = fopen(tmpPath1.c_str(), "rb");
+    FILE *fp = fopen(realPath, "rb");
     if (!fp) {
         LOG(ERROR) << "Open " << tmpPath1 << " failed: " << errno;
         env.GetPkgManager()->ClosePkgStream(outStream);
         return USCRIPT_ERROR_EXECUTE;
     }
     char partitionInfo[MAX_LOG_BUF_SIZE];
-    int32_t partitionCount = fread(partitionInfo, 1, MAX_LOG_BUF_SIZE, fp);
+    size_t partitionCount = fread(partitionInfo, 1, MAX_LOG_BUF_SIZE, fp);
     fclose(fp);
     if (partitionCount <= LEAST_PARTITION_COUNT) {
         env.GetPkgManager()->ClosePkgStream(outStream);

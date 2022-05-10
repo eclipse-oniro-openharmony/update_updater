@@ -59,6 +59,7 @@ public:
     {
         return nodeId_;
     }
+
 protected:
     int32_t Init(PkgManager::FileInfoPtr localFileInfo, const PkgManager::FileInfoPtr fileInfo,
         PkgStreamPtr inStream);
@@ -125,9 +126,11 @@ public:
     static int32_t ConvertStringToBuffer(const std::string &fileName, const PkgBuffer &buffer, size_t &realLen);
 
     void AddSignData(uint8_t digestMethod, size_t currOffset, size_t &signOffset);
+
 protected:
     PkgEntryPtr AddPkgEntry(const std::string& fileName);
     bool CheckState(std::vector<uint32_t> states, uint32_t state);
+
 protected:
     enum {
         PKG_FILE_STATE_IDLE = 0,

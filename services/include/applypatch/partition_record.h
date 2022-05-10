@@ -58,6 +58,7 @@ public:
     bool RecordPartitionUpdateStatus(const std::string &partitionName, bool status);
 
     bool ClearRecordPartitionOffset();
+
 private:
     PartitionRecord()
     {
@@ -65,6 +66,7 @@ private:
     }
 
     ~PartitionRecord() {}
+
 private:
     std::string GetMiscPartitionPath(const std::string &mountPoint = "/misc");
 

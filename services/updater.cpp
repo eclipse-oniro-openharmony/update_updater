@@ -71,6 +71,30 @@ int GetUpdatePackageInfo(PkgManager::PkgManagerPtr pkgManager, const std::string
     return PKG_SUCCESS;
 }
 
+static int OtaUpdatePreCheck(PkgManager::PkgManagerPtr pkgManager, const std::string &packagePath)
+{
+    if (pkgManager == nullptr) {
+        LOG(ERROR) << "Fail to GetPackageInstance";
+        return UPDATE_CORRUPT;
+    }
+    char realPath[PATH_MAX + 1] = {0};
+    if (realpath(packagePath.c_str(), realPath) == nullptr) {
+        return PKG_INVALID_FILE;
+    }
+    if (access(realPath, F_OK) != 0) {
+        LOG(ERROR) << "package does not exist!";
+        return PKG_INVALID_FILE;
+    }
+
+    int32_t ret = pkgManager->VerifyOtaPackage(packagePath, utils::GetCertName());
+    if (ret != PKG_SUCCESS) {
+        LOG(INFO) << "VerifyOtaPackage fail ret :"<< ret;
+        return ret;
+    }
+
+    return PKG_SUCCESS;
+}
+
 int UpdatePreProcess(PkgManager::PkgManagerPtr pkgManager, const std::string &path)
 {
     int ret = -1;
@@ -113,25 +137,80 @@ int UpdatePreProcess(PkgManager::PkgManagerPtr pkgManager, const std::string &pa
     return ret;
 }
 
-static void ProgressSmoothHandler()
+UpdaterStatus IsSpaceCapacitySufficient(const std::string &packagePath)
+{
+    PkgManager::PkgManagerPtr pkgManager = hpackage::PkgManager::CreatePackageInstance();
+    UPDATER_ERROR_CHECK(pkgManager != nullptr, "pkgManager is nullptr", return UPDATE_CORRUPT);
+    std::vector<std::string> fileIds;
+    int ret = pkgManager->LoadPackageWithoutUnPack(packagePath, fileIds);
+    UPDATER_ERROR_CHECK(ret == PKG_SUCCESS, "LoadPackageWithoutUnPack failed",
+        PkgManager::ReleasePackageInstance(pkgManager); return UPDATE_CORRUPT);
+
+    const FileInfo *info = pkgManager->GetFileInfo("update.bin");
+    UPDATER_ERROR_CHECK(info != nullptr, "update.bin is not exist",
+        PkgManager::ReleasePackageInstance(pkgManager); return UPDATE_CORRUPT);
+    PkgManager::ReleasePackageInstance(pkgManager);
+
+    struct statvfs64 updaterVfs;
+    if (access("/sdcard/updater", 0) == 0) {
+        UPDATER_ERROR_CHECK(statvfs64("/sdcard", &updaterVfs) >= 0, "Statvfs read /sdcard error!", return UPDATE_ERROR);
+    } else {
+        UPDATER_ERROR_CHECK(statvfs64("/data", &updaterVfs) >= 0, "Statvfs read /data error!", return UPDATE_ERROR);
+    }
+
+    auto freeSpaceSize = static_cast<uint64_t>(updaterVfs.f_bfree);
+    auto blockSize = static_cast<uint64_t>(updaterVfs.f_bsize);
+    uint64_t totalFreeSize = freeSpaceSize * blockSize;
+    if (totalFreeSize <= static_cast<uint64_t>(info->unpackedSize + MAX_LOG_SPACE)) {
+        LOG(ERROR) << "Can not update, free space is not enough";
+        ShowText(GetUpdateInfoLabel(), "free space is not enough...");
+        return UPDATE_ERROR;
+    }
+    return UPDATE_SUCCESS;
+}
+
+static inline void ProgressSmoothHandler()
 {
     while (g_tmpProgressValue < FULL_PERCENT_PROGRESS) {
-        int gap = FULL_PERCENT_PROGRESS - g_tmpProgressValue;
-        int increase = gap / PROGRESS_VALUE_CONST;
+        int increase = (FULL_PERCENT_PROGRESS - g_tmpProgressValue) / PROGRESS_VALUE_CONST;
         g_tmpProgressValue += increase;
         if (g_tmpProgressValue >= FULL_PERCENT_PROGRESS || increase == 0) {
             break;
-        } else {
-            if (GetProgressBar() != nullptr) {
-                GetProgressBar()->SetProgressValue(g_tmpProgressValue);
-            }
-            std::this_thread::sleep_for(std::chrono::milliseconds(SHOW_FULL_PROGRESS_TIME));
         }
+        if (GetProgressBar() != nullptr) {
+            GetProgressBar()->SetProgressValue(g_tmpProgressValue);
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(SHOW_FULL_PROGRESS_TIME));
     }
 }
 
+#ifdef UPDATER_USE_PTABLE
+bool PtableProcess(PkgManager::PkgManagerPtr pkgManager, PackageUpdateMode updateMode)
+{
+    DevicePtable& devicePtb = DevicePtable::GetInstance();
+    devicePtb.LoadPartitionInfo();
+    PackagePtable& packagePtb = PackagePtable::GetInstance();
+    packagePtb.LoadPartitionInfo(pkgManager);
+    if (!devicePtb.ComparePtable(packagePtb)) {
+        LOG(INFO) << "Ptable NOT changed, no need to process!";
+        return true;
+    }
+    if (updateMode == HOTA_UPDATE) {
+        if (devicePtb.ComparePartition(packagePtb, "USERDATA")) {
+            LOG(ERROR) << "Hota update not allow userdata partition change!";
+            return false;
+        }
+    }
+    if (!packagePtb.WritePtableToDevice()) {
+        LOG(ERROR) << "Ptable changed, write new ptable failed!";
+        return false;
+    }
+    return true;
+}
+#endif
+
 UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, const std::string &packagePath,
-    int retryCount)
+    int retryCount, PackageUpdateMode updateMode)
 {
     if (GetProgressBar() != nullptr) {
         GetProgressBar()->Hide();
@@ -140,12 +219,21 @@ UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, cons
     UPDATER_ERROR_CHECK(pkgManager != nullptr, "Fail to GetPackageInstance", return UPDATE_CORRUPT);
     TextLabel *updateInfoLabel = GetUpdateInfoLabel();
     UPDATER_ERROR_CHECK(updateInfoLabel != nullptr, "Fail to updateInfoLabel", return UPDATE_CORRUPT);
+    UPDATER_CHECK_ONLY_RETURN(SetupPartitions(updateMode) == 0,
+        ShowText(GetUpdateInfoLabel(), "Install failed...");
+        return UPDATE_ERROR);
 
     LOG(INFO) << "Verify package...";
     updateInfoLabel->SetText("Verify package...");
 
     UPDATER_ERROR_CHECK(access(packagePath.c_str(), 0) == 0, "package is not exist",
         ShowText(GetUpdateInfoLabel(), "package is not exist"); return UPDATE_CORRUPT);
+
+    int32_t verifyret = OtaUpdatePreCheck(pkgManager, packagePath);
+    UPDATER_ERROR_CHECK(verifyret == PKG_SUCCESS, "Verify ota package Fail...",
+        ShowText(GetUpdateInfoLabel(), "Verify ota package Fail...");
+        return UPDATE_CORRUPT);
+
     if (retryCount > 0) {
         LOG(INFO) << "Retry for " << retryCount << " time(s)";
     } else {
@@ -160,12 +248,19 @@ UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, cons
         }
     }
 
-    int32_t verifyret = GetUpdatePackageInfo(pkgManager, packagePath);
+    verifyret = GetUpdatePackageInfo(pkgManager, packagePath);
     UPDATER_ERROR_CHECK(verifyret == PKG_SUCCESS, "Verify package Fail...",
         ShowText(GetUpdateInfoLabel(), "Verify package Fail..."); return UPDATE_CORRUPT);
     LOG(INFO) << "Package verified. start to install package...";
     int32_t versionRet = UpdatePreProcess(pkgManager, packagePath);
     UPDATER_ERROR_CHECK(versionRet == PKG_SUCCESS, "Version Check Fail...", return UPDATE_CORRUPT);
+
+#ifdef UPDATER_USE_PTABLE
+    if (!PtableProcess(pkgManager, updateMode)) {
+        LOG(ERROR) << "Ptable process failed!";
+        return UPDATE_CORRUPT;
+    }
+#endif
 
     int maxTemperature;
     UpdaterStatus updateRet = StartUpdaterProc(pkgManager, packagePath, retryCount, maxTemperature);
@@ -245,7 +340,7 @@ static void HandleChildOutput(const std::string &buffer, int32_t bufferLen,
     } else if (outputHeader == "set_progress") {
         HandleProgressSet(output);
     } else {
-        LOG(DEBUG) << "Child process returns unexpected message: " << outputHeader;
+        LOG(DEBUG) << "Child process returns unexpected message.";
     }
 }
 

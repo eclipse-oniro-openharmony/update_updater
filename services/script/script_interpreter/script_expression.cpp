@@ -43,7 +43,7 @@ UScriptExpression* AssignExpression::AddIdentifier(UScriptExpression *expression
 
 // binary operator
 UScriptExpression* BinaryExpression::CreateExpression(ExpressionAction action,
-    UScriptExpression *left, 
+    UScriptExpression *left,
     UScriptExpression *right)
 {
     return new BinaryExpression(action, left, right);
@@ -128,7 +128,7 @@ UScriptValuePtr BinaryExpression::Execute(ScriptInterpreter &inter, UScriptConte
         left = left_->Execute(inter, local);
     }
 
-    if (action_ == OR_OPERATOR && left_ != nullptr && left->IsTrue()) {
+    if (action_ == OR_OPERATOR && left != nullptr && left->IsTrue()) {
         INTERPRETER_LOGE(inter, local, "BinaryExpression::Execute left:%s %s",
             UScriptValue::ScriptToString(left).c_str(), opStr[action_].c_str());
         return std::make_shared<IntegerValue>(1);

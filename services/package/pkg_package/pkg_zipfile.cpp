@@ -18,6 +18,7 @@
 #include "pkg_algorithm.h"
 #include "pkg_manager.h"
 #include "pkg_stream.h"
+#include "zip_pkg_parse.h"
 #include "zlib.h"
 
 namespace hpackage {
@@ -61,6 +62,7 @@ int32_t ZipPkgFile::AddEntry(const PkgManager::FileInfoPtr file, const PkgStream
 
 int32_t ZipPkgFile::SavePackage(size_t &signOffset)
 {
+    UNUSED(signOffset);
     PKG_CHECK(CheckState({PKG_FILE_STATE_WORKING}, PKG_FILE_STATE_CLOSE),
         return PKG_INVALID_STATE, "error state curr %d ", state_);
     int32_t ret = PKG_SUCCESS;
@@ -88,7 +90,7 @@ int32_t ZipPkgFile::SavePackage(size_t &signOffset)
     PKG_CHECK(ret == PKG_SUCCESS, return ret, "Failed to write CentralDirEntry for %s",
         pkgStream_->GetFileName().c_str());
     currentOffset_ = offset + sizeof(EndCentralDir);
-    AddSignData(pkgInfo_.digestMethod, currentOffset_, signOffset);
+    pkgStream_->Flush(currentOffset_);
     return PKG_SUCCESS;
 }
 
@@ -152,7 +154,7 @@ int32_t ZipPkgFile::LoadPackage(std::vector<std::string>& fileNames, VerifyFunct
     if (buffSize < sizeof(Zip64EndCentralDirRecord)) {
         buffSize = sizeof(Zip64EndCentralDirRecord);
     }
-    size_t signatureLen = SIGN_SHA256_LEN + SIGN_SHA384_LEN;
+    size_t signatureLen = 0;
     uint32_t magic = 0;
     uint32_t endDirLen = sizeof(EndCentralDir);
     size_t endDirPos = fileLen - endDirLen;
@@ -162,12 +164,16 @@ int32_t ZipPkgFile::LoadPackage(std::vector<std::string>& fileNames, VerifyFunct
     PKG_CHECK(ret == PKG_SUCCESS, return ret, "read EOCD struct failed %s", pkgStream_->GetFileName().c_str());
     magic = ReadLE32(buffer.buffer);
     if (magic != END_CENTRAL_SIGNATURE) { // 按签名处理
-        PKG_CHECK(fileLen >= static_cast<size_t>(sizeof(EndCentralDir) + signatureLen), return PKG_INVALID_FILE,
-            "Too small to be zip %s", pkgStream_->GetFileName().c_str());
+        size_t signatureStart = 0;
+        ZipPkgParse zipParse;
+        int32_t ret = zipParse.ParseZipPkg(pkgStream_, signatureStart, signatureLen);
+        PKG_CHECK(ret == PKG_SUCCESS, return ret, "Parse zip package signature failed");
+
         endDirPos -= signatureLen;
         ret = pkgStream_->Read(buffer, endDirPos, sizeof(EndCentralDir), readLen);
         PKG_CHECK(ret == PKG_SUCCESS, return ret, "read EOCD struct failed %s", pkgStream_->GetFileName().c_str());
     }
+
     return LoadPackage(fileNames, buffer, endDirLen, endDirPos, readLen);
 }
 
@@ -175,7 +181,7 @@ int32_t ZipPkgFile::ParseFileEntries(std::vector<std::string> &fileNames,
     const EndCentralDir &endDir, size_t currentPos, size_t fileLen)
 {
     int32_t ret = PKG_SUCCESS;
-    int32_t buffLen = MAX_FILE_NAME + sizeof(LocalFileHeader) + sizeof(DataDescriptor)
+    size_t buffLen = MAX_FILE_NAME + sizeof(LocalFileHeader) + sizeof(DataDescriptor)
         + sizeof(CentralDirEntry) + BIG_SIZE_HEADER;
     PkgBuffer buffer(buffLen);
 
@@ -285,7 +291,7 @@ int32_t ZipFileEntry::EncodeCentralDirEntry(const PkgStreamPtr stream, size_t st
     if (fileInfo_.method == Z_DEFLATED) {
         centralDir->flags |= GPBDD_FLAG_MASK;
     }
-    centralDir->compressionMethod = fileInfo_.method;
+    centralDir->compressionMethod = static_cast<uint16_t>(fileInfo_.method);
     centralDir->crc = crc32_;
     uint16_t date;
     uint16_t time;
@@ -318,7 +324,7 @@ int32_t ZipFileEntry::EncodeLocalFileHeader(uint8_t *buffer, size_t bufferLen, b
     header->signature = LOCAL_HEADER_SIGNATURE;
     header->versionNeeded = 0;
     header->flags = 0;
-    header->compressionMethod = fileInfo_.method;
+    header->compressionMethod = static_cast<uint16_t>(fileInfo_.method);
     uint16_t date;
     uint16_t time;
     ExtraTimeAndDate(fileInfo_.fileInfo.modifiedTime, date, time);
@@ -391,7 +397,7 @@ int32_t ZipFileEntry::DecodeCentralDirEntry(PkgStreamPtr inStream, PkgBuffer &bu
         "data not not enough %zu", readLen);
     fileInfo_.fileInfo.identity.assign(reinterpret_cast<char*>(buffer.buffer + sizeof(CentralDirEntry)),
                                        fileNameLength);
-    fileInfo_.method = ReadLE16(buffer.buffer + offsetof(CentralDirEntry, compressionMethod));
+    fileInfo_.method = static_cast<int32_t>(ReadLE16(buffer.buffer + offsetof(CentralDirEntry, compressionMethod)));
     uint16_t modifiedTime = ReadLE16(buffer.buffer + offsetof(CentralDirEntry, modifiedTime));
     uint16_t modifiedDate = ReadLE16(buffer.buffer + offsetof(CentralDirEntry, modifiedDate));
     CombineTimeAndDate(fileInfo_.fileInfo.modifiedTime, modifiedTime, modifiedDate);
@@ -405,7 +411,7 @@ int32_t ZipFileEntry::DecodeCentralDirEntry(PkgStreamPtr inStream, PkgBuffer &bu
         return PKG_SUCCESS;
     }
     uint8_t* extraData = buffer.buffer + nameSize + sizeof(CentralDirEntry);
-    int16_t headerId = ReadLE16(extraData);
+    uint16_t headerId = ReadLE16(extraData);
     if (headerId != 1) { // zip64 扩展
         return PKG_SUCCESS;
     }
@@ -479,7 +485,7 @@ int32_t ZipFileEntry::DecodeLocalFileHeader(PkgStreamPtr inStream, const PkgBuff
         return PKG_INVALID_PKG_FORMAT, "data not not enough %zu", readLen);
     std::string fileName(reinterpret_cast<char*>(data.buffer + sizeof(LocalFileHeader)), fileNameLength);
     uint16_t compressionMethod = ReadLE16(data.buffer + offsetof(LocalFileHeader, compressionMethod));
-    fileInfo_.method = compressionMethod;
+    fileInfo_.method = static_cast<int32_t>(compressionMethod);
     fileInfo_.level = Z_BEST_COMPRESSION;
     fileInfo_.method = Z_DEFLATED;
     fileInfo_.windowBits = -MAX_WBITS;

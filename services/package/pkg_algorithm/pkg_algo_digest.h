@@ -21,7 +21,7 @@
 namespace hpackage {
 constexpr uint32_t DIGEST_CRC_LEN = 4;
 constexpr uint32_t DIGEST_SHA256_LEN = 32;
-constexpr uint32_t DIGEST_SHA384_LEN = 48;
+constexpr uint32_t DIGEST_SHA384_LEN = 64;
 constexpr uint32_t SIGN_SHA256_LEN = 256;
 constexpr uint32_t SIGN_SHA384_LEN = 384;
 constexpr uint32_t SIGN_TOTAL_LEN = 384 + 256;

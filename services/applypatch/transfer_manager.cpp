@@ -53,6 +53,7 @@ TransferManager::~TransferManager()
 bool TransferManager::CommandsParser(int fd, const std::vector<std::string> &context)
 {
     UPDATER_ERROR_CHECK(context.size() >= 1, "too small context in transfer file", return false);
+    UPDATER_ERROR_CHECK(globalParams != nullptr, "globalParams is nullptr", return false);
     std::vector<std::string>::const_iterator ct = context.begin();
     globalParams->version = utils::String2Int<size_t>(*ct++, utils::N_DEC);
     globalParams->blockCount = utils::String2Int<size_t>(*ct++, utils::N_DEC);
@@ -60,15 +61,15 @@ bool TransferManager::CommandsParser(int fd, const std::vector<std::string> &con
     globalParams->maxBlocks = utils::String2Int<size_t>(*ct++, utils::N_DEC);
     size_t totalSize = globalParams->blockCount;
     std::string retryCmd = "";
-    if (globalParams != nullptr && globalParams->env != nullptr && globalParams->env->IsRetry()) {
+    if (globalParams->env != nullptr && globalParams->env->IsRetry()) {
         retryCmd = ReloadForRetry();
     }
     std::unique_ptr<Command> cmd;
-    int initBlock = 0;
+    size_t initBlock = 0;
     while (ct != context.end()) {
         cmd = std::make_unique<Command>();
         UPDATER_ERROR_CHECK(cmd != nullptr, "Failed to parse command line.", return false);
-        if (cmd->Init(*ct) && cmd->GetCommandType() != CommandType::LAST) {
+        if (cmd->Init(*ct) && cmd->GetCommandType() != CommandType::LAST && globalParams->env != nullptr) {
             if (!retryCmd.empty() && globalParams->env->IsRetry()) {
                 if (*ct == retryCmd) {
                     retryCmd.clear();
@@ -93,7 +94,7 @@ bool TransferManager::CommandsParser(int fd, const std::vector<std::string> &con
             }
             if (totalSize != 0 && globalParams->env != nullptr && NeedSetProgress(cmd->GetCommandType())) {
                 globalParams->env->PostMessage("set_progress",
-                    std::to_string((float)(globalParams->written - initBlock) / totalSize));
+                    std::to_string((static_cast<double>(globalParams->written) - initBlock) / totalSize));
             }
             LOG(INFO) << "Running command : " << cmd->GetArgumentByPos(0) << " success";
         }

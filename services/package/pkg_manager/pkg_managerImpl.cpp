@@ -25,8 +25,10 @@
 #include "pkg_lz4file.h"
 #include "pkg_manager.h"
 #include "pkg_upgradefile.h"
+#include "pkg_verify_util.h"
 #include "pkg_zipfile.h"
 #include "securec.h"
+#include "zip_pkg_parse.h"
 
 using namespace std;
 
@@ -41,7 +43,7 @@ constexpr int32_t DIGEST_FLAGS_SIGNATURE = 4;
 constexpr uint32_t VERIFY_FINSH_PERCENT = 100;
 constexpr uint32_t VERIFY_DIGEST_PERCENT = 50;
 
-static PkgManagerImpl *g_pkgManagerInstance = nullptr;
+static thread_local PkgManagerImpl *g_pkgManagerInstance = nullptr;
 PkgManager::PkgManagerPtr PkgManager::GetPackageInstance()
 {
     if (g_pkgManagerInstance == nullptr) {
@@ -52,9 +54,7 @@ PkgManager::PkgManagerPtr PkgManager::GetPackageInstance()
 
 PkgManager::PkgManagerPtr PkgManager::CreatePackageInstance()
 {
-    PkgManager::PkgManagerPtr impl = new PkgManagerImpl();
-    PKG_LOGI("CreatePackageInstance %p", impl);
-    return impl;
+    return new PkgManagerImpl();
 }
 
 void PkgManager::ReleasePackageInstance(PkgManager::PkgManagerPtr manager)
@@ -62,7 +62,6 @@ void PkgManager::ReleasePackageInstance(PkgManager::PkgManagerPtr manager)
     if (manager == nullptr) {
         return;
     }
-    PKG_LOGI("ReleasePackageInstance %p", manager);
     if (g_pkgManagerInstance == manager) {
         delete g_pkgManagerInstance;
         g_pkgManagerInstance = nullptr;
@@ -83,12 +82,14 @@ void PkgManagerImpl::ClearPkgFile()
     while (iter != pkgFiles_.end()) {
         PkgFilePtr file = (*iter);
         delete file;
+        file = nullptr;
         iter = pkgFiles_.erase(iter);
     }
     auto iter1 = pkgStreams_.begin();
     while (iter1 != pkgStreams_.end()) {
         PkgStreamPtr stream = (*iter1).second;
         delete stream;
+        stream = nullptr;
         iter1 = pkgStreams_.erase(iter1);
     }
 }
@@ -107,6 +108,7 @@ int32_t PkgManagerImpl::CreatePackage(const std::string &path, const std::string
     offset = (header->digestMethod == PKG_DIGEST_TYPE_SHA384) ? (offset + SIGN_SHA256_LEN) : offset;
     ret = Sign(pkgFile->GetPkgStream(), offset, header);
     delete pkgFile;
+    pkgFile = nullptr;
     return ret;
 }
 
@@ -124,6 +126,7 @@ int32_t PkgManagerImpl::CreatePackage(const std::string &path, const std::string
     offset = (header->digestMethod == PKG_DIGEST_TYPE_SHA384) ? (offset + SIGN_SHA256_LEN) : offset;
     ret = Sign(pkgFile->GetPkgStream(), offset, header);
     delete pkgFile;
+    pkgFile = nullptr;
     return ret;
 }
 
@@ -141,6 +144,7 @@ int32_t PkgManagerImpl::CreatePackage(const std::string &path, const std::string
     offset = (header->digestMethod == PKG_DIGEST_TYPE_SHA384) ? (offset + SIGN_SHA256_LEN) : offset;
     ret = Sign(pkgFile->GetPkgStream(), offset, header);
     delete pkgFile;
+    pkgFile = nullptr;
     return ret;
 }
 
@@ -169,6 +173,7 @@ int32_t PkgManagerImpl::CreatePackage(const std::string &path, PkgInfoPtr header
         ret = Sign(pkgFile->GetPkgStream(), offset, header);
     }
     delete pkgFile;
+    pkgFile = nullptr;
     return ret;
 }
 
@@ -196,11 +201,13 @@ PkgFilePtr PkgManagerImpl::CreatePackage(const std::string &path, PkgInfoPtr hea
     if (ret != PKG_SUCCESS) {
         ClosePkgStream(inputStream);
         delete pkgFile;
+        pkgFile = nullptr;
         return nullptr;
     }
     ret = pkgFile->SavePackage(offset);
     if (ret != PKG_SUCCESS) {
         delete pkgFile;
+        pkgFile = nullptr;
         return nullptr;
     }
     return pkgFile;
@@ -431,6 +438,10 @@ int32_t PkgManagerImpl::CreatePkgStream(PkgStreamPtr &stream, const std::string 
     stream = nullptr;
     if (type == PkgStream::PkgStreamType_Write || type == PkgStream::PkgStreamType_Read) {
         static char const *modeFlags[] = { "rb", "wb+" };
+        char realPath[PATH_MAX + 1] = {};
+        if (type == PkgStream::PkgStreamType_Read && realpath(fileName.c_str(), realPath) == nullptr) {
+            return PKG_INVALID_FILE;
+        }
         int32_t ret = CheckFile(fileName);
         PKG_CHECK(ret == PKG_SUCCESS, return ret, "Fail to check file %s ", fileName.c_str());
 
@@ -442,7 +453,11 @@ int32_t PkgManagerImpl::CreatePkgStream(PkgStreamPtr &stream, const std::string 
         }
 
         FILE *file = nullptr;
-        file = fopen(fileName.c_str(), modeFlags[type]);
+        if (type == PkgStream::PkgStreamType_Read) {
+            file = fopen(realPath, modeFlags[type]);
+        } else {
+            file = fopen(fileName.c_str(), modeFlags[type]);
+        }
         PKG_CHECK(file != nullptr, return PKG_INVALID_FILE, "Fail to open file %s ", fileName.c_str());
         stream = new FileStream(this, fileName, file, type);
     } else if (type == PkgStream::PkgStreamType_MemoryMap) {
@@ -494,8 +509,8 @@ void PkgManagerImpl::ClosePkgStream(PkgStreamPtr &stream)
 
 PkgFile::PkgType PkgManagerImpl::GetPkgTypeByName(const std::string &path)
 {
-    int32_t pos = path.find_last_of('.');
-    if (pos < 0) {
+    std::size_t pos = path.find_last_of('.');
+    if (pos == std::string::npos) {
         return PkgFile::PKG_TYPE_NONE;
     }
     std::string postfix = path.substr(pos + 1, -1);
@@ -526,7 +541,7 @@ int32_t PkgManagerImpl::VerifyPackage(const std::string &packagePath, const std:
     PKG_CHECK(fileLen > 0, ClosePkgStream(stream); return PKG_INVALID_FILE, "invalid file to load");
 
     PkgFile::PkgType type = GetPkgTypeByName(packagePath);
-    int8_t digestMethod = DigestAlgorithm::GetDigestMethod(version);
+    int8_t digestMethod = static_cast<int8_t>(DigestAlgorithm::GetDigestMethod(version));
     size_t digestLen = DigestAlgorithm::GetDigestLen(digestMethod);
     size_t signatureLen = DigestAlgorithm::GetSignatureLen(digestMethod);
     PKG_CHECK(digestLen == digest.length, return PKG_INVALID_PARAM, "Invalid digestLen");
@@ -723,5 +738,84 @@ void PkgManagerImpl::PostDecodeProgress(int type, size_t writeDataLen, const voi
     if (decodeProgress_ != nullptr) {
         decodeProgress_(type, writeDataLen, context);
     }
+}
+
+int32_t PkgManagerImpl::VerifyOtaPackage(const std::string &packagePath, const std::string &keyPath)
+{
+    size_t signatureStart = 0;
+    size_t signatureSize = 0;
+    char realPath[PATH_MAX + 1] = {0};
+    if (realpath(keyPath.c_str(), realPath) == nullptr) {
+        return PKG_INVALID_FILE;
+    }
+    if (access(realPath, F_OK) != 0) {
+        PKG_LOGE("%s does not exist!", keyPath.c_str());
+        return PKG_INVALID_FILE;
+    }
+
+    PkgStreamPtr pkgStream = nullptr;
+    int32_t ret = CreatePkgStream(pkgStream, packagePath, 0, PkgStream::PkgStreamType_Read);
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("CreatePackage fail %s", packagePath.c_str());
+        return ret;
+    }
+
+    ZipPkgParse zipParse;
+    ret = zipParse.ParseZipPkg(pkgStream, signatureStart, signatureSize);
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("Parse zip package signature failed.");
+        ClosePkgStream(pkgStream);
+        return ret;
+    }
+
+    PkgVerifyUtil verifyUtil(keyPath);
+    ret = verifyUtil.VerifyPkcs7SignedData(pkgStream, signatureStart, signatureSize);
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("Verify zpkcs7 signature failed.");
+        ClosePkgStream(pkgStream);
+        return ret;
+    }
+
+    ClosePkgStream(pkgStream);
+    return PKG_SUCCESS;
+}
+
+int32_t PkgManagerImpl::CreateSignContent(const std::string &packagePath, const std::string &signedPackage,
+    const std::string &keyPath, PkgInfoPtr header)
+{
+    int32_t ret = SetSignVerifyKeyName(keyPath);
+    if (ret != PKG_SUCCESS) {
+        return ret;
+    }
+    if (access(packagePath.c_str(), F_OK) != 0) {
+        PKG_LOGE("%s does not exist!", packagePath.c_str());
+        return PKG_INVALID_FILE;
+    }
+    PkgStreamPtr outStream = nullptr;
+    ret = CreatePkgStream(outStream, signedPackage, 0, PkgStream::PkgStreamType_Write);
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("CreatePackage fail %s", signedPackage.c_str());
+        return ret;
+    }
+    PkgStreamPtr inStream = nullptr;
+    ret = CreatePkgStream(inStream, packagePath, 0, PkgStream::PkgStreamType_Read);
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("CreatePackage fail %s", packagePath.c_str());
+        ClosePkgStream(outStream);
+        return ret;
+    }
+
+    SignPkg signPkg(inStream, keyPath, header->signMethod);
+    ret = signPkg.SignPackage(outStream);
+    if (ret != PKG_SUCCESS) {
+        ClosePkgStream(inStream);
+        ClosePkgStream(outStream);
+        PKG_LOGE("sign package failed, ret[%d]", ret);
+        return ret;
+    }
+
+    ClosePkgStream(inStream);
+    ClosePkgStream(outStream);
+    return PKG_SUCCESS;
 }
 } // namespace hpackage

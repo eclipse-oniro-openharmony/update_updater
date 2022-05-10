@@ -80,8 +80,8 @@ private:
     std::map<std::string, ScriptFunction*> functions_;
     std::vector<UScriptContextPtr> contextStack_;
     ScriptManagerImpl* scriptManager_ = nullptr;
-    Parser* parser_ = nullptr;
-    Scanner* scanner_ = nullptr;
+    std::unique_ptr<Parser> parser_;
+    std::unique_ptr<Scanner> scanner_;
     int32_t instanceId_ = 0;
 };
 } // namespace uscript

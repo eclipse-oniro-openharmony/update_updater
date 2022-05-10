@@ -324,7 +324,7 @@ int32_t BlockSet::WriteDiffToBlock(const Command &cmd, std::vector<uint8_t> &src
         UPDATER_ERROR_CHECK(writer.get() != nullptr, "Cannot create block writer, pkgdiff patch abort!", return -1);
         int32_t ret = updatepatch::UpdatePatch::ApplyImagePatch(patchParam, empty,
             [&](size_t start, const updatepatch::BlockBuffer &data, size_t size) -> int {
-                bool ret = writer->Write(data.buffer, size, WRITE_BLOCK, "");
+                bool ret = writer->Write(data.buffer, size);
                 return ret ? 0 : -1;
             }, cmd.GetArgumentByPos(pos + 1));
         writer.reset();
@@ -336,7 +336,7 @@ int32_t BlockSet::WriteDiffToBlock(const Command &cmd, std::vector<uint8_t> &src
         UPDATER_ERROR_CHECK(writer.get() != nullptr, "Cannot create block writer, pkgdiff patch abort!", return -1);
         auto ret = updatepatch::UpdatePatch::ApplyBlockPatch(patchInfo, {srcBuffer.data(), srcBuffSize},
             [&](size_t start, const updatepatch::BlockBuffer &data, size_t size) -> int {
-                bool ret = writer->Write(data.buffer, size, WRITE_BLOCK, "");
+                bool ret = writer->Write(data.buffer, size);
                 return ret ? 0 : -1;
             }, cmd.GetArgumentByPos(pos + 1));
         writer.reset();

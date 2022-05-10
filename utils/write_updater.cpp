@@ -31,8 +31,13 @@ int main(int argc, char **argv)
         return -1;
     }
 
+    const std::string miscFile = "/dev/block/by-name/misc";
     if (strcmp(argv[1], "updater") == 0) {
         struct UpdateMessage boot {};
+        if (argc < BINARY_MAX_ARGS) {
+            cout << "Please input correct updater command!" << endl;
+            return -1;
+        }
         if (argv[WRITE_SECOND_CMD] != nullptr) {
             if (snprintf_s(boot.update, sizeof(boot.update), sizeof(boot.update) - 1, "--update_package=%s",
                 argv[WRITE_SECOND_CMD]) == -1) {
@@ -40,7 +45,7 @@ int main(int argc, char **argv)
                 return -1;
             }
         }
-        bool ret = WriteUpdaterMessage(MISC_FILE, boot);
+        bool ret = WriteUpdaterMessage(miscFile, boot);
         if (!ret) {
             cout << "WriteUpdaterMessage failed!" << endl;
             return -1;
@@ -51,14 +56,14 @@ int main(int argc, char **argv)
             cout << "strncpy_s failed!" << endl;
             return -1;
         }
-        bool ret = WriteUpdaterMessage(MISC_FILE, boot);
+        bool ret = WriteUpdaterMessage(miscFile, boot);
         if (!ret) {
             cout << "WriteUpdaterMessage failed!" << endl;
             return -1;
         }
     } else if (strcmp(argv[1], "clear") == 0) {
         struct UpdateMessage boot {};
-        bool ret = WriteUpdaterMessage(MISC_FILE, boot);
+        bool ret = WriteUpdaterMessage(miscFile, boot);
         if (!ret) {
             cout << "WriteUpdaterMessage failed!" << endl;
             return -1;

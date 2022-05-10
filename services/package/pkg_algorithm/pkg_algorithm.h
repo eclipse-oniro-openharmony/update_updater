@@ -47,7 +47,7 @@ struct PkgAlgorithmContext {
     size_t unpackedSize = 0;
     uint32_t crc = 0;
     uint8_t digestMethod = 0;
-    uint8_t digest[DIGEST_MAX_LEN];
+    uint8_t digest[DIGEST_MAX_LEN] = {};
 
     PkgAlgorithmContext(PkgContextOffset offset, PkgContextSize size, uint32_t crc, uint8_t digestMethod)
     {

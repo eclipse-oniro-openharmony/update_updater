@@ -19,6 +19,7 @@
 #include "fs_manager/mount.h"
 #include "log/log.h"
 #include "securec.h"
+#include "updater/updater_const.h"
 
 namespace updater {
 bool WriteUpdaterMessage(const std::string &path, const UpdateMessage &boot)
@@ -32,8 +33,8 @@ bool WriteUpdaterMessage(const std::string &path, const UpdateMessage &boot)
     size_t ret = fwrite(&boot, sizeof(UpdateMessage), 1, fp);
     UPDATER_FILE_CHECK(ret == 1, "WriteUpdaterMessage fwrite failed", fclose(fp); return false);
 
-    ret = fclose(fp);
-    UPDATER_FILE_CHECK(ret == 0, "WriteUpdaterMessage fclose failed", return false);
+    int res = fclose(fp);
+    UPDATER_FILE_CHECK(res == 0, "WriteUpdaterMessage fclose failed", return false);
     return true;
 }
 
@@ -49,10 +50,26 @@ bool ReadUpdaterMessage(const std::string &path, UpdateMessage &boot)
     size_t ret = fread(&tempBoot, sizeof(UpdateMessage), 1, fp);
     UPDATER_FILE_CHECK(ret == 1, "ReadUpdaterMessage fwrite failed", fclose(fp); return false);
 
-    ret = fclose(fp);
-    UPDATER_FILE_CHECK(ret == 0, "ReadUpdaterMessage fclose failed", return false);
+    int res = fclose(fp);
+    UPDATER_FILE_CHECK(res == 0, "ReadUpdaterMessage fclose failed", return false);
     UPDATER_FILE_CHECK(!memcpy_s(&boot, sizeof(UpdateMessage), &tempBoot, sizeof(UpdateMessage)),
         "ReadUpdaterMessage memcpy failed", return false);
     return true;
+}
+
+bool WriteUpdaterMiscMsg(const UpdateMessage &boot)
+{
+    auto path = GetBlockDeviceByMountPoint(MISC_PATH);
+    UPDATER_INFO_CHECK(!path.empty(), "cannot get block device of partition", path = MISC_FILE);
+    LOG(INFO) << "WriteUpdaterMiscMsg::misc path : " << path;
+    return WriteUpdaterMessage(path, boot);
+}
+
+bool ReadUpdaterMiscMsg(UpdateMessage &boot)
+{
+    auto path = GetBlockDeviceByMountPoint(MISC_PATH);
+    UPDATER_INFO_CHECK(!path.empty(), "cannot get block device of partition", path = MISC_FILE);
+    LOG(INFO) << "ReadUpdaterMiscMsg::misc path : " << path;
+    return ReadUpdaterMessage(path, boot);
 }
 } // updater

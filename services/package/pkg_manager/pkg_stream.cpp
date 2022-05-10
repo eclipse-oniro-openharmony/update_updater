@@ -18,7 +18,6 @@
 #include <cstdlib>
 #include <memory>
 #include "pkg_manager.h"
-#include "pkg_manager_impl.h"
 #include "pkg_utils.h"
 #include "securec.h"
 
@@ -93,12 +92,9 @@ size_t FileStream::GetFileLength()
     PKG_CHECK(stream_ != nullptr, return 0, "Invalid stream");
     if (fileLength_ == 0) {
         PKG_CHECK(Seek(0, SEEK_END) == 0, return -1, "Invalid stream");
-        off_t pos = ftello(stream_);
-        if (pos < 0) {
-            PKG_LOGE("Failed to get file length, err = %d", errno);
-            return 0;
-        }
-        fileLength_ = static_cast<size_t>(pos);
+        off64_t ret = ftello64(stream_);
+        PKG_CHECK(ret >= 0, return PKG_INVALID_STREAM, "ftell64 failed");
+        fileLength_ = static_cast<size_t>(ret);
         fseek(stream_, 0, SEEK_SET);
     }
     return fileLength_;
@@ -115,6 +111,13 @@ int32_t FileStream::Flush(size_t size)
     PKG_CHECK(stream_ != nullptr, return PKG_INVALID_STREAM, "Invalid stream");
     if (fileLength_ == 0) {
         fileLength_ = size;
+    }
+    (void)fseek(stream_, 0, SEEK_END);
+    off64_t ret = ftello64(stream_);
+    PKG_CHECK(ret >= 0, return PKG_INVALID_STREAM, "ftell64 failed");
+    fileLength_ = static_cast<size_t>(ret);
+    if (size != fileLength_) {
+        PKG_LOGE("Flush size %zu local size:%zu", size, fileLength_);
     }
     PKG_CHECK(fflush(stream_) == 0, return PKG_INVALID_STREAM, "Invalid stream");
     return PKG_SUCCESS;
@@ -161,16 +164,17 @@ int32_t MemoryMapStream::Seek(long int offset, int whence)
     if (whence == SEEK_SET) {
         PKG_CHECK(offset >= 0, return PKG_INVALID_STREAM, "Invalid offset");
         PKG_CHECK(static_cast<size_t>(offset) <= memSize_, return PKG_INVALID_STREAM, "Invalid offset");
-        currOffset_ = offset;
+        currOffset_ = static_cast<size_t>(offset);
     } else if (whence == SEEK_CUR) {
         PKG_CHECK(static_cast<size_t>(offset) <= (memSize_ - currOffset_), return PKG_INVALID_STREAM,
             "Invalid offset");
-        currOffset_ += offset;
+        currOffset_ += static_cast<size_t>(offset);
     } else {
         PKG_CHECK(offset <= 0, return PKG_INVALID_STREAM, "Invalid offset");
-        PKG_CHECK((memSize_ + offset) <= memSize_, return PKG_INVALID_STREAM, "Invalid offset");
-        PKG_CHECK((memSize_ + offset) >= 0, return PKG_INVALID_STREAM, "Invalid offset");
-        currOffset_ = memSize_ + offset;
+        auto memSize = static_cast<long long>(memSize_);
+        PKG_CHECK((memSize + offset) <= memSize, return PKG_INVALID_STREAM, "Invalid offset");
+        PKG_CHECK((memSize + offset) >= 0, return PKG_INVALID_STREAM, "Invalid offset");
+        currOffset_ = static_cast<size_t>(memSize + offset);
     }
     return PKG_SUCCESS;
 }

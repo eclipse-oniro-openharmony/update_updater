@@ -57,6 +57,7 @@ public:
         const BlockBuffer &oldInfo, std::fstream &patchFile, size_t &patchSize);
 
     int32_t MakePatch(const BlockBuffer &newInfo, const BlockBuffer &oldInfo, size_t &patchSize);
+
 private:
     virtual std::unique_ptr<DeflateAdapter> CreateBZip2Adapter(size_t patchOffset) = 0;
     virtual int32_t WritePatchHeader(int64_t controlSize,
@@ -86,10 +87,11 @@ class BlocksStreamDiff : public BlocksDiff {
 public:
     BlocksStreamDiff(std::fstream &stream, size_t offset) : BlocksDiff(), stream_(stream), offset_(offset) {}
     ~BlocksStreamDiff() override {}
+
 private:
     std::unique_ptr<DeflateAdapter> CreateBZip2Adapter(size_t patchOffset) override;
     int32_t WritePatchHeader(int64_t controlSize,
-        int64_t diffDataSize, int64_t newSize, size_t &headerLen) override;
+        int64_t diffDataSize, int64_t newSize, size_t &patchOffset) override;
     std::fstream &stream_;
     size_t offset_ { 0 };
 };
@@ -99,10 +101,11 @@ public:
     BlocksBufferDiff(std::vector<uint8_t> &patchData, size_t offset)
         : BlocksDiff(), patchData_(patchData), offset_(offset) {}
     ~BlocksBufferDiff() override {}
+
 private:
     std::unique_ptr<DeflateAdapter> CreateBZip2Adapter(size_t patchOffset) override;
     int32_t WritePatchHeader(int64_t controlSize,
-        int64_t diffDataSize, int64_t newSize, size_t &headerLen) override;
+        int64_t diffDataSize, int64_t newSize, size_t &patchOffset) override;
     std::vector<uint8_t> &patchData_;
     size_t offset_ { 0 };
 };

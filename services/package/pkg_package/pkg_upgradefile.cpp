@@ -370,7 +370,8 @@ int32_t UpgradeFileEntry::EncodeHeader(PkgStreamPtr inStream, size_t startOffset
     size_t len = 0;
     int32_t ret = PkgFile::ConvertStringToBuffer(
         fileInfo_.fileInfo.identity, {comp.address, sizeof(comp.address)}, len);
-    ret |= PkgFile::ConvertStringToBuffer(fileInfo_.version, {comp.version, sizeof(comp.version)}, len);
+    PKG_CHECK(ret == PKG_SUCCESS, return PKG_INVALID_PARAM, "outStream or inStream null for %s", fileName_.c_str());
+    ret = PkgFile::ConvertStringToBuffer(fileInfo_.version, {comp.version, sizeof(comp.version)}, len);
     PKG_CHECK(ret == PKG_SUCCESS, return PKG_INVALID_PARAM, "outStream or inStream null for %s", fileName_.c_str());
 
     ret = memcpy_s(comp.digest, sizeof(comp.digest), fileInfo_.digest, sizeof(fileInfo_.digest));

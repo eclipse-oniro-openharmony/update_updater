@@ -122,7 +122,7 @@ private:
 
 class StageLogger {
 public:
-    StageLogger(int stage) : stage_(stage) { }
+    StageLogger(int stage) : stage_(stage) {}
 
     ~StageLogger();
 
@@ -133,9 +133,9 @@ private:
 
 class ErrorCode {
 public:
-    ErrorCode(enum UpdaterErrorCode level)     {}
+    ErrorCode(enum UpdaterErrorCode level) {}
 
-    ~ErrorCode() {};
+    ~ErrorCode() {}
 
     std::ostream& OutputErrorCode(const std::string &path, int line, UpdaterErrorCode code);
 };

@@ -489,8 +489,6 @@ static const flex_int16_t yy_chk[168] = {
 
 #include <cerrno>
 #include <climits>
-#include <cstdlib>
-#include <iostream>
 #include <string>
 #include "parser.hpp"  // 包含由parser.y生成的头文件
 #include "scanner.h"   // 包含yyFlexLexer子类的头文件
@@ -549,7 +547,7 @@ static int yy_flex_strlen(const char *);
  * is returned in "result".
  */
 #ifndef YY_INPUT
-#define YY_INPUT(buf,result,max_size) \
+#define YY_INPUT(buf, result, max_size) \
     if ((int)(result = LexerInput((char *)buf, max_size)) < 0)\
         YY_FATAL_ERROR("input in flex scanner failed");
 #endif
@@ -839,7 +837,8 @@ do_action:    /* This label is used only to access EOF actions. */
                     YY_BREAK
                 case 34:
                     YY_RULE_SETUP {
-                        return Parser::make_NUMBER(std::strtol(yytext,(&yytext+yyleng), 10),loc);
+                        const int decimal = 10;
+                        return Parser::make_NUMBER(std::strtol(yytext, (&yytext + yyleng), decimal), loc);
                     }
                     YY_BREAK
                 case 35:
@@ -1337,14 +1336,13 @@ int yyFlexLexer::yyinput()
 
 /** Immediately switch to a different input stream.
  * @param input_file A readable stream.
- * 
+ *
  * @note This function does not reset the start condition to @c INITIAL .
  */
 void yyFlexLexer::yyrestart(std::istream& input_file)
 {
-    
     if (!YY_CURRENT_BUFFER) {
-        yyensure_buffer_stack ();
+        yyensure_buffer_stack();
         YY_CURRENT_BUFFER_LVALUE =
             yy_create_buffer(yyin, YY_BUF_SIZE);
     }

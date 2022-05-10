@@ -55,6 +55,10 @@ bool ReadFully(int fd, void* data, size_t size);
 bool ReadFileToString(int fd, std::string &content);
 bool WriteStringToFile(int fd, const std::string& content);
 std::string GetLocalBoardId();
+bool CopyUpdaterLogs(const std::string &sLog, const std::string &dLog);
+void CompressLogs(const std::string &name);
+void WriteOtaResult(const int status);
+void UsSleep(int usec);
 } // utils
 } // updater
 #endif // UPDATER_UTILS_H

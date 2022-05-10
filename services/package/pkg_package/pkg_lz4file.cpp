@@ -130,6 +130,7 @@ int32_t Lz4PkgFile::AddEntry(const PkgManager::FileInfoPtr file, const PkgStream
     PKG_CHECK(ret == PKG_SUCCESS, return ret, "Fail Pack for %s", file->identity.c_str());
     currentOffset_ += encodeLen;
     PKG_LOGI("offset:%zu ", currentOffset_);
+    pkgStream_->Flush(currentOffset_);
     return PKG_SUCCESS;
 }
 

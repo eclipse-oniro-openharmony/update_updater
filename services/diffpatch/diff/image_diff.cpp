@@ -452,7 +452,7 @@ int32_t Lz4ImageDiff::TestAndSetConfig(const BlockBuffer &buffer, const std::str
     const FileInfo *fileInfo = newParser_->GetFileInfo(fileName);
     PATCH_CHECK(fileInfo != nullptr, return -1, "Failed to get file info");
     Lz4FileInfo *info = (Lz4FileInfo *)fileInfo;
-    method_ = info->fileInfo.packMethod;
+    method_ = static_cast<int32_t>(info->fileInfo.packMethod);
     compressionLevel_ = info->compressionLevel;
     blockIndependence_ = info->blockIndependence;
     contentChecksumFlag_ = info->contentChecksumFlag;
