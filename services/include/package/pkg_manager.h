@@ -275,6 +275,9 @@ public:
 
     virtual int32_t VerifyOtaPackage(const std::string &packagePath, const std::string &keyPath) = 0;
 
+    virtual int32_t VerifyBinFile(const std::string &packagePath, const std::string &keyPath,
+        const std::string &version, const PkgBuffer &digest) = 0;
+
     /**
      * Get the information about the update package.
      *
