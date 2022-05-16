@@ -157,7 +157,7 @@ Parser::Parser(uscript::Scanner* scanner_yyarg, uscript::ScriptInterpreter* inte
         that.clear();
     }
 
-    Parser::by_state::by_state(state_type s) YY_NOEXCEPT
+    Parser::by_state::by_state(kind_type s) YY_NOEXCEPT
         : state(s) {}
 
     Parser::symbol_kind_type
@@ -309,16 +309,16 @@ Parser::Parser(uscript::Scanner* scanner_yyarg, uscript::ScriptInterpreter* inte
 #endif
     }
 
-    Parser::stack_symbol_type::stack_symbol_type(state_type s, YY_MOVE_REF (symbol_type)that)
-        : super_type(s, YY_MOVE(that.location))
+    Parser::stack_symbol_type::stack_symbol_type(state_type s, YY_MOVE_REF (symbol_type)sym)
+        : super_type(s, YY_MOVE(sym.location))
     {
-        switch(that.kind()) {
+        switch(sym.kind()) {
             case symbol_kind::S_function_definition: // function_definition
-                value.move< ScriptFunction* > (YY_MOVE (that.value));
+                value.move< ScriptFunction* > (YY_MOVE (sym.value));
                 break;
 
             case symbol_kind::S_arglist: // arglist
-                value.move< ScriptParams* > (YY_MOVE (that.value));
+                value.move< ScriptParams* > (YY_MOVE (sym.value));
                 break;
 
             case symbol_kind::S_definition_or_statement: // definition_or_statement
@@ -338,7 +338,7 @@ Parser::Parser(uscript::Scanner* scanner_yyarg, uscript::ScriptInterpreter* inte
             case symbol_kind::S_arg: // arg
                 /* fallthrough */
             case symbol_kind::S_expression_option: // expression_option
-                value.move< UScriptExpression* > (YY_MOVE (that.value));
+                value.move< UScriptExpression* > (YY_MOVE (sym.value));
                 break;
 
             case symbol_kind::S_statement: // statement
@@ -356,21 +356,21 @@ Parser::Parser(uscript::Scanner* scanner_yyarg, uscript::ScriptInterpreter* inte
             case symbol_kind::S_continue_statement: // continue_statement
                 /* fallthrough */
             case symbol_kind::S_return_statement: // return_statement
-                value.move< UScriptStatement* > (YY_MOVE (that.value));
+                value.move< UScriptStatement* > (YY_MOVE (sym.value));
                 break;
 
             case symbol_kind::S_statement_list: // statement_list
                 /* fallthrough */
             case symbol_kind::S_block: // block
-                value.move< UScriptStatementList* > (YY_MOVE (that.value));
+                value.move< UScriptStatementList* > (YY_MOVE (sym.value));
                 break;
 
             case symbol_kind::S_FLOAT: // FLOAT
-                value.move< float > (YY_MOVE (that.value));
+                value.move< float > (YY_MOVE (sym.value));
                 break;
 
             case symbol_kind::S_NUMBER: // NUMBER
-                value.move< int > (YY_MOVE (that.value));
+                value.move< int > (YY_MOVE (sym.value));
                 break;
 
             case symbol_kind::S_VAR: // VAR
@@ -434,14 +434,14 @@ Parser::Parser(uscript::Scanner* scanner_yyarg, uscript::ScriptInterpreter* inte
             case symbol_kind::S_COMMA: // COMMA
                 /* fallthrough */
             case symbol_kind::S_STRING: // STRING
-                value.move< string > (YY_MOVE (that.value));
+                value.move< string > (YY_MOVE (sym.value));
                 break;
 
             default:
                 break;
         }
-        // that is emptied.
-        that.kind_ = symbol_kind::S_YYEMPTY;
+        // sym is emptied.
+        sym.kind_ = symbol_kind::S_YYEMPTY;
     }
 
 #if YY_CPLUSPLUS < 201103L
@@ -1561,9 +1561,9 @@ yyreturn:
 #endif // YY_EXCEPTIONS
     }
 
-    void Parser::error(const syntax_error& yyexc)
+    void Parser::error(const syntax_error& err)
     {
-        error(yyexc.location, yyexc.what());
+        error(err.location, err.what());
     }
 
     /* Return YYSTR after stripping away unnecessary quotes and

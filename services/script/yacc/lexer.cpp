@@ -271,9 +271,9 @@ struct yy_buffer_state {
  */
 #define YY_CURRENT_BUFFER_LVALUE (yy_buffer_stack)[(yy_buffer_stack_top)]
 
-void *yyalloc(yy_size_t);
-void *yyrealloc(void *, yy_size_t);
-void yyfree(void *);
+void *yyalloc(yy_size_t size);
+void *yyrealloc(void *ptr, yy_size_t size);
+void yyfree(void *ptr);
 
 #define yy_new_buffer yy_create_buffer
 #define yy_set_interactive(is_interactive)\
