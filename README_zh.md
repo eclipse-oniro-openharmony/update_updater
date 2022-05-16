@@ -86,9 +86,9 @@ b、 产品中添加需要编译的组件
 
 升级子系统
 
-**update\_updater**
+[**update\_updater**](https://gitee.com/openharmony/update_updater)
 
-build
+[build](https://gitee.com/openharmony/build)
 
-productdefine\_common
+[productdefine\_common](https://gitee.com/openharmony/productdefine_common)
 
