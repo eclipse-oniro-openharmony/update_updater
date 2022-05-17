@@ -592,10 +592,14 @@ int32_t PkgManagerImpl::GenerateFileDigest(PkgStreamPtr stream,
         PkgBuffer data(SIGN_TOTAL_LEN);
         PKG_IS_TRUE_DONE(flags & DIGEST_FLAGS_NO_SIGN, algorithmInner->Update(data, SIGN_TOTAL_LEN));
     }
-    PKG_IS_TRUE_DONE(flags & DIGEST_FLAGS_HAS_SIGN,
-        PkgBuffer result(digestInfos[DIGEST_INFO_HAS_SIGN].data(), digestLen); algorithm->Final(result));
-    PKG_IS_TRUE_DONE(flags & DIGEST_FLAGS_NO_SIGN,
-        PkgBuffer result(digestInfos[DIGEST_INFO_NO_SIGN].data(), digestLen); algorithmInner->Final(result));
+    if (flags & DIGEST_FLAGS_HAS_SIGN) {
+        PkgBuffer result(digestInfos[DIGEST_INFO_HAS_SIGN].data(), digestLen);
+        algorithm->Final(result);
+    }
+    if (lags & DIGEST_FLAGS_NO_SIGN) {
+        PkgBuffer result(digestInfos[DIGEST_INFO_NO_SIGN].data(), digestLen);
+	algorithmInner->Final(result);
+    }
     if (flags & DIGEST_FLAGS_SIGNATURE) {
         if (digestMethod == PKG_DIGEST_TYPE_SHA256) {
             PKG_CHECK(!memcpy_s(digestInfos[DIGEST_INFO_SIGNATURE].data(), signatureLen, buff.buffer, signatureLen),
@@ -801,7 +805,10 @@ int32_t PkgManagerImpl::VerifyBinFile(const std::string &packagePath, const std:
     int8_t digestMethod = static_cast<int8_t>(DigestAlgorithm::GetDigestMethod(version));
     size_t digestLen = DigestAlgorithm::GetDigestLen(digestMethod);
     size_t signatureLen = DigestAlgorithm::GetSignatureLen(digestMethod);
-    PKG_CHECK(digestLen == digest.length, return PKG_INVALID_PARAM, "Invalid digestLen");
+    if (digestLen != digest.length) {
+        PKG_LOGE("Invalid digestLen");
+        return PKG_INVALID_PARAM;
+    }
     std::vector<std::vector<uint8_t>> digestInfos(DIGEST_INFO_SIGNATURE + 1);
     digestInfos[DIGEST_INFO_HAS_SIGN].resize(digestLen);
     digestInfos[DIGEST_INFO_NO_SIGN].resize(digestLen);
