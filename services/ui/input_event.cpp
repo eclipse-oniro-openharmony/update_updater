@@ -170,7 +170,7 @@ int HandleInputEvent(const struct input_event *iev)
     return 0;
 }
 
-void ReportEventPkgCallback(const EventPackage **pkgs, const uint32_t count, uint32_t devIndex)
+void ReportEventPkgCallback(const InputEventPackage **pkgs, const uint32_t count, uint32_t devIndex)
 {
     if (pkgs == nullptr || *pkgs == nullptr || !g_menuFrame->IsVisiable()) {
         return;

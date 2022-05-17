@@ -22,7 +22,7 @@
 namespace updater {
 void TouchToKey(const int dx, const int dy);
 int HandleInputEvent(const struct input_event *iev);
-void ReportEventPkgCallback(const EventPackage **pkgs, const uint32_t count, uint32_t devIndex);
+void ReportEventPkgCallback(const InputEventPackage **pkgs, const uint32_t count, uint32_t devIndex);
 int HdfInit();
 } // namespace updater
 #endif // UPDATER_UI_INPUT_EVENT_H
