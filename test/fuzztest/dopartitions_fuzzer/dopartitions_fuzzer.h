@@ -13,15 +13,9 @@
  * limitations under the License.
  */
 
-#ifndef UPDATER_FACTORY_RESET_FUZZER_H
-#define UPDATER_FACTORY_RESET_FUZZER_H
-#include <climits>
-#include <cstdint>
-#include <cstdio>
-#include <cstdlib>
-#include <fcntl.h>
-#include <unistd.h>
+#ifndef DO_PARTTIONS_FUZZER_H
+#define DO_PARTTIONS_FUZZER_H
 
-#define FUZZ_PROJECT_NAME "UpdaterFactoryReset_fuzzer"
+#define FUZZ_PROJECT_NAME "dopartitions_fuzzer"
 
-#endif /* UPDATER_FACTORY_RESET_FUZZER_H */
+#endif /* DO_PARTTIONS_FUZZER_H */

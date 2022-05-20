@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "DoPartitions_fuzzer.h"
+#include "readfstabfromfile_fuzzer.h"
 
 #include <array>
 #include <cstddef>
@@ -21,37 +21,29 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include "fs_manager/fs_manager.h"
 #include "log/log.h"
-#include "partitions.h"
-#include "securec.h"
 
 using namespace updater;
-namespace {
-static constexpr int FSTAB_NAME_LENGTH = 20;
-}
-static void InitEmmcPartition(struct Partition &part, const std::string &partName, size_t start, size_t length)
-{
-    part.partName = partName;
-    part.start = start;
-    part.length = length;
-    /* Paramters below just give a random values, DoPartition will ignore the values. */
-    part.devName = "mmcblk0px";
-    part.fsType = "emmc";
-}
 
 namespace OHOS {
-    bool FuzzDoPartitions(const uint8_t* data, size_t size)
+    bool FuzzReadFstabFromFile(const uint8_t* data, size_t size)
     {
-        PartitonList nList;
-        struct Partition myPaty;
-        memset_s(&myPaty, sizeof(struct Partition), 0, sizeof(struct Partition));
+        FILE *pFile;
+        Fstab *fstab = NULL;
+        const std::string fstabFile = "ReadFstabFromFile.txt";
 
-        if (size < FSTAB_NAME_LENGTH) {  /* fstable name length */
-            InitEmmcPartition(myPaty, reinterpret_cast<const char*>(data), 0, size);
-            nList.push_back(&myPaty);
-            DoPartitions(nList);
+        pFile = fopen("ReadFstabFromFile.txt", "w+");
+        if (pFile == nullptr) {
+            LOG(ERROR) << "[fuzz]open file failed";
+            return -1;
         }
 
+        (void)fwrite(data, 1, size, pFile);
+        (void)fclose(pFile);
+        fstab = ReadFstabFromFile(fstabFile.c_str(), false);
+        (void)remove("ReadFstabFromFile.txt");
+        ReleaseFstab(fstab);
         return 0;
     }
 }
@@ -60,7 +52,6 @@ namespace OHOS {
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    OHOS::FuzzDoPartitions(data, size);
+    OHOS::FuzzReadFstabFromFile(data, size);
     return 0;
 }
-

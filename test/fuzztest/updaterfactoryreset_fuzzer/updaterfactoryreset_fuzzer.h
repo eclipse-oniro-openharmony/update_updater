@@ -13,15 +13,9 @@
  * limitations under the License.
  */
 
-#ifndef READ_FSTAB_FROM_FILE_FUZZER_H
-#define READ_FSTAB_FROM_FILE_FUZZER_H
-#include <climits>
-#include <cstdint>
-#include <cstdio>
-#include <cstdlib>
-#include <fcntl.h>
-#include <unistd.h>
+#ifndef UPDATER_FACTORY_RESET_FUZZER_H
+#define UPDATER_FACTORY_RESET_FUZZER_H
 
-#define FUZZ_PROJECT_NAME "ReadFstabFromFile_fuzzer"
+#define FUZZ_PROJECT_NAME "updaterfactoryreset_fuzzer"
 
-#endif /* READ_FSTAB_FROM_FILE_FUZZER_H */
+#endif /* UPDATER_FACTORY_RESET_FUZZER_H */

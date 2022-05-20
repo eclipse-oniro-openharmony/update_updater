@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "ExtractAndExecuteScript_fuzzer.h"
+#include "extractandexecutescript_fuzzer.h"
 
 #include <array>
 #include <cstddef>
@@ -303,11 +303,11 @@ namespace OHOS {
             return -1;
         }
 
-        fwrite(data, 1, size, pFile);
-        fclose(pFile);
+        (void)fwrite(data, 1, size, pFile);
+        (void)fclose(pFile);
 
         ExtractAndExecuteScriptFun(inputFile);
-        remove("test_script.us");
+        (void)remove("test_script.us");
         return 0;
     }
 }
