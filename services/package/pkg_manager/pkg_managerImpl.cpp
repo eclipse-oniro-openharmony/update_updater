@@ -801,7 +801,10 @@ int32_t PkgManagerImpl::VerifyBinFile(const std::string &packagePath, const std:
     int8_t digestMethod = static_cast<int8_t>(DigestAlgorithm::GetDigestMethod(version));
     size_t digestLen = DigestAlgorithm::GetDigestLen(digestMethod);
     size_t signatureLen = DigestAlgorithm::GetSignatureLen(digestMethod);
-    PKG_CHECK(digestLen == digest.length, return PKG_INVALID_PARAM, "Invalid digestLen");
+    if (digestLen != digest.length) {
+        PKG_LOGE("Invalid digestLen");
+        return PKG_INVALID_PARAM;
+    }
     std::vector<std::vector<uint8_t>> digestInfos(DIGEST_INFO_SIGNATURE + 1);
     digestInfos[DIGEST_INFO_HAS_SIGN].resize(digestLen);
     digestInfos[DIGEST_INFO_NO_SIGN].resize(digestLen);

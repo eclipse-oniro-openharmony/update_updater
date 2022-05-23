@@ -50,8 +50,7 @@ std::unique_ptr<DataWriter> DataWriter::CreateDataWriter(WriteMode mode, const s
     uint64_t offset)
 {
     switch (mode) {
-        case WRITE_RAW:
-        {
+        case WRITE_RAW: {
             std::unique_ptr<RawWriter> writer(std::make_unique<RawWriter>(path, offset));
             return std::move(writer);
         }
