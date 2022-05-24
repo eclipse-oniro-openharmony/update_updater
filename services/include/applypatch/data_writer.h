@@ -32,7 +32,7 @@ enum WriteMode : int {
 class DataWriter {
 public:
     using DataWriterPtr = DataWriter *;
-    virtual bool Write(const uint8_t *addr, size_t len, const void *context = nullptr) = 0;
+    virtual bool Write(const uint8_t *addr, size_t len, const void *context) = 0;
     virtual ~DataWriter() {}
     static std::unique_ptr<DataWriter> CreateDataWriter(WriteMode mode, const std::string &path, UpdaterEnv *env,
         uint64_t offset = 0);

@@ -72,7 +72,7 @@ int32_t Store::CreateNewSpace(const std::string &path, bool needClear)
             if (DeleteFile(*iter) == 0) {
                 LOG(INFO) << "Delete " << *iter;
             }
-            iter++;
+            ++iter;
         }
         files.clear();
     }
@@ -95,7 +95,7 @@ int32_t Store::WriteDataToStore(const std::string &dirPath, const std::string &f
     UPDATER_ERROR_CHECK(fchown(fd, O_USER_GROUP_ID, O_USER_GROUP_ID) == 0,
         "Failed to chown", close(fd); return -1);
     LOG(INFO) << "Writing " << size << " blocks to " << path;
-    if (size < 0 || !WriteFully(fd, const_cast<uint8_t *>(buffer.data()), static_cast<size_t>(size))) {
+    if (size < 0 || !WriteFully(fd, buffer.data(), static_cast<size_t>(size))) {
         UPDATER_CHECK_ONLY_RETURN(errno != EIO, close(fd); return 1);
         LOG(ERROR) << "Write to stash failed";
         close(fd);

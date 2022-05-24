@@ -112,7 +112,7 @@ int Partition::DoErase()
         FLASHING_CHECK(ret >= 0,
             flash_->RecordMsg(updater::ERROR, "Failed to erase \"%s\" error: %s", partName_.c_str(), strerror(errno));
             return ret, "Failed to erase %s error: %s", partName_.c_str(), strerror(errno));
-        std::vector<char> buffer(BLOCK_SIZE, 0);
+        std::vector<uint8_t> buffer(BLOCK_SIZE, 0);
 #ifndef UPDATER_UT
         ret = updater::utils::WriteFully(fd_, buffer.data(), buffer.size());
 #endif

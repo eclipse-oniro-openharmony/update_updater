@@ -105,7 +105,7 @@ int64_t GetFilesFromDirectory(const std::string &path, std::vector<std::string> 
     return totalSize;
 }
 
-std::vector<std::string> SplitString(const std::string &str, const std::string del)
+std::vector<std::string> SplitString(const std::string &str, const std::string &del)
 {
     std::vector<std::string> result;
     size_t found = std::string::npos;
@@ -223,21 +223,20 @@ std::string GetCertName()
     return signingCertName;
 }
 
-bool WriteFully(int fd, const void *data, size_t size)
+bool WriteFully(int fd, const uint8_t *data, size_t size)
 {
     ssize_t written = 0;
     size_t rest = size;
 
-    auto p = reinterpret_cast<const uint8_t*>(data);
     while (rest > 0) {
         do {
-            written = write(fd, p, rest);
+            written = write(fd, data, rest);
         } while (written < 0 && errno == EINTR);
 
         if (written < 0) {
             return false;
         }
-        p += written;
+        data += written;
         rest -= static_cast<size_t>(written);
     }
     return true;

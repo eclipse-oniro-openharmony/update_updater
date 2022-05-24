@@ -102,7 +102,7 @@ int UScriptInstructionRawImageWrite::RawImageWriteProcessor(const PkgBuffer &buf
         return PKG_SUCCESS;
     }
 
-    bool ret = writer->Write(const_cast<uint8_t*>(buffer.buffer), size);
+    bool ret = writer->Write(const_cast<uint8_t*>(buffer.buffer), size, nullptr);
     if (!ret) {
         LOG(ERROR) << "Write " << size << " byte(s) failed";
         return PKG_INVALID_STREAM;

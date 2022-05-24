@@ -24,7 +24,7 @@
 namespace updater {
 class BlockWriter : public DataWriter {
 public:
-    bool Write(const uint8_t *addr, size_t len, const void *context = nullptr) override;
+    bool Write(const uint8_t *addr, size_t len, const void *context) override;
     virtual ~BlockWriter() {}
     BlockWriter(int fd, BlockSet& bs) : fd_(fd), bs_(bs), totalWritten_(0), blockIndex_(0),
         currentBlockLeft_(0) {}
