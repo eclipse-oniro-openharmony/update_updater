@@ -278,6 +278,7 @@ static int32_t ExecuteUpdateBlock(uscript::UScriptEnv &env, uscript::UScriptCont
     UPDATER_CHECK_ONLY_RETURN(ret == USCRIPT_SUCCESS, return USCRIPT_ERROR_EXECUTE);
 
     const FileInfo *info = env.GetPkgManager()->GetFileInfo(infos.transferName);
+    UPDATER_ERROR_CHECK(info != nullptr, "get file info fail", return USCRIPT_ERROR_EXECUTE);
     hpackage::PkgManager::StreamPtr outStream = nullptr;
     ret = env.GetPkgManager()->CreatePkgStream(outStream,
         infos.transferName, info->unpackedSize, PkgStream::PkgStreamType_MemoryMap);
@@ -299,6 +300,7 @@ static int32_t ExecuteUpdateBlock(uscript::UScriptEnv &env, uscript::UScriptCont
     info = env.GetPkgManager()->GetFileInfo(infos.patchDataName);
     // Close stream opened before.
     env.GetPkgManager()->ClosePkgStream(outStream);
+    UPDATER_ERROR_CHECK(info != nullptr, "get file info fail", return USCRIPT_ERROR_EXECUTE);
     ret = env.GetPkgManager()->CreatePkgStream(outStream,
         infos.patchDataName, info->unpackedSize, PkgStream::PkgStreamType_MemoryMap);
     UPDATER_ERROR_CHECK(outStream != nullptr, "Error to create output stream", return USCRIPT_ERROR_EXECUTE);
