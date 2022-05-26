@@ -311,8 +311,8 @@ void CompressLogs(const std::string &name)
     }
 
     PkgInfo pkgInfo;
-    pkgInfo.signMethod = PKG_SIGN_METHOD_RSA;
-    pkgInfo.digestMethod = PKG_DIGEST_TYPE_SHA256;
+    pkgInfo.signMethod = PKG_SIGN_METHOD_NONE;
+    pkgInfo.digestMethod = PKG_SIGN_METHOD_NONE;
     pkgInfo.pkgType = PKG_PACK_TYPE_ZIP;
 
     char realTime[MAX_TIME_SIZE] = {0};
