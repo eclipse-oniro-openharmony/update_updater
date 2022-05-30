@@ -14,6 +14,7 @@
  */
 #include "pkg_utils.h"
 #include <cstring>
+#include <endian.h>
 #include <fcntl.h>
 #include <iostream>
 #include <sstream>
@@ -29,10 +30,7 @@ constexpr uint32_t TM_YEAR_BITS = 9;
 constexpr uint32_t TM_MON_BITS = 5;
 constexpr uint32_t TM_MIN_BITS = 5;
 constexpr uint32_t TM_HOUR_BITS = 11;
-constexpr uint32_t BYTE_SIZE = 8;
 constexpr uint32_t MAX_MEM_SIZE = 1 << 29;
-constexpr uint32_t SECOND_BUFFER = 2;
-constexpr uint32_t THIRD_BUFFER = 3;
 constexpr uint8_t SHIFT_RIGHT_FOUR_BITS = 4;
 
 using namespace updater::utils;
@@ -135,53 +133,47 @@ void ExtraTimeAndDate(time_t when, uint16_t &date, uint16_t &time)
 
 uint32_t ReadLE32(const uint8_t *buff)
 {
-    PKG_CHECK(buff != nullptr, return 0, "buff is null");
-    size_t offset = 0;
-    uint32_t value32 = buff[0];
-    offset += BYTE_SIZE;
-    value32 += static_cast<uint32_t>(static_cast<uint32_t>(buff[1]) << offset);
-    offset +=  BYTE_SIZE;
-    value32 += static_cast<uint32_t>(static_cast<uint32_t>(buff[SECOND_BUFFER]) << offset);
-    offset += BYTE_SIZE;
-    value32 += static_cast<uint32_t>(static_cast<uint32_t>(buff[THIRD_BUFFER]) << offset);
-    return value32;
+    if (buff == nullptr) {
+        PKG_LOGE("buff is null");
+        return 0;
+    }
+    return le32toh(*(reinterpret_cast<const uint32_t *>(buff)));    
 }
 
 uint64_t ReadLE64(const uint8_t *buff)
 {
-    PKG_CHECK(buff != nullptr, return 0, "buff is null");
-    uint32_t low = ReadLE32(buff);
-    uint32_t high = ReadLE32(buff + sizeof(uint32_t));
-    uint64_t value = ((static_cast<uint64_t>(high)) << (BYTE_SIZE * sizeof(uint32_t))) | low;
-    return value;
+    if (buff == nullptr) {
+        PKG_LOGE("buff is null");
+        return 0;
+    }
+    return le64toh(*(reinterpret_cast<const uint64_t *>(buff)));   
 }
 
 void WriteLE32(uint8_t *buff, uint32_t value)
 {
-    PKG_CHECK(buff != nullptr, return, "buff is null");
-    size_t offset = 0;
-    buff[0] = static_cast<uint8_t>(value);
-    offset += BYTE_SIZE;
-    buff[1] = static_cast<uint8_t>(value >> offset);
-    offset += BYTE_SIZE;
-    buff[SECOND_BUFFER] = static_cast<uint8_t>(value >> offset);
-    offset += BYTE_SIZE;
-    buff[THIRD_BUFFER] = static_cast<uint8_t>(value >> offset);
+    if (buff == nullptr) {
+        PKG_LOGE("buff is null");
+        return;
+    }
+    *(reinterpret_cast<uint32_t *>(buff)) = htole32(value);
 }
 
 uint16_t ReadLE16(const uint8_t *buff)
 {
-    PKG_CHECK(buff != nullptr, return 0, "buff is null");
-    uint16_t value16 = buff[0];
-    value16 += static_cast<uint16_t>(buff[1] << BYTE_SIZE);
-    return value16;
+    if (buff == nullptr) {
+        PKG_LOGE("buff is null");
+        return 0;
+    }
+    return le16toh(*(reinterpret_cast<const uint16_t *>(buff)));  
 }
 
 void WriteLE16(uint8_t *buff, uint16_t value)
 {
-    PKG_CHECK(buff != nullptr, return, "buff is null");
-    buff[0] = static_cast<uint8_t>(value);
-    buff[1] = static_cast<uint8_t>(value >> BYTE_SIZE);
+    if (buff == nullptr) {
+        PKG_LOGE("buff is null");
+        return;
+    }
+    *(reinterpret_cast<uint16_t *>(buff)) = htole16(value);
 }
 
 std::string ConvertShaHex(const std::vector<uint8_t> &shaDigest)
