@@ -15,6 +15,7 @@
 
 #include "blocks_diff.h"
 #include <cstdio>
+#include <endian.h>
 #include <iostream>
 #include <vector>
 #include "update_diff.h"
@@ -25,8 +26,6 @@ using namespace std;
 namespace updatepatch {
 #define SWAP(a, b) auto swapTmp = (a); (a) = (b); (b) = swapTmp
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
-#define SET_BUFFER(y, buffer, index) \
-    (buffer)[index] = static_cast<uint8_t>((y) % 256); (y) -= (buffer)[index]; (y) = (y) / 256
 
 constexpr uint32_t BUCKET_SIZE = 256;
 constexpr uint32_t MULTIPLE_TWO = 2;
@@ -35,26 +34,11 @@ constexpr int64_t MIN_LENGTH = 16;
 
 static void WriteLE64(const BlockBuffer &buffer, int64_t value)
 {
-    int32_t index = 0;
-    auto y = static_cast<uint64_t>((value < 0) ? -value : value);
-    SET_BUFFER(y, buffer.buffer, index);
-    index++;
-    SET_BUFFER(y, buffer.buffer, index);
-    index++;
-    SET_BUFFER(y, buffer.buffer, index);
-    index++;
-    SET_BUFFER(y, buffer.buffer, index);
-    index++;
-    SET_BUFFER(y, buffer.buffer, index);
-    index++;
-    SET_BUFFER(y, buffer.buffer, index);
-    index++;
-    SET_BUFFER(y, buffer.buffer, index);
-    index++;
-    SET_BUFFER(y, buffer.buffer, index);
-    if (value < 0) {
-        buffer.buffer[index] |= 0x80;
+    if (buffer.buffer == nullptr) {
+        PATCH_LOGE("buffer is null");
+        return;
     }
+    *(reinterpret_cast<uint64_t *>(buffer.buffer)) = htole64(static_cast<uint64_t>(value));
 }
 
 int32_t BlocksDiff::MakePatch(const std::string &oldFileName, const std::string &newFileName,
