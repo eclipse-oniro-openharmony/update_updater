@@ -54,7 +54,7 @@ static int ExtractNewData(const PkgBuffer &buffer, size_t size, size_t start, bo
         size_t toWrite = std::min(size, info->writer->GetBlocksSize() - info->writer->GetTotalWritten());
         // No more data to write.
         UPDATER_CHECK_ONLY_RETURN(toWrite != 0, break);
-        bool ret = info->writer->Write(const_cast<uint8_t *>(addr), toWrite);
+        bool ret = info->writer->Write(addr, toWrite, nullptr);
         std::ostringstream logMessage;
         logMessage << "Write " << toWrite << " byte(s) failed";
         UPDATER_ERROR_CHECK(ret == true, logMessage.str(), return hpackage::PKG_INVALID_STREAM);

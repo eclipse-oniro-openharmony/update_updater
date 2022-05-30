@@ -50,10 +50,8 @@ std::unique_ptr<DataWriter> DataWriter::CreateDataWriter(WriteMode mode, const s
     uint64_t offset)
 {
     switch (mode) {
-        case WRITE_RAW: {
-            std::unique_ptr<RawWriter> writer(std::make_unique<RawWriter>(path, offset));
-            return std::move(writer);
-        }
+        case WRITE_RAW:
+            return std::make_unique<RawWriter>(path, offset);
         case WRITE_DECRYPT:
             LOG(WARNING) << "Unsupported writer mode.";
             break;
