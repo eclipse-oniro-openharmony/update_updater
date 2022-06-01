@@ -13,36 +13,45 @@
  * limitations under the License.
  */
 
-#include "ReadFstabFromFile_fuzzer.h"
+#include "dopartitions_fuzzer.h"
+
 #include <array>
 #include <cstddef>
 #include <cstdint>
 #include <iostream>
 #include <string>
 #include <vector>
-#include "fs_manager/fs_manager.h"
 #include "log/log.h"
+#include "partitions.h"
+#include "securec.h"
 
 using namespace updater;
+namespace {
+static constexpr int FSTAB_NAME_LENGTH = 20;
+}
+static void InitEmmcPartition(struct Partition &part, const std::string &partName, size_t start, size_t length)
+{
+    part.partName = partName;
+    part.start = start;
+    part.length = length;
+    /* Paramters below just give a random values, DoPartition will ignore the values. */
+    part.devName = "mmcblk0px";
+    part.fsType = "emmc";
+}
 
 namespace OHOS {
-    bool FuzzReadFstabFromFile(const uint8_t* data, size_t size)
+    bool FuzzDoPartitions(const uint8_t* data, size_t size)
     {
-        FILE *pFile;
-        Fstab *fstab = NULL;
-        const std::string fstabFile = "ReadFstabFromFile.txt";
+        PartitonList nList;
+        struct Partition myPaty;
+        memset_s(&myPaty, sizeof(struct Partition), 0, sizeof(struct Partition));
 
-        pFile = fopen("ReadFstabFromFile.txt", "w+");
-        if (pFile == nullptr) {
-            LOG(ERROR) << "[fuzz]open file failed";
-            return -1;
+        if (size < FSTAB_NAME_LENGTH) {  /* fstable name length */
+            InitEmmcPartition(myPaty, reinterpret_cast<const char*>(data), 0, size);
+            nList.push_back(&myPaty);
+            DoPartitions(nList);
         }
 
-        fwrite(data, 1, size, pFile);
-        fclose(pFile);
-        fstab = ReadFstabFromFile(fstabFile.c_str(), false);
-        remove("ReadFstabFromFile.txt");
-        ReleaseFstab(fstab);
         return 0;
     }
 }
@@ -51,6 +60,7 @@ namespace OHOS {
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    OHOS::FuzzReadFstabFromFile(data, size);
+    OHOS::FuzzDoPartitions(data, size);
     return 0;
 }
+

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "UpdaterFactoryReset_fuzzer.h"
+#include "updaterfactoryreset_fuzzer.h"
 
 #include <array>
 #include <cstddef>

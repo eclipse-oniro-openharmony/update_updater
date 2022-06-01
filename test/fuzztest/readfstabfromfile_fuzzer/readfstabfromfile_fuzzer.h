@@ -13,15 +13,9 @@
  * limitations under the License.
  */
 
-#ifndef DO_PARTTIONS_FUZZER_H
-#define DO_PARTTIONS_FUZZER_H
-#include <climits>
-#include <cstdint>
-#include <cstdio>
-#include <cstdlib>
-#include <fcntl.h>
-#include <unistd.h>
+#ifndef READ_FSTAB_FROM_FILE_FUZZER_H
+#define READ_FSTAB_FROM_FILE_FUZZER_H
 
-#define FUZZ_PROJECT_NAME "DoPartitions_fuzzer"
+#define FUZZ_PROJECT_NAME "readfstabfromfile_fuzzer"
 
-#endif /* DO_PARTTIONS_FUZZER_H */
+#endif /* READ_FSTAB_FROM_FILE_FUZZER_H */
