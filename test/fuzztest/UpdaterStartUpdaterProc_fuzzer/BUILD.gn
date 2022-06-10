@@ -45,7 +45,6 @@ ohos_fuzztest("UpdaterStartUpdaterProcFuzzTest") {
     "//base/update/updater/services/package:libupdaterpackage",
     "//base/update/updater/services/ui:libui",
     "//base/update/updater/utils:libutils",
-    "//drivers/peripheral/input/hal:hdi_input",
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/bzip2:libbz2",
     "//third_party/libdrm:libdrm",
@@ -55,6 +54,8 @@ ohos_fuzztest("UpdaterStartUpdaterProcFuzzTest") {
     "//third_party/openssl:ssl_source",
     "//third_party/zlib:libz",
   ]
+
+  external_deps = [ "input_device_driver_interface:hdi_input" ]
 
   cflags = [
     "-g",
