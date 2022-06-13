@@ -50,11 +50,12 @@ ohos_static_library("libui") {
     "//base/update/updater/interfaces/kits/packages:libpackageExt",
     "//base/update/updater/services/log:libupdaterlog",
     "//base/update/updater/utils:libutils",
-    "//drivers/peripheral/input/hal:hdi_input",
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/libdrm:libdrm",
     "//third_party/libpng:libpng",
   ]
+
+  external_deps = [ "input_device_driver_interface:hdi_input" ]
 
   subsystem_name = "updater"
   part_name = "updater"
