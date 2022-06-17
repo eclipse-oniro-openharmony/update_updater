@@ -20,7 +20,8 @@ module_output_path = "updater/read_fstab_from_file"
 ##############################fuzztest##########################################
 ohos_fuzztest("ReadFstabFromFileFuzzTest") {
   module_out_path = module_output_path
-  fuzz_config_file = "//base/update/updater/test/fuzztest/readfstabfromfile_fuzzer"
+  fuzz_config_file =
+      "//base/update/updater/test/fuzztest/readfstabfromfile_fuzzer"
   sources = [ "readfstabfromfile_fuzzer.cpp" ]
 
   include_dirs = [
@@ -38,9 +39,7 @@ ohos_fuzztest("ReadFstabFromFileFuzzTest") {
     "//base/update/updater/services/log:libupdaterlog",
   ]
 
-  external_deps = [
-    "init:libbegetutil",
-  ]
+  external_deps = [ "init:libbegetutil" ]
 
   cflags = [
     "-g",

@@ -20,7 +20,8 @@ import("//build/test.gni")
 ##############################fuzztest##########################################
 ohos_fuzztest("UpdaterFactoryResetFuzzTest") {
   module_out_path = module_output_path
-  fuzz_config_file = "//base/update/updater/test/fuzztest/updaterfactoryreset_fuzzer"
+  fuzz_config_file =
+      "//base/update/updater/test/fuzztest/updaterfactoryreset_fuzzer"
   include_dirs = [
     "//base/update/updater/utils/include",
     "//base/update/updater/interfaces/kits/include/",
@@ -52,9 +53,7 @@ ohos_fuzztest("UpdaterFactoryResetFuzzTest") {
     "//third_party/zlib:libz",
   ]
 
-  external_deps = [
-    "init:libbegetutil",
-  ]
+  external_deps = [ "init:libbegetutil" ]
 
   cflags = [
     "-g",
