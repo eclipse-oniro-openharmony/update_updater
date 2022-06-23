@@ -66,7 +66,6 @@ ohos_source_set("flashd_deamon") {
   ]
   deps += [
     "//developtools/hdc:hdc_hash_gen",
-    "//third_party/selinux:libselinux",
   ]
   if (use_musl) {
     external_deps = [
@@ -82,12 +81,17 @@ ohos_source_set("flashd_deamon") {
     "//base/update/updater/services/flashd/daemon",
     "//base/update/updater/services/flashd/common",
     "//base/update/updater/services/flashd/host",
-    "//third_party/selinux/libselinux/include",
     "//third_party/bounds_checking_function/include",
     "//third_party/lz4/lib",
     "//third_party/openssl/include",
     "//third_party/libuv",
   ]
+
+  if (!(is_mingw || is_mac) && build_selinux) {
+    deps += [ "//third_party/selinux:libselinux" ]
+    include_dirs += [ "//third_party/selinux/libselinux/include" ]
+    define += [ "SURPPORT_SELINUX" ]
+  }
 
   subsystem_name = "updater"
   part_name = "updater"
@@ -195,7 +199,6 @@ ohos_executable("ohflash") {
   deps += [ "//third_party/libusb:libusb" ]
   deps += [
     "//developtools/hdc:hdc_hash_gen",
-    "//third_party/selinux:libselinux",
   ]
   include_dirs = [
     "${FLASHD_PATH}/host",
@@ -206,8 +209,13 @@ ohos_executable("ohflash") {
     "//third_party/lz4/lib",
     "//third_party/openssl/include",
     "//third_party/libuv",
-    "//third_party/selinux/libselinux/include",
   ]
+
+  if (!(is_mingw || is_mac) && build_selinux) {
+    deps += [ "//third_party/selinux:libselinux" ]
+    include_dirs += [ "//third_party/selinux/libselinux/include" ]
+    define += [ "SURPPORT_SELINUX" ]
+  }
 
   if (is_mingw) {
     static_link = true
