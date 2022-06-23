@@ -88,7 +88,7 @@ ohos_source_set("flashd_deamon") {
   if (!(is_mingw || is_mac) && build_selinux) {
     deps += [ "//third_party/selinux:libselinux" ]
     include_dirs += [ "//third_party/selinux/libselinux/include" ]
-    define += [ "SURPPORT_SELINUX" ]
+    defines += [ "SURPPORT_SELINUX" ]
   }
 
   subsystem_name = "updater"
@@ -210,7 +210,7 @@ ohos_executable("ohflash") {
   if (!(is_mingw || is_mac) && build_selinux) {
     deps += [ "//third_party/selinux:libselinux" ]
     include_dirs += [ "//third_party/selinux/libselinux/include" ]
-    define += [ "SURPPORT_SELINUX" ]
+    defines += [ "SURPPORT_SELINUX" ]
   }
 
   if (is_mingw) {
