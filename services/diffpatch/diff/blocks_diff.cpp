@@ -152,28 +152,28 @@ std::unique_ptr<DeflateAdapter> BlocksStreamDiff::CreateBZip2Adapter(size_t patc
 }
 
 int32_t BlocksBufferDiff::WritePatchHeader(int64_t controlSize,
-    int64_t diffDataSize, int64_t newSize, size_t &headerLen)
+    int64_t diffDataSize, int64_t newSize, size_t &patchOffset)
 {
-    headerLen = BSDIFF_MAGIC.size() + sizeof(int64_t) + sizeof(int64_t) + sizeof(int64_t);
-    PATCH_CHECK(patchData_.size() > headerLen + offset_, return -1, "Invalid patch size");
+    patchOffset = BSDIFF_MAGIC.size() + sizeof(int64_t) + sizeof(int64_t) + sizeof(int64_t);
+    PATCH_CHECK(patchData_.size() > patchOffset + offset_, return -1, "Invalid patch size");
 
     int32_t ret = memcpy_s(patchData_.data() + offset_, patchData_.size(), BSDIFF_MAGIC.c_str(), BSDIFF_MAGIC.size());
     PATCH_CHECK(ret == 0, return ret, "Failed to copy magic");
-    headerLen = BSDIFF_MAGIC.size();
-    BlockBuffer data = {patchData_.data() + offset_ + headerLen, patchData_.size()};
+    patchOffset = BSDIFF_MAGIC.size();
+    BlockBuffer data = {patchData_.data() + offset_ + patchOffset, patchData_.size()};
     WriteLE64(data, controlSize);
-    headerLen += sizeof(int64_t);
-    BlockBuffer diffData = {patchData_.data() + offset_ + headerLen, patchData_.size()};
+    patchOffset += sizeof(int64_t);
+    BlockBuffer diffData = {patchData_.data() + offset_ + patchOffset, patchData_.size()};
     WriteLE64(diffData, diffDataSize);
-    headerLen += sizeof(int64_t);
-    BlockBuffer newData = {patchData_.data() + offset_ + headerLen, patchData_.size()};
+    patchOffset += sizeof(int64_t);
+    BlockBuffer newData = {patchData_.data() + offset_ + patchOffset, patchData_.size()};
     WriteLE64(newData, newSize);
-    headerLen += sizeof(int64_t);
+    patchOffset += sizeof(int64_t);
     return 0;
 }
 
 int32_t BlocksStreamDiff::WritePatchHeader(int64_t controlSize,
-    int64_t diffDataSize, int64_t newSize, size_t &headerLen)
+    int64_t diffDataSize, int64_t newSize, size_t &patchOffset)
 {
     PATCH_DEBUG("WritePatchHeader %zu", static_cast<size_t>(stream_.tellp()));
     stream_.seekp(offset_, std::ios::beg);
@@ -185,7 +185,7 @@ int32_t BlocksStreamDiff::WritePatchHeader(int64_t controlSize,
     stream_.write(reinterpret_cast<const char*>(buffer.buffer), sizeof(int64_t));
     WriteLE64(buffer, newSize);
     stream_.write(reinterpret_cast<const char*>(buffer.buffer), sizeof(int64_t));
-    headerLen = BSDIFF_MAGIC.size() + sizeof(int64_t)  + sizeof(int64_t)  + sizeof(int64_t);
+    patchOffset = BSDIFF_MAGIC.size() + sizeof(int64_t)  + sizeof(int64_t)  + sizeof(int64_t);
     stream_.seekp(0, std::ios::end);
     return 0;
 }
