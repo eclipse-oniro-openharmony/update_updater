@@ -44,8 +44,7 @@
         "ram": "",
         "deps": {
             "components": [
-                "startup_init_lite",
-                "startup_syspara_lite",
+                "startup_init",
                 "developtools_hdc",
                 "utils_native",
                 "drivers_peripheral"
