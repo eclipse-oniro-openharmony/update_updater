@@ -31,11 +31,6 @@ config("package_config") {
     "pkg_verify",
     "//third_party/bounds_checking_function/include",
   ]
-  if (current_cpu == "arm" && host_os != "mac") {
-    cflags = [ "-DOPENSSL_ARM_PLATFORM" ]
-  } else if (current_cpu == "arm64" && host_os != "mac") {
-    cflags = [ "-DOPENSSL_ARM64_PLATFORM" ]
-  }
 }
 
 ohos_static_library("libupdaterpackage") {
@@ -59,7 +54,10 @@ ohos_static_library("libupdaterpackage") {
     "$SUBSYSTEM_DIR/pkg_verify/zip_pkg_parse.cpp",
   ]
 
-  deps = [ "//third_party/bounds_checking_function:libsec_static" ]
+  deps = [
+      "//third_party/bounds_checking_function:libsec_static",
+	  "//third_party/openssl::libcrypto_shared",
+  ]
 
   configs = [ ":package_config" ]
   subsystem_name = "updater"
