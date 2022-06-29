@@ -64,7 +64,7 @@ ohos_source_set("flashd_deamon") {
     "//third_party/openssl:libcrypto_static",
     "//utils/native/base:utils",
   ]
-
+  deps += [ "//developtools/hdc:hdc_hash_gen" ]
   if (use_musl) {
     external_deps = [
       "init:libbegetutil",
@@ -84,6 +84,12 @@ ohos_source_set("flashd_deamon") {
     "//third_party/openssl/include",
     "//third_party/libuv",
   ]
+
+  if (!(is_mingw || is_mac) && build_selinux) {
+    deps += [ "//third_party/selinux:libselinux" ]
+    include_dirs += [ "//third_party/selinux/libselinux/include" ]
+    defines += [ "SURPPORT_SELINUX" ]
+  }
 
   subsystem_name = "updater"
   part_name = "updater"
@@ -189,7 +195,7 @@ ohos_executable("ohflash") {
   ]
 
   deps += [ "//third_party/libusb:libusb" ]
-
+  deps += [ "//developtools/hdc:hdc_hash_gen" ]
   include_dirs = [
     "${FLASHD_PATH}/host",
     "${HDC_PATH}/host",
@@ -200,6 +206,12 @@ ohos_executable("ohflash") {
     "//third_party/openssl/include",
     "//third_party/libuv",
   ]
+
+  if (!(is_mingw || is_mac) && build_selinux) {
+    deps += [ "//third_party/selinux:libselinux" ]
+    include_dirs += [ "//third_party/selinux/libselinux/include" ]
+    defines += [ "SURPPORT_SELINUX" ]
+  }
 
   if (is_mingw) {
     static_link = true
