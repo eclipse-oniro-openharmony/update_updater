@@ -537,7 +537,7 @@ int32_t PkgManagerImpl::VerifyPackage(const std::string &packagePath, const std:
     if (type != PkgFile::PKG_TYPE_UPGRADE) {
         ret = VerifyOtaPackage(packagePath, keyPath);
     } else if (digest.buffer != nullptr) {
-        // update.bin include signature infomation, verify entire file.
+        // update.bin include signature information, verify entire file.
         ret = VerifyBinFile(packagePath, keyPath, version, digest);
     }
 
