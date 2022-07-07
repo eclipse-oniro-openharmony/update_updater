@@ -228,10 +228,7 @@ ohos_unittest("updater_unittest") {
     "//base/update/updater/test/unittest:test_update_binary_abnormal",
   ]
 
-  external_deps = [
-    "init:libbegetutil",
-    "startup_l2:syspara",
-  ]
+  external_deps = [ "init:libbegetutil" ]
 
   cflags_cc = [ "-fexceptions" ]
 
