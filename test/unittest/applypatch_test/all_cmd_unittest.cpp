@@ -26,9 +26,9 @@
 
 
 using namespace testing::ext;
-using namespace updater;
+using namespace Updater;
 using namespace std;
-namespace updater_ut {
+namespace UpdaterUt {
 class AllCmdUnitTest : public testing::Test {
 public:
     static void SetUpTestCase(void);

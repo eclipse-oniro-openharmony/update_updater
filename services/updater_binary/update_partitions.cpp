@@ -23,12 +23,12 @@
 #include "utils.h"
 
 using namespace std;
-using namespace uscript;
-using namespace hpackage;
-using namespace updater;
+using namespace Uscript;
+using namespace Hpackage;
+using namespace Updater;
 constexpr int MIN_PARTITIONS_NUM = 2;
 constexpr int MAX_PARTITIONS_NUM = 20;
-namespace updater {
+namespace Updater {
 int UpdatePartitions::ParsePartitionInfo(const std::string &partitionInfo, PartitonList &newPartList) const
 {
     cJSON* root = cJSON_Parse(partitionInfo.c_str());

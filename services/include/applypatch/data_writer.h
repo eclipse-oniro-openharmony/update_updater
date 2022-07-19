@@ -22,7 +22,7 @@
 #include <unistd.h>
 #include "updater_env.h"
 
-namespace updater {
+namespace Updater {
 enum WriteMode : int {
     WRITE_RAW = 1,
     WRITE_DECRYPT = 2,
@@ -50,5 +50,5 @@ private:
 
 // Maybe we should read sector size from flash.
 #define DEFAULT_SECTOR_SIZE (512)
-} // updater
+} // Updater
 #endif // UPDATER_DATA_WRITER_H

@@ -25,8 +25,8 @@
 #include "log/log.h"
 #include "utils.h"
 
-namespace updater {
-using updater::utils::SplitString;
+namespace Updater {
+using Updater::Utils::SplitString;
 static std::string g_defaultUpdaterFstab = "";
 static Fstab *g_fstab = nullptr;
 static const std::string PARTITION_PATH = "/dev/block/by-name";

@@ -17,7 +17,7 @@
 
 #include <string>
 
-namespace updater {
+namespace Updater {
 const std::string COMMAND_FILE = "/data/updater/command";
 const std::string TMP_LOG = "/tmp/updater.log";
 const std::string TMP_STAGE_LOG = "/tmp/updater_stage.log";

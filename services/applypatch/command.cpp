@@ -19,7 +19,7 @@
 #include "log/log.h"
 #include "utils.h"
 
-namespace updater {
+namespace Updater {
 bool Command::Init(const std::string &cmdLine)
 {
     cmdLine_ = std::move(cmdLine);

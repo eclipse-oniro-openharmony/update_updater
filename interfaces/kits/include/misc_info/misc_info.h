@@ -20,7 +20,7 @@
 #include <cstdio>
 #include <unistd.h>
 
-namespace updater {
+namespace Updater {
 constexpr int MAX_COMMAND_SIZE = 20;
 constexpr int MAX_UPDATE_SIZE = 100;
 

@@ -23,7 +23,7 @@
 #include "pkg_manager.h"
 #include "securec.h"
 
-namespace updatepatch {
+namespace UpdatePatch {
 class BZip2Adapter : public DeflateAdapter {
 public:
     BZip2Adapter() : DeflateAdapter() {}
@@ -98,5 +98,5 @@ public:
 private:
     BlockBuffer buffer_ {};
 };
-} // namespace updatepatch
+} // namespace UpdatePatch
 #endif // BZIP2_ADAPTER_H

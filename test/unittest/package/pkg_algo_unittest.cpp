@@ -26,11 +26,11 @@
 #include "pkg_test.h"
 
 using namespace std;
-using namespace hpackage;
-using namespace updater;
+using namespace Hpackage;
+using namespace Updater;
 using namespace testing::ext;
 
-namespace {
+namespace UpdaterUt {
 constexpr size_t BUFFER_LEN = 10;
 constexpr size_t DIGEST_LEN = 32;
 class PkgAlgoUnitTest : public PkgTest {

@@ -23,9 +23,9 @@
 #include "securec.h"
 #include "zip_adapter.h"
 
-using namespace hpackage;
+using namespace Hpackage;
 
-namespace updatepatch {
+namespace UpdatePatch {
 uint32_t g_tmpFileId = 0;
 
 int32_t NormalImagePatch::ApplyImagePatch(const PatchParam &param, size_t &startOffset)

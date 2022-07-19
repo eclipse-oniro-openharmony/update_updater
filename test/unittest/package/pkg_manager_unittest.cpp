@@ -32,11 +32,11 @@
 #include "securec.h"
 
 using namespace std;
-using namespace hpackage;
-using namespace updater;
+using namespace Hpackage;
+using namespace Updater;
 using namespace testing::ext;
 
-namespace {
+namespace UpdaterUt {
 constexpr auto WINDOWBITS = -15;  // 32kb window; negative to indicate a raw stream.
 constexpr auto MEMLEVEL = 8;      // the default value.
 constexpr auto STRATEGY = Z_DEFAULT_STRATEGY;

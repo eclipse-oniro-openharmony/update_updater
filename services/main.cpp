@@ -19,7 +19,7 @@
 #include "updater/updater_const.h"
 #include "updater_main.h"
 
-using namespace updater;
+using namespace Updater;
 
 int main(int argc, char **argv)
 {

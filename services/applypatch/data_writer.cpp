@@ -24,7 +24,7 @@
 #include "log/log.h"
 #include "raw_writer.h"
 
-namespace updater {
+namespace Updater {
 UpdaterEnv *DataWriter::env_ = nullptr;
 int DataWriter::OpenPath(const std::string &path)
 {

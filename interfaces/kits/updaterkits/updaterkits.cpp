@@ -26,7 +26,7 @@
 #include "securec.h"
 #include "utils.h"
 
-using namespace updater;
+using namespace Updater;
 
 static bool WriteToMiscAndRebootToUpdater(const std::string &miscFile,
     const struct UpdateMessage &updateMsg)

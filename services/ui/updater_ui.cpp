@@ -26,7 +26,7 @@
 #include "utils.h"
 #include "view.h"
 
-namespace updater {
+namespace Updater {
 using utils::String2Int;
 
 constexpr int LABEL_HEIGHT = 13;

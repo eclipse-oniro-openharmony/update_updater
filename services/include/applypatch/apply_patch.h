@@ -17,7 +17,7 @@
 #include <string>
 #include <vector>
 
-namespace updater {
+namespace Updater {
 struct BlockDiffParameters {
     std::vector<std::string> fields;
     size_t pos; /* position of command line */
@@ -30,5 +30,5 @@ struct BlockDiffParameters {
 
     bool targetVerified;
 };
-} // updater
+} // Updater
 #endif // UPDATER_APPLY_PATCH_H

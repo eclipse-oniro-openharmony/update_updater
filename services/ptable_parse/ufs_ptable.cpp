@@ -23,7 +23,7 @@
 #include "log/log.h"
 #include "securec.h"
 
-namespace updater {
+namespace Updater {
 uint32_t UfsPtable::GetDeviceLunNum()
 {
     return deviceLunNum_;

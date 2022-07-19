@@ -33,9 +33,9 @@
 #include "script_utils.h"
 
 
-using namespace hpackage;
-using namespace uscript;
-using namespace updater;
+using namespace Hpackage;
+using namespace Uscript;
+using namespace Updater;
 
 const static std::string TEST_PATH_TO = "/data/fuzz/test/";
 const static int32_t SCRIPT_TEST_PRIORITY_NUM = 3;

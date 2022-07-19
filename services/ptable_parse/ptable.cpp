@@ -19,7 +19,7 @@
 #include "log/log.h"
 #include "securec.h"
 
-namespace updater {
+namespace Updater {
 const std::string PTABLE_CONFIG_PATH = "/etc/ptable_data.json";
 const std::string PTABLE_DATA_LABEL = "ptableData";
 const std::string EMMC_GPT_DATA_LEN_LABEL = "emmcGptDataLen";

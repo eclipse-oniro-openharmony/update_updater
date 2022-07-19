@@ -18,7 +18,7 @@
 
 #include <gtest/gtest.h>
 
-namespace updater_ut {
+namespace UpdaterUt {
 class UpdatePartitionsUnitTest : public testing::Test {
 public:
     static void SetUpTestCase(void);

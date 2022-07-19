@@ -21,7 +21,7 @@
 #include "json_node.h"
 #include "log/log.h"
 
-namespace updater {
+namespace Updater {
 enum Action { SETVAL, PRINTVAL };
 
 template<typename T>

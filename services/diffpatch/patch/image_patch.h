@@ -23,7 +23,7 @@
 #include "package/pkg_manager.h"
 #include "securec.h"
 
-namespace updatepatch {
+namespace UpdatePatch {
 class ImagePatch {
 public:
     explicit ImagePatch(UpdatePatchWriterPtr writer) : writer_(writer) {}

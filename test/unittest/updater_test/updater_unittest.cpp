@@ -28,12 +28,12 @@
 #include "updater_ui.h"
 #include "utils.h"
 
-namespace updater_ut {
+namespace UpdaterUt {
 using namespace testing::ext;
-using namespace updater_ut;
-using namespace updater;
+using namespace UpdaterUt;
+using namespace Updater;
 using namespace std;
-using namespace hpackage;
+using namespace Hpackage;
 using namespace testing;
 
 void UpdaterUnitTest::SetUp()

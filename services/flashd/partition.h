@@ -23,7 +23,7 @@
 #include "blockdevice.h"
 #include "flash_utils.h"
 
-namespace flashd {
+namespace Flashd {
 enum class PartitionType {
     NORMAL,
     LOGICAL,

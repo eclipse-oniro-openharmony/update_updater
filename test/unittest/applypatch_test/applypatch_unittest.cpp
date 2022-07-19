@@ -31,9 +31,9 @@
 #include "unittest_comm.h"
 #include "utils.h"
 
-namespace updater_ut {
+namespace UpdaterUt {
 using namespace testing::ext;
-using namespace updater;
+using namespace Updater;
 using namespace std;
 using namespace testing;
 constexpr unsigned int BUFFER_LEN = 12;

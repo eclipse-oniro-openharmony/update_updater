@@ -26,9 +26,9 @@
 #include "updater/updater.h"
 
 using namespace testing::ext;
-using namespace updater;
+using namespace Updater;
 using namespace std;
-namespace updater_ut {
+namespace UpdaterUt {
 class PartitionUpdateRecordUnitTest : public testing::Test {
 public:
     static void SetUpTestCase(void);

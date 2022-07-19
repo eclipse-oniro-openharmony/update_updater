@@ -29,7 +29,7 @@
 #include "macros.h"
 #include "traits_util.h"
 
-namespace updater {
+namespace Updater {
 class JsonNode;
 
 enum class NodeType { OBJECT, INT, STRING, ARRAY, BOOL, NUL, UNKNOWN };

@@ -20,8 +20,8 @@
 #include <sys/types.h>
 #include <vector>
 
-namespace updater {
-namespace utils {
+namespace Updater {
+namespace Utils {
 constexpr int N_BIN = 2;
 constexpr int N_OCT = 8;
 constexpr int N_DEC = 10;

@@ -19,7 +19,7 @@
 #include "text_label.h"
 #include "progress_bar.h"
 
-namespace updater {
+namespace Updater {
 void DoProgress();
 
 void ShowUpdateFrame(bool isShow);

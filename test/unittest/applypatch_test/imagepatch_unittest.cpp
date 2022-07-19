@@ -31,8 +31,8 @@
 #include "utils.h"
 
 using namespace testing::ext;
-using namespace updater;
-namespace updater_ut {
+using namespace Updater;
+namespace UpdaterUt {
 bool ImagePatchTest::ReadContentFromFile(const std::string& file, std::string &content) const
 {
     int flags = O_RDONLY | O_CLOEXEC;

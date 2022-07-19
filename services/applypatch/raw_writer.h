@@ -22,7 +22,7 @@
 #include <unistd.h>
 #include "applypatch/data_writer.h"
 
-namespace updater {
+namespace Updater {
 class RawWriter : public DataWriter {
 public:
     bool Write(const uint8_t *addr, size_t len, const void *context) override;

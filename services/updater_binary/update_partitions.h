@@ -20,7 +20,7 @@
 #include "script_instruction.h"
 #include "script_manager.h"
 
-namespace updater {
+namespace Updater {
 class UpdatePartitions : public uscript::UScriptInstruction {
 public:
     UpdatePartitions() {}

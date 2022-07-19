@@ -22,7 +22,7 @@
 #include <vector>
 #include "openssl/sha.h"
 
-namespace updatepatch {
+namespace UpdatePatch {
 int32_t WriteDataToFile(const std::string &fileName, const std::vector<uint8_t> &data, size_t dataSize)
 {
     std::ofstream patchFile(fileName, std::ios::out | std::ios::binary);

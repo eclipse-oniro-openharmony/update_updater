@@ -20,7 +20,7 @@
 #include "pkg_manager.h"
 #include "script_instruction.h"
 
-namespace uscript {
+namespace Uscript {
 enum {
     USCRIPT_SUCCESS = 0,
     USCRIPT_BASE = 500,

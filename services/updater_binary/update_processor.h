@@ -24,35 +24,12 @@
 #include "script_instruction.h"
 #include "script_manager.h"
 
-using uscript::UScriptEnv;
-using uscript::UScriptInstructionFactory;
-using uscript::UScriptInstructionFactoryPtr;
-using uscript::UScriptInstructionPtr;
+using Uscript::UScriptEnv;
+using Uscript::UScriptInstructionFactory;
+using Uscript::UScriptInstructionFactoryPtr;
+using Uscript::UScriptInstructionPtr;
 
-namespace updater {
-class UpdaterInstructionFactory : public UScriptInstructionFactory {
-public:
-    virtual int32_t CreateInstructionInstance(UScriptInstructionPtr& instr, const std::string& name);
-    UpdaterInstructionFactory() {}
-    virtual ~UpdaterInstructionFactory() {}
-};
-
-class UScriptInstructionRawImageWrite : public uscript::UScriptInstruction {
-public:
-    UScriptInstructionRawImageWrite() {}
-    virtual ~UScriptInstructionRawImageWrite() {}
-    int32_t Execute(uscript::UScriptEnv &env, uscript::UScriptContext &context) override;
-
-private:
-    static int RawImageWriteProcessor(const hpackage::PkgBuffer &buffer, size_t size, size_t start, bool isFinish,
-        const void* context);
-    int GetWritePathAndOffset(const std::string &partitionName, std::string &writePath, uint64_t &offset,
-        uint64_t &partitionSize);
-    static size_t totalSize_;
-    static size_t readSize_;
-};
-} // updater
-
+namespace Updater {
 enum EXIT_CODES {
     EXIT_INVALID_ARGS = EXIT_SUCCESS + 1,
     EXIT_READ_PACKAGE_ERROR = 2,

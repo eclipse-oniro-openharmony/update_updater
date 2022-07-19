@@ -18,7 +18,7 @@
 
 #include "fs_manager/partitions.h"
 
-namespace updater {
+namespace Updater {
 extern int RegisterUpdaterPartitionList(const PartitonList &nlist, const PartitonList &olist);
 extern int GetRegisterUpdaterPartitionList(PartitonList &ulist);
 } // updater

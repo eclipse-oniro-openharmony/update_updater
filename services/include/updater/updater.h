@@ -19,7 +19,7 @@
 #include "package/packages_info.h"
 #include "package/pkg_manager.h"
 
-namespace updater {
+namespace Updater {
 enum UpdaterStatus {
     UPDATE_ERROR = -1,
     UPDATE_SUCCESS,

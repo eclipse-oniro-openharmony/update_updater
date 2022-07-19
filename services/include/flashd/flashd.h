@@ -18,7 +18,7 @@
 #include <functional>
 #include <iostream>
 
-namespace flashd {
+namespace Flashd {
 enum {
     FLASHING_SYSTEM_ERROR = 100,
     FLASHING_ARG_INVALID,

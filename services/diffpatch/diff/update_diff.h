@@ -24,7 +24,7 @@
 #include "package/pkg_manager.h"
 #include "securec.h"
 
-namespace updatepatch {
+namespace UpdatePatch {
 class ImageParser {
 public:
     ImageParser() = default;

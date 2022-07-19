@@ -19,9 +19,9 @@
 #include "image_diff.h"
 #include "pkg_manager.h"
 
-using namespace hpackage;
+using namespace Hpackage;
 
-namespace updatepatch {
+namespace UpdatePatch {
 ImageParser::~ImageParser()
 {
     hpackage::PkgManager::ReleasePackageInstance(pkgManager_);

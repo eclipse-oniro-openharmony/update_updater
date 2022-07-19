@@ -18,7 +18,7 @@
 #include "updater/updater.h"
 
 using namespace Hdc;
-namespace flashd {
+namespace Flashd {
 int flashd_main(int argc, char **argv)
 {
     Base::SetLogLevel(LOG_LAST);  // debug log print

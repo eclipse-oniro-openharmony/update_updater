@@ -25,11 +25,11 @@
 #include "partitions.h"
 #include "securec.h"
 
-using namespace updater;
+using namespace Updater;
 using namespace testing::ext;
 using namespace std;
 
-namespace updater_ut {
+namespace UpdaterUt {
 constexpr int PARTITION_NUMBER = 9;
 constexpr size_t BOOT_PARTITION_LEN = 2048;
 constexpr size_t KERNEL_PARTITION_LEN = 30720;

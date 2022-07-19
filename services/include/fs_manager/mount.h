@@ -19,7 +19,7 @@
 #include "fs_manager/fs_manager.h"
 #include "updater/updater.h"
 
-namespace updater {
+namespace Updater {
 void LoadFstab(); /* Load fstab */
 void LoadSpecificFstab(const std::string &fstabName);
 int FormatPartition(const std::string &path);

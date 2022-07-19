@@ -18,9 +18,9 @@
 #include <vector>
 #include "diffpatch.h"
 
-using namespace hpackage;
+using namespace Hpackage;
 
-namespace updatepatch {
+namespace UpdatePatch {
 #define GET_REAL_DATA_LEN(info) (info) ->packedSize + (info)->dataOffset - (info)->headerOffset
 constexpr int32_t LZ4F_MAX_BLOCKID = 7;
 constexpr int32_t ZIP_MAX_LEVEL = 9;

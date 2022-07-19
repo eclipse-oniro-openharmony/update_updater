@@ -27,8 +27,8 @@
 #include "updater.h"
 #include "updater_ui.h"
 
-using namespace updater;
-using namespace hpackage;
+using namespace Updater;
+using namespace Hpackage;
 
 const static std::string TEST_PATH_TO = "/data/fuzz/test/";
 

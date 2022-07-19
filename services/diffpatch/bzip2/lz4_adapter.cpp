@@ -21,9 +21,9 @@
 #include "lz4hc.h"
 #include "pkg_manager.h"
 
-using namespace hpackage;
+using namespace Hpackage;
 
-namespace updatepatch {
+namespace UpdatePatch {
 Lz4Adapter::Lz4Adapter(UpdatePatchWriterPtr outStream, size_t offset, const PkgManager::FileInfoPtr fileInfo)
     : DeflateAdapter(), outStream_(outStream), offset_(offset)
 {

@@ -21,7 +21,7 @@
 #include "blocks_diff.h"
 #include "update_diff.h"
 
-namespace updatepatch {
+namespace UpdatePatch {
 struct ImageBlock {
     int32_t type;
     PatchBuffer newInfo;

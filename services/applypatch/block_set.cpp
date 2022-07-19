@@ -28,10 +28,10 @@
 #include "securec.h"
 #include "utils.h"
 
-using namespace updater;
-using namespace updater::utils;
+using namespace Updater;
+using namespace Updater::Utils;
 
-namespace updater {
+namespace Updater {
 BlockSet::BlockSet(std::vector<BlockPair> &&pairs)
 {
     blockSize_ = 0;

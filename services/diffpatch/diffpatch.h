@@ -24,7 +24,7 @@
 #include "log/log.h"
 #include "patch/update_patch.h"
 
-namespace updatepatch {
+namespace UpdatePatch {
 #define PATCH_LOGE(format, ...) Logger(updater::ERROR, (__FILE_NAME__), (__LINE__), format, ##__VA_ARGS__)
 #define PATCH_DEBUG(format, ...) Logger(updater::DEBUG, (__FILE_NAME__), (__LINE__), format, ##__VA_ARGS__)
 #define PATCH_LOGI(format, ...) Logger(updater::INFO, (__FILE_NAME__), (__LINE__), format, ##__VA_ARGS__)

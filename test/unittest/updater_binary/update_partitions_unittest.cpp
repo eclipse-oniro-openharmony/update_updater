@@ -29,13 +29,13 @@
 #include "update_processor.h"
 #include "utils.h"
 
-using namespace updater;
+using namespace Updater;
 using namespace testing::ext;
-using namespace uscript;
+using namespace Uscript;
 using namespace std;
-using namespace hpackage;
+using namespace Hpackage;
 
-namespace updater_ut {
+namespace UpdaterUt {
 void UpdatePartitionsUnitTest::SetUp(void)
 {
     cout << "Updater Unit UpdatePartitionsUnitTest Begin!" << endl;

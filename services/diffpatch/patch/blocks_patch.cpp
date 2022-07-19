@@ -20,10 +20,10 @@
 #include <vector>
 #include "diffpatch.h"
 
-using namespace hpackage;
+using namespace Hpackage;
 using namespace std;
 
-namespace updatepatch {
+namespace UpdatePatch {
 #define PATCH_MIN BSDIFF_MAGIC.size() + sizeof(int64_t) * 3
 
 static int64_t ReadLE64(const uint8_t *buffer)

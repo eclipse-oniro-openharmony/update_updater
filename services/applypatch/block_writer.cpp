@@ -19,7 +19,7 @@
 #include "log/log.h"
 #include "utils.h"
 
-namespace updater {
+namespace Updater {
 bool BlockWriter::IsWriteDone() const
 {
     return blockIndex_ == bs_.CountOfRanges() && currentBlockLeft_ == 0;

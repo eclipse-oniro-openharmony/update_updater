@@ -23,7 +23,7 @@
 #include "pkg_manager.h"
 #include "securec.h"
 
-namespace updatepatch {
+namespace UpdatePatch {
 class BlocksPatch {
 public:
     BlocksPatch() = delete;

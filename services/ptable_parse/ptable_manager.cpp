@@ -18,7 +18,7 @@
 #include "log/log.h"
 #include "securec.h"
 
-namespace updater {
+namespace Updater {
 // class PtableManager
 PtableManager::PtableManager() : pPtable_(nullptr)
 {

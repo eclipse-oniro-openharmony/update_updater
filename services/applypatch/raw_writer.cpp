@@ -19,7 +19,7 @@
 #include <unistd.h>
 #include "log/log.h"
 
-namespace updater {
+namespace Updater {
 bool RawWriter::Write(const uint8_t *addr, size_t len, [[maybe_unused]] const void *context)
 {
     if (addr == nullptr) {

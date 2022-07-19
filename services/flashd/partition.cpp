@@ -28,7 +28,7 @@
 #include "flash_service.h"
 #include "utils.h"
 
-namespace flashd {
+namespace Flashd {
 Partition::~Partition()
 {
     if (fd_ != -1) {

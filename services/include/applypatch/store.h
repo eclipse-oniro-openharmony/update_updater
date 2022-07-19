@@ -21,7 +21,7 @@
 #include "applypatch/block_set.h"
 #include "applypatch/command.h"
 
-namespace updater {
+namespace Updater {
 class Store {
 public:
     // Create new store space
@@ -35,5 +35,5 @@ public:
     static int32_t LoadDataFromStore(const std::string &dirPath, const std::string &fileName,
         std::vector<uint8_t> &buffer);
 };
-} // namespace updater
+} // namespace Updater
 #endif // UPDATER_STORE_H

@@ -24,7 +24,7 @@
 #include "securec.h"
 #include "update_diff.h"
 
-namespace updatepatch {
+namespace UpdatePatch {
 template<class DataType>
 class SuffixArray {
 public:
