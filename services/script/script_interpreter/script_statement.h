@@ -19,7 +19,7 @@
 #include "script_context.h"
 #include "script_param.h"
 
-namespace uscript {
+namespace Uscript {
 class UScriptStatementList;
 class UScriptExpression;
 
@@ -225,5 +225,5 @@ public:
 private:
     std::vector<UScriptStatement*> statements_ = {};
 };
-} // namespace uscript
+} // namespace Uscript
 #endif // USCRIPT_STATEMENT_H

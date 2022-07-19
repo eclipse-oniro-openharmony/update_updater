@@ -19,7 +19,7 @@
 /* 指定bison的版本 */
 %require "3.0.4"
 
-%define api.namespace {uscript} //声明命名空间与下面声明的类名结合使用 uscript::Parser::  在scanner.l中有体现
+%define api.namespace {uscript} //声明命名空间与下面声明的类名结合使用 Uscript::Parser::  在scanner.l中有体现
 %define api.parser.class { Parser }
 %define api.token.constructor
 %define api.value.type variant //使得类型与token定义可以使用各种复杂的结构与类型
@@ -41,7 +41,7 @@
 
   using std::string;
 
-  namespace uscript { /*避免包含头文件时冲突 */
+  namespace Uscript { /*避免包含头文件时冲突 */
     class Scanner;
     class ScriptInterpreter;
   }
@@ -58,13 +58,13 @@
   #include "log.h"
 
   /* 注意：这里的参数由%parse-param决定 */
-  static uscript::Parser::symbol_type yylex(uscript::Scanner* scanner, uscript::ScriptInterpreter* interpreter){
+  static Uscript::Parser::symbol_type yylex(Uscript::Scanner* scanner, Uscript::ScriptInterpreter* interpreter){
     return scanner->nextToken();
   }
 
   using namespace std;
-  using namespace uscript;
-  using namespace updater;
+  using namespace Uscript;
+  using namespace Updater;
 }
 
 %{
@@ -75,12 +75,12 @@ void Parser::error (const location_type& loc, const std::string& msg)
 %}
 
 /*定义parser传给scanner的参数*/
-%lex-param { uscript::Scanner* scanner }
-%lex-param { uscript::ScriptInterpreter* interpreter }
+%lex-param { Uscript::Scanner* scanner }
+%lex-param { Uscript::ScriptInterpreter* interpreter }
 
 /*定义interpreter传给parser的参数*/
-%parse-param { uscript::Scanner* scanner }
-%parse-param { uscript::ScriptInterpreter* interpreter }
+%parse-param { Uscript::Scanner* scanner }
+%parse-param { Uscript::ScriptInterpreter* interpreter }
 
 %locations
 

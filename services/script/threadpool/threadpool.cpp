@@ -16,7 +16,7 @@
 #include <cstring>
 #include "script_utils.h"
 
-namespace uscript {
+namespace Uscript {
 static ThreadPool* g_threadPool = nullptr;
 static std::mutex g_initMutex;
 
@@ -167,4 +167,4 @@ void ThreadPool::RunTask(Task &&task, int32_t index)
         }
     } while (!complete);
 }
-} // namespace uscript
+} // namespace Uscript

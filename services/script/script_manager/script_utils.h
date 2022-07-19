@@ -20,19 +20,19 @@
 #include "log.h"
 #include "script_manager.h"
 
-namespace uscript {
+namespace Uscript {
 enum {
     USCRIPT_INVALID_STATEMENT = USCRIPT_BASE + 100,
 };
 
-#define USCRIPT_LOGE(format, ...) Logger(updater::ERROR, (__FILE_NAME__), (__LINE__), format, ##__VA_ARGS__)
-#define USCRIPT_LOGI(format, ...) Logger(updater::INFO, (__FILE_NAME__), (__LINE__), format, ##__VA_ARGS__)
-#define USCRIPT_LOGW(format, ...) Logger(updater::WARNING, (__FILE_NAME__), (__LINE__), format, ##__VA_ARGS__)
+#define USCRIPT_LOGE(format, ...) Logger(Updater::ERROR, (__FILE_NAME__), (__LINE__), format, ##__VA_ARGS__)
+#define USCRIPT_LOGI(format, ...) Logger(Updater::INFO, (__FILE_NAME__), (__LINE__), format, ##__VA_ARGS__)
+#define USCRIPT_LOGW(format, ...) Logger(Updater::WARNING, (__FILE_NAME__), (__LINE__), format, ##__VA_ARGS__)
 
 #define USCRIPT_CHECK(ret, statement, ...) \
     if (!(ret)) {                          \
         USCRIPT_LOGE(__VA_ARGS__);         \
         statement;                         \
     }
-} // namespace uscript
+} // namespace Uscript
 #endif /* USCRIPT_UTILES_H */

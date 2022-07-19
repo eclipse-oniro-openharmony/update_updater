@@ -18,7 +18,7 @@
 #include <memory>
 #include "script_context.h"
 
-namespace uscript {
+namespace Uscript {
 class UScriptExpression;
 using UScriptExpressionPtr = std::shared_ptr<UScriptExpression>;
 
@@ -202,5 +202,5 @@ private:
     std::string functionName_;
     ScriptParams* params_ = nullptr;
 };
-} // namespace uscript
+} // namespace Uscript
 #endif // _HS_EXPRESSION_H
