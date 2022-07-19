@@ -20,25 +20,25 @@
 #include "script_manager.h"
 
 namespace Updater {
-class UScriptInstructionBlockUpdate : public uscript::UScriptInstruction {
+class UScriptInstructionBlockUpdate : public Uscript::UScriptInstruction {
 public:
     UScriptInstructionBlockUpdate() {}
     virtual ~UScriptInstructionBlockUpdate() {}
-    int32_t Execute(uscript::UScriptEnv &env, uscript::UScriptContext &context) override;
+    int32_t Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context) override;
 };
 
-class UScriptInstructionBlockCheck : public uscript::UScriptInstruction {
+class UScriptInstructionBlockCheck : public Uscript::UScriptInstruction {
 public:
     UScriptInstructionBlockCheck() {}
     virtual ~UScriptInstructionBlockCheck() {}
-    int32_t Execute(uscript::UScriptEnv &env, uscript::UScriptContext &context) override;
+    int32_t Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context) override;
 };
 
-class UScriptInstructionShaCheck : public uscript::UScriptInstruction {
+class UScriptInstructionShaCheck : public Uscript::UScriptInstruction {
 public:
     UScriptInstructionShaCheck() {}
     virtual ~UScriptInstructionShaCheck() {}
-    int32_t Execute(uscript::UScriptEnv &env, uscript::UScriptContext &context) override;
+    int32_t Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context) override;
 };
 }
 

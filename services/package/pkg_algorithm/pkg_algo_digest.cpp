@@ -18,7 +18,7 @@
 #include "pkg_utils.h"
 #include "zlib.h"
 
-namespace hpackage {
+namespace Hpackage {
 size_t DigestAlgorithm::GetDigestLen(int8_t digestMethod)
 {
     static size_t digestLens[PKG_DIGEST_TYPE_MAX] = {0, DIGEST_CRC_LEN, DIGEST_SHA256_LEN, DIGEST_SHA256_LEN};
@@ -154,4 +154,4 @@ DigestAlgorithm::DigestAlgorithmPtr PkgAlgorithmFactory::GetDigestAlgorithm(uint
     }
     return nullptr;
 }
-} // namespace hpackage
+} // namespace Hpackage

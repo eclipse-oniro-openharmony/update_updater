@@ -31,7 +31,7 @@ using Uscript::UScriptInstructionFactoryPtr;
 namespace Updater {
 class UpdaterEnv : public UScriptEnv {
 public:
-    UpdaterEnv(hpackage::PkgManager::PkgManagerPtr pkgManager, PostMessageFunction postMessage, bool retry)
+    UpdaterEnv(Hpackage::PkgManager::PkgManagerPtr pkgManager, PostMessageFunction postMessage, bool retry)
         : UScriptEnv(pkgManager), postMessage_(postMessage), isRetry_(retry) {}
     virtual ~UpdaterEnv();
 

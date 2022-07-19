@@ -66,15 +66,15 @@ private:
 class BlocksStreamPatch : public BlocksPatch {
 public:
     BlocksStreamPatch(const PatchBuffer &patchInfo,
-        hpackage::PkgManager::StreamPtr stream, UpdatePatchWriterPtr writer)
+        Hpackage::PkgManager::StreamPtr stream, UpdatePatchWriterPtr writer)
         : BlocksPatch(patchInfo), stream_(stream), writer_(writer) {}
     ~BlocksStreamPatch() override {}
 private:
     int32_t RestoreDiffData(const ControlData &ctrlData) override;
     int32_t RestoreExtraData(const ControlData &ctrlData) override;
 
-    hpackage::PkgManager::StreamPtr stream_ { nullptr };
+    Hpackage::PkgManager::StreamPtr stream_ { nullptr };
     UpdatePatchWriterPtr writer_ { nullptr };
 };
-} // namespace updatepatch
+} // namespace UpdatePatch
 #endif // BLOCKS_DIFF_H

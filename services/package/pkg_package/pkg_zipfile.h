@@ -20,7 +20,7 @@
 #include "pkg_pkgfile.h"
 #include "pkg_utils.h"
 
-namespace hpackage {
+namespace Hpackage {
 // Local file header: descript in APPNOTE-6.3.4
 //    local file header signature     4 bytes  (0x04034b50)
 //    version needed to extract       2 bytes
@@ -194,5 +194,5 @@ private:
     PkgInfo pkgInfo_ {};
     size_t currentOffset_ = 0;
 };
-} // namespace hpackage
+} // namespace Hpackage
 #endif

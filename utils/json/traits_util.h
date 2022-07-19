@@ -46,6 +46,5 @@ struct StandardTypeHelper {
 template<typename T>
 using StandardType = typename StandardTypeHelper<T>::type;
 }
-
 }
 #endif

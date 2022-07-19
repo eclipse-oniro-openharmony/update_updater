@@ -21,8 +21,8 @@
 #include "package/pkg_manager.h"
 #include "securec.h"
 
-using namespace updater;
-using namespace hpackage;
+using namespace Updater;
+using namespace Hpackage;
 constexpr uint32_t VERIFY_FINSH_PERCENT = 100;
 
 static int32_t GetUpgradePkgInfo(UpgradePkgInfo *upgradePackageInfo,

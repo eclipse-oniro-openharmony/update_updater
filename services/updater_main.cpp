@@ -130,7 +130,7 @@ UpdaterStatus UpdaterFromSdcard()
     LOG(INFO) << "UpdaterFromSdcard start, sdcard updaterPath : " << SDCARD_CARD_PKG_PATH;
 
     g_logLabel->SetText("Don't remove SD Card!");
-    utils::UsSleep(DISPLAY_TIME);
+    Utils::UsSleep(DISPLAY_TIME);
     UpdaterStatus updateRet = DoInstallUpdaterPackage(pkgManager, SDCARD_CARD_PKG_PATH.c_str(), 0, SDCARD_UPDATE);
     if (updateRet != UPDATE_SUCCESS) {
         std::this_thread::sleep_for(std::chrono::milliseconds(UI_SHOW_DURATION));
@@ -177,7 +177,7 @@ static UpdaterStatus InstallUpdaterPackage(UpdaterParams &upParams, const std::v
                 upParams.retryCount += 1;
                 g_logLabel->SetText("Retry installation");
                 SetRetryCountToMisc(upParams.retryCount, args);
-                utils::DoReboot("updater");
+                Utils::DoReboot("updater");
             }
         } else {
             LOG(INFO) << "Install package success.";
@@ -305,7 +305,7 @@ int UpdaterMain(int argc, char **argv)
     }
 #endif
     PostUpdater(true);
-    utils::DoReboot("");
+    Utils::DoReboot("");
     return 0;
 }
 } // updater

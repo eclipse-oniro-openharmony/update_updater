@@ -38,7 +38,7 @@ bool DaemonUpdater::CommandDispatch(const uint16_t command, uint8_t *payload, co
     }
 #endif
     if (flashHandle_ == nullptr) {
-        int ret = flashd::CreateFlashInstance(&flashHandle_, errorMsg_,
+        int ret = Flashd::CreateFlashInstance(&flashHandle_, errorMsg_,
             [&](uint32_t type, size_t dataLen, const void *context) {
                 SendProgress(dataLen);
             });
@@ -63,13 +63,13 @@ bool DaemonUpdater::CommandDispatch(const uint16_t command, uint8_t *payload, co
         }
         case CMD_UPDATER_ERASE: {
             std::string param(reinterpret_cast<char *>(payload), payloadSize);
-            RunUpdateShell(flashd::UPDATEMOD_ERASE, param, "");
+            RunUpdateShell(Flashd::UPDATEMOD_ERASE, param, "");
             TaskFinish();
             break;
         }
         case CMD_UPDATER_FORMAT: {
             std::string param(reinterpret_cast<char *>(payload), payloadSize);
-            RunUpdateShell(flashd::UPDATEMOD_FORMAT, param, "");
+            RunUpdateShell(Flashd::UPDATEMOD_FORMAT, param, "");
             TaskFinish();
             break;
         }
@@ -95,9 +95,9 @@ void DaemonUpdater::ProcessUpdateCheck(const uint8_t *payload, const int payload
 
     WRITE_LOG(LOG_DEBUG, "ProcessUpdateCheck local function %s size %llu realSize %llu",
         ctxNow.transferConfig.functionName.c_str(), ctxNow.fileSize, realSize);
-    uint8_t type = flashd::UPDATEMOD_FLASH;
+    uint8_t type = Flashd::UPDATEMOD_FLASH;
     if (ctxNow.transferConfig.functionName == CMDSTR_UPDATE_SYSTEM) {
-        type = flashd::UPDATEMOD_UPDATE;
+        type = Flashd::UPDATEMOD_UPDATE;
         totalSize_ = static_cast<double>(ctxNow.fileSize);
         if (!MatchPackageExtendName(ctxNow.transferConfig.optionalName, ".bin")) {
             totalSize_ += static_cast<double>(realSize); // for decode from zip
@@ -107,7 +107,7 @@ void DaemonUpdater::ProcessUpdateCheck(const uint8_t *payload, const int payload
         totalSize_ += static_cast<double>(realSize); // for write partition
     } else if (ctxNow.transferConfig.functionName == CMDSTR_FLASH_PARTITION) {
         totalSize_ = static_cast<double>(ctxNow.fileSize);
-        type = flashd::UPDATEMOD_FLASH;
+        type = Flashd::UPDATEMOD_FLASH;
     } else {
         WRITE_LOG(LOG_FATAL, "ProcessUpdateCheck local function %s size %lu realSize %lu",
             ctxNow.transferConfig.functionName.c_str(), ctxNow.fileSize, realSize);
@@ -115,7 +115,7 @@ void DaemonUpdater::ProcessUpdateCheck(const uint8_t *payload, const int payload
         return;
     }
     ctxNow.localPath = ctxNow.transferConfig.optionalName;
-    ret = flashd::DoUpdaterPrepare(flashHandle_, type, ctxNow.transferConfig.options, ctxNow.localPath);
+    ret = Flashd::DoUpdaterPrepare(flashHandle_, type, ctxNow.transferConfig.options, ctxNow.localPath);
     if (ret == 0) {
         refCount++;
         WRITE_LOG(LOG_DEBUG, "ProcessUpdateCheck localPath %s", ctxNow.localPath.c_str());
@@ -129,15 +129,15 @@ void DaemonUpdater::ProcessUpdateCheck(const uint8_t *payload, const int payload
 
 void DaemonUpdater::RunUpdateShell(uint8_t type, const std::string &options, const std::string &package)
 {
-    int ret = flashd::DoUpdaterFlash(flashHandle_, type, options, package);
+    int ret = Flashd::DoUpdaterFlash(flashHandle_, type, options, package);
     AsyncUpdateFinish(type, ret, errorMsg_);
 }
 
 void DaemonUpdater::SendProgress(size_t dataLen)
 {
     currSize_ += dataLen;
-    int32_t percentage = static_cast<int32_t>(currSize_ * (flashd::PERCENT_FINISH - 1) / totalSize_);
-    if (static_cast<uint32_t>(percentage) >= flashd::PERCENT_FINISH) {
+    int32_t percentage = static_cast<int32_t>(currSize_ * (Flashd::PERCENT_FINISH - 1) / totalSize_);
+    if (static_cast<uint32_t>(percentage) >= Flashd::PERCENT_FINISH) {
         WRITE_LOG(LOG_DEBUG, "SendProgress %lf percentage %d", currSize_, percentage);
         return;
     }
@@ -156,12 +156,12 @@ void DaemonUpdater::WhenTransferFinish(CtxFile *context)
               ctxNow.transferConfig.functionName.c_str(), context->indexIO, nMSec, fRate);
 
     int ret = 0;
-    uint8_t type = flashd::UPDATEMOD_UPDATE;
+    uint8_t type = Flashd::UPDATEMOD_UPDATE;
     if (ctxNow.transferConfig.functionName == CMDSTR_UPDATE_SYSTEM) {
-        type = flashd::UPDATEMOD_UPDATE;
-        ret = flashd::DoUpdaterFlash(flashHandle_, type, ctxNow.transferConfig.options, ctxNow.localPath);
+        type = Flashd::UPDATEMOD_UPDATE;
+        ret = Flashd::DoUpdaterFlash(flashHandle_, type, ctxNow.transferConfig.options, ctxNow.localPath);
     } else if (ctxNow.transferConfig.functionName == CMDSTR_FLASH_PARTITION) {
-        type = flashd::UPDATEMOD_FLASH;
+        type = Flashd::UPDATEMOD_FLASH;
     }
     AsyncUpdateFinish(type, ret, errorMsg_);
     TaskFinish();
@@ -170,9 +170,9 @@ void DaemonUpdater::WhenTransferFinish(CtxFile *context)
 void DaemonUpdater::AsyncUpdateFinish(uint8_t type, int32_t retCode, const string &result)
 {
     WRITE_LOG(LOG_DEBUG, "AsyncUpdateFinish retCode %d result %s", retCode, result.c_str());
-    uint32_t percentage = (retCode != 0) ? flashd::PERCENT_CLEAR : flashd::PERCENT_FINISH;
+    uint32_t percentage = (retCode != 0) ? Flashd::PERCENT_CLEAR : Flashd::PERCENT_FINISH;
     SendToAnother(CMD_UPDATER_PROGRESS, (uint8_t *)&percentage, sizeof(uint32_t));
-    (void)flashd::DoUpdaterFinish(flashHandle_, type, ctxNow.localPath);
+    (void)Flashd::DoUpdaterFinish(flashHandle_, type, ctxNow.localPath);
 
     string echo = result;
     echo = Base::ReplaceAll(echo, "\n", " ");

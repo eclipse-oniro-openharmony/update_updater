@@ -16,7 +16,7 @@
 #ifndef UPDATE_UI_UPDATER_UI_CONST_H
 #define UPDATE_UI_UPDATER_UI_CONST_H
 
-namespace updater {
+namespace Updater {
 constexpr int START_X1 = 0;
 constexpr int START_Y1 = 850;
 constexpr int WIDTH1 = 480;

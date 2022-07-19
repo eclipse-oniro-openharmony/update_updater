@@ -127,4 +127,4 @@ std::string PartitionRecord::GetMiscPartitionPath(const std::string &misc)
     }
     return miscBlockDevice;
 }
-} // namespace updater
+} // namespace Updater

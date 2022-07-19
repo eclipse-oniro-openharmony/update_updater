@@ -48,5 +48,5 @@ private:
     std::string path_;
     off64_t offset_;
 };
-} // namespace updater
+} // namespace Updater
 #endif /* UPDATER_RAW_WRITER_H */

@@ -140,4 +140,4 @@ std::ostream& ErrorCode::OutputErrorCode(const std::string &path, int line, Upda
     }
     return std::cout;
 }
-} // updater
+} // Updater

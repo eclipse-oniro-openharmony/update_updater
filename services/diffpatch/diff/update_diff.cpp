@@ -24,14 +24,14 @@ using namespace Hpackage;
 namespace UpdatePatch {
 ImageParser::~ImageParser()
 {
-    hpackage::PkgManager::ReleasePackageInstance(pkgManager_);
+    Hpackage::PkgManager::ReleasePackageInstance(pkgManager_);
     pkgManager_ = nullptr;
 }
 
 int32_t ImageParser::GetPkgBuffer(BlockBuffer &buffer) const
 {
     int32_t ret = -1;
-    hpackage::PkgBuffer pkgBuffer {};
+    Hpackage::PkgBuffer pkgBuffer {};
     if (stream_ != nullptr) {
         ret = stream_->GetBuffer(pkgBuffer);
         buffer.buffer = pkgBuffer.buffer;
@@ -40,7 +40,7 @@ int32_t ImageParser::GetPkgBuffer(BlockBuffer &buffer) const
     return ret;
 }
 
-const hpackage::FileInfo *ImageParser::GetFileInfo(const std::string &fileName) const
+const Hpackage::FileInfo *ImageParser::GetFileInfo(const std::string &fileName) const
 {
     if (pkgManager_ != nullptr) {
         return pkgManager_->GetFileInfo(fileName);
@@ -50,7 +50,7 @@ const hpackage::FileInfo *ImageParser::GetFileInfo(const std::string &fileName) 
 
 int32_t ImageParser::Parse(const std::string &packageName)
 {
-    pkgManager_ = hpackage::PkgManager::CreatePackageInstance();
+    pkgManager_ = Hpackage::PkgManager::CreatePackageInstance();
     PATCH_CHECK(pkgManager_ != nullptr, return PATCH_INVALID_PARAM, "Failed to get pkg manager");
     int32_t ret = PatchMapFile(packageName, memMap_);
     PATCH_CHECK(ret == 0, return -1, "Failed to read file");
@@ -84,7 +84,7 @@ int32_t ImageParser::Extract(const std::string &fileName, std::vector<uint8_t> &
     PATCH_DEBUG("ImageParser::Extract %s", fileName.c_str());
     PATCH_CHECK(pkgManager_ != nullptr, return PATCH_INVALID_PARAM, "Failed to get pkg manager");
     size_t bufferSize = 0;
-    hpackage::PkgManager::StreamPtr outStream = nullptr;
+    Hpackage::PkgManager::StreamPtr outStream = nullptr;
     int32_t ret = pkgManager_->CreatePkgStream(outStream, fileName,
         [&buffer, &bufferSize](const PkgBuffer &data, size_t size,
             size_t start, bool isFinish, const void *context) ->int {
@@ -153,7 +153,7 @@ int32_t UpdateDiff::MakePatch(const std::string &oldFileName,
 int32_t UpdateDiff::DiffImage(size_t limit, const std::string &oldFileName,
     const std::string &newFileName, const std::string &patchFileName)
 {
-    std::unique_ptr<UpdateDiff> updateDiff(new UpdateDiff(limit, false));
+    auto updateDiff = std::make_unique<UpdateDiff>(limit, false);
     PATCH_CHECK(updateDiff != nullptr, return -1, "Failed to create update diff");
     return updateDiff->MakePatch(oldFileName, newFileName, patchFileName);
 }
@@ -161,8 +161,8 @@ int32_t UpdateDiff::DiffImage(size_t limit, const std::string &oldFileName,
 int32_t UpdateDiff::DiffBlock(const std::string &oldFileName,
     const std::string &newFileName, const std::string &patchFileName)
 {
-    std::unique_ptr<UpdateDiff> updateDiff(new UpdateDiff(0, true));
+    auto updateDiff = std::make_unique<UpdateDiff>(0, true);
     PATCH_CHECK(updateDiff != nullptr, return -1, "Failed to create update diff");
     return updateDiff->MakePatch(oldFileName, newFileName, patchFileName);
 }
-} // namespace updatepatch
+} // namespace UpdatePatch

@@ -23,7 +23,8 @@
 #include "securec.h"
 #include "zip_pkg_parse.h"
 
-namespace hpackage {
+namespace Hpackage {
+namespace {
 static constexpr uint32_t HASH_SOURCE_BLOCK_LEN = 4096;
 static constexpr uint32_t ZIP_EOCD_FIXED_PART_LEN = 22;
 static constexpr uint32_t PKG_FOOTER_SIZE = 6;
@@ -43,6 +44,7 @@ static int ConvertNidToMethod(int algId)
     }
 
     return nid;
+}
 }
 
 int32_t SignPkg::SignPackage(PkgStreamPtr outStream) const
@@ -346,4 +348,4 @@ int32_t CalcSha256ByBlock(const PkgStreamPtr srcData, const size_t dataLen, std:
 
     return PKG_SUCCESS;
 }
-} // namespace hpackage
+} // namespace Hpackage

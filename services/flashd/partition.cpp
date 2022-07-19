@@ -68,7 +68,7 @@ int Partition::DoFlash(const std::string &fileName)
 
     auto inputFd = open(fileName.c_str(), O_RDONLY);
     FLASHING_CHECK(inputFd > 0,
-        flash_->RecordMsg(updater::ERROR, "Can not open image \"%s\" error: %s", fileName.c_str(), strerror(errno));
+        flash_->RecordMsg(Updater::ERROR, "Can not open image \"%s\" error: %s", fileName.c_str(), strerror(errno));
         return FLASHING_NOPERMISSION, "Can not open image \"%s\" error: %s", fileName.c_str(), strerror(errno));
 
     struct stat st {};
@@ -110,11 +110,11 @@ int Partition::DoErase()
         ret = ioctl(fd_, BLKDISCARD, &range);
 #endif
         FLASHING_CHECK(ret >= 0,
-            flash_->RecordMsg(updater::ERROR, "Failed to erase \"%s\" error: %s", partName_.c_str(), strerror(errno));
+            flash_->RecordMsg(Updater::ERROR, "Failed to erase \"%s\" error: %s", partName_.c_str(), strerror(errno));
             return ret, "Failed to erase %s error: %s", partName_.c_str(), strerror(errno));
         std::vector<uint8_t> buffer(BLOCK_SIZE, 0);
 #ifndef UPDATER_UT
-        ret = updater::utils::WriteFully(fd_, buffer.data(), buffer.size());
+        ret = Updater::Utils::WriteFully(fd_, buffer.data(), buffer.size());
 #endif
         FLASHING_CHECK(ret == 0, return FLASHING_PART_WRITE_ERROR, "Failed to flash data errno %d", errno);
         fsync(fd_);
@@ -134,13 +134,13 @@ int Partition::DoFormat(const std::string &fsType)
     FLASHING_CHECK(ret == 0, return FLASHING_PART_WRITE_ERROR, "Failed to get param");
     ret = FlashService::ExecCommand(formatCmds);
     FLASHING_CHECK(ret == 0,
-        flash_->RecordMsg(updater::ERROR, "Failed to format \"%s\" error: %s", partName_.c_str(), strerror(ret));
+        flash_->RecordMsg(Updater::ERROR, "Failed to format \"%s\" error: %s", partName_.c_str(), strerror(ret));
         return FLASHING_PART_WRITE_ERROR, "Failed to format \"%s\" error: %s", partPath_.c_str(), strerror(ret));
 
     fsType_ = fsType;
     ret = DoMount();
     FLASHING_CHECK(ret == 0,
-        flash_->RecordMsg(updater::ERROR, "Failed to mount \"%s\" error: %s", partName_.c_str(), strerror(ret));
+        flash_->RecordMsg(Updater::ERROR, "Failed to mount \"%s\" error: %s", partName_.c_str(), strerror(ret));
         return FLASHING_PART_WRITE_ERROR, "Failed to mount \"%s\"", partPath_.c_str());
     FLASHING_LOGI("DoFormat partition %s format %s success", partName_.c_str(), fsType_.c_str());
     return ret;
@@ -165,11 +165,11 @@ int Partition::DoResize(uint32_t blocks)
     formatCmds.push_back(partPath_);
     ret = FlashService::ExecCommand(formatCmds);
     FLASHING_CHECK(ret == 0,
-        flash_->RecordMsg(updater::ERROR, "Failed to resize \"%s\" error: %s", partName_.c_str(), strerror(ret));
+        flash_->RecordMsg(Updater::ERROR, "Failed to resize \"%s\" error: %s", partName_.c_str(), strerror(ret));
         return FLASHING_PART_WRITE_ERROR, "Failed to resize \"%s\" error: %s", partName_.c_str(), strerror(ret));
     ret = DoMount();
     FLASHING_CHECK(ret == 0,
-        flash_->RecordMsg(updater::ERROR, "Failed to mount \"%s\" error: %s", partName_.c_str(), strerror(ret));
+        flash_->RecordMsg(Updater::ERROR, "Failed to mount \"%s\" error: %s", partName_.c_str(), strerror(ret));
         return FLASHING_PART_WRITE_ERROR, "Failed to mount \"%s\"", partPath_.c_str());
     FLASHING_LOGI("Resize partition %s success", partName_.c_str());
     return 0;
@@ -181,7 +181,7 @@ int Partition::Open()
         fd_ = open(partPath_.c_str(), O_RDWR);
     }
     FLASHING_CHECK(fd_ > 0,
-        flash_->RecordMsg(updater::ERROR,
+        flash_->RecordMsg(Updater::ERROR,
         "Can not open partiton \"%s\" error: %s", partName_.c_str(), strerror(errno));
         return FLASHING_NOPERMISSION,
         "Can open partition %s error %s", partPath_.c_str(), strerror(errno));
@@ -289,7 +289,7 @@ int Partition::DoUmount()
 #ifndef UPDATER_UT
     int ret = umount2(mountPoint_.c_str(), MNT_FORCE);
     FLASHING_CHECK(ret == 0,
-        flash_->RecordMsg(updater::ERROR, "Failed to umount \"%s\" error: %s", partName_.c_str(), strerror(errno));
+        flash_->RecordMsg(Updater::ERROR, "Failed to umount \"%s\" error: %s", partName_.c_str(), strerror(errno));
         return FLASHING_PART_WRITE_ERROR, "Failed to umount \"%s\" error: %s", partName_.c_str(), strerror(errno));
 #endif
     return 0;
@@ -335,7 +335,7 @@ int Partition::BuildCommandParam(const std::string &fsType, std::vector<std::str
     };
     auto it = fsToolsMap.find(fsType);
     FLASHING_CHECK(it != fsToolsMap.end(),
-        flash_->RecordMsg(updater::ERROR,  "Not support fs type %s", fsType.c_str());
+        flash_->RecordMsg(Updater::ERROR,  "Not support fs type %s", fsType.c_str());
         return FLASHING_FSTYPE_NOT_SUPPORT, "Not support fs type %s", fsType.c_str());
 
     if (fsType == "ext4") {

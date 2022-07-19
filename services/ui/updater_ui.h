@@ -35,5 +35,5 @@ TextLabel *GetUpdateInfoLabel();
 ProgressBar *GetProgressBar();
 
 void SetUpdateFlag(int updateFlag);
-} // namespace updater
+} // namespace Updater
 #endif /* UPDATE_UI_HOS_UPDATER_H */

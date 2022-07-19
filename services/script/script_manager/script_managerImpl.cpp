@@ -15,7 +15,6 @@
 #include "script_manager_impl.h"
 #include <cstring>
 #include <dlfcn.h>
-#include "dump.h"
 #include "pkg_manager.h"
 #include "script_instructionhelper.h"
 #include "script_interpreter.h"
@@ -25,8 +24,8 @@
 using namespace Hpackage;
 
 namespace Uscript {
-constexpr const char *LOAD_SCRIPT_NAME = "loadScript.us";
-constexpr const char *REGISTER_CMD_SCRIPT_NAME = "registerCmd.us";
+const std::string LOAD_SCRIPT_NAME = "loadScript.us";
+const std::string REGISTER_CMD_SCRIPT_NAME = "registerCmd.us";
 
 static ScriptManagerImpl* g_scriptManager = nullptr;
 ScriptManager* ScriptManager::GetScriptManager(UScriptEnv *env)
@@ -134,11 +133,9 @@ int32_t ScriptManagerImpl::ExtractAndExecuteScript(PkgManager::PkgManagerPtr man
 int32_t ScriptManagerImpl::ExecuteScript(int32_t priority)
 {
     USCRIPT_CHECK(priority < MAX_PRIORITY && priority >= 0,
-        UPDATER_LAST_WORD(USCRIPT_INVALID_PRIORITY, priority);
         return USCRIPT_INVALID_PRIORITY, "ExecuteScript priority not support %d", priority);
     PkgManager::PkgManagerPtr manager = scriptEnv_->GetPkgManager();
-    USCRIPT_CHECK(manager != nullptr, UPDATER_LAST_WORD(USCRIPT_INVALID_PARAM);
-        return USCRIPT_INVALID_PARAM, "Failed to get pkg manager");
+    USCRIPT_CHECK(manager != nullptr, return USCRIPT_INVALID_PARAM, "Failed to get pkg manager");
     if (scriptFiles_[priority].size() == 0) {
         return USCRIPT_SUCCESS;
     }
@@ -150,8 +147,7 @@ int32_t ScriptManagerImpl::ExecuteScript(int32_t priority)
     int32_t retCode = USCRIPT_SUCCESS;
     task.workSize = threadNumber;
     task.processor = [&](int iter) {
-        for (size_t i = static_cast<size_t>(iter); i < scriptFiles_[priority].size();
-            i += static_cast<size_t>(threadNumber)) {
+        for (size_t i = iter; i < scriptFiles_[priority].size(); i += static_cast<size_t>(threadNumber)) {
             ret = ExtractAndExecuteScript(manager, scriptFiles_[priority][i]);
             if (ret != USCRIPT_SUCCESS) {
                 USCRIPT_LOGE("Failed to execute script %s", scriptFiles_[priority][i].c_str());

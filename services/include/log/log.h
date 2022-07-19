@@ -139,5 +139,5 @@ public:
 
     std::ostream& OutputErrorCode(const std::string &path, int line, UpdaterErrorCode code);
 };
-} // updater
+} // Updater
 #endif /* UPDATE_LOG_H__ */

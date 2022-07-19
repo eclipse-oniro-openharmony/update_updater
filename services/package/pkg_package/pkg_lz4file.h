@@ -19,7 +19,7 @@
 #include "pkg_pkgfile.h"
 #include "pkg_utils.h"
 
-namespace hpackage {
+namespace Hpackage {
 class Lz4FileEntry : public PkgEntry {
 public:
     Lz4FileEntry(PkgFilePtr pkgFile, uint32_t nodeId) : PkgEntry(pkgFile, nodeId)
@@ -71,5 +71,5 @@ private:
     PkgInfo pkgInfo_ {};
     size_t currentOffset_ {0};
 };
-} // namespace hpackage
+} // namespace Hpackage
 #endif // LZ4_PKG_FILE_H

@@ -55,7 +55,7 @@ public:
     template<typename T>
     std::optional<T> As() const
     {
-        if (auto optPtr = std::get_if<std::optional<detail::StandardType<T>>>(&innerObj_); optPtr) {
+        if (auto optPtr = std::get_if<std::optional<Detail::StandardType<T>>>(&innerObj_); optPtr) {
             return *optPtr;
         }
         return std::nullopt;
@@ -64,7 +64,7 @@ public:
     template<typename T>
     bool operator==(T rhs) const
     {
-        if (auto optPtr = std::get_if<std::optional<detail::StandardType<T>>>(&innerObj_); optPtr) {
+        if (auto optPtr = std::get_if<std::optional<Detail::StandardType<T>>>(&innerObj_); optPtr) {
             return *optPtr == rhs;
         }
         return false;

@@ -44,7 +44,7 @@ public:
      * @param packagePath       path of the update package
      * @return                  version information of the update package
      */
-    std::vector<std::string> GetOTAVersion(hpackage::PkgManager::PkgManagerPtr manager,
+    std::vector<std::string> GetOTAVersion(Hpackage::PkgManager::PkgManagerPtr manager,
         const std::string &versionList, const std::string &versionPath);
 
    /**
@@ -53,7 +53,7 @@ public:
      * @param packagePath       path of the update package
      * @return                  Boardid information of the update package
      */
-    std::vector<std::string> GetBoardID(hpackage::PkgManager::PkgManagerPtr manager, const std::string &boardList,
+    std::vector<std::string> GetBoardID(Hpackage::PkgManager::PkgManagerPtr manager, const std::string &boardList,
         const std::string &boardListPath);
 
     /**

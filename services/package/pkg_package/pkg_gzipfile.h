@@ -20,7 +20,7 @@
 #include "pkg_zipfile.h"
 #include "zlib.h"
 
-namespace hpackage {
+namespace Hpackage {
 struct __attribute__((packed)) GZipHeader {
     uint16_t magic = 0;
     uint8_t method = 0;
@@ -76,5 +76,5 @@ private:
     PkgInfo pkgInfo_ {};
     size_t currentOffset_ = 0;
 };
-} // namespace hpackage
+} // namespace Hpackage
 #endif // GZIP_PKG_FILE_H

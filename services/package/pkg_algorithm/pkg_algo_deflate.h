@@ -20,7 +20,7 @@
 #include "pkg_utils.h"
 #include "zlib.h"
 
-namespace hpackage {
+namespace Hpackage {
 class PkgAlgoDeflate : public PkgAlgorithm {
 public:
     explicit PkgAlgoDeflate(const ZipFileInfo &info)
@@ -58,5 +58,5 @@ private:
     int32_t memLevel_ {0};
     int32_t strategy_ {0};
 };
-} // namespace hpackage
+} // namespace Hpackage
 #endif

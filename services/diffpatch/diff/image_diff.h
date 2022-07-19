@@ -73,7 +73,7 @@ public:
 protected:
     virtual int32_t TestAndSetConfig(const BlockBuffer &buffer, const std::string &fileName) = 0;
     int32_t DiffFile(const std::string &fileName, size_t &oldOffset, size_t &newOffset);
-    int32_t CompressData(hpackage::PkgManager::FileInfoPtr info,
+    int32_t CompressData(Hpackage::PkgManager::FileInfoPtr info,
         const BlockBuffer &buffer, std::vector<uint8_t> &outData, size_t &outSize) const;
     int32_t type_;
 };
@@ -124,5 +124,5 @@ public:
         : ZipImageDiff(limit, newParser, oldParser) {}
     ~GZipImageDiff() override {}
 };
-} // namespace updatepatch
+} // namespace UpdatePatch
 #endif // IMGAE_DIFF_H

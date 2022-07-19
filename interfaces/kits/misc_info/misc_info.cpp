@@ -72,4 +72,4 @@ bool ReadUpdaterMiscMsg(UpdateMessage &boot)
     LOG(INFO) << "ReadUpdaterMiscMsg::misc path : " << path;
     return ReadUpdaterMessage(path, boot);
 }
-} // updater
+} // Updater

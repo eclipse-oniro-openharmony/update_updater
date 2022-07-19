@@ -82,4 +82,4 @@ void DataWriter::ReleaseDataWriter(std::unique_ptr<DataWriter> &writer)
 {
     writer.reset();
 }
-} // namespace updater
+} // namespace Updater

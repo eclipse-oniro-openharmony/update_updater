@@ -40,6 +40,6 @@ int main(int argc, char **argv)
     // Re-load fstab to child process.
     LoadFstab();
     std::string packagePath = argv[0];
-    return ProcessUpdater(retry, pipeFd, packagePath, utils::GetCertName());
+    return ProcessUpdater(retry, pipeFd, packagePath, Utils::GetCertName());
 }
 #endif

@@ -21,7 +21,7 @@
 #include <functional>
 #include <mutex>
 
-namespace updater {
+namespace Updater {
 class View {
 public:
     struct BRGA888Pixel {

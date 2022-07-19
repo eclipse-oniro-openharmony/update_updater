@@ -128,8 +128,8 @@ void PostUpdater(bool clearMisc)
     if (!access(SDCARD_CARD_PATH.c_str(), 0)) {
         UPDATER_ERROR_CHECK_NOT_RETURN(DeleteUpdaterPath(SDCARD_CARD_PATH), "Delete sdcard path failed");
     }
-    if (access(flashd::FLASHD_FILE_PATH.c_str(), 0) == 0) {
-        UPDATER_ERROR_CHECK_NOT_RETURN(DeleteUpdaterPath(flashd::FLASHD_FILE_PATH), "DeleteUpdaterPath failed");
+    if (access(Flashd::FLASHD_FILE_PATH.c_str(), 0) == 0) {
+        UPDATER_ERROR_CHECK_NOT_RETURN(DeleteUpdaterPath(Flashd::FLASHD_FILE_PATH), "DeleteUpdaterPath failed");
     }
 
     // save logs
@@ -137,7 +137,7 @@ void PostUpdater(bool clearMisc)
     UPDATER_ERROR_CHECK_NOT_RETURN(ret, "Copy updater log failed!");
     ret = CopyUpdaterLogs(TMP_ERROR_CODE_PATH, errorCodePath);
     UPDATER_ERROR_CHECK_NOT_RETURN(ret, "Copy error code log failed!");
-    ret = CopyUpdaterLogs(flashd::FLASHD_HDC_LOG_PATH, UPDATER_HDC_LOG);
+    ret = CopyUpdaterLogs(Flashd::FLASHD_HDC_LOG_PATH, UPDATER_HDC_LOG);
     UPDATER_ERROR_CHECK_NOT_RETURN(ret, "Copy error hdc log failed!");
 
     mode_t mode = 0640;
@@ -165,7 +165,7 @@ std::vector<std::string> ParseParams(int argc, char **argv)
     STAGE(UPDATE_STAGE_OUT) << "Init Params: " << boot.update;
     std::vector<std::string> parseParams(argv, argv + argc);
     boot.update[sizeof(boot.update) - 1] = '\0';
-    std::vector<std::string> parseParams1 = utils::SplitString(boot.update, "\n");
+    std::vector<std::string> parseParams1 = Utils::SplitString(boot.update, "\n");
     parseParams.insert(parseParams.end(), parseParams1.begin(), parseParams1.end());
     return parseParams;
 }

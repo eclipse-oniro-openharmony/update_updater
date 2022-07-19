@@ -34,7 +34,7 @@ struct PatchBuffer {
     size_t length;
 };
 
-using BlockBuffer = hpackage::PkgBuffer;
+using BlockBuffer = Hpackage::PkgBuffer;
 
 class UpdatePatchWriter {
 public:
@@ -64,7 +64,7 @@ public:
     static int32_t ApplyBlockPatch(const PatchBuffer &patchInfo,
         const BlockBuffer &oldInfo, std::vector<uint8_t> &newData);
     static int32_t ApplyBlockPatch(const PatchBuffer &patchInfo,
-        hpackage::PkgManager::StreamPtr stream, UpdatePatchWriterPtr writer);
+        Hpackage::PkgManager::StreamPtr stream, UpdatePatchWriterPtr writer);
     static int32_t ApplyPatch(const std::string &patchName, const std::string &oldfile, const std::string &newFile);
 };
 
@@ -99,5 +99,5 @@ private:
     std::string expected_;
     std::string partitionName_;
 };
-} // namespace updatepatch
+} // namespace UpdatePatch
 #endif // UPDATE_PATCH_H

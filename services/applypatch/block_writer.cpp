@@ -72,7 +72,7 @@ bool BlockWriter::Write(const uint8_t *addr, size_t len, [[maybe_unused]] const 
         if (currentBlockLeft_ < len) {
             written = currentBlockLeft_;
         }
-        if (updater::utils::WriteFully(fd_, addr, written) == false) {
+        if (Updater::Utils::WriteFully(fd_, addr, written) == false) {
             LOG(ERROR) << "BlockWriter: failed to write " << written << " byte(s).";
             return false;
         }
@@ -83,4 +83,4 @@ bool BlockWriter::Write(const uint8_t *addr, size_t len, [[maybe_unused]] const 
     }
     return true;
 }
-} // namespace updater
+} // namespace Updater

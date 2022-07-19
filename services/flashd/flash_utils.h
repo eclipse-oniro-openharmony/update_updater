@@ -21,11 +21,11 @@
 #include "log/log.h"
 #include "securec.h"
 
-namespace flashd {
-#define FLASHING_LOGE(format, ...) Logger(updater::ERROR, (__FILE_NAME__), (__LINE__), format, ##__VA_ARGS__)
-#define FLASHING_DEBUG(format, ...) Logger(updater::DEBUG, (__FILE_NAME__), (__LINE__), format, ##__VA_ARGS__)
-#define FLASHING_LOGI(format, ...) Logger(updater::INFO, (__FILE_NAME__), (__LINE__), format, ##__VA_ARGS__)
-#define FLASHING_LOGW(format, ...) Logger(updater::WARNING, (__FILE_NAME__), (__LINE__), format, ##__VA_ARGS__)
+namespace Flashd {
+#define FLASHING_LOGE(format, ...) Logger(Updater::ERROR, (__FILE_NAME__), (__LINE__), format, ##__VA_ARGS__)
+#define FLASHING_DEBUG(format, ...) Logger(Updater::DEBUG, (__FILE_NAME__), (__LINE__), format, ##__VA_ARGS__)
+#define FLASHING_LOGI(format, ...) Logger(Updater::INFO, (__FILE_NAME__), (__LINE__), format, ##__VA_ARGS__)
+#define FLASHING_LOGW(format, ...) Logger(Updater::WARNING, (__FILE_NAME__), (__LINE__), format, ##__VA_ARGS__)
 
 #define FLASHING_CHECK(retCode, exper, ...) \
     if (!(retCode)) {                       \

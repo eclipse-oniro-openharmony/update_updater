@@ -21,7 +21,7 @@
 #include "zip_pkg_parse.h"
 #include "zlib.h"
 
-namespace hpackage {
+namespace Hpackage {
 constexpr uint32_t TM_YEAR_BITS = 9;
 constexpr uint32_t TM_MON_BITS = 5;
 constexpr uint32_t TM_MIN_BITS = 5;
@@ -75,7 +75,6 @@ int32_t ZipPkgFile::SavePackage(size_t &signOffset)
         offset += encodeLen;
     }
 
-    // EndCentralDir er;
     std::vector<uint8_t> buff(sizeof(EndCentralDir));
     WriteLE32(buff.data() + offsetof(EndCentralDir, signature), END_CENTRAL_SIGNATURE);
     WriteLE16(buff.data() + offsetof(EndCentralDir, numDisk), 0);
@@ -585,4 +584,4 @@ int32_t ZipFileEntry::Init(const PkgManager::FileInfoPtr fileInfo, PkgStreamPtr 
     }
     return PKG_SUCCESS;
 }
-} // namespace hpackage
+} // namespace Hpackage

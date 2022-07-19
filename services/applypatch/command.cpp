@@ -24,7 +24,7 @@ bool Command::Init(const std::string &cmdLine)
 {
     cmdLine_ = std::move(cmdLine);
     tokens_.clear();
-    tokens_ = utils::SplitString(cmdLine_, " ");
+    tokens_ = Utils::SplitString(cmdLine_, " ");
     type_ = ParseCommandType(tokens_[H_ZERO_NUMBER]);
     return true;
 }

@@ -26,7 +26,7 @@
 #include <openssl/sha.h>
 #include "pkg_utils.h"
 
-namespace hpackage {
+namespace Hpackage {
 enum KEYTYPE {
     KEY_TYPE_RSA,
     KEY_TYPE_EC,
@@ -111,5 +111,5 @@ public:
         return PKG_INVALID_SIGNATURE;
     }
 };
-} // namespace hpackage
+} // namespace Hpackage
 #endif

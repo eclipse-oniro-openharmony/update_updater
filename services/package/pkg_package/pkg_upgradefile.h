@@ -21,7 +21,7 @@
 #include "pkg_pkgfile.h"
 #include "pkg_utils.h"
 
-namespace hpackage {
+namespace Hpackage {
 struct __attribute__((packed)) PkgTlv {
     uint16_t type;
     uint16_t length;
@@ -121,5 +121,5 @@ private:
     UpgradePkgInfo pkgInfo_ {};
     size_t packedFileSize_ {0};
 };
-} // namespace hpackage
+} // namespace Hpackage
 #endif

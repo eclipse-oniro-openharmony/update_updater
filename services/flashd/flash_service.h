@@ -24,7 +24,7 @@
 #include "updater/updater.h"
 
 // Just update-mode use
-namespace flashd {
+namespace Flashd {
 class FlashService {
 public:
     FlashService(std::string &errorMsg, ProgressFunction progressor)

@@ -133,7 +133,7 @@ size_t BlockSet::ReadDataFromBlock(int fd, std::vector<uint8_t> &buffer)
         ret = lseek64(fd, static_cast<off64_t>(it->first * H_BLOCK_SIZE), SEEK_SET);
         UPDATER_ERROR_CHECK(ret != -1, "Fail to seek", return -1);
         size_t size = (it->second - it->first) * H_BLOCK_SIZE;
-        UPDATER_ERROR_CHECK(utils::ReadFully(fd, buffer.data() + pos, size), "Fail to read", return -1);
+        UPDATER_ERROR_CHECK(Utils::ReadFully(fd, buffer.data() + pos, size), "Fail to read", return -1);
         pos += size;
     }
     return pos;
@@ -154,7 +154,7 @@ size_t BlockSet::WriteDataToBlock(int fd, std::vector<uint8_t> &buffer)
 #endif
         ret = lseek64(fd, offset, SEEK_SET);
         UPDATER_ERROR_CHECK(ret != -1, "BlockSet::WriteDataToBlock Fail to seek", return -1);
-        if (utils::WriteFully(fd, buffer.data() + pos, writeSize) == false) {
+        if (Utils::WriteFully(fd, buffer.data() + pos, writeSize) == false) {
             LOG(ERROR) << "Write data to block error, errno : " << errno;
             return -1;
         }
@@ -178,7 +178,7 @@ int32_t BlockSet::VerifySha256(const std::vector<uint8_t> &buffer, const size_t 
 {
     uint8_t digest[SHA256_DIGEST_LENGTH];
     SHA256(buffer.data(), size * H_BLOCK_SIZE, digest);
-    std::string hexdigest = utils::ConvertSha256Hex(digest, SHA256_DIGEST_LENGTH);
+    std::string hexdigest = Utils::ConvertSha256Hex(digest, SHA256_DIGEST_LENGTH);
     UPDATER_CHECK_ONLY_RETURN(hexdigest != expected, return 0);
     return -1;
 }
@@ -292,7 +292,7 @@ int32_t BlockSet::WriteZeroToBlock(int fd, bool isErase)
             ret = lseek64(fd, offset, SEEK_SET);
             UPDATER_ERROR_CHECK(ret != -1, "BlockSet::WriteZeroToBlock Fail to seek", return -1);
             for (size_t pos = iter->first; pos < iter->second; pos++) {
-                if (utils::WriteFully(fd, buffer.data(), H_BLOCK_SIZE) == false) {
+            if (Utils::WriteFully(fd, buffer.data(), H_BLOCK_SIZE) == false) {
                     UPDATER_CHECK_ONLY_RETURN(errno != EIO, return 1);
                     LOG(ERROR) << "BlockSet::WriteZeroToBlock Write 0 to block error, errno : " << errno;
                     return -1;
@@ -308,8 +308,8 @@ int32_t BlockSet::WriteDiffToBlock(const Command &cmd, std::vector<uint8_t> &src
     const size_t srcBlockSize, bool isImgDiff)
 {
     size_t pos = H_MOVE_CMD_ARGS_START;
-    size_t offset = utils::String2Int<size_t>(cmd.GetArgumentByPos(pos++), utils::N_DEC);
-    size_t length = utils::String2Int<size_t>(cmd.GetArgumentByPos(pos++), utils::N_DEC);
+    size_t offset = Utils::String2Int<size_t>(cmd.GetArgumentByPos(pos++), Utils::N_DEC);
+    size_t length = Utils::String2Int<size_t>(cmd.GetArgumentByPos(pos++), Utils::N_DEC);
     LOG(INFO) << "Get patch data offset: " << offset << ", length: " << length;
     // Get patch buffer
     auto globalParams = TransferManager::GetTransferManagerInstance()->GetGlobalParams();
@@ -317,13 +317,13 @@ int32_t BlockSet::WriteDiffToBlock(const Command &cmd, std::vector<uint8_t> &src
     size_t srcBuffSize =  srcBlockSize * H_BLOCK_SIZE;
     if (isImgDiff) {
         std::vector<uint8_t> empty;
-        updatepatch::PatchParam patchParam = {
+        UpdatePatch::PatchParam patchParam = {
             reinterpret_cast<u_char*>(srcBuffer.data()), srcBuffSize, reinterpret_cast<u_char*>(patchBuff), length
         };
         std::unique_ptr<BlockWriter> writer = std::make_unique<BlockWriter>(cmd.GetFileDescriptor(), *this);
         UPDATER_ERROR_CHECK(writer.get() != nullptr, "Cannot create block writer, pkgdiff patch abort!", return -1);
-        int32_t ret = updatepatch::UpdatePatch::ApplyImagePatch(patchParam, empty,
-            [&](size_t start, const updatepatch::BlockBuffer &data, size_t size) -> int {
+        int32_t ret = UpdatePatch::UpdatePatch::ApplyImagePatch(patchParam, empty,
+            [&](size_t start, const UpdatePatch::BlockBuffer &data, size_t size) -> int {
                 bool ret = writer->Write(data.buffer, size, nullptr);
                 return ret ? 0 : -1;
             }, cmd.GetArgumentByPos(pos + 1));
@@ -331,11 +331,11 @@ int32_t BlockSet::WriteDiffToBlock(const Command &cmd, std::vector<uint8_t> &src
         UPDATER_ERROR_CHECK(ret == 0, "Fail to ApplyImagePatch", return -1);
     } else {
         LOG(DEBUG) << "Run bsdiff patch.";
-        updatepatch::PatchBuffer patchInfo = {patchBuff, 0, length};
+        UpdatePatch::PatchBuffer patchInfo = {patchBuff, 0, length};
         std::unique_ptr<BlockWriter> writer = std::make_unique<BlockWriter>(cmd.GetFileDescriptor(), *this);
         UPDATER_ERROR_CHECK(writer.get() != nullptr, "Cannot create block writer, pkgdiff patch abort!", return -1);
-        auto ret = updatepatch::UpdatePatch::ApplyBlockPatch(patchInfo, {srcBuffer.data(), srcBuffSize},
-            [&](size_t start, const updatepatch::BlockBuffer &data, size_t size) -> int {
+        auto ret = UpdatePatch::UpdatePatch::ApplyBlockPatch(patchInfo, {srcBuffer.data(), srcBuffSize},
+            [&](size_t start, const UpdatePatch::BlockBuffer &data, size_t size) -> int {
                 bool ret = writer->Write(data.buffer, size, nullptr);
                 return ret ? 0 : -1;
             }, cmd.GetArgumentByPos(pos + 1));
@@ -344,4 +344,4 @@ int32_t BlockSet::WriteDiffToBlock(const Command &cmd, std::vector<uint8_t> &src
     }
     return 0;
 }
-} // namespace updater
+} // namespace Updater

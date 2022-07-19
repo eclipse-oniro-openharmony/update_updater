@@ -21,7 +21,7 @@
 #include "frame.h"
 #include "view.h"
 
-namespace updater {
+namespace Updater {
 constexpr int MAX_FONT_BUFFER_SIZE_HW  = 4096;
 constexpr int MAX_TEXT_SIZE = 512;
 constexpr int FONT_BUFFER_SIZE = 96;

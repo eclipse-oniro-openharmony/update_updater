@@ -32,7 +32,7 @@
 
 using namespace std;
 
-namespace hpackage {
+namespace Hpackage {
 constexpr int32_t BUFFER_SIZE = 4096;
 constexpr int32_t DIGEST_INFO_NO_SIGN = 0;
 constexpr int32_t DIGEST_INFO_HAS_SIGN = 1;

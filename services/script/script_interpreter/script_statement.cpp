@@ -23,12 +23,8 @@ using namespace std;
 namespace Uscript {
 void UScriptStatementResult::UpdateStatementResult(UScriptValuePtr value)
 {
-    if (value == nullptr) {
-        USCRIPT_LOGE("Invalid value");
-        SetResultType(UScriptStatementResult::STATEMENT_RESULT_TYPE_ERROR);
-        SetError(USCRIPT_INVALID_PARAM);
-        return;
-    }
+    USCRIPT_CHECK(value != nullptr, SetResultType(UScriptStatementResult::STATEMENT_RESULT_TYPE_ERROR),
+        "Invalid value");
     switch (value->GetValueType()) {
         case UScriptValue::VALUE_TYPE_INTEGER:
             /* fallthrough */
@@ -55,7 +51,6 @@ void UScriptStatementResult::UpdateStatementResult(UScriptValuePtr value)
             break;
         default:
             SetResultType(UScriptStatementResult::STATEMENT_RESULT_TYPE_ERROR);
-            SetError(USCRIPT_INVALID_SCRIPT);
             break;
     }
     return;
@@ -183,13 +178,10 @@ UScriptStatementResult UScriptForStatement::Execute(ScriptInterpreter &interpret
     while (1) {
         if (condition_ != nullptr) {
             UScriptValuePtr v = condition_->Execute(interpreter, context);
-            if (v == nullptr || v->GetValueType() == UScriptValue::VALUE_TYPE_ERROR) {
-                INTERPRETER_LOGE(interpreter, context, "Execute for condition failed: %s",
-                    UScriptValue::ScriptToString(v).c_str());
-                result.SetResultType(UScriptStatementResult::STATEMENT_RESULT_TYPE_ERROR);
-                result.SetError(USCRIPT_INVALID_PARAM);
-                return result;
-            }
+            INTERPRETER_CHECK(interpreter, context, !(v == nullptr || v->GetValueType() ==
+                UScriptValue::VALUE_TYPE_ERROR),
+                result.SetResultType(UScriptStatementResult::STATEMENT_RESULT_TYPE_ERROR); return result,
+                "Execute for condition failed: %s", UScriptValue::ScriptToString(v).c_str());
             if (!v->IsTrue()) {
                 break;
             }
@@ -220,13 +212,10 @@ UScriptStatementResult UScriptWhileStatement::Execute(ScriptInterpreter &interpr
     while (1) {
         if (condition_ != nullptr) {
             UScriptValuePtr v = condition_->Execute(interpreter, local);
-            if (v == nullptr || v->GetValueType() == UScriptValue::VALUE_TYPE_ERROR) {
-                INTERPRETER_LOGE(interpreter, local, "Execute while condition failed: %s",
-                    UScriptValue::ScriptToString(v).c_str());
-                result.SetResultType(UScriptStatementResult::STATEMENT_RESULT_TYPE_ERROR);
-                result.SetError(USCRIPT_INVALID_PARAM);
-                return result;
-            }
+            INTERPRETER_CHECK(interpreter, local, !(v == nullptr || v->GetValueType() ==
+                UScriptValue::VALUE_TYPE_ERROR),
+                result.SetResultType(UScriptStatementResult::STATEMENT_RESULT_TYPE_ERROR); return result,
+                "Execute while condition failed: %s", UScriptValue::ScriptToString(v).c_str());
             if (!v->IsTrue()) {
                 break;
             }
@@ -252,13 +241,10 @@ UScriptStatementResult UScriptIfStatement::Execute(ScriptInterpreter &interprete
 {
     UScriptStatementResult result(UScriptStatementResult::STATEMENT_RESULT_TYPE_NORMAL, nullptr);
     UScriptValuePtr v = expression_->Execute(interpreter, context);
-    if (v == nullptr || v->GetValueType() == UScriptValue::VALUE_TYPE_ERROR) {
-        INTERPRETER_LOGE(interpreter, context, "Execute for condition failed: %s",
-            UScriptValue::ScriptToString(v).c_str());
-        result.SetResultType(UScriptStatementResult::STATEMENT_RESULT_TYPE_ERROR);
-        result.SetError(USCRIPT_INVALID_PARAM);
-        return result;
-    }
+    INTERPRETER_CHECK(interpreter, context,
+        !(v == nullptr || v->GetValueType() == UScriptValue::VALUE_TYPE_ERROR),
+        result.SetResultType(UScriptStatementResult::STATEMENT_RESULT_TYPE_ERROR); return result,
+        "Execute for condition failed: %s", UScriptValue::ScriptToString(v).c_str());
 
     if (v->IsTrue()) {
         if (trueStatements_ == nullptr) {

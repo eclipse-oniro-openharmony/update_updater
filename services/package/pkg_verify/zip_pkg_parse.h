@@ -19,31 +19,31 @@
 #include "pkg_stream.h"
 #include "pkg_verify_util.h"
 
-namespace hpackage {
+namespace Hpackage {
 class ZipPkgParse {
 public:
     ZipPkgParse() {};
 
     ~ZipPkgParse() {};
 
-    int32_t CheckZipPkg(const hpackage::PkgStreamPtr pkgStream) const;
+    int32_t CheckZipPkg(const Hpackage::PkgStreamPtr pkgStream) const;
 
-    int32_t ParseZipPkg(hpackage::PkgStreamPtr pkgStream, size_t &signatureStart,
+    int32_t ParseZipPkg(Hpackage::PkgStreamPtr pkgStream, size_t &signatureStart,
         size_t &signatureSize) const;
 
-    int32_t WriteZipSignedData(hpackage::PkgStreamPtr outStream,
-        const hpackage::PkgBuffer &p7Data, hpackage::PkgStreamPtr inStream) const;
+    int32_t WriteZipSignedData(Hpackage::PkgStreamPtr outStream,
+        const Hpackage::PkgBuffer &p7Data, Hpackage::PkgStreamPtr inStream) const;
 
 private:
     int32_t ParsePkgFooter(const uint8_t *footer, size_t length, uint16_t &commentAppendLen,
         uint16_t &commentTotalLen) const;
 
-    int32_t WriteSourcePackageData(hpackage::PkgStreamPtr outStream, hpackage::PkgStreamPtr inStream,
+    int32_t WriteSourcePackageData(Hpackage::PkgStreamPtr outStream, Hpackage::PkgStreamPtr inStream,
         size_t wirteLen) const;
 
-    int32_t WriteFooter(hpackage::PkgStreamPtr outStream, uint16_t zipCommentLen, size_t &offset) const;
+    int32_t WriteFooter(Hpackage::PkgStreamPtr outStream, uint16_t zipCommentLen, size_t &offset) const;
 
     int32_t CheckZipEocd(const uint8_t *eocd, size_t length, uint16_t commentTotalLen) const;
 };
-} // namespace hpackage
+} // namespace Hpackage
 #endif

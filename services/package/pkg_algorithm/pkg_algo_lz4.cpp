@@ -20,7 +20,7 @@
 #include "pkg_utils.h"
 #include "securec.h"
 
-namespace hpackage {
+namespace Hpackage {
 PkgAlgorithmLz4::PkgAlgorithmLz4(const Lz4FileInfo &config) : PkgAlgorithm(),
     compressionLevel_(config.compressionLevel),
     blockIndependence_(config.blockIndependence),
@@ -364,4 +364,4 @@ void PkgAlgorithmLz4::UpdateFileInfo(PkgManager::FileInfoPtr info) const
     lz4Info->blockSizeID = blockSizeID_;
     lz4Info->autoFlush = autoFlush_;
 }
-} // namespace hpackage
+} // namespace Hpackage

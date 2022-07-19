@@ -16,7 +16,7 @@
 
 using namespace std;
 
-namespace hpackage {
+namespace Hpackage {
 /* gzip flag byte */
 constexpr uint16_t HEADER_CRC = 0x02; /* bit 1 set: CRC16 for the gzip header */
 constexpr uint16_t EXTRA_FIELD = 0x04; /* bit 2 set: extra field present */
@@ -310,4 +310,4 @@ int32_t GZipPkgFile::LoadPackage(std::vector<std::string> &fileNames, VerifyFunc
     fileNames.push_back(entry->GetFileName());
     return ret;
 }
-} // namespace hpackage
+} // namespace Hpackage

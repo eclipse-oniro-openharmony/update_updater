@@ -94,4 +94,3 @@ bool RebootAndCleanUserData(const std::string &miscFile, const std::string &cmd)
     // Never get here.
     return true;
 }
-

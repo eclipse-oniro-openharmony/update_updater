@@ -19,7 +19,7 @@
 #include "pkg_utils.h"
 #include "securec.h"
 
-namespace hpackage {
+namespace Hpackage {
 constexpr uint32_t MAX_BUFFER_SIZE = (4 * 1024 * 1024);
 
 int32_t PkgAlgorithm::ReadData(const PkgStreamPtr inStream, size_t offset, PkgBuffer &buffer,
@@ -143,4 +143,4 @@ PkgAlgorithm::PkgAlgorithmPtr PkgAlgorithmFactory::GetAlgorithm(const PkgManager
     }
     return nullptr;
 }
-} // namespace hpackage
+} // namespace Hpackage

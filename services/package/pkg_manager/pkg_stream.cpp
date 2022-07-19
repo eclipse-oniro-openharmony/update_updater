@@ -21,7 +21,7 @@
 #include "pkg_utils.h"
 #include "securec.h"
 
-namespace hpackage {
+namespace Hpackage {
 const std::string PkgStreamImpl::GetFileName() const
 {
     return fileName_;
@@ -178,4 +178,4 @@ int32_t MemoryMapStream::Seek(long int offset, int whence)
     }
     return PKG_SUCCESS;
 }
-} // namespace hpackage
+} // namespace Hpackage

@@ -16,7 +16,7 @@
 #include "securec.h"
 #include "view.h"
 
-namespace updater {
+namespace Updater {
 constexpr int RGBA_PIXEL_SIZE = 4;
 void *View::CreateBuffer(int w, int h, int pixelFormat)
 {

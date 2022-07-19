@@ -19,7 +19,7 @@
 #include "log/log.h"
 #include "securec.h"
 
-namespace updater {
+namespace Updater {
 constexpr int DEFAULT_NORMAL_COLOR = 0xFF;
 constexpr int MAX_PROGRESS_VALUE = 100;
 constexpr uint32_t DEFAULT_PROGRESS_COLOR = 0x00;

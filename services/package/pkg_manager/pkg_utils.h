@@ -21,7 +21,7 @@
 #include "pkg_manager.h"
 #include "securec.h"
 
-namespace hpackage {
+namespace Hpackage {
 #ifndef EOK
 #define EOK 0
 #endif
@@ -45,9 +45,9 @@ uint16_t ReadLE16(const uint8_t *buff);
 void WriteLE16(uint8_t *buff, uint16_t value);
 uint64_t ReadLE64(const uint8_t *buff);
 
-#define PKG_LOGE(format, ...) Logger(updater::ERROR, (__FILE_NAME__), (__LINE__), format, ##__VA_ARGS__)
-#define PKG_LOGI(format, ...) Logger(updater::INFO, (__FILE_NAME__), (__LINE__), format, ##__VA_ARGS__)
-#define PKG_LOGW(format, ...) Logger(updater::WARNING, (__FILE_NAME__), (__LINE__), format, ##__VA_ARGS__)
+#define PKG_LOGE(format, ...) Logger(Updater::ERROR, (__FILE_NAME__), (__LINE__), format, ##__VA_ARGS__)
+#define PKG_LOGI(format, ...) Logger(Updater::INFO, (__FILE_NAME__), (__LINE__), format, ##__VA_ARGS__)
+#define PKG_LOGW(format, ...) Logger(Updater::WARNING, (__FILE_NAME__), (__LINE__), format, ##__VA_ARGS__)
 
 #define PKG_CHECK(retCode, exper, ...) \
     if (!(retCode)) {                  \
@@ -72,5 +72,5 @@ enum {
     PKG_BUFFER_END,
     PKG_LZ4_FINISH,
 };
-} // namespace hpackage
+} // namespace Hpackage
 #endif // PKG_UTILS_H

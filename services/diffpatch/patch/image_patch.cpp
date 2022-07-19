@@ -79,13 +79,13 @@ int32_t CompressedImagePatch::ApplyImagePatch(const PatchParam &param, size_t &s
     PATCH_CHECK(header.srcStart + header.srcLength <= param.oldSize, return -1, "Failed to check patch");
 
     // decompress old data
-    hpackage::PkgManager::StreamPtr stream = nullptr;
+    Hpackage::PkgManager::StreamPtr stream = nullptr;
     BlockBuffer oldData = { param.oldBuff + header.srcStart, header.srcLength };
     ret = DecompressData(oldData, stream, true, header.expandedLen);
     PATCH_CHECK(ret == 0, return -1, "Failed to decompress data");
 
     // prepare new data
-    std::unique_ptr<hpackage::FileInfo> info = GetFileInfo();
+    std::unique_ptr<Hpackage::FileInfo> info = GetFileInfo();
     PATCH_CHECK(info != nullptr, return -1, "Failed to get file info");
     info->packedSize = header.targetSize;
     info->unpackedSize = header.expandedLen;
@@ -109,14 +109,14 @@ int32_t CompressedImagePatch::ApplyImagePatch(const PatchParam &param, size_t &s
 }
 
 int32_t CompressedImagePatch::DecompressData(PkgBuffer buffer,
-    hpackage::PkgManager::StreamPtr &stream, bool memory, size_t expandedLen) const
+    Hpackage::PkgManager::StreamPtr &stream, bool memory, size_t expandedLen) const
 {
     PATCH_CHECK(expandedLen > 0, return 0, "Decompress data is null");
     int32_t ret = 0;
-    PkgManager* pkgManager = hpackage::PkgManager::GetPackageInstance();
+    PkgManager* pkgManager = Hpackage::PkgManager::GetPackageInstance();
     PATCH_CHECK(pkgManager != nullptr, return -1, "Failed to get pkg manager");
 
-    std::unique_ptr<hpackage::FileInfo> info = GetFileInfo();
+    std::unique_ptr<Hpackage::FileInfo> info = GetFileInfo();
     PATCH_CHECK(info != nullptr, return -1, "Failed to get file info");
 
     info->packedSize = buffer.length;
@@ -175,9 +175,9 @@ int32_t ZipImagePatch::ReadHeader(const PatchParam &param, PatchHeader &header, 
     return 0;
 }
 
-std::unique_ptr<hpackage::FileInfo> ZipImagePatch::GetFileInfo() const
+std::unique_ptr<Hpackage::FileInfo> ZipImagePatch::GetFileInfo() const
 {
-    hpackage::ZipFileInfo *fileInfo = new ZipFileInfo;
+    Hpackage::ZipFileInfo *fileInfo = new ZipFileInfo;
     PATCH_CHECK(fileInfo != nullptr, return nullptr, "Failed to new file info");
     fileInfo->fileInfo.packMethod = PKG_COMPRESS_METHOD_ZIP;
     fileInfo->fileInfo.digestMethod = PKG_DIGEST_TYPE_NONE;
@@ -189,7 +189,7 @@ std::unique_ptr<hpackage::FileInfo> ZipImagePatch::GetFileInfo() const
     fileInfo->windowBits = windowBits_;
     fileInfo->memLevel = memLevel_;
     fileInfo->strategy = strategy_;
-    return std::unique_ptr<hpackage::FileInfo>((FileInfo *)fileInfo);
+    return std::unique_ptr<Hpackage::FileInfo>((FileInfo *)fileInfo);
 }
 
 int32_t Lz4ImagePatch::ReadHeader(const PatchParam &param, PatchHeader &header, size_t &offset)
@@ -223,9 +223,9 @@ int32_t Lz4ImagePatch::ReadHeader(const PatchParam &param, PatchHeader &header, 
     return 0;
 }
 
-std::unique_ptr<hpackage::FileInfo> Lz4ImagePatch::GetFileInfo() const
+std::unique_ptr<Hpackage::FileInfo> Lz4ImagePatch::GetFileInfo() const
 {
-    hpackage::Lz4FileInfo *fileInfo = new Lz4FileInfo;
+    Hpackage::Lz4FileInfo *fileInfo = new Lz4FileInfo;
     PATCH_CHECK(fileInfo != nullptr, return nullptr, "Failed to new file info");
     fileInfo->fileInfo.packMethod = (method_ == LZ4B_MAGIC) ? PKG_COMPRESS_METHOD_LZ4_BLOCK : PKG_COMPRESS_METHOD_LZ4;
     fileInfo->fileInfo.digestMethod = PKG_DIGEST_TYPE_NONE;
@@ -237,7 +237,7 @@ std::unique_ptr<hpackage::FileInfo> Lz4ImagePatch::GetFileInfo() const
     fileInfo->contentChecksumFlag = static_cast<int8_t>(contentChecksumFlag_);
     fileInfo->blockSizeID = static_cast<int8_t>(blockSizeID_);
     fileInfo->autoFlush = static_cast<int8_t>(autoFlush_);
-    return std::unique_ptr<hpackage::FileInfo>((FileInfo *)fileInfo);
+    return std::unique_ptr<Hpackage::FileInfo>((FileInfo *)fileInfo);
 }
 
 int32_t CompressedFileRestore::Init()
@@ -278,4 +278,4 @@ int32_t CompressedFileRestore::CompressData(size_t &originalSize, size_t &compre
     PATCH_LOGI("CompressedFileRestore hash %zu %s ", dataSize_, hexDigest.c_str());
     return 0;
 }
-} // namespace updater
+} // namespace UpdatePatch

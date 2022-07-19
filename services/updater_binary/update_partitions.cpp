@@ -89,13 +89,13 @@ int UpdatePartitions::DoNewPartitions(PartitonList &newPartList)
     } else if (ret > 1) {
         LOG(INFO) << "do_partitions success reboot";
 #ifndef UPDATER_UT
-        utils::DoReboot("updater");
+        Utils::DoReboot("updater");
 #endif
     }
     return ret;
 }
 
-int32_t UpdatePartitions::Execute(uscript::UScriptEnv &env, uscript::UScriptContext &context)
+int32_t UpdatePartitions::Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context)
 {
     LOG(INFO) << "enter UpdatePartitions::Execute ";
     if (context.GetParamCount() != 1) {
@@ -110,7 +110,7 @@ int32_t UpdatePartitions::Execute(uscript::UScriptEnv &env, uscript::UScriptCont
     } else {
         LOG(INFO) << "UpdatePartitions::Execute filePath " << filePath;
     }
-    hpackage::PkgManager::StreamPtr outStream = nullptr;
+    Hpackage::PkgManager::StreamPtr outStream = nullptr;
     const FileInfo *info = env.GetPkgManager()->GetFileInfo(filePath);
     UPDATER_ERROR_CHECK(info != nullptr, "Error to get file info", return USCRIPT_ERROR_EXECUTE);
     std::string tmpPath = "/data/updater";
@@ -151,4 +151,4 @@ int32_t UpdatePartitions::Execute(uscript::UScriptEnv &env, uscript::UScriptCont
     env.GetPkgManager()->ClosePkgStream(outStream);
     return USCRIPT_SUCCESS;
 }
-} // namespace updater
+} // namespace Updater

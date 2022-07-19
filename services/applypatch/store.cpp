@@ -130,4 +130,4 @@ int32_t Store::LoadDataFromStore(const std::string &dirPath, const std::string &
     fd = -1;
     return 0;
 }
-} // namespace updater
+} // namespace Updater

@@ -38,20 +38,20 @@ enum PackageUpdateMode {
     UNKNOWN_UPDATE,
 };
 
-UpdaterStatus DoInstallUpdaterPackage(hpackage::PkgManager::PkgManagerPtr pkgManager,
+UpdaterStatus DoInstallUpdaterPackage(Hpackage::PkgManager::PkgManagerPtr pkgManager,
     const std::string &packagePath, int retryCount, PackageUpdateMode updateMode);
 
-UpdaterStatus StartUpdaterProc(hpackage::PkgManager::PkgManagerPtr pkgManager, const std::string &packagePath,
+UpdaterStatus StartUpdaterProc(Hpackage::PkgManager::PkgManagerPtr pkgManager, const std::string &packagePath,
     int retryCount, int &maxTemperature);
 
-int GetUpdatePackageInfo(hpackage::PkgManager::PkgManagerPtr pkgManager, const std::string& path);
+int GetUpdatePackageInfo(Hpackage::PkgManager::PkgManagerPtr pkgManager, const std::string& path);
 
-int UpdatePreProcess(hpackage::PkgManager::PkgManagerPtr pkgManager, const std::string& path);
+int UpdatePreProcess(Hpackage::PkgManager::PkgManagerPtr pkgManager, const std::string& path);
 #ifdef UPDATER_USE_PTABLE
-bool PtableProcess(hpackage::PkgManager::PkgManagerPtr pkgManager, PackageUpdateMode updateMode);
+bool PtableProcess(Hpackage::PkgManager::PkgManagerPtr pkgManager, PackageUpdateMode updateMode);
 #endif
 
-int ExecUpdate(hpackage::PkgManager::PkgManagerPtr pkgManager, int retry, PostMessageFunction postMessage);
+int ExecUpdate(Hpackage::PkgManager::PkgManagerPtr pkgManager, int retry, PostMessageFunction postMessage);
 
 UpdaterStatus IsSpaceCapacitySufficient(const std::string &packagePath);
 
@@ -62,5 +62,5 @@ void PostUpdater(bool clearMisc);
 std::vector<std::string> ParseParams(int argc, char **argv);
 
 int GetBootMode(int &mode);
-} // updater
+} // Updater
 #endif /* UPDATER_UPDATER_H */

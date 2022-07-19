@@ -18,7 +18,7 @@
 #include "frame.h"
 #include "view.h"
 
-namespace updater {
+namespace Updater {
 class ProgressBar : public View {
 public:
     ProgressBar(const int startX, const int startY, const int w, const int h, Frame *parent);

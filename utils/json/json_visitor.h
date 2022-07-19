@@ -27,7 +27,7 @@ enum Action { SETVAL, PRINTVAL };
 template<typename T>
 struct Traits;
 
-namespace detail {
+namespace Detail {
 template<typename T, std::size_t idx>
 using memberType = std::remove_reference_t<decltype(Traits<T>::template Get<idx>(std::declval<T&>()))>;
 
@@ -57,7 +57,7 @@ struct MemberVisitor<SETVAL> {
     // visit string, int, bool
     template<typename T, std::size_t i>
     static auto VisitMember(const JsonNode &node, const JsonNode &defaultNode, T &obj)
-        -> detail::isMatch<detail::G_IS_BASE_TYPE<memberType<T, i>>, bool>
+        -> Detail::isMatch<Detail::G_IS_BASE_TYPE<memberType<T, i>>, bool>
     {
         auto r = node.As<memberType<T, i>>();
         auto defaultR = defaultNode.As<memberType<T, i>>();
@@ -78,31 +78,31 @@ struct MemberVisitor<SETVAL> {
     // visit struct
     template<typename T, std::size_t i>
     static auto VisitMember(const JsonNode &node, const JsonNode &defaultNode, T &obj)
-        -> detail::isMatch<std::is_integral_v<decltype(Traits<memberType<T, i>>::COUNT)>, bool>
+        -> Detail::isMatch<std::is_integral_v<decltype(Traits<memberType<T, i>>::COUNT)>, bool>
     {
         return StructVisitor<SETVAL>::VisitStruct(node, defaultNode, Traits<T>::template Get<i>(obj),
             std::make_index_sequence<Traits<memberType<T, i>>::COUNT> {});
     }
 };
-}  // namespace detail
+}  // namespace Detail
 
 template<Action act, typename T>
 auto Visit(const JsonNode &node, const JsonNode &defaultNode, T &obj)
-    -> detail::isMatch<detail::G_IS_NUM<decltype(Traits<T>::COUNT)>, bool>
+    -> Detail::isMatch<Detail::G_IS_NUM<decltype(Traits<T>::COUNT)>, bool>
 {
     static_assert(act == SETVAL,
         "Only for setting member of struct with default node!");
-    return detail::StructVisitor<act>::VisitStruct(node, defaultNode, obj,
+    return Detail::StructVisitor<act>::VisitStruct(node, defaultNode, obj,
                                                    std::make_index_sequence<Traits<T>::COUNT> {});
 }
 
 template<Action act, typename T>
-auto Visit(const JsonNode &node, T &obj) -> detail::isMatch<detail::G_IS_NUM<decltype(Traits<T>::COUNT)>, bool>
+auto Visit(const JsonNode &node, T &obj) -> Detail::isMatch<Detail::G_IS_NUM<decltype(Traits<T>::COUNT)>, bool>
 {
     static_assert(act == SETVAL,
         "Only for setting member of struct without default node!");
     static JsonNode dummyNode {};
-    return detail::StructVisitor<act>::VisitStruct(node, dummyNode, obj,
+    return Detail::StructVisitor<act>::VisitStruct(node, {}, obj,
                                                    std::make_index_sequence<Traits<T>::COUNT> {});
 }
 }  // namespace updater

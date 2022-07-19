@@ -18,7 +18,7 @@
 #include "openssl/sha.h"
 #include "pkg_utils.h"
 
-namespace hpackage {
+namespace Hpackage {
 constexpr uint32_t DIGEST_CRC_LEN = 4;
 constexpr uint32_t DIGEST_SHA256_LEN = 32;
 constexpr uint32_t DIGEST_SHA384_LEN = 64;
@@ -116,5 +116,5 @@ public:
 private:
     SHA512_CTX shaCtx_ {};
 };
-} // namespace hpackage
+} // namespace Hpackage
 #endif

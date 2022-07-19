@@ -84,7 +84,7 @@ bool ScriptInstructionHelper::IsReservedInstruction(const std::string &scriptNam
     return false;
 }
 
-int32_t ScriptInstructionHelper::AddScript(const std::string &scriptName, int32_t priority) const
+int32_t ScriptInstructionHelper::AddScript(const std::string &scriptName, int32_t priority)
 {
     return scriptManager_->AddScript(scriptName, priority);
 }
@@ -137,30 +137,4 @@ int32_t ScriptInstructionHelper::RegisterUserInstruction(const std::string& libN
 
     return ret;
 }
-
-int32_t ScriptInstructionHelper::RegisterUserInstruction(const std::string &instrName,
-    Uscript::UScriptInstructionFactory *factory)
-{
-    if (factory == nullptr) {
-        USCRIPT_LOGE("%s factory is null", instrName.c_str());
-        return USCRIPT_INVALID_PARAM;
-    }
-
-    // Create instruction and register it
-    UScriptInstructionPtr instr = nullptr;
-    int32_t ret = factory->CreateInstructionInstance(instr, instrName);
-    if (ret != USCRIPT_SUCCESS) {
-        USCRIPT_LOGE("Fail to create instruction for %s", instrName.c_str());
-        return ret;
-    }
-
-    ret = AddInstruction(instrName, instr);
-    if (ret != USCRIPT_SUCCESS) {
-        USCRIPT_LOGE("Fail to add instruction for %s", instrName.c_str());
-        return ret;
-    }
-
-    USCRIPT_LOGI("RegisterUserInstruction %s successfull", instrName.c_str());
-    return USCRIPT_SUCCESS;
-}
-} // namespace Uscript
+} // namespace uscript

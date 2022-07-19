@@ -18,7 +18,7 @@
 #include "log/log.h"
 #include "updater_ui_const.h"
 
-namespace updater {
+namespace Updater {
 constexpr int TOUCH_LOW_TH = 50;
 constexpr int TOUCH_HIGH_TH = 90;
 constexpr int INIT_DEFAULT_VALUE = 255;

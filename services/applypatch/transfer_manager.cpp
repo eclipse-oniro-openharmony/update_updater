@@ -55,10 +55,10 @@ bool TransferManager::CommandsParser(int fd, const std::vector<std::string> &con
     UPDATER_ERROR_CHECK(context.size() >= 1, "too small context in transfer file", return false);
     UPDATER_ERROR_CHECK(globalParams != nullptr, "globalParams is nullptr", return false);
     std::vector<std::string>::const_iterator ct = context.begin();
-    globalParams->version = utils::String2Int<size_t>(*ct++, utils::N_DEC);
-    globalParams->blockCount = utils::String2Int<size_t>(*ct++, utils::N_DEC);
-    globalParams->maxEntries = utils::String2Int<size_t>(*ct++, utils::N_DEC);
-    globalParams->maxBlocks = utils::String2Int<size_t>(*ct++, utils::N_DEC);
+    globalParams->version = Utils::String2Int<size_t>(*ct++, Utils::N_DEC);
+    globalParams->blockCount = Utils::String2Int<size_t>(*ct++, Utils::N_DEC);
+    globalParams->maxEntries = Utils::String2Int<size_t>(*ct++, Utils::N_DEC);
+    globalParams->maxBlocks = Utils::String2Int<size_t>(*ct++, Utils::N_DEC);
     size_t totalSize = globalParams->blockCount;
     std::string retryCmd = "";
     if (globalParams->env != nullptr && globalParams->env->IsRetry()) {
@@ -118,7 +118,7 @@ bool TransferManager::RegisterForRetry(const std::string &cmd)
     UPDATER_ERROR_CHECK(fd != -1, "Failed to create", return false);
     UPDATER_ERROR_CHECK(fchown(fd, O_USER_GROUP_ID, O_USER_GROUP_ID) == 0,
         "Failed to chown", close(fd); return -1);
-    bool ret = utils::WriteStringToFile(fd, cmd);
+    bool ret = Utils::WriteStringToFile(fd, cmd);
     UPDATER_ERROR_CHECK_NOT_RETURN(ret, "Write retry flag error");
     fsync(fd);
     close(fd);
@@ -132,7 +132,7 @@ std::string TransferManager::ReloadForRetry() const
     UPDATER_ERROR_CHECK(fd >= 0, "Failed to open", return "");
     (void)lseek(fd, 0, SEEK_SET);
     std::string cmd = "";
-    UPDATER_ERROR_CHECK_NOT_RETURN(utils::ReadFileToString(fd, cmd), "Error to read retry flag");
+    UPDATER_ERROR_CHECK_NOT_RETURN(Utils::ReadFileToString(fd, cmd), "Error to read retry flag");
     close(fd);
     return cmd;
 }
@@ -164,4 +164,4 @@ bool TransferManager::CheckResult(const CommandResult result, const std::string 
     }
     return true;
 }
-} // namespace updater
+} // namespace Updater

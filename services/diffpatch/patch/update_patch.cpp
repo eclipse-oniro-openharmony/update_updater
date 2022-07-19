@@ -91,10 +91,10 @@ int32_t UpdatePatch::ApplyBlockPatch(const PatchBuffer &patchInfo,
 int32_t UpdatePatch::ApplyBlockPatch(const PatchBuffer &patchInfo,
     const BlockBuffer &oldInfo, UpdatePatchWriterPtr writer)
 {
-    PkgManager* pkgManager = hpackage::PkgManager::GetPackageInstance();
+    PkgManager* pkgManager = Hpackage::PkgManager::GetPackageInstance();
     PATCH_CHECK(pkgManager != nullptr, return -1, "Failed to get pkg manager");
 
-    hpackage::PkgManager::StreamPtr stream = nullptr;
+    Hpackage::PkgManager::StreamPtr stream = nullptr;
     int32_t ret = pkgManager->CreatePkgStream(stream, "", {oldInfo.buffer, oldInfo.length});
     PATCH_CHECK(stream != nullptr, pkgManager->ClosePkgStream(stream); return -1, "Failed to create stream");
 
@@ -114,10 +114,10 @@ int32_t UpdatePatch::ApplyBlockPatch(const PatchBuffer &patchInfo,
     int32_t ret = patchWriter->Init();
     PATCH_CHECK(ret == 0, return -1, "Failed to init patch writer");
 
-    PkgManager* pkgManager = hpackage::PkgManager::GetPackageInstance();
+    PkgManager* pkgManager = Hpackage::PkgManager::GetPackageInstance();
     PATCH_CHECK(pkgManager != nullptr, return -1, "Failed to get pkg manager");
 
-    hpackage::PkgManager::StreamPtr stream = nullptr;
+    Hpackage::PkgManager::StreamPtr stream = nullptr;
     ret = pkgManager->CreatePkgStream(stream, "", {oldInfo.buffer, oldInfo.length});
     PATCH_CHECK(stream != nullptr, pkgManager->ClosePkgStream(stream); return -1, "Failed to create stream");
 
@@ -131,7 +131,7 @@ int32_t UpdatePatch::ApplyBlockPatch(const PatchBuffer &patchInfo,
 }
 
 int32_t UpdatePatch::ApplyBlockPatch(const PatchBuffer &patchInfo,
-    hpackage::PkgManager::StreamPtr stream, UpdatePatchWriterPtr writer)
+    Hpackage::PkgManager::StreamPtr stream, UpdatePatchWriterPtr writer)
 {
     std::unique_ptr<BlocksStreamPatch> patch = std::make_unique<BlocksStreamPatch>(patchInfo, stream, writer);
     PATCH_CHECK(patch != nullptr, return -1, "Failed to  creare patch ");
@@ -160,7 +160,7 @@ int32_t UpdatePatch::ApplyPatch(const std::string &patchName, const std::string 
         param.patchSize = patchData.length;
         param.oldBuff = oldData.memory;
         param.oldSize = oldData.length;
-        ret = updatepatch::UpdatePatch::ApplyImagePatch(param, writer.get(), empty);
+        ret = UpdatePatch::UpdatePatch::ApplyImagePatch(param, writer.get(), empty);
         PATCH_CHECK(ret == 0, return -1, "Failed to apply image patch file");
     } else if (memcmp(patchData.memory, BSDIFF_MAGIC.c_str(), BSDIFF_MAGIC.size()) == 0) { // bsdiff
         PatchBuffer patchInfo = {patchData.memory, 0, patchData.length};
@@ -239,4 +239,4 @@ int32_t FilePatchWriter::Finish()
     init_ = false;
     return 0;
 }
-} // namespace updatepatch
+} // namespace UpdatePatch

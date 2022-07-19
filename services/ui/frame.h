@@ -21,7 +21,7 @@
 #include "surface_dev.h"
 #include "view.h"
 
-namespace updater {
+namespace Updater {
 struct CmpByStartY {
     bool operator()(const View *v1, const View *v2) const
     {

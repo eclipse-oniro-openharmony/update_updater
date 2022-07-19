@@ -16,7 +16,6 @@
 #ifndef USCRIPT_INSTRUCTION_HELPER_H
 #define USCRIPT_INSTRUCTION_HELPER_H
 
-#include <unordered_map>
 #include "script_instruction.h"
 #include "script_manager_impl.h"
 #include "script_utils.h"
@@ -32,13 +31,11 @@ public:
 
     bool IsReservedInstruction(const std::string &scriptName) const;
 
-    int32_t AddScript(const std::string &scriptName, int32_t priority) const;
+    int32_t AddScript(const std::string &scriptName, int32_t priority);
 
     int32_t AddInstruction(const std::string &instrName, const UScriptInstructionPtr instr);
 
     int32_t RegisterUserInstruction(const std::string &libName, const std::string &instrName);
-
-    int32_t RegisterUserInstruction(const std::string &instrName, Uscript::UScriptInstructionFactory *factory);
 
     static ScriptInstructionHelper* GetBasicInstructionHelper(ScriptManagerImpl *impl = nullptr);
 

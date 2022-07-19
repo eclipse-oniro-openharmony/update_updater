@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-#include "ptable_manager.h"
-
 #include "log/log.h"
 #include "securec.h"
 
@@ -49,7 +47,7 @@ bool PtableManager::IsUfsDevice()
     return true;
 }
 
-void PtableManager::ReloadDevicePartition(hpackage::PkgManager *pkgManager)
+void PtableManager::ReloadDevicePartition(Hpackage::PkgManager *pkgManager)
 {
     return LoadPartitionInfo(pkgManager);
 }
@@ -223,7 +221,7 @@ bool PtableManager::GetPartionInfoByName(const std::string &partitionName, Ptabl
 // class PackagePtable
 PackagePtable::PackagePtable() : PtableManager() {}
 
-void PackagePtable::LoadPartitionInfo([[maybe_unused]] hpackage::PkgManager *pkgManager)
+void PackagePtable::LoadPartitionInfo([[maybe_unused]] Hpackage::PkgManager *pkgManager)
 {
     if (pkgManager == nullptr) {
         LOG(ERROR) << "pkgManager is nullptr";
@@ -259,7 +257,7 @@ void PackagePtable::LoadPartitionInfo([[maybe_unused]] hpackage::PkgManager *pkg
     return;
 }
 
-bool PackagePtable::GetPtableBufferFromPkg(hpackage::PkgManager *pkgManager, uint8_t *&imageBuf, uint32_t size)
+bool PackagePtable::GetPtableBufferFromPkg(Hpackage::PkgManager *pkgManager, uint8_t *&imageBuf, uint32_t size)
 {
     if (pkgManager == nullptr) {
         LOG(ERROR) << "pkgManager is nullptr";
@@ -267,20 +265,20 @@ bool PackagePtable::GetPtableBufferFromPkg(hpackage::PkgManager *pkgManager, uin
     }
 
     std::string ptableName = "/ptable";
-    const hpackage::FileInfo *info = pkgManager->GetFileInfo(ptableName);
+    const Hpackage::FileInfo *info = pkgManager->GetFileInfo(ptableName);
     if (info == nullptr) {
         LOG(ERROR) << "Can not get file info " << ptableName;
         return false;
     }
-    hpackage::PkgManager::StreamPtr outStream = nullptr;
+    Hpackage::PkgManager::StreamPtr outStream = nullptr;
     (void)pkgManager->CreatePkgStream(outStream, ptableName, info->unpackedSize,
-        hpackage::PkgStream::PkgStreamType_MemoryMap);
+        Hpackage::PkgStream::PkgStreamType_MemoryMap);
     if (outStream == nullptr) {
         LOG(ERROR) << "Error to create output stream";
         return false;
     }
 
-    if (pkgManager->ExtractFile(ptableName, outStream) != hpackage::PKG_SUCCESS) {
+    if (pkgManager->ExtractFile(ptableName, outStream) != Hpackage::PKG_SUCCESS) {
         LOG(ERROR) << "Error to extract ptable";
         pkgManager->ClosePkgStream(outStream);
         return false;
@@ -301,7 +299,7 @@ bool PackagePtable::GetPtableBufferFromPkg(hpackage::PkgManager *pkgManager, uin
 // class DevicePtable
 DevicePtable::DevicePtable() : PtableManager() {}
 
-void DevicePtable::LoadPartitionInfo([[maybe_unused]] hpackage::PkgManager *pkgManager)
+void DevicePtable::LoadPartitionInfo([[maybe_unused]] Hpackage::PkgManager *pkgManager)
 {
     (void)pkgManager;
     if (!InitPtableManager()) {
@@ -347,4 +345,4 @@ bool DevicePtable::ComparePtable(PtableManager &newPtbManager)
     LOG(INFO) << "two ptables are the same";
     return false;
 }
-} // namespace updater
+} // namespace Updater

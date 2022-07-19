@@ -22,7 +22,7 @@ namespace Flashd {
 int flashd_main(int argc, char **argv)
 {
     Base::SetLogLevel(LOG_LAST);  // debug log print
-    std::vector<std::string> args = updater::ParseParams(argc, argv);
+    std::vector<std::string> args = Updater::ParseParams(argc, argv);
     bool enableUsb = false;
     bool enableTcp = false;
     WRITE_LOG(LOG_DEBUG, "flashd main run %d", argc);

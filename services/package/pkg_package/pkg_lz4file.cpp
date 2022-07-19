@@ -18,7 +18,7 @@
 
 using namespace std;
 
-namespace hpackage {
+namespace Hpackage {
 int32_t Lz4FileEntry::Init(const PkgManager::FileInfoPtr fileInfo, PkgStreamPtr inStream)
 {
     int32_t ret = PkgEntry::Init(&fileInfo_.fileInfo, fileInfo, inStream);
@@ -173,4 +173,4 @@ int32_t Lz4PkgFile::LoadPackage(std::vector<std::string> &fileNames, VerifyFunct
     }
     return ret;
 }
-} // namespace hpackage
+} // namespace Hpackage

@@ -60,4 +60,4 @@ int RawWriter::WriteInternal(int fd, const uint8_t *data, size_t len)
     offset_ += static_cast<off64_t>(len);
     return 0;
 }
-} // namespace updater
+} // namespace Updater

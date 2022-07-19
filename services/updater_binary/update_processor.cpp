@@ -116,7 +116,7 @@ int UScriptInstructionRawImageWrite::RawImageWriteProcessor(const PkgBuffer &buf
     return PKG_SUCCESS;
 }
 
-int32_t UScriptInstructionRawImageWrite::Execute(uscript::UScriptEnv &env, uscript::UScriptContext &context)
+int32_t UScriptInstructionRawImageWrite::Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context)
 {
     std::string partitionName;
     int32_t ret = context.GetParam(0, partitionName);
@@ -147,7 +147,7 @@ int32_t UScriptInstructionRawImageWrite::Execute(uscript::UScriptEnv &env, uscri
     UPDATER_ERROR_CHECK(writer != nullptr, "Error to create writer", return USCRIPT_ERROR_EXECUTE);
 
     // Extract partition information
-    hpackage::PkgManager::StreamPtr outStream = nullptr;
+    Hpackage::PkgManager::StreamPtr outStream = nullptr;
     const FileInfo *info = env.GetPkgManager()->GetFileInfo(partitionName);
     UPDATER_ERROR_CHECK(info != nullptr, "Error to get file info",
         DataWriter::ReleaseDataWriter(writer); return USCRIPT_ERROR_EXECUTE);
@@ -246,7 +246,7 @@ int ProcessUpdater(bool retry, int pipeFd, const std::string &packagePath, const
     packagePtb.LoadPartitionInfo(pkgManager);
 #endif
 
-    ret = updater::ExecUpdate(pkgManager, retry,
+    ret = Updater::ExecUpdate(pkgManager, retry,
         [&pipeWrite](const char *cmd, const char *content) {
             if (pipeWrite != nullptr) {
                 fprintf(pipeWrite, "%s:%s\n", cmd, content);

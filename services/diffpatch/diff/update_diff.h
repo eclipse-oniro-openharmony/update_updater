@@ -41,13 +41,13 @@ public:
         return fileIds_;
     }
     int32_t GetPkgBuffer(BlockBuffer &buffer) const;
-    const hpackage::FileInfo *GetFileInfo(const std::string &fileName) const;
+    const Hpackage::FileInfo *GetFileInfo(const std::string &fileName) const;
 private:
     PkgPackType type_ = PKG_PACK_TYPE_NONE;
     MemMapInfo memMap_ {};
     std::vector<std::string> fileIds_;
-    hpackage::PkgManager::StreamPtr stream_ { nullptr };
-    hpackage::PkgManager::PkgManagerPtr pkgManager_ { nullptr };
+    Hpackage::PkgManager::StreamPtr stream_ { nullptr };
+    Hpackage::PkgManager::PkgManagerPtr pkgManager_ { nullptr };
 };
 
 class UpdateDiff {
@@ -70,5 +70,5 @@ private:
     std::unique_ptr<ImageParser> newParser_ { nullptr };
     std::unique_ptr<ImageParser> oldParser_ { nullptr };
 };
-} // namespace updatepatch
+} // namespace UpdatePatch
 #endif // UPDATE_DIFF_H

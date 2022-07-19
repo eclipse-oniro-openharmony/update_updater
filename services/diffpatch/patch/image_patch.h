@@ -71,9 +71,9 @@ public:
     int32_t ApplyImagePatch(const PatchParam &param, size_t &startOffset) override;
 protected:
     virtual int32_t ReadHeader(const PatchParam &param, PatchHeader &header, size_t &offset) = 0;
-    virtual std::unique_ptr<hpackage::FileInfo> GetFileInfo() const = 0;
-    int32_t DecompressData(hpackage::PkgBuffer buffer,
-        hpackage::PkgManager::StreamPtr &stream, bool memory, size_t expandedLen) const;
+    virtual std::unique_ptr<Hpackage::FileInfo> GetFileInfo() const = 0;
+    int32_t DecompressData(Hpackage::PkgBuffer buffer,
+        Hpackage::PkgManager::StreamPtr &stream, bool memory, size_t expandedLen) const;
 
     std::vector<uint8_t> bonusData_ {};
 };
@@ -86,7 +86,7 @@ public:
 
 protected:
     int32_t ReadHeader(const PatchParam &param, PatchHeader &header, size_t &offset) override;
-    std::unique_ptr<hpackage::FileInfo> GetFileInfo() const override;
+    std::unique_ptr<Hpackage::FileInfo> GetFileInfo() const override;
 
     int32_t method_ {0};
     int32_t level_ {0};
@@ -103,7 +103,7 @@ public:
 
 protected:
     int32_t ReadHeader(const PatchParam &param, PatchHeader &header, size_t &offset) override;
-    std::unique_ptr<hpackage::FileInfo> GetFileInfo() const override;
+    std::unique_ptr<Hpackage::FileInfo> GetFileInfo() const override;
 
     int32_t compressionLevel_ {0};
     int32_t blockIndependence_ {0};
@@ -115,7 +115,7 @@ protected:
 
 class CompressedFileRestore : public UpdatePatchWriter {
 public:
-    CompressedFileRestore(hpackage::PkgManager::FileInfoPtr fileInfo, UpdatePatchWriterPtr writer)
+    CompressedFileRestore(Hpackage::PkgManager::FileInfoPtr fileInfo, UpdatePatchWriterPtr writer)
         : UpdatePatchWriter(), fileInfo_(fileInfo), writer_(writer) {}
     ~CompressedFileRestore() override
     {
@@ -132,10 +132,10 @@ public:
 private:
     std::vector<uint8_t> data_ {};
     size_t dataSize_ {0};
-    hpackage::PkgManager::FileInfoPtr fileInfo_ { nullptr };
+    Hpackage::PkgManager::FileInfoPtr fileInfo_ { nullptr };
     UpdatePatchWriterPtr writer_ { nullptr };
     std::unique_ptr<DeflateAdapter> deflateAdapter_ { nullptr };
     SHA256_CTX sha256Ctx_ {};
 };
-} // namespace updater
+} // namespace UpdatePatch
 #endif  // IMAGE_PATCH_H

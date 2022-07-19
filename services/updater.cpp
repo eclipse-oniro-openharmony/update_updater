@@ -63,7 +63,7 @@ int GetUpdatePackageInfo(PkgManager::PkgManagerPtr pkgManager, const std::string
         LOG(ERROR) << "Fail to GetPackageInstance";
         return UPDATE_CORRUPT;
     }
-    int32_t ret = pkgManager->LoadPackage(path, utils::GetCertName(), components);
+    int32_t ret = pkgManager->LoadPackage(path, Utils::GetCertName(), components);
     if (ret != PKG_SUCCESS) {
         LOG(INFO) << "LoadPackage fail ret :"<< ret;
         return ret;
@@ -86,7 +86,7 @@ static int OtaUpdatePreCheck(PkgManager::PkgManagerPtr pkgManager, const std::st
         return PKG_INVALID_FILE;
     }
 
-    int32_t ret = pkgManager->VerifyOtaPackage(packagePath, utils::GetCertName());
+    int32_t ret = pkgManager->VerifyOtaPackage(packagePath, Utils::GetCertName());
     if (ret != PKG_SUCCESS) {
         LOG(INFO) << "VerifyOtaPackage fail ret :"<< ret;
         return ret;
@@ -120,7 +120,7 @@ int UpdatePreProcess(PkgManager::PkgManagerPtr pkgManager, const std::string &pa
         return ret;
     }
     LOG(WARNING) << "Check version success ";
-    std::string localBoardId = utils::GetLocalBoardId();
+    std::string localBoardId = Utils::GetLocalBoardId();
     if (localBoardId.empty()) {
         PackagesInfo::ReleasePackagesInfoInstance(pkginfomanager);
         return 0;
@@ -139,7 +139,7 @@ int UpdatePreProcess(PkgManager::PkgManagerPtr pkgManager, const std::string &pa
 
 UpdaterStatus IsSpaceCapacitySufficient(const std::string &packagePath)
 {
-    PkgManager::PkgManagerPtr pkgManager = hpackage::PkgManager::CreatePackageInstance();
+    PkgManager::PkgManagerPtr pkgManager = Hpackage::PkgManager::CreatePackageInstance();
     UPDATER_ERROR_CHECK(pkgManager != nullptr, "pkgManager is nullptr", return UPDATE_CORRUPT);
     std::vector<std::string> fileIds;
     int ret = pkgManager->LoadPackageWithoutUnPack(packagePath, fileIds);

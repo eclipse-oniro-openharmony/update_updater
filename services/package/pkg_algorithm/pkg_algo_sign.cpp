@@ -25,9 +25,9 @@
 #include "pkg_algorithm.h"
 #include "pkg_utils.h"
 
-using namespace updater;
+using namespace Updater;
 
-namespace hpackage {
+namespace Hpackage {
 #ifndef BIO_FP_READ
 constexpr uint32_t BIO_FP_READ = 0x02;
 #endif
@@ -196,4 +196,4 @@ SignAlgorithm::SignAlgorithmPtr PkgAlgorithmFactory::GetVerifyAlgorithm(const st
 {
     return std::make_shared<VerifyAlgorithm>(path, type);
 }
-} // namespace hpackage
+} // namespace Hpackage

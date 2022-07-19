@@ -19,7 +19,7 @@
 #include <memory>
 #include "flash_utils.h"
 
-namespace flashd {
+namespace Flashd {
 enum class DeviceType {
     DEVICE_UNKNOWN = 0,
     DEVICE_SCSI = 1,

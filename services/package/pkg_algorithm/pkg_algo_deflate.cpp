@@ -18,7 +18,7 @@
 #include "securec.h"
 #include "zlib.h"
 
-namespace hpackage {
+namespace Hpackage {
 constexpr uint8_t INFLATE_ERROR_TIMES = 5;
 constexpr uint32_t IN_BUFFER_SIZE = 1024 * 64;
 constexpr uint32_t OUT_BUFFER_SIZE = 1024 * 32;
@@ -190,4 +190,4 @@ void PkgAlgoDeflate::ReleaseStream(z_stream &zstream, bool zip) const
         PKG_CHECK(ret == Z_OK, return, "fail inflateEnd %d", ret);
     }
 }
-} // namespace hpackage
+} // namespace Hpackage
