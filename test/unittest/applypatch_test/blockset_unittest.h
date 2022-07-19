@@ -18,7 +18,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-namespace updater_ut {
+namespace UpdaterUt {
 class BlockSetUnitTest : public testing::Test {
 public:
     static void SetUpTestCase(void) {}

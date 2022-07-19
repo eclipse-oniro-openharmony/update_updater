@@ -25,7 +25,7 @@
 #include "partitions.h"
 #include "securec.h"
 
-using namespace updater;
+using namespace Updater;
 namespace {
 static constexpr int FSTAB_NAME_LENGTH = 20;
 }

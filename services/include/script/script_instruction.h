@@ -18,7 +18,7 @@
 #include <string>
 #include "pkg_manager.h"
 
-namespace uscript {
+namespace Uscript {
 class UScriptInstructionFactory;
 class UScriptInstruction;
 typedef UScriptInstructionFactory* UScriptInstructionFactoryPtr;

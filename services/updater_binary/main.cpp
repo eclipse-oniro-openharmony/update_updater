@@ -23,7 +23,7 @@
 #include "update_processor.h"
 #include "utils.h"
 
-using namespace updater;
+using namespace Updater;
 #ifndef UPDATER_UT
 int main(int argc, char **argv)
 {

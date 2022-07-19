@@ -42,10 +42,10 @@
 #include "updater/updater_const.h"
 #include "utils.h"
 
-namespace updater {
-using utils::String2Int;
-using namespace hpackage;
-using namespace updater::utils;
+namespace Updater {
+using Utils::String2Int;
+using namespace Hpackage;
+using namespace Updater::Utils;
 
 extern TextLabel *g_logLabel;
 extern TextLabel *g_logResultLabel;

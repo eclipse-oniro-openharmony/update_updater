@@ -31,9 +31,9 @@
 #include "utils.h"
 
 constexpr int O_BINARY = 0;
-namespace updater_ut {
+namespace UpdaterUt {
 #define UNUSED(x) (void)(x)
-using namespace updater;
+using namespace Updater;
 class FileWriter : public DataWriter {
 public:
     virtual bool Write(const uint8_t *addr, size_t len, WriteMode mode, const std::string &partitionName)

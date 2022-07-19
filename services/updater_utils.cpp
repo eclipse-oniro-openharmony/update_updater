@@ -30,9 +30,9 @@
 #include "updater_ui.h"
 #include "utils.h"
 
-namespace updater {
-using namespace hpackage;
-using namespace updater::utils;
+namespace Updater {
+using namespace Hpackage;
+using namespace Updater::Utils;
 static bool IsDir(const std::string &path)
 {
     struct stat st {};

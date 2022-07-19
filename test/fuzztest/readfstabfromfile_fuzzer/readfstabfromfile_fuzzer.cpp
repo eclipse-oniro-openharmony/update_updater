@@ -24,7 +24,7 @@
 #include "fs_manager/fs_manager.h"
 #include "log/log.h"
 
-using namespace updater;
+using namespace Updater;
 
 namespace OHOS {
     bool FuzzReadFstabFromFile(const uint8_t* data, size_t size)

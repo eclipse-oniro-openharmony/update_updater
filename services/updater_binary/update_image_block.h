@@ -19,7 +19,7 @@
 #include "script_instruction.h"
 #include "script_manager.h"
 
-namespace updater {
+namespace Updater {
 class UScriptInstructionBlockUpdate : public uscript::UScriptInstruction {
 public:
     UScriptInstructionBlockUpdate() {}

@@ -17,7 +17,7 @@
 
 #include "log/log.h"
 
-namespace updater {
+namespace Updater {
 namespace {
 inline const std::unordered_map<uint16_t, NodeType> &GetJsonTypeMap()
 {

@@ -18,7 +18,7 @@
 #include <iostream>
 #include "diffpatch.h"
 
-namespace updatepatch {
+namespace UpdatePatch {
 class DeflateAdapter {
 public:
     static constexpr uint32_t BUFFER_SIZE = 1024 * 32;
@@ -48,5 +48,5 @@ public:
 protected:
     bool init_ = false;
 };
-} // namespace updatepatch
+} // namespace UpdatePatch
 #endif // DEFLATE_ADAPTER_H

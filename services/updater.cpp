@@ -37,10 +37,10 @@
 #include "updater_ui.h"
 #include "utils.h"
 
-namespace updater {
-using updater::utils::SplitString;
-using updater::utils::Trim;
-using namespace hpackage;
+namespace Updater {
+using Updater::Utils::SplitString;
+using Updater::Utils::Trim;
+using namespace Hpackage;
 
 int g_percentage;
 int g_tmpProgressValue;

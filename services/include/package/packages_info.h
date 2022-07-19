@@ -27,7 +27,7 @@
 /**
  * Constructor used to create a singleton PackagesInfo instance.
  */
-namespace updater {
+namespace Updater {
 class PackagesInfo;
 using PackagesInfoPtr = PackagesInfo *;
 class PackagesInfo {

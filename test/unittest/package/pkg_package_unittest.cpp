@@ -30,11 +30,11 @@
 #include "securec.h"
 
 using namespace std;
-using namespace hpackage;
-using namespace updater;
+using namespace Hpackage;
+using namespace Updater;
 using namespace testing::ext;
 
-namespace {
+namespace UpdaterUt {
 constexpr uint32_t MAX_FILE_NAME = 256;
 constexpr uint32_t CENTRAL_SIGNATURE = 0x02014b50;
 constexpr uint32_t END_CENTRAL_SIGNATURE = 0x06054b50;

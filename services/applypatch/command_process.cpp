@@ -32,8 +32,8 @@
 #include "securec.h"
 #include "utils.h"
 
-using namespace hpackage;
-namespace updater {
+using namespace Hpackage;
+namespace Updater {
 CommandResult AbortCommandFn::Execute(const Command &params)
 {
     return SUCCESS;

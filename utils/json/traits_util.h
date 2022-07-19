@@ -16,7 +16,8 @@
 #ifndef TRAITS_UTIL_H
 #define TRAITS_UTIL_H
 
-namespace updater::detail {
+namespace Updater {
+namespace Detail {
 template<typename T>
 inline constexpr bool G_IS_NUM = std::is_integral_v<T> && !std::is_same_v<T, bool>;
 
@@ -46,4 +47,5 @@ template<typename T>
 using StandardType = typename StandardTypeHelper<T>::type;
 }
 
+}
 #endif

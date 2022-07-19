@@ -25,7 +25,7 @@
 #include "pkg_manager.h"
 #include "securec.h"
 
-namespace updatepatch {
+namespace UpdatePatch {
 #define LZ4_BLOCK_SIZE(blockId) (1 << (8 + (2 * (blockId))))
 
 class Lz4Adapter : public DeflateAdapter {

@@ -22,8 +22,8 @@
 #include "openssl/sha.h"
 #include "securec.h"
 
-using namespace hpackage;
-namespace updatepatch {
+using namespace Hpackage;
+namespace UpdatePatch {
 int32_t UpdatePatch::ApplyImagePatch(const PatchParam &param, const std::vector<uint8_t> &bonusData,
     ImageProcessor writer, const std::string& expected)
 {

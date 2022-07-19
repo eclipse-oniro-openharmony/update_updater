@@ -25,7 +25,7 @@
 #define O_BINARY 0
 #endif
 
-namespace updater {
+namespace Updater {
 // Each partition takes 126 bytes
 // So total size of partition record is
 // 126 * 8 = 1008. round up to 1024 bytes
@@ -76,5 +76,5 @@ private:
     // start from the global offset of misc partition.
     off_t offset_;
 };
-} // namespace updater
+} // namespace Updater
 #endif //  UPDATER_PARTITION_UPDATE_RECORD_H

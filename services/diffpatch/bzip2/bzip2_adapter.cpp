@@ -18,9 +18,9 @@
 #include <vector>
 #include "bzlib.h"
 
-using namespace hpackage;
+using namespace Hpackage;
 
-namespace updatepatch {
+namespace UpdatePatch {
 int32_t BZip2Adapter::Open()
 {
     (void)memset_s(&stream_, sizeof(bz_stream), 0, sizeof(bz_stream));
@@ -208,4 +208,4 @@ int32_t BZip2BufferReadAdapter::ReadData(BlockBuffer &info)
     }
     return 0;
 }
-} // namespace updatepatch
+} // namespace UpdatePatch

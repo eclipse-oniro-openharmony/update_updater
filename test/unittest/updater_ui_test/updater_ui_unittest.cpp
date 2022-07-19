@@ -27,15 +27,14 @@
 #include "utils.h"
 #include "input_event.h"
 
-using namespace updater;
-using namespace testing::ext;
+using namespace Updater;
 using namespace std;
-using namespace updater::utils;
+using namespace Updater::Utils;
 static constexpr int EV_VALUE_15 = 15;
 static constexpr int EV_VALUE_80 = 80;
 static constexpr int EV_VALUE_500 = 500;
 
-namespace updater_ut {
+namespace UpdaterUt {
 // do something at the each function begining
 void UpdaterUiUnitTest::SetUp(void)
 {

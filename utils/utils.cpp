@@ -33,10 +33,10 @@
 #include "securec.h"
 #include "updater/updater_const.h"
 
-namespace updater {
-using namespace hpackage;
+namespace Updater {
+using namespace Hpackage;
 
-namespace utils {
+namespace Utils {
 constexpr uint32_t MAX_PATH_LEN = 256;
 constexpr uint8_t SHIFT_RIGHT_FOUR_BITS = 4;
 constexpr int USER_ROOT_AUTHORITY = 0;

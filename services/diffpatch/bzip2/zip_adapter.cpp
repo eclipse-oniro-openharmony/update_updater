@@ -18,9 +18,9 @@
 #include <vector>
 #include "zlib.h"
 
-using namespace hpackage;
+using namespace Hpackage;
 
-namespace updatepatch {
+namespace UpdatePatch {
 ZipAdapter::ZipAdapter(UpdatePatchWriterPtr outStream, size_t offset, const PkgManager::FileInfoPtr fileInfo)
     : DeflateAdapter(), outStream_(outStream), offset_(offset)
 {

@@ -24,7 +24,7 @@
 #include <vector>
 #include "package/package.h"
 
-namespace hpackage {
+namespace Hpackage {
 /**
  * Error code definition
  */

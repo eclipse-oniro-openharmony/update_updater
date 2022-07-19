@@ -21,7 +21,7 @@
 #include "log/log.h"
 #include "securec.h"
 
-namespace updater {
+namespace Updater {
 PartitionRecord &PartitionRecord::GetInstance()
 {
     static PartitionRecord partitionRecord;

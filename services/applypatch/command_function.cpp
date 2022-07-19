@@ -16,7 +16,7 @@
 #include "applypatch/command_function.h"
 #include "command_process.h"
 
-namespace updater {
+namespace Updater {
 std::unique_ptr<CommandFunction> CommandFunctionFactory::GetCommandFunction(const CommandType type)
 {
     switch (type) {

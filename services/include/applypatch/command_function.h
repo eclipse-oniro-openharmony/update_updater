@@ -17,7 +17,7 @@
 
 #include "command.h"
 
-namespace updater {
+namespace Updater {
 class CommandFunction {
 public:
     virtual ~CommandFunction() = default;

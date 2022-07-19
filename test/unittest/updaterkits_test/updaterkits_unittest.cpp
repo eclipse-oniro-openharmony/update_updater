@@ -20,10 +20,10 @@
 #include "updaterkits/updaterkits.h"
 
 using namespace testing::ext;
-using namespace updater_ut;
+using namespace UpdaterUt;
 using namespace std;
 
-namespace updater_ut {
+namespace UpdaterUt {
 const std::string MISC_FILE = "/data/updater/misc_ut";
 
 void UpdaterKitsUnitTest::SetUpTestCase(void)

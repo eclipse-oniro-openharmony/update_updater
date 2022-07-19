@@ -28,11 +28,11 @@
 #include "log/log.h"
 #include "utils.h"
 
-using namespace uscript;
-using namespace hpackage;
-using namespace updater;
+using namespace Uscript;
+using namespace Hpackage;
+using namespace Updater;
 
-namespace updater {
+namespace Updater {
 constexpr int32_t SHA_CHECK_SECOND = 2;
 constexpr int32_t SHA_CHECK_PARAMS = 3;
 static int ExtractNewData(const PkgBuffer &buffer, size_t size, size_t start, bool isFinish, const void* context)

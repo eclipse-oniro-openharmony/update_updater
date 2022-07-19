@@ -29,11 +29,11 @@
 #include "update_image_block.h"
 #include "update_partitions.h"
 
-using namespace uscript;
-using namespace hpackage;
-using namespace updater;
+using namespace Uscript;
+using namespace Hpackage;
+using namespace Updater;
 
-namespace updater {
+namespace Updater {
 size_t UScriptInstructionRawImageWrite::totalSize_ = 0;
 size_t UScriptInstructionRawImageWrite::readSize_ = 0;
 const std::string PREFIX_PARTITION_NODE = "/dev/block/by-name/";

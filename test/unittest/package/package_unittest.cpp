@@ -28,11 +28,11 @@
 #include "pkg_utils.h"
 
 using namespace std;
-using namespace hpackage;
-using namespace updater;
+using namespace Hpackage;
+using namespace Updater;
 using namespace testing::ext;
 
-namespace {
+namespace UpdaterUt {
 class PackageUnitTest : public PkgTest {
 public:
     PackageUnitTest() {}

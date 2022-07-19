@@ -18,7 +18,7 @@
 #include "applypatch/command.h"
 #include "applypatch/command_function.h"
 
-namespace updater {
+namespace Updater {
 class AbortCommandFn : public CommandFunction {
 public:
     AbortCommandFn() {}

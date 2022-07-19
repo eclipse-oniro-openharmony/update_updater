@@ -29,11 +29,11 @@
 #include "utils.h"
 
 using namespace std;
-using namespace hpackage;
-using namespace uscript;
-using namespace updater;
+using namespace Hpackage;
+using namespace Uscript;
+using namespace Updater;
 using namespace testing::ext;
-using namespace updater::utils;
+using namespace Updater::Utils;
 
 namespace {
 class UpdaterBinaryUnittest : public ::testing::Test {

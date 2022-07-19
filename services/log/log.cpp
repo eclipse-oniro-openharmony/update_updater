@@ -20,7 +20,7 @@
 #include <vector>
 #include "securec.h"
 
-namespace updater {
+namespace Updater {
 static std::ofstream g_updaterLog;
 static std::ofstream g_updaterStage;
 static std::ofstream g_errorCode;

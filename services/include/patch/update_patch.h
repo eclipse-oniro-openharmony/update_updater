@@ -20,7 +20,7 @@
 #include "package/pkg_manager.h"
 #include "openssl/sha.h"
 
-namespace updatepatch {
+namespace UpdatePatch {
 struct PatchParam {
     uint8_t* oldBuff;
     size_t oldSize;

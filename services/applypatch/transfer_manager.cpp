@@ -21,8 +21,8 @@
 #include "log/log.h"
 #include "utils.h"
 
-namespace updater {
-using namespace updater::utils;
+namespace Updater {
+using namespace Updater::Utils;
 static TransferManagerPtr g_transferManagerInstance = nullptr;
 TransferManagerPtr TransferManager::GetTransferManagerInstance()
 {

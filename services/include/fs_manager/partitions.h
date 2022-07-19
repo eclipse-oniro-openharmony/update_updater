@@ -22,7 +22,7 @@
 #include <sys/types.h>
 
 
-namespace updater {
+namespace Updater {
 #define RD_MODE (O_RDONLY)
 #define WR_MODE (O_WRONLY)
 #define RW_MODE (O_RDWR)

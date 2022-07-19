@@ -31,18 +31,18 @@
 #include "unittest_comm.h"
 #include "utils.h"
 
-using hpackage::PkgManager;
-using hpackage::PkgManagerImpl;
-using hpackage::PkgStream;
-using hpackage::PkgAlgorithmFactory;
-using hpackage::DigestAlgorithm;
-using hpackage::ComponentInfo;
-using hpackage::FileInfo;
-using hpackage::ZipFileInfo;
-using hpackage::PkgInfo;
-using updater::InitUpdaterLogger;
+using Hpackage::PkgManager;
+using Hpackage::PkgManagerImpl;
+using Hpackage::PkgStream;
+using Hpackage::PkgAlgorithmFactory;
+using Hpackage::DigestAlgorithm;
+using Hpackage::ComponentInfo;
+using Hpackage::FileInfo;
+using Hpackage::ZipFileInfo;
+using Hpackage::PkgInfo;
+using Updater::InitUpdaterLogger;
 
-namespace {
+namespace UpdaterUt {
 class PkgTest : public ::testing::Test {
 public:
     PkgTest()
