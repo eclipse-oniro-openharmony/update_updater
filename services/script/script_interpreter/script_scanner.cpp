@@ -15,9 +15,9 @@
 #include "scanner.h"
 #include "pkg_manager.h"
 
-using namespace hpackage;
+using namespace Hpackage;
 
-namespace uscript {
+namespace Uscript {
 int Scanner::LexerInput(char *buf, int maxSize)
 {
     size_t readLen = 0;
@@ -26,4 +26,4 @@ int Scanner::LexerInput(char *buf, int maxSize)
     currPos += readLen;
     return readLen;
 }
-} // namespace uscript
+} // namespace Uscript

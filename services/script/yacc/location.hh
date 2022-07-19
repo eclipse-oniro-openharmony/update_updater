@@ -31,7 +31,7 @@
 #endif
 #endif
 
-namespace uscript {
+namespace Uscript {
     /// A point in a source file.
     class position {
     public:
@@ -222,5 +222,5 @@ namespace uscript {
         }
         return ostr;
     }
-} // uscript
+} // Uscript
 #endif // !YY_YY_YACC_LOCATION_HH_INCLUDED

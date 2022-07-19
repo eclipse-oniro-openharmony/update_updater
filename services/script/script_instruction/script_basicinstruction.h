@@ -20,45 +20,45 @@
 #include "script_utils.h"
 
 namespace BasicInstruction {
-class UScriptInstructionAbort : public uscript::UScriptInstruction {
+class UScriptInstructionAbort : public Uscript::UScriptInstruction {
 public:
     UScriptInstructionAbort() {}
     virtual ~UScriptInstructionAbort() {}
-    int32_t Execute(uscript::UScriptEnv &env, uscript::UScriptContext &context) override;
+    int32_t Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context) override;
 };
 
-class UScriptInstructionAssert : public uscript::UScriptInstruction {
+class UScriptInstructionAssert : public Uscript::UScriptInstruction {
 public:
     UScriptInstructionAssert() {}
     virtual ~UScriptInstructionAssert() {}
-    int32_t Execute(uscript::UScriptEnv &env, uscript::UScriptContext &context) override;
+    int32_t Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context) override;
 };
 
-class UScriptInstructionSleep : public uscript::UScriptInstruction {
+class UScriptInstructionSleep : public Uscript::UScriptInstruction {
 public:
     UScriptInstructionSleep() {}
     virtual ~UScriptInstructionSleep() {}
-    int32_t Execute(uscript::UScriptEnv &env, uscript::UScriptContext &context) override;
+    int32_t Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context) override;
 };
-class UScriptInstructionStdout : public uscript::UScriptInstruction {
+class UScriptInstructionStdout : public Uscript::UScriptInstruction {
 public:
     UScriptInstructionStdout() {}
     virtual ~UScriptInstructionStdout() {}
-    int32_t Execute(uscript::UScriptEnv &env, uscript::UScriptContext &context) override;
+    int32_t Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context) override;
 };
 
-class UScriptInstructionConcat : public uscript::UScriptInstruction {
+class UScriptInstructionConcat : public Uscript::UScriptInstruction {
 public:
     UScriptInstructionConcat() {}
     virtual ~UScriptInstructionConcat() {}
-    int32_t Execute(uscript::UScriptEnv &env, uscript::UScriptContext &context) override;
+    int32_t Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context) override;
 };
 
-class UScriptInstructionIsSubString : public uscript::UScriptInstruction {
+class UScriptInstructionIsSubString : public Uscript::UScriptInstruction {
 public:
     UScriptInstructionIsSubString() {}
     virtual ~UScriptInstructionIsSubString() {}
-    int32_t Execute(uscript::UScriptEnv &env, uscript::UScriptContext &context) override;
+    int32_t Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context) override;
 };
 } // namespace BasicInstruction
 #endif // USCRIPT_BASIC_INSTRUCTION_H

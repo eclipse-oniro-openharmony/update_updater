@@ -14,5 +14,5 @@
  */
 #include "script_utils.h"
 
-namespace uscript {
-} // namespace uscript
+namespace Uscript {
+} // namespace Uscript

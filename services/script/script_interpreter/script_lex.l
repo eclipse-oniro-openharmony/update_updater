@@ -27,7 +27,7 @@
 /* 定义了YY_USER_ACTION，该宏在每个记号的语义动作之前被调用，来根据记号的长度设置位置的信息 */
 #define YY_USER_ACTION  loc.columns (yyleng);
 
-using namespace uscript;
+using namespace Uscript;
 #define yyterminate() Parser::make_END(loc);
 %}
 

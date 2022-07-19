@@ -29,7 +29,7 @@
 #include "script_statement.h"
 
 using std::string;
-namespace uscript {
+namespace Uscript {
   class Scanner;
   class ScriptInterpreter;
 }
@@ -163,7 +163,7 @@ namespace uscript {
 # define YYDEBUG 0
 #endif
 
-namespace uscript {
+namespace Uscript {
 /// A Bison parser.
 class  Parser {
 public:
@@ -923,7 +923,7 @@ private:
 #endif
     };
     /// Build a parser object.
-    Parser(uscript::Scanner* scanner_yyarg, uscript::ScriptInterpreter* interpreter_yyarg);
+    Parser(Uscript::Scanner* scanner_yyarg, Uscript::ScriptInterpreter* interpreter_yyarg);
     virtual ~ Parser();
 #if 201103L <= YY_CPLUSPLUS
     /// Non copyable.
@@ -1637,8 +1637,8 @@ private:
       yyfinal_ = 47 ///< Termination state number.
     };
     // User arguments.
-    uscript::Scanner* scanner;
-    uscript::ScriptInterpreter* interpreter;
+    Uscript::Scanner* scanner;
+    Uscript::ScriptInterpreter* interpreter;
 };
 
     inline Parser::symbol_kind_type Parser::yytranslate_(int t)
@@ -1900,6 +1900,6 @@ private:
     {
         return this->kind ();
     }
-} // uscript
+} // Uscript
 
 #endif // !YY_YY_YACC_PARSER_HPP_INCLUDED

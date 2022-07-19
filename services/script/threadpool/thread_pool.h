@@ -21,7 +21,7 @@
 #include <thread>
 #include <vector>
 
-namespace uscript {
+namespace Uscript {
 struct Task {
     std::function<void(int)> processor;
     int32_t workSize;
@@ -71,5 +71,5 @@ private:
     std::mutex queueMutex_;
     int32_t threadNumber_ = 0;
 };
-} // namespace uscript
+} // namespace Uscript
 #endif

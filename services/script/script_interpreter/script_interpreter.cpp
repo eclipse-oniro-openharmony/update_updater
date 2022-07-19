@@ -15,6 +15,7 @@
 #include "script_interpreter.h"
 #include <algorithm>
 #include <fstream>
+#include "dump.h"
 #include "script_context.h"
 #include "script_manager_impl.h"
 #include "scanner.h"
@@ -22,18 +23,20 @@
 
 using namespace std;
 
-namespace uscript {
+namespace Uscript {
 static int32_t g_instanceId = 0;
 
-int32_t ScriptInterpreter::ExecuteScript(ScriptManagerImpl *manager, hpackage::PkgManager::StreamPtr pkgStream)
+int32_t ScriptInterpreter::ExecuteScript(ScriptManagerImpl *manager, Hpackage::PkgManager::StreamPtr pkgStream)
 {
-    USCRIPT_CHECK(pkgStream != nullptr, return USCRIPT_INVALID_PARAM, "Param error");
+    USCRIPT_CHECK(pkgStream != nullptr, UPDATER_LAST_WORD(USCRIPT_INVALID_PARAM);
+        return USCRIPT_INVALID_PARAM, "Param error");
     USCRIPT_LOGI("ExecuteScript %s", pkgStream->GetFileName().c_str());
     auto inter = new ScriptInterpreter(manager);
-    USCRIPT_CHECK(inter != nullptr, return USCRIPT_ERROR_CREATE_OBJ,
+    USCRIPT_CHECK(inter != nullptr, UPDATER_LAST_WORD(USCRIPT_ERROR_CREATE_OBJ); return USCRIPT_ERROR_CREATE_OBJ,
         "Fail to create ScriptInterpreter for script %s", pkgStream->GetFileName().c_str());
     int32_t ret = inter->LoadScript(pkgStream);
-    USCRIPT_CHECK(ret == USCRIPT_SUCCESS, return ret, "Fail to loadScript script %s", pkgStream->GetFileName().c_str());
+    USCRIPT_CHECK(ret == USCRIPT_SUCCESS, UPDATER_LAST_WORD(USCRIPT_ERROR_CREATE_OBJ);
+        return ret, "Fail to loadScript script %s", pkgStream->GetFileName().c_str());
     ret = inter->Execute();
     delete inter;
     inter = nullptr;
@@ -62,7 +65,7 @@ ScriptInterpreter::~ScriptInterpreter()
     contextStack_.clear();
 }
 
-int32_t ScriptInterpreter::LoadScript(hpackage::PkgManager::StreamPtr pkgStream)
+int32_t ScriptInterpreter::LoadScript(Hpackage::PkgManager::StreamPtr pkgStream)
 {
     scanner_ = std::make_unique<Scanner>(this);
     parser_ = std::make_unique<Parser>(scanner_.get(), this);
@@ -200,4 +203,4 @@ UScriptValuePtr ScriptInterpreter::ExecuteNativeFunc(UScriptContextPtr context,
     retValue->AddValues(funcContext->GetOutVar());
     return retValue;
 }
-} // namespace uscript
+} // namespace Uscript

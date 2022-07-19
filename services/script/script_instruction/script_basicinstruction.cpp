@@ -19,11 +19,11 @@
 #include "script_registercmd.h"
 #include "script_utils.h"
 
-using namespace uscript;
+using namespace Uscript;
 using namespace std;
 
 namespace BasicInstruction {
-int32_t UScriptInstructionAbort::Execute(uscript::UScriptEnv &env, uscript::UScriptContext &context)
+int32_t UScriptInstructionAbort::Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context)
 {
     int32_t result = 1;
     int32_t ret = context.GetParam(0, result);
@@ -31,7 +31,7 @@ int32_t UScriptInstructionAbort::Execute(uscript::UScriptEnv &env, uscript::UScr
     return ((result == 0) ? USCRIPT_ABOART : USCRIPT_SUCCESS);
 }
 
-int32_t UScriptInstructionAssert::Execute(uscript::UScriptEnv &env, uscript::UScriptContext &context)
+int32_t UScriptInstructionAssert::Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context)
 {
     int32_t result = 1;
     int32_t ret = context.GetParam(0, result);
@@ -39,7 +39,7 @@ int32_t UScriptInstructionAssert::Execute(uscript::UScriptEnv &env, uscript::USc
     return ((result == 0) ? USCRIPT_ASSERT : USCRIPT_SUCCESS);
 }
 
-int32_t UScriptInstructionSleep::Execute(uscript::UScriptEnv &env, uscript::UScriptContext &context)
+int32_t UScriptInstructionSleep::Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context)
 {
     int32_t seconds = 1;
     int32_t ret = context.GetParam(0, seconds);
@@ -48,7 +48,7 @@ int32_t UScriptInstructionSleep::Execute(uscript::UScriptEnv &env, uscript::UScr
     return USCRIPT_SUCCESS;
 }
 
-int32_t UScriptInstructionConcat::Execute(uscript::UScriptEnv &env, uscript::UScriptContext &context)
+int32_t UScriptInstructionConcat::Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context)
 {
     int32_t ret = 0;
     std::string str;
@@ -86,7 +86,7 @@ int32_t UScriptInstructionConcat::Execute(uscript::UScriptEnv &env, uscript::USc
     return USCRIPT_SUCCESS;
 }
 
-int32_t UScriptInstructionIsSubString::Execute(uscript::UScriptEnv &env, uscript::UScriptContext &context)
+int32_t UScriptInstructionIsSubString::Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context)
 {
     std::string str;
     std::string subStr;
@@ -103,7 +103,7 @@ int32_t UScriptInstructionIsSubString::Execute(uscript::UScriptEnv &env, uscript
     return USCRIPT_SUCCESS;
 }
 
-int32_t UScriptInstructionStdout::Execute(uscript::UScriptEnv &env, uscript::UScriptContext &context)
+int32_t UScriptInstructionStdout::Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context)
 {
     int32_t ret;
     for (int32_t i = 0; i < context.GetParamCount(); i++) {

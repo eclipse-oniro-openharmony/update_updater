@@ -19,7 +19,7 @@
 #include "script_instructionhelper.h"
 #include "script_manager.h"
 
-using namespace uscript;
+using namespace Uscript;
 
 namespace BasicInstruction {
 int32_t ScriptRegisterCmd::Execute(UScriptEnv &env, UScriptContext &context)

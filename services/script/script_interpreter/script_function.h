@@ -19,7 +19,7 @@
 #include "script_context.h"
 #include "script_statement.h"
 
-namespace uscript {
+namespace Uscript {
 class UScriptStatementList;
 class ScriptParams;
 
@@ -49,5 +49,5 @@ private:
     ScriptParams* params_ = nullptr;
     UScriptStatementList* statements_ = nullptr;
 };
-} // namespace uscript
+} // namespace Uscript
 #endif // USCRIPT_FUNCTION_H

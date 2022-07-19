@@ -18,7 +18,7 @@
 #include "script_manager.h"
 #include "script_utils.h"
 
-using namespace uscript;
+using namespace Uscript;
 
 namespace BasicInstruction {
 int32_t ScriptLoadScript::Execute(UScriptEnv &env, UScriptContext &context)

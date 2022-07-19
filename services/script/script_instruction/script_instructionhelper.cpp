@@ -24,7 +24,7 @@
 
 using namespace BasicInstruction;
 
-namespace uscript {
+namespace Uscript {
 static std::set<std::string> g_reservedInstructions = {
     "LoadScript", "RegisterCmd", "abort", "assert", "concat",
     "is_substring", "stdout", "sleep", "set_progress", "ui_print",
@@ -84,7 +84,7 @@ bool ScriptInstructionHelper::IsReservedInstruction(const std::string &scriptNam
     return false;
 }
 
-int32_t ScriptInstructionHelper::AddScript(const std::string &scriptName, int32_t priority)
+int32_t ScriptInstructionHelper::AddScript(const std::string &scriptName, int32_t priority) const
 {
     return scriptManager_->AddScript(scriptName, priority);
 }
@@ -107,9 +107,9 @@ int32_t ScriptInstructionHelper::RegisterUserInstruction(const std::string& libN
     }
 
     userInstrLibName_.assign(libName);
-    uscript::UScriptInstructionFactoryPtr factory = nullptr;
+    Uscript::UScriptInstructionFactoryPtr factory = nullptr;
     if (instrLib_ == nullptr) {
-        char *realPath = realpath(libName.c_str(), NULL);
+        char *realPath = realpath(libName.c_str(), nullptr);
         USCRIPT_CHECK(realPath != nullptr, return USCRIPT_INVALID_PARAM, "realPath is NULL");
         instrLib_ = dlopen(realPath, RTLD_LAZY);
         free(realPath);
@@ -117,8 +117,8 @@ int32_t ScriptInstructionHelper::RegisterUserInstruction(const std::string& libN
     USCRIPT_CHECK(instrLib_ != nullptr, return USCRIPT_INVALID_PARAM,
         "Fail to dlopen %s ", libName.c_str());
 
-    uscript::UScriptInstructionFactoryPtr (*pGetInstructionFactory)();
-    pGetInstructionFactory = (uscript::UScriptInstructionFactoryPtr(*)())dlsym(instrLib_, "GetInstructionFactory");
+    Uscript::UScriptInstructionFactoryPtr (*pGetInstructionFactory)();
+    pGetInstructionFactory = (Uscript::UScriptInstructionFactoryPtr(*)())dlsym(instrLib_, "GetInstructionFactory");
     if (pGetInstructionFactory == nullptr) {
         USCRIPT_LOGE("Fail to get sym %s ", libName.c_str());
         return USCRIPT_INVALID_PARAM;
@@ -137,4 +137,30 @@ int32_t ScriptInstructionHelper::RegisterUserInstruction(const std::string& libN
 
     return ret;
 }
-} // namespace uscript
+
+int32_t ScriptInstructionHelper::RegisterUserInstruction(const std::string &instrName,
+    Uscript::UScriptInstructionFactory *factory)
+{
+    if (factory == nullptr) {
+        USCRIPT_LOGE("%s factory is null", instrName.c_str());
+        return USCRIPT_INVALID_PARAM;
+    }
+
+    // Create instruction and register it
+    UScriptInstructionPtr instr = nullptr;
+    int32_t ret = factory->CreateInstructionInstance(instr, instrName);
+    if (ret != USCRIPT_SUCCESS) {
+        USCRIPT_LOGE("Fail to create instruction for %s", instrName.c_str());
+        return ret;
+    }
+
+    ret = AddInstruction(instrName, instr);
+    if (ret != USCRIPT_SUCCESS) {
+        USCRIPT_LOGE("Fail to add instruction for %s", instrName.c_str());
+        return ret;
+    }
+
+    USCRIPT_LOGI("RegisterUserInstruction %s successfull", instrName.c_str());
+    return USCRIPT_SUCCESS;
+}
+} // namespace Uscript
