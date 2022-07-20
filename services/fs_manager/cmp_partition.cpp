@@ -20,7 +20,7 @@
 
 using namespace std;
 
-namespace updater {
+namespace Updater {
 static PartitonList g_updaterPlist;
 static PartitionChangeType ComparePartition(const PartitonList &plist, struct Partition &newp)
 {

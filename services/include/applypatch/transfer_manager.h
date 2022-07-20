@@ -25,7 +25,7 @@
 #include "script_manager.h"
 
 
-namespace updater {
+namespace Updater {
 static std::unordered_map<std::string, BlockSet> blocksetMap;
 
 struct WriterThreadInfo {
@@ -34,8 +34,8 @@ struct WriterThreadInfo {
     BlockSet bs;
     std::unique_ptr<BlockWriter> writer;
     bool readyToWrite;
-    uscript::UScriptEnv *env;
-    hpackage::PkgManager::FileInfoPtr fileInfo;
+    Uscript::UScriptEnv *env;
+    Hpackage::PkgManager::FileInfoPtr fileInfo;
     std::string newPatch;
 };
 
@@ -46,7 +46,7 @@ struct TransferParams {
     size_t maxBlocks;
     size_t written;
     pthread_t thread;
-    uscript::UScriptEnv *env;
+    Uscript::UScriptEnv *env;
     std::unique_ptr<WriterThreadInfo> writerThreadInfo;
     int storeCreated;
     std::string storeBase;
@@ -79,5 +79,5 @@ private:
     bool RegisterForRetry(const std::string &cmd);
     std::unique_ptr<GlobalParams> globalParams;
 };
-} // namespace updater
+} // namespace Updater
 #endif

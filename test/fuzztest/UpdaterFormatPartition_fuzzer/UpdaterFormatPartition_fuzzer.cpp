@@ -23,7 +23,7 @@
 #include <vector>
 #include "mount.h"
 
-using namespace updater;
+using namespace Updater;
 
 namespace OHOS {
     bool FuzzFormatPartition(const uint8_t* data, size_t size)

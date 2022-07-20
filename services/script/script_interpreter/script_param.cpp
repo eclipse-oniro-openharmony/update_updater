@@ -18,7 +18,7 @@
 
 using namespace std;
 
-namespace uscript {
+namespace Uscript {
 ScriptParams::~ScriptParams()
 {
     for (auto iter = expressionList_.begin(); iter != expressionList_.end();) {
@@ -50,4 +50,4 @@ void ScriptParams::AddParams(UScriptExpression *expression)
 {
     expressionList_.push_back(expression);
 }
-} // namespace uscript
+} // namespace Uscript

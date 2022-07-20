@@ -34,10 +34,10 @@
 #include "updater/updater_const.h"
 #include "utils.h"
 
-using namespace hpackage;
-using namespace updater;
+using namespace Hpackage;
+using namespace Updater;
 
-namespace flashd {
+namespace Flashd {
 static std::atomic<bool> g_flashdRunning { false };
 FlashService::~FlashService()
 {
@@ -66,9 +66,9 @@ int FlashService::DoUpdate(const std::string &packageName)
     FLASHING_LOGI("DoUpdate packageName %s", packageName.c_str());
     FLASHING_CHECK(access(packageName.c_str(), 0) == 0,
         return FLASHING_IMAGE_INVALID, "Invalid package %s for update", packageName.c_str());
-    ret = updater::IsSpaceCapacitySufficient(packageName);
+    ret = Updater::IsSpaceCapacitySufficient(packageName);
     if (ret == UPDATE_SPACE_NOTENOUGH) {
-        RecordMsg(updater::ERROR, "Free space is not enough");
+        RecordMsg(Updater::ERROR, "Free space is not enough");
         return FLASHING_SPACE_NOTENOUGH;
     }
     FLASHING_LOGI("Check space for packageName %s success", packageName.c_str());
@@ -81,17 +81,17 @@ int FlashService::DoUpdate(const std::string &packageName)
         PostProgress(UPDATEMOD_UPDATE, writeDataLen, context);
     });
     std::vector<std::string> components;
-    ret = pkgManager->LoadPackage(packageName, utils::GetCertName(), components);
+    ret = pkgManager->LoadPackage(packageName, Utils::GetCertName(), components);
     FLASHING_CHECK(ret == PKG_SUCCESS, PkgManager::ReleasePackageInstance(pkgManager);
-        RecordMsg(updater::ERROR, "Can not load package %s", packageName.c_str());
+        RecordMsg(Updater::ERROR, "Can not load package %s", packageName.c_str());
         return FLASHING_PACKAGE_INVALID, "Failed to load package %s", packageName.c_str());
 
     ret = UpdatePreProcess(pkgManager, packageName);
     FLASHING_CHECK(ret == PKG_SUCCESS, PkgManager::ReleasePackageInstance(pkgManager);
-        RecordMsg(updater::ERROR, "Invalid package %s", packageName.c_str());
+        RecordMsg(Updater::ERROR, "Invalid package %s", packageName.c_str());
         return FLASHING_PACKAGE_INVALID, "Invalid package %s", packageName.c_str());
 #ifndef UPDATER_UT
-    ret = updater::ExecUpdate(pkgManager, 0,
+    ret = Updater::ExecUpdate(pkgManager, 0,
         [&](const char *cmd, const char *content) {
             if (strncmp(cmd, "data", strlen(cmd)) == 0) {
                 size_t dataLen = std::stoll(content);
@@ -100,7 +100,7 @@ int FlashService::DoUpdate(const std::string &packageName)
         });
 #endif
     FLASHING_CHECK(ret == PKG_SUCCESS, PkgManager::ReleasePackageInstance(pkgManager);
-        RecordMsg(updater::ERROR, "Failed to update package %s", packageName.c_str());
+        RecordMsg(Updater::ERROR, "Failed to update package %s", packageName.c_str());
         return FLASHING_PACKAGE_INVALID, "Failed to update package %s", packageName.c_str());
     FLASHING_LOGI("Load packageName %s success %llu", packageName.c_str(), pkgLen);
     PkgManager::ReleasePackageInstance(pkgManager);
@@ -109,40 +109,40 @@ int FlashService::DoUpdate(const std::string &packageName)
 
 int FlashService::DoFlashPartition(const std::string &fileName, const std::string &partition)
 {
-    int ret = CheckOperationPermission(flashd::UPDATEMOD_FLASH, partition);
+    int ret = CheckOperationPermission(Flashd::UPDATEMOD_FLASH, partition);
     FLASHING_CHECK(ret == 0,
-        RecordMsg(updater::ERROR, "Forbit to flash partition %s", partition.c_str());
+        RecordMsg(Updater::ERROR, "Forbit to flash partition %s", partition.c_str());
         return FLASHING_NOPERMISSION, "Forbit to flash partition %s", partition.c_str());
 
     ret = LoadSysDevice();
     FLASHING_CHECK(ret == 0,
-        RecordMsg(updater::ERROR, "Can not read device information");
+        RecordMsg(Updater::ERROR, "Can not read device information");
         return FLASHING_PART_NOEXIST, "Failed to load partition");
 
     FLASHING_LOGI("DoFlashPartition partition %s image:%s", partition.c_str(), fileName.c_str());
     PartitionPtr part = GetPartition(partition);
     FLASHING_CHECK(part != nullptr,
-        RecordMsg(updater::ERROR, "Can not find partition %s", partition.c_str());
+        RecordMsg(Updater::ERROR, "Can not find partition %s", partition.c_str());
         return FLASHING_PART_NOEXIST, "Failed to get partition %s", partition.c_str());
     return part->DoFlash(fileName);
 }
 
 int FlashService::GetPartitionPath(const std::string &partition, std::string &paratitionPath)
 {
-    int ret = CheckOperationPermission(flashd::UPDATEMOD_FLASH, partition);
+    int ret = CheckOperationPermission(Flashd::UPDATEMOD_FLASH, partition);
     FLASHING_CHECK(ret == 0,
-        RecordMsg(updater::ERROR, "Forbit to flash partition %s", partition.c_str());
+        RecordMsg(Updater::ERROR, "Forbit to flash partition %s", partition.c_str());
         return FLASHING_NOPERMISSION, "Forbit to flash partition %s", partition.c_str());
 
     ret = LoadSysDevice();
     FLASHING_CHECK(ret == 0,
-        RecordMsg(updater::ERROR, "Can not read device information");
+        RecordMsg(Updater::ERROR, "Can not read device information");
         return FLASHING_PART_NOEXIST, "Failed to load partition");
 
     FLASHING_LOGI("DoFlashPartition partition %s", partition.c_str());
     PartitionPtr part = GetPartition(partition);
     FLASHING_CHECK(part != nullptr,
-        RecordMsg(updater::ERROR, "Can not find partition %s", partition.c_str());
+        RecordMsg(Updater::ERROR, "Can not find partition %s", partition.c_str());
         return FLASHING_PART_NOEXIST, "Failed to get partition %s", partition.c_str());
     paratitionPath = part->GetPartitionPath();
     return 0;
@@ -150,38 +150,38 @@ int FlashService::GetPartitionPath(const std::string &partition, std::string &pa
 
 int FlashService::DoErasePartition(const std::string &partition)
 {
-    int ret = CheckOperationPermission(flashd::UPDATEMOD_ERASE, partition);
+    int ret = CheckOperationPermission(Flashd::UPDATEMOD_ERASE, partition);
     FLASHING_CHECK(ret == 0,
-        RecordMsg(updater::ERROR, "Forbit to erase partition %s", partition.c_str());
+        RecordMsg(Updater::ERROR, "Forbit to erase partition %s", partition.c_str());
         return FLASHING_NOPERMISSION, "Forbit to erase partition %s", partition.c_str());
 
     ret = LoadSysDevice();
     FLASHING_CHECK(ret == 0,
-        RecordMsg(updater::ERROR, "Can not read device information");
+        RecordMsg(Updater::ERROR, "Can not read device information");
         return FLASHING_PART_NOEXIST, "Failed to load partition");
 
     FLASHING_LOGI("DoErasePartition partition %s ", partition.c_str());
     PartitionPtr part = GetPartition(partition);
     FLASHING_CHECK(part != nullptr,
-        RecordMsg(updater::ERROR, "Can not find partition %s", partition.c_str());
+        RecordMsg(Updater::ERROR, "Can not find partition %s", partition.c_str());
         return FLASHING_PART_NOEXIST, "Failed to get partition %s", partition.c_str());
     return part->DoErase();
 }
 
 int FlashService::DoFormatPartition(const std::string &partition, const std::string &fsType)
 {
-    int ret = CheckOperationPermission(flashd::UPDATEMOD_FORMAT, partition);
+    int ret = CheckOperationPermission(Flashd::UPDATEMOD_FORMAT, partition);
     FLASHING_CHECK(ret == 0,
-        RecordMsg(updater::ERROR, "Forbit to format partition %s", partition.c_str());
+        RecordMsg(Updater::ERROR, "Forbit to format partition %s", partition.c_str());
         return FLASHING_NOPERMISSION, "Forbit to format partition %s", partition.c_str());
 
     ret = LoadSysDevice();
     FLASHING_CHECK(ret == 0,
-        RecordMsg(updater::ERROR, "Can not read device information");
+        RecordMsg(Updater::ERROR, "Can not read device information");
         return FLASHING_PART_NOEXIST, "Failed to load partition");
     PartitionPtr part = GetPartition(partition);
     FLASHING_CHECK(part != nullptr,
-        RecordMsg(updater::ERROR, "Can not find partition %s", partition.c_str());
+        RecordMsg(Updater::ERROR, "Can not find partition %s", partition.c_str());
         return FLASHING_PART_NOEXIST, "Failed to get partition %s", partition.c_str());
     if (part->IsOnlyErase()) {
         FLASHING_LOGI("DoFormatPartition format partition %s", partition.c_str());
@@ -193,19 +193,19 @@ int FlashService::DoFormatPartition(const std::string &partition, const std::str
 
 int FlashService::DoResizeParatiton(const std::string &partition, uint32_t blocks)
 {
-    int ret = CheckOperationPermission(flashd::UPDATEMOD_UPDATE, partition);
+    int ret = CheckOperationPermission(Flashd::UPDATEMOD_UPDATE, partition);
     FLASHING_CHECK(ret == 0,
-        RecordMsg(updater::ERROR, "Forbit to resize partition %s", partition.c_str());
+        RecordMsg(Updater::ERROR, "Forbit to resize partition %s", partition.c_str());
         return FLASHING_NOPERMISSION, "Forbit to resize partition %s", partition.c_str());
 
     ret = LoadSysDevice();
     FLASHING_CHECK(ret == 0,
-        RecordMsg(updater::ERROR, "Can not read device information");
+        RecordMsg(Updater::ERROR, "Can not read device information");
         return FLASHING_PART_NOEXIST, "Failed to load partition");
 
     PartitionPtr part = GetPartition(partition);
     FLASHING_CHECK(part != nullptr,
-        RecordMsg(updater::ERROR, "Can not find partition %s", partition.c_str());
+        RecordMsg(Updater::ERROR, "Can not find partition %s", partition.c_str());
         return FLASHING_PART_NOEXIST, "Failed to get partition %s", partition.c_str());
     return part->DoResize(blocks);
 }
@@ -487,7 +487,7 @@ static bool FilterParam(const std::string &param, const std::vector<std::string>
 static int GetCmdParam(uint8_t type, const std::string &origString,
     const std::vector<std::string> &filter, std::vector<std::string> &resultStrings)
 {
-    static uint32_t paramMinNumber[flashd::UPDATEMOD_MAX + 1] = { 1, 2, 2, 2, 0 };
+    static uint32_t paramMinNumber[Flashd::UPDATEMOD_MAX + 1] = { 1, 2, 2, 2, 0 };
     std::string::size_type p1 = 0;
     std::string::size_type p2 = origString.find(" ");
 
@@ -512,7 +512,7 @@ static int GetCmdParam(uint8_t type, const std::string &origString,
             resultStrings.push_back(param);
         }
     }
-    FLASHING_CHECK((type <= flashd::UPDATEMOD_MAX) && (resultStrings.size() >= paramMinNumber[type]),
+    FLASHING_CHECK((type <= Flashd::UPDATEMOD_MAX) && (resultStrings.size() >= paramMinNumber[type]),
         return FLASHING_ARG_INVALID, "Invalid param for %d cmd %s", type, origString.c_str());
     return 0;
 }
@@ -520,7 +520,7 @@ static int GetCmdParam(uint8_t type, const std::string &origString,
 int CreateFlashInstance(FlashHandle *handle, std::string &errorMsg, ProgressFunction progressor)
 {
     int mode = BOOT_UPDATER;
-    int ret = updater::GetBootMode(mode);
+    int ret = Updater::GetBootMode(mode);
     FLASHING_CHECK(ret == 0 && mode == BOOT_FLASHD, errorMsg = "Boot mode is not in flashd";
         return FLASHING_SYSTEM_ERROR, "Boot mode error");
 
@@ -529,7 +529,7 @@ int CreateFlashInstance(FlashHandle *handle, std::string &errorMsg, ProgressFunc
     g_flashdRunning = true;
 
     FLASHING_CHECK(handle != nullptr, return FLASHING_ARG_INVALID, "Invalid handle");
-    flashd::FlashService *flash = new flashd::FlashService(errorMsg, progressor);
+    Flashd::FlashService *flash = new Flashd::FlashService(errorMsg, progressor);
     FLASHING_CHECK(flash != nullptr, errorMsg = "Failed to create flash service";
         return FLASHING_SYSTEM_ERROR, "Failed to create flash service");
     *handle = static_cast<FlashHandle>(flash);
@@ -539,21 +539,21 @@ int CreateFlashInstance(FlashHandle *handle, std::string &errorMsg, ProgressFunc
 int DoUpdaterPrepare(FlashHandle handle, uint8_t type, const std::string &cmdParam, std::string &filePath)
 {
     FLASHING_CHECK(handle != nullptr, return FLASHING_ARG_INVALID, "Invalid handle for %d", type);
-    flashd::FlashService *flash = static_cast<flashd::FlashService *>(handle);
+    Flashd::FlashService *flash = static_cast<Flashd::FlashService *>(handle);
 
     std::vector<std::string> params {};
     int ret = GetCmdParam(type, cmdParam, { "-f" }, params);
-    FLASHING_CHECK(ret == 0, flash->RecordMsg(updater::ERROR, "Invalid param for %d", type);
+    FLASHING_CHECK(ret == 0, flash->RecordMsg(Updater::ERROR, "Invalid param for %d", type);
         return FLASHING_ARG_INVALID, "Invalid param for %d", type);
     FLASHING_DEBUG("DoUpdaterPrepare type: %d param %s filePath %s", type, cmdParam.c_str(), filePath.c_str());
     switch (type) {
-        case flashd::UPDATEMOD_UPDATE: {
+        case Flashd::UPDATEMOD_UPDATE: {
             filePath = FLASHD_FILE_PATH + filePath;
             // 检查剩余分区大小，扩展分区
-            const std::string root = flashd::FlashService::GetPathRoot(FLASHD_FILE_PATH);
+            const std::string root = Flashd::FlashService::GetPathRoot(FLASHD_FILE_PATH);
             ret = MountForPath(root);
             FLASHING_CHECK(ret == 0, g_flashdRunning = false;
-                flash->RecordMsg(updater::ERROR, "Failed to mount data paratition for %s", filePath.c_str());
+                flash->RecordMsg(Updater::ERROR, "Failed to mount data paratition for %s", filePath.c_str());
                 return FLASHING_INVALID_SPACE, "Failed to mount data paratition for %s", filePath.c_str());
 
             ret = flash->DoResizeParatiton(root, MIN_BLOCKS_FOR_UPDATE);
@@ -564,12 +564,12 @@ int DoUpdaterPrepare(FlashHandle handle, uint8_t type, const std::string &cmdPar
             }
             break;
         }
-        case flashd::UPDATEMOD_FLASH: {
+        case Flashd::UPDATEMOD_FLASH: {
             ret = flash->GetPartitionPath(params[0], filePath);
             break;
         }
         default:
-            ret = flashd::FLASHING_SYSTEM_ERROR;
+            ret = Flashd::FLASHING_SYSTEM_ERROR;
             break;
     }
     return ret;
@@ -578,25 +578,25 @@ int DoUpdaterPrepare(FlashHandle handle, uint8_t type, const std::string &cmdPar
 int DoUpdaterFlash(FlashHandle handle, uint8_t type, const std::string &cmdParam, const std::string &filePath)
 {
     FLASHING_CHECK(handle != nullptr, return FLASHING_ARG_INVALID, "Invalid handle for %d", type);
-    flashd::FlashService *flash = static_cast<flashd::FlashService *>(handle);
+    Flashd::FlashService *flash = static_cast<Flashd::FlashService *>(handle);
 
     std::vector<std::string> params {};
     int ret = GetCmdParam(type, cmdParam, {"-f"}, params);
     FLASHING_CHECK(ret == 0, g_flashdRunning = false;
-        flash->RecordMsg(updater::ERROR, "Invalid param for %d", type);
+        flash->RecordMsg(Updater::ERROR, "Invalid param for %d", type);
         return FLASHING_ARG_INVALID, "Invalid param for %d", type);
     FLASHING_DEBUG("DoUpdaterFlash type: %d param %s filePath %s", type, cmdParam.c_str(), filePath.c_str());
     switch (type) {
-        case flashd::UPDATEMOD_UPDATE: {
+        case Flashd::UPDATEMOD_UPDATE: {
             ret = flash->DoUpdate(filePath);
             break;
         }
-        case flashd::UPDATEMOD_ERASE:
+        case Flashd::UPDATEMOD_ERASE:
             FLASHING_CHECK(params.size() > 1, g_flashdRunning = false;
                 return FLASHING_ARG_INVALID, "Invalid param size for erase");
             ret = flash->DoErasePartition(params[1]);
             break;
-        case flashd::UPDATEMOD_FORMAT: {
+        case Flashd::UPDATEMOD_FORMAT: {
             std::string fsType = GetValueFromParam(params, "-t", "ext4");
             FLASHING_CHECK(params.size() > 1, g_flashdRunning = false;
                 return FLASHING_ARG_INVALID, "Invalid param size for format");
@@ -604,7 +604,7 @@ int DoUpdaterFlash(FlashHandle handle, uint8_t type, const std::string &cmdParam
             break;
         }
         default:
-            ret = flashd::FLASHING_SYSTEM_ERROR;
+            ret = Flashd::FLASHING_SYSTEM_ERROR;
             break;
     }
     return ret;
@@ -615,16 +615,16 @@ int DoUpdaterFinish(FlashHandle handle, uint8_t type, const std::string &partiti
     FLASHING_CHECK(handle != nullptr, return FLASHING_ARG_INVALID, "Invalid handle for %d", type);
     FLASHING_DEBUG("DoUpdaterFinish type: %d %s", type, partition.c_str());
     switch (type) {
-        case flashd::UPDATEMOD_UPDATE: {
+        case Flashd::UPDATEMOD_UPDATE: {
 #ifndef UPDATER_UT
             unlink(partition.c_str());
 #endif
-            updater::PostUpdater(true);
-            utils::DoReboot("");
+            Updater::PostUpdater(true);
+            Utils::DoReboot("");
             break;
         }
-        case flashd::UPDATEMOD_FLASH: {
-            updater::PostUpdater(false);
+        case Flashd::UPDATEMOD_FLASH: {
+            Updater::PostUpdater(false);
             break;
         }
         default:

@@ -38,7 +38,7 @@
 
 using namespace std;
 
-namespace hpackage {
+namespace Hpackage {
 constexpr int32_t UPGRADE_FILE_HEADER_LEN = 3 * sizeof(PkgTlv) + sizeof(UpgradePkgHeader) + sizeof(UpgradePkgTime);
 constexpr int32_t UPGRADE_RESERVE_LEN = 16;
 constexpr int16_t TLV_TYPE_FOR_SHA256 = 0x0001;
@@ -488,4 +488,4 @@ int16_t UpgradePkgFile::GetPackageTlvType()
     }
     return TLV_TYPE_FOR_SHA256;
 }
-} // namespace hpackage
+} // namespace Hpackage

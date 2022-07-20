@@ -21,7 +21,7 @@
 #include "log/log.h"
 #include "securec.h"
 
-namespace updater {
+namespace Updater {
 PartitionRecord &PartitionRecord::GetInstance()
 {
     static PartitionRecord partitionRecord;
@@ -127,4 +127,4 @@ std::string PartitionRecord::GetMiscPartitionPath(const std::string &misc)
     }
     return miscBlockDevice;
 }
-} // namespace updater
+} // namespace Updater

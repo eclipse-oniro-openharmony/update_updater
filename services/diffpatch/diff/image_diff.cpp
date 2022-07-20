@@ -18,9 +18,9 @@
 #include <vector>
 #include "diffpatch.h"
 
-using namespace hpackage;
+using namespace Hpackage;
 
-namespace updatepatch {
+namespace UpdatePatch {
 #define GET_REAL_DATA_LEN(info) (info) ->packedSize + (info)->dataOffset - (info)->headerOffset
 constexpr int32_t LZ4F_MAX_BLOCKID = 7;
 constexpr int32_t ZIP_MAX_LEVEL = 9;
@@ -494,12 +494,12 @@ int32_t Lz4ImageDiff::TestAndSetConfig(const BlockBuffer &buffer, const std::str
     return -1;
 }
 
-int32_t CompressedImageDiff::CompressData(hpackage::PkgManager::FileInfoPtr info,
+int32_t CompressedImageDiff::CompressData(Hpackage::PkgManager::FileInfoPtr info,
     const BlockBuffer &buffer, std::vector<uint8_t> &outData, size_t &bufferSize) const
 {
-    hpackage::PkgManager *pkgManager = hpackage::PkgManager::GetPackageInstance();
+    Hpackage::PkgManager *pkgManager = Hpackage::PkgManager::GetPackageInstance();
     PATCH_CHECK(pkgManager != nullptr, return -1, "Can not get manager ");
-    hpackage::PkgManager::StreamPtr stream1 = nullptr;
+    Hpackage::PkgManager::StreamPtr stream1 = nullptr;
     pkgManager->CreatePkgStream(stream1, "gzip",
         [&outData, &bufferSize](const PkgBuffer &data,
             size_t size, size_t start, bool isFinish, const void *context) ->int {
@@ -517,4 +517,4 @@ int32_t CompressedImageDiff::CompressData(hpackage::PkgManager::FileInfoPtr info
     PATCH_DEBUG("UpdateDiff::MakePatch totalSize: %zu", bufferSize);
     return 0;
 }
-} // namespace updatepatch
+} // namespace UpdatePatch

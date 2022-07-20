@@ -29,9 +29,9 @@
 
 /* 替换默认的get_next_token定义 */
 #undef YY_DECL
-#define YY_DECL uscript::Parser::symbol_type uscript::Scanner::nextToken()
+#define YY_DECL Uscript::Parser::symbol_type Uscript::Scanner::nextToken()
 
-namespace uscript {
+namespace Uscript {
 class ScriptInterpreter;
 
 class Scanner : public yyFlexLexer {
@@ -42,7 +42,7 @@ public:
     }
     virtual ~Scanner() {}
     // 不需要手动实现这个函数，Flex会生成YY_DECL宏定义的代码来实现这个函数
-    virtual uscript::Parser::symbol_type nextToken();
+    virtual Uscript::Parser::symbol_type nextToken();
     virtual int yywrap()
     {
         return 1;
@@ -50,15 +50,15 @@ public:
 
     virtual int LexerInput(char* buf, int maxSize);
 
-    void SetPkgStream(hpackage::PkgManager::StreamPtr pkgStream)
+    void SetPkgStream(Hpackage::PkgManager::StreamPtr pkgStream)
     {
         pkgStream_ = pkgStream;
     }
 
 private:
-    hpackage::PkgManager::StreamPtr pkgStream_ = nullptr;
+    Hpackage::PkgManager::StreamPtr pkgStream_ = nullptr;
     size_t currPos = 0;
     location loc {};
 };
-} // namespace uscript
+} // namespace Uscript
 #endif // FLEX_BISON_SCANNER_H

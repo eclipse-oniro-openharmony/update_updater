@@ -15,7 +15,7 @@
 #ifndef FAULT_CODE_H
 #define FAULT_CODE_H
 
-namespace updater {
+namespace Updater {
 enum UpdaterErrorCode {
     CODE_VERIFY_FAIL = 1000,
     CODE_MOUNT_FAIL,

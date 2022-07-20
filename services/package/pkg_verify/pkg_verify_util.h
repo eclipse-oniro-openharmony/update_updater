@@ -20,7 +20,7 @@
 #include "pkcs7_signed_data.h"
 #include "pkg_stream.h"
 
-namespace hpackage {
+namespace Hpackage {
 struct DigestBlock {
     uint16_t algorithmId;
     uint16_t digestLen;
@@ -33,25 +33,25 @@ public:
 
     ~PkgVerifyUtil() {}
 
-    int32_t VerifyPkcs7SignedData(const hpackage::PkgStreamPtr pkgStream, const size_t signatureStart,
+    int32_t VerifyPkcs7SignedData(const Hpackage::PkgStreamPtr pkgStream, const size_t signatureStart,
         const size_t signatureSize);
 
 private:
-    int32_t VerifySignedData(const hpackage::PkgStreamPtr srcData, const size_t dataLen,
+    int32_t VerifySignedData(const Hpackage::PkgStreamPtr srcData, const size_t dataLen,
         std::vector<Pkcs7SignerInfo> &signerInfos) const;
 
     int32_t ParseDigestBlock(const std::vector<uint8_t> &digestBlock);
 
-    int32_t VerifyDigestEncryptData(const hpackage::PkgStreamPtr srcData, const size_t dataLen,
+    int32_t VerifyDigestEncryptData(const Hpackage::PkgStreamPtr srcData, const size_t dataLen,
         std::vector<Pkcs7SignerInfo> &signerInfos) const;
 
     int32_t SingleDigestEncryptVerify(Pkcs7SignerInfo &signer,
-        const hpackage::PkgStreamPtr srcData, const size_t dataLen) const;
+        const Hpackage::PkgStreamPtr srcData, const size_t dataLen) const;
 
     int32_t VerifyPackageDigest(const std::vector<uint8_t> &digestEncryptData,
     const std::vector<uint8_t> &digest, const uint8_t digestMethod) const;
 
-    int32_t HashCheck(const hpackage::PkgStreamPtr srcData, const size_t dataLen) const;
+    int32_t HashCheck(const Hpackage::PkgStreamPtr srcData, const size_t dataLen) const;
 
 private:
     std::string pubKey_;
@@ -60,12 +60,12 @@ private:
 
 class SignPkg {
 public:
-    SignPkg(hpackage::PkgStreamPtr inStream, const std::string &keyPath, uint32_t signMethod)
+    SignPkg(Hpackage::PkgStreamPtr inStream, const std::string &keyPath, uint32_t signMethod)
         : pkgStream_(inStream), privateKey_(keyPath), signMethod_(signMethod) {}
 
     ~SignPkg() {}
 
-    int32_t SignPackage(hpackage::PkgStreamPtr outStream) const;
+    int32_t SignPackage(Hpackage::PkgStreamPtr outStream) const;
 
 private:
     int32_t SignPackageDigest(std::vector<uint8_t> &digest, std::vector<uint8_t> &signData) const;
@@ -75,11 +75,11 @@ private:
     int32_t CreateDigestBlock(std::vector<uint8_t> &digestBlock, const std::vector<uint8_t> &digest) const;
 
 private:
-    hpackage::PkgStreamPtr pkgStream_;
+    Hpackage::PkgStreamPtr pkgStream_;
     std::string privateKey_;
     uint32_t signMethod_;
 };
 
-int32_t CalcSha256ByBlock(const hpackage::PkgStreamPtr srcData, const size_t dataLen, std::vector<uint8_t> &result);
-} // namespace hpackage
+int32_t CalcSha256ByBlock(const Hpackage::PkgStreamPtr srcData, const size_t dataLen, std::vector<uint8_t> &result);
+} // namespace Hpackage
 #endif

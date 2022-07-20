@@ -21,7 +21,7 @@
 #include <unistd.h>
 #include "flash_service.h"
 
-namespace flashd {
+namespace Flashd {
 int BlockDevice::Load()
 {
     struct stat devStat {};

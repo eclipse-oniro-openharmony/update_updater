@@ -20,25 +20,25 @@
 #include "script_utils.h"
 
 namespace BasicInstruction {
-class UScriptInstructionSetProcess : public uscript::UScriptInstruction {
+class UScriptInstructionSetProcess : public Uscript::UScriptInstruction {
 public:
     UScriptInstructionSetProcess() {}
     virtual ~UScriptInstructionSetProcess() {}
-    int32_t Execute(uscript::UScriptEnv &env, uscript::UScriptContext &context) override;
+    int32_t Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context) override;
 };
 
-class UScriptInstructionShowProcess : public uscript::UScriptInstruction {
+class UScriptInstructionShowProcess : public Uscript::UScriptInstruction {
 public:
     UScriptInstructionShowProcess() {}
     virtual ~UScriptInstructionShowProcess() {}
-    int32_t Execute(uscript::UScriptEnv &env, uscript::UScriptContext &context) override;
+    int32_t Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context) override;
 };
 
-class UScriptInstructionUiPrint : public uscript::UScriptInstruction {
+class UScriptInstructionUiPrint : public Uscript::UScriptInstruction {
 public:
     UScriptInstructionUiPrint() {}
     virtual ~UScriptInstructionUiPrint() {}
-    int32_t Execute(uscript::UScriptEnv &env, uscript::UScriptContext &context) override;
+    int32_t Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context) override;
 };
 } // namespace BasicInstruction
 #endif // USCRIPT_UPDATE_PROCESSOR_H

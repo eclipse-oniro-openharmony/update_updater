@@ -27,12 +27,12 @@
 #include "updater/updater.h"
 #include "utils.h"
 
-using namespace updater;
+using namespace Updater;
 using namespace testing::ext;
 using namespace std;
-using namespace updater::utils;
+using namespace Updater::Utils;
 
-namespace updater_ut {
+namespace UpdaterUt {
 constexpr uint32_t MAX_ARG_SIZE = 10;
 const std::string MISC_FILE = "/dev/block/platform/soc/10100000.himci.eMMC/by-name/misc";
 // do something at the each function begining

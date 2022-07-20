@@ -27,7 +27,7 @@
 #include <xf86drm.h>
 #include <xf86drmMode.h>
 
-namespace updater {
+namespace Updater {
 struct BufferObject {
     uint32_t width;
     uint32_t height;

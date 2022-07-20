@@ -17,7 +17,7 @@
 #include <vector>
 #include "pkg_utils.h"
 
-namespace hpackage {
+namespace Hpackage {
 struct Footer {
     uint16_t signDataStart;
     uint16_t signDataFlag;
@@ -257,4 +257,4 @@ int32_t ZipPkgParse::WriteFooter(PkgStreamPtr outStream, uint16_t zipCommentLen,
 
     return outStream->Write(buffer, sizeof(Footer), offset);
 }
-} // namespace hpackage
+} // namespace Hpackage

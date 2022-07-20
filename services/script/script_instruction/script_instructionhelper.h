@@ -20,7 +20,7 @@
 #include "script_manager_impl.h"
 #include "script_utils.h"
 
-namespace uscript {
+namespace Uscript {
 class ScriptInstructionHelper {
 public:
     explicit ScriptInstructionHelper(ScriptManagerImpl *impl) : scriptManager_(impl) {}
@@ -45,5 +45,5 @@ private:
     std::string userInstrLibName_ {};
     ScriptManagerImpl* scriptManager_ {};
 };
-} // namespace uscript
+} // namespace Uscript
 #endif // USCRIPT_INSTRUCTION_HELPER_H

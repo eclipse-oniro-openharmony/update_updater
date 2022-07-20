@@ -25,9 +25,9 @@
 #include "log/log.h"
 #include "utils.h"
 
-using namespace updater::utils;
+using namespace Updater::Utils;
 
-namespace updater {
+namespace Updater {
 int32_t Store::DoFreeSpace(const std::string &directoryPath)
 {
     std::vector<std::string> files;
@@ -130,4 +130,4 @@ int32_t Store::LoadDataFromStore(const std::string &dirPath, const std::string &
     fd = -1;
     return 0;
 }
-} // namespace updater
+} // namespace Updater

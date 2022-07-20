@@ -13,17 +13,10 @@
  * limitations under the License.
  */
 
-#include "ufs_ptable.h"
-
-#include <algorithm>
-#include <fcntl.h>
-#include <sys/types.h>
-#include <unistd.h>
-
 #include "log/log.h"
 #include "securec.h"
 
-namespace updater {
+namespace Updater {
 uint32_t UfsPtable::GetDeviceLunNum()
 {
     return deviceLunNum_;

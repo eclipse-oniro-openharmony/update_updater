@@ -21,7 +21,7 @@
 #include "securec.h"
 #include "updater/updater_const.h"
 
-namespace updater {
+namespace Updater {
 bool WriteUpdaterMessage(const std::string &path, const UpdateMessage &boot)
 {
     char *realPath = realpath(path.c_str(), NULL);
@@ -72,4 +72,4 @@ bool ReadUpdaterMiscMsg(UpdateMessage &boot)
     LOG(INFO) << "ReadUpdaterMiscMsg::misc path : " << path;
     return ReadUpdaterMessage(path, boot);
 }
-} // updater
+} // Updater

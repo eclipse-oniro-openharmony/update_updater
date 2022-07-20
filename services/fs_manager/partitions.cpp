@@ -27,7 +27,7 @@
 #include "partition_const.h"
 #include "securec.h"
 
-namespace updater {
+namespace Updater {
 static struct Disk *g_disks;
 static int DeviceStat(const BlockDevice &dev, struct stat &devStat)
 {

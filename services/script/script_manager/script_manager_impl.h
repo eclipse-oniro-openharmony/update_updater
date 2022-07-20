@@ -23,7 +23,7 @@
 #include "script_manager.h"
 #include "thread_pool.h"
 
-namespace uscript {
+namespace Uscript {
 class ScriptInstructionHelper;
 class ScriptManagerImpl : public ScriptManager {
 public:
@@ -36,7 +36,7 @@ public:
     int32_t ExecuteScript(int32_t priority) override;
 
 private:
-    int32_t ExtractAndExecuteScript(hpackage::PkgManager::PkgManagerPtr manager,
+    int32_t ExtractAndExecuteScript(Hpackage::PkgManager::PkgManagerPtr manager,
         const std::string &scriptName);
     int32_t AddScript(const std::string &instrName, int32_t priority);
     int32_t AddInstruction(const std::string &instrName, const UScriptInstructionPtr instruction);
@@ -50,5 +50,5 @@ private:
     ThreadPool *threadPool_ = nullptr;
     UScriptEnv *scriptEnv_ = nullptr;
 };
-} // namespace uscript
+} // namespace Uscript
 #endif

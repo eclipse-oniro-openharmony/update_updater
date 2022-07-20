@@ -24,12 +24,12 @@
 #include "script_instruction.h"
 #include "script_manager.h"
 
-using uscript::UScriptEnv;
-using uscript::UScriptInstructionFactory;
-using uscript::UScriptInstructionFactoryPtr;
-using uscript::UScriptInstructionPtr;
+using Uscript::UScriptEnv;
+using Uscript::UScriptInstructionFactory;
+using Uscript::UScriptInstructionFactoryPtr;
+using Uscript::UScriptInstructionPtr;
 
-namespace updater {
+namespace Updater {
 class UpdaterInstructionFactory : public UScriptInstructionFactory {
 public:
     virtual int32_t CreateInstructionInstance(UScriptInstructionPtr& instr, const std::string& name);
@@ -37,14 +37,14 @@ public:
     virtual ~UpdaterInstructionFactory() {}
 };
 
-class UScriptInstructionRawImageWrite : public uscript::UScriptInstruction {
+class UScriptInstructionRawImageWrite : public Uscript::UScriptInstruction {
 public:
     UScriptInstructionRawImageWrite() {}
     virtual ~UScriptInstructionRawImageWrite() {}
-    int32_t Execute(uscript::UScriptEnv &env, uscript::UScriptContext &context) override;
+    int32_t Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context) override;
 
 private:
-    static int RawImageWriteProcessor(const hpackage::PkgBuffer &buffer, size_t size, size_t start, bool isFinish,
+    static int RawImageWriteProcessor(const Hpackage::PkgBuffer &buffer, size_t size, size_t start, bool isFinish,
         const void* context);
     int GetWritePathAndOffset(const std::string &partitionName, std::string &writePath, uint64_t &offset,
         uint64_t &partitionSize);

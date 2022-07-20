@@ -18,7 +18,7 @@
 #include "log/log.h"
 #include "securec.h"
 
-namespace updater {
+namespace Updater {
 void DrmDriver::FlipBuffer(const void *buf)
 {
     if (!buf) {

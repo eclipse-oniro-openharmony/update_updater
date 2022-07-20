@@ -19,7 +19,7 @@
 
 using namespace std;
 
-namespace uscript {
+namespace Uscript {
 UScriptExpression::UScriptExpression(ExpressionType expressType) : expressType_(expressType) {}
 UScriptExpression::~UScriptExpression() {}
 
@@ -170,4 +170,4 @@ FunctionCallExpression::~FunctionCallExpression()
 {
     delete params_;
 }
-} // namespace uscript
+} // namespace Uscript

@@ -18,7 +18,7 @@
 #include <string>
 #include "pkg_manager.h"
 
-namespace uscript {
+namespace Uscript {
 class UScriptInstructionFactory;
 class UScriptInstruction;
 typedef UScriptInstructionFactory* UScriptInstructionFactoryPtr;
@@ -29,11 +29,11 @@ typedef UScriptInstruction* UScriptInstructionPtr;
  */
 class UScriptEnv {
 public:
-    UScriptEnv(hpackage::PkgManager::PkgManagerPtr pkgManager) : pkgManager_(pkgManager) {}
+    UScriptEnv(Hpackage::PkgManager::PkgManagerPtr pkgManager) : pkgManager_(pkgManager) {}
 
     virtual ~UScriptEnv() {}
 
-    hpackage::PkgManager::PkgManagerPtr GetPkgManager()
+    Hpackage::PkgManager::PkgManagerPtr GetPkgManager()
     {
         return pkgManager_;
     }
@@ -47,7 +47,7 @@ public:
     virtual const std::vector<std::string> GetInstructionNames() const = 0;
     virtual bool IsRetry() const = 0;
 private:
-    hpackage::PkgManager::PkgManagerPtr pkgManager_ = nullptr;
+    Hpackage::PkgManager::PkgManagerPtr pkgManager_ = nullptr;
     int32_t state_ = 0;
 };
 
@@ -119,16 +119,16 @@ public:
 
     virtual ~UScriptInstructionFactory() = default;
 };
-} // namespace uscript
+} // namespace Uscript
 
 #ifdef __cplusplus
-extern "C"{
+extern "C" {
 #endif
 
 /**
  * 接口，用来从用户自定义的共享库中获取factory
  */
-uscript::UScriptInstructionFactoryPtr GetInstructionFactory();
+Uscript::UScriptInstructionFactoryPtr GetInstructionFactory();
 
 #ifdef __cplusplus
 }

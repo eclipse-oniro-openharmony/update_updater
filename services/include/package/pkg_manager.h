@@ -24,7 +24,7 @@
 #include <vector>
 #include "package/package.h"
 
-namespace hpackage {
+namespace Hpackage {
 /**
  * Error code definition
  */
@@ -356,5 +356,5 @@ public:
 
     virtual void PostDecodeProgress(int type, size_t writeDataLen, const void *context) = 0;
 };
-} // namespace hpackage
+} // namespace Hpackage
 #endif // PKG_MANAGER_H

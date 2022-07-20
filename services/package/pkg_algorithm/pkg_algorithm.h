@@ -19,7 +19,7 @@
 #include "pkg_algo_sign.h"
 #include "pkg_stream.h"
 
-namespace hpackage {
+namespace Hpackage {
 struct PkgContextOffset {
     size_t srcOffset;
     size_t destOffset;
@@ -95,5 +95,5 @@ public:
 
     static SignAlgorithm::SignAlgorithmPtr GetVerifyAlgorithm(const std::string &path, uint8_t type);
 };
-} // namespace hpackage
+} // namespace Hpackage
 #endif

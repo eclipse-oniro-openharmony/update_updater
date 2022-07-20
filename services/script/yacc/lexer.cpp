@@ -497,7 +497,7 @@ static const flex_int16_t yy_chk[168] = {
 /* 定义了YY_USER_ACTION，该宏在每个记号的语义动作之前被调用，来根据记号的长度设置位置的信息 */
 #define YY_USER_ACTION  loc.columns (yyleng);
 
-using namespace uscript;
+using namespace Uscript;
 #define yyterminate()Parser::make_END(loc);
 /* 声明使用C++版本FLEXER */
 /* 使用Scanner::yylex()*/

@@ -20,10 +20,10 @@
 #include <vector>
 #include "update_diff.h"
 
-using namespace hpackage;
+using namespace Hpackage;
 using namespace std;
 
-namespace updatepatch {
+namespace UpdatePatch {
 #define SWAP(a, b) auto swapTmp = (a); (a) = (b); (b) = swapTmp
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
 

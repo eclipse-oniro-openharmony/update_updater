@@ -22,7 +22,7 @@
 #include "pkg_stream.h"
 #include "pkg_utils.h"
 
-namespace hpackage {
+namespace Hpackage {
 class PkgAlgorithmLz4 : public PkgAlgorithm {
 public:
     static const uint32_t LZ4S_MAGIC_NUMBER = 0x184D2204;
@@ -79,5 +79,5 @@ public:
     int32_t Unpack(const PkgStreamPtr inStream, const PkgStreamPtr outStream,
         PkgAlgorithmContext &) override;
 };
-} // namespace hpackage
+} // namespace Hpackage
 #endif

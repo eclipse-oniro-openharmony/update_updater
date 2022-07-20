@@ -22,7 +22,7 @@
 #include "script_instruction.h"
 #include "script_manager.h"
 
-namespace uscript {
+namespace Uscript {
 class ScriptInterpreter;
 class UScriptValue;
 class UScriptInterpretContext;
@@ -260,5 +260,5 @@ private:
     bool top_ = false;
     std::map<std::string, UScriptValuePtr> localVariables_ {};
 };
-} // namespace uscript
+} // namespace Uscript
 #endif // USCRIPT_CONTEXT_H

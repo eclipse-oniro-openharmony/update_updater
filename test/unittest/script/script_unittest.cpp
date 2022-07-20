@@ -29,9 +29,9 @@
 #include "utils.h"
 
 using namespace std;
-using namespace hpackage;
-using namespace uscript;
-using namespace updater;
+using namespace Hpackage;
+using namespace Uscript;
+using namespace Updater;
 using namespace testing::ext;
 
 namespace {

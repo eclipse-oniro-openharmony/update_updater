@@ -22,7 +22,7 @@
 
 using namespace std;
 
-namespace uscript {
+namespace Uscript {
 static uint32_t g_contextId = 0;
 
 int32_t UScriptInstructionContext::PushParam(int32_t value)
@@ -520,4 +520,4 @@ UScriptValuePtr UScriptValue::GetRightCompluteValue(UScriptValuePtr rightValue)
     }
     return rightValue;
 }
-} // namespace uscript
+} // namespace Uscript

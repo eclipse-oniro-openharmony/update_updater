@@ -20,7 +20,7 @@
 #include <vector>
 #include "script_context.h"
 
-namespace uscript {
+namespace Uscript {
 /**
  * 定义函数的参数，使用vector保存函数参数
  * 在定义函数时，实参，对应标识符表达式
@@ -47,5 +47,5 @@ public:
 private:
     std::vector<UScriptExpression*> expressionList_ {};
 };
-} // namespace uscript
+} // namespace Uscript
 #endif // HS_PARAM_H

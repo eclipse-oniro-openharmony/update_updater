@@ -20,7 +20,7 @@
 #include <vector>
 #include "securec.h"
 
-namespace updater {
+namespace Updater {
 static std::ofstream g_updaterLog;
 static std::ofstream g_updaterStage;
 static std::ofstream g_errorCode;
@@ -140,4 +140,4 @@ std::ostream& ErrorCode::OutputErrorCode(const std::string &path, int line, Upda
     }
     return std::cout;
 }
-} // updater
+} // Updater

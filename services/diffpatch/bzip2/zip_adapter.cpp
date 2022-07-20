@@ -18,13 +18,13 @@
 #include <vector>
 #include "zlib.h"
 
-using namespace hpackage;
+using namespace Hpackage;
 
-namespace updatepatch {
+namespace UpdatePatch {
 ZipAdapter::ZipAdapter(UpdatePatchWriterPtr outStream, size_t offset, const PkgManager::FileInfoPtr fileInfo)
     : DeflateAdapter(), outStream_(outStream), offset_(offset)
 {
-    const hpackage::ZipFileInfo *info = (const hpackage::ZipFileInfo *)fileInfo;
+    const Hpackage::ZipFileInfo *info = (const Hpackage::ZipFileInfo *)fileInfo;
     method_ = info->method;
     level_ = info->level;
     windowBits_ = info->windowBits;
@@ -111,4 +111,4 @@ int32_t ZipAdapter::FlushData(size_t &offset)
     offset = offset_;
     return ret;
 }
-} // namespace updatepatch
+} // namespace UpdatePatch

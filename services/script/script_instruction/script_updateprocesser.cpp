@@ -18,10 +18,10 @@
 #include "script_manager.h"
 #include "script_utils.h"
 
-using namespace uscript;
+using namespace Uscript;
 
 namespace BasicInstruction {
-int32_t UScriptInstructionSetProcess::Execute(uscript::UScriptEnv &env, uscript::UScriptContext &context)
+int32_t UScriptInstructionSetProcess::Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context)
 {
     float setProcess = 0.0f;
     int32_t ret = context.GetParam(0, setProcess);
@@ -34,7 +34,7 @@ int32_t UScriptInstructionSetProcess::Execute(uscript::UScriptEnv &env, uscript:
     return USCRIPT_SUCCESS;
 }
 
-int32_t UScriptInstructionShowProcess::Execute(uscript::UScriptEnv &env, uscript::UScriptContext &context)
+int32_t UScriptInstructionShowProcess::Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context)
 {
     float startProcess = 0.0f;
     float endProcess = 0.0f;
@@ -52,7 +52,7 @@ int32_t UScriptInstructionShowProcess::Execute(uscript::UScriptEnv &env, uscript
     return USCRIPT_SUCCESS;
 }
 
-int32_t UScriptInstructionUiPrint::Execute(uscript::UScriptEnv &env, uscript::UScriptContext &context)
+int32_t UScriptInstructionUiPrint::Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context)
 {
     std::string message;
     int32_t ret = context.GetParam(0, message);

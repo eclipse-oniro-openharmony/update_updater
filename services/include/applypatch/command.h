@@ -24,7 +24,7 @@
 #include "script_instruction.h"
 #include "script_manager.h"
 
-namespace updater {
+namespace Updater {
 enum CommandType {
     ABORT,
     BSDIFF,
@@ -63,5 +63,5 @@ private:
     std::vector<std::string> tokens_ {};
     std::unique_ptr<int> fd_ {};
 };
-} // namespace updater
+} // namespace Updater
 #endif

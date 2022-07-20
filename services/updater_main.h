@@ -21,7 +21,7 @@
 #include "macros.h"
 #include "updater/updater.h"
 
-namespace updater {
+namespace Updater {
 enum UpdaterInitEvent {
     UPDATER_PRE_INIT_EVENT = 0,
     UPDATER_INIT_EVENT,

@@ -19,11 +19,11 @@
 #include <vector>
 #include "utils.h"
 
-using namespace updater;
+using namespace Updater;
 using namespace testing::ext;
 using namespace std;
 
-namespace updater_ut {
+namespace UpdaterUt {
 class UtilsUnitTest : public testing::Test {
 public:
     static void SetUpTestCase(void) {};

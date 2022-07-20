@@ -20,7 +20,7 @@
 #include "pkg_manager.h"
 #include "pkg_utils.h"
 
-namespace hpackage {
+namespace Hpackage {
 class PkgFile;
 class PkgEntry;
 using PkgEntryPtr = PkgEntry *;
@@ -146,5 +146,5 @@ protected:
     std::multimap<std::string, PkgEntryPtr, std::greater<std::string>> pkgEntryMapFileName_ {};
     uint32_t state_ = PKG_FILE_STATE_IDLE;
 };
-} // namespace hpackage
+} // namespace Hpackage
 #endif

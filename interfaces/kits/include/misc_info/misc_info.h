@@ -20,7 +20,7 @@
 #include <cstdio>
 #include <unistd.h>
 
-namespace updater {
+namespace Updater {
 constexpr int MAX_COMMAND_SIZE = 20;
 constexpr int MAX_UPDATE_SIZE = 100;
 
@@ -45,5 +45,5 @@ bool WriteUpdaterMessage(const std::string &path, const UpdateMessage &boot);
 bool ReadUpdaterMessage(const std::string &path, UpdateMessage &boot);
 bool WriteUpdaterMiscMsg(const UpdateMessage &boot);
 bool ReadUpdaterMiscMsg(UpdateMessage &boot);
-} // updater
+} // Updater
 #endif /* MISC_INFO_H */

@@ -21,7 +21,7 @@
 
 using namespace std;
 
-namespace uscript {
+namespace Uscript {
 ScriptFunction::~ScriptFunction()
 {
     delete params_;
@@ -81,4 +81,4 @@ std::vector<std::string> ScriptFunction::GetParamNames(ScriptInterpreter &inter,
     }
     return names;
 }
-} // namespace uscript
+} // namespace Uscript

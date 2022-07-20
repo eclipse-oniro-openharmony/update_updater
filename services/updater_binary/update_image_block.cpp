@@ -28,11 +28,11 @@
 #include "log/log.h"
 #include "utils.h"
 
-using namespace uscript;
-using namespace hpackage;
-using namespace updater;
+using namespace Uscript;
+using namespace Hpackage;
+using namespace Updater;
 
-namespace updater {
+namespace Updater {
 constexpr int32_t SHA_CHECK_SECOND = 2;
 constexpr int32_t SHA_CHECK_PARAMS = 3;
 static int ExtractNewData(const PkgBuffer &buffer, size_t size, size_t start, bool isFinish, const void* context)
@@ -46,7 +46,7 @@ static int ExtractNewData(const PkgBuffer &buffer, size_t size, size_t start, bo
             if (!info->readyToWrite) {
                 LOG(WARNING) << "writer is not ready to write.";
                 pthread_mutex_unlock(&info->mutex);
-                return hpackage::PKG_INVALID_STREAM;
+                return Hpackage::PKG_INVALID_STREAM;
             }
             pthread_cond_wait(&info->cond, &info->mutex);
         }
@@ -57,7 +57,7 @@ static int ExtractNewData(const PkgBuffer &buffer, size_t size, size_t start, bo
         bool ret = info->writer->Write(addr, toWrite, nullptr);
         std::ostringstream logMessage;
         logMessage << "Write " << toWrite << " byte(s) failed";
-        UPDATER_ERROR_CHECK(ret == true, logMessage.str(), return hpackage::PKG_INVALID_STREAM);
+        UPDATER_ERROR_CHECK(ret == true, logMessage.str(), return Hpackage::PKG_INVALID_STREAM);
         size -= toWrite;
         addr += toWrite;
 
@@ -68,13 +68,13 @@ static int ExtractNewData(const PkgBuffer &buffer, size_t size, size_t start, bo
             pthread_mutex_unlock(&info->mutex);
         }
     }
-    return hpackage::PKG_SUCCESS;
+    return Hpackage::PKG_SUCCESS;
 }
 
 void* UnpackNewData(void *arg)
 {
     WriterThreadInfo *info = static_cast<WriterThreadInfo *>(arg);
-    hpackage::PkgManager::StreamPtr stream = nullptr;
+    Hpackage::PkgManager::StreamPtr stream = nullptr;
     TransferManagerPtr tm = TransferManager::GetTransferManagerInstance();
     if (info->newPatch.empty()) {
         LOG(ERROR) << "new patch file name is empty. thread quit.";
@@ -102,7 +102,7 @@ void* UnpackNewData(void *arg)
     LOG(DEBUG) << info->newPatch << " info: size " << file->packedSize << " unpacked size " <<
         file->unpackedSize << " name " << file->identity;
     int32_t ret = env->GetPkgManager()->CreatePkgStream(stream, info->newPatch, ExtractNewData, info);
-    if (ret != hpackage::PKG_SUCCESS || stream == nullptr) {
+    if (ret != Hpackage::PKG_SUCCESS || stream == nullptr) {
         LOG(ERROR) << "Cannot extract " << info->newPatch << " from package.";
         pthread_mutex_lock(&info->mutex);
         info->readyToWrite = false;
@@ -124,7 +124,7 @@ void* UnpackNewData(void *arg)
     return nullptr;
 }
 
-static int32_t ReturnAndPushParam(int32_t returnValue, uscript::UScriptContext &context)
+static int32_t ReturnAndPushParam(int32_t returnValue, Uscript::UScriptContext &context)
 {
     context.PushParam(returnValue);
     return returnValue;
@@ -138,8 +138,8 @@ struct UpdateBlockInfo {
     std::string devPath;
 };
 
-static int32_t GetUpdateBlockInfo(struct UpdateBlockInfo &infos, uscript::UScriptEnv &env,
-    uscript::UScriptContext &context)
+static int32_t GetUpdateBlockInfo(struct UpdateBlockInfo &infos, Uscript::UScriptEnv &env,
+    Uscript::UScriptContext &context)
 {
     UPDATER_ERROR_CHECK(context.GetParamCount() == 4, "Invalid param",
     return ReturnAndPushParam(USCRIPT_INVALID_PARAM, context));
@@ -166,8 +166,8 @@ static int32_t GetUpdateBlockInfo(struct UpdateBlockInfo &infos, uscript::UScrip
     return USCRIPT_SUCCESS;
 }
 
-static int32_t ExecuteTransferCommand(int fd, const std::vector<std::string> &lines, uscript::UScriptEnv &env,
-    uscript::UScriptContext &context, const std::string &partitionName)
+static int32_t ExecuteTransferCommand(int fd, const std::vector<std::string> &lines, Uscript::UScriptEnv &env,
+    Uscript::UScriptContext &context, const std::string &partitionName)
 {
     TransferManagerPtr tm = TransferManager::GetTransferManagerInstance();
     auto globalParams = tm->GetGlobalParams();
@@ -200,7 +200,7 @@ static int32_t ExecuteTransferCommand(int fd, const std::vector<std::string> &li
     return USCRIPT_SUCCESS;
 }
 
-static int InitThread(struct UpdateBlockInfo &infos, uscript::UScriptEnv &env, uscript::UScriptContext &context)
+static int InitThread(struct UpdateBlockInfo &infos, Uscript::UScriptEnv &env, Uscript::UScriptContext &context)
 {
     TransferManagerPtr tm = TransferManager::GetTransferManagerInstance();
     auto globalParams = tm->GetGlobalParams();
@@ -216,10 +216,10 @@ static int InitThread(struct UpdateBlockInfo &infos, uscript::UScriptEnv &env, u
     return error;
 }
 
-static int32_t ExtractDiffPackageAndLoad(const UpdateBlockInfo &infos, uscript::UScriptEnv &env,
-    uscript::UScriptContext &context)
+static int32_t ExtractDiffPackageAndLoad(const UpdateBlockInfo &infos, Uscript::UScriptEnv &env,
+    Uscript::UScriptContext &context)
 {
-    hpackage::PkgManager::StreamPtr outStream = nullptr;
+    Hpackage::PkgManager::StreamPtr outStream = nullptr;
     LOG(DEBUG) << "partitionName is " << infos.partitionName;
     const FileInfo *info = env.GetPkgManager()->GetFileInfo(infos.partitionName);
     UPDATER_ERROR_CHECK(info != nullptr, "Error to get file info", return USCRIPT_ERROR_EXECUTE);
@@ -236,14 +236,14 @@ static int32_t ExtractDiffPackageAndLoad(const UpdateBlockInfo &infos, uscript::
     rename(diffPackage.c_str(), diffPackageZip.c_str());
     LOG(DEBUG) << "Rename " << diffPackage << " to zip\nExtract " << diffPackage << " done\nReload " << diffPackageZip;
     std::vector<std::string> diffPackageComponents;
-    ret = env.GetPkgManager()->LoadPackage(diffPackageZip, updater::utils::GetCertName(), diffPackageComponents);
+    ret = env.GetPkgManager()->LoadPackage(diffPackageZip, Updater::Utils::GetCertName(), diffPackageComponents);
     UPDATER_ERROR_CHECK(diffPackageComponents.size() >= 1, "Diff package is empty",
         return ReturnAndPushParam(USCRIPT_ERROR_EXECUTE, context));
     return USCRIPT_SUCCESS;
 }
 
-static int32_t DoExecuteUpdateBlock(UpdateBlockInfo &infos, uscript::UScriptEnv &env,
-    hpackage::PkgManager::StreamPtr &outStream, const std::vector<std::string> &lines, uscript::UScriptContext &context)
+static int32_t DoExecuteUpdateBlock(UpdateBlockInfo &infos, Uscript::UScriptEnv &env,
+    Hpackage::PkgManager::StreamPtr &outStream, const std::vector<std::string> &lines, Uscript::UScriptContext &context)
 {
     int fd = open(infos.devPath.c_str(), O_RDWR | O_LARGEFILE);
     UPDATER_ERROR_CHECK (fd != -1, "Failed to open block",
@@ -259,7 +259,7 @@ static int32_t DoExecuteUpdateBlock(UpdateBlockInfo &infos, uscript::UScriptEnv 
     return ret;
 }
 
-static int32_t ExecuteUpdateBlock(uscript::UScriptEnv &env, uscript::UScriptContext &context)
+static int32_t ExecuteUpdateBlock(Uscript::UScriptEnv &env, Uscript::UScriptContext &context)
 {
     UpdateBlockInfo infos {};
     UPDATER_CHECK_ONLY_RETURN(!GetUpdateBlockInfo(infos, env, context), return USCRIPT_ERROR_EXECUTE);
@@ -279,7 +279,7 @@ static int32_t ExecuteUpdateBlock(uscript::UScriptEnv &env, uscript::UScriptCont
 
     const FileInfo *info = env.GetPkgManager()->GetFileInfo(infos.transferName);
     UPDATER_ERROR_CHECK(info != nullptr, "get file info fail", return USCRIPT_ERROR_EXECUTE);
-    hpackage::PkgManager::StreamPtr outStream = nullptr;
+    Hpackage::PkgManager::StreamPtr outStream = nullptr;
     ret = env.GetPkgManager()->CreatePkgStream(outStream,
         infos.transferName, info->unpackedSize, PkgStream::PkgStreamType_MemoryMap);
     ret = env.GetPkgManager()->ExtractFile(infos.transferName, outStream);
@@ -291,7 +291,7 @@ static int32_t ExecuteUpdateBlock(uscript::UScriptEnv &env, uscript::UScriptCont
     /* Save Script Env to transfer manager */
     globalParams->env = &env;
     std::vector<std::string> lines =
-        updater::utils::SplitString(std::string(reinterpret_cast<const char*>(transferListBuffer)), "\n");
+        Updater::Utils::SplitString(std::string(reinterpret_cast<const char*>(transferListBuffer)), "\n");
     LOG(INFO) << "Ready to start a thread to handle new data processing";
 
     UPDATER_ERROR_CHECK (InitThread(infos, env, context) == 0, "Failed to create pthread",
@@ -314,14 +314,14 @@ static int32_t ExecuteUpdateBlock(uscript::UScriptEnv &env, uscript::UScriptCont
     return ret;
 }
 
-int32_t UScriptInstructionBlockUpdate::Execute(uscript::UScriptEnv &env, uscript::UScriptContext &context)
+int32_t UScriptInstructionBlockUpdate::Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context)
 {
     int32_t result = ExecuteUpdateBlock(env, context);
     context.PushParam(result);
     return result;
 }
 
-int32_t UScriptInstructionBlockCheck::Execute(uscript::UScriptEnv &env, uscript::UScriptContext &context)
+int32_t UScriptInstructionBlockCheck::Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context)
 {
     UPDATER_ERROR_CHECK(context.GetParamCount() == 1, "Invalid param",
         return ReturnAndPushParam(USCRIPT_INVALID_PARAM, context));
@@ -350,7 +350,7 @@ int32_t UScriptInstructionBlockCheck::Execute(uscript::UScriptEnv &env, uscript:
             close(fd); return ReturnAndPushParam(USCRIPT_ERROR_EXECUTE, context));
         size_t size = (it->second - it->first) * H_BLOCK_SIZE;
         LOG(INFO) << "BlockSet::ReadDataFromBlock Read " << size << " from block";
-        UPDATER_ERROR_CHECK(utils::ReadFully(fd, block_buff.data() + pos, size), "Failed to read",
+        UPDATER_ERROR_CHECK(Utils::ReadFully(fd, block_buff.data() + pos, size), "Failed to read",
             close(fd); return ReturnAndPushParam(USCRIPT_ERROR_EXECUTE, context));
         pos += size;
     }
@@ -371,7 +371,7 @@ int32_t UScriptInstructionBlockCheck::Execute(uscript::UScriptEnv &env, uscript:
     return USCRIPT_SUCCESS;
 }
 
-int32_t UScriptInstructionShaCheck::Execute(uscript::UScriptEnv &env, uscript::UScriptContext &context)
+int32_t UScriptInstructionShaCheck::Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context)
 {
     UPDATER_ERROR_CHECK(context.GetParamCount() == SHA_CHECK_PARAMS, "Invalid param",
                         return ReturnAndPushParam(USCRIPT_INVALID_PARAM, context));
@@ -411,14 +411,14 @@ int32_t UScriptInstructionShaCheck::Execute(uscript::UScriptEnv &env, uscript::U
             close(fd); return ReturnAndPushParam(USCRIPT_ERROR_EXECUTE, context));
 
         for (size_t i = it->first; i < it->second; ++i) {
-            UPDATER_ERROR_CHECK(utils::ReadFully(fd, block_buff.data(), H_BLOCK_SIZE), "Failed to read",
+            UPDATER_ERROR_CHECK(Utils::ReadFully(fd, block_buff.data(), H_BLOCK_SIZE), "Failed to read",
                 close(fd); return ReturnAndPushParam(USCRIPT_ERROR_EXECUTE, context));
             SHA256_Update(&ctx, block_buff.data(), H_BLOCK_SIZE);
         }
     }
     uint8_t digest[SHA256_DIGEST_LENGTH];
     SHA256_Final(digest, &ctx);
-    std::string resultSha = utils::ConvertSha256Hex(digest, SHA256_DIGEST_LENGTH);
+    std::string resultSha = Utils::ConvertSha256Hex(digest, SHA256_DIGEST_LENGTH);
     UPDATER_ERROR_CHECK(resultSha == contrastSha, "Different sha256, cannot continue",
         close(fd); return ReturnAndPushParam(USCRIPT_ERROR_EXECUTE, context));
     LOG(INFO) << "UScriptInstructionShaCheck::Execute Success";

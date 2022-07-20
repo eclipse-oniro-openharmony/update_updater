@@ -21,7 +21,7 @@
 #include "frame.h"
 #include "png.h"
 
-namespace updater {
+namespace Updater {
 constexpr int IMG_LIST_MAX_SIZE = 255;
 constexpr int PNG_HEADER_SIZE = 8;
 constexpr useconds_t SECOND_PER_MS = 1000;

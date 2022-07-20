@@ -22,8 +22,8 @@
 #include "zip_adapter.h"
 
 using namespace std;
-using namespace hpackage;
-using namespace updatepatch;
+using namespace Hpackage;
+using namespace UpdatePatch;
 using namespace testing::ext;
 
 namespace {

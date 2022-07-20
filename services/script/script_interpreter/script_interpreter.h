@@ -23,10 +23,10 @@
 #include "script_statement.h"
 
 #define INTERPRETER_LOGE(inter, context, format, ...) \
-    Logger(updater::INFO, (__FILE_NAME__), (__LINE__), \
+    Logger(Updater::INFO, (__FILE_NAME__), (__LINE__), \
     "[INTERPRETER %d-%d]"#format, (inter).GetInstanceId(), (context)->GetContextId(), ##__VA_ARGS__)
 #define INTERPRETER_LOGI(inter, context, format, ...) \
-    Logger(updater::INFO, (__FILE_NAME__), (__LINE__), \
+    Logger(Updater::INFO, (__FILE_NAME__), (__LINE__), \
     "[INTERPRETER %d-%d]"#format, (inter).GetInstanceId(), (context)->GetContextId(), ##__VA_ARGS__)
 
 #define INTERPRETER_CHECK(inter, context, ret, statement, ...) \
@@ -35,14 +35,14 @@
         statement;                                             \
     }
 
-namespace uscript {
+namespace Uscript {
 class Parser;
 class Scanner;
 class ScriptManagerImpl;
 
 class ScriptInterpreter {
 public:
-    static int32_t ExecuteScript(ScriptManagerImpl *manager, hpackage::PkgManager::StreamPtr pkgStream);
+    static int32_t ExecuteScript(ScriptManagerImpl *manager, Hpackage::PkgManager::StreamPtr pkgStream);
 
     explicit ScriptInterpreter(ScriptManagerImpl *manager);
     ~ScriptInterpreter();
@@ -71,7 +71,7 @@ public:
     }
 
 private:
-    int32_t LoadScript(hpackage::PkgManager::StreamPtr pkgStream);
+    int32_t LoadScript(Hpackage::PkgManager::StreamPtr pkgStream);
     int32_t Execute();
 
 private:
@@ -84,5 +84,5 @@ private:
     std::unique_ptr<Scanner> scanner_;
     int32_t instanceId_ = 0;
 };
-} // namespace uscript
+} // namespace Uscript
 #endif

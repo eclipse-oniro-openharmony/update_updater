@@ -18,11 +18,11 @@
 #include "script_instruction.h"
 
 namespace BasicInstruction {
-class ScriptLoadScript : public uscript::UScriptInstruction {
+class ScriptLoadScript : public Uscript::UScriptInstruction {
 public:
     ScriptLoadScript() {}
     virtual ~ScriptLoadScript() {}
-    int32_t Execute(uscript::UScriptEnv &env, uscript::UScriptContext &context) override;
+    int32_t Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context) override;
 };
 } // namespace BasicInstruction
 #endif // USCRIPT_LOAD_SCRIPT_H

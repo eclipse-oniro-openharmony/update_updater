@@ -22,7 +22,7 @@
 #include "securec.h"
 #include "updater_ui_const.h"
 
-namespace updater {
+namespace Updater {
 TextLabel::TextLabel(int mStartX, int mStartY, int w, int h, Frame *mparent)
 {
     startX_ = mStartX;

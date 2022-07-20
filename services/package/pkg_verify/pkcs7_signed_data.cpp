@@ -26,7 +26,7 @@
 #include <openssl/x509.h>
 #include "pkg_utils.h"
 
-namespace hpackage {
+namespace Hpackage {
 Pkcs7SignedData::Pkcs7SignedData()
 {
     pkcs7_ = nullptr;
@@ -390,4 +390,4 @@ int32_t Pkcs7SignedData::ParseSignerInfoX509Algo(int32_t &algoNid, const X509_AL
 
     return PKG_SUCCESS;
 }
-} // namespace hpackage
+} // namespace Hpackage

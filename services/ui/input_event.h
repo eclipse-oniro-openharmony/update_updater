@@ -19,7 +19,7 @@
 #include "input_manager.h"
 #include "updater_ui.h"
 
-namespace updater {
+namespace Updater {
 void TouchToKey(const int dx, const int dy);
 int HandleInputEvent(const struct input_event *iev);
 void ReportEventPkgCallback(const InputEventPackage **pkgs, const uint32_t count, uint32_t devIndex);

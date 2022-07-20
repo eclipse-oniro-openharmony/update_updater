@@ -32,8 +32,8 @@
 #include "securec.h"
 #include "utils.h"
 
-using namespace hpackage;
-namespace updater {
+using namespace Hpackage;
+namespace Updater {
 CommandResult AbortCommandFn::Execute(const Command &params)
 {
     return SUCCESS;
@@ -182,4 +182,4 @@ CommandResult StashCommandFn::Execute(const Command &params)
     int ret = Store::WriteDataToStore(storeBase, shaStr, buffer, srcBlockSize * H_BLOCK_SIZE);
     return CommandResult(ret);
 }
-} // namespace updater
+} // namespace Updater

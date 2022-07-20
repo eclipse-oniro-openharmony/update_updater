@@ -21,7 +21,7 @@
 #include "applypatch/block_set.h"
 #include "applypatch/data_writer.h"
 
-namespace updater {
+namespace Updater {
 class BlockWriter : public DataWriter {
 public:
     bool Write(const uint8_t *addr, size_t len, const void *context) override;
@@ -41,5 +41,5 @@ private:
     size_t blockIndex_;
     size_t currentBlockLeft_;
 };
-} // namespace updater
+} // namespace Updater
 #endif // UPDATER_BLOCK_WRITER_H

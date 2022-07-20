@@ -22,10 +22,10 @@
 
 using namespace std;
 
-namespace uscript {
+namespace Uscript {
 static int32_t g_instanceId = 0;
 
-int32_t ScriptInterpreter::ExecuteScript(ScriptManagerImpl *manager, hpackage::PkgManager::StreamPtr pkgStream)
+int32_t ScriptInterpreter::ExecuteScript(ScriptManagerImpl *manager, Hpackage::PkgManager::StreamPtr pkgStream)
 {
     USCRIPT_CHECK(pkgStream != nullptr, return USCRIPT_INVALID_PARAM, "Param error");
     USCRIPT_LOGI("ExecuteScript %s", pkgStream->GetFileName().c_str());
@@ -62,7 +62,7 @@ ScriptInterpreter::~ScriptInterpreter()
     contextStack_.clear();
 }
 
-int32_t ScriptInterpreter::LoadScript(hpackage::PkgManager::StreamPtr pkgStream)
+int32_t ScriptInterpreter::LoadScript(Hpackage::PkgManager::StreamPtr pkgStream)
 {
     scanner_ = std::make_unique<Scanner>(this);
     parser_ = std::make_unique<Parser>(scanner_.get(), this);
@@ -200,4 +200,4 @@ UScriptValuePtr ScriptInterpreter::ExecuteNativeFunc(UScriptContextPtr context,
     retValue->AddValues(funcContext->GetOutVar());
     return retValue;
 }
-} // namespace uscript
+} // namespace Uscript

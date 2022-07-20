@@ -17,7 +17,7 @@
 #define UPDATER_UI_SURFACE_DEV_H
 #include "drm_driver.h"
 
-namespace updater {
+namespace Updater {
 class SurfaceDev : public DrmDriver {
 public:
     enum DevType {

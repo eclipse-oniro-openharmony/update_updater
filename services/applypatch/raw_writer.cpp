@@ -19,7 +19,7 @@
 #include <unistd.h>
 #include "log/log.h"
 
-namespace updater {
+namespace Updater {
 bool RawWriter::Write(const uint8_t *addr, size_t len, [[maybe_unused]] const void *context)
 {
     if (addr == nullptr) {
@@ -60,4 +60,4 @@ int RawWriter::WriteInternal(int fd, const uint8_t *data, size_t len)
     offset_ += static_cast<off64_t>(len);
     return 0;
 }
-} // namespace updater
+} // namespace Updater

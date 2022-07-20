@@ -21,13 +21,13 @@
 #include "lz4hc.h"
 #include "pkg_manager.h"
 
-using namespace hpackage;
+using namespace Hpackage;
 
-namespace updatepatch {
+namespace UpdatePatch {
 Lz4Adapter::Lz4Adapter(UpdatePatchWriterPtr outStream, size_t offset, const PkgManager::FileInfoPtr fileInfo)
     : DeflateAdapter(), outStream_(outStream), offset_(offset)
 {
-    const hpackage::Lz4FileInfo *info = (const hpackage::Lz4FileInfo *)fileInfo;
+    const Hpackage::Lz4FileInfo *info = (const Hpackage::Lz4FileInfo *)fileInfo;
     compressionLevel_ = info->compressionLevel;
     blockIndependence_ = info->blockIndependence;
     contentChecksumFlag_ = info->contentChecksumFlag;
@@ -224,4 +224,4 @@ int32_t Lz4BlockAdapter::FlushData(size_t &offset)
     offset = offset_;
     return 0;
 }
-} // namespace updatepatch
+} // namespace UpdatePatch

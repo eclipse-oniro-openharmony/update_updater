@@ -24,11 +24,11 @@
 #include "utils.h"
 
 using namespace testing::ext;
-using namespace updater_ut;
-using namespace updater;
+using namespace UpdaterUt;
+using namespace Updater;
 using namespace std;
 
-namespace updater_ut {
+namespace UpdaterUt {
 void StoreUnitTest::SetUp()
 {
     cout << "SetUpTestCase" << endl;

@@ -30,7 +30,7 @@ static constexpr int H_MOVE_CMD_ARGS_START = 1;
 static constexpr int H_ZERO_NUMBER = 0;
 
 
-namespace updater {
+namespace Updater {
 class Command;
 
 class BlockSet {
@@ -109,5 +109,5 @@ private:
     int32_t LoadSourceBuffer(const Command &cmd, size_t &pos, std::vector<uint8_t> &sourceBuffer,
         bool &isOverlap, size_t &srcBlockSize);
 };
-} // namespace updater
+} // namespace Updater
 #endif // UPDATER_BLOCKSET_H

@@ -24,14 +24,14 @@
 #include "script_manager.h"
 #include "updater/updater.h"
 
-using uscript::UScriptEnv;
-using uscript::UScriptInstructionFactory;
-using uscript::UScriptInstructionFactoryPtr;
+using Uscript::UScriptEnv;
+using Uscript::UScriptInstructionFactory;
+using Uscript::UScriptInstructionFactoryPtr;
 
-namespace updater {
+namespace Updater {
 class UpdaterEnv : public UScriptEnv {
 public:
-    UpdaterEnv(hpackage::PkgManager::PkgManagerPtr pkgManager, PostMessageFunction postMessage, bool retry)
+    UpdaterEnv(Hpackage::PkgManager::PkgManagerPtr pkgManager, PostMessageFunction postMessage, bool retry)
         : UScriptEnv(pkgManager), postMessage_(postMessage), isRetry_(retry) {}
     virtual ~UpdaterEnv();
 

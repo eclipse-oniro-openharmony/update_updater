@@ -18,11 +18,11 @@
 #include "script_instruction.h"
 
 namespace BasicInstruction {
-class ScriptRegisterCmd : public uscript::UScriptInstruction {
+class ScriptRegisterCmd : public Uscript::UScriptInstruction {
 public:
     ScriptRegisterCmd() {}
     virtual ~ScriptRegisterCmd() {}
-    int32_t Execute(uscript::UScriptEnv &env, uscript::UScriptContext &context) override;
+    int32_t Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context) override;
 };
 } // namespace BasicInstruction
 #endif // USCRIPT_REGISTER_CMD_H

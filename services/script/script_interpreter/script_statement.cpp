@@ -20,7 +20,7 @@
 
 using namespace std;
 
-namespace uscript {
+namespace Uscript {
 void UScriptStatementResult::UpdateStatementResult(UScriptValuePtr value)
 {
     USCRIPT_CHECK(value != nullptr, SetResultType(UScriptStatementResult::STATEMENT_RESULT_TYPE_ERROR),
@@ -347,4 +347,4 @@ UScriptStatementResult UScriptReturnStatement::Execute(ScriptInterpreter &interp
     result.SetResultValue(retValue);
     return result;
 }
-} // namespace uscript
+} // namespace Uscript

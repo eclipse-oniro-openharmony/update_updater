@@ -21,23 +21,23 @@
 
 int main(int argc, char **argv)
 {
-    if (argc > updater::utils::ARGC_TWO_NUMS) {
-        updater::LOG(updater::ERROR) << "param must be nullptr or updater.";
+    if (argc > Updater::Utils::ARGC_TWO_NUMS) {
+        Updater::LOG(Updater::ERROR) << "param must be nullptr or updater.";
         return 1;
     }
     if (argc == 1) {
-        updater::LOG(updater::INFO) << "updater::utils::DoReboot nullptr";
-        updater::utils::DoReboot("");
+        Updater::LOG(Updater::INFO) << "Updater::Utils::DoReboot nullptr";
+        Updater::Utils::DoReboot("");
     } else {
         std::string updaterStr = "updater";
         if (!memcmp(argv[1], updaterStr.c_str(), updaterStr.length())) {
-            updater::utils::DoReboot(argv[1]);
+            Updater::Utils::DoReboot(argv[1]);
         } else if (strcmp(argv[1], "flashd") == 0) {
-            updater::utils::DoReboot(argv[1]);
+            Updater::Utils::DoReboot(argv[1]);
         } else if (strncmp(argv[1], "flashd:", strlen("flashd:")) == 0) {
-            updater::utils::DoReboot("flashd", argv[1] + strlen("flashd:"));
+            Updater::Utils::DoReboot("flashd", argv[1] + strlen("flashd:"));
         } else {
-            updater::LOG(updater::INFO) << "param must be updater/flashd!";
+            Updater::LOG(Updater::INFO) << "param must be updater/flashd!";
         }
     }
     return 0;

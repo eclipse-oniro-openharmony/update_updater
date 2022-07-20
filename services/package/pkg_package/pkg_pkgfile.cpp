@@ -23,7 +23,7 @@
 #include "pkg_utils.h"
 #include "pkg_zipfile.h"
 
-namespace hpackage {
+namespace Hpackage {
 PkgFile::~PkgFile()
 {
     auto iter = pkgEntryMapId_.begin();
@@ -161,4 +161,4 @@ void PkgFile::AddSignData(uint8_t digestMethod, size_t currOffset, size_t &signO
     pkgStream_->Flush(currOffset + buffer.size());
     PKG_LOGI("SavePackage success file length: %zu signOffset %zu", pkgStream_->GetFileLength(), signOffset);
 }
-} // namespace hpackage
+} // namespace Hpackage

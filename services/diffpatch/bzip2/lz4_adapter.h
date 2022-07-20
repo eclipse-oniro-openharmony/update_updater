@@ -25,7 +25,7 @@
 #include "pkg_manager.h"
 #include "securec.h"
 
-namespace updatepatch {
+namespace UpdatePatch {
 #define LZ4_BLOCK_SIZE(blockId) (1 << (8 + (2 * (blockId))))
 
 class Lz4Adapter : public DeflateAdapter {
@@ -33,7 +33,7 @@ public:
     static constexpr uint32_t LZ4B_BLOCK_SIZE = 1 << 22; // (4M)
     static constexpr uint32_t LZ4B_MAGIC_NUMBER = 0x184C2102;
     static constexpr uint32_t LZ4B_REVERSED_LEN = 4;
-    Lz4Adapter(UpdatePatchWriterPtr outStream, size_t offset, const hpackage::PkgManager::FileInfoPtr fileInfo);
+    Lz4Adapter(UpdatePatchWriterPtr outStream, size_t offset, const Hpackage::PkgManager::FileInfoPtr fileInfo);
     ~Lz4Adapter() override {}
 protected:
     virtual int32_t CompressData(const BlockBuffer &srcData) = 0;
@@ -51,7 +51,7 @@ protected:
 class Lz4FrameAdapter : public Lz4Adapter {
 public:
     Lz4FrameAdapter(UpdatePatchWriterPtr outStream, size_t offset,
-        const hpackage::PkgManager::FileInfoPtr fileInfo) : Lz4Adapter(outStream, offset, fileInfo) {}
+        const Hpackage::PkgManager::FileInfoPtr fileInfo) : Lz4Adapter(outStream, offset, fileInfo) {}
     ~Lz4FrameAdapter() override
     {
         Close();
@@ -72,7 +72,7 @@ private:
 class Lz4BlockAdapter : public Lz4FrameAdapter {
 public:
     Lz4BlockAdapter(UpdatePatchWriterPtr outStream, size_t offset,
-        const hpackage::PkgManager::FileInfoPtr fileInfo) : Lz4FrameAdapter(outStream, offset, fileInfo) {}
+        const Hpackage::PkgManager::FileInfoPtr fileInfo) : Lz4FrameAdapter(outStream, offset, fileInfo) {}
     ~Lz4BlockAdapter() override
     {
         Close();
@@ -84,5 +84,5 @@ public:
 private:
     int32_t CompressData(const BlockBuffer &srcData) override;
 };
-} // namespace updatepatch
+} // namespace UpdatePatch
 #endif // LZ4_ADAPTER_H

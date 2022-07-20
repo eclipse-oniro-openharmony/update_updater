@@ -24,9 +24,9 @@
 #include "pkg_utils.h"
 
 using namespace std;
-using namespace hpackage;
+using namespace Hpackage;
 
-namespace updater {
+namespace Updater {
 vector<string> SplitString(const string &str, const string &pattern)
 {
     vector<string> ret;
@@ -72,7 +72,7 @@ void PackagesInfo::ReleasePackagesInfoInstance(PackagesInfoPtr pkginfomanager)
     g_packagesInfoInstance = nullptr;
 }
 
-std::vector<std::string> PackagesInfo::GetOTAVersion(hpackage::PkgManager::PkgManagerPtr manager,
+std::vector<std::string> PackagesInfo::GetOTAVersion(Hpackage::PkgManager::PkgManagerPtr manager,
     const std::string &versionList, const std::string &versionPath)
 {
     vector<string> tmpVersionList;
@@ -98,7 +98,7 @@ std::vector<std::string> PackagesInfo::GetOTAVersion(hpackage::PkgManager::PkgMa
     return tmpVersionList;
 }
 
-std::vector<std::string> PackagesInfo::GetBoardID(hpackage::PkgManager::PkgManagerPtr manager,
+std::vector<std::string> PackagesInfo::GetBoardID(Hpackage::PkgManager::PkgManagerPtr manager,
     const std::string &boardIdName, const std::string &boardListPath)
 {
     vector<string> boardlist;
@@ -125,4 +125,4 @@ bool PackagesInfo::IsAllowRollback()
 {
     return false;
 }
-} // namespace updater
+} // namespace Updater

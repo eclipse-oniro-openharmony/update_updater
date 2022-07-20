@@ -19,7 +19,7 @@
 #include "updater_ui_const.h"
 #include "view.h"
 
-namespace updater {
+namespace Updater {
 using namespace std;
 extern int g_textLabelNum;
 extern Frame *g_menuFrame;

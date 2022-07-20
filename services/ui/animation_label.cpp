@@ -22,7 +22,7 @@
 #include "securec.h"
 #include "view.h"
 
-namespace updater {
+namespace Updater {
 AnimationLable::AnimationLable(int startX, int startY, int w, int h, Frame *mParent)
 {
     startX_ = startX;

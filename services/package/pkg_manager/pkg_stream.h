@@ -22,7 +22,7 @@
 #include "pkg_manager.h"
 #include "pkg_utils.h"
 
-namespace hpackage {
+namespace Hpackage {
 class PkgStreamImpl;
 using PkgStreamPtr = PkgStreamImpl *;
 class PkgStreamImpl : public PkgStream {
@@ -209,5 +209,5 @@ private:
     ExtractFileProcessor processor_ = nullptr;
     const void *context_;
 };
-} // namespace hpackage
+} // namespace Hpackage
 #endif // PKG_STREAM_H

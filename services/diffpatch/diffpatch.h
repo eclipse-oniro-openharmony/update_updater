@@ -24,11 +24,11 @@
 #include "log/log.h"
 #include "patch/update_patch.h"
 
-namespace updatepatch {
-#define PATCH_LOGE(format, ...) Logger(updater::ERROR, (__FILE_NAME__), (__LINE__), format, ##__VA_ARGS__)
-#define PATCH_DEBUG(format, ...) Logger(updater::DEBUG, (__FILE_NAME__), (__LINE__), format, ##__VA_ARGS__)
-#define PATCH_LOGI(format, ...) Logger(updater::INFO, (__FILE_NAME__), (__LINE__), format, ##__VA_ARGS__)
-#define PATCH_LOGW(format, ...) Logger(updater::WARNING, (__FILE_NAME__), (__LINE__), format, ##__VA_ARGS__)
+namespace UpdatePatch {
+#define PATCH_LOGE(format, ...) Logger(Updater::ERROR, (__FILE_NAME__), (__LINE__), format, ##__VA_ARGS__)
+#define PATCH_DEBUG(format, ...) Logger(Updater::DEBUG, (__FILE_NAME__), (__LINE__), format, ##__VA_ARGS__)
+#define PATCH_LOGI(format, ...) Logger(Updater::INFO, (__FILE_NAME__), (__LINE__), format, ##__VA_ARGS__)
+#define PATCH_LOGW(format, ...) Logger(Updater::WARNING, (__FILE_NAME__), (__LINE__), format, ##__VA_ARGS__)
 
 #define PATCH_CHECK(retCode, exper, ...) \
     if (!(retCode)) { \

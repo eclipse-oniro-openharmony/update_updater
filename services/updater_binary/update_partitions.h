@@ -20,12 +20,12 @@
 #include "script_instruction.h"
 #include "script_manager.h"
 
-namespace updater {
-class UpdatePartitions : public uscript::UScriptInstruction {
+namespace Updater {
+class UpdatePartitions : public Uscript::UScriptInstruction {
 public:
     UpdatePartitions() {}
     virtual ~UpdatePartitions() {}
-    int32_t Execute(uscript::UScriptEnv &env, uscript::UScriptContext &context) override;
+    int32_t Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context) override;
 private:
     int ParsePartitionInfo(const std::string &partitionInfo, PartitonList &newPartList) const;
     int DoNewPartitions(PartitonList &newPartList);

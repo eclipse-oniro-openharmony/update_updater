@@ -19,7 +19,7 @@
 #include "text_label.h"
 #include "progress_bar.h"
 
-namespace updater {
+namespace Updater {
 void DoProgress();
 
 void ShowUpdateFrame(bool isShow);
@@ -35,5 +35,5 @@ TextLabel *GetUpdateInfoLabel();
 ProgressBar *GetProgressBar();
 
 void SetUpdateFlag(int updateFlag);
-} // namespace updater
+} // namespace Updater
 #endif /* UPDATE_UI_HOS_UPDATER_H */

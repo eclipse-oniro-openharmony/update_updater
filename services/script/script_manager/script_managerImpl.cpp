@@ -21,9 +21,9 @@
 #include "script_utils.h"
 #include "thread_pool.h"
 
-using namespace hpackage;
+using namespace Hpackage;
 
-namespace uscript {
+namespace Uscript {
 const std::string LOAD_SCRIPT_NAME = "loadScript.us";
 const std::string REGISTER_CMD_SCRIPT_NAME = "registerCmd.us";
 
@@ -101,7 +101,7 @@ int32_t ScriptManagerImpl::Init()
 
 int32_t ScriptManagerImpl::RegisterInstruction(ScriptInstructionHelper &helper)
 {
-    uscript::UScriptInstructionFactoryPtr factory = scriptEnv_->GetInstructionFactory();
+    Uscript::UScriptInstructionFactoryPtr factory = scriptEnv_->GetInstructionFactory();
     USCRIPT_CHECK(factory != nullptr, return USCRIPT_SUCCESS, "None factory");
 
     for (auto instrName : scriptEnv_->GetInstructionNames()) {
@@ -200,4 +200,4 @@ UScriptEnv* ScriptManagerImpl::GetScriptEnv(const std::string &instrName) const
 {
     return scriptEnv_;
 }
-} // namespace uscript
+} // namespace Uscript

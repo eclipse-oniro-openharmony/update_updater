@@ -15,7 +15,7 @@
 
 #ifndef UPDATER_FS_MANAGER_PARTITION_CONST_H
 #define UPDATER_FS_MANAGER_PARTITION_CONST_H
-namespace updater {
+namespace Updater {
 constexpr int SCSI_CDROM_MAJOR = 11;
 constexpr int SCSI_DISK0_MAJOR = 8;
 constexpr int SDMMC_MAJOR = 179;

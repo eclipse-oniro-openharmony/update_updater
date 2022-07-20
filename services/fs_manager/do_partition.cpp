@@ -29,7 +29,7 @@
 #include "partition_const.h"
 #include "securec.h"
 
-namespace updater {
+namespace Updater {
 namespace {
 const std::string USERDATA_PARTNAME = "userdata";
 const std::string UPDATER_PARTNAME = "updater";

@@ -24,7 +24,7 @@
 #include "securec.h"
 #include "utils.h"
 
-namespace hpackage {
+namespace Hpackage {
 constexpr int32_t MIN_YEAR = 80;
 constexpr uint32_t TM_YEAR_BITS = 9;
 constexpr uint32_t TM_MON_BITS = 5;
@@ -33,7 +33,7 @@ constexpr uint32_t TM_HOUR_BITS = 11;
 constexpr uint32_t MAX_MEM_SIZE = 1 << 29;
 constexpr uint8_t SHIFT_RIGHT_FOUR_BITS = 4;
 
-using namespace updater::utils;
+using namespace Updater::Utils;
 
 std::string GetFilePath(const std::string &fileName)
 {
@@ -189,4 +189,4 @@ std::string ConvertShaHex(const std::vector<uint8_t> &shaDigest)
     }
     return haxSha256;
 }
-} // namespace hpackage
+} // namespace Hpackage

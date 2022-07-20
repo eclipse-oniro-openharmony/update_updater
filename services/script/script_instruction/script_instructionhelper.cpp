@@ -24,7 +24,7 @@
 
 using namespace BasicInstruction;
 
-namespace uscript {
+namespace Uscript {
 static std::set<std::string> g_reservedInstructions = {
     "LoadScript", "RegisterCmd", "abort", "assert", "concat",
     "is_substring", "stdout", "sleep", "set_progress", "ui_print",
@@ -107,9 +107,9 @@ int32_t ScriptInstructionHelper::RegisterUserInstruction(const std::string& libN
     }
 
     userInstrLibName_.assign(libName);
-    uscript::UScriptInstructionFactoryPtr factory = nullptr;
+    Uscript::UScriptInstructionFactoryPtr factory = nullptr;
     if (instrLib_ == nullptr) {
-        char *realPath = realpath(libName.c_str(), NULL);
+        char *realPath = realpath(libName.c_str(), nullptr);
         USCRIPT_CHECK(realPath != nullptr, return USCRIPT_INVALID_PARAM, "realPath is NULL");
         instrLib_ = dlopen(realPath, RTLD_LAZY);
         free(realPath);
@@ -117,8 +117,8 @@ int32_t ScriptInstructionHelper::RegisterUserInstruction(const std::string& libN
     USCRIPT_CHECK(instrLib_ != nullptr, return USCRIPT_INVALID_PARAM,
         "Fail to dlopen %s ", libName.c_str());
 
-    uscript::UScriptInstructionFactoryPtr (*pGetInstructionFactory)();
-    pGetInstructionFactory = (uscript::UScriptInstructionFactoryPtr(*)())dlsym(instrLib_, "GetInstructionFactory");
+    Uscript::UScriptInstructionFactoryPtr (*pGetInstructionFactory)();
+    pGetInstructionFactory = (Uscript::UScriptInstructionFactoryPtr(*)())dlsym(instrLib_, "GetInstructionFactory");
     if (pGetInstructionFactory == nullptr) {
         USCRIPT_LOGE("Fail to get sym %s ", libName.c_str());
         return USCRIPT_INVALID_PARAM;

@@ -22,7 +22,7 @@
 #include <sys/types.h>
 
 
-namespace updater {
+namespace Updater {
 #define RD_MODE (O_RDONLY)
 #define WR_MODE (O_WRONLY)
 #define RW_MODE (O_RDWR)
@@ -112,6 +112,6 @@ extern struct Partition *GetPartition(const Disk &disk, int partn);
 extern int GetPartitionNumByPartName(const std::string &partname, const PartitonList &plist);
 extern int DoPartitions(PartitonList &nlist);
 extern bool SetBlockDeviceMode(BlockDevice &dev);
-} // updater
+} // Updater
 #endif // __UPDATER_FS_MANAGER_PARTITIONS_H
 

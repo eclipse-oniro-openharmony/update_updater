@@ -22,7 +22,7 @@
 #include <openssl/sha.h>
 #include "pkg_manager.h"
 
-namespace hpackage {
+namespace Hpackage {
 struct Pkcs7SignerInfo {
     int32_t digestNid;
     int32_t digestEncryptNid;
@@ -35,7 +35,7 @@ public:
 
     ~Pkcs7SignedData();
 
-    int32_t BuildPkcs7SignedData(hpackage::PkgBuffer &p7Data, uint32_t signMethod,
+    int32_t BuildPkcs7SignedData(Hpackage::PkgBuffer &p7Data, uint32_t signMethod,
         const std::vector<uint8_t> &digestBlock, const std::vector<uint8_t> &signedData);
 
     int32_t ParsePkcs7SignedData(const uint8_t *sourceData, uint32_t sourceDataLen,
@@ -48,7 +48,7 @@ private:
 
     ASN1_OBJECT *GetSignAlgorithmObj(uint32_t signMethod);
 
-    int32_t PutDataToBuffer(hpackage::PkgBuffer &p7Data);
+    int32_t PutDataToBuffer(Hpackage::PkgBuffer &p7Data);
 
 private:
     int32_t VerifyInit(const uint8_t *sourceData, uint32_t sourceDataLen);
@@ -69,5 +69,5 @@ private:
     PKCS7 *pkcs7_;
     BIO *p7Bio_;
 };
-} // namespace hpackage
+} // namespace Hpackage
 #endif

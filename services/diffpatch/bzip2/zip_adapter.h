@@ -23,10 +23,10 @@
 #include "securec.h"
 #include "zlib.h"
 
-namespace updatepatch {
+namespace UpdatePatch {
 class ZipAdapter : public DeflateAdapter {
 public:
-    ZipAdapter(UpdatePatchWriterPtr outStream, size_t offset, const hpackage::PkgManager::FileInfoPtr fileInfo);
+    ZipAdapter(UpdatePatchWriterPtr outStream, size_t offset, const Hpackage::PkgManager::FileInfoPtr fileInfo);
     ~ZipAdapter() override
     {
         Close();
@@ -49,5 +49,5 @@ private:
     int32_t memLevel_ {0};
     int32_t strategy_ {0};
 };
-} // namespace updatepatch
+} // namespace UpdatePatch
 #endif // ZIP_ADAPTER_H

@@ -23,7 +23,7 @@
 #include "update_processor.h"
 #include "utils.h"
 
-using namespace updater;
+using namespace Updater;
 #ifndef UPDATER_UT
 int main(int argc, char **argv)
 {
@@ -40,6 +40,6 @@ int main(int argc, char **argv)
     // Re-load fstab to child process.
     LoadFstab();
     std::string packagePath = argv[0];
-    return ProcessUpdater(retry, pipeFd, packagePath, utils::GetCertName());
+    return ProcessUpdater(retry, pipeFd, packagePath, Utils::GetCertName());
 }
 #endif

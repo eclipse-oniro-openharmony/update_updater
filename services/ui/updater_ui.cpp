@@ -26,8 +26,8 @@
 #include "utils.h"
 #include "view.h"
 
-namespace updater {
-using utils::String2Int;
+namespace Updater {
+using Utils::String2Int;
 
 constexpr int LABEL_HEIGHT = 13;
 constexpr int MAX_IMGS = 62;
@@ -163,7 +163,7 @@ void OnKeyEvent(int viewId)
     if (viewId == g_textLabel0->GetViewId() && g_textLabel0->IsVisiable()) {
         HideDialog();
         PostUpdater(true);
-        utils::DoReboot("");
+        Utils::DoReboot("");
     } else if (viewId == g_textLabel2->GetViewId() && g_textLabel2->IsVisiable()) {
         ShowDialog();
     } else if (viewId == g_textLabel3->GetViewId() && g_textLabel3->IsVisiable()) {
@@ -175,7 +175,7 @@ void OnKeyEvent(int viewId)
             return;
         }
         PostUpdater(true);
-        utils::DoReboot("");
+        Utils::DoReboot("");
     } else if (viewId == g_dialogCancalBtn->GetViewId() && g_dialogCancalBtn->IsVisiable()) {
         HideDialog();
     } else if (viewId == g_dialogOkBtn->GetViewId() && g_dialogOkBtn->IsVisiable()) {

@@ -24,7 +24,7 @@
 #include "pkg_stream.h"
 #include "pkg_utils.h"
 
-namespace hpackage {
+namespace Hpackage {
 class PkgManagerImpl : public PkgManager {
 public:
     PkgManagerImpl() {}
@@ -130,5 +130,5 @@ private:
     std::string signVerifyKeyName_ {};
     PkgDecodeProgress decodeProgress_ { nullptr };
 };
-} // namespace hpackage
+} // namespace Hpackage
 #endif // PKG_MANAGER_IMPL_H

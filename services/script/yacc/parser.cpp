@@ -21,19 +21,19 @@
 #include "log.h"
 
 /* 注意：这里的参数由%parse-param决定 */
-static uscript::Parser::symbol_type yylex(uscript::Scanner* scanner, uscript::ScriptInterpreter* interpreter) {
+static Uscript::Parser::symbol_type yylex(Uscript::Scanner* scanner, Uscript::ScriptInterpreter* interpreter) {
     return scanner->nextToken();
 }
 
 using namespace std;
-using namespace uscript;
-using namespace updater;
+using namespace Uscript;
+using namespace Updater;
 
 // First part of user prologue.
 
 void Parser::error(const location_type& loc, const std::string& msg)
 {
-    LOG(updater::ERROR) << "error " << msg << "  loc " << loc << std::endl;
+    LOG(Updater::ERROR) << "error " << msg << "  loc " << loc << std::endl;
 }
 
 #ifndef YY_
@@ -119,10 +119,10 @@ void Parser::error(const location_type& loc, const std::string& msg)
 #define YYERROR         goto yyerrorlab
 #define YYRECOVERING() (!!yyerrstatus_)
 
-namespace uscript {
+namespace Uscript {
 
 // Build a parser object.
-Parser::Parser(uscript::Scanner* scanner_yyarg, uscript::ScriptInterpreter* interpreter_yyarg)
+Parser::Parser(Uscript::Scanner* scanner_yyarg, Uscript::ScriptInterpreter* interpreter_yyarg)
 #if YYDEBUG
     : yydebug_(false),
     yycdebug_(&std::cerr),
@@ -1911,5 +1911,5 @@ append:
     }
 #endif // YYDEBUG
 
-} // uscript
+} // Uscript
 
