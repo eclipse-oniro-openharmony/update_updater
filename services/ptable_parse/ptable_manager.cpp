@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "ptable_manager.h"
+
 #include "log/log.h"
 #include "securec.h"
 

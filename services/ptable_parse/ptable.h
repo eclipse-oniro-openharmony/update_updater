@@ -31,11 +31,11 @@ public:
     const std::string PREFIX_SYS_CLASS_BLOCK = "/sys/class/block/sd";
 
     struct PtnInfo {
-        uint64_t startAddr;
-        uint64_t partitionSize;
-        uint8_t partitionTypeGuid[GPT_PARTITION_TYPE_GUID_LEN];
-        uint32_t lun;
-        std::string dispName;
+        uint64_t startAddr {};
+        uint64_t partitionSize {};
+        uint8_t partitionTypeGuid[GPT_PARTITION_TYPE_GUID_LEN] {};
+        uint32_t lun {};
+        std::string dispName {};
     };
 
     std::vector<PtnInfo> GetPtablePartitionInfo() const;
@@ -118,22 +118,22 @@ protected:
     }
 
     struct GPTHeaderInfo {
-        uint32_t headerSize;
-        uint32_t partitionEntrySize;
-        uint32_t maxPartitionCount;
-        uint64_t firstUsableLba;
+        uint32_t headerSize {};
+        uint32_t partitionEntrySize {};
+        uint32_t maxPartitionCount {};
+        uint64_t firstUsableLba {};
     };
 
     struct PtableData {
-        bool dataValid;
-        uint32_t emmcGptDataLen;
-        uint32_t lbaLen;
-        uint32_t gptHeaderLen;
-        uint32_t blockSize;
-        uint32_t imgLuSize;
-        uint32_t startLunNumber;
-        uint32_t writeDeviceLunSize;
-        uint32_t defaultLunNum;
+        bool dataValid {};
+        uint32_t emmcGptDataLen {};
+        uint32_t lbaLen {};
+        uint32_t gptHeaderLen {};
+        uint32_t blockSize {};
+        uint32_t imgLuSize {};
+        uint32_t startLunNumber {};
+        uint32_t writeDeviceLunSize {};
+        uint32_t defaultLunNum {};
     };
 
     std::vector<PtnInfo> partitionInfo_;

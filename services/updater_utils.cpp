@@ -52,8 +52,9 @@ static bool DeleteUpdaterPath(const std::string &path)
     struct dirent *dp = nullptr;
     while ((dp = readdir(pDir.get())) != nullptr) {
         std::string currentName(dp->d_name);
-        if (currentName[0] != '.' && (currentName.compare("log") != 0) &&
-            (currentName.compare(UPDATER_RESULT_FILE) != 0)) {
+        if (currentName[0] != '.' && (currentName.compare("log") != 0)
+            && (currentName.compare(UPDATER_RESULT_FILE) != 0) &&
+            (currentName.compare(UPDATER_LOCALE_FILE) != 0)) {
             std::string tmpName(path);
             tmpName.append("/" + currentName);
             if (IsDir(tmpName)) {
@@ -67,7 +68,7 @@ static bool DeleteUpdaterPath(const std::string &path)
     return true;
 }
 
-static bool ClearMisc()
+bool ClearMisc()
 {
     struct UpdateMessage cleanBoot {};
     UPDATER_ERROR_CHECK(WriteUpdaterMiscMsg(cleanBoot) == true,
@@ -77,7 +78,10 @@ static bool ClearMisc()
     LOG(INFO) << "ClearMisc::misc path : " << miscBlockDev;
     auto fp = std::unique_ptr<FILE, decltype(&fclose)>(fopen(miscBlockDev.c_str(), "rb+"), fclose);
     UPDATER_FILE_CHECK(fp != nullptr, "WriteVersionCode fopen failed", return false);
-    (void)fseek(fp.get(), PARTITION_RECORD_OFFSET, SEEK_SET);
+    if (fseek(fp.get(), PARTITION_RECORD_OFFSET, SEEK_SET) != 0) {
+        LOG(ERROR) << "ClearMisc fseek failed";
+        return false;
+    }
     off_t clearOffset = 0;
     UPDATER_FILE_CHECK(fwrite(&clearOffset, sizeof(off_t), 1, fp.get()) == 1,
         "ClearMisc write misc initOffset 0 failed", return false);
@@ -85,7 +89,10 @@ static bool ClearMisc()
     struct PartitionRecordInfo cleanPartition {};
     for (size_t tmpOffset = 0; tmpOffset < PARTITION_UPDATER_RECORD_MSG_SIZE; tmpOffset +=
         sizeof(PartitionRecordInfo)) {
-        (void)fseek(fp.get(), PARTITION_RECORD_START + tmpOffset, SEEK_SET);
+        if (fseek(fp.get(), PARTITION_RECORD_START + tmpOffset, SEEK_SET) != 0) {
+            LOG(ERROR) << "ClearMisc fseek failed";
+            return false;
+        }
         UPDATER_FILE_CHECK(fwrite(&cleanPartition, sizeof(PartitionRecordInfo), 1, fp.get()) == 1,
             "ClearMisc write misc cleanPartition failed", return false);
     }
@@ -183,17 +190,11 @@ int GetBootMode(int &mode)
     if (!ret) {
         return -1;
     }
-    // if boot.update is empty, read from command.The Misc partition may have dirty data,
-    // so strlen(boot.update) is not used, which can cause system exceptions.
-    if (boot.update[0] == '\0' && !access(COMMAND_FILE.c_str(), 0)) {
-        ret = ReadUpdaterMessage(COMMAND_FILE, boot);
-        if (!ret) {
-            return -1;
-        }
-    }
-    if (memcmp(boot.command, "boot_flash", strlen("boot_flash")) == 0) {
+
+    LOG(INFO) << "GetBootMode, boot.update" << boot.update;
+    if (strncmp(boot.update, "boot_flash", strlen("boot_flash")) == 0) {
         mode = BOOT_FLASHD;
     }
     return 0;
 }
-} // namespace updater
+} // namespace Updater

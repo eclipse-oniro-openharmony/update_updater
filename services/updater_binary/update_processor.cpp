@@ -19,6 +19,7 @@
 #include <unistd.h>
 #include "applypatch/data_writer.h"
 #include "applypatch/partition_record.h"
+#include "dump.h"
 #include "log.h"
 #include "pkg_manager.h"
 #ifdef UPDATER_USE_PTABLE
@@ -27,7 +28,10 @@
 #include "script_instruction.h"
 #include "script_manager.h"
 #include "update_image_block.h"
+#include "update_image_patch.h"
 #include "update_partitions.h"
+#include "updater_main.h"
+#include "updater/updater_const.h"
 
 using namespace Uscript;
 using namespace Hpackage;
@@ -37,7 +41,7 @@ namespace Updater {
 size_t UScriptInstructionRawImageWrite::totalSize_ = 0;
 size_t UScriptInstructionRawImageWrite::readSize_ = 0;
 const std::string PREFIX_PARTITION_NODE = "/dev/block/by-name/";
-const std::string PREFIX_UFS_NODE = "/dev/block/sd";
+
 UpdaterEnv::~UpdaterEnv()
 {
     if (factory_ != nullptr) {
@@ -65,7 +69,8 @@ const std::vector<std::string> UpdaterEnv::GetInstructionNames() const
 {
     static std::vector<std::string> updaterCmds = {
         "sha_check", "first_block_check", "block_update",
-        "raw_image_write", "update_partitions"
+        "raw_image_write", "update_partitions", "image_patch",
+        "image_sha_check"
     };
     return updaterCmds;
 }
@@ -83,6 +88,10 @@ int32_t UpdaterInstructionFactory::CreateInstructionInstance(UScriptInstructionP
         instr = new UScriptInstructionRawImageWrite();
     } else if (name == "update_partitions") {
         instr = new UpdatePartitions();
+    } else if (name == "image_patch") {
+        instr = new USInstrImagePatch();
+    }  else if (name == "image_sha_check") {
+        instr = new USInstrImageShaCheck();
     }
     return USCRIPT_SUCCESS;
 }
@@ -181,16 +190,21 @@ int32_t UScriptInstructionRawImageWrite::Execute(Uscript::UScriptEnv &env, Uscri
 int ExecUpdate(PkgManager::PkgManagerPtr pkgManager, int retry, PostMessageFunction postMessage)
 {
     UpdaterEnv* env = new UpdaterEnv(pkgManager, postMessage, retry);
-    UPDATER_ERROR_CHECK(env != nullptr, "Fail to create env", return EXIT_PARSE_SCRIPT_ERROR);
+    UPDATER_ERROR_CHECK(env != nullptr, "Fail to create env", UPDATER_LAST_WORD(EXIT_PARSE_SCRIPT_ERROR);
+        return EXIT_PARSE_SCRIPT_ERROR);
     int ret = 0;
     ScriptManager* scriptManager = ScriptManager::GetScriptManager(env);
     UPDATER_ERROR_CHECK(scriptManager != nullptr, "Fail to create scriptManager",
         ScriptManager::ReleaseScriptManager();
         delete env;
+        UPDATER_LAST_WORD(EXIT_PARSE_SCRIPT_ERROR);
         return EXIT_PARSE_SCRIPT_ERROR);
+
+    UpdaterInit::GetInstance().InvokeEvent(UPDATER_BINARY_INIT_DONE_EVENT);
+
     for (int32_t i = 0; i < ScriptManager::MAX_PRIORITY; i++) {
         ret = scriptManager->ExecuteScript(i);
-        UPDATER_ERROR_CHECK(ret == USCRIPT_SUCCESS, "Fail to execute script", break);
+        UPDATER_ERROR_CHECK(ret == USCRIPT_SUCCESS, "Fail to execute script", UPDATER_LAST_WORD(ret); break);
     }
     ScriptManager::ReleaseScriptManager();
     delete env;
@@ -222,17 +236,21 @@ int UScriptInstructionRawImageWrite::GetWritePathAndOffset(const std::string &pa
 #endif
     return USCRIPT_SUCCESS;
 }
-} // updater
 
 int ProcessUpdater(bool retry, int pipeFd, const std::string &packagePath, const std::string &keyPath)
 {
+    UPDATER_INIT_RECORD;
+    UpdaterInit::GetInstance().InvokeEvent(UPDATER_BINARY_INIT_EVENT);
+    Dump::GetInstance().RegisterDump("DumpHelperLog", std::make_unique<DumpHelperLog>());
     FILE *pipeWrite = fdopen(pipeFd, "w");
-    UPDATER_ERROR_CHECK(pipeWrite != nullptr, "Fail to fdopen", return EXIT_INVALID_ARGS);
+    UPDATER_ERROR_CHECK(pipeWrite != nullptr, "Fail to fdopen", UPDATER_LAST_WORD(EXIT_INVALID_ARGS);
+        return EXIT_INVALID_ARGS);
     // line buffered, make sure parent read per line.
     setlinebuf(pipeWrite);
     PkgManager::PkgManagerPtr pkgManager = PkgManager::GetPackageInstance();
     UPDATER_ERROR_CHECK(pkgManager != nullptr,
-        "Fail to GetPackageInstance", fclose(pipeWrite); pipeWrite = nullptr; return EXIT_INVALID_ARGS);
+        "Fail to GetPackageInstance", fclose(pipeWrite); pipeWrite = nullptr; UPDATER_LAST_WORD(EXIT_INVALID_ARGS);
+        return EXIT_INVALID_ARGS);
 
     std::vector<std::string> components;
     int32_t ret = pkgManager->LoadPackage(packagePath, keyPath, components);
@@ -240,6 +258,7 @@ int ProcessUpdater(bool retry, int pipeFd, const std::string &packagePath, const
         fclose(pipeWrite);
         pipeWrite = nullptr;
         PkgManager::ReleasePackageInstance(pkgManager);
+        UPDATER_LAST_WORD(EXIT_INVALID_ARGS);
         return EXIT_INVALID_ARGS);
 #ifdef UPDATER_USE_PTABLE
     PackagePtable& packagePtb = PackagePtable::GetInstance();
@@ -259,3 +278,4 @@ int ProcessUpdater(bool retry, int pipeFd, const std::string &packagePath, const
 #endif
     return ret;
 }
+} // Updater
