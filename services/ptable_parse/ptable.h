@@ -19,7 +19,7 @@
 #include "macros.h"
 #include "json_node.h"
 
-namespace updater {
+namespace Updater {
 class Ptable {
 public:
     Ptable() = default;
@@ -181,5 +181,5 @@ private:
     bool ParsePtableDataNode(const JsonNode &ptableDataNode);
     bool ParsePtableData();
 };
-} // namespace updater
+} // namespace Updater
 #endif // UPDATER_PTABLE_H
