@@ -470,29 +470,6 @@ bool Ptable::WriteBufferToPath(const std::string &path, const uint64_t offset,
     return true;
 }
 
-void Ptable::SetPartitionName(const std::string &name, uint8_t *data, const uint32_t size)
-{
-    if (data == nullptr || size == 0) {
-        LOG(ERROR) << "invalid input";
-        return;
-    }
-    // convert utf8 to utf16, 2 bytes for 1 charactor of partition name
-    if (name.length() * 2 >= MAX_GPT_NAME_SIZE) {
-        LOG(ERROR) << "name size too large";
-        return;
-    }
-
-    char utf16Name[MAX_GPT_NAME_SIZE] = {0};
-    for (uint32_t i = 0; i <= name.length(); i++) {
-        // convert utf8 to utf16, 2 bytes for 1 charactor of partition name
-        utf16Name[i * 2] = static_cast<char>(tolower(name[i]));
-    }
-    if (memcpy_s(data, size, utf16Name, sizeof(utf16Name)) != EOK) {
-        LOG(ERROR) << "copy name failed";
-    }
-    return;
-}
-
 bool Ptable::GetPartionInfoByName(const std::string &partitionName, PtnInfo &ptnInfo, int32_t &index)
 {
     if (partitionInfo_.empty()) {
