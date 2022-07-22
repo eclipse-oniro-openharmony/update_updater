@@ -41,11 +41,11 @@ int32_t UpdatePatch::ApplyImagePatch(const PatchParam &param,
     UpdatePatchWriterPtr writer, const std::vector<uint8_t> &bonusData)
 {
     PATCH_CHECK(writer != nullptr, return -1, "check param fail ");
-    PATCH_CHECK(param.patchSize >= (PKGDIFF_MAGIC.size() + sizeof(int32_t)),
+    PATCH_CHECK(param.patchSize >= (std::char_traits<char>::length(PKGDIFF_MAGIC) + sizeof(int32_t)),
         return -1, "patch too short to contain header ");
-    PATCH_CHECK(memcmp(param.patch, PKGDIFF_MAGIC.c_str(), PKGDIFF_MAGIC.size()) == 0,
+    PATCH_CHECK(memcmp(param.patch, PKGDIFF_MAGIC, std::char_traits<char>::length(PKGDIFF_MAGIC)) == 0,
         return -1, "corrupt patch file header (magic number) ");
-    size_t offset = PKGDIFF_MAGIC.size();
+    size_t offset = std::char_traits<char>::length(PKGDIFF_MAGIC);
     int32_t numChunks = ImagePatch::ReadLE<int32_t>(param.patch + offset);
     offset += sizeof(int32_t);
 
@@ -154,7 +154,7 @@ int32_t UpdatePatch::ApplyPatch(const std::string &patchName, const std::string 
     writer->Init();
 
     // check if image patch
-    if (memcmp(patchData.memory, PKGDIFF_MAGIC.c_str(), PKGDIFF_MAGIC.size()) == 0) {
+    if (memcmp(patchData.memory, PKGDIFF_MAGIC, std::char_traits<char>::length(PKGDIFF_MAGIC)) == 0) {
         PatchParam param {};
         param.patch = patchData.memory;
         param.patchSize = patchData.length;
@@ -162,7 +162,7 @@ int32_t UpdatePatch::ApplyPatch(const std::string &patchName, const std::string 
         param.oldSize = oldData.length;
         ret = UpdatePatch::UpdatePatch::ApplyImagePatch(param, writer.get(), empty);
         PATCH_CHECK(ret == 0, return -1, "Failed to apply image patch file");
-    } else if (memcmp(patchData.memory, BSDIFF_MAGIC.c_str(), BSDIFF_MAGIC.size()) == 0) { // bsdiff
+    } else if (memcmp(patchData.memory, BSDIFF_MAGIC, std::char_traits<char>::length(BSDIFF_MAGIC)) == 0) { // bsdiff
         PatchBuffer patchInfo = {patchData.memory, 0, patchData.length};
         BlockBuffer oldInfo = {oldData.memory, oldData.length};
         ret = ApplyBlockPatch(patchInfo, oldInfo, writer.get());

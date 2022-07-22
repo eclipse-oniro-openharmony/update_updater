@@ -27,6 +27,7 @@
 #include <unistd.h>
 #include <vector>
 #include "fs_manager/mount.h"
+#include "log/dump.h"
 #include "log/log.h"
 #include "package/pkg_manager.h"
 #include "package/packages_info.h"
@@ -362,7 +363,7 @@ UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, const std::
     UPDATER_CHECK_ONLY_RETURN(pid >= 0, ERROR_CODE(CODE_FORK_FAIL); return UPDATE_ERROR);
     if (pid == 0) { // child
         close(pipeRead);   // close read endpoint
-        std::string fullPath = G_WORK_PATH + UPDATER_BINARY;
+        std::string fullPath = std::string(G_WORK_PATH) + std::string(UPDATER_BINARY);
 #ifdef UPDATER_UT
         if (packagePath.find("updater_binary_abnormal") != std::string::npos) {
             fullPath = "/system/bin/updater_binary_abnormal";

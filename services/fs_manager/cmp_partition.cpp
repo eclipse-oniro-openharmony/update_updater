@@ -97,4 +97,4 @@ int GetRegisterUpdaterPartitionList(PartitonList &ulist)
     UPDATER_CHECK_ONLY_RETURN(!ulist.empty(), return 0);
     return 1;
 }
-} // namespace updater
+} // namespace Updater

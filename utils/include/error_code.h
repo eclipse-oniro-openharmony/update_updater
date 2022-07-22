@@ -30,5 +30,5 @@ enum UpdaterErrorCode {
     CODE_INCREMENT_UPDATER_FAIL,
     CODE_FULL_UPDATER_FAIL,
 };
-} // namespace updater
+} // namespace Updater
 #endif // FAULT_CODE_H

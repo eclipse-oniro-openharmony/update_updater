@@ -32,8 +32,8 @@ int main(int argc, char **argv)
     }
 
     const std::string miscFile = "/dev/block/by-name/misc";
+    struct UpdateMessage boot {};
     if (strcmp(argv[1], "updater") == 0) {
-        struct UpdateMessage boot {};
         if (argc < BINARY_MAX_ARGS) {
             cout << "Please input correct updater command!" << endl;
             return -1;
@@ -45,31 +45,25 @@ int main(int argc, char **argv)
                 return -1;
             }
         }
-        bool ret = WriteUpdaterMessage(miscFile, boot);
-        if (!ret) {
-            cout << "WriteUpdaterMessage failed!" << endl;
-            return -1;
-        }
     } else if (strcmp(argv[1], "user_factory_reset") == 0) {
-        struct UpdateMessage boot {};
         if (strncpy_s(boot.update, sizeof(boot.update), "--user_wipe_data", sizeof(boot.update) - 1) != 0) {
             cout << "strncpy_s failed!" << endl;
             return -1;
         }
-        bool ret = WriteUpdaterMessage(miscFile, boot);
-        if (!ret) {
-            cout << "WriteUpdaterMessage failed!" << endl;
+    } else if (strcmp(argv[1], "boot_flash") == 0) {
+        if (strncpy_s(boot.update, sizeof(boot.update), "boot_flash", sizeof(boot.update) - 1) != 0) {
+            cout << "strncpy_s failed!" << endl;
             return -1;
         }
     } else if (strcmp(argv[1], "clear") == 0) {
-        struct UpdateMessage boot {};
-        bool ret = WriteUpdaterMessage(miscFile, boot);
-        if (!ret) {
-            cout << "WriteUpdaterMessage failed!" << endl;
-            return -1;
-        }
+        cout << "clear misc" << endl;
     } else {
         cout << "Please input correct command!" << endl;
+        return -1;
+    }
+    bool ret = WriteUpdaterMessage(miscFile, boot);
+    if (!ret) {
+        cout << "WriteUpdaterMessage failed!" << endl;
         return -1;
     }
     return 0;

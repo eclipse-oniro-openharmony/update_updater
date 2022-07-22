@@ -22,11 +22,11 @@
 namespace Updater {
 void LoadFstab(); /* Load fstab */
 void LoadSpecificFstab(const std::string &fstabName);
-int FormatPartition(const std::string &path);
+int FormatPartition(const std::string &path, bool isZeroErase = false);
 int UmountForPath(const std::string &path);
 int MountForPath(const std::string &path);
 int SetupPartitions(PackageUpdateMode mode = HOTA_UPDATE);
 const std::string GetBlockDeviceByMountPoint(const std::string &mountPoint);
 MountStatus GetMountStatusForPath(const std::string &path);
-} // updater
+} // Updater
 #endif // UPDATER_FS_MANAGER_MOUNT_H

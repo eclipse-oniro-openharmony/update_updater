@@ -15,7 +15,6 @@
 
 #include "blocks_diff.h"
 #include <cstdio>
-#include <endian.h>
 #include <iostream>
 #include <vector>
 #include "update_diff.h"
@@ -152,32 +151,36 @@ std::unique_ptr<DeflateAdapter> BlocksStreamDiff::CreateBZip2Adapter(size_t patc
 }
 
 int32_t BlocksBufferDiff::WritePatchHeader(int64_t controlSize,
-    int64_t diffDataSize, int64_t newSize, size_t &patchOffset)
+    int64_t diffDataSize, int64_t newSize, size_t &headerLen)
 {
-    patchOffset = BSDIFF_MAGIC.size() + sizeof(int64_t) + sizeof(int64_t) + sizeof(int64_t);
-    PATCH_CHECK(patchData_.size() > patchOffset + offset_, return -1, "Invalid patch size");
+    headerLen = std::char_traits<char>::length(BSDIFF_MAGIC) + sizeof(int64_t) + sizeof(int64_t) + sizeof(int64_t);
+    PATCH_CHECK(patchData_.size() > headerLen + offset_, return -1, "Invalid patch size");
 
-    int32_t ret = memcpy_s(patchData_.data() + offset_, patchData_.size(), BSDIFF_MAGIC.c_str(), BSDIFF_MAGIC.size());
-    PATCH_CHECK(ret == 0, return ret, "Failed to copy magic");
-    patchOffset = BSDIFF_MAGIC.size();
-    BlockBuffer data = {patchData_.data() + offset_ + patchOffset, patchData_.size()};
+    int32_t ret = memcpy_s(patchData_.data() + offset_, patchData_.size(), BSDIFF_MAGIC,
+        std::char_traits<char>::length(BSDIFF_MAGIC));
+    if (ret != 0) {
+        PATCH_LOGE("Failed to copy magic");
+        return ret;
+    }
+    headerLen = std::char_traits<char>::length(BSDIFF_MAGIC);
+    BlockBuffer data = {patchData_.data() + offset_ + headerLen, patchData_.size()};
     WriteLE64(data, controlSize);
-    patchOffset += sizeof(int64_t);
-    BlockBuffer diffData = {patchData_.data() + offset_ + patchOffset, patchData_.size()};
+    headerLen += sizeof(int64_t);
+    BlockBuffer diffData = {patchData_.data() + offset_ + headerLen, patchData_.size()};
     WriteLE64(diffData, diffDataSize);
-    patchOffset += sizeof(int64_t);
-    BlockBuffer newData = {patchData_.data() + offset_ + patchOffset, patchData_.size()};
+    headerLen += sizeof(int64_t);
+    BlockBuffer newData = {patchData_.data() + offset_ + headerLen, patchData_.size()};
     WriteLE64(newData, newSize);
-    patchOffset += sizeof(int64_t);
+    headerLen += sizeof(int64_t);
     return 0;
 }
 
 int32_t BlocksStreamDiff::WritePatchHeader(int64_t controlSize,
-    int64_t diffDataSize, int64_t newSize, size_t &patchOffset)
+    int64_t diffDataSize, int64_t newSize, size_t &headerLen)
 {
     PATCH_DEBUG("WritePatchHeader %zu", static_cast<size_t>(stream_.tellp()));
     stream_.seekp(offset_, std::ios::beg);
-    stream_.write(BSDIFF_MAGIC.c_str(), BSDIFF_MAGIC.size());
+    stream_.write(BSDIFF_MAGIC, std::char_traits<char>::length(BSDIFF_MAGIC));
     PkgBuffer buffer(sizeof(int64_t));
     WriteLE64(buffer, controlSize);
     stream_.write(reinterpret_cast<const char*>(buffer.buffer), sizeof(int64_t));
@@ -185,7 +188,7 @@ int32_t BlocksStreamDiff::WritePatchHeader(int64_t controlSize,
     stream_.write(reinterpret_cast<const char*>(buffer.buffer), sizeof(int64_t));
     WriteLE64(buffer, newSize);
     stream_.write(reinterpret_cast<const char*>(buffer.buffer), sizeof(int64_t));
-    patchOffset = BSDIFF_MAGIC.size() + sizeof(int64_t)  + sizeof(int64_t)  + sizeof(int64_t);
+    headerLen = std::char_traits<char>::length(BSDIFF_MAGIC) + sizeof(int64_t)  + sizeof(int64_t)  + sizeof(int64_t);
     stream_.seekp(0, std::ios::end);
     return 0;
 }
@@ -397,22 +400,19 @@ void SuffixArray<DataType>::Init(const BlockBuffer &oldInfo)
     DataType len = 0;
     for (h = 1; suffixArray_[0] != -(static_cast<DataType>(oldInfo.length) + 1); h += h) {
         len = 0;
-        i = 0;
-        while (i < (static_cast<DataType>(oldInfo.length) + 1)) {
+        for (i = 0; i < (static_cast<DataType>(oldInfo.length) + 1);) {
             if (suffixArray_[i] < 0) {
                 len -= suffixArray_[i];
                 i -= suffixArray_[i];
             } else {
-                if (len) {
-                    suffixArray_[i - len] = -len;
-                }
+                suffixArray_[i - len] = len != 0 ? -len : suffixArray_[i - len];
                 len = suffixArrayTemp[suffixArray_[i]] + 1 - i;
                 Split(suffixArrayTemp, i, len, h);
                 i += len;
                 len = 0;
             }
         }
-        if (len) {
+        if (len != 0) {
             suffixArray_[i - len] = -len;
         }
     }
@@ -582,4 +582,4 @@ void SuffixArray<DataType>::InitBuckets(const BlockBuffer &oldInfo,
     }
     suffixArray_[0] = -1;
 }
-} // namespace updatepatch
+} // namespace UpdatePatch
