@@ -225,7 +225,7 @@ UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, cons
     }
     ShowUpdateFrame(true);
     UPDATER_ERROR_CHECK(pkgManager != nullptr, "Fail to GetPackageInstance", UPDATER_LAST_WORD(UPDATE_CORRUPT);
-	    return UPDATE_CORRUPT);
+        return UPDATE_CORRUPT);
     TextLabel *updateInfoLabel = GetUpdateInfoLabel();
     UPDATER_ERROR_CHECK(updateInfoLabel != nullptr, "Fail to updateInfoLabel", return UPDATE_CORRUPT);
     UPDATER_CHECK_ONLY_RETURN(SetupPartitions(updateMode) == 0,
@@ -239,7 +239,7 @@ UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, cons
     UPDATER_ERROR_CHECK(access(packagePath.c_str(), 0) == 0, "package is not exist",
         ShowText(GetUpdateInfoLabel(), "package is not exist");
         UPDATER_LAST_WORD(UPDATE_ERROR);
-		return UPDATE_CORRUPT);
+        return UPDATE_ERROR);
 
     int32_t verifyret = OtaUpdatePreCheck(pkgManager, packagePath);
     UPDATER_ERROR_CHECK(verifyret == PKG_SUCCESS, "Verify ota package Fail...",
