@@ -12,7 +12,6 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import("//base/update/updater/services/vendor/build/${product_name}/build_cfg.gni")
 
 SUBSYSTEM_DIR = "//base/update/updater"
 
@@ -65,7 +64,6 @@ ohos_executable("updater") {
     "//base/update/updater/services/fs_manager:libfsmanager",
     "//base/update/updater/services/log:libupdaterlog",
     "//base/update/updater/services/package:libupdaterpackage",
-    "//base/update/updater/services/ptable_parse:libptableparse",
     "//base/update/updater/services/ui:libui",
     "//base/update/updater/utils:libutils",
     "//third_party/bounds_checking_function:libsec_static",
@@ -78,89 +76,8 @@ ohos_executable("updater") {
     "//base/startup/syspara_lite/interfaces/innerkits/native/syspara:syspara",
     "//base/startup/syspara_lite/hals/parameter:sysparam_hal",
     "//third_party/bounds_checking_function:libsec_shared",
-    "//drivers/peripheral/adapter/input/hal:hdi_input_adapter",
+    "//drivers/peripheral/input/hal:hdi_input",
     "//third_party/cJSON:cjson_static",
-  ]
-
-  # add updater custom library
-  if (defined(updater_custom_lib)) {
-    deps += updater_custom_lib
-  }
-
-  # force link invisible function
-  ldflags = [ "-Wl,--whole-archive" ]
-  foreach(lib, updater_force_link_libs) {
-    ldflags += [ "${lib}" ]
-  }
-  ldflags += [ "-Wl,--no-whole-archive" ]
-
-  external_deps = [ "init:libbegetutil" ]
-  install_images = [ "updater" ]
-  install_enable = true
-  part_name = "updater"
-}
-
-ohos_static_library("libupdater") {
-  defines = [ "BUILD_OHOS" ]
-  sources = [
-    "updater.cpp",
-    "updater_main.cpp",
-    "updater_utils.cpp",
-  ]
-
-  include_dirs = [
-    "include",
-    "${SUBSYSTEM_DIR}/utils/include",
-    "${SUBSYSTEM_DIR}/interfaces/kits/include/",
-    "//third_party/bounds_checking_function/include",
-    "//base/update/updater/services/include/package",
-    "//base/update/updater/services/package/pkg_manager",
-    "//base/update/updater/services/package/pkg_verify",
-    "//base/update/updater/services/include/log",
-    "//base/update/updater/utils/json",
-    "//drivers/hdf_core/framework/ability/sbuf/include",
-    "//drivers/hdf_core/framework/include/platform",
-    "//drivers/hdf_core/framework/include/core",
-    "//drivers/hdf_core/framework/include/osal",
-    "//drivers/hdf_core/framework/include/utils",
-    "//drivers/hdf_core/framework/include/config",
-    "//drivers/hdf_core/framework/include",
-    "//drivers/peripheral/input/hal/include",
-    "//drivers/peripheral/input/interfaces/include",
-    "//foundation/graphic/ui/frameworks",
-    "//foundation/graphic/ui/interfaces/kits",
-    "//foundation/graphic/ui/interfaces/innerkits",
-    "//foundation/graphic/utils/interfaces/kits",
-    "//foundation/graphic/utils/interfaces/innerkits",
-    "//third_party/bounds_checking_function/include",
-    "//base/update/updater/services",
-    "//base/update/updater/services/ui",
-    "//base/update/updater/services/ui/view",
-    "//base/update/updater/services/include",
-  ]
-
-  deps = [
-    "//base/startup/syspara_lite/hals/parameter:sysparam_hal",
-    "//base/startup/syspara_lite/interfaces/innerkits/native/syspara:syspara",
-    "//base/update/updater/interfaces/kits/misc_info:libmiscinfo",
-    "//base/update/updater/interfaces/kits/packages:libpackageExt",
-    "//base/update/updater/services/applypatch:libapplypatch",
-    "//base/update/updater/services/diffpatch/patch:libpatch",
-    "//base/update/updater/services/flashd:libflashd",
-    "//base/update/updater/services/fs_manager:libfsmanager",
-    "//base/update/updater/services/log:libupdaterlog",
-    "//base/update/updater/services/package:libupdaterpackage",
-    "//base/update/updater/services/ui:libui",
-    "//base/update/updater/utils:libutils",
-    "//third_party/bounds_checking_function:libsec_shared",
-    "//third_party/bounds_checking_function:libsec_static",
-    "//third_party/bzip2:libbz2",
-    "//third_party/cJSON:cjson_static",
-    "//third_party/libdrm:libdrm",
-    "//third_party/lz4:liblz4_static",
-    "//third_party/openssl:libcrypto_static",
-    "//third_party/openssl:ssl_source",
-    "//third_party/zlib:libz",
   ]
 
   if (defined(use_ptable)) {

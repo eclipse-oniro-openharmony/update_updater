@@ -57,6 +57,8 @@ public:
 private:
     static int RawImageWriteProcessor(const Hpackage::PkgBuffer &buffer, size_t size, size_t start, bool isFinish,
         const void* context);
+    int GetWritePathAndOffset(const std::string &partitionName, std::string &writePath, uint64_t &offset,
+        uint64_t &partitionSize);
     static size_t totalSize_;
     static size_t readSize_;
 };

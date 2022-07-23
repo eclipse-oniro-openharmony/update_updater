@@ -308,17 +308,13 @@ static UpdaterStatus StartUpdater(PkgManager::PkgManagerPtr manager, const std::
                 std::string option = OPTIONS[optionIndex].name;
                 if (option == "update_package") {
                     upParams.updatePackage = optarg;
-                    (void)UpdaterUiFacade::GetInstance().SetMode(OTA);
                     mode = HOTA_UPDATE;
                 } else if (option == "retry_count") {
                     upParams.retryCount = atoi(optarg);
-                    (void)UpdaterUiFacade::GetInstance().SetMode(OTA);
                     mode = HOTA_UPDATE;
                 } else if (option == "factory_wipe_data") {
-                    (void)UpdaterUiFacade::GetInstance().SetMode(REBOOTFACTORYRST);
                     upParams.factoryWipeData = true;
                 } else if (option == "user_wipe_data") {
-                    (void)UpdaterUiFacade::GetInstance().SetMode(REBOOTFACTORYRST);
                     upParams.userWipeData = true;
                 }
                 break;
@@ -349,7 +345,7 @@ int UpdaterMain(int argc, char **argv)
 
     LOG(INFO) << "Ready to start";
 #ifndef UPDATER_UT
-    UpdaterUiEnv::GetInstance().Init();
+    UpdaterUiInit();
 #endif
     UpdaterInit::GetInstance().InvokeEvent(UPDATER_INIT_EVENT);
     PackageUpdateMode mode = UNKNOWN_UPDATE;
