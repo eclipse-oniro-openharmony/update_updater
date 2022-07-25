@@ -49,19 +49,15 @@ std::vector<std::string> SplitString(const std::string &str, const std::string d
 std::string Trim(const std::string &str);
 std::string ConvertSha256Hex(const uint8_t* shaDigest, size_t length);
 void DoReboot(const std::string& rebootTarget, const std::string& extData = "");
-void DoShutdown();
 std::string GetCertName();
 bool WriteFully(int fd, const uint8_t *data, size_t size);
 bool ReadFully(int fd, void* data, size_t size);
 bool ReadFileToString(int fd, std::string &content);
-bool CopyFile(const std::string &src, const std::string &dest);
 bool WriteStringToFile(int fd, const std::string& content);
 std::string GetLocalBoardId();
 bool CopyUpdaterLogs(const std::string &sLog, const std::string &dLog);
 void CompressLogs(const std::string &name);
-bool CheckDumpResult();
-void WriteDumpResult(const std::string &result);
-bool PathToRealPath(const std::string &path, std::string &realPath);
+void WriteOtaResult(const int status);
 void UsSleep(int usec);
 } // Utils
 } // Updater

@@ -22,7 +22,7 @@
 namespace Updater {
 void LoadFstab(); /* Load fstab */
 void LoadSpecificFstab(const std::string &fstabName);
-int FormatPartition(const std::string &path, bool isZeroErase = false);
+int FormatPartition(const std::string &path);
 int UmountForPath(const std::string &path);
 int MountForPath(const std::string &path);
 int SetupPartitions(PackageUpdateMode mode = HOTA_UPDATE);

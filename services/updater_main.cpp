@@ -30,7 +30,6 @@
 #include "applypatch/partition_record.h"
 #include "fs_manager/mount.h"
 #include "include/updater/updater.h"
-#include "log/dump.h"
 #include "log/log.h"
 #include "misc_info/misc_info.h"
 #include "package/pkg_manager.h"
@@ -86,7 +85,7 @@ static int DoFactoryReset(FactoryResetMode mode, const std::string &path)
     if (mode == USER_WIPE_DATA) {
         STAGE(UPDATE_STAGE_BEGIN) << "User FactoryReset";
         LOG(INFO) << "Begin erasing /data";
-        if (FormatPartition(path, true) != 0) {
+        if (FormatPartition(path) != 0) {
             LOG(ERROR) << "User level FactoryReset failed";
             STAGE(UPDATE_STAGE_FAIL) << "User FactoryReset";
             ERROR_CODE(CODE_FACTORY_RESET_FAIL);
@@ -195,13 +194,8 @@ static UpdaterStatus StartUpdaterEntry(PkgManager::PkgManagerPtr manager,
     if (upParams.updatePackage != "") {
         ShowUpdateFrame(true);
         status = InstallUpdaterPackage(upParams, args, manager);
-        if (status != UPDATE_SUCCESS) {
-            if (!CheckDumpResult()) {
-                UPDATER_LAST_WORD(status);
-            }
-            return status;
-        }
-        WriteDumpResult("pass");
+        WriteOtaResult(status);
+        UPDATER_CHECK_ONLY_RETURN(status == UPDATE_SUCCESS, return status);
     } else if (upParams.factoryWipeData) {
         LOG(INFO) << "Factory level FactoryReset begin";
         status = UPDATE_SUCCESS;
@@ -290,7 +284,6 @@ int UpdaterMain(int argc, char **argv)
     UpdaterStatus status = UPDATE_UNKNOWN;
     PkgManager::PkgManagerPtr manager = PkgManager::GetPackageInstance();
     UpdaterInit::GetInstance().InvokeEvent(UPDATER_PRE_INIT_EVENT);
-    Dump::GetInstance().RegisterDump("DumpHelperLog", std::make_unique<DumpHelperLog>());
     std::vector<std::string> args = ParseParams(argc, argv);
 
     LOG(INFO) << "Ready to start";

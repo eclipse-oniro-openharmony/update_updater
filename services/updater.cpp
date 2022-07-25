@@ -27,7 +27,6 @@
 #include <unistd.h>
 #include <vector>
 #include "fs_manager/mount.h"
-#include "log/dump.h"
 #include "log/log.h"
 #include "package/pkg_manager.h"
 #include "package/packages_info.h"

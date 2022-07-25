@@ -14,10 +14,7 @@
 import("//build/ohos.gni")
 
 ohos_static_library("libupdaterlog") {
-  sources = [
-    "dump.cpp",
-    "log.cpp",
-  ]
+  sources = [ "log.cpp" ]
 
   include_dirs = [
     "//base/update/updater/services/include",
