@@ -21,50 +21,23 @@ std::unique_ptr<CommandFunction> CommandFunctionFactory::GetCommandFunction(cons
 {
     switch (type) {
         case CommandType::ABORT:
-        {
-            std::unique_ptr<AbortCommandFn> instr(std::make_unique<AbortCommandFn>());
-            return std::move(instr);
-        }
+            return std::make_unique<AbortCommandFn>();
         case CommandType::NEW:
-        {
-            std::unique_ptr<NewCommandFn> instr(std::make_unique<NewCommandFn>());
-            return std::move(instr);
-        }
+            return std::make_unique<NewCommandFn>();
         case CommandType::BSDIFF:
-        {
-            std::unique_ptr<DiffAndMoveCommandFn> instr(std::make_unique<DiffAndMoveCommandFn>());
-            return std::move(instr);
-        }
+            return std::make_unique<DiffAndMoveCommandFn>();
         case CommandType::IMGDIFF:
-        {
-            std::unique_ptr<DiffAndMoveCommandFn> instr(std::make_unique<DiffAndMoveCommandFn>());
-            return std::move(instr);
-        }
+            return std::make_unique<DiffAndMoveCommandFn>();
         case CommandType::ERASE:
-        {
-            std::unique_ptr<ZeroAndEraseCommandFn> instr(std::make_unique<ZeroAndEraseCommandFn>());
-            return std::move(instr);
-        }
+            return std::make_unique<ZeroAndEraseCommandFn>();
         case CommandType::ZERO:
-        {
-            std::unique_ptr<ZeroAndEraseCommandFn> instr(std::make_unique<ZeroAndEraseCommandFn>());
-            return std::move(instr);
-        }
+            return std::make_unique<ZeroAndEraseCommandFn>();
         case CommandType::FREE:
-        {
-            std::unique_ptr<FreeCommandFn> instr(std::make_unique<FreeCommandFn>());
-            return std::move(instr);
-        }
+            return std::make_unique<FreeCommandFn>();
         case CommandType::MOVE:
-        {
-            std::unique_ptr<DiffAndMoveCommandFn> instr(std::make_unique<DiffAndMoveCommandFn>());
-            return std::move(instr);
-        }
+            return std::make_unique<DiffAndMoveCommandFn>();
         case CommandType::STASH:
-        {
-            std::unique_ptr<StashCommandFn> instr(std::make_unique<StashCommandFn>());
-            return std::move(instr);
-        }
+            return std::make_unique<StashCommandFn>();
         default:
             break;
     }

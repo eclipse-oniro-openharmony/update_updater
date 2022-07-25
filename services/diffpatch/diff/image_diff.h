@@ -45,7 +45,7 @@ public:
 
     virtual int32_t MakePatch(const std::string &patchName);
     virtual int32_t WriteHeader(std::ofstream &patchFile,
-        std::fstream &blockPatchFile, size_t &offset, ImageBlock &block) const;
+        std::fstream &blockPatchFile, size_t &dataOffset, ImageBlock &block) const;
 
 protected:
     int32_t SplitImage(const PatchBuffer &oldInfo, const PatchBuffer &newInfo);
@@ -85,7 +85,7 @@ public:
     ~ZipImageDiff() override {}
 
     int32_t WriteHeader(std::ofstream &patchFile,
-        std::fstream &blockPatchFile, size_t &offset, ImageBlock &block) const override;
+        std::fstream &blockPatchFile, size_t &dataOffset, ImageBlock &block) const override;
 
 protected:
     int32_t TestAndSetConfig(const BlockBuffer &buffer, const std::string &fileName) override;
@@ -104,7 +104,7 @@ public:
     ~Lz4ImageDiff() override {}
 
     int32_t WriteHeader(std::ofstream &patchFile,
-        std::fstream &blockPatchFile, size_t &offset, ImageBlock &block) const override;
+        std::fstream &blockPatchFile, size_t &dataOffset, ImageBlock &block) const override;
 
 protected:
     int32_t TestAndSetConfig(const BlockBuffer &buffer, const std::string &fileName) override;

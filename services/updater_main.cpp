@@ -116,11 +116,11 @@ UpdaterStatus UpdaterFromSdcard()
         return UPDATE_ERROR;
     }
     if (MountForPath(SDCARD_PATH) != 0) {
-        int ret = mount(sdcardStr.c_str(), SDCARD_PATH.c_str(), "vfat", 0, NULL);
+        int ret = mount(sdcardStr.c_str(), SDCARD_PATH, "vfat", 0, NULL);
         UPDATER_WARING_CHECK(ret == 0, "MountForPath /sdcard failed!", return UPDATE_ERROR);
     }
 #endif
-    UPDATER_ERROR_CHECK(access(SDCARD_CARD_PKG_PATH.c_str(), 0) == 0, "package is not exist",
+    UPDATER_ERROR_CHECK(access(SDCARD_CARD_PKG_PATH, 0) == 0, "package is not exist",
         ShowText(g_logLabel, "Package is not exist!");
         return UPDATE_CORRUPT);
     PkgManager::PkgManagerPtr pkgManager = PkgManager::GetPackageInstance();
@@ -131,7 +131,7 @@ UpdaterStatus UpdaterFromSdcard()
 
     g_logLabel->SetText("Don't remove SD Card!");
     Utils::UsSleep(DISPLAY_TIME);
-    UpdaterStatus updateRet = DoInstallUpdaterPackage(pkgManager, SDCARD_CARD_PKG_PATH.c_str(), 0, SDCARD_UPDATE);
+    UpdaterStatus updateRet = DoInstallUpdaterPackage(pkgManager, SDCARD_CARD_PKG_PATH, 0, SDCARD_UPDATE);
     if (updateRet != UPDATE_SUCCESS) {
         std::this_thread::sleep_for(std::chrono::milliseconds(UI_SHOW_DURATION));
         g_logLabel->SetText("SD Card update failed!");
@@ -308,4 +308,4 @@ int UpdaterMain(int argc, char **argv)
     Utils::DoReboot("");
     return 0;
 }
-} // updater
+} // Updater

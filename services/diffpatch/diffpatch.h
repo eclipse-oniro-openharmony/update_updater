@@ -136,8 +136,8 @@ static constexpr int PATCH_NORMAL_MIN_HEADER_LEN = 24;
 static constexpr int PATCH_DEFLATE_MIN_HEADER_LEN = 60;
 static constexpr int PATCH_LZ4_MIN_HEADER_LEN = 64;
 
-static const std::string BSDIFF_MAGIC = "BSDIFF40";
-static const std::string PKGDIFF_MAGIC = "PKGDIFF0";
+constexpr const char *BSDIFF_MAGIC = "BSDIFF40";
+constexpr const char *PKGDIFF_MAGIC = "PKGDIFF0";
 
 struct PatchHeader {
     size_t srcStart = 0;
@@ -157,14 +157,19 @@ struct ControlData {
 };
 
 struct MemMapInfo {
-    uint8_t *memory;
-    size_t length;
+    uint8_t *memory {};
+    size_t length {};
+    int fd {-1};
     ~MemMapInfo()
     {
         if (memory != nullptr) {
             munmap(memory, length);
         }
         memory = nullptr;
+        if (fd != -1) {
+            close(fd);
+            fd = -1;
+        }
     }
 };
 
@@ -172,5 +177,5 @@ int32_t WriteDataToFile(const std::string &fileName, const std::vector<uint8_t> 
 int32_t PatchMapFile(const std::string &fileName, MemMapInfo &info);
 std::string GeneraterBufferHash(const BlockBuffer &buffer);
 std::string ConvertSha256Hex(const BlockBuffer &buffer);
-} // namespace updatepatch
+} // namespace UpdatePatch
 #endif // DIFF_PATCH_H

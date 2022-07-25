@@ -559,8 +559,8 @@ int DoUpdaterPrepare(FlashHandle handle, uint8_t type, const std::string &cmdPar
             ret = flash->DoResizeParatiton(root, MIN_BLOCKS_FOR_UPDATE);
             FLASHING_CHECK(ret == 0, g_flashdRunning = false;
                 return ret, "Failed to resize partition");
-            if (access(FLASHD_FILE_PATH.c_str(), F_OK) == -1) {
-                mkdir(FLASHD_FILE_PATH.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+            if (access(FLASHD_FILE_PATH, F_OK) == -1) {
+                mkdir(FLASHD_FILE_PATH, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
             }
             break;
         }

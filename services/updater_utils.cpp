@@ -117,18 +117,18 @@ void PostUpdater(bool clearMisc)
     if (clearMisc) {
         UPDATER_ERROR_CHECK_NOT_RETURN(ClearMisc() == true, "PostUpdater clear misc failed");
     }
-    if (!access(COMMAND_FILE.c_str(), 0)) {
-        UPDATER_ERROR_CHECK_NOT_RETURN(unlink(COMMAND_FILE.c_str()) == 0, "Delete command failed");
+    if (!access(COMMAND_FILE, 0)) {
+        UPDATER_ERROR_CHECK_NOT_RETURN(unlink(COMMAND_FILE) == 0, "Delete command failed");
     }
 
     // delete updater tmp files
-    if (access(UPDATER_PATH.c_str(), 0) == 0 && access(SDCARD_CARD_PATH.c_str(), 0) != 0) {
+    if (access(UPDATER_PATH, 0) == 0 && access(SDCARD_CARD_PATH, 0) != 0) {
         UPDATER_ERROR_CHECK_NOT_RETURN(DeleteUpdaterPath(UPDATER_PATH), "DeleteUpdaterPath failed");
     }
-    if (!access(SDCARD_CARD_PATH.c_str(), 0)) {
+    if (!access(SDCARD_CARD_PATH, 0)) {
         UPDATER_ERROR_CHECK_NOT_RETURN(DeleteUpdaterPath(SDCARD_CARD_PATH), "Delete sdcard path failed");
     }
-    if (access(Flashd::FLASHD_FILE_PATH.c_str(), 0) == 0) {
+    if (access(Flashd::FLASHD_FILE_PATH, 0) == 0) {
         UPDATER_ERROR_CHECK_NOT_RETURN(DeleteUpdaterPath(Flashd::FLASHD_FILE_PATH), "DeleteUpdaterPath failed");
     }
 
@@ -142,7 +142,7 @@ void PostUpdater(bool clearMisc)
 
     mode_t mode = 0640;
     chmod(updaterLogPath.c_str(), mode);
-    chmod(UPDATER_HDC_LOG.c_str(), mode);
+    chmod(UPDATER_HDC_LOG, mode);
     chmod(errorCodePath.c_str(), mode);
     STAGE(UPDATE_STAGE_SUCCESS) << "PostUpdater";
     ret = CopyUpdaterLogs(TMP_STAGE_LOG, stageLogPath);
@@ -158,7 +158,7 @@ std::vector<std::string> ParseParams(int argc, char **argv)
         "ReadUpdaterMessage MISC_FILE failed!");
     // if boot.update is empty, read from command.The Misc partition may have dirty data,
     // so strlen(boot.update) is not used, which can cause system exceptions.
-    if (boot.update[0] == '\0' && !access(COMMAND_FILE.c_str(), 0)) {
+    if (boot.update[0] == '\0' && !access(COMMAND_FILE, 0)) {
         UPDATER_ERROR_CHECK_NOT_RETURN(ReadUpdaterMessage(COMMAND_FILE, boot) == true,
                                        "ReadUpdaterMessage COMMAND_FILE failed!");
     }
@@ -185,7 +185,7 @@ int GetBootMode(int &mode)
     }
     // if boot.update is empty, read from command.The Misc partition may have dirty data,
     // so strlen(boot.update) is not used, which can cause system exceptions.
-    if (boot.update[0] == '\0' && !access(COMMAND_FILE.c_str(), 0)) {
+    if (boot.update[0] == '\0' && !access(COMMAND_FILE, 0)) {
         ret = ReadUpdaterMessage(COMMAND_FILE, boot);
         if (!ret) {
             return -1;

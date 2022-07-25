@@ -26,12 +26,12 @@ constexpr int DEFAULT_PARTSUM = 16;
 constexpr size_t SECTOR_SIZE_DEFAULT = 512;
 constexpr size_t DEFAULT_SIZE_1MB = 1048576;
 
-const std::string SDA_PATH = "/dev/sda";
-const std::string SDA_DEV = "sda";
-const std::string SDB_PATH = "/dev/sdb";
-const std::string SDB_DEV = "sdb";
-const std::string MMC_PATH = "/dev/block/mmcblk0";
-const std::string MMC_DEV = "mmcblk0";
+constexpr const char *SDA_PATH = "/dev/sda";
+constexpr const char *SDA_DEV = "sda";
+constexpr const char *SDB_PATH = "/dev/sdb";
+constexpr const char *SDB_DEV = "sdb";
+constexpr const char *MMC_PATH = "/dev/block/mmcblk0";
+constexpr const char *MMC_DEV = "mmcblk0";
 
 const std::string P_TYPE[] = {
     "GPT",
@@ -39,5 +39,5 @@ const std::string P_TYPE[] = {
 };
 
 #define SCSI_BLK_MAJOR(M) ((M) == SCSI_DISK0_MAJOR || (M) == SCSI_CDROM_MAJOR)
-} // namespace updater
+} // namespace Updater
 #endif // UPDATER_FS_MANAGER_PARTITION_CONST_H

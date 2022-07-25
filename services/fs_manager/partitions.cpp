@@ -370,4 +370,4 @@ int GetPartitionNumByPartName(const std::string &partname, const PartitonList &p
     }
     return ret;
 }
-} // namespace updater
+} // namespace Updater

@@ -69,37 +69,34 @@ bool TransferManager::CommandsParser(int fd, const std::vector<std::string> &con
     while (ct != context.end()) {
         cmd = std::make_unique<Command>();
         UPDATER_ERROR_CHECK(cmd != nullptr, "Failed to parse command line.", return false);
-        if (cmd->Init(*ct) && cmd->GetCommandType() != CommandType::LAST && globalParams->env != nullptr) {
-            if (!retryCmd.empty() && globalParams->env->IsRetry()) {
-                if (*ct == retryCmd) {
-                    retryCmd.clear();
-                }
-                if (cmd->GetCommandType() != CommandType::NEW) {
-                    LOG(INFO) << "Retry: Command " << *ct << " passed";
-                    cmd.reset();
-                    ct++;
-                    continue;
-                }
-            }
-            cmd->SetFileDescriptor(fd);
-            std::unique_ptr<CommandFunction> cf = CommandFunctionFactory::GetCommandFunction(cmd->GetCommandType());
-            UPDATER_ERROR_CHECK(cf != nullptr, "Failed to get cmd exec", return false);
-            CommandResult ret = cf->Execute(const_cast<Command &>(*cmd.get()));
-            CommandFunctionFactory::ReleaseCommandFunction(cf);
-            if (CheckResult(ret, cmd->GetCommandLine(), cmd->GetCommandType()) == false) {
-                return false;
-            }
-            if (initBlock == 0) {
-                initBlock = globalParams->written;
-            }
-            if (totalSize != 0 && globalParams->env != nullptr && NeedSetProgress(cmd->GetCommandType())) {
-                globalParams->env->PostMessage("set_progress",
-                    std::to_string((static_cast<double>(globalParams->written) - initBlock) / totalSize));
-            }
-            LOG(INFO) << "Running command : " << cmd->GetArgumentByPos(0) << " success";
+        if (!cmd->Init(*ct) || cmd->GetCommandType() == CommandType::LAST || globalParams->env == nullptr) {
+            continue;
         }
-        cmd.reset();
-        ct++;
+        if (!retryCmd.empty() && globalParams->env->IsRetry()) {
+            if (*ct == retryCmd) {
+                retryCmd.clear();
+            }
+            if (cmd->GetCommandType() != CommandType::NEW) {
+                LOG(INFO) << "Retry: Command " << *ct << " passed";
+                continue;
+            }
+        }
+        cmd->SetFileDescriptor(fd);
+        std::unique_ptr<CommandFunction> cf = CommandFunctionFactory::GetCommandFunction(cmd->GetCommandType());
+        UPDATER_ERROR_CHECK(cf != nullptr, "Failed to get cmd exec", return false);
+        CommandResult ret = cf->Execute(const_cast<Command &>(*cmd.get()));
+        CommandFunctionFactory::ReleaseCommandFunction(cf);
+        if (CheckResult(ret, cmd->GetCommandLine(), cmd->GetCommandType()) == false) {
+            return false;
+        }
+        if (initBlock == 0) {
+            initBlock = globalParams->written;
+        }
+        if (totalSize != 0 && globalParams->env != nullptr && NeedSetProgress(cmd->GetCommandType())) {
+            globalParams->env->PostMessage("set_progress",
+                std::to_string((static_cast<double>(globalParams->written) - initBlock) / totalSize));
+        }
+        LOG(INFO) << "Running command : " << cmd->GetArgumentByPos(0) << " success";
     }
     return true;
 }
