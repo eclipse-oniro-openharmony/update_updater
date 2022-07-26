@@ -1,0 +1,54 @@
+/*
+ * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef UPDATER_UI_ANIMATION_LABLE_H
+#define UPDATER_UI_ANIMATION_LABLE_H
+
+#include <string>
+#include <thread>
+#include "components/ui_image_view.h"
+#include "view_api.h"
+namespace Updater {
+class ImgViewAdapter : public OHOS::UIImageView {
+    class ImgAnimatorCallback;
+    static constexpr uint32_t MAX_IMG_CNT = 300;
+    static constexpr uint32_t MAX_INTERVAL_MS = 5000;
+    static constexpr uint32_t USECOND_TO_MSECOND = 1000;
+    static constexpr int ANIMATION_FILE_NAME_LENGTH = 5;
+public:
+    using SpecificInfoType = UxImageInfo;
+    ImgViewAdapter();
+    explicit ImgViewAdapter(const UxViewInfo &info);
+    ~ImgViewAdapter();
+    void Start();
+    void Stop();
+    void ShowNextImage();
+    void ShowImage(uint32_t cnt);
+    static bool IsValid(const UxImageInfo &info);
+private:
+    bool IsOverImgCnt() const;
+    void ThreadCb();
+    bool animatorStop_ { true };
+    bool valid_ { false };
+    uint32_t currId_ { 0 };
+    uint32_t imgCnt_ { 0 };
+    uint32_t interval_ { 0 };
+    std::string currPath_ {};
+    std::string dir_ {};
+    std::string viewId_ {};
+    std::string filePrefix_ {};
+    std::unique_ptr<ImgAnimatorCallback> cb_ {};
+};
+} // namespace Updater
+#endif // UPDATER_UI_ANIMATION_LABLE_H
