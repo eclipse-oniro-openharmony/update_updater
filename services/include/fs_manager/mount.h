@@ -28,5 +28,5 @@ int MountForPath(const std::string &path);
 int SetupPartitions(PackageUpdateMode mode = HOTA_UPDATE);
 const std::string GetBlockDeviceByMountPoint(const std::string &mountPoint);
 MountStatus GetMountStatusForPath(const std::string &path);
-} // updater
+} // Updater
 #endif // UPDATER_FS_MANAGER_MOUNT_H

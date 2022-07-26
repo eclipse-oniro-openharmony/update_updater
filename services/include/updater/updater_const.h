@@ -18,31 +18,33 @@
 #include <string>
 
 namespace Updater {
-const std::string COMMAND_FILE = "/data/updater/command";
-const std::string TMP_LOG = "/tmp/updater.log";
-const std::string TMP_STAGE_LOG = "/tmp/updater_stage.log";
-const std::string TMP_ERROR_CODE_PATH = "/tmp/error_code.log";
-const std::string ERROR_CODE_PATH = "/data/updater/log/error_code.log";
-const std::string UPDATER_LOG_DIR = "/data/updater/log";
-const std::string UPDATER_LOG = "/data/updater/log/updater_log";
-const std::string UPDATER_STAGE_LOG = "/data/updater/log/updater_stage_log";
-const std::string UPDATER_PATH = "/data/updater";
-const std::string UPDATER_RESULT_FILE = "updater_result";
-const std::string MISC_FILE = "/dev/block/platform/soc/10100000.himci.eMMC/by-name/misc";
-const std::string MISC_PATH = "/misc";
-const std::string UPDATER_BINARY = "updater_binary";
-const std::string SDCARD_PATH = "/sdcard";
-const std::string UPDATER_HDC_LOG = "/data/updater/log/flashd_hdc.log";
+constexpr const char *COMMAND_FILE = "/data/updater/command";
+constexpr const char *TMP_LOG = "/tmp/updater.log";
+constexpr const char *TMP_STAGE_LOG = "/tmp/updater_stage.log";
+constexpr const char *TMP_ERROR_CODE_PATH = "/tmp/error_code.log";
+constexpr const char *ERROR_CODE_PATH = "/data/updater/log/error_code.log";
+constexpr const char *UPDATER_LOG_DIR = "/data/updater/log";
+constexpr const char *UPDATER_LOG = "/data/updater/log/updater_log";
+constexpr const char *UPDATER_STAGE_LOG = "/data/updater/log/updater_stage_log";
+constexpr const char *UPDATER_PATH = "/data/updater";
+constexpr const char *UPDATER_LOCALE_FILE = "locale";
+constexpr const char *UPDATER_RESULT_FILE = "updater_result";
+constexpr const char *MISC_FILE = "/dev/block/platform/soc/10100000.himci.eMMC/by-name/misc";
+constexpr const char *MISC_PATH = "/misc";
+constexpr const char *UPDATER_BINARY = "updater_binary";
+constexpr const char *SDCARD_PATH = "/sdcard";
+constexpr const char *UPDATER_HDC_LOG = "/data/updater/log/flashd_hdc.log";
+constexpr const char *PREFIX_UFS_NODE = "/dev/block/sd";
 
 #ifndef UPDATER_UT
-const std::string SDCARD_CARD_PATH = "/sdcard/updater";
-const std::string SDCARD_CARD_PKG_PATH = "/sdcard/updater/updater.zip";
-const std::string DEFAULT_LOCALE = "en-US";
-const std::string G_WORK_PATH = "/tmp/";
+constexpr const char *SDCARD_CARD_PATH = "/sdcard/updater";
+constexpr const char *SDCARD_CARD_PKG_PATH = "/sdcard/updater/updater.zip";
+constexpr const char *DEFAULT_LOCALE = "en-US";
+constexpr const char *G_WORK_PATH = "/tmp/";
 #else
-const std::string SDCARD_CARD_PATH = "/data/sdcard/updater";
-const std::string SDCARD_CARD_PKG_PATH = "/data/updater/updater/updater.zip";
-const std::string G_WORK_PATH = "/data/updater/src/";
+constexpr const char *SDCARD_CARD_PATH = "/data/sdcard/updater";
+constexpr const char *SDCARD_CARD_PKG_PATH = "/data/updater/updater/updater.zip";
+constexpr const char *G_WORK_PATH = "/data/updater/src/";
 #endif
 constexpr int MAX_RETRY_COUNT = 4;
 constexpr int MINIMAL_ARGC_LIMIT = 2;
@@ -51,6 +53,7 @@ constexpr int MAX_LOG_NAME_SIZE = 100;
 constexpr long MAX_LOG_SIZE = 5 * 1024 * 1024;
 constexpr int MAX_TIME_SIZE = 20;
 constexpr int MAX_RESULT_SIZE = 20;
+constexpr int MAX_RESULT_BUFF_SIZE = 1000;
 constexpr int VERIFICATION_PROGRESS_TIME = 60;
 constexpr float VERIFICATION_PROGRESS_FRACTION = 0.25f;
 constexpr int PREDICTED_ELAPSED_TIME = 30;
@@ -83,5 +86,5 @@ constexpr float EPSINON = 0.00001;
 constexpr float FULL_EPSINON = 1;
 constexpr int BOOT_FLASHD = 1;
 constexpr int BOOT_UPDATER = 2;
-} // namespace updater
+} // namespace Updater
 #endif

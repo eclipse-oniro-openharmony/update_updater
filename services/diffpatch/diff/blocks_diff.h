@@ -61,7 +61,7 @@ public:
 private:
     virtual std::unique_ptr<DeflateAdapter> CreateBZip2Adapter(size_t patchOffset) = 0;
     virtual int32_t WritePatchHeader(int64_t controlSize,
-        int64_t diffDataSize, int64_t newSize, size_t &patchOffset) = 0;
+        int64_t diffDataSize, int64_t newSize, size_t &headerLen) = 0;
 
     int32_t GetCtrlDatas(const BlockBuffer &newInfo,
         const BlockBuffer &oldInfo, std::vector<ControlData> &controlDatas);
@@ -91,7 +91,7 @@ public:
 private:
     std::unique_ptr<DeflateAdapter> CreateBZip2Adapter(size_t patchOffset) override;
     int32_t WritePatchHeader(int64_t controlSize,
-        int64_t diffDataSize, int64_t newSize, size_t &patchOffset) override;
+        int64_t diffDataSize, int64_t newSize, size_t &headerLen) override;
     std::fstream &stream_;
     size_t offset_ { 0 };
 };
@@ -105,9 +105,9 @@ public:
 private:
     std::unique_ptr<DeflateAdapter> CreateBZip2Adapter(size_t patchOffset) override;
     int32_t WritePatchHeader(int64_t controlSize,
-        int64_t diffDataSize, int64_t newSize, size_t &patchOffset) override;
+        int64_t diffDataSize, int64_t newSize, size_t &headerLen) override;
     std::vector<uint8_t> &patchData_;
     size_t offset_ { 0 };
 };
-} // namespace updatepatch
+} // namespace UpdatePatch
 #endif // BLOCKS_DIFF_H

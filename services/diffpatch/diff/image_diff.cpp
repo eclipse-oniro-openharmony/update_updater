@@ -193,8 +193,8 @@ int32_t ImageDiff::DiffImage(const std::string &patchName)
     std::ofstream patchFile(patchName, std::ios::out | std::ios::trunc | std::ios::binary);
     PATCH_CHECK(!patchFile.fail(), return -1, "Failed to open %s", patchName.c_str());
 
-    patchFile.write(PKGDIFF_MAGIC.c_str(), PKGDIFF_MAGIC.size());
-    size_t dataOffset = PKGDIFF_MAGIC.size();
+    patchFile.write(PKGDIFF_MAGIC, std::char_traits<char>::length(PKGDIFF_MAGIC));
+    size_t dataOffset = std::char_traits<char>::length(PKGDIFF_MAGIC);
     uint32_t size = static_cast<uint32_t>(updateBlocks_.size());
     patchFile.write(reinterpret_cast<const char*>(&size), sizeof(uint32_t));
     dataOffset += sizeof(uint32_t);

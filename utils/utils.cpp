@@ -41,6 +41,7 @@ constexpr uint32_t MAX_PATH_LEN = 256;
 constexpr uint8_t SHIFT_RIGHT_FOUR_BITS = 4;
 constexpr int USER_ROOT_AUTHORITY = 0;
 constexpr int GROUP_SYS_AUTHORITY = 1000;
+constexpr int GROUP_UPDATE_AUTHORITY = 6666;
 constexpr int USECONDS_PER_SECONDS = 1000000; // 1s = 1000000us
 constexpr int NANOSECS_PER_USECONDS = 1000; // 1us = 1000ns
 int32_t DeleteFile(const std::string& filename)
@@ -105,7 +106,7 @@ int64_t GetFilesFromDirectory(const std::string &path, std::vector<std::string> 
     return totalSize;
 }
 
-std::vector<std::string> SplitString(const std::string &str, const std::string &del)
+std::vector<std::string> SplitString(const std::string &str, const std::string del)
 {
     std::vector<std::string> result;
     size_t found = std::string::npos;
@@ -332,12 +333,12 @@ void CompressLogs(const std::string &name)
 bool CopyUpdaterLogs(const std::string &sLog, const std::string &dLog)
 {
     UPDATER_WARING_CHECK(MountForPath(UPDATER_LOG_DIR) == 0, "MountForPath /data/log failed!", return false);
-    if (access(UPDATER_LOG_DIR.c_str(), 0) != 0) {
+    if (access(UPDATER_LOG_DIR, 0) != 0) {
         UPDATER_ERROR_CHECK(!MkdirRecursive(UPDATER_LOG_DIR, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH),
             "MkdirRecursive error!", return false);
-        UPDATER_ERROR_CHECK(chown(UPDATER_PATH.c_str(), USER_ROOT_AUTHORITY, GROUP_SYS_AUTHORITY) == 0,
+        UPDATER_ERROR_CHECK(chown(UPDATER_PATH, USER_ROOT_AUTHORITY, GROUP_SYS_AUTHORITY) == 0,
             "Chown failed!", return false);
-        UPDATER_ERROR_CHECK(chmod(UPDATER_PATH.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) == 0,
+        UPDATER_ERROR_CHECK(chmod(UPDATER_PATH, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) == 0,
             "Chmod failed!", return false);
     }
 
@@ -351,10 +352,18 @@ bool CopyUpdaterLogs(const std::string &sLog, const std::string &dLog)
     size_t bytes;
     while ((bytes = fread(buf, 1, sizeof(buf), sFp)) != 0) {
         if (fwrite(buf, 1, bytes, dFp) <= 0) {
-            LOG(WARNING) << "CopyUpdaterLogs write failed, err:" << errno;
+            LOG(ERROR) << "fwrite failed";
+            fclose(sFp);
+            fclose(dFp);
+            return false;
         }
     }
-    fseek(dFp, 0, SEEK_END);
+    if (fseek(dFp, 0, SEEK_END) != 0) {
+        LOG(ERROR) << "fseek failed";
+        fclose(sFp);
+        fclose(dFp);
+        return false;
+    }
     UPDATER_INFO_CHECK(ftell(dFp) < MAX_LOG_SIZE, "log size greater than 5M!", CompressLogs(dLog));
     sync();
     fclose(sFp);
@@ -364,12 +373,12 @@ bool CopyUpdaterLogs(const std::string &sLog, const std::string &dLog)
 
 void WriteOtaResult(const int status)
 {
-    if (access(UPDATER_PATH.c_str(), 0) != 0) {
-        UPDATER_ERROR_CHECK(!MkdirRecursive(UPDATER_PATH, 0644),
+    if (access(UPDATER_PATH, 0) != 0) {
+        UPDATER_ERROR_CHECK(!MkdirRecursive(UPDATER_PATH, 0755), // 0755: -rwxr-xr-x
             "MkdirRecursive error!", return);
     }
 
-    const std::string resultPath = UPDATER_PATH + "/" + UPDATER_RESULT_FILE;
+    const std::string resultPath = std::string(UPDATER_PATH) + "/" + std::string(UPDATER_RESULT_FILE);
     FILE *fp = fopen(resultPath.c_str(), "w+");
     if (fp == nullptr) {
         LOG(ERROR) << "open result file failed";
@@ -390,7 +399,7 @@ void WriteOtaResult(const int status)
         LOG(WARNING) << "close result file failed";
     }
 
-    (void)chown(resultPath.c_str(), USER_ROOT_AUTHORITY, GROUP_SYS_AUTHORITY);
+    (void)chown(resultPath.c_str(), USER_ROOT_AUTHORITY, GROUP_UPDATE_AUTHORITY);
     (void)chmod(resultPath.c_str(), 0640); // 0640: -rw-r-----
 }
 
@@ -402,5 +411,5 @@ void UsSleep(int usec)
     while (nanosleep(&ts, &ts) < 0 && errno == EINTR) {
     }
 }
-} // utils
-} // namespace updater
+} // Utils
+} // namespace Updater
