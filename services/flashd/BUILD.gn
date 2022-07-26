@@ -62,11 +62,11 @@ ohos_source_set("flashd_deamon") {
     "//third_party/libuv:uv_static",
     "//third_party/lz4:liblz4_static",
     "//third_party/openssl:libcrypto_static",
-    "//utils/native/base:utils",
   ]
   deps += [ "//developtools/hdc:hdc_hash_gen" ]
+  external_deps = [ "c_utils:utils" ]
   if (use_musl) {
-    external_deps = [ "init:libbegetutil" ]
+    external_deps += [ "init:libbegetutil" ]
   }
 
   include_dirs = [
@@ -125,7 +125,6 @@ ohos_static_library("libflashd") {
     "//third_party/lz4:liblz4_static",
     "//third_party/openssl:libcrypto_static",
     "//third_party/zlib:libz",
-    "//utils/native/base:utils",
   ]
 
   include_dirs = [
@@ -148,7 +147,10 @@ ohos_static_library("libflashd") {
     "//third_party/libuv",
   ]
 
-  external_deps = [ "init:libbegetutil" ]
+  external_deps = [
+    "c_utils:utils",
+    "init:libbegetutil",
+  ]
 
   part_name = "updater"
 }
