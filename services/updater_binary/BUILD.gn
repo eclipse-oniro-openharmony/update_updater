@@ -41,6 +41,8 @@ ohos_executable("updater_binary") {
   ]
   configs = [ ":updater_config" ]
 
+  ldflags = [ "-Wl -std=c++11" ]
+
   deps = [
     "//base/update/updater/interfaces/kits/misc_info:libmiscinfo",
     "//base/update/updater/services/applypatch:libapplypatch",
