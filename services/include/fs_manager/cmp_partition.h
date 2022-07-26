@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef __UPDATER_CMP_PARTITIONS_H
-#define __UPDATER_CMP_PARTITIONS_H
+#ifndef UPDATER_CMP_PARTITIONS_H
+#define UPDATER_CMP_PARTITIONS_H
 
 #include "fs_manager/partitions.h"
 

@@ -72,7 +72,7 @@ int32_t Store::CreateNewSpace(const std::string &path, bool needClear)
             if (DeleteFile(*iter) == 0) {
                 LOG(INFO) << "Delete " << *iter;
             }
-            ++iter;
+            iter++;
         }
         files.clear();
     }

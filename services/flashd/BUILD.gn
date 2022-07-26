@@ -66,10 +66,7 @@ ohos_source_set("flashd_deamon") {
   ]
   deps += [ "//developtools/hdc:hdc_hash_gen" ]
   if (use_musl) {
-    external_deps = [
-      "init:libbegetutil",
-      "startup_l2:syspara",
-    ]
+    external_deps = [ "init:libbegetutil" ]
   }
 
   include_dirs = [

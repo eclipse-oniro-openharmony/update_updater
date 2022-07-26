@@ -15,7 +15,6 @@
 
 #include "blocks_patch.h"
 #include <cstdio>
-#include <endian.h>
 #include <iostream>
 #include <vector>
 #include "diffpatch.h"
@@ -24,7 +23,7 @@ using namespace Hpackage;
 using namespace std;
 
 namespace UpdatePatch {
-#define PATCH_MIN BSDIFF_MAGIC.size() + sizeof(int64_t) * 3
+#define PATCH_MIN std::char_traits<char>::length(BSDIFF_MAGIC) + sizeof(int64_t) * 3
 
 static int64_t ReadLE64(const uint8_t *buffer)
 {
@@ -80,11 +79,11 @@ int32_t BlocksPatch::ReadHeader(int64_t &controlDataSize, int64_t &diffDataSize,
         patchInfo_.length - patchInfo_.start, GeneraterBufferHash(patchData).c_str());
     uint8_t *header = patchInfo_.buffer + patchInfo_.start;
     // Compare header
-    PATCH_CHECK(memcmp(header, BSDIFF_MAGIC.c_str(), BSDIFF_MAGIC.size()) == 0,
+    PATCH_CHECK(memcmp(header, BSDIFF_MAGIC, std::char_traits<char>::length(BSDIFF_MAGIC)) == 0,
         return -1, "Corrupt patch, patch head != BSDIFF40");
 
     /* Read lengths from header */
-    size_t offset = BSDIFF_MAGIC.size();
+    size_t offset = std::char_traits<char>::length(BSDIFF_MAGIC);
     controlDataSize = ReadLE64(header + offset);
     offset += sizeof(int64_t);
     diffDataSize = ReadLE64(header + offset);
@@ -211,4 +210,4 @@ int32_t BlocksStreamPatch::RestoreExtraData(const ControlData &ctrlData)
     // write
     return writer_->Write(newOffset_, extraBuffer, static_cast<size_t>(ctrlData.extraLength));
 }
-} // namespace updatepatch
+} // namespace UpdatePatch

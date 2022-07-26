@@ -288,15 +288,17 @@ int32_t BlockSet::WriteZeroToBlock(int fd, bool isErase)
         ret = ioctl(fd, BLKDISCARD, &arguments);
         UPDATER_ERROR_CHECK(ret != -1 || errno == EOPNOTSUPP, "Error to write block set to memory", return -1);
 #endif
-        if (!isErase) {
-            ret = lseek64(fd, offset, SEEK_SET);
-            UPDATER_ERROR_CHECK(ret != -1, "BlockSet::WriteZeroToBlock Fail to seek", return -1);
-            for (size_t pos = iter->first; pos < iter->second; pos++) {
+        if (isErase) {
+            iter++;
+            continue;
+        }
+        ret = lseek64(fd, offset, SEEK_SET);
+        UPDATER_ERROR_CHECK(ret != -1, "BlockSet::WriteZeroToBlock Fail to seek", return -1);
+        for (size_t pos = iter->first; pos < iter->second; pos++) {
             if (Utils::WriteFully(fd, buffer.data(), H_BLOCK_SIZE) == false) {
-                    UPDATER_CHECK_ONLY_RETURN(errno != EIO, return 1);
-                    LOG(ERROR) << "BlockSet::WriteZeroToBlock Write 0 to block error, errno : " << errno;
-                    return -1;
-                }
+                UPDATER_CHECK_ONLY_RETURN(errno != EIO, return 1);
+                LOG(ERROR) << "BlockSet::WriteZeroToBlock Write 0 to block error, errno : " << errno;
+                return -1;
             }
         }
         iter++;

@@ -45,7 +45,7 @@ T String2Int(const std::string &str, int base = N_HEX)
 int32_t DeleteFile(const std::string& filename);
 int MkdirRecursive(const std::string &pathName, mode_t mode);
 int64_t GetFilesFromDirectory(const std::string &path, std::vector<std::string> &files, bool isRecursive = false);
-std::vector<std::string> SplitString(const std::string &str, const std::string &del = " \t");
+std::vector<std::string> SplitString(const std::string &str, const std::string del = " \t");
 std::string Trim(const std::string &str);
 std::string ConvertSha256Hex(const uint8_t* shaDigest, size_t length);
 void DoReboot(const std::string& rebootTarget, const std::string& extData = "");
@@ -59,6 +59,6 @@ bool CopyUpdaterLogs(const std::string &sLog, const std::string &dLog);
 void CompressLogs(const std::string &name);
 void WriteOtaResult(const int status);
 void UsSleep(int usec);
-} // utils
-} // updater
+} // Utils
+} // Updater
 #endif // UPDATER_UTILS_H

@@ -25,7 +25,8 @@ using namespace Updater;
 using namespace Hpackage;
 constexpr uint32_t VERIFY_FINSH_PERCENT = 100;
 
-static int32_t GetUpgradePkgInfo(UpgradePkgInfo *upgradePackageInfo,
+namespace {
+int32_t GetUpgradePkgInfo(UpgradePkgInfo *upgradePackageInfo,
     std::vector<std::pair<std::string, ComponentInfo>> &files,
     const UpgradePkgInfoExt *pkgInfoExt,
     ComponentInfoExt compInfo[])
@@ -71,7 +72,7 @@ static int32_t GetUpgradePkgInfo(UpgradePkgInfo *upgradePackageInfo,
     return PKG_SUCCESS;
 }
 
-static int32_t GetZipPkgInfo(PkgManager::PkgInfoPtr pkgInfo,
+int32_t GetZipPkgInfo(PkgManager::PkgInfoPtr pkgInfo,
     std::vector<std::pair<std::string, ZipFileInfo>> &files,
     const UpgradePkgInfoExt *pkgInfoExt,
     ComponentInfoExt compInfo[])
@@ -91,7 +92,7 @@ static int32_t GetZipPkgInfo(PkgManager::PkgInfoPtr pkgInfo,
     return PKG_SUCCESS;
 }
 
-static int32_t GetLz4PkgInfo(PkgManager::PkgInfoPtr pkgInfo,
+int32_t GetLz4PkgInfo(PkgManager::PkgInfoPtr pkgInfo,
     std::vector<std::pair<std::string, Lz4FileInfo>> &files,
     const UpgradePkgInfoExt *pkgInfoExt,
     ComponentInfoExt compInfo[])
@@ -113,6 +114,15 @@ static int32_t GetLz4PkgInfo(PkgManager::PkgInfoPtr pkgInfo,
         info->blockIndependence = 0;
     }
     return PKG_SUCCESS;
+}
+
+void GetSignContentInfo(PkgInfo *pkgInfo, const UpgradePkgInfoExt *pkgInfoExt)
+{
+    pkgInfo->signMethod = pkgInfoExt->signMethod;
+    pkgInfo->digestMethod = pkgInfoExt->digestMethod;
+    pkgInfo->entryCount = pkgInfoExt->entryCount;
+    pkgInfo->pkgType = pkgInfoExt->pkgType;
+}
 }
 
 int32_t CreatePackage(const UpgradePkgInfoExt *pkgInfoExt,
@@ -201,7 +211,7 @@ int32_t VerifyPackageWithCallback(const std::string &packagePath,
 }
 
 int32_t CreatePackageL1(const UpgradePkgInfoExt *pkgInfo, ComponentInfoExt comp[],
-    const char *path, uint32_t *offset, char **hashCode)
+    const char *path, uint32_t *offset, const char **hashCode)
 {
     PkgManager::PkgManagerPtr manager = PkgManager::GetPackageInstance();
     if (pkgInfo == nullptr || path == nullptr || hashCode == nullptr || manager == nullptr || offset == nullptr) {
@@ -225,16 +235,6 @@ int32_t CreatePackageL1(const UpgradePkgInfoExt *pkgInfo, ComponentInfoExt comp[
     }
     PkgManager::ReleasePackageInstance(manager);
     return ret;
-}
-
-static void GetSignContentInfo(PkgManager::PkgInfoPtr pkgInfo, const UpgradePkgInfoExt *pkgInfoExt)
-{
-    pkgInfo->signMethod = pkgInfoExt->signMethod;
-    pkgInfo->digestMethod  = pkgInfoExt->digestMethod;
-    pkgInfo->entryCount = pkgInfoExt->entryCount;
-    pkgInfo->pkgType = pkgInfoExt->pkgType;
-
-    return;
 }
 
 int32_t CreateSignContent(const UpgradePkgInfoExt *pkgInfoExt, const char *packagePath,

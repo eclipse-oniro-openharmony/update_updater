@@ -31,8 +31,8 @@
 
 namespace Updater {
 namespace {
-const std::string USERDATA_PARTNAME = "userdata";
-const std::string UPDATER_PARTNAME = "updater";
+constexpr const char *USERDATA_PARTNAME = "userdata";
+constexpr const char *UPDATER_PARTNAME = "updater";
 }
 
 static int BlkpgPartCommand(const Partition &part, struct blkpg_partition &pg, int op)
@@ -206,7 +206,11 @@ static bool WriteDiskPartitionToMisc(PartitonList &nlist)
     free(realPath);
     UPDATER_ERROR_CHECK(fp, "fopen error " << errno, return false);
 
-    fseek(fp, MISC_RECORD_UPDATE_PARTITIONS_OFFSET, SEEK_SET);
+    if (fseek(fp, MISC_RECORD_UPDATE_PARTITIONS_OFFSET, SEEK_SET) != 0) {
+        LOG(ERROR) << "fseek error";
+        fclose(fp);
+        return false;
+    }
     size_t ret = fwrite(blkdevparts, sizeof(blkdevparts), 1, fp);
     UPDATER_ERROR_CHECK(ret >= 0, "fwrite error " << errno, fclose(fp); return false);
 
@@ -230,7 +234,7 @@ static bool AddPartitions(const Disk &disk, const PartitonList &ulist, int &part
             UPDATER_ERROR_CHECK(p2->partName != UPDATER_PARTNAME, "Change updater image is not supported.", continue);
             p2->partNum = userNum + step;
             UPDATER_CHECK_ONLY_RETURN(snprintf_s(pdevname, sizeof(pdevname), sizeof(pdevname) - 1,
-                "%sp%d", MMC_DEV.c_str(), p2->partNum) != -1, return false);
+                "%sp%d", MMC_DEV, p2->partNum) != -1, return false);
             p2->devName.clear();
             p2->devName = pdevname;
             LOG(INFO) << "Adding partition " << p2->partName;
@@ -303,5 +307,5 @@ error:
     free(disk);
     return 0;
 }
-} // updater
+} // Updater
 
