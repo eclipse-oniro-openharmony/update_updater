@@ -87,13 +87,11 @@
     }
 
 #define DEFINE_TRAIT(NAME, KEY, ...)                                                       \
-    template <>                                                                            \
-    struct Traits<NAME> {                                                                  \
+    template <> struct Traits<NAME> {                                                      \
         constexpr static const char *STRUCT_KEY = KEY;                                     \
         constexpr static const char *MEMBER_KEY[] = {REPEAT(GET_MEMBER_KEY, __VA_ARGS__)}; \
         constexpr static int COUNT = sizeof(MEMBER_KEY) / sizeof(char *);                  \
-        template <std::size_t idx>                                                         \
-        constexpr static auto &Get(NAME &obj)                                              \
+        template <std::size_t idx> constexpr static auto &Get(NAME &obj)                   \
         {                                                                                  \
             return Detail::Get<idx>(REPEAT(GET_MEMBER, __VA_ARGS__));                      \
         }                                                                                  \

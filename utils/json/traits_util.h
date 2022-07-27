@@ -17,8 +17,6 @@
 #define TRAITS_UTIL_H
 
 #include <string>
-#include <tuple>
-#include <type_traits>
 #include <vector>
 
 namespace Updater {
