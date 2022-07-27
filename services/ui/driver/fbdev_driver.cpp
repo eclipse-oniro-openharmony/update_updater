@@ -92,7 +92,7 @@ void FbdevDriver::Init()
     buff_.height = vinfo_.yres;
     buff_.size = finfo_.line_length * vinfo_.yres;
     buff_.vaddr = mmap(nullptr, finfo_.smem_len, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
-    if (buff_.vaddr == static_cast<void *>(MAP_FAILED)) {
+    if (buff_.vaddr == static_cast<void *>(-1)) {
         LOG(ERROR) << "failed to mmap framebuffer";
         close(fd);
         return;

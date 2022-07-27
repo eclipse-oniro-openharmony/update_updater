@@ -65,21 +65,21 @@ int HandleInputEvent(const struct input_event *iev)
         }
         return 0;
     }
-    if (ev.type == EV_KEY && ev.code <= KEY_MAX) {
-        if (ev.code == BTN_TOUCH) {
-            g_touchFingerDown = (ev.value == 1);
-        }
-        if (ev.code == BTN_TOUCH || ev.code == BTN_TOOL_FINGER) {
-            return 0;
-        }
-        // KEY_VOLUMEDOWN = 114, KEY_VOLUMEUP = 115, KEY_POWER = 116
-        if (!(ev.code == KEY_VOLUMEDOWN || ev.code == KEY_VOLUMEUP || ev.code == KEY_POWER)) {
-            return 0;
-        }
-        g_keyState = (ev.value == 1) ? OHOS::InputDevice::STATE_PRESS : OHOS::InputDevice::STATE_RELEASE;
-        g_lastKeyId = ev.code;
+    if (ev.type != EV_KEY || ev.code > KEY_MAX) {
+        return 0;
     }
-    return 0;
+    if (ev.code == BTN_TOUCH) {
+        g_touchFingerDown = (ev.value == 1);
+    }
+    if (ev.code == BTN_TOUCH || ev.code == BTN_TOOL_FINGER) {
+        return 0;
+    }
+    // KEY_VOLUMEDOWN = 114, KEY_VOLUMEUP = 115, KEY_POWER = 116
+    if (!(ev.code == KEY_VOLUMEDOWN || ev.code == KEY_VOLUMEUP || ev.code == KEY_POWER)) {
+        return 0;
+    }
+    g_keyState = (ev.value == 1) ? OHOS::InputDevice::STATE_PRESS : OHOS::InputDevice::STATE_RELEASE;
+    g_lastKeyId = ev.code;
 }
 
 void ReportEventPkgCallback(const InputEventPackage **pkgs, const uint32_t count, uint32_t devIndex)
