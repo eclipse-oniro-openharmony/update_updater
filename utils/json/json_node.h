@@ -16,6 +16,7 @@
 #ifndef JSON_NODE_H
 #define JSON_NODE_H
 
+#include <filesystem>
 #include <list>
 #include <memory>
 #include <optional>
@@ -37,16 +38,17 @@ enum class NodeType { OBJECT, INT, STRING, ARRAY, BOOL, NUL, UNKNOWN };
 using NodeMap = std::unordered_map<std::string, std::unique_ptr<JsonNode>>;
 using NodeVec = std::vector<std::unique_ptr<JsonNode>>;
 using cJSONPtr = std::unique_ptr<cJSON, decltype(&cJSON_Delete)>;
-
 template<typename...T>
 using optionalVariant = std::variant<std::optional<T> ...>;
 
+namespace Fs = std::filesystem;
 class JsonNode {
     DISALLOW_COPY_MOVE(JsonNode);
 public:
     JsonNode();
-    explicit JsonNode(const std::string &str, bool needDeletecJSON = true);
-    explicit JsonNode(const cJSON *root, bool needDeletecJSON = true);
+    explicit JsonNode(const Fs::path &path);
+    explicit JsonNode(const std::string &str, bool needDelete = true);
+    explicit JsonNode(const cJSON *root, bool needDelete = true);
     ~JsonNode();
 
     const JsonNode &operator[](int idx) const;
@@ -86,8 +88,9 @@ public:
     std::list<std::reference_wrapper<JsonNode>>::const_iterator end() const;
 private:
     void Parse(const cJSON *root);
+    void Init(const cJSON *root, bool needDelete);
     template<typename T>
-    void Assign(T rhs)
+    void Assign(T rhs) const
     {
         if (innerObj_.valueless_by_exception()) {
             innerObj_ = std::optional<T>(rhs);
@@ -102,6 +105,11 @@ private:
     optionalVariant<bool, int, std::string, NodeVec, NodeMap> innerObj_ {};
     std::list<std::reference_wrapper<JsonNode>> innerNodesList_ {};
 };
-}
 
+inline const JsonNode &GetInvalidNode()
+{
+    static JsonNode emptyNode;  // used for invalid json node
+    return emptyNode;
+}
+}
 #endif // NODE_H

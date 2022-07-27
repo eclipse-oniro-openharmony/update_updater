@@ -56,6 +56,8 @@ ohos_executable("updater") {
   ]
 
   deps = [
+    "//base/startup/syspara_lite/hals/parameter:sysparam_hal",
+    "//base/startup/syspara_lite/interfaces/innerkits/native/syspara:syspara",
     "//base/update/updater/interfaces/kits/misc_info:libmiscinfo",
     "//base/update/updater/interfaces/kits/packages:libpackageExt",
     "//base/update/updater/services/applypatch:libapplypatch",
@@ -66,18 +68,16 @@ ohos_executable("updater") {
     "//base/update/updater/services/package:libupdaterpackage",
     "//base/update/updater/services/ui:libui",
     "//base/update/updater/utils:libutils",
+    "//drivers/peripheral/input/hal:hdi_input",
+    "//third_party/bounds_checking_function:libsec_shared",
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/bzip2:libbz2",
+    "//third_party/cJSON:cjson_static",
     "//third_party/libdrm:libdrm",
     "//third_party/lz4:liblz4_static",
     "//third_party/openssl:libcrypto_static",
     "//third_party/openssl:ssl_source",
     "//third_party/zlib:libz",
-    "//base/startup/syspara_lite/interfaces/innerkits/native/syspara:syspara",
-    "//base/startup/syspara_lite/hals/parameter:sysparam_hal",
-    "//third_party/bounds_checking_function:libsec_shared",
-    "//drivers/peripheral/input/hal:hdi_input",
-    "//third_party/cJSON:cjson_static",
   ]
 
   if (defined(use_ptable)) {

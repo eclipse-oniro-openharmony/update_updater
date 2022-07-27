@@ -100,6 +100,7 @@ ohos_static_library("libflashd") {
     "//base/update/updater/services/flashd/flash_service.cpp",
     "//base/update/updater/services/flashd/partition.cpp",
     "//base/update/updater/services/updater_binary/update_image_block.cpp",
+    "//base/update/updater/services/updater_binary/update_image_patch.cpp",
     "//base/update/updater/services/updater_binary/update_partitions.cpp",
     "//base/update/updater/services/updater_binary/update_processor.cpp",
   ]

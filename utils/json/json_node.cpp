@@ -16,6 +16,7 @@
 #include "json_node.h"
 
 #include "log/log.h"
+#include "utils.h"
 
 namespace Updater {
 namespace {
@@ -28,37 +29,60 @@ inline const std::unordered_map<uint16_t, NodeType> &GetJsonTypeMap()
     };
     return jsonTypeMap;
 }
-
-inline const JsonNode &GetInvalidNode()
-{
-    static JsonNode emptyNode = {};  // used for invalid json node
-    return emptyNode;
-}
 }  // namespace
 
 JsonNode::JsonNode() : type_ {NodeType::UNKNOWN}
 {
 }
 
-JsonNode::JsonNode(const std::string &str, bool needDeletecJSON) : JsonNode(cJSON_Parse(str.c_str()), needDeletecJSON)
+JsonNode::JsonNode(const std::string &str, bool needDelete) : JsonNode(cJSON_Parse(str.c_str()), needDelete)
 {
+}
+
+JsonNode::JsonNode(const Fs::path &path)
+{
+    std::string realPath {};
+    if (!Utils::PathToRealPath(path, realPath)) {
+        return;
+    }
+
+    std::ifstream ifs(realPath);
+    if (!ifs.is_open()) {
+        LOG(ERROR) << realPath << " not exist";
+        return;
+    }
+
+    // get root node
+    std::string content {std::istreambuf_iterator<char> {ifs}, {}};
+    cJSON *root = cJSON_Parse(content.c_str());
+    if (root == nullptr || cJSON_IsInvalid(root)) {
+        LOG(ERROR) << path << " contained json invalid";
+        return;
+    }
+
+    Init(root, true);
 }
 
 JsonNode::JsonNode(const cJSON *root, bool needDelete)
 {
-    if (root == nullptr || cJSON_IsInvalid(root)) {
-        LOG(ERROR) << "root is not valid";
-        type_ = NodeType::UNKNOWN;
-        if (needDelete) {
-            cJSON_Delete(const_cast<cJSON *>(root));
-        }
+    if (root != nullptr && !cJSON_IsInvalid(root)) {
+        Init(root, needDelete);
         return;
     }
+    LOG(ERROR) << "root is not valid";
+    type_ = NodeType::UNKNOWN;
+}
+
+
+void JsonNode::Init(const cJSON *root, bool needDelete)
+{
     if (auto it = GetJsonTypeMap().find(root->type); it != GetJsonTypeMap().end()) {
         type_ = it->second;
     }
-    innerNodesList_.clear();
     Parse(root);
+    if (needDelete) {
+        cJSON_Delete(const_cast<cJSON *>(root));
+    }
 }
 
 void JsonNode::Parse(const cJSON *root)
@@ -150,4 +174,4 @@ std::list<std::reference_wrapper<JsonNode>>::const_iterator JsonNode::end() cons
 {
     return innerNodesList_.cend();
 }
-}  // namespace updater
+}  // namespace Updater

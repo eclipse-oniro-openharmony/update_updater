@@ -22,6 +22,7 @@
 #include <limits>
 #include <linux/reboot.h>
 #include <string>
+#include <sys/reboot.h>
 #include <sys/stat.h>
 #include <sys/syscall.h>
 #include <unistd.h>
@@ -40,7 +41,7 @@ namespace Utils {
 constexpr uint32_t MAX_PATH_LEN = 256;
 constexpr uint8_t SHIFT_RIGHT_FOUR_BITS = 4;
 constexpr int USER_ROOT_AUTHORITY = 0;
-constexpr int GROUP_SYS_AUTHORITY = 1000;
+//constexpr int GROUP_SYS_AUTHORITY = 1000;
 constexpr int GROUP_UPDATE_AUTHORITY = 6666;
 constexpr int USECONDS_PER_SECONDS = 1000000; // 1s = 1000000us
 constexpr int NANOSECS_PER_USECONDS = 1000; // 1us = 1000ns
@@ -214,6 +215,17 @@ void DoReboot(const std::string& rebootTarget, const std::string &extData)
 #endif
 }
 
+void DoShutdown()
+{
+    UpdateMessage msg = {};
+    if (!WriteUpdaterMiscMsg(msg)) {
+        LOG(ERROR) << "DoShutdown: WriteUpdaterMessage empty error";
+        return;
+    }
+    sync();
+    reboot(RB_POWER_OFF);
+}
+
 std::string GetCertName()
 {
 #ifndef UPDATER_UT
@@ -287,6 +299,29 @@ bool WriteStringToFile(int fd, const std::string& content)
     return true;
 }
 
+bool CopyFile(const std::string &src, const std::string &dest)
+{
+    char realPath[PATH_MAX + 1] = {0};
+    if (realpath(src.c_str(), realPath) == nullptr) {
+        LOG(ERROR) << src << " get realpath fail";
+        return false;
+    }
+
+    std::ifstream fin(realPath);
+    std::ofstream fout(dest);
+    if (!fin.is_open() || !fout.is_open()) {
+        return false;
+    }
+
+    fout << fin.rdbuf();
+    if (fout.fail()) {
+        fout.clear();
+        return false;
+    }
+    fout.flush();
+    return true;
+}
+
 std::string GetLocalBoardId()
 {
     return "HI3516";
@@ -333,14 +368,14 @@ void CompressLogs(const std::string &name)
 bool CopyUpdaterLogs(const std::string &sLog, const std::string &dLog)
 {
     UPDATER_WARING_CHECK(MountForPath(UPDATER_LOG_DIR) == 0, "MountForPath /data/log failed!", return false);
-    if (access(UPDATER_LOG_DIR, 0) != 0) {
+    /*if (access(UPDATER_LOG_DIR, 0) != 0) {
         UPDATER_ERROR_CHECK(!MkdirRecursive(UPDATER_LOG_DIR, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH),
             "MkdirRecursive error!", return false);
         UPDATER_ERROR_CHECK(chown(UPDATER_PATH, USER_ROOT_AUTHORITY, GROUP_SYS_AUTHORITY) == 0,
             "Chown failed!", return false);
         UPDATER_ERROR_CHECK(chmod(UPDATER_PATH, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) == 0,
             "Chmod failed!", return false);
-    }
+    }*/
 
     FILE* dFp = fopen(dLog.c_str(), "ab+");
     UPDATER_ERROR_CHECK(dFp != nullptr, "open log failed", return false);
@@ -371,30 +406,39 @@ bool CopyUpdaterLogs(const std::string &sLog, const std::string &dLog)
     return true;
 }
 
-void WriteOtaResult(const int status)
+bool CheckDumpResult()
 {
-    if (access(UPDATER_PATH, 0) != 0) {
+    std::ifstream ifs;
+    const std::string resultPath = std::string(UPDATER_PATH) + "/" + std::string(UPDATER_RESULT_FILE);
+    ifs.open(resultPath, std::ios::in);
+    std::string buff;
+    if (ifs.is_open() && getline(ifs, buff) && buff.find("fail:") != std::string::npos) {
+        return true;
+    }
+    LOG(ERROR) << "open result file failed";
+    return false;
+}
+
+void WriteDumpResult(const std::string &result)
+{
+    /*if (access(UPDATER_PATH, 0) != 0) {
         UPDATER_ERROR_CHECK(!MkdirRecursive(UPDATER_PATH, 0755), // 0755: -rwxr-xr-x
             "MkdirRecursive error!", return);
-    }
-
+    }*/
+    LOG(INFO) << "WriteDumpResult: " << result;
     const std::string resultPath = std::string(UPDATER_PATH) + "/" + std::string(UPDATER_RESULT_FILE);
     FILE *fp = fopen(resultPath.c_str(), "w+");
     if (fp == nullptr) {
         LOG(ERROR) << "open result file failed";
         return;
     }
-    char buf[MAX_RESULT_SIZE] = "pass\n";
-    if (status != 0) {
-        if (sprintf_s(buf, MAX_RESULT_SIZE - 1, "fail:%d\n", status) < 0) {
-            LOG(WARNING) << "sprintf status fialed";
-        }
+    char buf[MAX_RESULT_BUFF_SIZE] = "Pass\n";
+    if (sprintf_s(buf, MAX_RESULT_BUFF_SIZE - 1, "%s\n", result.c_str()) < 0) {
+        LOG(WARNING) << "sprintf status fialed";
     }
-
     if (fwrite(buf, 1, strlen(buf) + 1, fp) <= 0) {
         LOG(WARNING) << "write result file failed, err:" << errno;
     }
-
     if (fclose(fp) != 0) {
         LOG(WARNING) << "close result file failed";
     }
@@ -410,6 +454,28 @@ void UsSleep(int usec)
     struct timespec ts = { static_cast<time_t>(seconds), nanoSeconds };
     while (nanosleep(&ts, &ts) < 0 && errno == EINTR) {
     }
+}
+
+bool PathToRealPath(const std::string &path, std::string &realPath)
+{
+    if (path.empty()) {
+        LOG(ERROR) << "path is empty!";
+        return false;
+    }
+
+    if ((path.length() >= PATH_MAX)) {
+        LOG(ERROR) << "path len is error, the len is: " << path.length();
+        return false;
+    }
+
+    char tmpPath[PATH_MAX] = {0};
+    if (realpath(path.c_str(), tmpPath) == nullptr) {
+        LOG(ERROR) << "path to realpath error " << path;
+        return false;
+    }
+
+    realPath = tmpPath;
+    return true;
 }
 } // Utils
 } // namespace Updater

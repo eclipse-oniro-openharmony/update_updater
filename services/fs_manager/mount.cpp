@@ -129,7 +129,7 @@ int MountForPath(const std::string &path)
     return ret;
 }
 
-int FormatPartition(const std::string &path)
+int FormatPartition(const std::string &path, bool isZeroErase)
 {
     FstabItem *item = FindFstabItemForPath(*g_fstab, path.c_str());
     if (item == nullptr) {
