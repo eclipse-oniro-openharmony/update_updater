@@ -539,6 +539,14 @@ int32_t PkgManagerImpl::VerifyPackage(const std::string &packagePath, const std:
     } else if (digest.buffer != nullptr) {
         // update.bin include signature information, verify entire file.
         ret = VerifyBinFile(packagePath, keyPath, version, digest);
+    } else {
+        PkgManager::PkgManagerPtr pkgManager = PkgManager::GetPackageInstance();
+        if (pkgManager == nullptr) {
+            PKG_LOGE("Fail to GetPackageInstance");
+            return PKG_INVALID_SIGNATURE;
+        }
+        std::vector<std::string> components;
+        ret = pkgManager->LoadPackage(packagePath, keyPath, components);
     }
 
     verifyCallback(ret, VERIFY_FINSH_PERCENT);
@@ -794,15 +802,23 @@ int32_t PkgManagerImpl::VerifyBinFile(const std::string &packagePath, const std:
 {
     PkgStreamPtr stream = nullptr;
     int32_t ret = CreatePkgStream(stream, packagePath, 0, PkgStream::PkgStreamType_Read);
-    PKG_CHECK(ret == PKG_SUCCESS, return ret, "Create input stream fail %s", packagePath.c_str());
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("Create input stream fail %s", packagePath.c_str());
+        return ret;
+    }
     size_t fileLen = stream->GetFileLength();
-    PKG_CHECK(fileLen > 0, ClosePkgStream(stream); return PKG_INVALID_FILE, "invalid file to load");
+    if (fileLen <= 0) {
+        PKG_LOGE("invalid file to load");
+        ClosePkgStream(stream);
+        return PKG_INVALID_FILE;
+    }
 
     int8_t digestMethod = static_cast<int8_t>(DigestAlgorithm::GetDigestMethod(version));
     size_t digestLen = DigestAlgorithm::GetDigestLen(digestMethod);
     size_t signatureLen = DigestAlgorithm::GetSignatureLen(digestMethod);
     if (digestLen != digest.length) {
         PKG_LOGE("Invalid digestLen");
+        ClosePkgStream(stream);
         return PKG_INVALID_PARAM;
     }
     std::vector<std::vector<uint8_t>> digestInfos(DIGEST_INFO_SIGNATURE + 1);
