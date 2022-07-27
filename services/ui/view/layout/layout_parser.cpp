@@ -30,10 +30,10 @@ const auto &GetSpecificInfoMap()
 {
     using namespace OHOS;
     const static std::unordered_map<std::string, std::function<SpecificInfo()>> specificInfoMap {
-        { VIEW_TYPE_STRING[UI_IMAGE_VIEW], []() { return UxImageInfo{}; } },
-        { VIEW_TYPE_STRING[UI_BOX_PROGRESS], []() { return UxBoxProgressInfo{}; } },
-        { VIEW_TYPE_STRING[UI_LABEL], []() { return UxLabelInfo{}; } },
-        { VIEW_TYPE_STRING[UI_LABEL_BUTTON], []() { return UxLabelBtnInfo{}; } }
+        { VIEW_TYPE_STRING[UI_IMAGE_VIEW], []() { return UxImageInfo {}; } },
+        { VIEW_TYPE_STRING[UI_BOX_PROGRESS], []() { return UxBoxProgressInfo {}; } },
+        { VIEW_TYPE_STRING[UI_LABEL], []() { return UxLabelInfo {}; } },
+        { VIEW_TYPE_STRING[UI_LABEL_BUTTON], []() { return UxLabelBtnInfo {}; } }
     };
     return specificInfoMap;
 }
