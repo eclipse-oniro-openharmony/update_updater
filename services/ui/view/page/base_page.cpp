@@ -22,13 +22,13 @@ namespace Updater {
 using namespace OHOS;
 BasePage::BasePage()
     : width_ {}, height_ {}, root_ { std::make_unique<OHOS::UIViewGroup>() },
-    coms_ {}, comsMap_ {}, pageId_ {}, extraMsg_ {}, color_{ 0, 0, 0, 255 }
+    coms_ {}, comsMap_ {}, pageId_ {}, extraMsg_ {}, color_ { 0, 0, 0, 255 }
 {
 }
 
 BasePage::BasePage(uint16_t width, uint16_t height)
     : width_ { width }, height_ { height }, root_ { std::make_unique<OHOS::UIViewGroup>() },
-    coms_ {}, comsMap_ {}, pageId_ {}, extraMsg_ {}, color_{ 0, 0, 0, 255 }
+    coms_ {}, comsMap_ {}, pageId_ {}, extraMsg_ {}, color_ { 0, 0, 0, 255 }
 {
 }
 
