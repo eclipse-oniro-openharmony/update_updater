@@ -20,27 +20,37 @@
 
 #include "json_node.h"
 #include "log/log.h"
+#include "updater_ui_traits.h"
 
 namespace Updater {
 enum Action { SETVAL, PRINTVAL };
-
-template<typename T>
-struct Traits;
-
 namespace Detail {
-template<typename T, std::size_t idx>
-using memberType = std::remove_reference_t<decltype(Traits<T>::template Get<idx>(std::declval<T&>()))>;
+template<typename Traits>
+constexpr bool CheckTrait()
+{
+    bool res = true;
+    for (int i = 0; i < Traits::COUNT; ++i) {
+        res = res && Traits::MEMBER_KEY[i] != nullptr && std::string_view("") != Traits::MEMBER_KEY[i];
+    }
+    return res;
+};
 
 template<Action action>
 struct MemberVisitor;
+
+template<typename T, std::size_t idx>
+using memberType = std::remove_reference_t<decltype(Traits<T>::template Get<idx>(std::declval<T&>()))>;
 
 template<Action action>
 struct StructVisitor {
     template<typename T, std::size_t F, std::size_t... R>
     static bool VisitStruct(const JsonNode &node, const JsonNode &defaultNode, T &t, std::index_sequence<F, R...>)
     {
+        static_assert(CheckTrait<Traits<T>>(), "Trait member key invalid, please check");
         constexpr auto key = Traits<T>::MEMBER_KEY[F];
-        if (!MemberVisitor<action>::template VisitMember<T, F>(node[key], defaultNode[key], t)) {
+        auto &FthMember = Traits<T>::template Get<F>(t);
+        if (!MemberVisitor<action>::template VisitMember<memberType<T, F>>(
+            node[key], defaultNode[key], FthMember, key)) {
             return false;
         }
 
@@ -55,40 +65,65 @@ struct StructVisitor {
 template<>
 struct MemberVisitor<SETVAL> {
     // visit string, int, bool
-    template<typename T, std::size_t i>
-    static auto VisitMember(const JsonNode &node, const JsonNode &defaultNode, T &obj)
-        -> Detail::isMatch<Detail::G_IS_BASE_TYPE<memberType<T, i>>, bool>
+    template<typename T, std::enable_if_t<Detail::G_IS_BASE_TYPE<T>, bool> = true>
+    static bool VisitMember(const JsonNode &node, const JsonNode &defaultNode, T &obj, const char *key)
     {
-        auto r = node.As<memberType<T, i>>();
-        auto defaultR = defaultNode.As<memberType<T, i>>();
+        auto r = node.As<T>();
+        auto defaultR = defaultNode.As<T>();
         if (!r.has_value() && !defaultR.has_value()) {
-            LOG(ERROR) << Traits<T>::MEMBER_KEY[i] << " has not both default and non-default value!!!";
+            LOG(ERROR) << key << " has not both default and non-default value!!!";
             return false;
         }
         if (r) {
-            Traits<T>::template Get<i>(obj) = *r;
+            obj = *r;
             return true;
         }
         if (defaultR) {
-            Traits<T>::template Get<i>(obj) = *defaultR;
+            obj = *defaultR;
             return true;
         }
         return false;
     }
-    // visit struct
-    template<typename T, std::size_t i>
-    static auto VisitMember(const JsonNode &node, const JsonNode &defaultNode, T &obj)
-        -> Detail::isMatch<std::is_integral_v<decltype(Traits<memberType<T, i>>::COUNT)>, bool>
+    // visit vector, T is std::vector<T::value_type>
+    template<typename T, std::enable_if_t<Detail::G_IS_VECTOR<T>, bool> = true>
+    static auto VisitMember(const JsonNode &node, const JsonNode &defaultNode, T &obj, const char *key)
     {
-        return StructVisitor<SETVAL>::VisitStruct(node, defaultNode, Traits<T>::template Get<i>(obj),
-            std::make_index_sequence<Traits<memberType<T, i>>::COUNT> {});
+        if ((node.Type() != NodeType::UNKNOWN && node.Type() != NodeType::NUL && node.Type() != NodeType::ARRAY) ||
+            (defaultNode.Type() != NodeType::UNKNOWN && defaultNode.Type() != NodeType::NUL
+            && defaultNode.Type() != NodeType::ARRAY)) {
+                LOG(ERROR) << "Node type not matched with " << key;
+                return false;
+        }
+        typename T::value_type ele {};
+        for (auto &subNode : node) {
+            ele = {};
+            if (!VisitMember(subNode, {}, ele, "")) {
+                return false;
+            }
+            obj.push_back(std::move(ele));
+        }
+        for (auto &subNode : defaultNode) {
+            ele = {};
+            // using subNode to contruct an element of i-th type of T
+            if (!VisitMember(subNode, {}, ele, "")) {
+                return false;
+            }
+            obj.push_back(std::move(ele));
+        }
+        return true;
+    }
+    // visit struct
+    template<typename T, std::enable_if_t<std::is_integral_v<decltype(Traits<T>::COUNT)>, bool> = true>
+    static bool VisitMember(const JsonNode &node, const JsonNode &defaultNode, T &obj, const char *key)
+    {
+        return StructVisitor<SETVAL>::VisitStruct(node, defaultNode, obj,
+            std::make_index_sequence<Traits<T>::COUNT> {});
     }
 };
 }  // namespace Detail
 
-template<Action act, typename T>
-auto Visit(const JsonNode &node, const JsonNode &defaultNode, T &obj)
-    -> Detail::isMatch<Detail::G_IS_NUM<decltype(Traits<T>::COUNT)>, bool>
+template<Action act, typename T, std::enable_if_t<Detail::G_IS_NUM<decltype(Traits<T>::COUNT)>, bool> = true>
+bool Visit(const JsonNode &node, const JsonNode &defaultNode, T &obj)
 {
     static_assert(act == SETVAL,
         "Only for setting member of struct with default node!");
@@ -96,15 +131,14 @@ auto Visit(const JsonNode &node, const JsonNode &defaultNode, T &obj)
                                                    std::make_index_sequence<Traits<T>::COUNT> {});
 }
 
-template<Action act, typename T>
-auto Visit(const JsonNode &node, T &obj) -> Detail::isMatch<Detail::G_IS_NUM<decltype(Traits<T>::COUNT)>, bool>
+template<Action act, typename T, std::enable_if_t<Detail::G_IS_NUM<decltype(Traits<T>::COUNT)>, bool> = true>
+bool Visit(const JsonNode &node, T &obj)
 {
     static_assert(act == SETVAL,
         "Only for setting member of struct without default node!");
-    static JsonNode dummyNode {};
     return Detail::StructVisitor<act>::VisitStruct(node, {}, obj,
                                                    std::make_index_sequence<Traits<T>::COUNT> {});
 }
-}  // namespace updater
+}  // namespace Updater
 
 #endif

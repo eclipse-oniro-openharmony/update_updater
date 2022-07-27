@@ -33,9 +33,14 @@ enum UpdaterInitEvent {
 using InitHandler = void (*)(void);
 
 class UpdaterInit {
-    DEFINE_COMMON_FOR_SINGLETON(UpdaterInit)
+    DISALLOW_COPY_MOVE(UpdaterInit);
 public:
-    void InvokeEvent(enum UpdaterInitEvent eventId)
+    static UpdaterInit &GetInstance()
+    {
+        static UpdaterInit instance;
+        return instance;
+    }
+    void InvokeEvent(enum UpdaterInitEvent eventId) const
     {
         if (eventId >= UPDATER_INIT_EVENT_BUTT) {
             return;
@@ -77,5 +82,5 @@ int FactoryReset(FactoryResetMode mode, const std::string &path);
 UpdaterStatus UpdaterFromSdcard();
 
 bool IsBatteryCapacitySufficient();
-} // namespace updater
+} // namespace Updater
 #endif // UPDATER_MAIN_H

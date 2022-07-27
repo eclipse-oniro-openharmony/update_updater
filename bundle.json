@@ -107,6 +107,15 @@
                         ],
                         "header_base": "//base/update/updater/interfaces/kits/include"
                     }
+                },
+                {
+                    "name": "//base/update/updater/interfaces/kits/diff_patch:libdiff_patch",
+                    "header": {
+                        "header_files": [
+                            "diff_patch/diff_patch_interface.h"
+                        ],
+                        "header_base": "//base/update/updater/interfaces/kits/include"
+                    }
                 }
             ],
             "test": []
