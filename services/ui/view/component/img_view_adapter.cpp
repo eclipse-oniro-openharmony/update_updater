@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "animation_label.h"
+#include "img_view_adapter.h"
 #include <sstream>
 #include <unistd.h>
 #include "animator/animator_manager.h"

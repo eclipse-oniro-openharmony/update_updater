@@ -22,9 +22,9 @@
 #include "utils.h"
 
 namespace Updater {
-UIGraphicEngine &UIGraphicEngine::GetInstance()
+GraphicEngine &GraphicEngine::GetInstance()
 {
-    static UIGraphicEngine instance;
+    static GraphicEngine instance;
     static bool isRegister = false;
     if (!isRegister) {
         OHOS::BaseGfxEngine::InitGfxEngine(&instance);
@@ -34,7 +34,7 @@ UIGraphicEngine &UIGraphicEngine::GetInstance()
     return instance;
 }
 
-void UIGraphicEngine::Init(uint16_t width, uint16_t height, uint32_t bkgColor, uint8_t mode, SurfaceDev &sfDev)
+void GraphicEngine::Init(uint16_t width, uint16_t height, uint32_t bkgColor, uint8_t mode, SurfaceDev &sfDev)
 {
     bkgColor_ = bkgColor;
     colorMode_ = mode;
@@ -46,10 +46,10 @@ void UIGraphicEngine::Init(uint16_t width, uint16_t height, uint32_t bkgColor, u
     InitFontEngine();
     InitImageDecodeAbility();
     InitFlushThread();
-    LOG(INFO) << "UIGraphicEngine Init width: " << width << ", height: " << height << ", bkgColor: " << bkgColor;
+    LOG(INFO) << "GraphicEngine Init width: " << width << ", height: " << height << ", bkgColor: " << bkgColor;
 }
 
-void UIGraphicEngine::InitFontEngine() const
+void GraphicEngine::InitFontEngine() const
 {
     constexpr uint32_t uiFontMemAlignment = 4;
     static uint32_t fontMemBaseAddr[OHOS::MIN_FONT_PSRAM_LENGTH / uiFontMemAlignment];
@@ -58,21 +58,21 @@ void UIGraphicEngine::InitFontEngine() const
     LOG(INFO) << "InitFontEngine VECTOR_FONT_DIR: " << VECTOR_FONT_DIR << DEFAULT_VECTOR_FONT_FILENAME;
 }
 
-void UIGraphicEngine::InitImageDecodeAbility() const
+void GraphicEngine::InitImageDecodeAbility() const
 {
     uint32_t imageType = OHOS::IMG_SUPPORT_BITMAP | OHOS::IMG_SUPPORT_JPEG | OHOS::IMG_SUPPORT_PNG;
     OHOS::ImageDecodeAbility::GetInstance().SetImageDecodeAbility(imageType);
 }
 
-void UIGraphicEngine::InitFlushThread()
+void GraphicEngine::InitFlushThread()
 {
     flushStop_ = false;
-    flushLoop_ = std::thread(&UIGraphicEngine::FlushThreadLoop, this);
+    flushLoop_ = std::thread(&GraphicEngine::FlushThreadLoop, this);
     flushLoop_.detach();
     LOG(INFO) << "init flush thread";
 }
 
-void UIGraphicEngine::FlushThreadLoop() const
+void GraphicEngine::FlushThreadLoop() const
 {
     while (!flushStop_) {
         OHOS::TaskManager::GetInstance()->TaskHandler();
@@ -80,7 +80,7 @@ void UIGraphicEngine::FlushThreadLoop() const
     }
 }
 
-OHOS::BufferInfo *UIGraphicEngine::GetFBBufferInfo()
+OHOS::BufferInfo *GraphicEngine::GetFBBufferInfo()
 {
     if (buffInfo_ != nullptr) {
         return buffInfo_.get();
@@ -88,7 +88,7 @@ OHOS::BufferInfo *UIGraphicEngine::GetFBBufferInfo()
 
     uint8_t pixelBytes = OHOS::DrawUtils::GetByteSizeByColorMode(colorMode_);
     if (pixelBytes == 0) {
-        LOG(ERROR) << "UIGraphicEngine get pixelBytes fail";
+        LOG(ERROR) << "GraphicEngine get pixelBytes fail";
         return nullptr;
     }
 
@@ -111,7 +111,7 @@ OHOS::BufferInfo *UIGraphicEngine::GetFBBufferInfo()
     return buffInfo_.get();
 }
 
-void UIGraphicEngine::Flush()
+void GraphicEngine::Flush()
 {
     if ((sfDev_ == nullptr) || (buffInfo_ == nullptr)) {
         LOG(ERROR) << "null error";
@@ -121,12 +121,12 @@ void UIGraphicEngine::Flush()
     sfDev_->Flip(reinterpret_cast<uint8_t *>(buffInfo_->virAddr));
 }
 
-uint16_t UIGraphicEngine::GetScreenWidth()
+uint16_t GraphicEngine::GetScreenWidth()
 {
     return width_;
 }
 
-uint16_t UIGraphicEngine::GetScreenHeight()
+uint16_t GraphicEngine::GetScreenHeight()
 {
     return height_;
 }

@@ -22,13 +22,13 @@
 #include "surface_dev.h"
 
 namespace Updater {
-class UIGraphicEngine : public OHOS::BaseGfxEngine {
+class GraphicEngine : public OHOS::BaseGfxEngine {
 static constexpr uint32_t THREAD_USLEEP_TIME = 10000;
 
 public:
-    UIGraphicEngine() = default;
-    virtual ~UIGraphicEngine() = default;
-    static UIGraphicEngine &GetInstance();
+    GraphicEngine() = default;
+    virtual ~GraphicEngine() = default;
+    static GraphicEngine &GetInstance();
     void Init(uint16_t width, uint16_t height, uint32_t bkgColor, uint8_t mode, SurfaceDev &sfDev);
     void Flush() override;
     OHOS::BufferInfo *GetFBBufferInfo() override;

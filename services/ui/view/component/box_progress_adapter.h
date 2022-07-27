@@ -16,8 +16,8 @@
 #ifndef UPDATER_UI_PROGRESS_BAR_H
 #define UPDATER_UI_PROGRESS_BAR_H
 
-#include "animation_label.h"
 #include "components/ui_box_progress.h"
+#include "img_view_adapter.h"
 #include "page/view_proxy.h"
 #include "view_api.h"
 

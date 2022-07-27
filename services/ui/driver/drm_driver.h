@@ -40,7 +40,7 @@ struct BufferObject {
     uint32_t fbId;
 };
 
-class DrmDriver : public IGraphicDriver {
+class DrmDriver : public GraphicDrv {
 public:
     DrmDriver() : conn_(nullptr), res_(nullptr) {}
     ~DrmDriver() override;

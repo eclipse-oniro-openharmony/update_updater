@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-#include "component/component_factory.h"
-#include "animation_label.h"
-#include "label_button.h"
-#include "progress_bar.h"
-#include "text_label.h"
+#include "component_factory.h"
+#include "box_progress_adapter.h"
+#include "img_view_adapter.h"
+#include "label_btn_adapter.h"
+#include "text_label_adapter.h"
 
 namespace Updater {
 /*

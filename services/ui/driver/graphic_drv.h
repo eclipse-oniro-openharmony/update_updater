@@ -23,10 +23,10 @@ using GrSurface = struct GrSurface_ {
     unsigned int rowBytes;
     unsigned int pixelBytes;
 };
-class IGraphicDriver {
+class GraphicDrv {
 public:
-    IGraphicDriver() : fd_(-1) {}
-    virtual ~IGraphicDriver() {}
+    GraphicDrv() : fd_(-1) {}
+    virtual ~GraphicDrv() {}
     virtual void Init() = 0;
     virtual void Flip(const uint8_t *buf) = 0;
     virtual void GetGrSurface(GrSurface &surface) = 0;

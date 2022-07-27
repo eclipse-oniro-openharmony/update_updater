@@ -33,8 +33,8 @@ public:
     void GetScreenSize(int &w, int &h) const;
 private:
     DevType GetDevType() const;
-    std::unique_ptr<IGraphicDriver> MakeDevDrv(DevType devType);
-    std::unique_ptr<IGraphicDriver> drv_;
+    std::unique_ptr<GraphicDrv> MakeDevDrv(DevType devType);
+    std::unique_ptr<GraphicDrv> drv_;
 };
 } // namespace Updater
 #endif

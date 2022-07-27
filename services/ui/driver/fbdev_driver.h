@@ -28,7 +28,7 @@ struct FbBufferObject {
     void *vaddr;
 };
 
-class FbdevDriver : public IGraphicDriver {
+class FbdevDriver : public GraphicDrv {
 public:
     FbdevDriver() {}
     ~FbdevDriver() override;

@@ -20,9 +20,9 @@
 #include "updater_ui_const.h"
 
 namespace Updater {
-std::unique_ptr<IGraphicDriver> SurfaceDev::MakeDevDrv(DevType devType)
+std::unique_ptr<GraphicDrv> SurfaceDev::MakeDevDrv(DevType devType)
 {
-    std::unique_ptr<IGraphicDriver> drv = nullptr;
+    std::unique_ptr<GraphicDrv> drv = nullptr;
     switch (devType) {
         case DevType::DRM_DEVICE:
             drv = std::make_unique<DrmDriver>();

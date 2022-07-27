@@ -14,7 +14,7 @@
  */
 #include "language/language_ui.h"
 #include "log/log.h"
-#include "text_label.h"
+#include "text_label_adapter.h"
 
 namespace Updater {
 TextLabelAdapter::TextLabelAdapter(const UxViewInfo &info)

@@ -25,12 +25,12 @@
 #include "page/page_manager.h"
 
 namespace Updater {
-class UxEventManage final {
-    DISALLOW_COPY_MOVE(UxEventManage);
+class EventManage final {
+    DISALLOW_COPY_MOVE(EventManage);
 public:
-    UxEventManage();
-    ~UxEventManage() = default;
-    static UxEventManage &GetInstance();
+    EventManage();
+    ~EventManage() = default;
+    static EventManage &GetInstance();
     void Add(const ComInfo &viewId, std::unique_ptr<LabelOnTouchListener> listener);
     void Add(const ComInfo &viewId, std::unique_ptr<BtnOnEventListener> listener);
     void Add(const ComInfo &viewId, std::unique_ptr<BtnOnDragListener> listener);

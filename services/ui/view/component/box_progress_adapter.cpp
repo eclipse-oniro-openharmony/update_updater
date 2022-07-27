@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "progress_bar.h"
+#include "box_progress_adapter.h"
 #include "graphic_engine.h"
 #include "log/log.h"
 #include "scope_guard.h"
@@ -51,7 +51,7 @@ bool BoxProgressAdapter::IsValid(const UxBoxProgressInfo &info)
 void BoxProgressAdapter::SetValue(float value)
 {
     ON_SCOPE_EXIT(flush) {
-        UIGraphicEngine::GetInstance().Flush();
+        GraphicEngine::GetInstance().Flush();
     };
     OHOS::UIBoxProgress::SetValue(static_cast<int>((value / FULL_PERCENT_PROGRESS) * (progressWidth_ - 1)));
     if (!hasEp_) {

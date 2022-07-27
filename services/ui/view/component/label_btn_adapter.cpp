@@ -12,13 +12,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "label_button.h"
+#include "label_btn_adapter.h"
 #include "dock/focus_manager.h"
 #include "log/log.h"
 #include "page/view_proxy.h"
 
 namespace Updater {
-class LabelBtnOnFocusListener : public OHOS::UIView::OnFocusListener {
+struct LabelBtnAdapter::LabelBtnOnFocusListener : public OHOS::UIView::OnFocusListener {
 public:
     LabelBtnOnFocusListener(UxBRGAPixel focusedTxtColor, UxBRGAPixel unfocusedTxtcolor,
         UxBRGAPixel focusedBgColor, UxBRGAPixel unfocusedBgcolor)

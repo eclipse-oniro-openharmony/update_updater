@@ -19,8 +19,8 @@
 #include "view_api.h"
 
 namespace Updater {
-class LabelBtnOnFocusListener;
 class LabelBtnAdapter : public OHOS::UILabelButton {
+    struct LabelBtnOnFocusListener;
     static constexpr uint32_t MAX_FONT_SIZE = 255;
 public:
     using SpecificInfoType = UxLabelBtnInfo;
