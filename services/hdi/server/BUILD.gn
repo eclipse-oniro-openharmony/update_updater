@@ -14,16 +14,11 @@
 import("//build/ohos.gni")
 
 ohos_shared_library("libupdate_hdi_impl") {
-  sources = [
-    "update_hdi_impl.cpp",
-  ]
+  sources = [ "update_hdi_impl.cpp" ]
 
-  include_dirs = [
-    "//base/update/updater/interfaces/kits/include"
-  ]
+  include_dirs = [ "//base/update/updater/interfaces/kits/include" ]
 
-  deps = [
-  ]
+  deps = []
   install_images = [ "updater" ]
   subsystem_name = "updater"
   part_name = "updater"
