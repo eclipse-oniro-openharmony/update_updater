@@ -142,7 +142,7 @@ std::string USInstrImagePatch::GetPatchFile(Uscript::UScriptEnv &env, const Imag
         return "";
     }
 
-    LOG(INFO) << "USInstrImageShaCheck::Execute patchFile " << patchFile;;
+    LOG(INFO) << "USInstrImageShaCheck::Execute patchFile " << patchFile;
     return patchFile;
 }
 
