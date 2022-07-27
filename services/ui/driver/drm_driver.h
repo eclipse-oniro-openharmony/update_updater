@@ -22,7 +22,6 @@
 #include <cstring>
 #include <drm_fourcc.h>
 #include <fcntl.h>
-#include <linux/fb.h>
 #include <poll.h>
 #include <sys/mman.h>
 #include <xf86drm.h>

@@ -22,7 +22,6 @@
 #include <sys/ioctl.h>
 #include <sys/mman.h>
 #include <sys/types.h>
-#include <linux/fb.h>
 #include <unistd.h>
 #include "log/log.h"
 #include "securec.h"
@@ -93,7 +92,7 @@ void FbdevDriver::Init()
     buff_.height = vinfo_.yres;
     buff_.size = finfo_.line_length * vinfo_.yres;
     buff_.vaddr = mmap(nullptr, finfo_.smem_len, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
-    if (buff_.vaddr == MAP_FAILED) {
+    if (buff_.vaddr == static_cast<void *>(MAP_FAILED)) {
         LOG(ERROR) << "failed to mmap framebuffer";
         close(fd);
         return;

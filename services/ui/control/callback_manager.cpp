@@ -77,7 +77,7 @@ void CallbackManager::Register(CallbackCfg cbCfg)
         return;
     }
     cb = itFunc->second;
-    EventManage::GetInstance().Add(ComInfo {cbCfg.pageId, cbCfg.comId}, evtType, cb);
+    EventManager::GetInstance().Add(ComInfo {cbCfg.pageId, cbCfg.comId}, evtType, cb);
     LOG(DEBUG) << "register " << cbCfg.func << " for " << ComInfo {cbCfg.pageId, cbCfg.comId} << " succeed";
 }
 
@@ -89,7 +89,7 @@ void CallbackManager::Init(bool hasFocus)
 
     if (hasFocus) {
         // for focus manager
-        EventManage::GetInstance().AddKeyListener();
+        EventManager::GetInstance().AddKeyListener();
     }
 
     // for long press warning

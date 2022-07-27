@@ -18,17 +18,17 @@
 #include "log/log.h"
 
 namespace Updater {
-EventManage::EventManage() : pgMgr_(PageManager::GetInstance())
+EventManager::EventManager() : pgMgr_(PageManager::GetInstance())
 {
 }
 
-EventManage &EventManage::GetInstance()
+EventManager &EventManager::GetInstance()
 {
-    static EventManage instance;
+    static EventManager instance;
     return instance;
 }
 
-void EventManage::Add(const ComInfo &viewId, std::unique_ptr<LabelOnTouchListener> listener)
+void EventManager::Add(const ComInfo &viewId, std::unique_ptr<LabelOnTouchListener> listener)
 {
     if (!pgMgr_.IsValidCom(viewId)) {
         LOG(ERROR) << "not an valid view " << viewId;
@@ -40,7 +40,7 @@ void EventManage::Add(const ComInfo &viewId, std::unique_ptr<LabelOnTouchListene
     com->SetOnTouchListener(labelOnTouchListener_.back().get());
 }
 
-void EventManage::Add(const ComInfo &viewId, std::unique_ptr<BtnOnEventListener> listener)
+void EventManager::Add(const ComInfo &viewId, std::unique_ptr<BtnOnEventListener> listener)
 {
     if (!pgMgr_.IsValidCom(viewId)) {
         LOG(ERROR) << "not an valid view " << viewId;
@@ -56,7 +56,7 @@ void EventManage::Add(const ComInfo &viewId, std::unique_ptr<BtnOnEventListener>
     com->SetOnTouchListener(btnListener);
 }
 
-void EventManage::Add(const ComInfo &viewId, std::unique_ptr<BtnOnDragListener> listener)
+void EventManager::Add(const ComInfo &viewId, std::unique_ptr<BtnOnDragListener> listener)
 {
     if (!pgMgr_.IsValidCom(viewId)) {
         LOG(ERROR) << "not an valid view " << viewId;
@@ -69,13 +69,13 @@ void EventManage::Add(const ComInfo &viewId, std::unique_ptr<BtnOnDragListener> 
 }
 
 // key listener is registered at root view, because key event don't has position info and is globally responded
-void EventManage::AddKeyListener()
+void EventManager::AddKeyListener()
 {
     keyListener_ = std::make_unique<KeyListener>();
     OHOS::RootView::GetInstance()->SetOnKeyActListener(keyListener_.get());
 }
 
-void EventManage::Add(const ComInfo &viewId, EventType evt, Callback cb)
+void EventManager::Add(const ComInfo &viewId, EventType evt, Callback cb)
 {
     switch (evt) {
         case EventType::CLICKEVENT:

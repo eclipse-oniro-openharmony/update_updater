@@ -31,8 +31,6 @@ std::unordered_map<Language, std::string> g_languageDataVars = {
     {Language::SPANISH, "spa"},
 };
 
-std::string LanguageUI::empty_;
-
 // map key zh/es/en is used in locale file to specify locale env for updater
 const std::unordered_map<std::string, Language> LanguageUI::LOCALES {
     { "zh", Language::CHINESE },
@@ -113,13 +111,14 @@ bool LanguageUI::CheckLevel(int level)
 
 const std::string &LanguageUI::Translate(const std::string &key, UpdaterUiMsgID msgId) const
 {
+    static std::string emptyStr;
     if (auto it = strMap_.find(key); it != strMap_.end() && !it->second.empty()) {
         return it->second;
     }
     if (auto it = strMap_.find(DEFAULT_KEY); it != strMap_.end()) {
         return it->second;
     }
-    return empty_;
+    return emptyStr;
 }
 
 void LanguageUI::SetLanguage(Language language)

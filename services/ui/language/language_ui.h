@@ -52,7 +52,6 @@ private:
     std::vector<std::string> res_;
     LangResource langRes_;
     Language language_;
-    static std::string empty_;
     static constexpr auto LANG_RES_KEY = "locale";
     const static std::unordered_map<std::string, Language> LOCALES;
 };
