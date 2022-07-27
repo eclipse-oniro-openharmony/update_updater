@@ -130,7 +130,7 @@ int MountForPath(const std::string &path)
     return ret;
 }
 
-static void ErasePartition(const std::string &devPath)
+void ErasePartition(const std::string &devPath)
 {
     std::string realPath {};
     if (!Utils::PathToRealPath(devPath, realPath)) {
