@@ -41,7 +41,7 @@ uint16_t g_keyState = OHOS::INVALID_KEY_STATE;
 
 void HandleEvAbs(const input_event &ev)
 {
-    const static std::unordered_map<int, std::function<void(void)>> evMap{
+    const static std::unordered_map<int, std::function<void(void)>> evMap {
         {ABS_MT_POSITION_Y, [&ev] () {
             g_touchY = ev.value;
             g_touchFingerDown = true;
@@ -58,8 +58,7 @@ void HandleEvAbs(const input_event &ev)
             }
         }}
     };
-    if (auto it = evMap.find(ev.code); it != evMap.end())
-    {
+    if (auto it = evMap.find(ev.code); it != evMap.end()) {
         it->second();
     }
 }
