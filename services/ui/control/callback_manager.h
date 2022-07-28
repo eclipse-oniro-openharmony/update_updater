@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef CALLBACK_MANAGER_H
-#define CALLBACK_MANAGER_H
+#ifndef UPDATER_UI_CALLBACK_MANAGER_H
+#define UPDATER_UI_CALLBACK_MANAGER_H
 
 #include <functional>
 #include <unordered_map>

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef EVENT_PRODUCT_H
-#define EVENT_PRODUCT_H
+#ifndef UPDATER_UI_EVENT_PRODUCT_H
+#define UPDATER_UI_EVENT_PRODUCT_H
 
 #include <functional>
 #include "components/root_view.h"

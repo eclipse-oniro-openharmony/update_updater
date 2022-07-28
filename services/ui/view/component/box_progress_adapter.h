@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef UPDATER_UI_PROGRESS_BAR_H
-#define UPDATER_UI_PROGRESS_BAR_H
+#ifndef UPDATER_UI_BOX_PROGRESS_ADAPTER_H
+#define UPDATER_UI_BOX_PROGRESS_ADAPTER_H
 
 #include "components/ui_box_progress.h"
 #include "img_view_adapter.h"

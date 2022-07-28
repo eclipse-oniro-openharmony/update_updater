@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef COMPONENT_FACTORY_H
-#define COMPONENT_FACTORY_H
+#ifndef UPDATER_UI_COMPONENT_FACTORY_H
+#define UPDATER_UI_COMPONENT_FACTORY_H
 
 #include <memory>
 #include <string>

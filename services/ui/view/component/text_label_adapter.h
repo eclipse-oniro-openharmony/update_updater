@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef UPDATER_UI_TEXT_LABLE_H
-#define UPDATER_UI_TEXT_LABLE_H
+#ifndef UPDATER_UI_TEXT_LABEL_ADAPTER_H
+#define UPDATER_UI_TEXT_LABEL_ADAPTER_H
 
 #include "components/ui_label.h"
 #include "view_api.h"

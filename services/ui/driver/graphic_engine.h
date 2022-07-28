@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef UPDATER_UX_GRAPHIC_ENGINE_H
-#define UPDATER_UX_GRAPHIC_ENGINE_H
+#ifndef UPDATER_UI_GRAPHIC_ENGINE_H
+#define UPDATER_UI_GRAPHIC_ENGINE_H
 
 #include <memory>
 #include <thread>

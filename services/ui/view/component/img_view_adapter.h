@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef UPDATER_UI_ANIMATION_LABLE_H
-#define UPDATER_UI_ANIMATION_LABLE_H
+#ifndef UPDATER_UI_IMG_VIEW_ADAPTER_H
+#define UPDATER_UI_IMG_VIEW_ADAPTER_H
 
 #include <string>
 #include <thread>

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef UPDATER_UX_EVENT_MANAGE_H
-#define UPDATER_UX_EVENT_MANAGE_H
+#ifndef UPDATER_UI_EVENT_MANAGER_H
+#define UPDATER_UI_EVENT_MANAGER_H
 
 #include <memory>
 #include <vector>

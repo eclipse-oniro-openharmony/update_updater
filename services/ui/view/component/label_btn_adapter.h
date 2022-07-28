@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef UPDATER_UI_LABEL_BUTTON_H
-#define UPDATER_UI_LABEL_BUTTON_H
+#ifndef UPDATER_UI_LABEL_BTN_ADAPTER_H
+#define UPDATER_UI_LABEL_BTN_ADAPTER_H
 
 #include "components/ui_label_button.h"
 #include "view_api.h"
