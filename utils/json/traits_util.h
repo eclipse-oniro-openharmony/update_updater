@@ -16,6 +16,9 @@
 #ifndef TRAITS_UTIL_H
 #define TRAITS_UTIL_H
 
+#include <string>
+#include <vector>
+
 namespace Updater {
 namespace Detail {
 template<typename T>
@@ -34,6 +37,15 @@ inline constexpr bool G_IS_PRINTABLE = (G_IS_NUM<T> || G_IS_BOOL<T> || G_IS_STR<
 template<typename T>
 inline constexpr bool G_IS_BASE_TYPE = (G_IS_NUM<T> || G_IS_BOOL<T> || G_IS_STR<T>);
 
+template<typename T>
+struct IsVector : std::false_type {};
+
+template<typename T>
+struct IsVector<std::vector<T>> : std::true_type {};
+
+template<typename T>
+constexpr bool G_IS_VECTOR = IsVector<T>::value;
+
 template<bool b, typename T>
 using isMatch = typename std::enable_if_t<b, T>;
 
@@ -45,6 +57,12 @@ struct StandardTypeHelper {
 
 template<typename T>
 using StandardType = typename StandardTypeHelper<T>::type;
+
+template<std::size_t idx, typename...T>
+inline auto &Get(T &&...t)
+{
+    return std::get<idx>(std::forward_as_tuple(t...));
+}
 }
 }
 #endif
