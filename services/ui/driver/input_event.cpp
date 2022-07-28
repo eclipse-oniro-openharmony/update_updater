@@ -42,12 +42,12 @@ uint16_t g_keyState = OHOS::INVALID_KEY_STATE;
 void HandleEvAbs(const input_event &ev)
 {
     switch (ev.code) {
-        case ABS_MT_POSITION_X:
-            g_touchX = ev.value;
-            g_touchFingerDown = true;
-            break;
         case ABS_MT_POSITION_Y:
             g_touchY = ev.value;
+            g_touchFingerDown = true;
+            break;
+        case ABS_MT_POSITION_X:
+            g_touchX = ev.value;
             g_touchFingerDown = true;
             break;
         case ABS_MT_TRACKING_ID:
@@ -55,6 +55,8 @@ void HandleEvAbs(const input_event &ev)
             if (ev.value < 0) {
                 g_touchFingerDown = false;
             }
+            break;
+        default:
             break;
     }
 }
