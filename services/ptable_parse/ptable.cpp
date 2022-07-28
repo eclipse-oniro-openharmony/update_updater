@@ -179,17 +179,17 @@ uint32_t Ptable::CalculateCrc32(const uint8_t *buffer, const uint32_t len)
     uint32_t regsMsb;
     for (uint32_t i = 0; i < len; i++) {
         uint32_t dataByte = buffer[i];
-        dataByte = Reflect(dataByte, 8); // 8:length of unit (i.e. byte)
+        dataByte = Reflect(dataByte, 8);
         for (uint32_t j = 0; j < byteLen; j++) {
-            msb = dataByte >> (byteLen - 1); // get MSB
-            msb &= 1; // ensure just 1 bit
-            regsMsb = (regs >> 31) & 1; // 31:32-1, MSB of regs
-            regs = regs << 1; // shift regs for CRC-CCITT
-            if (regsMsb ^ msb) { // MSB is a 1
-                regs = regs ^ polynomial; // XOR with generator poly
+            msb = dataByte >> (byteLen - 1);
+            msb &= 1;
+            regsMsb = (regs >> 31) & 1;
+            regs = regs << 1;
+            if (regsMsb ^ msb) { 
+                regs = regs ^ polynomial;
             }
-            regs = regs & regsMask; // Mask off excess upper bits
-            dataByte <<= 1; // get to next bit
+            regs = regs & regsMask;
+            dataByte <<= 1;
         }
     }
     regs = regs & regsMask;
