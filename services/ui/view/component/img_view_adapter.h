@@ -34,7 +34,6 @@ public:
     void Start();
     void Stop();
     void ShowNextImage();
-    void ShowImage(uint32_t cnt);
     static bool IsValid(const UxImageInfo &info);
 private:
     bool IsOverImgCnt() const;

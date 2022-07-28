@@ -163,27 +163,4 @@ void ImgViewAdapter::ShowNextImage()
     currId_ = (currId_ + 1) % imgCnt_;
     Utils::UsSleep(interval_ * USECOND_TO_MSECOND);
 }
-
-void ImgViewAdapter::ShowImage(uint32_t cnt)
-{
-    LOG(DEBUG) << "show progress image " << cnt;
-    if (cnt < 0 || cnt > FULL_PERCENT_PROGRESS) {
-        LOG(ERROR) << "progress value invalid:" << cnt;
-        return;
-    }
-    if (imgCnt_ < 1u) {
-        LOG(ERROR) << "imgCnt invalid";
-        return;
-    }
-    int nxt = (static_cast<float>(cnt) / FULL_PERCENT_PROGRESS) * imgCnt_;
-    // image index begin from 0, 100% progress's image index is imgCnt_-1
-    nxt = std::min(static_cast<int>(imgCnt_ - 1), nxt);
-    std::stringstream ss;
-    ss << dir_ << filePrefix_ << std::setw(ANIMATION_FILE_NAME_LENGTH) << std::setfill('0') << nxt << ".png";
-    currPath_ = ss.str();
-    if (access(currPath_.c_str(), F_OK) == -1) {
-        LOG(ERROR) << "not exist: " << currPath_;
-    }
-    this->SetSrc(currPath_.c_str());
-}
 } // namespace Updater

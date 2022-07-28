@@ -83,13 +83,13 @@ bool BtnOnEventListener::OnCancel(OHOS::UIView &view, const OHOS::CancelEvent &e
 
 bool BtnOnDragListener::OnDragStart(OHOS::UIView &view, const OHOS::DragEvent &event)
 {
-    cb_();
+    CallBackDecorator(view, cb_)();
     return isConsumed_;
 }
 
 bool BtnOnDragListener::OnDrag(OHOS::UIView &view, const OHOS::DragEvent &event)
 {
-    cb_();
+    CallBackDecorator(view, cb_)();
     view.SetPosition(view.GetX() + event.GetDeltaX(), view.GetY() + event.GetDeltaY());
     if (view.GetParent() != nullptr) {
         view.GetParent()->Invalidate();
@@ -99,7 +99,7 @@ bool BtnOnDragListener::OnDrag(OHOS::UIView &view, const OHOS::DragEvent &event)
 
 bool BtnOnDragListener::OnDragEnd(OHOS::UIView &view, const OHOS::DragEvent &event)
 {
-    cb_();
+    CallBackDecorator(view, cb_)();
     return isConsumed_;
 }
 
@@ -154,8 +154,8 @@ bool KeyListener::ProcessPowerKey(OHOS::UIView &view, const OHOS::KeyEvent &even
 bool KeyListener::ProcessVolumeKey(OHOS::UIView &view, const OHOS::KeyEvent &event)
 {
     const static std::unordered_map<uint16_t, uint8_t> dirMap {
-        { KEY_VOLUMEUP, OHOS::FOCUS_DIRECTION_UP},
-        { KEY_VOLUMEDOWN, OHOS::FOCUS_DIRECTION_DOWN},
+        {KEY_VOLUMEUP, OHOS::FOCUS_DIRECTION_UP},
+        {KEY_VOLUMEDOWN, OHOS::FOCUS_DIRECTION_DOWN},
     };
     if (isButtonPressed_) {
         return true;

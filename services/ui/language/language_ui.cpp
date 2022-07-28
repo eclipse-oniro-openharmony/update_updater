@@ -33,9 +33,9 @@ std::unordered_map<Language, std::string> g_languageDataVars = {
 
 // map key zh/es/en is used in locale file to specify locale env for updater
 const std::unordered_map<std::string, Language> LanguageUI::LOCALES {
-    { "zh", Language::CHINESE },
-    { "en", Language::ENGLISH },
-    { "es", Language::SPANISH }
+    {"zh", Language::CHINESE},
+    {"en", Language::ENGLISH},
+    {"es", Language::SPANISH}
 };
 
 LanguageUI::LanguageUI() : strMap_ {}, res_ {}, langRes_ {}, language_ {Language::ENGLISH}
@@ -82,7 +82,6 @@ bool LanguageUI::Parse()
 bool LanguageUI::ParseJson(const std::string &file)
 {
     JsonNode root {std::filesystem::path { file }};
-
     for (auto &node : root) {
         const JsonNode &strNode = node.get();
         std::string key = strNode.Key().value_or("");

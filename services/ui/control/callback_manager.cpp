@@ -27,20 +27,20 @@ constexpr auto CB_FIELD = "callbacks";
 std::vector<CallbackCfg> CallbackManager::callbackCfgs_;
 
 std::unordered_map<std::string, EventType> CallbackManager::evtTypes_ = {
-    { "TOUCHEVENT", EventType::TOUCHEVENT },
-    { "CLICKEVENT", EventType::CLICKEVENT }
+    {"TOUCHEVENT", EventType::TOUCHEVENT},
+    {"CLICKEVENT", EventType::CLICKEVENT}
 };
 
 std::unordered_map<std::string, Callback> CallbackManager::funcs_ = {
-    { "OnLabelCancelEvt", &OnLabelCancelEvt },
-    { "OnLabelOkEvt", &OnLabelOkEvt },
-    { "OnRebootEvt", &OnRebootEvt },
-    { "OnLabelResetEvt", &OnLabelResetEvt },
-    { "OnMenuShutdownEvt", &OnMenuShutdownEvt },
-    { "OnLabelSDCardEvt", &OnLabelSDCardEvt },
-    { "OnLabelSDCardNoDelayEvt", &OnLabelSDCardNoDelayEvt },
-    { "OnConfirmRstEvt", &OnConfirmRstEvt },
-    { "OnMenuClearCacheEvt", &OnMenuClearCacheEvt }
+    {"OnLabelCancelEvt", &OnLabelCancelEvt},
+    {"OnLabelOkEvt", &OnLabelOkEvt},
+    {"OnRebootEvt", &OnRebootEvt},
+    {"OnLabelResetEvt", &OnLabelResetEvt},
+    {"OnMenuShutdownEvt", &OnMenuShutdownEvt},
+    {"OnLabelSDCardEvt", &OnLabelSDCardEvt},
+    {"OnLabelSDCardNoDelayEvt", &OnLabelSDCardNoDelayEvt},
+    {"OnConfirmRstEvt", &OnConfirmRstEvt},
+    {"OnMenuClearCacheEvt", &OnMenuClearCacheEvt}
 };
 
 bool CallbackManager::LoadCallbacks(const JsonNode &node)
@@ -69,15 +69,12 @@ void CallbackManager::Register(CallbackCfg cbCfg)
         LOG(ERROR) << "not recognized event type: " << cbCfg.type;
         return;
     }
-    EventType evtType = it->second;
-    std::function<void(void)> cb;
     auto itFunc = funcs_.find(cbCfg.func);
     if (itFunc == funcs_.end()) {
         LOG(ERROR) << "not recognized event type: " << cbCfg.func;
         return;
     }
-    cb = itFunc->second;
-    EventManager::GetInstance().Add(ComInfo {cbCfg.pageId, cbCfg.comId}, evtType, cb);
+    EventManager::GetInstance().Add(ComInfo {cbCfg.pageId, cbCfg.comId}, it->second, itFunc->second);
     LOG(DEBUG) << "register " << cbCfg.func << " for " << ComInfo {cbCfg.pageId, cbCfg.comId} << " succeed";
 }
 
