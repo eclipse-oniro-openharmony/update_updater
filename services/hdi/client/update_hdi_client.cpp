@@ -79,7 +79,7 @@ bool UpdateHdiClient::LoadLibrary()
         CloseLibrary();
         return false;
     }
-    LOG(ERROR) << "load " << HDI_LIB_NAME << " success";
+    LOG(INFO) << "load " << HDI_LIB_NAME << " success";
     return true;
 }
 

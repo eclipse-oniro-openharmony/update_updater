@@ -89,8 +89,8 @@ struct MemberVisitor<SETVAL> {
     static auto VisitMember(const JsonNode &node, const JsonNode &defaultNode, T &obj, const char *key)
     {
         if ((node.Type() != NodeType::UNKNOWN && node.Type() != NodeType::NUL && node.Type() != NodeType::ARRAY) ||
-            (defaultNode.Type() != NodeType::UNKNOWN && defaultNode.Type() != NodeType::NUL
-            && defaultNode.Type() != NodeType::ARRAY)) {
+            (defaultNode.Type() != NodeType::UNKNOWN && defaultNode.Type() != NodeType::NUL &&
+            defaultNode.Type() != NodeType::ARRAY)) {
                 LOG(ERROR) << "Node type not matched with " << key;
                 return false;
         }

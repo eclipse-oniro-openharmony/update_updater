@@ -46,6 +46,7 @@ public:
 
 class Dump {
 public:
+    DISALLOW_COPY_MOVE(Dump);
     void RegisterDump(const std::string &key, std::unique_ptr<DumpHelper> ptr)
     {
         helpers_.emplace(key, std::move(ptr));
