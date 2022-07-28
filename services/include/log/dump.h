@@ -24,6 +24,7 @@
 #include <string>
 #include <vector>
 #include "log.h"
+#include "macros.h"
 
 #define UPDATER_LAST_WORD Updater::Dump::GetInstance().DumpInfo
 #define UPDATER_INIT_RECORD DumpStageHelper stageHelper(__FUNCTION__)
@@ -46,6 +47,7 @@ public:
 
 class Dump {
 public:
+    DISALLOW_COPY_MOVE(Dump);
     void RegisterDump(const std::string &key, std::unique_ptr<DumpHelper> ptr)
     {
         helpers_.emplace(key, std::move(ptr));
@@ -57,7 +59,7 @@ public:
     {
         std::ostringstream oss;
         std::size_t n {0};
-        ((oss << args << ( ++n != sizeof ...(Args) ? "," : "")), ...);
+        ((oss << args << (++n != sizeof ...(Args) ? "," : "")), ...);
         std::string str = oss.str();
         for (const auto &[key, value] : helpers_) {
             if (value != nullptr) {
@@ -77,6 +79,5 @@ public:
     ~DumpStageHelper();
     static std::stack<std::string> &GetDumpStack();
 };
-
 } // namespace Updater
 #endif // UPDATE_DUMP_H

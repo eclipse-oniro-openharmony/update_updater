@@ -49,5 +49,4 @@ Dump &Dump::GetInstance()
 Dump::~Dump()
 {
 }
-
 } // Updater
