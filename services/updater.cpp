@@ -366,7 +366,8 @@ UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, const std::
 {
     UPDATER_INIT_RECORD;
     int pfd[DEFAULT_PIPE_NUM]; /* communication between parent and child */
-    UPDATER_FILE_CHECK(pipe(pfd) >= 0, "Create pipe failed: ", UPDATER_LAST_WORD(UPDATE_ERROR); return UPDATE_ERROR);
+    UPDATER_FILE_CHECK(pipe(pfd) >= 0, "Create pipe failed: ", UPDATER_LAST_WORD(UPDATE_ERROR);
+        return UPDATE_ERROR);
     UPDATER_ERROR_CHECK(pkgManager != nullptr, "Fail to GetPackageInstance", UPDATER_LAST_WORD(UPDATE_CORRUPT);
         return UPDATE_CORRUPT);
     int pipeRead = pfd[0];
@@ -380,7 +381,8 @@ UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, const std::
         GetProgressBar()->SetProgressValue(0);
     }
     pid_t pid = fork();
-    UPDATER_CHECK_ONLY_RETURN(pid >= 0, ERROR_CODE(CODE_FORK_FAIL); UPDATER_LAST_WORD(UPDATE_ERROR);
+    UPDATER_CHECK_ONLY_RETURN(pid >= 0, ERROR_CODE(CODE_FORK_FAIL);
+        UPDATER_LAST_WORD(UPDATE_ERROR);
         return UPDATE_ERROR);
     if (pid == 0) { // child
         close(pipeRead);   // close read endpoint

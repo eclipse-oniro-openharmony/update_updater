@@ -204,7 +204,11 @@ int ExecUpdate(PkgManager::PkgManagerPtr pkgManager, int retry, PostMessageFunct
 
     for (int32_t i = 0; i < ScriptManager::MAX_PRIORITY; i++) {
         ret = scriptManager->ExecuteScript(i);
-        UPDATER_ERROR_CHECK(ret == USCRIPT_SUCCESS, "Fail to execute script", UPDATER_LAST_WORD(ret); break);
+        if (ret != USCRIPT_SUCCESS) {
+            LOG(ERROR) << "Fail to execute script";
+            UPDATER_LAST_WORD(ret);
+            break;
+        }
     }
     ScriptManager::ReleaseScriptManager();
     delete env;
@@ -248,9 +252,13 @@ int ProcessUpdater(bool retry, int pipeFd, const std::string &packagePath, const
     // line buffered, make sure parent read per line.
     setlinebuf(pipeWrite);
     PkgManager::PkgManagerPtr pkgManager = PkgManager::GetPackageInstance();
-    UPDATER_ERROR_CHECK(pkgManager != nullptr,
-        "Fail to GetPackageInstance", fclose(pipeWrite); pipeWrite = nullptr; UPDATER_LAST_WORD(EXIT_INVALID_ARGS);
-        return EXIT_INVALID_ARGS);
+    if (pkgManager == nullptr) {
+        LOG(ERROR) << "Fail to GetPackageInstance";
+        fclose(pipeWrite);
+        pipeWrite = nullptr;
+        UPDATER_LAST_WORD(EXIT_INVALID_ARGS);
+        return EXIT_INVALID_ARGS;
+    }
 
     std::vector<std::string> components;
     int32_t ret = pkgManager->LoadPackage(packagePath, keyPath, components);

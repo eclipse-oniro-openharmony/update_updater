@@ -35,9 +35,9 @@ ohos_executable("updater_binary") {
   sources = [
     "//base/update/updater/services/updater_binary/main.cpp",
     "//base/update/updater/services/updater_binary/update_image_block.cpp",
+    "//base/update/updater/services/updater_binary/update_image_patch.cpp",
     "//base/update/updater/services/updater_binary/update_partitions.cpp",
     "//base/update/updater/services/updater_binary/update_processor.cpp",
-    "//base/update/updater/services/updater_binary/update_image_patch.cpp",
   ]
   configs = [ ":updater_config" ]
 
