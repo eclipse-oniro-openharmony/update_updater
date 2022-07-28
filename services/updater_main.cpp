@@ -30,6 +30,7 @@
 #include "applypatch/partition_record.h"
 #include "fs_manager/mount.h"
 #include "include/updater/updater.h"
+#include "json_node.h"
 #include "log/dump.h"
 #include "log/log.h"
 #include "misc_info/misc_info.h"
