@@ -58,8 +58,8 @@ ohos_fuzztest("ExtractAndExecuteScriptFuzzTest") {
     "//third_party/openssl:libcrypto_static",
     "//third_party/openssl:ssl_source",
     "//third_party/zlib:libz",
-    "//utils/native/base:utils",
   ]
+  external_deps = [ "c_utils:utils" ]
 
   cflags = [
     "-g",
