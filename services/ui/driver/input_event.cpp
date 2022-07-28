@@ -23,6 +23,7 @@
 #include "updater_ui_const.h"
 
 namespace Updater {
+namespace {
 constexpr int MAX_INPUT_DEVICES = 32;
 
 IInputInterface *g_inputInterface;
@@ -38,6 +39,27 @@ int g_touchY;
 uint16_t g_lastKeyId;
 uint16_t g_keyState = OHOS::INVALID_KEY_STATE;
 
+void HandleEvAbs(const input_event &ev)
+{
+    switch (ev.code) {
+        case ABS_MT_POSITION_X:
+            g_touchX = ev.value;
+            g_touchFingerDown = true;
+            break;
+        case ABS_MT_POSITION_Y:
+            g_touchY = ev.value;
+            g_touchFingerDown = true;
+            break;
+        case ABS_MT_TRACKING_ID:
+            // Protocol B: -1 marks lifting the contact.
+            if (ev.value < 0) {
+                g_touchFingerDown = false;
+            }
+            break;
+    }
+}
+}
+
 int HandleInputEvent(const struct input_event *iev)
 {
     struct input_event ev {};
@@ -45,24 +67,7 @@ int HandleInputEvent(const struct input_event *iev)
     ev.code = iev->code;
     ev.value = iev->value;
     if (ev.type == EV_ABS) {
-        switch (ev.code) {
-            case ABS_MT_POSITION_X:
-                g_touchX = ev.value;
-                g_touchFingerDown = true;
-                break;
-            case ABS_MT_POSITION_Y:
-                g_touchY = ev.value;
-                g_touchFingerDown = true;
-                break;
-            case ABS_MT_TRACKING_ID:
-                // Protocol B: -1 marks lifting the contact.
-                if (ev.value < 0) {
-                    g_touchFingerDown = false;
-                }
-                break;
-            default:
-                break;
-        }
+        HandleEvAbs(ev);
         return 0;
     }
     if (ev.type != EV_KEY || ev.code > KEY_MAX) {
