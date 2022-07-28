@@ -41,23 +41,26 @@ uint16_t g_keyState = OHOS::INVALID_KEY_STATE;
 
 void HandleEvAbs(const input_event &ev)
 {
-    switch (ev.code) {
-        case ABS_MT_POSITION_Y:
+    const static std::unordered_map<int, std::function<void(void)>> evMap{
+        {ABS_MT_POSITION_Y, [&ev] () {
             g_touchY = ev.value;
             g_touchFingerDown = true;
-            break;
-        case ABS_MT_POSITION_X:
+        }},
+        {ABS_MT_POSITION_X, [&ev] () {
             g_touchX = ev.value;
             g_touchFingerDown = true;
-            break;
-        case ABS_MT_TRACKING_ID:
+        }},
+        {ABS_MT_TRACKING_ID, [&ev] () {
             // Protocol B: -1 marks lifting the contact.
-            if (ev.value < 0) {
+            if (ev.value < 0)
+            {
                 g_touchFingerDown = false;
             }
-            break;
-        default:
-            break;
+        }}
+    };
+    if (auto it = evMap.find(ev.code); it != evMap.end())
+    {
+        it->second();
     }
 }
 }
