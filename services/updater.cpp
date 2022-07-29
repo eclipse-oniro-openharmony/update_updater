@@ -59,7 +59,7 @@ int32_t ExtractUpdaterBinary(PkgManager::PkgManagerPtr manager, const std::strin
     return ret;
 }
 
-inline void ProgressSmoothHandler()
+void ProgressSmoothHandler()
 {
     while (g_tmpProgressValue < FULL_PERCENT_PROGRESS) {
         int increase = (FULL_PERCENT_PROGRESS - g_tmpProgressValue) / PROGRESS_VALUE_CONST;
