@@ -15,6 +15,7 @@
 
 #ifndef UPDATER_FILE_PATCH_H
 #define UPDATER_FILE_PATCH_H
+
 #include "pkg_manager.h"
 #include "script_instruction.h"
 #include "script_manager.h"
@@ -23,13 +24,13 @@ namespace Updater {
 class USInstrImagePatch : public Uscript::UScriptInstruction {
 public:
     struct ImagePatchPara {
-        std::string partName;
-        std::string devPath;
-        std::string srcSize;
-        std::string srcHash;
-        std::string destSize;
-        std::string destHash;
-        std::string patchFile;
+        std::string partName {};
+        std::string devPath {};
+        std::string srcSize {};
+        std::string srcHash {};
+        std::string destSize {};
+        std::string destHash {};
+        std::string patchFile {};
     };
     USInstrImagePatch() {}
     virtual ~USInstrImagePatch() {}

@@ -173,8 +173,8 @@ bool GetBatteryCapacity(int &capacity)
 
 bool IsBatteryCapacitySufficient()
 {
-    static constexpr auto levelIdx = "lowBatteryLevel";
-    static constexpr auto jsonPath = "/etc/product_cfg.json";
+    constexpr auto levelIdx = "lowBatteryLevel";
+    constexpr auto jsonPath = "/etc/product_cfg.json";
 
     int capacity = 0;
     bool ret = GetBatteryCapacity(capacity);

@@ -122,7 +122,7 @@ std::string USInstrImagePatch::GetPatchFile(Uscript::UScriptEnv &env, const Imag
 
     const FileInfo *info = env.GetPkgManager()->GetFileInfo(para.partName);
     if (info == nullptr) {
-        LOG(ERROR) << "Error to get pkg manager";
+        LOG(ERROR) << "Error to get file info";
         return "";
     }
 
