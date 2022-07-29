@@ -16,13 +16,11 @@
 #ifndef UPDATE_DIFF_H
 #define UPDATE_DIFF_H
 
-#include <iostream>
 #include <memory>
 #include <vector>
 #include "diffpatch.h"
 #include "package/package.h"
 #include "package/pkg_manager.h"
-#include "securec.h"
 
 namespace UpdatePatch {
 class ImageParser {

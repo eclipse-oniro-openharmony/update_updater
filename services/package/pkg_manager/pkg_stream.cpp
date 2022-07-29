@@ -13,10 +13,7 @@
  * limitations under the License.
  */
 #include "pkg_stream.h"
-#include <cerrno>
 #include <cstdio>
-#include <cstdlib>
-#include <memory>
 #include "pkg_manager.h"
 #include "pkg_utils.h"
 #include "securec.h"

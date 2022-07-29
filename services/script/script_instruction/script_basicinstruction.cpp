@@ -14,9 +14,6 @@
  */
 #include "script_basicinstruction.h"
 #include <unistd.h>
-#include "script_loadscript.h"
-#include "script_manager_impl.h"
-#include "script_registercmd.h"
 #include "script_utils.h"
 
 using namespace Uscript;

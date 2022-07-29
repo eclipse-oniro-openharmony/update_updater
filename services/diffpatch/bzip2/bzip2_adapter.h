@@ -15,7 +15,6 @@
 
 #ifndef BZIP2_ADAPTER_H
 #define BZIP2_ADAPTER_H
-#include <iostream>
 #include <vector>
 #include "bzlib.h"
 #include "deflate_adapter.h"
