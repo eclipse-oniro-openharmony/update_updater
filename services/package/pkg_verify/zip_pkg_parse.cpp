@@ -15,6 +15,7 @@
 
 #include "zip_pkg_parse.h"
 #include <vector>
+#include "dump.h"
 #include "pkg_utils.h"
 
 namespace Hpackage {
@@ -31,8 +32,6 @@ static constexpr uint32_t PKG_FOOTER_SIZE = 6;
 static constexpr uint32_t PKG_ZIP_EOCD_MIN_LEN = ZIP_EOCD_FIXED_PART_LEN + PKG_FOOTER_SIZE;
 static constexpr uint32_t ZIP_EOCD_SIGNATURE = 0x06054b50;
 static constexpr uint16_t PKG_ZIP_EOCD_FOOTER_FLAG = 0xFFFF;
-static constexpr uint32_t SECOND_BYTE = 2;
-static constexpr uint32_t THIRD_BYTE = 3;
 static const uint8_t ZIP_EOCD_SIGNATURE_BIG_ENDIAN[4] = {0x50, 0x4b, 0x05, 0x06};
 
 /*
@@ -50,39 +49,45 @@ static const uint8_t ZIP_EOCD_SIGNATURE_BIG_ENDIAN[4] = {0x50, 0x4b, 0x05, 0x06}
 int32_t ZipPkgParse::ParseZipPkg(PkgStreamPtr pkgStream, size_t &signatureStart, size_t &signatureSize) const
 {
     if (pkgStream == nullptr) {
+        UPDATER_LAST_WORD(PKG_INVALID_PARAM);
         return PKG_INVALID_PARAM;
     }
     size_t fileLen = pkgStream->GetFileLength();
     size_t footerSize = PKG_FOOTER_SIZE;
-    PKG_CHECK(fileLen > footerSize, return PKG_INVALID_FILE,
+    PKG_CHECK(fileLen > footerSize, UPDATER_LAST_WORD(PKG_INVALID_FILE, fileLen); return PKG_INVALID_FILE,
         "file len[%zu] < footerSize.", pkgStream->GetFileLength());
     size_t footerStart = fileLen - footerSize;
     size_t readLen = 0;
     PkgBuffer footer(footerSize);
     int32_t ret = pkgStream->Read(footer, footerStart, footerSize, readLen);
-    PKG_CHECK(ret == PKG_SUCCESS, return ret, "read FOOTER struct failed %s", pkgStream->GetFileName().c_str());
+    PKG_CHECK(ret == PKG_SUCCESS, UPDATER_LAST_WORD(ret);
+        return ret, "read FOOTER struct failed %s", pkgStream->GetFileName().c_str());
 
     uint16_t signCommentAppendLen = 0;
     uint16_t signCommentTotalLen = 0;
     ret = ParsePkgFooter(footer.buffer, PKG_FOOTER_SIZE, signCommentAppendLen, signCommentTotalLen);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("ParsePkgFooter() error, ret[%d]", ret);
+        UPDATER_LAST_WORD(ret);
         return ret;
     }
 
     size_t eocdTotalLen = ZIP_EOCD_FIXED_PART_LEN + signCommentTotalLen;
-    PKG_CHECK(fileLen > eocdTotalLen, return PKG_INVALID_PKG_FORMAT, "Invalid eocd len[%zu]", eocdTotalLen);
+    PKG_CHECK(fileLen > eocdTotalLen, UPDATER_LAST_WORD(PKG_INVALID_PKG_FORMAT);
+        return PKG_INVALID_PKG_FORMAT, "Invalid eocd len[%zu]", eocdTotalLen);
 
     size_t zipEocdStart = fileLen - eocdTotalLen;
     PkgBuffer zipEocd(eocdTotalLen);
     ret = pkgStream->Read(zipEocd, zipEocdStart, eocdTotalLen, readLen);
-    PKG_CHECK(ret == PKG_SUCCESS, return ret, "read zip eocd failed %s", pkgStream->GetFileName().c_str());
+    PKG_CHECK(ret == PKG_SUCCESS, UPDATER_LAST_WORD(PKG_INVALID_PKG_FORMAT);
+        return ret, "read zip eocd failed %s", pkgStream->GetFileName().c_str());
 
     ret = CheckZipEocd(zipEocd.buffer, eocdTotalLen, signCommentTotalLen);
-    PKG_CHECK(ret == PKG_SUCCESS, return ret, "CheckZipEocd() error, ret[%d]", ret);
+    PKG_CHECK(ret == PKG_SUCCESS, UPDATER_LAST_WORD(PKG_INVALID_PKG_FORMAT);
+        return ret, "CheckZipEocd() error, ret[%d]", ret);
 
-    PKG_CHECK(fileLen > signCommentTotalLen, return PKG_INVALID_FILE,
-        "file len[%zu] < signCommentTotalLen[%zu]", fileLen, signCommentTotalLen);
+    PKG_CHECK(fileLen > signCommentTotalLen, UPDATER_LAST_WORD(PKG_INVALID_PKG_FORMAT, fileLen, signCommentTotalLen);
+        return PKG_INVALID_FILE, "file len[%zu] < signCommentTotalLen[%zu]", fileLen, signCommentTotalLen);
     signatureStart = fileLen - signCommentTotalLen;
     signatureSize = signCommentTotalLen;
 
@@ -94,6 +99,7 @@ int32_t ZipPkgParse::ParsePkgFooter(const uint8_t *footer, size_t length,
 {
     if (length < PKG_FOOTER_SIZE) {
         PKG_LOGE("length[%d] < Footer Size[%d]", length, PKG_FOOTER_SIZE);
+        UPDATER_LAST_WORD(PKG_INVALID_PARAM, length);
         return PKG_INVALID_PARAM;
     }
 
@@ -106,6 +112,7 @@ int32_t ZipPkgParse::ParsePkgFooter(const uint8_t *footer, size_t length,
     signFooter.signDataSize = ReadLE16(footer + offset);
     if (signFooter.signDataFlag != PKG_ZIP_EOCD_FOOTER_FLAG) {
         PKG_LOGE("error FooterFlag[0x%04X]", signFooter.signDataFlag);
+        UPDATER_LAST_WORD(PKG_INVALID_PKG_FORMAT, signFooter.signDataFlag);
         return PKG_INVALID_PKG_FORMAT;
     }
 
@@ -115,6 +122,7 @@ int32_t ZipPkgParse::ParsePkgFooter(const uint8_t *footer, size_t length,
         (signCommentAppendLen > signCommentTotalLen)) {
         PKG_LOGE("bad footer length: append[0x%04X], total[0x%04X]",
             signCommentAppendLen, signCommentTotalLen);
+        UPDATER_LAST_WORD(PKG_INVALID_PKG_FORMAT, signCommentAppendLen, signCommentTotalLen);
         return PKG_INVALID_PKG_FORMAT;
     }
 
@@ -137,10 +145,12 @@ int32_t ZipPkgParse::CheckZipEocd(const uint8_t *eocd, size_t length,
 
     /* the beginning 4 chars are already checked before, so begin with i = 4; (length - 3) in case for overflow */
     for (size_t i = 4; i < length - 3; i++) {
+        /* every 4 byte check if eocd, if eocd[i] = 0x50, eocd[i + 1] = 0x4b, eocd[i + 2] = 0x05, eocd[i + 3] = 0x06 */
+        /* the zip contain another ecod, we can consider it's invalid zip */
         if (eocd[i] == ZIP_EOCD_SIGNATURE_BIG_ENDIAN[0] &&
             eocd[i + 1] == ZIP_EOCD_SIGNATURE_BIG_ENDIAN[1] &&
-            eocd[i + SECOND_BYTE] == ZIP_EOCD_SIGNATURE_BIG_ENDIAN[SECOND_BYTE] &&
-            eocd[i + THIRD_BYTE] == ZIP_EOCD_SIGNATURE_BIG_ENDIAN[THIRD_BYTE]) {
+            eocd[i + 2] == ZIP_EOCD_SIGNATURE_BIG_ENDIAN[2] && /* eocd[i + 2] = 0x05 */
+            eocd[i + 3] == ZIP_EOCD_SIGNATURE_BIG_ENDIAN[3]) { /* eocd[i + 3] = 0x06 */
             PKG_LOGE("EOCD marker occurs after start of EOCD");
             return PKG_INVALID_PKG_FORMAT;
         }
@@ -158,6 +168,9 @@ int32_t ZipPkgParse::CheckZipEocd(const uint8_t *eocd, size_t length,
 
 int32_t ZipPkgParse::CheckZipPkg(const PkgStreamPtr pkgStream) const
 {
+    if (pkgStream == nullptr) {
+        return PKG_INVALID_FILE;
+    }
     size_t fileLen = pkgStream->GetFileLength();
     if (fileLen <= ZIP_EOCD_FIXED_PART_LEN) {
         PKG_LOGE("Invalid file len %zu", fileLen);
@@ -226,16 +239,16 @@ int32_t ZipPkgParse::WriteSourcePackageData(PkgStreamPtr outStream, PkgStreamPtr
     while (remainLen >= blockLen) {
         ret = inStream->Read(buffer, offset, blockLen, readLen);
         PKG_CHECK(ret == PKG_SUCCESS, return ret, "Fail read data");
-        ret = outStream->Write(buffer, blockLen, offset);
+        ret = outStream->Write(buffer, readLen, offset);
         PKG_CHECK(ret == PKG_SUCCESS, return ret, "Fail write data");
 
-        offset += blockLen;
-        remainLen -= blockLen;
+        offset += readLen;
+        remainLen -= readLen;
     }
     if (remainLen > 0) {
         ret = inStream->Read(buffer, offset, remainLen, readLen);
         PKG_CHECK(ret == PKG_SUCCESS, return ret, "Fail read data");
-        ret = outStream->Write(buffer, remainLen, offset);
+        ret = outStream->Write(buffer, readLen, offset);
         PKG_CHECK(ret == PKG_SUCCESS, return ret, "Fail write data");
     }
 
