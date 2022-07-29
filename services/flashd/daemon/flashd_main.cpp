@@ -16,25 +16,29 @@
 #include "daemon_updater.h"
 #include "flashd/flashd.h"
 #include "updater/updater.h"
+#include "updater_main.h"
 
 using namespace Hdc;
 namespace Flashd {
 int flashd_main(int argc, char **argv)
 {
     Base::SetLogLevel(LOG_LAST);  // debug log print
+    Base::SetLogCache(false);
+    UpdaterInit::GetInstance().InvokeEvent(FLAHSD_PRE_INIT_EVENT);
+
     std::vector<std::string> args = Updater::ParseParams(argc, argv);
     bool enableUsb = false;
     bool enableTcp = false;
     WRITE_LOG(LOG_DEBUG, "flashd main run %d", argc);
     const int size = 64;
     char modeSet[size] = "";
-    Base::GetHdcProperty("persist.hdc.mode", modeSet, size);
     WRITE_LOG(LOG_DEBUG, "Background mode, persist.hdc.mode %s", modeSet);
     for (std::string arg : args) {
         if (arg.find("-l") != std::string::npos) {
             int logLevel = atoi(arg.c_str() + strlen("-l"));
-            FLASHDAEMON_CHECK(!(logLevel < 0 || logLevel > LOG_LAST),
-                logLevel = LOG_LAST, "Loglevel error %d", logLevel);
+            if (logLevel < 0 || logLevel > LOG_LAST) {
+                logLevel = LOG_LAST;
+            }
             Base::SetLogLevel(logLevel);
         } else if (arg.find("-t") != std::string::npos || strncmp(modeSet, "tcp", 3) == 0) { // 3 tcp
             enableTcp = true;
