@@ -138,8 +138,8 @@ void UfsPtable::UfsPatchGptHeader(UfsPartitionDataInfo &ptnDataInfo, const uint3
     PUT_LONG_LONG(primaryGptHeader + LAST_USABLE_LBA_OFFSET, (cardSizeSector - 1));
     // Find last partition
     uint32_t totalPart = 0;
-    while (((TMP_DATA_SIZE - blockSize - blockSize - totalPart * PARTITION_ENTRY_SIZE) > 0)
-        && (*(primaryGptHeader + blockSize + totalPart * PARTITION_ENTRY_SIZE) != 0)) {
+    while (((TMP_DATA_SIZE - blockSize - blockSize) > totalPart * PARTITION_ENTRY_SIZE) &&
+        (*(primaryGptHeader + blockSize + totalPart * PARTITION_ENTRY_SIZE) != 0)) {
         totalPart++;
     }
     if (totalPart == 0) {
