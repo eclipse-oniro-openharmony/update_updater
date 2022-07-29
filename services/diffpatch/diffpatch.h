@@ -16,9 +16,7 @@
 #ifndef DIFF_PATCH_H
 #define DIFF_PATCH_H
 #include <cstdlib>
-#include <fcntl.h>
 #include <sys/mman.h>
-#include <sys/stat.h>
 #include <unistd.h>
 #include <vector>
 #include "log/log.h"

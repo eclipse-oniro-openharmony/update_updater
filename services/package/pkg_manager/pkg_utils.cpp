@@ -16,12 +16,9 @@
 #include <cstring>
 #include <endian.h>
 #include <fcntl.h>
-#include <iostream>
-#include <sstream>
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include "securec.h"
 #include "utils.h"
 
 namespace Hpackage {

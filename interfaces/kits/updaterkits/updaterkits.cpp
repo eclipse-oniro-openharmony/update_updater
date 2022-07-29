@@ -15,16 +15,10 @@
 #include "updaterkits/updaterkits.h"
 
 #include <string>
-#include <sys/reboot.h>
-#include <sys/syscall.h>
-#include <sys/types.h>
 #include <unistd.h>
-
 #include "init_reboot.h"
 #include "misc_info/misc_info.h"
-#include "parameters.h"
 #include "securec.h"
-#include "utils.h"
 
 using namespace Updater;
 

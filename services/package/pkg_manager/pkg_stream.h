@@ -16,9 +16,7 @@
 #define PKG_STREAM_H
 
 #include <atomic>
-#include <map>
 #include <sys/mman.h>
-#include <sys/stat.h>
 #include "pkg_manager.h"
 #include "pkg_utils.h"
 
@@ -89,7 +87,7 @@ public:
 
     int32_t Write(const PkgBuffer &data, size_t size, size_t start) override;
 
-    int32_t Seek(long int sizeT, int whence) override;
+    int32_t Seek(long int offset, int whence) override;
 
     int32_t Flush(size_t size) override;
 
@@ -117,7 +115,7 @@ public:
 
     int32_t Write(const PkgBuffer &data, size_t size, size_t start) override;
 
-    int32_t Seek(long int sizeT, int whence) override;
+    int32_t Seek(long int offset, int whence) override;
 
     int32_t GetStreamType() const override
     {
