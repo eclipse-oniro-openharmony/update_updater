@@ -60,5 +60,5 @@ private:
     std::unique_ptr<FlashdWriter> GetRawWriter() const;
     std::vector<FlashdWriterGet>  writerGet_ = {};
 };
-} // flashd
+} // Flashd
 #endif // FLASHD_IMAGE_WRITER_H
