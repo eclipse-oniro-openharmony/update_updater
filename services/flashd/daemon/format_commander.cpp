@@ -22,7 +22,6 @@
 
 namespace Flashd {
 namespace {
-constexpr size_t CMD_PARAM_COUNT_MIN = 2;
 const std::vector<std::string> ERASE_ONLY_LIST = { "boot", "fastboot", "kernel", "misc", "system" };
 }
 
