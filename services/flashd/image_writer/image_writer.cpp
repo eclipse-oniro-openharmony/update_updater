@@ -84,7 +84,6 @@ FlashdImageWriter &FlashdImageWriter::GetInstance()
     return instance;
 }
 
-
 void FlashdImageWriter::RegisterUserWriter(CheckImageProcess checkImage, GetWriterProcess getWriter)
 {
     FlashdWriterGet writerGet = { checkImage, getWriter };
