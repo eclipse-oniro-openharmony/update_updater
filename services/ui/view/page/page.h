@@ -24,6 +24,7 @@
 
 namespace Updater {
 class Page {
+    DISALLOW_COPY_MOVE(Page);
 public:
     Page() : focusedView_ {nullptr} {}
     virtual ~Page() = default;

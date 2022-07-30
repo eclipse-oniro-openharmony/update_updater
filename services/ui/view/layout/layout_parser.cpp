@@ -78,6 +78,7 @@ private:
     bool ParseViewInfo(const JsonNode &root, std::vector<UxViewInfo> &vec) const
     {
         UxViewInfo info {};
+        std::vector<UxPageInfo>().swap(vec);
         const JsonNode &defaultNode = root[DEFAULT_MODULE];
         const JsonNode &componentNodes = root[COMPONENT_MODULE];
         if (componentNodes.Type() != NodeType::ARRAY) {
@@ -121,6 +122,12 @@ private:
 LayoutParser::~LayoutParser() = default;
 
 LayoutParser::LayoutParser() : pImpl_(std::make_unique<Impl>()) { }
+
+LayoutParser &LayoutParser::GetInstance()
+{
+    static LayoutParser layoutParser;
+    return layoutParser;
+}
 
 bool LayoutParser::LoadLayout(const std::string &layoutFile, UxPageInfo &pageInfo) const
 {

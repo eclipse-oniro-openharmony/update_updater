@@ -27,10 +27,8 @@ public:
     explicit ProgressStrategy(const ComInfo &id) : id_ { id }, pgMgr_ { PageManager::GetInstance() } {}
     virtual ~ProgressStrategy() = default;
     virtual void ShowProgress(float value) const = 0;
-    virtual void Show() const = 0;
-    virtual void Hide() const = 0;
-    virtual void Start() const {}
-    virtual void Stop([[maybe_unused]] bool isForced) const {}
+    void Show() const;
+    void Hide() const;
     static std::unique_ptr<ProgressStrategy> Factory(const std::string &type, const ComInfo &id);
 protected:
     ComInfo id_;
@@ -40,18 +38,14 @@ protected:
 class TxtProgress final : public ProgressStrategy {
 public:
     explicit TxtProgress(const ComInfo &id) : ProgressStrategy(id) { }
-    ~TxtProgress() = default;
-    void Show() const override;
-    void Hide() const override;
+    ~TxtProgress() override = default;
     void ShowProgress(float value) const override;
 };
 
 class BarProgress final : public ProgressStrategy {
 public:
     explicit BarProgress(const ComInfo &id);
-    ~BarProgress() = default;
-    void Show() const override;
-    void Hide() const override;
+    ~BarProgress() override = default;
     void ShowProgress(float value) const override;
 };
 }

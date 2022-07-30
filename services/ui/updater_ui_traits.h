@@ -111,10 +111,10 @@ struct UxViewInfo {
 };
 
 struct UxPageInfo {
-    std::string id;
-    UxBRGAPixel bgColor;
-    std::vector<UxViewInfo> viewInfos;
-    std::vector<UxSubPageInfo> subpages;
+    std::string id {};
+    UxBRGAPixel bgColor {};
+    std::vector<UxViewInfo> viewInfos {};
+    std::vector<UxSubPageInfo> subpages {};
 };
 
 /**

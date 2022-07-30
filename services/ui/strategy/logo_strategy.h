@@ -34,18 +34,10 @@ protected:
     PageManager &pgMgr_;
 };
 
-class TxtLogo final : public LogoStrategy {
-public:
-    explicit TxtLogo(const ComInfo &id) : LogoStrategy(id) { }
-    ~TxtLogo() = default;
-    void Show() const override;
-    void Hide() const override;
-};
-
 class AnimatorLogo final : public LogoStrategy {
 public:
     explicit AnimatorLogo(const ComInfo &id) : LogoStrategy(id) { }
-    ~AnimatorLogo() = default;
+    ~AnimatorLogo() override = default;
     void Show() const override;
     void Hide() const override;
 };
@@ -53,7 +45,7 @@ public:
 class ImageLogo final : public LogoStrategy {
 public:
     explicit ImageLogo(const ComInfo &id) : LogoStrategy(id) { }
-    ~ImageLogo() = default;
+    ~ImageLogo() override = default;
     void Show() const override;
     void Hide() const override;
 };

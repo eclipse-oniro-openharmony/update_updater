@@ -27,6 +27,12 @@ PageManager &PageManager::GetInstance()
 
 void PageManager::Init(std::vector<UxPageInfo> &pageInfos, std::string_view entry)
 {
+    static bool isInited = false;
+    if (isInited) {
+        LOG(WARNING) << "pagemanager has been inited, don't init again";
+        return;
+    }
+    isInited = true;
     for (auto &pageInfo : pageInfos) {
         auto basePage =
             std::make_unique<BasePage>(OHOS::Screen::GetInstance().GetWidth(), OHOS::Screen::GetInstance().GetHeight());

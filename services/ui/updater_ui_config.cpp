@@ -49,8 +49,8 @@ bool CanonicalPagePath(PagePath &pagePath)
 
 std::ostream &operator<<(std::ostream &os, const UxViewCommonInfo &info)
 {
-    os << info.x << " " << info.y << " " << info.w << " " << info.h << " ";
-    os << info.id << " " << info.parent << " " << info.type << " " << info.visible;
+    os << "x=" << info.x << ", y=" << info.y << ", w=" << info.w << ", h=" << info.h << ", id=";
+    os << info.id << ", parent=" << info.parent << ", type" << info.type << ", visible" << info.visible;
     return os;
 }
 
@@ -133,6 +133,12 @@ bool UpdaterUiConfig::Init()
 
 bool UpdaterUiConfig::Init(const JsonNode &node)
 {
+    static bool isInited = false;
+    if (isInited) {
+        LOG(WARNING) << "updater ui config has been initialized, don't init again";
+        return false;
+    }
+    isInited = true;
     return LoadLayout(node) && LoadLangRes(node) && LoadStrategy(node) && LoadCallbacks(node) && LoadFocusCfg(node);
 }
 
@@ -169,6 +175,7 @@ bool UpdaterUiConfig::LoadLayout(const JsonNode &node)
 
     if (!LayoutParser::GetInstance().LoadLayout(pagePath_.pages, pageInfos_)) {
         LOG(ERROR) << "load layout error: " << UI_CFG_FILE;
+        std::vector<UxPageInfo>().swap(pageInfos_);
         return false;
     }
     PrintInfoVec(pageInfos_);
@@ -189,6 +196,7 @@ bool UpdaterUiConfig::LoadCallbacks(const JsonNode &node)
 {
     return CallbackManager::LoadCallbacks(node);
 }
+
 bool UpdaterUiConfig::LoadFocusCfg(const JsonNode &node)
 {
     // disable focus by default

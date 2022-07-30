@@ -42,14 +42,15 @@ std::unique_ptr<ProgressStrategy> ProgressStrategy::Factory(const std::string &t
     return std::make_unique<BarProgress>(id);
 }
 
-void TxtProgress::Show() const
+void ProgressStrategy::Show() const
 {
-    pgMgr_[id_].As<TextLabelAdapter>()->SetVisible(true);
+    ShowProgress(0);
+    pgMgr_[id_]->SetVisible(true);
 }
 
-void TxtProgress::Hide() const
+void ProgressStrategy::Hide() const
 {
-    pgMgr_[id_].As<TextLabelAdapter>()->SetVisible(false);
+    pgMgr_[id_]->SetVisible(false);
 }
 
 void TxtProgress::ShowProgress(float value) const
@@ -68,16 +69,6 @@ BarProgress::BarProgress(const ComInfo &id) : ProgressStrategy(id)
     if (!pgMgr_[id_].As<BoxProgressAdapter>()->InitEp()) {
         LOG(ERROR) << "bar progress's endpoint init failed";
     }
-}
-
-void BarProgress::Show() const
-{
-    pgMgr_[id_].As<BoxProgressAdapter>()->SetVisible(true);
-}
-
-void BarProgress::Hide() const
-{
-    pgMgr_[id_].As<BoxProgressAdapter>()->SetVisible(false);
 }
 
 void BarProgress::ShowProgress(float value) const

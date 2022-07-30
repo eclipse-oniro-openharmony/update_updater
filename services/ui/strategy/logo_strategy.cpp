@@ -28,43 +28,35 @@ std::unique_ptr<LogoStrategy> LogoStrategy::Factory(const std::string &type, con
 {
     using Fun = std::function<std::unique_ptr<LogoStrategy>(const ComInfo &)>;
     const static std::unordered_map<std::string, Fun> logoMap {
-        { "txt", [] (const ComInfo &id) { return std::make_unique<TxtLogo>(id); }},
         { "img", [] (const ComInfo &id) { return std::make_unique<ImageLogo>(id); }},
         { "anim", [] (const ComInfo &id) { return std::make_unique<AnimatorLogo>(id); }},
     };
-    if (auto it  = logoMap.find(type); it != logoMap.end()) {
+    if (auto it = logoMap.find(type); it != logoMap.end()) {
         return it->second(id);
     }
     LOG(ERROR) << "not recognized logo type " << type;
-    return std::make_unique<TxtLogo>(id);
-}
-
-void TxtLogo::Show() const
-{
-    pgMgr_[id_].As<TextLabelAdapter>()->SetVisible(true);
-}
-void TxtLogo::Hide() const
-{
-    pgMgr_[id_].As<TextLabelAdapter>()->SetVisible(false);
+    return std::make_unique<ImageLogo>(id);
 }
 
 void AnimatorLogo::Show() const
 {
-    pgMgr_[id_].As<ImgViewAdapter>()->SetVisible(true);
+    pgMgr_[id_]->SetVisible(true);
     pgMgr_[id_].As<ImgViewAdapter>()->Start();
 }
+
 void AnimatorLogo::Hide() const
 {
     pgMgr_[id_].As<ImgViewAdapter>()->Stop();
-    pgMgr_[id_].As<ImgViewAdapter>()->SetVisible(false);
+    pgMgr_[id_]->SetVisible(false);
 }
 
 void ImageLogo::Show() const
 {
-    pgMgr_[id_].As<ImgViewAdapter>()->SetVisible(true);
+    pgMgr_[id_]->SetVisible(true);
 }
+
 void ImageLogo::Hide() const
 {
-    pgMgr_[id_].As<ImgViewAdapter>()->SetVisible(false);
+    pgMgr_[id_]->SetVisible(false);
 }
 }

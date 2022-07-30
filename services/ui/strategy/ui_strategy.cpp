@@ -82,6 +82,7 @@ bool UiStrategy::LoadStrategy(const JsonNode &node)
     for (auto mode : { OTA, FACTORYRST, SDCARD, REBOOTFACTORYRST }) {
         if (!LoadStrategy(node, mode)) {
             LOG(ERROR) << "load strategy " << modeStr_[mode] << " failed";
+            std::unordered_map<UpdaterMode, UiStrategyCfg>().swap(strategies_);
             return false;
         }
     }

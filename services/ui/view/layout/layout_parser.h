@@ -23,11 +23,7 @@ namespace Updater {
 class LayoutParser {
     DISALLOW_COPY_MOVE(LayoutParser);
 public:
-    static LayoutParser &GetInstance()
-    {
-        static LayoutParser layoutParser;
-        return layoutParser;
-    }
+    static LayoutParser &GetInstance();
     bool LoadLayout(const std::vector<std::string> &layoutFiles, std::vector<UxPageInfo> &vec) const;
     bool LoadLayout(const std::string &layoutFile, UxPageInfo &pageInfo) const;
 private:

@@ -60,6 +60,7 @@ void SubPage::SetVisible(bool isVisible)
     }
     UpdateFocus(isVisible);
 }
+
 bool SubPage::IsVisible() const
 {
     return isVisible_;

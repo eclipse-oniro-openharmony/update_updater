@@ -36,6 +36,8 @@ constexpr std::array BRIGHTNESS_FILES {
     std::pair { "/sys/class/leds/lcd_backlight0/brightness", "/sys/class/leds/lcd_backlight0/max_brightness" },
     std::pair { "/sys/class/leds/lcd-backlight/brightness", "/sys/class/leds/lcd-backlight/max_brightness" }
 };
+
+constexpr uint32_t WHITE_BGCOLOR = 0x000000ff;
 }
 
 UpdaterUiEnv &UpdaterUiEnv::GetInstance()
@@ -46,20 +48,21 @@ UpdaterUiEnv &UpdaterUiEnv::GetInstance()
 
 void UpdaterUiEnv::Init()
 {
-    if (!isInited_) {
-        InitDisplayDriver(); // init display driver
-        InitEngine(); // Graphic UI init
-        InitPages(); // page manager init
-        InitEvts(); // init input driver and input events callback
-        InitInputDriver(); // init input driver and input events callback
-        isInited_ = true;
+    if (isInited_) {
+        return 0;
     }
+    InitDisplayDriver(); // init display driver
+    InitEngine(); // Graphic UI init
+    InitPages(); // page manager init
+    InitEvts(); // init input driver and input events callback
+    InitInputDriver(); // init input driver and input events callback
+    isInited_ = true;
 }
 
 void UpdaterUiEnv::InitEngine() const
 {
     OHOS::GraphicStartUp::Init();
-    UIGraphicEngine::GetInstance().Init(screenW_, screenH_, 0x000000ff, OHOS::ColorMode::ARGB8888, *sfDev_);
+    UIGraphicEngine::GetInstance().Init(screenW_, screenH_, WHITE_BGCOLOR, OHOS::ColorMode::ARGB8888, *sfDev_);
     InitRootView();
     LOG(INFO) << "UxInitEngine done";
 }

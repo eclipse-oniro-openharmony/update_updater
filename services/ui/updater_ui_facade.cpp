@@ -84,7 +84,7 @@ bool UpdaterUiFacade::IsInProgress() const
 
 void UpdaterUiFacade::SetLogoVisible(bool isVisible) const
 {
-    if (!logo_) {
+    if (logo_ == nullptr) {
         LOG(ERROR) << "logo is null, can't show logo";
         return;
     }
@@ -93,7 +93,7 @@ void UpdaterUiFacade::SetLogoVisible(bool isVisible) const
 
 void UpdaterUiFacade::StopProgress(bool isForced) const
 {
-    if (!progress_) {
+    if (progress_ == nullptr) {
         LOG(ERROR) << "progress is null, can't show progress";
         return;
     }
@@ -102,7 +102,7 @@ void UpdaterUiFacade::StopProgress(bool isForced) const
 
 void UpdaterUiFacade::StartProgress() const
 {
-    if (!progress_) {
+    if (progress_ == nullptr) {
         LOG(ERROR) << "progress is null, can't show progress";
         return;
     }
@@ -111,7 +111,7 @@ void UpdaterUiFacade::StartProgress() const
 
 void UpdaterUiFacade::SetProgressVisible(bool isVisible) const
 {
-    if (!progress_) {
+    if (progress_ == nullptr) {
         LOG(ERROR) << "progress is null, can't show progress";
         return;
     }
