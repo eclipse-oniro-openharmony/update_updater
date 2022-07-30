@@ -177,9 +177,10 @@ int32_t UpgradePkgFile::LoadPackage(std::vector<std::string> &fileNames, VerifyF
     // Allocate buffer with smallest package size
     size_t buffSize = UPGRADE_FILE_HEADER_LEN + sizeof(UpgradeCompInfo) +
         GetUpgradeSignatureLen() + UPGRADE_RESERVE_LEN;
-    PKG_CHECK(fileLen > 0 && fileLen >= buffSize,
-        return PKG_INVALID_FILE, "Invalid file %s fileLen:%zu ", pkgStream_->GetFileName().c_str(), fileLen);
-
+    if (fileLen < buffSize) {
+        PKG_LOGE("Invalid file %s fileLen:%zu ", pkgStream_->GetFileName().c_str(), fileLen);
+        return PKG_INVALID_FILE;
+    }
     DigestAlgorithm::DigestAlgorithmPtr algorithm = nullptr;
     // Parse header
     PkgBuffer buffer(buffSize);

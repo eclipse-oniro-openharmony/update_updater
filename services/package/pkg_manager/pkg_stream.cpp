@@ -104,8 +104,7 @@ int32_t FileStream::Write(const PkgBuffer &data, size_t size, size_t offset)
         PKG_LOGE("write data fail");
         return PKG_INVALID_STREAM;
     }
-    size_t len = fwrite(data.buffer, size, 1, stream_);
-    if (len != 1) {
+    if (fwrite(data.buffer, size, 1, stream_) != 1) {
         PKG_LOGE("Write buffer fail");
         return PKG_INVALID_STREAM;
     }

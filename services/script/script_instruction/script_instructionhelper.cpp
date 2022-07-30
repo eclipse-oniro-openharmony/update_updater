@@ -130,11 +130,18 @@ int32_t ScriptInstructionHelper::RegisterUserInstruction(const std::string& libN
     // Create instruction and register it
     UScriptInstructionPtr instr = nullptr;
     int32_t ret = factory->CreateInstructionInstance(instr, instrName);
-    USCRIPT_CHECK(ret == USCRIPT_SUCCESS, return ret, "Fail to create instruction for %s", instrName.c_str());
+    if (ret != USCRIPT_SUCCESS || instr == nullptr) {
+        USCRIPT_LOGE("Fail to create instruction for %s", instrName.c_str());
+        return ret;
+    }
 
     AddInstruction(instrName, instr);
-    USCRIPT_CHECK(ret == USCRIPT_SUCCESS, return ret, "Fail to add instruction for %s", instrName.c_str());
-
+    if (ret != USCRIPT_SUCCESS) {
+        USCRIPT_LOGE("Fail to add instruction for %s", instrName.c_str());
+        delete instr;
+        return ret;
+    }
+    delete instr;
     return ret;
 }
 
@@ -149,7 +156,7 @@ int32_t ScriptInstructionHelper::RegisterUserInstruction(const std::string &inst
     // Create instruction and register it
     UScriptInstructionPtr instr = nullptr;
     int32_t ret = factory->CreateInstructionInstance(instr, instrName);
-    if (ret != USCRIPT_SUCCESS) {
+    if (ret != USCRIPT_SUCCESS || instr == nullptr) {
         USCRIPT_LOGE("Fail to create instruction for %s", instrName.c_str());
         return ret;
     }
@@ -157,10 +164,12 @@ int32_t ScriptInstructionHelper::RegisterUserInstruction(const std::string &inst
     ret = AddInstruction(instrName, instr);
     if (ret != USCRIPT_SUCCESS) {
         USCRIPT_LOGE("Fail to add instruction for %s", instrName.c_str());
+        delete instr;
         return ret;
     }
 
     USCRIPT_LOGI("RegisterUserInstruction %s successfull", instrName.c_str());
+    delete instr;
     return USCRIPT_SUCCESS;
 }
 } // namespace Uscript
