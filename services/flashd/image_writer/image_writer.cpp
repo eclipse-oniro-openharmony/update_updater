@@ -31,7 +31,6 @@
 namespace Flashd {
 using namespace Updater;
 using namespace std::placeholders;
-const std::string PREFIX_UFS_NODE = "/dev/block/sd";
 
 bool FlashdWriterRaw::GetDataWriter(const std::string &partition)
 {
