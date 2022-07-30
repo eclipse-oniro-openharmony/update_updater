@@ -33,6 +33,7 @@ constexpr const char *CMDSTR_FLASH_PARTITION = "flash";
 constexpr const char *CMDSTR_ERASE_PARTITION = "erase";
 constexpr const char *CMDSTR_FORMAT_PARTITION = "format";
 constexpr int TASK_UPDATER = TASK_APP + 1;
+constexpr size_t CMD_PARAM_COUNT_MIN = 2;
 
 enum FlashdCommander {
     CMD_UPDATER_UPDATE_INIT = 4000,
