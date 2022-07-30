@@ -14,7 +14,6 @@
  */
 #include "pkg_utils.h"
 #include <cstring>
-#include <endian.h>
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
@@ -49,7 +48,11 @@ size_t GetFileSize(const std::string &fileName)
     free(realPath);
     PKG_CHECK(fp != nullptr, return 0, "Invalid file %s", fileName.c_str());
 
-    fseek(fp, 0, SEEK_END);
+    if (fseek(fp, 0, SEEK_END) != 0) {
+        PKG_LOGE("return value of fseek < 0");
+        fclose(fp);
+        return 0;
+    }
     long size = ftell(fp);
     if (size < 0) {
         PKG_LOGE("return value of ftell < 0");

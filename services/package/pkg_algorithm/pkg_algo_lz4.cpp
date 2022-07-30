@@ -163,11 +163,15 @@ int32_t PkgAlgorithmLz4::GetPackParam(LZ4F_compressionContext_t &ctx, LZ4F_prefe
 {
     LZ4F_errorCode_t errorCode = 0;
     errorCode = LZ4F_createCompressionContext(&ctx, LZ4F_VERSION);
-    PKG_CHECK(!LZ4F_isError(errorCode), return PKG_NONE_MEMORY,
-        "Fail to create compress context %s", LZ4F_getErrorName(errorCode));
+    if (LZ4F_isError(errorCode)) {
+        PKG_LOGE("Fail to create compress context %s", LZ4F_getErrorName(errorCode));
+        return PKG_NONE_MEMORY;
+    }
     size_t blockSize = static_cast<size_t>(GetBlockSizeFromBlockId(blockSizeID_));
-    PKG_CHECK(!memset_s(&preferences, sizeof(preferences), 0, sizeof(preferences)),
-        return PKG_NONE_MEMORY, "Memset failed");
+    if (memset_s(&preferences, sizeof(preferences), 0, sizeof(preferences)) != EOK) {
+        PKG_LOGE("Memset failed");
+        return PKG_NONE_MEMORY;
+    }
     preferences.autoFlush = autoFlush_;
     preferences.compressionLevel = compressionLevel_;
     preferences.frameInfo.blockMode = ((blockIndependence_ == 0) ? LZ4F_blockLinked : LZ4F_blockIndependent);
@@ -176,7 +180,10 @@ int32_t PkgAlgorithmLz4::GetPackParam(LZ4F_compressionContext_t &ctx, LZ4F_prefe
         ((contentChecksumFlag_ == 0) ? LZ4F_noContentChecksum : LZ4F_contentChecksumEnabled);
 
     outBuffSize = LZ4F_compressBound(blockSize, &preferences);
-    PKG_CHECK(outBuffSize > 0, return PKG_NONE_MEMORY, "BufferSize must > 0");
+    if (outBuffSize <= 0) {
+        PKG_LOGE("BufferSize must > 0");
+        return PKG_NONE_MEMORY;
+    }
     inBuffSize = blockSize;
 
     PKG_LOGI("frameInfo blockSizeID %d compressionLevel_: %d blockIndependence_:%d contentChecksumFlag_:%d",

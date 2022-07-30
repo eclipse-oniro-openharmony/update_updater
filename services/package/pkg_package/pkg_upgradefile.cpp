@@ -27,7 +27,7 @@
 #include "pkg_zipfile.h"
 #include "securec.h"
 
-#define CHECK_TLV(tlv, tlvType, len, fileLen)                                                    \
+#define TLV_CHECK_AND_RETURN(tlv, tlvType, len, fileLen)                                         \
     do {                                                                                         \
         if (!((tlv)->length < (fileLen) && (tlv)->length >= (len) && (tlv)->type == (tlvType) && \
               ((tlv)->length + sizeof(PkgTlv)) < (fileLen))) {                                   \
@@ -177,9 +177,10 @@ int32_t UpgradePkgFile::LoadPackage(std::vector<std::string> &fileNames, VerifyF
     // Allocate buffer with smallest package size
     size_t buffSize = UPGRADE_FILE_HEADER_LEN + sizeof(UpgradeCompInfo) +
         GetUpgradeSignatureLen() + UPGRADE_RESERVE_LEN;
-    PKG_CHECK(fileLen > 0 && fileLen <= static_cast<size_t>(0xffffffff) && fileLen >= buffSize,
-        return PKG_INVALID_FILE, "Invalid file %s fileLen:%zu ", pkgStream_->GetFileName().c_str(), fileLen);
-
+    if (fileLen < buffSize) {
+        PKG_LOGE("Invalid file %s fileLen:%zu ", pkgStream_->GetFileName().c_str(), fileLen);
+        return PKG_INVALID_FILE;
+    }
     DigestAlgorithm::DigestAlgorithmPtr algorithm = nullptr;
     // Parse header
     PkgBuffer buffer(buffSize);
@@ -253,7 +254,7 @@ int32_t UpgradePkgFile::ReadComponents(const PkgBuffer &buffer, size_t &parsedLe
     PkgTlv tlv;
     tlv.type = ReadLE16(buffer.buffer);
     tlv.length = ReadLE16(buffer.buffer + sizeof(uint16_t));
-    CHECK_TLV(&tlv, 5, sizeof(UpgradeCompInfo), fileLen); // component type is 5
+    TLV_CHECK_AND_RETURN(&tlv, 5, sizeof(UpgradeCompInfo), fileLen); // component type is 5
     algorithm->Update(buffer, sizeof(PkgTlv)); // tlv generate digest
 
     parsedLen += sizeof(PkgTlv);
@@ -344,7 +345,7 @@ int32_t UpgradePkgFile::ReadUpgradePkgHeader(const PkgBuffer &buffer, size_t &re
     // Time information
     tlv.type = ReadLE16(buffer.buffer + currLen);
     tlv.length = ReadLE16(buffer.buffer + currLen + sizeof(uint16_t));
-    CHECK_TLV(&tlv, sizeof(uint16_t), sizeof(UpgradePkgTime), fileLen);
+    TLV_CHECK_AND_RETURN(&tlv, sizeof(uint16_t), sizeof(UpgradePkgTime), fileLen);
     currLen += sizeof(PkgTlv);
     UpgradePkgTime *time = reinterpret_cast<UpgradePkgTime *>(buffer.buffer + currLen);
     PkgFile::ConvertBufferToString(pkgInfo_.date, {time->date, sizeof(time->date)});
