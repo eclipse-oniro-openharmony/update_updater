@@ -24,7 +24,7 @@
 namespace Updater {
 UpdaterUiFacade::UpdaterUiFacade()
     : strategies_ {UpdaterUiConfig::GetStrategy()}, pgMgr_ {PageManager::GetInstance()},
-      lang_ {Lang::LanguageUI::GetInstance().GetInstance()}, mode_ { MODEMAX }
+      lang_ {Lang::LanguageUI::GetInstance()}, mode_ { MODEMAX }
 {
 }
 
@@ -190,12 +190,12 @@ void UpdaterUiFacade::ShowMsg(const ComInfo &id, const std::string &tag, bool is
         LOG(INFO) << "clear all log label's text";
         ClearText();
     }
-    pgMgr_[id.pageId][id.comId].As<TextLabelAdapter>()->SetText(tag.data());
+    pgMgr_[id.pageId][id.comId].As<TextLabelAdapter>()->SetText(tag);
 }
 
 void UpdaterUiFacade::ShowMsg(const ComInfo &id, const std::string &tag) const
 {
-    pgMgr_[id.pageId][id.comId].As<TextLabelAdapter>()->SetText(tag.data());
+    pgMgr_[id.pageId][id.comId].As<TextLabelAdapter>()->SetText(tag);
 }
 
 void UpdaterUiFacade::SetLogoProgress()

@@ -61,7 +61,7 @@ void TxtProgress::ShowProgress(float value) const
         return;
     }
     std::string progress = std::to_string(intValue) + "%";
-    pgMgr_[id_].As<TextLabelAdapter>()->SetText(progress.c_str());
+    pgMgr_[id_].As<TextLabelAdapter>()->SetText(progress);
 }
 
 BarProgress::BarProgress(const ComInfo &id) : ProgressStrategy(id)
