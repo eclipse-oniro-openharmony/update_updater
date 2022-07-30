@@ -58,89 +58,6 @@ int32_t ExtractUpdaterBinary(PkgManager::PkgManagerPtr manager, const std::strin
     manager->ClosePkgStream(outStream);
     return ret;
 }
-
-void ProgressSmoothHandler()
-{
-    while (g_tmpProgressValue < FULL_PERCENT_PROGRESS) {
-        int increase = (FULL_PERCENT_PROGRESS - g_tmpProgressValue) / PROGRESS_VALUE_CONST;
-        g_tmpProgressValue += increase;
-        if (g_tmpProgressValue >= FULL_PERCENT_PROGRESS || increase == 0) {
-            break;
-        }
-        if (GetProgressBar() != nullptr) {
-            GetProgressBar()->SetProgressValue(g_tmpProgressValue);
-        }
-        std::this_thread::sleep_for(std::chrono::milliseconds(SHOW_FULL_PROGRESS_TIME));
-    }
-}
-
-void SetProgress(const std::vector<std::string> &output)
-{
-    UPDATER_ERROR_CHECK(output.size() >= DEFAULT_PROCESS_NUM, "check output fail", return);
-    auto outputInfo = Trim(output[1]);
-    float frac = 0.0;
-    frac = std::stof(output[1]);
-    int tmpProgressValue = 0;
-    if (frac >= -EPSINON && frac <= EPSINON) {
-        return;
-    } else {
-        tmpProgressValue = static_cast<int>(frac * g_percentage);
-    }
-    if (frac >= FULL_EPSINON && g_tmpValue + g_percentage < FULL_PERCENT_PROGRESS) {
-        g_tmpValue += g_percentage;
-        g_tmpProgressValue = g_tmpValue;
-        return;
-    }
-    g_tmpProgressValue = tmpProgressValue + g_tmpValue;
-    if (g_tmpProgressValue == 0) {
-        return;
-    }
-    if (GetProgressBar() != nullptr) {
-        GetProgressBar()->SetProgressValue(g_tmpProgressValue);
-    }
-}
-
-void HandleChildOutput(const std::string &buffer, int32_t bufferLen, bool &retryUpdate)
-{
-    UPDATER_CHECK_ONLY_RETURN(bufferLen != 0, return);
-    TextLabel *updateInfoLabel = GetUpdateInfoLabel();
-    UPDATER_ERROR_CHECK(updateInfoLabel != nullptr, "Fail to updateInfoLabel", return);
-
-    std::string str = buffer;
-    std::vector<std::string> output = SplitString(str, ":");
-    UPDATER_ERROR_CHECK(output.size() >= 1, "check output fail", return);
-    auto outputHeader = Trim(output[0]);
-    if (outputHeader == "ui_log") {
-        UPDATER_ERROR_CHECK(output.size() >= DEFAULT_PROCESS_NUM, "check output fail", return);
-        auto outputInfo = Trim(output[1]);
-    } else if (outputHeader == "write_log") {
-        UPDATER_ERROR_CHECK(output.size() >= DEFAULT_PROCESS_NUM, "check output fail", return);
-        auto outputInfo = Trim(output[1]);
-        LOG(INFO) << outputInfo;
-    } else if (outputHeader == "retry_update") {
-        retryUpdate = true;
-    } else if (outputHeader == "show_progress") {
-        UPDATER_ERROR_CHECK(output.size() >= DEFAULT_PROCESS_NUM, "check output fail", return);
-        g_tmpValue = g_tmpProgressValue;
-        auto outputInfo = Trim(output[1]);
-        float frac;
-        std::vector<std::string> progress = SplitString(outputInfo, ",");
-        if (progress.size() != DEFAULT_PROCESS_NUM) {
-            LOG(ERROR) << "show progress with wrong arguments";
-        } else {
-            if (GetProgressBar() != nullptr) {
-                GetProgressBar()->Show();
-            }
-            updateInfoLabel->SetText("Start to install package.");
-            frac = std::stof(progress[0]);
-            g_percentage = static_cast<int>(frac * FULL_PERCENT_PROGRESS);
-        }
-    } else if (outputHeader == "set_progress") {
-        SetProgress(output);
-    } else {
-        LOG(WARNING) << "Child process returns unexpected message.";
-    }
-}
 }
 
 int GetUpdatePackageInfo(PkgManager::PkgManagerPtr pkgManager, const std::string &path)
@@ -261,6 +178,23 @@ UpdaterStatus IsSpaceCapacitySufficient(const std::string &packagePath)
     return UPDATE_SUCCESS;
 }
 
+namespace {
+inline void ProgressSmoothHandler()
+{
+    while (g_tmpProgressValue < FULL_PERCENT_PROGRESS) {
+        int increase = (FULL_PERCENT_PROGRESS - g_tmpProgressValue) / PROGRESS_VALUE_CONST;
+        g_tmpProgressValue += increase;
+        if (g_tmpProgressValue >= FULL_PERCENT_PROGRESS || increase == 0) {
+            break;
+        }
+        if (GetProgressBar() != nullptr) {
+            GetProgressBar()->SetProgressValue(g_tmpProgressValue);
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(SHOW_FULL_PROGRESS_TIME));
+    }
+}
+}
+
 #ifdef UPDATER_USE_PTABLE
 bool PtableProcess(PkgManager::PkgManagerPtr pkgManager, PackageUpdateMode updateMode)
 {
@@ -360,6 +294,69 @@ UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, cons
         LOG(ERROR) << "Install package failed.";
     }
     return updateRet;
+}
+
+namespace {
+void SetProgress(const std::vector<std::string> &output)
+{
+    UPDATER_ERROR_CHECK(output.size() >= DEFAULT_PROCESS_NUM, "check output fail", return);
+    auto outputInfo = Trim(output[1]);
+    float frac = std::stof(output[1]);
+    int tmpProgressValue = 0;
+    if (frac >= -EPSINON && frac <= EPSINON) {
+        return;
+    } else {
+        tmpProgressValue = static_cast<int>(frac * g_percentage);
+    }
+    if (frac >= FULL_EPSINON && g_tmpValue + g_percentage < FULL_PERCENT_PROGRESS) {
+        g_tmpValue += g_percentage;
+        g_tmpProgressValue = g_tmpValue;
+        return;
+    }
+    g_tmpProgressValue = tmpProgressValue + g_tmpValue;
+    if (g_tmpProgressValue == 0) {
+        return;
+    }
+    if (GetProgressBar() != nullptr) {
+        GetProgressBar()->SetProgressValue(g_tmpProgressValue);
+    }
+}
+
+void HandleChildOutput(const std::string &buffer, int32_t bufferLen, bool &retryUpdate)
+{
+    UPDATER_CHECK_ONLY_RETURN(bufferLen != 0, return);
+    TextLabel *updateInfoLabel = GetUpdateInfoLabel();
+    UPDATER_ERROR_CHECK(updateInfoLabel != nullptr, "Fail to updateInfoLabel", return);
+
+    std::string str = buffer;
+    std::vector<std::string> output = SplitString(str, ":");
+    UPDATER_ERROR_CHECK(output.size() >= 1, "check output fail", return);
+    auto outputHeader = Trim(output[0]);
+    if (outputHeader == "ui_log" || outputHeader == "write_log") {
+        UPDATER_ERROR_CHECK(output.size() >= DEFAULT_PROCESS_NUM, "check output fail", return);
+        LOG(INFO) << Trim(output[1]);
+    } else if (outputHeader == "retry_update") {
+        retryUpdate = true;
+    } else if (outputHeader == "show_progress") {
+        UPDATER_ERROR_CHECK(output.size() >= DEFAULT_PROCESS_NUM, "check output fail", return);
+        g_tmpValue = g_tmpProgressValue;
+        auto outputInfo = Trim(output[1]);
+        std::vector<std::string> progress = SplitString(outputInfo, ",");
+        if (progress.size() != DEFAULT_PROCESS_NUM) {
+            LOG(ERROR) << "show progress with wrong arguments";
+        } else {
+            if (GetProgressBar() != nullptr) {
+                GetProgressBar()->Show();
+            }
+            updateInfoLabel->SetText("Start to install package.");
+            g_percentage = static_cast<int>(std::stof(progress[0]) * FULL_PERCENT_PROGRESS);
+        }
+    } else if (outputHeader == "set_progress") {
+        SetProgress(output);
+    } else {
+        LOG(WARNING) << "Child process returns unexpected message.";
+    }
+}
 }
 
 UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, const std::string &packagePath,
