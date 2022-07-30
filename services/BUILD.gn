@@ -59,7 +59,6 @@ ohos_executable("updater") {
     "//base/update/updater/services/log:libupdaterlog",
     "//base/update/updater/services/package:libupdaterpackage",
     "//base/update/updater/services/ui:libui",
-    "//base/update/updater/utils:libutils",
     "//third_party/bounds_checking_function:libsec_shared",
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/bzip2:libbz2",

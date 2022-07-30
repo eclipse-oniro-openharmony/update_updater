@@ -50,7 +50,6 @@ ohos_executable("updater_binary") {
     "//base/update/updater/services/log:libupdaterlog",
     "//base/update/updater/services/package:libupdaterpackage",
     "//base/update/updater/services/script:libupdaterscript",
-    "//base/update/updater/utils:libutils",
     "//third_party/bzip2:libbz2",
     "//third_party/cJSON:cjson_static",
     "//third_party/lz4:liblz4_static",
