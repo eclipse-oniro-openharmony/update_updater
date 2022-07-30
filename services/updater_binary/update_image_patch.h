@@ -47,12 +47,12 @@ private:
 class USInstrImageShaCheck : public Uscript::UScriptInstruction {
 public:
     struct CheckPara {
-        std::string partName;
-        std::string devPath;
-        std::string srcSize;
-        std::string srcHash;
-        std::string destSize;
-        std::string destHash;
+        std::string partName {};
+        std::string devPath {};
+        std::string srcSize {};
+        std::string srcHash {};
+        std::string destSize {};
+        std::string destHash {};
     };
     USInstrImageShaCheck() {}
     virtual ~USInstrImageShaCheck() {}

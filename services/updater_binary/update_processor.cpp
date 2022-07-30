@@ -255,7 +255,6 @@ int ProcessUpdater(bool retry, int pipeFd, const std::string &packagePath, const
     if (pkgManager == nullptr) {
         LOG(ERROR) << "Fail to GetPackageInstance";
         fclose(pipeWrite);
-        pipeWrite = nullptr;
         UPDATER_LAST_WORD(EXIT_INVALID_ARGS);
         return EXIT_INVALID_ARGS;
     }
@@ -264,7 +263,6 @@ int ProcessUpdater(bool retry, int pipeFd, const std::string &packagePath, const
     int32_t ret = pkgManager->LoadPackage(packagePath, keyPath, components);
     UPDATER_ERROR_CHECK(ret == PKG_SUCCESS, "Fail to load package",
         fclose(pipeWrite);
-        pipeWrite = nullptr;
         PkgManager::ReleasePackageInstance(pkgManager);
         UPDATER_LAST_WORD(EXIT_INVALID_ARGS);
         return EXIT_INVALID_ARGS);
@@ -282,7 +280,6 @@ int ProcessUpdater(bool retry, int pipeFd, const std::string &packagePath, const
     PkgManager::ReleasePackageInstance(pkgManager);
 #ifndef UPDATER_UT
     fclose(pipeWrite);
-    pipeWrite = nullptr;
 #endif
     return ret;
 }
