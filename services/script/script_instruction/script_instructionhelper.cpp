@@ -138,10 +138,9 @@ int32_t ScriptInstructionHelper::RegisterUserInstruction(const std::string& libN
     AddInstruction(instrName, instr);
     if (ret != USCRIPT_SUCCESS) {
         USCRIPT_LOGE("Fail to add instruction for %s", instrName.c_str());
-        delete instr;
-        return ret;
     }
     delete instr;
+    instr = nullptr;
     return ret;
 }
 
@@ -164,12 +163,11 @@ int32_t ScriptInstructionHelper::RegisterUserInstruction(const std::string &inst
     ret = AddInstruction(instrName, instr);
     if (ret != USCRIPT_SUCCESS) {
         USCRIPT_LOGE("Fail to add instruction for %s", instrName.c_str());
-        delete instr;
-        return ret;
     }
 
     USCRIPT_LOGI("RegisterUserInstruction %s successfull", instrName.c_str());
     delete instr;
-    return USCRIPT_SUCCESS;
+    instr = nullptr;
+    return ret;
 }
 } // namespace Uscript
