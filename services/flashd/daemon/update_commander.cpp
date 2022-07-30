@@ -134,6 +134,7 @@ bool UpdateCommander::ExecUpdate(const std::string &packageName) const
 
     std::vector<std::string> components;
     if (auto ret = pkgManager->LoadPackage(packageName, Updater::Utils::GetCertName(), components); ret != 0) {
+        Hpackage::PkgManager::ReleasePackageInstance(pkgManager);
         FLASHD_LOGE("LoadPackage fail, ret = %d", ret);
         return false;
     }
