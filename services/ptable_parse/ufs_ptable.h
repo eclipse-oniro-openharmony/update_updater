@@ -16,7 +16,7 @@
 #ifndef UPDATER_UFS_PTABLE_H
 #define UPDATER_UFS_PTABLE_H
 
-namespace updater {
+namespace Updater {
 class UfsPtable : public Ptable {
 public:
     UfsPtable() = default;
@@ -58,5 +58,5 @@ private:
     uint8_t *GetPtableImageUfsLunGptHeaderStart(uint8_t *imageBuf, const uint32_t lunIndex);
     uint8_t *GetPtableImageUfsLunEntryStart(uint8_t *imageBuf, const uint32_t lunIndex);
 };
-} // namespace updater
+} // namespace Updater
 #endif // UPDATER_UFS_PTABLE_H

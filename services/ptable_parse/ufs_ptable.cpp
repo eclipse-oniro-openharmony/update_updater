@@ -13,8 +13,16 @@
  * limitations under the License.
  */
 
+#include "ufs_ptable.h"
+
+#include <algorithm>
+#include <fcntl.h>
+#include <sys/types.h>
+#include <unistd.h>
+
 #include "log/log.h"
 #include "securec.h"
+#include "updater/updater_const.h"
 
 namespace Updater {
 uint32_t UfsPtable::GetDeviceLunNum()
@@ -130,7 +138,8 @@ void UfsPtable::UfsPatchGptHeader(UfsPartitionDataInfo &ptnDataInfo, const uint3
     PUT_LONG_LONG(primaryGptHeader + LAST_USABLE_LBA_OFFSET, (cardSizeSector - 1));
     // Find last partition
     uint32_t totalPart = 0;
-    while (*(primaryGptHeader + blockSize + totalPart * PARTITION_ENTRY_SIZE) != 0) {
+    while (((TMP_DATA_SIZE - blockSize - blockSize) > totalPart * PARTITION_ENTRY_SIZE) &&
+        (*(primaryGptHeader + blockSize + totalPart * PARTITION_ENTRY_SIZE) != 0)) {
         totalPart++;
     }
     if (totalPart == 0) {
@@ -251,9 +260,9 @@ bool UfsPtable::ReadAndCheckMbr(const uint32_t lunIndex, const uint32_t blockSiz
 
 int32_t UfsPtable::GetLunNumFromNode(const std::string &ufsNode)
 {
-    if (PREFIX_UFS_NODE.length() + 1 != ufsNode.length()) {
+    if (std::char_traits<char>::length(PREFIX_UFS_NODE) + 1 != ufsNode.length()) {
         LOG(ERROR) << "ufsNode length is " << ufsNode.length() << ", \
-            not equal to PREFIX_UFS_NODE(" << PREFIX_UFS_NODE.length() << ") + 1";
+            not equal to PREFIX_UFS_NODE(" << std::char_traits<char>::length(PREFIX_UFS_NODE) << ") + 1";
         return -1;
     }
     char ufsLunIndex = ufsNode.back();
@@ -367,4 +376,4 @@ uint8_t *UfsPtable::GetPtableImageUfsLunEntryStart(uint8_t *imageBuf, const uint
     LOG(INFO) << "GetPtableImageUfsLunEntryStart : " << std::hex << entryStart << std::dec;
     return imageBuf + entryStart;
 }
-} // namespace updater
+} // namespace Updater

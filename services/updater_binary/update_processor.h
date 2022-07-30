@@ -30,6 +30,17 @@ using Uscript::UScriptInstructionFactoryPtr;
 using Uscript::UScriptInstructionPtr;
 
 namespace Updater {
+enum EXIT_CODES {
+    EXIT_INVALID_ARGS = EXIT_SUCCESS + 1,
+    EXIT_READ_PACKAGE_ERROR = 2,
+    EXIT_FOUND_SCRIPT_ERROR = 3,
+    EXIT_PARSE_SCRIPT_ERROR = 4,
+    EXIT_EXEC_SCRIPT_ERROR = 5,
+};
+
+int ProcessUpdater(bool retry, int pipeFd, const std::string &packagePath, const std::string &keyPath);
+void GetPartitionPathFromName(const std::string &partitionName, std::string &partitionPath);
+
 class UpdaterInstructionFactory : public UScriptInstructionFactory {
 public:
     virtual int32_t CreateInstructionInstance(UScriptInstructionPtr& instr, const std::string& name);
@@ -51,17 +62,5 @@ private:
     static size_t totalSize_;
     static size_t readSize_;
 };
-} // updater
-
-enum EXIT_CODES {
-    EXIT_INVALID_ARGS = EXIT_SUCCESS + 1,
-    EXIT_READ_PACKAGE_ERROR = 2,
-    EXIT_FOUND_SCRIPT_ERROR = 3,
-    EXIT_PARSE_SCRIPT_ERROR = 4,
-    EXIT_EXEC_SCRIPT_ERROR = 5,
-};
-
-int ProcessUpdater(bool retry, int pipeFd, const std::string &packagePath, const std::string &keyPath);
-void GetPartitionPathFromName(const std::string &partitionName, std::string &partitionPath);
-
+} // Updater
 #endif /* UPDATE_PROCESSOR_H */
