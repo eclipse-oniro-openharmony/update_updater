@@ -16,7 +16,6 @@
 #define PKG_UTILS_H
 
 #include <cstring>
-#include <iostream>
 #include "log.h"
 #include "pkg_manager.h"
 #include "securec.h"

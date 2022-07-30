@@ -14,9 +14,7 @@
  */
 
 #include "fs_manager/cmp_partition.h"
-#include <cstring>
 #include "log/log.h"
-#include "partition_const.h"
 
 using namespace std;
 

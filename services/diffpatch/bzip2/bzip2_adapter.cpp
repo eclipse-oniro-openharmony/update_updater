@@ -12,10 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include "bzip2_adapter.h"
 #include <iostream>
-#include <vector>
 #include "bzlib.h"
 
 using namespace Hpackage;

@@ -200,7 +200,7 @@ static int32_t ExecuteTransferCommand(int fd, const std::vector<std::string> &li
     return USCRIPT_SUCCESS;
 }
 
-static int InitThread(struct UpdateBlockInfo &infos, Uscript::UScriptEnv &env, Uscript::UScriptContext &context)
+static int InitThread(const struct UpdateBlockInfo &infos, Uscript::UScriptEnv &env, Uscript::UScriptContext &context)
 {
     TransferManagerPtr tm = TransferManager::GetTransferManagerInstance();
     auto globalParams = tm->GetGlobalParams();
@@ -233,7 +233,10 @@ static int32_t ExtractDiffPackageAndLoad(const UpdateBlockInfo &infos, Uscript::
         env.GetPkgManager()->ClosePkgStream(outStream); return USCRIPT_ERROR_EXECUTE);
     env.GetPkgManager()->ClosePkgStream(outStream);
     std::string diffPackageZip = diffPackage + ".zip";
-    rename(diffPackage.c_str(), diffPackageZip.c_str());
+    if (rename(diffPackage.c_str(), diffPackageZip.c_str()) != 0) {
+        LOG(ERROR) << "rename failed";
+        return USCRIPT_ERROR_EXECUTE;
+    }
     LOG(DEBUG) << "Rename " << diffPackage << " to zip\nExtract " << diffPackage << " done\nReload " << diffPackageZip;
     std::vector<std::string> diffPackageComponents;
     ret = env.GetPkgManager()->LoadPackage(diffPackageZip, Updater::Utils::GetCertName(), diffPackageComponents);
@@ -242,7 +245,7 @@ static int32_t ExtractDiffPackageAndLoad(const UpdateBlockInfo &infos, Uscript::
     return USCRIPT_SUCCESS;
 }
 
-static int32_t DoExecuteUpdateBlock(UpdateBlockInfo &infos, Uscript::UScriptEnv &env,
+static int32_t DoExecuteUpdateBlock(const UpdateBlockInfo &infos, Uscript::UScriptEnv &env,
     Hpackage::PkgManager::StreamPtr &outStream, const std::vector<std::string> &lines, Uscript::UScriptContext &context)
 {
     int fd = open(infos.devPath.c_str(), O_RDWR | O_LARGEFILE);
@@ -278,7 +281,7 @@ static int32_t ExecuteUpdateBlock(Uscript::UScriptEnv &env, Uscript::UScriptCont
     UPDATER_CHECK_ONLY_RETURN(ret == USCRIPT_SUCCESS, return USCRIPT_ERROR_EXECUTE);
 
     const FileInfo *info = env.GetPkgManager()->GetFileInfo(infos.transferName);
-    UPDATER_ERROR_CHECK(info != nullptr, "get file info fail", return USCRIPT_ERROR_EXECUTE);
+    UPDATER_ERROR_CHECK(info != nullptr, "GetFileInfo fail", return USCRIPT_ERROR_EXECUTE);
     Hpackage::PkgManager::StreamPtr outStream = nullptr;
     ret = env.GetPkgManager()->CreatePkgStream(outStream,
         infos.transferName, info->unpackedSize, PkgStream::PkgStreamType_MemoryMap);
@@ -300,7 +303,8 @@ static int32_t ExecuteUpdateBlock(Uscript::UScriptEnv &env, Uscript::UScriptCont
     info = env.GetPkgManager()->GetFileInfo(infos.patchDataName);
     // Close stream opened before.
     env.GetPkgManager()->ClosePkgStream(outStream);
-    UPDATER_ERROR_CHECK(info != nullptr, "get file info fail", return USCRIPT_ERROR_EXECUTE);
+    UPDATER_ERROR_CHECK(info != nullptr, "GetFileInfo fail", return USCRIPT_ERROR_EXECUTE);
+
     ret = env.GetPkgManager()->CreatePkgStream(outStream,
         infos.patchDataName, info->unpackedSize, PkgStream::PkgStreamType_MemoryMap);
     UPDATER_ERROR_CHECK(outStream != nullptr, "Error to create output stream", return USCRIPT_ERROR_EXECUTE);

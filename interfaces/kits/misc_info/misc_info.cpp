@@ -15,7 +15,6 @@
 
 #include "misc_info/misc_info.h"
 #include <cstring>
-#include <unistd.h>
 #include "fs_manager/mount.h"
 #include "log/log.h"
 #include "securec.h"
