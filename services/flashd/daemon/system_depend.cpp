@@ -51,14 +51,7 @@ namespace SystemDepend {
     {
         const string rebootProperty = "sys.powerctl";
         string propertyVal;
-        string reason;
-        if (cmd == "recovery") {
-            reason = "updater";
-        } else if (cmd == "flashd") {
-            reason = "flashd";
-        } else {
-            reason = cmd;
-        }
+        string reason = cmd;
         if (reason.size() == 0) {
             propertyVal = "reboot";
         } else {
