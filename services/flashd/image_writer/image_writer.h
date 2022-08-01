@@ -46,8 +46,8 @@ public:
     using CheckImageProcess = std::function<bool (const std::string &, const uint8_t *, size_t)>;
     using GetWriterProcess = std::function<std::unique_ptr<FlashdWriter>()>;
     struct FlashdWriterGet {
-        CheckImageProcess checkImage;
-        GetWriterProcess getWriter;
+        CheckImageProcess checkImage {};
+        GetWriterProcess getWriter {};
     };
     static FlashdImageWriter &GetInstance();
     std::unique_ptr<FlashdWriter> GetWriter(const std::string &partition, const uint8_t *data, size_t len) const;
