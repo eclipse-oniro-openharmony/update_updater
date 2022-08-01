@@ -17,6 +17,7 @@ config("updater_config") {
   visibility = [ ":*" ]
   include_dirs = [
     "//base/update/updater/interfaces/kits/include",
+    "//base/update/updater/services",
     "//base/update/updater/services/include/package",
     "//base/update/updater/services/include/script",
     "//base/update/updater/services/include/log",
@@ -24,7 +25,6 @@ config("updater_config") {
     "//base/update/updater/utils/include",
     "//base/update/updater/utils/json",
     "//base/update/updater/services/include/applypatch",
-    "//third_party/cJSON",
     "//third_party/openssl/include",
     "//third_party/bounds_checking_function/include",
     "//drivers/hdf/frameworks/include/utils",
@@ -35,6 +35,7 @@ ohos_executable("updater_binary") {
   sources = [
     "//base/update/updater/services/updater_binary/main.cpp",
     "//base/update/updater/services/updater_binary/update_image_block.cpp",
+    "//base/update/updater/services/updater_binary/update_image_patch.cpp",
     "//base/update/updater/services/updater_binary/update_partitions.cpp",
     "//base/update/updater/services/updater_binary/update_processor.cpp",
   ]

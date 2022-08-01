@@ -18,7 +18,7 @@
 
 #include "package/pkg_manager.h"
 
-namespace updater {
+namespace Updater {
 class PtableManager {
 public:
     DISALLOW_COPY_MOVE(PtableManager);
@@ -90,5 +90,5 @@ public:
 private:
     DevicePtable();
 };
-} // namespace updater
+} // namespace Updater
 #endif // UPDATER_PTABLE_MANAGER_H

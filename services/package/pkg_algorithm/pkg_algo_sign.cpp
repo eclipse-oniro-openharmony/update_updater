@@ -34,17 +34,29 @@ constexpr uint32_t BIO_FP_READ = 0x02;
 int32_t SignAlgorithmRsa::SignBuffer(const PkgBuffer &buffer, std::vector<uint8_t> &signedData,
     size_t &signLen) const
 {
-    PKG_CHECK(buffer.buffer != nullptr, return PKG_INVALID_PARAM, "Param null!");
+    if (buffer.buffer == nullptr) {
+        PKG_LOGE("Param null!");
+        return PKG_INVALID_PARAM;
+    }
     BIO *in = BIO_new(BIO_s_file());
-    PKG_CHECK(in != nullptr, return PKG_INVALID_PARAM, "Failed to new BIO ");
+    if (in == nullptr) {
+        PKG_LOGE("Failed to new BIO");
+        return PKG_INVALID_PARAM;
+    }
 
     int32_t ret = BIO_ctrl(in, BIO_C_SET_FILENAME, BIO_CLOSE | BIO_FP_READ, const_cast<char*>(keyName_.c_str()));
-    PKG_CHECK(ret == 1, BIO_free(in);
-        return PKG_INVALID_PARAM, "Failed to BIO_read_filename ret %d %s", ret, keyName_.c_str());
+    if (ret != 1) {
+        PKG_LOGE("Failed to BIO_read_filename ret %d %s", ret, keyName_.c_str());
+        BIO_free(in);
+        return PKG_INVALID_PARAM;
+    }
 
     RSA *rsa = PEM_read_bio_RSAPrivateKey(in, nullptr, nullptr, nullptr);
     BIO_free(in);
-    PKG_CHECK(rsa != nullptr, return PKG_INVALID_SIGNATURE, "Failed to PEM_read_bio_RSAPrivateKey ");
+    if (rsa == nullptr) {
+        PKG_LOGE("Failed to PEM_read_bio_RSAPrivateKey ");
+        return PKG_INVALID_SIGNATURE;
+    }
 
     // Adjust key size
     uint32_t size = static_cast<uint32_t>(RSA_size(rsa));
@@ -63,17 +75,29 @@ int32_t SignAlgorithmRsa::SignBuffer(const PkgBuffer &buffer, std::vector<uint8_
 int32_t SignAlgorithmEcc::SignBuffer(const PkgBuffer &buffer, std::vector<uint8_t> &signedData,
     size_t &signLen) const
 {
-    PKG_CHECK(buffer.buffer != nullptr, return PKG_INVALID_PARAM, "Param null!");
+    if (buffer.buffer == nullptr) {
+        PKG_LOGE("Param null!");
+        return PKG_INVALID_PARAM;
+    }
     BIO *in = BIO_new(BIO_s_file());
-    PKG_CHECK(in != nullptr, return PKG_INVALID_PARAM, "Failed to new BIO ");
+    if (in == nullptr) {
+        PKG_LOGE("Failed to new BIO ");
+        return PKG_INVALID_PARAM;
+    }
 
     int ret = BIO_ctrl(in, BIO_C_SET_FILENAME, BIO_CLOSE | BIO_FP_READ, const_cast<char*>(keyName_.c_str()));
-    PKG_CHECK(ret == 1, BIO_free(in);
-        return PKG_INVALID_PARAM, "Failed to BIO_read_filename ret %d %s", ret, keyName_.c_str());
+    if (ret != 1) {
+        PKG_LOGE("Failed to BIO_read_filename ret %d %s", ret, keyName_.c_str());
+        BIO_free(in);
+        return PKG_INVALID_PARAM;
+    }
 
     EC_KEY *ecKey = PEM_read_bio_ECPrivateKey(in, nullptr, nullptr, nullptr);
     BIO_free(in);
-    PKG_CHECK(ecKey != nullptr, return PKG_INVALID_PARAM, "Failed to PEM_read_bio_ECPrivateKey %s", keyName_.c_str());
+    if (ecKey == nullptr) {
+        PKG_LOGE("Failed to PEM_read_bio_ECPrivateKey %s", keyName_.c_str());
+        return PKG_INVALID_PARAM;
+    }
 
     // Adjust key size
     uint32_t size = static_cast<uint32_t>(ECDSA_size(ecKey));
@@ -85,52 +109,67 @@ int32_t SignAlgorithmEcc::SignBuffer(const PkgBuffer &buffer, std::vector<uint8_
     return ((ret == 1) ? PKG_SUCCESS : PKG_INVALID_SIGNATURE);
 }
 
-bool VerifyAlgorithm::CheckRsaKey(const RSA *rsakey, int &hashLen) const
+bool VerifyAlgorithm::CheckRsaKey(const RSA *rsakey) const
 {
     const BIGNUM *rsaN = nullptr;
     const BIGNUM *rsaE = nullptr;
     RSA_get0_key(rsakey, &rsaN, &rsaE, nullptr);
     auto modulusbits = BN_num_bits(rsaN);
-    if (modulusbits == 2048) { // 2048 hash leng
-        hashLen = SHA256_DIGEST_LENGTH;
-    } else if (modulusbits == 3072) { // 3072 hash leng
-        hashLen = SHA384_DIGEST_LENGTH;
-    } else {
-        PKG_LOGE("Modulus should be 2048 bits long, actual:%d ", modulusbits);
+    if (modulusbits != 2048) { // Modulus should be 2048 bits long.
+        PKG_LOGE("Modulus should be 2048 bits long, actual:%d\n ", modulusbits);
         return false;
     }
     BN_ULONG exponent = BN_get_word(rsaE);
-    PKG_CHECK(!(exponent != 3 && exponent != 65537),
-        return false, "Public exponent should be 3 or 65537, actual:%d \n", exponent);
+    if (exponent != 3 && exponent != 65537) { // Public exponent should be 3 or 65537.
+        PKG_LOGE("Public exponent should be 3 or 65537, actual:%d \n", exponent);
+        return false;
+    }
     return true;
 }
 
 bool VerifyAlgorithm::CheckEccKey(const EC_KEY *eccKey) const
 {
     const EC_GROUP *eccgroup = EC_KEY_get0_group(eccKey);
-    PKG_CHECK(eccgroup != nullptr, return false, "Failed to get the ec_group from the ecKey");
+    if (eccgroup == nullptr) {
+        PKG_LOGE("Failed to get the ec_group from the ecKey");
+        return false;
+    }
     auto eccdegree = EC_GROUP_get_degree(eccgroup);
-    PKG_CHECK(eccdegree == 256, return false,
-        "Field size of the ec key should be 256 bits long, actual:%d ", eccdegree);
+    if (eccdegree != 256) { // Field size of the ec key should be 256 bits long.
+        PKG_LOGE("Field size of the ec key should be 256 bits long, actual:%d ", eccdegree);
+        return false;
+    }
     return true;
 }
 
 bool VerifyAlgorithm::LoadPubKey(const std::string &keyfile, struct CertKeySt &certs) const
 {
     BIO *certbio = BIO_new_file(keyfile.c_str(), "r");
-    PKG_CHECK(certbio != nullptr, return false, "Failed to create BIO");
+    if (certbio == nullptr) {
+        PKG_LOGE("Failed to create BIO");
+        return false;
+    }
 
     X509 *rcert = PEM_read_bio_X509(certbio, nullptr, 0, nullptr);
     BIO_free(certbio);
-    PKG_CHECK(rcert != nullptr, return false, "Failed to read x509 certificate ");
+    if (rcert == nullptr) {
+        PKG_LOGE("Failed to read x509 certificate ");
+        return false;
+    }
     int nid = X509_get_signature_nid(rcert);
-    PKG_CHECK((nid == NID_sha256WithRSAEncryption || nid == NID_ecdsa_with_SHA256), X509_free(rcert);
-        return false, "Unrecognized nid %d", nid);
+    if (nid != NID_sha256WithRSAEncryption && nid != NID_ecdsa_with_SHA256) {
+        PKG_LOGE("Unrecognized nid %d", nid);
+        X509_free(rcert);
+        return false;
+    }
 
     certs.hashLen = SHA256_DIGEST_LENGTH;
     EVP_PKEY *pubKey = X509_get_pubkey(rcert);
-    PKG_CHECK(pubKey != nullptr, X509_free(rcert);
-        return false, "Failed to extract the public key from x509 certificate %s", keyfile.c_str());
+    if (pubKey == nullptr) {
+        PKG_LOGE("Failed to extract the public key from x509 certificate %s", keyfile.c_str());
+        X509_free(rcert);
+        return false;
+    }
 
     bool ret = false;
     int keyType = EVP_PKEY_id(pubKey);
@@ -138,7 +177,7 @@ bool VerifyAlgorithm::LoadPubKey(const std::string &keyfile, struct CertKeySt &c
         certs.keyType = KEY_TYPE_RSA;
         certs.rsa = EVP_PKEY_get1_RSA(pubKey);
         PKG_CHECK(certs.rsa != nullptr, X509_free(rcert); return false, "Failed to get rsa");
-        ret = CheckRsaKey(certs.rsa, certs.hashLen);
+        ret = CheckRsaKey(certs.rsa);
         PKG_CHECK(ret == true, RSA_free(certs.rsa); X509_free(rcert); return false, "Check rsa key failed");
     }
     if (keyType == EVP_PKEY_EC) {
@@ -157,13 +196,14 @@ int32_t VerifyAlgorithm::VerifyBuffer(const std::vector<uint8_t> &digest, const 
 {
     struct CertKeySt certs {};
     bool isValid = LoadPubKey(keyName_, certs);
-    PKG_CHECK(isValid, return PKG_INVALID_SIGNATURE, "Failed to load public key");
+    if (!isValid) {
+        PKG_LOGE("Failed to load public key");
+        return PKG_INVALID_SIGNATURE;
+    }
 
     int hashNid = NID_sha1;
     if (certs.hashLen == SHA256_DIGEST_LENGTH) {
         hashNid = NID_sha256;
-    } else if (certs.hashLen == SHA384_DIGEST_LENGTH) {
-        hashNid = NID_sha384;
     }
     int ret = 0;
     if (certs.keyType == KEY_TYPE_RSA) {

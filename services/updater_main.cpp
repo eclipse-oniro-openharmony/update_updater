@@ -30,6 +30,7 @@
 #include "applypatch/partition_record.h"
 #include "fs_manager/mount.h"
 #include "include/updater/updater.h"
+#include "json_node.h"
 #include "log/dump.h"
 #include "log/log.h"
 #include "misc_info/misc_info.h"
@@ -123,9 +124,9 @@ UpdaterStatus UpdaterFromSdcard()
 #endif
     UPDATER_ERROR_CHECK(access(SDCARD_CARD_PKG_PATH, 0) == 0, "package is not exist",
         ShowText(g_logLabel, "Package is not exist!");
-        return UPDATE_CORRUPT);
+        return UPDATE_ERROR);
     PkgManager::PkgManagerPtr pkgManager = PkgManager::GetPackageInstance();
-    UPDATER_ERROR_CHECK(pkgManager != nullptr, "pkgManager is nullptr", return UPDATE_CORRUPT);
+    UPDATER_ERROR_CHECK(pkgManager != nullptr, "pkgManager is nullptr", return UPDATE_ERROR);
 
     STAGE(UPDATE_STAGE_BEGIN) << "UpdaterFromSdcard";
     LOG(INFO) << "UpdaterFromSdcard start, sdcard updaterPath : " << SDCARD_CARD_PKG_PATH;
@@ -145,9 +146,57 @@ UpdaterStatus UpdaterFromSdcard()
     return updateRet;
 }
 
+bool GetBatteryCapacity(int &capacity)
+{
+    const static std::vector<const char *> vec = {
+        "/sys/class/power_supply/battery/capacity",
+        "/sys/class/power_supply/Battery/capacity"
+    };
+    for (auto &it : vec) {
+        std::ifstream ifs { it };
+        if (!ifs.is_open()) {
+            continue;
+        }
+
+        int tmpCapacity = 0;
+        ifs >> tmpCapacity;
+        if ((ifs.fail()) || (ifs.bad())) {
+            continue;
+        }
+
+        capacity = tmpCapacity;
+        return true;
+    }
+
+    return false;
+}
+
 bool IsBatteryCapacitySufficient()
 {
-    return true;
+    constexpr auto levelIdx = "lowBatteryLevel";
+    constexpr auto jsonPath = "/etc/product_cfg.json";
+
+    int capacity = 0;
+    bool ret = GetBatteryCapacity(capacity);
+    if (!ret) {
+        return true; /* maybe no battery or err value return default true */
+    }
+
+    JsonNode node { Fs::path { jsonPath }};
+    auto item = node[levelIdx].As<int>();
+    if (!item.has_value()) {
+        return true; /* maybe no value return default true */
+    }
+
+    int lowLevel = *item;
+    if (lowLevel > 100 || lowLevel < 0) { /* full percent is 100 */
+        LOG(ERROR) << "load battery level error:" << lowLevel;
+        return false; /* config err not allow to update */
+    }
+
+    LOG(INFO) << "current capacity:" << capacity << ", low level:" << lowLevel;
+
+    return capacity > lowLevel;
 }
 
 static UpdaterStatus InstallUpdaterPackage(UpdaterParams &upParams, const std::vector<std::string> &args,
@@ -157,6 +206,7 @@ static UpdaterStatus InstallUpdaterPackage(UpdaterParams &upParams, const std::v
     UpdaterStatus status = UPDATE_UNKNOWN;
     if (IsBatteryCapacitySufficient() == false) {
         g_logLabel->SetText("Battery is low.\n");
+        UPDATER_LAST_WORD(UPDATE_ERROR);
         LOG(ERROR) << "Battery is not sufficient for install package.";
         status = UPDATE_SKIP;
     } else {

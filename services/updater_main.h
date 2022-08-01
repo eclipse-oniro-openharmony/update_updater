@@ -23,9 +23,17 @@
 
 namespace Updater {
 enum UpdaterInitEvent {
+    // updater
     UPDATER_PRE_INIT_EVENT = 0,
     UPDATER_INIT_EVENT,
     UPDATER_POST_INIT_EVENT,
+
+    // flashd
+    FLAHSD_PRE_INIT_EVENT,
+
+    // binary
+    UPDATER_BINARY_INIT_EVENT,
+    UPDATER_BINARY_INIT_DONE_EVENT,
 
     UPDATER_INIT_EVENT_BUTT
 };
