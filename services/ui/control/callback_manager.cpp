@@ -62,7 +62,7 @@ bool CallbackManager::LoadCallbacks(const JsonNode &node)
     return true;
 }
 
-void CallbackManager::Register(CallbackCfg cbCfg)
+void CallbackManager::Register(const CallbackCfg &cbCfg)
 {
     auto it = evtTypes_.find(cbCfg.type);
     if (it == evtTypes_.end()) {

@@ -28,7 +28,7 @@ namespace Updater {
 class CallbackManager {
 public:
     static void Init(bool hasFocus);
-    static void Register(CallbackCfg cfg);
+    static void Register(const CallbackCfg &cfg);
     static bool LoadCallbacks(const JsonNode &node);
 private:
     static std::unordered_map<std::string, EventType> evtTypes_;
