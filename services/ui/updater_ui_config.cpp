@@ -23,8 +23,6 @@
 #include "utils.h"
 
 namespace Updater {
-PagePath UpdaterUiConfig::pagePath_;
-std::vector<UxPageInfo> UpdaterUiConfig::pageInfos_;
 bool UpdaterUiConfig::isFocusEnable_;
 constexpr auto UI_CFG_FILE = "/resources/pages/config.json";
 constexpr auto UI_CFG_KEY = "config";
@@ -139,12 +137,7 @@ bool UpdaterUiConfig::Init(const JsonNode &node)
         return false;
     }
     isInited = true;
-    return LoadLayout(node) && LoadLangRes(node) && LoadStrategy(node) && LoadCallbacks(node) && LoadFocusCfg(node);
-}
-
-std::string_view UpdaterUiConfig::GetMainPage()
-{
-    return pagePath_.entry;
+    return LoadLangRes(node) && LoadStrategy(node) && LoadCallbacks(node) && LoadFocusCfg(node) && LoadPages(node);
 }
 
 std::unordered_map<UpdaterMode, UiStrategyCfg> &UpdaterUiConfig::GetStrategy()
@@ -152,33 +145,30 @@ std::unordered_map<UpdaterMode, UiStrategyCfg> &UpdaterUiConfig::GetStrategy()
     return UiStrategy::GetStrategy();
 }
 
-std::vector<UxPageInfo> &UpdaterUiConfig::GetPageInfos()
-{
-    return pageInfos_;
-}
-
 bool UpdaterUiConfig::GetFocusCfg()
 {
     return isFocusEnable_;
 }
 
-bool UpdaterUiConfig::LoadLayout(const JsonNode &node)
+bool UpdaterUiConfig::LoadPages(const JsonNode &node)
 {
-    if (!Visit<SETVAL>(node, pagePath_)) {
-        LOG(ERROR) << "parse page path error: " << pagePath_.dir;
+    PagePath pagePath {};
+    if (!Visit<SETVAL>(node, pagePath)) {
+        LOG(ERROR) << "parse page path error: " << pagePath.dir;
         return false;
     }
 
-    if (!CanonicalPagePath(pagePath_)) {
+    if (!CanonicalPagePath(pagePath)) {
         return false;
     }
 
-    if (!LayoutParser::GetInstance().LoadLayout(pagePath_.pages, pageInfos_)) {
+    std::vector<UxPageInfo> pageInfos {};
+    if (!LayoutParser::GetInstance().LoadLayout(pagePath.pages, pageInfos)) {
         LOG(ERROR) << "load layout error: " << UI_CFG_FILE;
-        std::vector<UxPageInfo>().swap(pageInfos_);
         return false;
     }
-    PrintInfoVec(pageInfos_);
+    PageManager::GetInstance().Init(pageInfos, pagePath.entry);
+    PrintInfoVec(pageInfos);
     return true;
 }
 

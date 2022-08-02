@@ -34,7 +34,7 @@ protected:
     ~UpdaterUiEnv() = default;
     void InitDisplayDriver(); // input driver init
     void InitEngine() const; // Graphic UI engine init
-    void InitPages() const; // pages Init
+    void InitConfig() const; // ui configs Init
     void InitInputDriver() const; // input driver init
     void InitEvts() const; // input event callback init
 

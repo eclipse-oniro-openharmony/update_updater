@@ -53,7 +53,7 @@ void UpdaterUiEnv::Init()
     }
     InitDisplayDriver(); // init display driver
     InitEngine(); // Graphic UI init
-    InitPages(); // page manager init
+    InitConfig(); // page manager init
     InitEvts(); // init input driver and input events callback
     InitInputDriver(); // init input driver and input events callback
     isInited_ = true;
@@ -67,22 +67,12 @@ void UpdaterUiEnv::InitEngine() const
     LOG(INFO) << "UxInitEngine done";
 }
 
-void UpdaterUiEnv::InitPages() const
+void UpdaterUiEnv::InitConfig() const
 {
-    // load page layout, language resource, ui strategy
+    // load pages, language resource, ui strategy
     if (!UpdaterUiConfig::Init()) {
-        LOG(ERROR) << "page config failed";
-        return;
+        LOG(ERROR) << "config init failed";
     }
-
-    // get main menu's id
-    std::string_view mainPage = UpdaterUiConfig::GetMainPage();
-
-    // get page infos
-    std::vector<UxPageInfo> &pageInfos = UpdaterUiConfig::GetPageInfos();
-
-    // build pages from pageInfo vector
-    PageManager::GetInstance().Init(pageInfos, mainPage);
 }
 
 void UpdaterUiEnv::InitEvts() const

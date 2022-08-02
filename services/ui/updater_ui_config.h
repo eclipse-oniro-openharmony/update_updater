@@ -27,20 +27,16 @@ namespace Updater {
 class UpdaterUiConfig {
 public:
     static bool Init();
-    static std::string_view GetMainPage();
     static std::unordered_map<UpdaterMode, UiStrategyCfg> &GetStrategy();
-    static std::vector<UxPageInfo> &GetPageInfos();
     static bool GetFocusCfg();
 private:
     static bool Init(const JsonNode &node);
     static bool LoadStrategy(const JsonNode &node);
-    static bool LoadLayout(const JsonNode &node);
+    static bool LoadPages(const JsonNode &node);
     static bool LoadLangRes(const JsonNode &node);
     static bool LoadCallbacks(const JsonNode &node);
     static bool LoadFocusCfg(const JsonNode &node);
-    static PagePath pagePath_;
     static bool isFocusEnable_;
-    static std::vector<UxPageInfo> pageInfos_;
 };
 }
 #endif
