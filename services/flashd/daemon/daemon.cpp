@@ -15,9 +15,8 @@
 #include "daemon.h"
 
 #include <openssl/sha.h>
-
 #include "daemon_updater.h"
-#include "flash_define.h"
+#include "flashd_define.h"
 #include "serial_struct.h"
 
 namespace Hdc {
@@ -89,24 +88,43 @@ void HdcDaemon::InitMod(bool bEnableTCP, bool bEnableUSB)
     ((HdcJdwp *)clsJdwp)->Initial();
 
     // enable security
-    char value[4] = "0";
-    Base::GetHdcProperty("ro.hdc.secure", value, sizeof(value));
-    string secure = value;
+    string secure;
+    SystemDepend::GetDevItem("ro.hdc.secure", secure);
     enableSecure = (Base::Trim(secure) == "1");
 }
 
 // clang-format off
-#ifdef HDC_SUPPORT_FLASHD
 bool HdcDaemon::RedirectToTask(HTaskInfo hTaskInfo, HSession hSession, const uint32_t channelId,
     const uint16_t command, uint8_t *payload, const int payloadSize)
 {
     bool ret = true;
     hTaskInfo->ownerSessionClass = this;
+    WRITE_LOG(LOG_DEBUG, "RedirectToTask command %d", command);
     switch (command) {
+        case CMD_UNITY_EXECUTE:
+        case CMD_UNITY_REMOUNT:
         case CMD_UNITY_REBOOT:
         case CMD_UNITY_RUNMODE:
+        case CMD_UNITY_HILOG:
+        case CMD_UNITY_ROOTRUN:
+        case CMD_UNITY_TERMINATE:
+        case CMD_UNITY_BUGREPORT_INIT:
+        case CMD_JDWP_LIST:
+        case CMD_JDWP_TRACK:
             ret = TaskCommandDispatch<HdcDaemonUnity>(hTaskInfo, TYPE_UNITY, command, payload, payloadSize);
             break;
+        case CMD_SHELL_INIT:
+        case CMD_SHELL_DATA:
+            ret = TaskCommandDispatch<HdcShell>(hTaskInfo, TYPE_SHELL, command, payload, payloadSize);
+            break;
+        case CMD_FILE_CHECK:
+        case CMD_FILE_DATA:
+        case CMD_FILE_FINISH:
+        case CMD_FILE_INIT:
+        case CMD_FILE_BEGIN:
+            ret = TaskCommandDispatch<HdcFile>(hTaskInfo, TASK_FILE, command, payload, payloadSize);
+            break;
+        // One-way function, so fewer options
         case CMD_UPDATER_UPDATE_INIT:
         case CMD_UPDATER_FLASH_INIT:
         case CMD_UPDATER_CHECK:
@@ -119,26 +137,10 @@ bool HdcDaemon::RedirectToTask(HTaskInfo hTaskInfo, HSession hSession, const uin
             ret = TaskCommandDispatch<DaemonUpdater>(hTaskInfo, TASK_UPDATER, command, payload, payloadSize);
             break;
         default:
-            std::string info = "Command not support in flashd\n";
-            Send(hSession->sessionId, channelId, CMD_KERNEL_ECHO_RAW, (uint8_t *)info.data(), info.size());
-            uint8_t count = 1;
-            Send(hSession->sessionId, channelId, CMD_KERNEL_CHANNEL_CLOSE, &count, 1);
             break;
     }
     return ret;
 }
-#else
-bool HdcDaemon::RedirectToTask(HTaskInfo hTaskInfo, HSession hSession, const uint32_t channelId,
-                               const uint16_t command, uint8_t *payload, const int payloadSize)
-{
-    std::string info = "Command not support in hdcd\n";
-    Send(hSession->sessionId, channelId, CMD_KERNEL_ECHO_RAW, (uint8_t *)info.data(), info.size());
-    uint8_t count = 1;
-    Send(hSession->sessionId, channelId, CMD_KERNEL_CHANNEL_CLOSE, &count, 1);
-    return true;
-}
-// clang-format on
-#endif
 
 bool HdcDaemon::HandDaemonAuth(HSession hSession, const uint32_t channelId, SessionHandShake &handshake)
 {
@@ -229,6 +231,7 @@ bool HdcDaemon::DaemonSessionHandshake(HSession hSession, const uint32_t channel
 bool HdcDaemon::FetchCommand(HSession hSession, const uint32_t channelId, const uint16_t command, uint8_t *payload,
                              int payloadSize)
 {
+    WRITE_LOG(LOG_DEBUG, "FetchCommand command %d", command);
     bool ret = true;
     if (!hSession->handshakeOK && command != CMD_KERNEL_HANDSHAKE) {
         ret = false;
@@ -242,7 +245,7 @@ bool HdcDaemon::FetchCommand(HSession hSession, const uint32_t channelId, const 
         }
         case CMD_KERNEL_CHANNEL_CLOSE: {  // Daemon is only cleaning up the Channel task
             ClearOwnTasks(hSession, channelId);
-            if (*payload == 1) {
+            if (*payload != 0) {
                 --(*payload);
                 Send(hSession->sessionId, channelId, CMD_KERNEL_CHANNEL_CLOSE, payload, 1);
             }
@@ -275,11 +278,9 @@ bool HdcDaemon::RemoveInstanceTask(const uint8_t op, HTaskInfo hTask)
         case TASK_APP:
             ret = DoTaskRemove<HdcDaemonApp>(hTask, op);
             break;
-#ifdef HDC_SUPPORT_FLASHD
         case TASK_UPDATER:
             ret = DoTaskRemove<DaemonUpdater>(hTask, op);
             break;
-#endif
         default:
             ret = false;
             break;
@@ -299,4 +300,15 @@ void HdcDaemon::JdwpNewFileDescriptor(const uint8_t *buf, const int bytesIO)
     uint32_t fd = *(uint32_t *)(buf + 5);  // 5 : fd offset
     ((HdcJdwp *)clsJdwp)->SendJdwpNewFD(pid, fd);
 };
+
+void HdcDaemon::NotifyInstanceSessionFree(HSession hSession, bool freeOrClear)
+{
+    if (!freeOrClear) {
+        return;  // ignore step 1
+    }
+    if (clsUSBServ != nullptr) {
+        auto clsUsbModule = reinterpret_cast<HdcDaemonUSB *>(clsUSBServ);
+        clsUsbModule->OnSessionFreeFinally(hSession);
+    }
+}
 }  // namespace Hdc

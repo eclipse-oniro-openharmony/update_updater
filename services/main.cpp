@@ -35,13 +35,6 @@ int main(int argc, char **argv)
     InitUpdaterLogger(modeStr, TMP_LOG, TMP_STAGE_LOG, TMP_ERROR_CODE_PATH);
     SetLogLevel(INFO);
     LoadFstab();
-    STAGE(UPDATE_STAGE_OUT) << "Start " << modeStr;
-    std::string modePara = (mode == BOOT_FLASHD) ? "updater.flashd.configfs" : "updater.hdc.configfs";
-    Flashd::SetParameter(modePara.c_str(), "1");
-
-    if (mode == BOOT_FLASHD) {
-        Utils::UsSleep(3000 * 1000); // 3000 * 1000 : wait 3s
-        return Flashd::flashd_main(argc, argv);
-    }
+    STAGE(UPDATE_STAGE_OUT) << "Start " << ((mode == BOOT_FLASHD) ? "flashd" : "updater");
     return Updater::UpdaterMain(argc, argv);
 }
