@@ -21,6 +21,7 @@
 namespace Flashd {
 class FlashCommander : public Commander {
 public:
+    DISALLOW_COPY_MOVE(FlashCommander);
     explicit FlashCommander(callbackFun callback) : Commander(callback) {}
     ~FlashCommander() override {};
     void DoCommand(const uint8_t *payload, int payloadSize) override;
