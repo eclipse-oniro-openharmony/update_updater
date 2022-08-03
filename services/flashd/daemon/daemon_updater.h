@@ -24,6 +24,7 @@
 namespace Hdc {
 class DaemonUpdater : public HdcTransferBase {
 public:
+    DISALLOW_COPY_MOVE(DaemonUpdater);
     explicit DaemonUpdater(HTaskInfo hTaskInfo);
     virtual ~DaemonUpdater();
     bool CommandDispatch(const uint16_t command, uint8_t *payload, const int payloadSize) override;
