@@ -24,8 +24,8 @@ constexpr const char *PREFIX_PARTITION_NODE = "/dev/block/by-name/";
 
 std::string GetRealPath(const std::string &path)
 {
-    std::vector<char> realPath(PATH_MAX + 1, 0);
-    auto ret = realpath(path.c_str(), realPath.data());
+    char realPath[PATH_MAX + 1] = {0};
+    auto ret = realpath(path.c_str(), realPath);
     return (ret == nullptr) ? "" : ret;
 }
 
