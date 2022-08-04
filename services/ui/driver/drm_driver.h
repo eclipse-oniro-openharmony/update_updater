@@ -30,13 +30,13 @@
 
 namespace Updater {
 struct BufferObject {
-    uint32_t width;
-    uint32_t height;
-    uint32_t pitch;
-    uint32_t handle;
-    uint32_t size;
-    uint8_t *vaddr;
-    uint32_t fbId;
+    uint32_t width {};
+    uint32_t height {};
+    uint32_t pitch {};
+    uint32_t handle {};
+    uint32_t size {};
+    uint8_t *vaddr {};
+    uint32_t fbId {};
 };
 
 class DrmDriver : public GraphicDrv {

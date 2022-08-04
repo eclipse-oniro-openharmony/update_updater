@@ -127,7 +127,7 @@ void ImgViewAdapter::Start()
     if (!valid_ || !animatorStop_) {
         return;
     }
-    if (!cb_) {
+    if (cb_ == nullptr) {
         LOG(ERROR) << "cb_ is null";
         return;
     }
@@ -141,7 +141,7 @@ void ImgViewAdapter::Stop()
     if (!valid_ || animatorStop_) {
         return;
     }
-    if (!cb_) {
+    if (cb_ == nullptr) {
         LOG(ERROR) << "cb_ is null";
         return;
     }

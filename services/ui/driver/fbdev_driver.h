@@ -22,10 +22,10 @@
 
 namespace Updater {
 struct FbBufferObject {
-    uint32_t width;
-    uint32_t height;
-    uint32_t size;
-    void *vaddr;
+    uint32_t width {};
+    uint32_t height {};
+    uint32_t size {};
+    void *vaddr {};
 };
 
 class FbdevDriver : public GraphicDrv {

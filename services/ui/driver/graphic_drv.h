@@ -18,10 +18,10 @@
 
 namespace Updater {
 using GrSurface = struct GrSurface_ {
-    int width;
-    int height;
-    unsigned int rowBytes;
-    unsigned int pixelBytes;
+    int width {};
+    int height {};
+    unsigned int rowBytes {};
+    unsigned int pixelBytes {};
 };
 class GraphicDrv {
 public:

@@ -88,6 +88,7 @@ int HandleInputEvent(const struct input_event *iev)
     }
     g_keyState = (ev.value == 1) ? OHOS::InputDevice::STATE_PRESS : OHOS::InputDevice::STATE_RELEASE;
     g_lastKeyId = ev.code;
+    return 0;
 }
 
 void ReportEventPkgCallback(const InputEventPackage **pkgs, const uint32_t count, uint32_t devIndex)

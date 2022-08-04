@@ -26,7 +26,7 @@ void CallBackDecorator::operator()() const
 {
     Page *pagePtr = static_cast<Page *>(view_.GetExtraMsg()->elementPtr);
     if (pagePtr == nullptr) {
-        LOG(INFO) << "view's extra msg is null";
+        LOG(ERROR) << "view's extra msg is null";
         return;
     }
     Page &page = *pagePtr;
@@ -38,50 +38,50 @@ void CallBackDecorator::operator()() const
     std::string pageId = page.GetPageId();
     // page should be visible
     if (!page.IsVisible()) {
-        LOG(INFO) << pageId << " is not visible";
+        LOG(ERROR) << pageId << " is not visible";
         return;
     }
     // component should be visible
     if (!page[id]->IsVisible()) {
-        LOG(INFO) << id << " is not visible";
+        LOG(ERROR) << id << " is not visible";
         return;
     }
     // then can trigger callback
     cb_();
 }
 
-bool LabelOnTouchListener::OnRelease(OHOS::UIView &view, const OHOS::ReleaseEvent &event)
+bool LabelOnTouchListener::OnRelease(OHOS::UIView &view, [[maybe_unused]] const OHOS::ReleaseEvent &event)
 {
     // wrap cb_ with CallBackDecorator, then call operator()()
     CallBackDecorator(view, cb_)();
     return isConsumed_;
 }
 
-bool BtnOnEventListener::OnClick(OHOS::UIView &view, const OHOS::ClickEvent &event)
+bool BtnOnEventListener::OnClick(OHOS::UIView &view, [[maybe_unused]] const OHOS::ClickEvent &event)
 {
     CallBackDecorator(view, cb_)();
     return isConsumed_;
 }
 
-bool BtnOnEventListener::OnPress(OHOS::UIView &view, const OHOS::PressEvent &event)
+bool BtnOnEventListener::OnPress(OHOS::UIView &view, [[maybe_unused]] const OHOS::PressEvent &event)
 {
     KeyListener::SetButtonPressed(true);
     return true;
 }
 
-bool BtnOnEventListener::OnRelease(OHOS::UIView &view, const OHOS::ReleaseEvent &event)
+bool BtnOnEventListener::OnRelease(OHOS::UIView &view, [[maybe_unused]] const OHOS::ReleaseEvent &event)
 {
     KeyListener::SetButtonPressed(false);
     return true;
 }
 
-bool BtnOnEventListener::OnCancel(OHOS::UIView &view, const OHOS::CancelEvent &event)
+bool BtnOnEventListener::OnCancel(OHOS::UIView &view, [[maybe_unused]] const OHOS::CancelEvent &event)
 {
     KeyListener::SetButtonPressed(false);
     return true;
 }
 
-bool BtnOnDragListener::OnDragStart(OHOS::UIView &view, const OHOS::DragEvent &event)
+bool BtnOnDragListener::OnDragStart(OHOS::UIView &view, [[maybe_unused]] const OHOS::DragEvent &event)
 {
     CallBackDecorator(view, cb_)();
     return isConsumed_;
@@ -97,7 +97,7 @@ bool BtnOnDragListener::OnDrag(OHOS::UIView &view, const OHOS::DragEvent &event)
     return isConsumed_;
 }
 
-bool BtnOnDragListener::OnDragEnd(OHOS::UIView &view, const OHOS::DragEvent &event)
+bool BtnOnDragListener::OnDragEnd(OHOS::UIView &view, [[maybe_unused]] const OHOS::DragEvent &event)
 {
     CallBackDecorator(view, cb_)();
     return isConsumed_;
