@@ -22,7 +22,7 @@
 namespace Updater {
 void DrmDriver::Flip(const uint8_t *buf)
 {
-    UPDATER_CHECK_ONLY_RETURN(!memcpy_s(buff_.vaddr, buff_.size, buf, buff_.size), return);
+    static_cast<void>(memcpy_s(buff_.vaddr, buff_.size, buf, buff_.size));
 }
 
 void DrmDriver::GetGrSurface(GrSurface &surface)
@@ -71,7 +71,9 @@ int DrmDriver::ModesetCreateFb(struct BufferObject *bo)
     uint32_t i = 0;
     uint32_t color = newColor;
     while (i < bo->size) {
-        UPDATER_CHECK_ONLY_RETURN(!memcpy_s(&bo->vaddr[i], bo->size, &color, sizeof(color)), return -1);
+        if (memcpy_s(&bo->vaddr[i], bo->size, &color, sizeof(color)) != EOK) {
+            return -1;
+        }
         i += sizeof(color);
     }
     return 0;

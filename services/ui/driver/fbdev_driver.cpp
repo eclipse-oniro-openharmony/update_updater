@@ -103,8 +103,12 @@ void FbdevDriver::Init()
 
 void FbdevDriver::Flip(const uint8_t *buf)
 {
-    UPDATER_CHECK_ONLY_RETURN(fd_ >= 0 && !memcpy_s(buff_.vaddr, buff_.size, buf, buff_.size), return);
-    if (ioctl(fd_, FBIOPAN_DISPLAY, &vinfo_) < 0) {
+    if (fd_ < 0 || memcpy_s(buff_.vaddr, buff_.size, buf, buff_.size) != EOK)
+    {
+        return;
+    }
+    if (ioctl(fd_, FBIOPAN_DISPLAY, &vinfo_) < 0)
+    {
         LOG(ERROR) << "failed to display fb0!";
     }
 }
