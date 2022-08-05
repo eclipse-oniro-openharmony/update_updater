@@ -41,7 +41,7 @@ struct BufferObject {
 
 class DrmDriver : public GraphicDrv {
 public:
-    DrmDriver() : conn_(nullptr), res_(nullptr) {}
+    DrmDriver() : fd_(-1), conn_(nullptr), res_(nullptr), crtc_(nullptr) {}
     ~DrmDriver() override;
     void Init() override;
     void Flip(const uint8_t *buf) override;
@@ -50,8 +50,16 @@ private:
     int ModesetCreateFb(struct BufferObject *bo);
     void ModesetDestroyFb(struct BufferObject *bo);
     int DrmInit();
+    drmModeCrtc *GetCrtc(const drmModeRes &res, const int fd, const drmModeConnector &conn) const;
+    drmModeConnector *GetFirstConnector(const drmModeRes &res, const int fd) const;
+    drmModeConnector *GetConnectorByType(const drmModeRes &res, const int fd, const uint32_t type) const;
+    drmModeConnector *GetConnector(const drmModeRes &res, const int fd, uint32_t &modeId) const;
+    drmModeRes *GetResources(int &fd) const;
+    drmModeRes *GetOneResources(const int devIndex, int &fd) const;
+    int fd_;
     drmModeConnector *conn_;
     drmModeRes *res_;
+    drmModeCrtc *crtc_;
     struct BufferObject buff_ {};
 };
 } // namespace Updater
