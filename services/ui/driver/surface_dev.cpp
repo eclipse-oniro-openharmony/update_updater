@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -66,7 +66,7 @@ SurfaceDev::SurfaceDev()
     }
 }
 
-void SurfaceDev::GetScreenSize(int &w, int &h) const
+void SurfaceDev::GetScreenSize(uint16_t &w, uint16_t &h) const
 {
     GrSurface surface {0};
     if (drv_ != nullptr) {
@@ -79,6 +79,6 @@ void SurfaceDev::GetScreenSize(int &w, int &h) const
 
 SurfaceDev::~SurfaceDev()
 {
-    LOG(INFO)<<"SurfaceDev end";
+    LOG(INFO) << "SurfaceDev end";
 }
 } // namespace Updater

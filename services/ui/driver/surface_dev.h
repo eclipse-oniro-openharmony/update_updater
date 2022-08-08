@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,11 +26,12 @@ enum class DevType {
 };
 
 class SurfaceDev {
+    DISALLOW_COPY_MOVE(SurfaceDev);
 public:
     SurfaceDev();
     ~SurfaceDev();
     void Flip(const uint8_t* buf) const;
-    void GetScreenSize(int &w, int &h) const;
+    void GetScreenSize(uint16_t &w, uint16_t &h) const;
 private:
     DevType GetDevType() const;
     std::unique_ptr<GraphicDrv> MakeDevDrv(DevType devType);

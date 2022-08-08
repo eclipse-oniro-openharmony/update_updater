@@ -29,7 +29,7 @@ public:
     GraphicEngine() = default;
     virtual ~GraphicEngine() = default;
     static GraphicEngine &GetInstance();
-    void Init(uint16_t width, uint16_t height, uint32_t bkgColor, uint8_t mode, SurfaceDev &sfDev);
+    void Init(uint32_t bkgColor, uint8_t mode);
     void Flush() override;
     OHOS::BufferInfo *GetFBBufferInfo() override;
     uint16_t GetScreenWidth() override;
@@ -43,7 +43,7 @@ private:
     std::thread flushLoop_;
     std::unique_ptr<OHOS::BufferInfo> buffInfo_ = nullptr;
     std::unique_ptr<uint8_t[]> virAddr_ = nullptr;
-    SurfaceDev *sfDev_ = nullptr;
+    std::unique_ptr<SurfaceDev> sfDev_ = nullptr;
     uint32_t bkgColor_ = 0;
     uint16_t height_ = 0;
     uint16_t width_ = 0;

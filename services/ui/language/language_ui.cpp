@@ -151,6 +151,7 @@ bool LanguageUI::LoadLangRes(const JsonNode &node)
 Language LanguageUI::GetLanguage() const
 {
     constexpr Language DEFAULT_LOCALE = Language::CHINESE;
+    constexpr size_t localeLen = 2; // zh|es|en
     std::string realPath {};
     if (!Utils::PathToRealPath(langRes_.localeFile, realPath)) {
         LOG(ERROR) << "get real path failed";
@@ -164,7 +165,7 @@ Language LanguageUI::GetLanguage() const
     }
 
     std::string content {std::istreambuf_iterator<char> {ifs}, {}};
-    const std::string &locale = content.substr(0, 2);
+    const std::string &locale = content.substr(0, localeLen);
     if (auto it = LOCALES.find(locale); it != LOCALES.end()) {
         return it->second;
     }

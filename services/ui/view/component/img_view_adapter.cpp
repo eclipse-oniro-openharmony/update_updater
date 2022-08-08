@@ -26,6 +26,7 @@
 
 namespace Updater {
 class ImgViewAdapter::ImgAnimatorCallback final : public OHOS::AnimatorCallback {
+    DISALLOW_COPY_MOVE(ImgAnimatorCallback);
 public:
     explicit ImgAnimatorCallback(ImgViewAdapter *view)
         : viewProxy_(view, "animator of type ImgViewAdapter "), animator_(nullptr), stop_(true)
