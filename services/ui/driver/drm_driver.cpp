@@ -289,11 +289,15 @@ int DrmDriver::DrmInit(void)
 
 bool DrmDriver::Init()
 {
-    if (DrmInit() == -1) {
-        LOG(ERROR) << "load drm driver fail";
-        return false;
-    }
-    return true;
+    // this static variable can guarantee Init be called only once
+    static bool res = [this] () {
+        if (DrmInit() == -1) {
+            LOG(ERROR) << "load drm driver fail";
+            return false;
+        }
+        return true;
+    } ();
+    return res;
 }
 
 void DrmDriver::ModesetDestroyFb(struct BufferObject *bo)

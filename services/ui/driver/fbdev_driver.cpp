@@ -68,38 +68,41 @@ void FbdevDriver::FBLog() const
 
 bool FbdevDriver::Init()
 {
-    int fd = open(FB_DEV_PATH, O_RDWR | O_CLOEXEC);
-    if (fd < 0) {
-        LOG(ERROR) << "cannot open fb0";
-        return false;
-    }
+    static bool res = [this] () {
+        int fd = open(FB_DEV_PATH, O_RDWR | O_CLOEXEC);
+        if (fd < 0) {
+            LOG(ERROR) << "cannot open fb0";
+            return false;
+        }
 
-    if (ioctl(fd, FBIOGET_FSCREENINFO, &finfo_) < 0) {
-        LOG(ERROR) << "failed to get fb0 info";
-        close(fd);
-        return false;
-    }
+        if (ioctl(fd, FBIOGET_FSCREENINFO, &finfo_) < 0) {
+            LOG(ERROR) << "failed to get fb0 info";
+            close(fd);
+            return false;
+        }
 
-    if (ioctl(fd, FBIOGET_VSCREENINFO, &vinfo_) < 0) {
-        LOG(ERROR) << "failed to get fb0 info";
-        close(fd);
-        return false;
-    }
+        if (ioctl(fd, FBIOGET_VSCREENINFO, &vinfo_) < 0) {
+            LOG(ERROR) << "failed to get fb0 info";
+            close(fd);
+            return false;
+        }
 
-    FBLog();
+        FBLog();
 
-    buff_.width = vinfo_.xres;
-    buff_.height = vinfo_.yres;
-    buff_.size = finfo_.line_length * vinfo_.yres;
-    buff_.vaddr = mmap(nullptr, finfo_.smem_len, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
-    if (buff_.vaddr == MAP_FAILED) {
-        LOG(ERROR) << "failed to mmap framebuffer";
-        close(fd);
-        return false;
-    }
-    (void)memset_s(buff_.vaddr, finfo_.smem_len, 0, finfo_.smem_len);
-    fd_ = fd;
-    return true;
+        buff_.width = vinfo_.xres;
+        buff_.height = vinfo_.yres;
+        buff_.size = finfo_.line_length * vinfo_.yres;
+        buff_.vaddr = mmap(nullptr, finfo_.smem_len, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+        if (buff_.vaddr == MAP_FAILED) {
+            LOG(ERROR) << "failed to mmap framebuffer";
+            close(fd);
+            return false;
+        }
+        (void)memset_s(buff_.vaddr, finfo_.smem_len, 0, finfo_.smem_len);
+        fd_ = fd;
+        return true;
+    } ();
+    return res;
 }
 
 void FbdevDriver::Flip(const uint8_t *buf)

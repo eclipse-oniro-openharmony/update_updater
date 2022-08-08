@@ -38,18 +38,21 @@ void GraphicEngine::Init(uint32_t bkgColor, uint8_t mode)
 {
     bkgColor_ = bkgColor;
     colorMode_ = mode;
-    sfDev_ = std::make_unique<SurfaceDev>();
-    sfDev_->GetScreenSize(width_, height_);
-    buffInfo_ = nullptr;
-    virAddr_ = nullptr;
-    InitFontEngine();
-    InitImageDecodeAbility();
-    if (!sfDev_->Init()) {
-        LOG(INFO) << "GraphicEngine Init failed!";
-        return;
-    }
-    InitFlushThread();
-    LOG(INFO) << "GraphicEngine Init width: " << width_ << ", height: " << height_ << ", bkgColor: " << bkgColor;
+    [[maybe_unused]] static bool initOnce = [this] () {
+        sfDev_ = std::make_unique<SurfaceDev>();
+        sfDev_->GetScreenSize(width_, height_);
+        buffInfo_ = nullptr;
+        virAddr_ = nullptr;
+        InitFontEngine();
+        InitImageDecodeAbility();
+        if (!sfDev_->Init()) {
+            LOG(INFO) << "GraphicEngine Init failed!";
+            return false;
+        }
+        InitFlushThread();
+        LOG(INFO) << "GraphicEngine Init width: " << width_ << ", height: " << height_ << ", bkgColor: " << bkgColor_;
+        return true;
+    } ();
 }
 
 void GraphicEngine::InitFontEngine() const

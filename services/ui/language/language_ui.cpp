@@ -52,7 +52,10 @@ LanguageUI &LanguageUI::GetInstance()
 bool LanguageUI::Init(const Language language)
 {
     language_ = language;
-    return Parse();
+    static bool res = [this] () {
+        return Parse();
+    } ();
+    return res;
 }
 
 bool LanguageUI::SetRes(const Res &res)

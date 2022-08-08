@@ -80,16 +80,19 @@ void CallbackManager::Register(const CallbackCfg &cbCfg)
 
 void CallbackManager::Init(bool hasFocus)
 {
-    for (auto &cb : callbackCfgs_) {
-        Register(cb);
-    }
+    [[maybe_unused]] static bool isInited = [hasFocus] () {
+        for (auto &cb : callbackCfgs_) {
+            Register(cb);
+        }
 
-    if (hasFocus) {
-        // for focus manager
-        EventManager::GetInstance().AddKeyListener();
-    }
+        if (hasFocus) {
+            // for focus manager
+            EventManager::GetInstance().AddKeyListener();
+        }
 
-    // for long press warning
-    LOG(DEBUG) << "register key action listerner succeed";
+        // for long press warning
+        LOG(DEBUG) << "register key action listerner succeed";
+        return true;
+    } ();
 }
 }
