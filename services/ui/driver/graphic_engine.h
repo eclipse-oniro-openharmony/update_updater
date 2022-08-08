@@ -23,8 +23,8 @@
 
 namespace Updater {
 class GraphicEngine : public OHOS::BaseGfxEngine {
-static constexpr uint32_t THREAD_USLEEP_TIME = 10000;
-
+    static constexpr uint32_t THREAD_USLEEP_TIME = 10000;
+    DISALLOW_COPY_MOVE(GraphicEngine);
 public:
     GraphicEngine() = default;
     virtual ~GraphicEngine() = default;
