@@ -89,7 +89,8 @@ bool LanguageUI::ParseJson(const std::string &file)
             LOG(ERROR) << "key is empty";
             continue;
         }
-        if (auto optionalStr = strNode[g_languageDataVars[language_]].As<std::string>(); optionalStr) {
+        if (auto optionalStr = strNode[g_languageDataVars[language_]].As<std::string>();
+            optionalStr != std::nullopt) {
             strMap_[key] = *optionalStr;
             continue;
         }
