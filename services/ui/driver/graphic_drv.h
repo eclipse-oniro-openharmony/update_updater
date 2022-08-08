@@ -27,7 +27,7 @@ class GraphicDrv {
 public:
     GraphicDrv() : fd_(-1) {}
     virtual ~GraphicDrv() {}
-    virtual void Init() = 0;
+    virtual bool Init() = 0;
     virtual void Flip(const uint8_t *buf) = 0;
     virtual void GetGrSurface(GrSurface &surface) = 0;
 protected:

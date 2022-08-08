@@ -58,12 +58,19 @@ DevType SurfaceDev::GetDevType() const
     return DevType::UNKNOW_DEVICE;
 }
 
-SurfaceDev::SurfaceDev()
+bool SurfaceDev::Init()
 {
+    static bool isInited_ {false};
+    if (isInited_) {
+        return false;
+    }
+    isInited_ = true;
+
     drv_ = MakeDevDrv(GetDevType());
     if (drv_ != nullptr) {
-        drv_->Init();
+        return drv_->Init();
     }
+    return false;
 }
 
 void SurfaceDev::GetScreenSize(uint16_t &w, uint16_t &h) const

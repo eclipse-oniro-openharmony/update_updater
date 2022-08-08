@@ -66,24 +66,24 @@ void FbdevDriver::FBLog() const
     LOG(INFO) << "height=" << vinfo_.height;
 }
 
-void FbdevDriver::Init()
+bool FbdevDriver::Init()
 {
     int fd = open(FB_DEV_PATH, O_RDWR | O_CLOEXEC);
     if (fd < 0) {
         LOG(ERROR) << "cannot open fb0";
-        return;
+        return false;
     }
 
     if (ioctl(fd, FBIOGET_FSCREENINFO, &finfo_) < 0) {
         LOG(ERROR) << "failed to get fb0 info";
         close(fd);
-        return;
+        return false;
     }
 
     if (ioctl(fd, FBIOGET_VSCREENINFO, &vinfo_) < 0) {
         LOG(ERROR) << "failed to get fb0 info";
         close(fd);
-        return;
+        return false;
     }
 
     FBLog();
@@ -92,13 +92,14 @@ void FbdevDriver::Init()
     buff_.height = vinfo_.yres;
     buff_.size = finfo_.line_length * vinfo_.yres;
     buff_.vaddr = mmap(nullptr, finfo_.smem_len, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
-    if (buff_.vaddr == static_cast<void *>(-1)) {
+    if (buff_.vaddr == MAP_FAILED) {
         LOG(ERROR) << "failed to mmap framebuffer";
         close(fd);
-        return;
+        return false;
     }
     (void)memset_s(buff_.vaddr, finfo_.smem_len, 0, finfo_.smem_len);
     fd_ = fd;
+    return true;
 }
 
 void FbdevDriver::Flip(const uint8_t *buf)
@@ -119,13 +120,17 @@ void FbdevDriver::GetGrSurface(GrSurface &surface)
     surface.pixelBytes = vinfo_.bits_per_pixel / 8; // 8: byte bit len
 }
 
-void FbdevDriver::ReleaseFb(const struct FbBufferObject *fbo) const
+void FbdevDriver::ReleaseFb(const struct FbBufferObject *fbo)
 {
-    if (fbo != nullptr) {
-        munmap(fbo->vaddr, fbo->size);
+    /*
+     * When fd_ isn't less than 0, then fbo->vaddr is valid and can by safely munmap.
+     * this can be guaranteed by FbdevDriver::Init.
+     */
+    if (fd_ < 0) {
+        return;
     }
-    if (fd_ >= 0) {
-        close(fd_);
-    }
+    munmap(fbo->vaddr, fbo->size);
+    close(fd_);
+    fd_ = -1;
 }
 } // namespace Updater

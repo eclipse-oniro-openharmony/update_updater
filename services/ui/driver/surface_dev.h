@@ -28,14 +28,15 @@ enum class DevType {
 class SurfaceDev {
     DISALLOW_COPY_MOVE(SurfaceDev);
 public:
-    SurfaceDev();
+    SurfaceDev() = default;
     ~SurfaceDev();
     void Flip(const uint8_t* buf) const;
     void GetScreenSize(uint16_t &w, uint16_t &h) const;
+    bool Init();
 private:
     DevType GetDevType() const;
     std::unique_ptr<GraphicDrv> MakeDevDrv(DevType devType);
-    std::unique_ptr<GraphicDrv> drv_;
+    std::unique_ptr<GraphicDrv> drv_ {};
 };
 } // namespace Updater
 #endif

@@ -43,7 +43,7 @@ class DrmDriver : public GraphicDrv {
 public:
     DrmDriver() : fd_(-1), conn_(nullptr), res_(nullptr), crtc_(nullptr) {}
     ~DrmDriver() override;
-    void Init() override;
+    bool Init() override;
     void Flip(const uint8_t *buf) override;
     void GetGrSurface(GrSurface &surface) override;
 private:

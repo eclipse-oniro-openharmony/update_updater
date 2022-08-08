@@ -22,7 +22,9 @@
 namespace Updater {
 void DrmDriver::Flip(const uint8_t *buf)
 {
-    static_cast<void>(memcpy_s(buff_.vaddr, buff_.size, buf, buff_.size));
+    if (buff_.vaddr != MAP_FAILED) {
+        static_cast<void>(memcpy_s(buff_.vaddr, buff_.size, buf, buff_.size));
+    }
 }
 
 void DrmDriver::GetGrSurface(GrSurface &surface)
@@ -66,7 +68,11 @@ int DrmDriver::ModesetCreateFb(struct BufferObject *bo)
     /* map the dumb-buffer to userspace */
     map.handle = create.handle;
     drmIoctl(fd_, DRM_IOCTL_MODE_MAP_DUMB, &map);
-    bo->vaddr = static_cast<uint8_t*>(mmap(0, create.size, PROT_READ | PROT_WRITE, MAP_SHARED, fd_, map.offset));
+    bo->vaddr = static_cast<uint8_t *>(mmap(0, create.size, PROT_READ | PROT_WRITE, MAP_SHARED, fd_, map.offset));
+    if (bo->vaddr == MAP_FAILED) {
+        LOG(ERROR) << "failed to mmap framebuffer";
+        return -1;
+    }
     const uint32_t newColor = 0xff000000;
     uint32_t i = 0;
     uint32_t color = newColor;
@@ -281,11 +287,13 @@ int DrmDriver::DrmInit(void)
     return 0;
 }
 
-void DrmDriver::Init()
+bool DrmDriver::Init()
 {
     if (DrmInit() == -1) {
         LOG(ERROR) << "load drm driver fail";
+        return false;
     }
+    return true;
 }
 
 void DrmDriver::ModesetDestroyFb(struct BufferObject *bo)
@@ -293,7 +301,7 @@ void DrmDriver::ModesetDestroyFb(struct BufferObject *bo)
     if (fd_ > 0 && bo->fbId != 0) {
         drmModeRmFB(fd_, bo->fbId);
     }
-    if (bo->vaddr != nullptr) {
+    if (bo->vaddr != MAP_FAILED) {
         munmap(bo->vaddr, bo->size);
     }
     if (fd_ > 0) {
@@ -312,6 +320,7 @@ void DrmDriver::ModesetDestroyFb(struct BufferObject *bo)
     }
     if (fd_ > 0) {
         close(fd_);
+        fd_ = -1;
     }
 }
 

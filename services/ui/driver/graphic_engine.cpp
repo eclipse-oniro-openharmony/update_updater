@@ -44,6 +44,10 @@ void GraphicEngine::Init(uint32_t bkgColor, uint8_t mode)
     virAddr_ = nullptr;
     InitFontEngine();
     InitImageDecodeAbility();
+    if (!sfDev_->Init()) {
+        LOG(INFO) << "GraphicEngine Init failed!";
+        return;
+    }
     InitFlushThread();
     LOG(INFO) << "GraphicEngine Init width: " << width_ << ", height: " << height_ << ", bkgColor: " << bkgColor;
 }

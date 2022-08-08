@@ -32,12 +32,12 @@ class FbdevDriver : public GraphicDrv {
 public:
     FbdevDriver() {}
     ~FbdevDriver() override;
-    void Init() override;
+    bool Init() override;
     void Flip(const uint8_t *buf) override;
     void GetGrSurface(GrSurface &surface) override;
 private:
     void FBLog() const;
-    void ReleaseFb(const struct FbBufferObject *fbo) const;
+    void ReleaseFb(const struct FbBufferObject *fbo);
     struct FbBufferObject buff_ {};
     struct fb_fix_screeninfo finfo_ {};
     struct fb_var_screeninfo vinfo_ {};
