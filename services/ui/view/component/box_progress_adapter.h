@@ -24,6 +24,7 @@
 namespace Updater {
 class BoxProgressAdapter : public OHOS::UIBoxProgress {
     static constexpr uint32_t MAX_PROGRESS_VALUE = 100;
+    DISALLOW_COPY_MOVE(BoxProgressAdapter);
 public:
     using SpecificInfoType = UxBoxProgressInfo;
     BoxProgressAdapter() = default;

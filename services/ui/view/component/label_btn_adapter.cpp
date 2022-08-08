@@ -19,6 +19,7 @@
 
 namespace Updater {
 struct LabelBtnAdapter::LabelBtnOnFocusListener : public OHOS::UIView::OnFocusListener {
+    DISALLOW_COPY_MOVE(LabelBtnOnFocusListener);
 public:
     LabelBtnOnFocusListener(UxBRGAPixel focusedTxtColor, UxBRGAPixel unfocusedTxtcolor,
         UxBRGAPixel focusedBgColor, UxBRGAPixel unfocusedBgcolor)

@@ -21,6 +21,7 @@
 #include "view_api.h"
 namespace Updater {
 class ImgViewAdapter : public OHOS::UIImageView {
+    DISALLOW_COPY_MOVE(ImgViewAdapter);
     class ImgAnimatorCallback;
     static constexpr uint32_t MAX_IMG_CNT = 300;
     static constexpr uint32_t MAX_INTERVAL_MS = 5000;

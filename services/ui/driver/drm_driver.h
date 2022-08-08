@@ -40,6 +40,7 @@ struct BufferObject {
 };
 
 class DrmDriver : public GraphicDrv {
+    DISALLOW_COPY_MOVE(DrmDriver);
 public:
     DrmDriver() : fd_(-1), conn_(nullptr), res_(nullptr), crtc_(nullptr) {}
     ~DrmDriver() override;

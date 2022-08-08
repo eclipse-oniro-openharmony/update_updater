@@ -29,8 +29,9 @@ struct FbBufferObject {
 };
 
 class FbdevDriver : public GraphicDrv {
+    DISALLOW_COPY_MOVE(FbdevDriver);
 public:
-    FbdevDriver() {}
+    FbdevDriver() = default;
     ~FbdevDriver() override;
     bool Init() override;
     void Flip(const uint8_t *buf) override;
