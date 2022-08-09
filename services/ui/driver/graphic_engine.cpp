@@ -40,15 +40,15 @@ void GraphicEngine::Init(uint32_t bkgColor, uint8_t mode)
     colorMode_ = mode;
     [[maybe_unused]] static bool initOnce = [this] () {
         sfDev_ = std::make_unique<SurfaceDev>();
+        if (!sfDev_->Init()) {
+            LOG(INFO) << "GraphicEngine Init failed!";
+            return false;
+        }
         sfDev_->GetScreenSize(width_, height_);
         buffInfo_ = nullptr;
         virAddr_ = nullptr;
         InitFontEngine();
         InitImageDecodeAbility();
-        if (!sfDev_->Init()) {
-            LOG(INFO) << "GraphicEngine Init failed!";
-            return false;
-        }
         InitFlushThread();
         LOG(INFO) << "GraphicEngine Init width: " << width_ << ", height: " << height_ << ", bkgColor: " << bkgColor_;
         return true;
