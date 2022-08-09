@@ -49,8 +49,6 @@ public:
 private:
     void SetLogoVisible(bool isVisible) const;
     void SetProgressVisible(bool isVisible) const;
-    void StopProgress(bool isForced) const;
-    void StartProgress() const;
     void ShowMsg(const ComInfo &id, const std::string &tag, bool isClear) const;
     void ShowMsg(const ComInfo &id, const std::string &tag) const;
 

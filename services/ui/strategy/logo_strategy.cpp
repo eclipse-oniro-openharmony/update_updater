@@ -17,9 +17,9 @@
 
 #include <functional>
 
-#include "component/animation_label.h"
-#include "component/progress_bar.h"
-#include "component/text_label.h"
+#include "component/box_progress_adapter.h"
+#include "component/img_view_adapter.h"
+#include "component/text_label_adapter.h"
 #include "log/log.h"
 #include "updater_ui_env.h"
 

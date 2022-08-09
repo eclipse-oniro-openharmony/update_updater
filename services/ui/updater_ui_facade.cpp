@@ -17,7 +17,7 @@
 
 #include <thread>
 
-#include "component/text_label.h"
+#include "component/text_label_adapter.h"
 #include "updater_ui_config.h"
 #include "updater_ui_env.h"
 
@@ -91,24 +91,6 @@ void UpdaterUiFacade::SetLogoVisible(bool isVisible) const
     isVisible ? logo_->Show() : logo_->Hide();
 }
 
-void UpdaterUiFacade::StopProgress(bool isForced) const
-{
-    if (progress_ == nullptr) {
-        LOG(ERROR) << "progress is null, can't show progress";
-        return;
-    }
-    progress_->Stop(isForced);
-}
-
-void UpdaterUiFacade::StartProgress() const
-{
-    if (progress_ == nullptr) {
-        LOG(ERROR) << "progress is null, can't show progress";
-        return;
-    }
-    progress_->Start();
-}
-
 void UpdaterUiFacade::SetProgressVisible(bool isVisible) const
 {
     if (progress_ == nullptr) {
@@ -132,7 +114,6 @@ void UpdaterUiFacade::ShowProgressPage() const
     SetProgressVisible(true);
     SetLogoVisible(true);
     ShowProgress(0);
-    StartProgress();
     pgMgr_.ShowPage(strategies_[mode_].progressPage.progressPageId);
     ShowProgressWarning(false);
 }
@@ -140,8 +121,6 @@ void UpdaterUiFacade::ShowProgressPage() const
 void UpdaterUiFacade::ShowSuccessPage() const
 {
     LOG(DEBUG) << "show success page";
-    // wait until progress is 100%
-    StopProgress(false);
     SetProgressVisible(false);
     SetLogoVisible(false);
     StopLongPressTimer();
@@ -151,8 +130,6 @@ void UpdaterUiFacade::ShowSuccessPage() const
 void UpdaterUiFacade::ShowFailedPage() const
 {
     LOG(DEBUG) << "show failed page";
-    // force stop progress
-    StopProgress(true);
     SetProgressVisible(false);
     SetLogoVisible(false);
     StopLongPressTimer();

@@ -78,7 +78,7 @@ private:
     bool ParseViewInfo(const JsonNode &root, std::vector<UxViewInfo> &vec) const
     {
         UxViewInfo info {};
-        std::vector<UxPageInfo>().swap(vec);
+        std::vector<UxViewInfo>().swap(vec);
         const JsonNode &defaultNode = root[DEFAULT_MODULE];
         const JsonNode &componentNodes = root[COMPONENT_MODULE];
         if (componentNodes.Type() != NodeType::ARRAY) {

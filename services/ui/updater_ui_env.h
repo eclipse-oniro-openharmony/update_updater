@@ -40,11 +40,9 @@ protected:
 
     bool InitBrightness(const char *brightnessFile, const char *maxBrightnessFile) const; // init brightness
     void InitRootView() const;
-    std::unique_ptr<SurfaceDev> sfDev_;
     UpdaterMode mode_;
     int screenW_;
     int screenH_;
-    bool isInited_;
 };
 }
 #endif

@@ -48,21 +48,20 @@ UpdaterUiEnv &UpdaterUiEnv::GetInstance()
 
 void UpdaterUiEnv::Init()
 {
-    if (isInited_) {
-        return 0;
-    }
-    InitDisplayDriver(); // init display driver
-    InitEngine(); // Graphic UI init
-    InitConfig(); // page manager init
-    InitEvts(); // init input driver and input events callback
-    InitInputDriver(); // init input driver and input events callback
-    isInited_ = true;
+    [[maybe_unused]] static bool initOnce = [this] () {
+        InitDisplayDriver(); // init display driver
+        InitEngine(); // Graphic UI init
+        InitConfig(); // page manager init
+        InitEvts(); // init input driver and input events callback
+        InitInputDriver(); // init input driver and input events callback
+        return true;
+    } ();
 }
 
 void UpdaterUiEnv::InitEngine() const
 {
     OHOS::GraphicStartUp::Init();
-    UIGraphicEngine::GetInstance().Init(screenW_, screenH_, WHITE_BGCOLOR, OHOS::ColorMode::ARGB8888, *sfDev_);
+    GraphicEngine::GetInstance().Init(WHITE_BGCOLOR, OHOS::ColorMode::ARGB8888);
     InitRootView();
     LOG(INFO) << "UxInitEngine done";
 }
@@ -87,8 +86,6 @@ void UpdaterUiEnv::InitInputDriver() const
 
 void UpdaterUiEnv::InitDisplayDriver()
 {
-    sfDev_ = std::make_unique<SurfaceDev>();
-    sfDev_->GetScreenSize(screenW_, screenH_);
     std::find_if(std::begin(BRIGHTNESS_FILES), std::end(BRIGHTNESS_FILES), [this] (auto filePair) {
         return InitBrightness(filePair.first, filePair.second);
     });
