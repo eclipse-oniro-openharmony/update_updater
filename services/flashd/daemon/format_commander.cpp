@@ -23,6 +23,7 @@
 namespace Flashd {
 namespace {
 const std::vector<std::string> ERASE_ONLY_LIST = { "boot", "fastboot", "kernel", "misc", "system" };
+constexpr size_t CMD_PARAM_COUNT_MIN = 2;
 }
 
 void FormatCommander::DoCommand([[maybe_unused]] const std::string &cmmParam, [[maybe_unused]] size_t fileSize)
