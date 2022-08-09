@@ -357,7 +357,7 @@ int UpdaterMain(int argc, char **argv)
         ShowUpdateFrame(false);
         // Wait for user input
         while (true) {
-            pause();
+            Utils::UsSleep(DISPLAY_TIME);
         }
         return 0;
     }
