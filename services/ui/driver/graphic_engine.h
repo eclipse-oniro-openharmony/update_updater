@@ -19,6 +19,7 @@
 #include <memory>
 #include <thread>
 #include "engines/gfx/gfx_engine_manager.h"
+#include "macros.h"
 #include "surface_dev.h"
 
 namespace Updater {

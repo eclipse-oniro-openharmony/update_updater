@@ -18,6 +18,7 @@
 
 #include <cstdint>
 #include <linux/fb.h>
+#include "macros.h"
 #include "graphic_drv.h"
 
 namespace Updater {
