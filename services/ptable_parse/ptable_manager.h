@@ -16,6 +16,7 @@
 #ifndef UPDATER_PTABLE_MANAGER_H
 #define UPDATER_PTABLE_MANAGER_H
 
+#include "ufs_ptable.h"
 #include "package/pkg_manager.h"
 
 namespace Updater {
@@ -30,8 +31,8 @@ public:
         STORAGE_UFS,
     };
 
-    virtual void LoadPartitionInfo([[maybe_unused]] hpackage::PkgManager *pkgManager = nullptr) = 0;
-    void ReloadDevicePartition(hpackage::PkgManager *pkgManager);
+    virtual void LoadPartitionInfo([[maybe_unused]] Hpackage::PkgManager *pkgManager = nullptr) = 0;
+    void ReloadDevicePartition(Hpackage::PkgManager *pkgManager);
     bool WritePtableToDevice();
     void PrintPtableInfo();
     bool GetPartionInfoByName(const std::string &partitionName, Ptable::PtnInfo &ptnInfo, int32_t &index);
@@ -66,11 +67,11 @@ public:
         return instance;
     }
 
-    void LoadPartitionInfo([[maybe_unused]] hpackage::PkgManager *pkgManager = nullptr) override;
+    void LoadPartitionInfo([[maybe_unused]] Hpackage::PkgManager *pkgManager = nullptr) override;
 
 private:
     PackagePtable();
-    bool GetPtableBufferFromPkg(hpackage::PkgManager *pkgManager, uint8_t *&imageBuf, uint32_t size);
+    bool GetPtableBufferFromPkg(Hpackage::PkgManager *pkgManager, uint8_t *&imageBuf, uint32_t size);
 };
 
 
@@ -84,7 +85,7 @@ public:
         return instance;
     }
 
-    void LoadPartitionInfo([[maybe_unused]] hpackage::PkgManager *pkgManager = nullptr) override;
+    void LoadPartitionInfo([[maybe_unused]] Hpackage::PkgManager *pkgManager = nullptr) override;
     bool ComparePtable(PtableManager &newPtbManager);
     bool ComparePartition(PtableManager &newPtbManager, std::string partitionName);
 private:

@@ -15,8 +15,8 @@
 
 #ifndef UPDATER_FLASHING_H
 #define UPDATER_FLASHING_H
-#include <functional>
-#include <iostream>
+
+#include <string>
 
 namespace Flashd {
 enum {
@@ -30,23 +30,19 @@ enum {
     FLASHING_SPACE_NOTENOUGH,
     FLASHING_INVALID_SPACE,
     FLASHING_FSTYPE_NOT_SUPPORT,
+    FLASHING_OPEN_PART_ERROR,
 };
 
-enum UpdateModType {
-    UPDATEMOD_UPDATE,
-    UPDATEMOD_FLASH,
-    UPDATEMOD_ERASE,
-    UPDATEMOD_FORMAT,
-    UPDATEMOD_MAX
+enum class CmdType : uint8_t {
+    UPDATE = 0,
+    FLASH,
+    ERASE,
+    FORMAT,
+    UNKNOW
 };
 
-static constexpr uint16_t MAX_SIZE_BUF = 1024;
-static constexpr uint32_t PERCENT_FINISH = 100;
-static constexpr uint32_t PERCENT_CLEAR = (uint32_t)-1;
-
-const std::string FORMAT_TOOL_FOR_EXT4 = "/bin/mke2fs";
-const std::string FORMAT_TOOL_FOR_F2FS = "/bin/make_f2fs";
-const std::string RESIZE_TOOL = "/bin/resize2fs";
+static constexpr uint8_t PERCENT_FINISH = 100;
+static constexpr uint8_t PERCENT_CLEAR = UINT8_MAX;
 
 #ifndef UPDATER_UT
 constexpr const char *FLASHD_FILE_PATH = "/data/updater/";
@@ -55,18 +51,8 @@ constexpr const char *FLASHD_HDC_LOG_PATH = "/tmp/flashd_hdc.log";
 constexpr const char *FLASHD_FILE_PATH = "/data/updater/updater/";
 constexpr const char *FLASHD_HDC_LOG_PATH = "/data/updater/flashd_hdc.log";
 #endif
-static constexpr uint32_t MIN_BLOCKS_FOR_UPDATE = 1024 * 1024;
-static constexpr uint32_t DEFAULT_BLOCK_SIZE = 2048;
-static constexpr uint32_t DEFAULT_SIZE_UNIT = 1024 * 1024;
 
-using FlashHandle = void *;
 int flashd_main(int argc, char **argv);
-using ProgressFunction = std::function<void(uint32_t type, size_t dataLen, const void *context)>;
-
-int CreateFlashInstance(FlashHandle *handle, std::string &errorMsg, ProgressFunction progressor);
-int DoUpdaterPrepare(FlashHandle handle, uint8_t type, const std::string &cmdParam, std::string &filePath);
-int DoUpdaterFlash(FlashHandle handle, uint8_t type, const std::string &cmdParam, const std::string &filePath);
-int DoUpdaterFinish(FlashHandle handle, uint8_t type, const std::string &partition);
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -79,5 +65,5 @@ int SetParameter(const char *key, const char *value);
 }
 #endif
 #endif
-} // namespace flashd
+} // namespace Flashd
 #endif /* UPDATER_FLASHING_H */

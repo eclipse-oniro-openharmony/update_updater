@@ -27,7 +27,7 @@ public:
     virtual ~Ptable() {}
 
     static constexpr uint32_t GPT_PARTITION_TYPE_GUID_LEN = 16;
-    constexpr const char *PREFIX_SYS_CLASS_BLOCK = "/sys/class/block/sd";
+    static constexpr const char *PREFIX_SYS_CLASS_BLOCK = "/sys/class/block/sd";
 
     struct PtnInfo {
         uint64_t startAddr {};
