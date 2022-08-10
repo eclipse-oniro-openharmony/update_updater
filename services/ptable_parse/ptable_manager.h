@@ -16,8 +16,8 @@
 #ifndef UPDATER_PTABLE_MANAGER_H
 #define UPDATER_PTABLE_MANAGER_H
 
-#include "ufs_ptable.h"
 #include "package/pkg_manager.h"
+#include "ufs_ptable.h"
 
 namespace Updater {
 class PtableManager {
