@@ -36,7 +36,7 @@ int main(int argc, char **argv)
     SetLogLevel(INFO);
     LoadFstab();
     STAGE(UPDATE_STAGE_OUT) << "Start " << ((mode == BOOT_FLASHD) ? "flashd" : "updater");
-    std::string modePara = (mode == BOOT_FLASHD) ? "updater.flashd.configfs" : "updater.hdc.configfs";
+    auto modePara = (mode == BOOT_FLASHD) ? "updater.flashd.configfs" : "updater.hdc.configfs";
     Flashd::SetParameter(modePara.c_str(), "1");
 
     if (mode == BOOT_FLASHD) {
