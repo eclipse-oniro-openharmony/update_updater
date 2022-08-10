@@ -233,7 +233,7 @@ const std::string GetBlockDeviceByMountPoint(const std::string &mountPoint)
     }
     std::string blockDevice = PARTITION_PATH + mountPoint;
     if (mountPoint[0] != '/') {
-        blockDevice = std::string(PARTITION_PATH) + "/" + mountPoint;
+        blockDevice = PARTITION_PATH + "/" + mountPoint;
     }
     if (g_fstab != nullptr) {
         FstabItem *item = FindFstabItemForMountPoint(*g_fstab, mountPoint.c_str());
