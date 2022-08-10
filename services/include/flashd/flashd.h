@@ -38,7 +38,7 @@ enum class CmdType : uint8_t {
     FLASH,
     ERASE,
     FORMAT,
-    UNKNOW
+    UNKNOWN
 };
 
 static constexpr uint8_t PERCENT_FINISH = 100;
