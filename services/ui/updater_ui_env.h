@@ -25,24 +25,17 @@
 
 namespace Updater {
 class UpdaterUiEnv {
-    DISALLOW_COPY_MOVE(UpdaterUiEnv);
 public:
-    static UpdaterUiEnv &GetInstance();
-    void Init();
-protected:
-    UpdaterUiEnv() = default;
-    ~UpdaterUiEnv() = default;
-    void InitDisplayDriver(); // input driver init
-    void InitEngine() const; // Graphic UI engine init
-    void InitConfig() const; // ui configs Init
-    void InitInputDriver() const; // input driver init
-    void InitEvts() const; // input event callback init
+    static void Init();
+private:
+    static void InitDisplayDriver(); // input driver init
+    static void InitEngine() const; // Graphic UI engine init
+    static void InitConfig() const; // ui configs Init
+    static void InitInputDriver() const; // input driver init
+    static void InitEvts() const; // input event callback init
 
-    bool InitBrightness(const char *brightnessFile, const char *maxBrightnessFile) const; // init brightness
-    void InitRootView() const;
-    UpdaterMode mode_;
-    int screenW_;
-    int screenH_;
+    static bool InitBrightness(const char *brightnessFile, const char *maxBrightnessFile) const; // init brightness
+    static void InitRootView() const;
 };
 }
 #endif

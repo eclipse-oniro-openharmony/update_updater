@@ -23,8 +23,7 @@
 
 namespace Updater {
 UpdaterUiFacade::UpdaterUiFacade()
-    : strategies_ {UpdaterUiConfig::GetStrategy()}, pgMgr_ {PageManager::GetInstance()},
-      lang_ {Lang::LanguageUI::GetInstance()}, mode_ { MODEMAX }
+    : strategies_ {UpdaterUiConfig::GetStrategy()}, pgMgr_ {PageManager::GetInstance()}, mode_ {MODEMAX}
 {
 }
 

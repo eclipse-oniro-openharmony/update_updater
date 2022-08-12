@@ -40,15 +40,9 @@ constexpr std::array BRIGHTNESS_FILES {
 constexpr uint32_t WHITE_BGCOLOR = 0x000000ff;
 }
 
-UpdaterUiEnv &UpdaterUiEnv::GetInstance()
-{
-    static UpdaterUiEnv instance;
-    return instance;
-}
-
 void UpdaterUiEnv::Init()
 {
-    [[maybe_unused]] static bool initOnce = [this] () {
+    [[maybe_unused]] static bool initOnce = [] () {
         InitDisplayDriver(); // init display driver
         InitEngine(); // Graphic UI init
         InitConfig(); // page manager init
@@ -94,15 +88,15 @@ void UpdaterUiEnv::InitDisplayDriver()
 void UpdaterUiEnv::InitRootView() const
 {
     using namespace OHOS;
-    OHOS::RootView::GetInstance()->SetPosition(0, 0);
-    OHOS::RootView::GetInstance()->SetStyle(STYLE_BACKGROUND_COLOR, Color::Black().full);
-    OHOS::RootView::GetInstance()->Resize(Screen::GetInstance().GetWidth(), Screen::GetInstance().GetHeight());
-    OHOS::RootView::GetInstance()->Invalidate();
+    RootView::GetInstance()->SetPosition(0, 0);
+    RootView::GetInstance()->SetStyle(STYLE_BACKGROUND_COLOR, Color::Black().full);
+    RootView::GetInstance()->Resize(Screen::GetInstance().GetWidth(), Screen::GetInstance().GetHeight());
+    RootView::GetInstance()->Invalidate();
 }
 
 bool UpdaterUiEnv::InitBrightness(const char *brightnessFile, const char *maxBrightnessFile) const
 {
-    if (access(brightnessFile, R_OK | W_OK) != 0 || access(maxBrightnessFile, W_OK) != 0) {
+    if (access(brightnessFile, R_OK | W_OK) != 0 || access(maxBrightnessFile, R_OK) != 0) {
         LOG(ERROR) << "can't access brigntness file";
         return false;
     }

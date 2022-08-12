@@ -16,7 +16,6 @@
 #ifndef UPDATER_UI_FACADE_H
 #define UPDATER_UI_FACADE_H
 
-#include "language/language_ui.h"
 #include "macros.h"
 #include "strategy/ui_strategy.h"
 #include "updater_ui.h"
@@ -55,7 +54,6 @@ private:
     void SetLogoProgress();
     std::unordered_map<UpdaterMode, UiStrategyCfg> &strategies_;
     PageManager &pgMgr_;
-    Lang::LanguageUI &lang_;
     UpdaterMode mode_;
     std::unique_ptr<ProgressStrategy> progress_ {};
     std::unique_ptr<LogoStrategy> logo_ {};

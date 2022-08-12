@@ -23,26 +23,24 @@
 #include "utils.h"
 
 namespace Updater {
-bool UpdaterUiConfig::isFocusEnable_;
+namespace Fs = std::filesystem;
+namespace {
 constexpr auto UI_CFG_FILE = "/resources/pages/config.json";
 constexpr auto UI_CFG_KEY = "config";
 constexpr auto WIDTH_KEY = "screenWidth";
 constexpr auto HEIGHT_KEY = "screenHeight";
 constexpr auto FOCUS_CFG_FIELD = "enableFoucs";
-namespace Fs = std::filesystem;
-namespace {
+
 bool CanonicalPagePath(PagePath &pagePath)
 {
-    std::string realPath {};
-    if (bool res = Utils::PathToRealPath(pagePath.dir, realPath); res) {
-        pagePath.dir = std::move(realPath);
-        for (auto &file : pagePath.pages) {
-            file = pagePath.dir + "/" + file;
-        }
-        return true;
+    if (!Utils::PathToRealPath(pagePath.dir, pagePath.dir)) {
+        LOG(ERROR) << "page path canonical failed, please check your config, dir = " << pagePath.dir;
+        return false;
     }
-    LOG(ERROR) << "page path canonical failed, please check your config";
-    return false;
+    for (auto &file : pagePath.pages) {
+        file = pagePath.dir + "/" + file;
+    }
+    return true;
 }
 
 std::ostream &operator<<(std::ostream &os, const UxViewCommonInfo &info)
@@ -100,6 +98,8 @@ std::string SelectConfig(const JsonNode &node)
 }
 }
 
+bool UpdaterUiConfig::isFocusEnable_ {false};
+
 bool UpdaterUiConfig::Init()
 {
     JsonNode node { Fs::path { UI_CFG_FILE }};
@@ -131,13 +131,10 @@ bool UpdaterUiConfig::Init()
 
 bool UpdaterUiConfig::Init(const JsonNode &node)
 {
-    static bool isInited = false;
-    if (isInited) {
-        LOG(WARNING) << "updater ui config has been initialized, don't init again";
-        return false;
-    }
-    isInited = true;
-    return LoadLangRes(node) && LoadStrategy(node) && LoadCallbacks(node) && LoadFocusCfg(node) && LoadPages(node);
+    static bool res = [&node] () {
+        return LoadLangRes(node) && LoadStrategy(node) && LoadCallbacks(node) && LoadFocusCfg(node) && LoadPages(node);
+    } ();
+    return res;
 }
 
 std::unordered_map<UpdaterMode, UiStrategyCfg> &UpdaterUiConfig::GetStrategy()
@@ -167,7 +164,10 @@ bool UpdaterUiConfig::LoadPages(const JsonNode &node)
         LOG(ERROR) << "load layout error: " << UI_CFG_FILE;
         return false;
     }
-    PageManager::GetInstance().Init(pageInfos, pagePath.entry);
+    if (!PageManager::GetInstance().Init(pageInfos, pagePath.entry)) {
+        LOG(ERROR) << "page manager init error";
+        return false;
+    }
     PrintInfoVec(pageInfos);
     return true;
 }

@@ -52,7 +52,10 @@ public:
             errMsg = errMsg_ + " view is null";
             return &dummy;
         }
-        if ((&dummy)->GetViewType() != OHOS::UI_NUMBER_MAX && (&dummy)->GetViewType() != view_->GetViewType()) {
+        if constexpr (std::is_same_v<OHOS::UIView, T>) {
+            return static_cast<T *>(view_);
+        }
+        if (dummy.GetViewType() != view_->GetViewType()) {
             errMsg = errMsg_ + " view's real type not matched";
             LOG(ERROR) << errMsg;
             return &dummy;

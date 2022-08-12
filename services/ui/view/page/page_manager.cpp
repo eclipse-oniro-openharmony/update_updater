@@ -19,23 +19,19 @@
 #include "sub_page.h"
 
 namespace Updater {
+using namespace OHOS;
 PageManager &PageManager::GetInstance()
 {
     static PageManager instance;
     return instance;
 }
 
-void PageManager::Init(std::vector<UxPageInfo> &pageInfos, std::string_view entry)
+bool PageManager::Init(std::vector<UxPageInfo> &pageInfos, std::string_view entry)
 {
-    static bool isInited = false;
-    if (isInited) {
-        LOG(WARNING) << "pagemanager has been inited, don't init again";
-        return;
-    }
-    isInited = true;
+    Reset();
     for (auto &pageInfo : pageInfos) {
         auto basePage =
-            std::make_unique<BasePage>(OHOS::Screen::GetInstance().GetWidth(), OHOS::Screen::GetInstance().GetHeight());
+            std::make_unique<BasePage>(Screen::GetInstance().GetWidth(), Screen::GetInstance().GetHeight());
         basePage->BuildPage(pageInfo);
         basePage->SetVisible(false);
         OHOS::RootView::GetInstance()->Add(basePage->GetView());
@@ -48,9 +44,10 @@ void PageManager::Init(std::vector<UxPageInfo> &pageInfos, std::string_view entr
     }
     if (!IsValidPage(mainPage_)) {
         LOG(ERROR) << "entry " << entry << " is invalid ";
-        return;
+        return false;
     }
     curPage_ = mainPage_;
+    return true;
 }
 
 void PageManager::BuildSubPages(const std::string &pageId, BasePage &basePage,
@@ -97,14 +94,14 @@ void PageManager::ShowPage(const std::string &id)
         LOG(WARNING) << "show cur page again";
         return;
     }
-    curPage_->SetVisible(false);
-    auto newPage = &(*this)[id];
-    if (!IsValidPage(newPage)) {
+    auto it = pageMap_.find(id);
+    if (it == pageMap_.end()) {
         LOG(ERROR) << "show page failed, id = " << id;
         return;
     }
+    curPage_->SetVisible(false);
     EnQueuePage(curPage_);
-    curPage_ = newPage;
+    curPage_ = it->second;
     curPage_->SetVisible(true);
 }
 
@@ -119,7 +116,6 @@ void PageManager::ShowMainPage()
 
 void PageManager::GoBack()
 {
-    LOG(DEBUG) << "go back";
     if (!IsValidPage(curPage_)) {
         LOG(ERROR) << "cur page is null";
         return;
@@ -162,5 +158,14 @@ void PageManager::EnQueuePage(Page *page)
     if (pageQueue_.size() > MAX_PAGE_QUEUE_SZ) {
         pageQueue_.pop_back();
     }
+}
+
+void PageManager::Reset()
+{
+    pageQueue_.clear();
+    pageMap_.clear();
+    pages_.clear();
+    curPage_ = nullptr;
+    mainPage_ = nullptr;
 }
 }
