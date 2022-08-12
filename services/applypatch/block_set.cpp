@@ -342,6 +342,10 @@ int32_t BlockSet::WriteDiffToBlock(const Command &cmd, std::vector<uint8_t> &src
         writer.reset();
         UPDATER_ERROR_CHECK(ret == 0, "Fail to ApplyBlockPatch", return -1);
     }
+    if (fsync(cmd.GetFileDescriptor()) == -1) {
+        LOG(ERROR) << "Failed to sync restored data";
+        return -1;
+    }
     return 0;
 }
 } // namespace updater
