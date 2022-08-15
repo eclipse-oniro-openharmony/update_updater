@@ -38,4 +38,3 @@ ohos_shared_library("libdiff_patch_shared") {
 
   deps = [ "//base/update/updater/services/diffpatch/patch:libpatch" ]
 }
-
