@@ -77,6 +77,7 @@
                 "//base/update/updater/utils:write_updater",
                 "//base/update/updater/services/diffpatch/patch:libpatch",
                 "//base/update/updater/services/diffpatch/diff:libdiff",
+                "//base/update/updater/services/diffpatch/diff:libdiff_patch_shared",
                 "//base/update/updater/services/ui:libui"
             ],
             "inner_kits": [
