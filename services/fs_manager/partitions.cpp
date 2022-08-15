@@ -15,14 +15,10 @@
 
 #include "fs_manager/partitions.h"
 #include <cstdlib>
-#include <cstring>
-#include <libgen.h>
 #include <string>
 #include <sys/stat.h>
 #include <sys/sysmacros.h>
-#include <sys/types.h>
 #include <unistd.h>
-#include "fs_manager/cmp_partition.h"
 #include "log/log.h"
 #include "partition_const.h"
 #include "securec.h"

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,12 +13,20 @@
  * limitations under the License.
  */
 #include "daemon_updater.h"
-#include "daemon_common.h"
-#include "flashd/flashd.h"
-#include "flash_utils.h"
-#include "flash_define.h"
 
+#include "daemon_common.h"
+#include "flashd_define.h"
+#include "hdi/client/update_hdi_client.h"
+#include "updater/updater.h"
+#include "updater/updater_const.h"
+using namespace std;
 namespace Hdc {
+namespace {
+constexpr uint8_t PAYLOAD_FIX_RESERVER = 64;
+}
+
+std::atomic<bool> DaemonUpdater::isRunning_ = false;
+
 DaemonUpdater::DaemonUpdater(HTaskInfo hTaskInfo) : HdcTransferBase(hTaskInfo)
 {
     commandBegin = CMD_UPDATER_BEGIN;
@@ -27,170 +35,167 @@ DaemonUpdater::DaemonUpdater(HTaskInfo hTaskInfo) : HdcTransferBase(hTaskInfo)
 
 DaemonUpdater::~DaemonUpdater()
 {
-    WRITE_LOG(LOG_DEBUG, "~DaemonUpdater refCount %d", refCount);
+    FLASHD_LOGI("~DaemonUpdater refCount %d", refCount);
 }
 
 bool DaemonUpdater::CommandDispatch(const uint16_t command, uint8_t *payload, const int payloadSize)
 {
-#ifndef UPDATER_UT
-    if (!HdcTransferBase::CommandDispatch(command, payload, payloadSize)) {
+    if (IsDeviceLocked()) {
+        std::string echo = "operation is not allowed";
+        vector<uint8_t> buffer;
+        buffer.push_back(command);
+        buffer.push_back(Hdc::MSG_FAIL);
+        buffer.insert(buffer.end(), (uint8_t *)echo.c_str(), (uint8_t *)echo.c_str() + echo.size());
+        SendToAnother(Hdc::CMD_UPDATER_FINISH, buffer.data(), buffer.size());
+        FLASHD_LOGE("The devic is locked and operation is not allowed");
         return false;
     }
-#endif
-    if (flashHandle_ == nullptr) {
-        int ret = Flashd::CreateFlashInstance(&flashHandle_, errorMsg_,
-            [&](uint32_t type, size_t dataLen, const void *context) {
-                SendProgress(dataLen);
-            });
-        FLASHDAEMON_CHECK(ret == 0, AsyncUpdateFinish(command, -1, errorMsg_);
-            return false, "Faild to create flashd");
+
+    if (!isInit_) {
+        Init();
+        isInit_ = true;
     }
-    switch (command) {
-        case CMD_UPDATER_DATA: {
-            const uint8_t payloadPrefixReserve = 64;
-            string serialStrring((char *)payload, payloadPrefixReserve);
-            TransferPayload pld {};
-            SerialStruct::ParseFromString(pld, serialStrring);
-#ifdef UPDATER_UT
-            pld.uncompressSize = pld.compressSize;
-#endif
-            SendProgress(pld.uncompressSize);
-            break;
+
+    auto iter = cmdFunc_.find(command);
+    if (iter == cmdFunc_.end()) {
+        FLASHD_LOGE("command is invalid, command = %d", command);
+        return false;
+    }
+    iter->second(payload, payloadSize);
+    return true;
+}
+
+bool DaemonUpdater::SendToHost(Flashd::CmdType type, Flashd::UpdaterState state, const std::string &msg)
+{
+    if (!DaemonUpdater::isRunning_) {
+        FLASHD_LOGW("flasd is not runing");
+        return true;
+    }
+
+    if (state == Flashd::UpdaterState::DOING) {
+        uint32_t temp = 0;
+        std::stringstream percentageStream(msg);
+        if (!(percentageStream >> temp)) {
+            temp = 0;
         }
-        case CMD_UPDATER_CHECK: {
-            ProcessUpdateCheck(payload, payloadSize);
-            break;
+        uint8_t percentage = static_cast<uint8_t>(temp);
+        SendToAnother(Hdc::CMD_UPDATER_PROGRESS, &percentage, sizeof(percentage));
+        return true;
+    }
+
+    if (state == Flashd::UpdaterState::FAIL || state == Flashd::UpdaterState::SUCCESS) {
+        uint8_t percentage = (state == Flashd::UpdaterState::SUCCESS) ? Flashd::PERCENT_FINISH : Flashd::PERCENT_CLEAR;
+        SendToAnother(Hdc::CMD_UPDATER_PROGRESS, &percentage, sizeof(percentage));
+
+        std::string echo = Hdc::Base::ReplaceAll(msg, "\n", " ");
+        vector<uint8_t> buffer;
+        buffer.push_back(static_cast<uint8_t>(type));
+        buffer.push_back((state == Flashd::UpdaterState::SUCCESS) ? Hdc::MSG_OK : Hdc::MSG_FAIL);
+        buffer.insert(buffer.end(), (uint8_t *)echo.c_str(), (uint8_t *)echo.c_str() + echo.size());
+        SendToAnother(Hdc::CMD_UPDATER_FINISH, buffer.data(), buffer.size());
+        TaskFinish();
+        if (commander_ != nullptr) {
+            commander_->PostCommand();
         }
-        case CMD_UPDATER_ERASE: {
-            std::string param(reinterpret_cast<char *>(payload), payloadSize);
-            RunUpdateShell(Flashd::UPDATEMOD_ERASE, param, "");
-            TaskFinish();
-            break;
-        }
-        case CMD_UPDATER_FORMAT: {
-            std::string param(reinterpret_cast<char *>(payload), payloadSize);
-            RunUpdateShell(Flashd::UPDATEMOD_FORMAT, param, "");
-            TaskFinish();
-            break;
-        }
-        default:
-            WRITE_LOG(LOG_FATAL, "CommandDispatch command %d", command);
-            return false;
+        DaemonUpdater::isRunning_ = false;
     }
     return true;
-};
+}
 
-void DaemonUpdater::ProcessUpdateCheck(const uint8_t *payload, const int payloadSize)
+std::unique_ptr<Flashd::Commander> DaemonUpdater::CreateCommander(const std::string &cmd)
 {
-    uint64_t realSize = 0;
-    int ret = memcpy_s(&realSize, sizeof(realSize), payload, sizeof(realSize));
-    FLASHDAEMON_CHECK(ret == 0, return, "Faild to memcpy");
-    string bufString((char *)payload + sizeof(realSize), payloadSize - sizeof(realSize));
+    if (DaemonUpdater::isRunning_) {
+        FLASHD_LOGE("flashd has been running");
+        return nullptr;
+    }
+    DaemonUpdater::isRunning_ = true;
+    auto callback = [this](Flashd::CmdType type, Flashd::UpdaterState state, const std::string &msg) {
+        SendToHost(type, state, msg);
+    };
+    return Flashd::CommanderFactory::GetInstance().CreateCommander(cmd, callback);
+}
+
+void DaemonUpdater::CheckCommand(const uint8_t *payload, int payloadSize)
+{
+    if (payloadSize < static_cast<int>(sizeof(int64_t))) {
+        FLASHD_LOGE("payloadSize is invalid");
+        return;
+    }
+
+    string bufString(reinterpret_cast<const char *>(payload + sizeof(int64_t)), payloadSize - sizeof(int64_t));
     SerialStruct::ParseFromString(ctxNow.transferConfig, bufString);
+
     ctxNow.master = false;
     ctxNow.fsOpenReq.data = &ctxNow;
-    ctxNow.transferBegin = Base::GetRuntimeMSec();
     ctxNow.fileSize = ctxNow.transferConfig.fileSize;
-    percentage_ = -1;
 
-    WRITE_LOG(LOG_DEBUG, "ProcessUpdateCheck local function %s size %llu realSize %llu",
-        ctxNow.transferConfig.functionName.c_str(), ctxNow.fileSize, realSize);
-    uint8_t type = Flashd::UPDATEMOD_FLASH;
-    if (ctxNow.transferConfig.functionName == CMDSTR_UPDATE_SYSTEM) {
-        type = Flashd::UPDATEMOD_UPDATE;
-        totalSize_ = static_cast<double>(ctxNow.fileSize);
-        if (!MatchPackageExtendName(ctxNow.transferConfig.optionalName, ".bin")) {
-            totalSize_ += static_cast<double>(realSize); // for decode from zip
-        }
-        totalSize_ += static_cast<double>(realSize); // for verify
-        totalSize_ += static_cast<double>(realSize); // for read to partition
-        totalSize_ += static_cast<double>(realSize); // for write partition
-    } else if (ctxNow.transferConfig.functionName == CMDSTR_FLASH_PARTITION) {
-        totalSize_ = static_cast<double>(ctxNow.fileSize);
-        type = Flashd::UPDATEMOD_FLASH;
-    } else {
-        WRITE_LOG(LOG_FATAL, "ProcessUpdateCheck local function %s size %lu realSize %lu",
-            ctxNow.transferConfig.functionName.c_str(), ctxNow.fileSize, realSize);
-        AsyncUpdateFinish(type, -1, "Invalid command");
+    FLASHD_LOGI("functionName = %s, options = %s, fileSize = %u", ctxNow.transferConfig.functionName.c_str(),
+        ctxNow.transferConfig.options.c_str(), ctxNow.transferConfig.fileSize);
+
+    commander_ = CreateCommander(ctxNow.transferConfig.functionName.c_str());
+    if (commander_ == nullptr) {
+        FLASHD_LOGE("commander_ is null for cmd = %s", ctxNow.transferConfig.functionName.c_str());
         return;
     }
-    ctxNow.localPath = ctxNow.transferConfig.optionalName;
-    ret = Flashd::DoUpdaterPrepare(flashHandle_, type, ctxNow.transferConfig.options, ctxNow.localPath);
-    if (ret == 0) {
-        refCount++;
-        WRITE_LOG(LOG_DEBUG, "ProcessUpdateCheck localPath %s", ctxNow.localPath.c_str());
-#ifndef UPDATER_UT
-        uv_fs_open(loopTask, &ctxNow.fsOpenReq, ctxNow.localPath.c_str(),
-            UV_FS_O_TRUNC | UV_FS_O_CREAT | UV_FS_O_WRONLY, S_IRUSR, OnFileOpen);
-#endif
-    }
-    FLASHDAEMON_CHECK(ret == 0, AsyncUpdateFinish(type, ret, errorMsg_), "Faild to prepare for %d", type);
+    commander_->DoCommand(ctxNow.transferConfig.options, ctxNow.transferConfig.fileSize);
+
+    SendToAnother(commandBegin, nullptr, 0);
+    refCount++;
 }
 
-void DaemonUpdater::RunUpdateShell(uint8_t type, const std::string &options, const std::string &package)
+void DaemonUpdater::DataCommand(const uint8_t *payload, int payloadSize) const
 {
-    int ret = Flashd::DoUpdaterFlash(flashHandle_, type, options, package);
-    AsyncUpdateFinish(type, ret, errorMsg_);
-}
-
-void DaemonUpdater::SendProgress(size_t dataLen)
-{
-    currSize_ += dataLen;
-    int32_t percentage = static_cast<int32_t>(currSize_ * (Flashd::PERCENT_FINISH - 1) / totalSize_);
-    if (static_cast<uint32_t>(percentage) >= Flashd::PERCENT_FINISH) {
-        WRITE_LOG(LOG_DEBUG, "SendProgress %lf percentage %d", currSize_, percentage);
+    if (commander_ == nullptr) {
+        FLASHD_LOGE("commander_ is null");
         return;
     }
-    if (percentage_ < percentage) {
-        percentage_ = percentage;
-        WRITE_LOG(LOG_DEBUG, "SendProgress %lf percentage_ %d", currSize_, percentage_);
-        SendToAnother(CMD_UPDATER_PROGRESS, (uint8_t *)&percentage, sizeof(uint32_t));
+
+    if (payloadSize <= PAYLOAD_FIX_RESERVER) {
+        FLASHD_LOGE("payloadSize is invaild");
+        return;
     }
+
+    string serialStrring(reinterpret_cast<const char *>(payload), PAYLOAD_FIX_RESERVER);
+    TransferPayload pld = {};
+    SerialStruct::ParseFromString(pld, serialStrring);
+    commander_->DoCommand(payload + PAYLOAD_FIX_RESERVER, pld.uncompressSize);
 }
 
-void DaemonUpdater::WhenTransferFinish(CtxFile *context)
+void DaemonUpdater::EraseCommand(const uint8_t *payload, int payloadSize)
 {
-    uint64_t nMSec = Base::GetRuntimeMSec() - context->transferBegin;
-    double fRate = static_cast<double>(context->indexIO) / nMSec; // / /1000 * 1000 = 0
-    WRITE_LOG(LOG_DEBUG, "File for %s transfer finish Size:%lld time:%lldms rate:%.2lfkB/s",
-              ctxNow.transferConfig.functionName.c_str(), context->indexIO, nMSec, fRate);
-
-    int ret = 0;
-    uint8_t type = Flashd::UPDATEMOD_UPDATE;
-    if (ctxNow.transferConfig.functionName == CMDSTR_UPDATE_SYSTEM) {
-        type = Flashd::UPDATEMOD_UPDATE;
-        ret = Flashd::DoUpdaterFlash(flashHandle_, type, ctxNow.transferConfig.options, ctxNow.localPath);
-    } else if (ctxNow.transferConfig.functionName == CMDSTR_FLASH_PARTITION) {
-        type = Flashd::UPDATEMOD_FLASH;
+    commander_ = CreateCommander(CMDSTR_ERASE_PARTITION);
+    if (commander_ == nullptr) {
+        FLASHD_LOGE("commander_ is null for cmd = %s", CMDSTR_ERASE_PARTITION);
+        return;
     }
-    AsyncUpdateFinish(type, ret, errorMsg_);
-    TaskFinish();
+    commander_->DoCommand(payload, payloadSize);
 }
 
-void DaemonUpdater::AsyncUpdateFinish(uint8_t type, int32_t retCode, const string &result)
+void DaemonUpdater::FormatCommand(const uint8_t *payload, int payloadSize)
 {
-    WRITE_LOG(LOG_DEBUG, "AsyncUpdateFinish retCode %d result %s", retCode, result.c_str());
-    uint32_t percentage = (retCode != 0) ? Flashd::PERCENT_CLEAR : Flashd::PERCENT_FINISH;
-    SendToAnother(CMD_UPDATER_PROGRESS, (uint8_t *)&percentage, sizeof(uint32_t));
-    (void)Flashd::DoUpdaterFinish(flashHandle_, type, ctxNow.localPath);
-
-    string echo = result;
-    echo = Base::ReplaceAll(echo, "\n", " ");
-    vector<uint8_t> vecBuf;
-    vecBuf.push_back(type);
-    if (retCode != 0) {
-        vecBuf.push_back(MSG_FAIL);
-    } else {
-        vecBuf.push_back(MSG_OK);
+    commander_ = CreateCommander(CMDSTR_FORMAT_PARTITION);
+    if (commander_ == nullptr) {
+        FLASHD_LOGE("commander_ is null for cmd = %s", CMDSTR_FORMAT_PARTITION);
+        return;
     }
-    vecBuf.insert(vecBuf.end(), (uint8_t *)echo.c_str(), (uint8_t *)echo.c_str() + echo.size());
-    SendToAnother(CMD_UPDATER_FINISH, vecBuf.data(), vecBuf.size());
+    commander_->DoCommand(payload, payloadSize);
 }
 
-#ifdef UPDATER_UT
-void DaemonUpdater::DoTransferFinish()
+void DaemonUpdater::Init()
 {
-    WhenTransferFinish(&ctxNow);
+    cmdFunc_.emplace(CMD_UPDATER_CHECK, bind(&DaemonUpdater::CheckCommand, this, placeholders::_1, placeholders::_2));
+    cmdFunc_.emplace(CMD_UPDATER_DATA, bind(&DaemonUpdater::DataCommand, this, placeholders::_1, placeholders::_2));
+    cmdFunc_.emplace(CMD_UPDATER_ERASE, bind(&DaemonUpdater::EraseCommand, this, placeholders::_1, placeholders::_2));
+    cmdFunc_.emplace(CMD_UPDATER_FORMAT, bind(&DaemonUpdater::FormatCommand, this, placeholders::_1, placeholders::_2));
 }
-#endif
+
+bool DaemonUpdater::IsDeviceLocked() const
+{
+    bool isLocked = true;
+    if (auto ret = Updater::UpdateHdiClient::GetInstance().GetLockStatus(isLocked); ret != 0) {
+        FLASHD_LOGE("GetLockStatus fail, ret = %d", ret);
+        return true;
+    }
+    return isLocked;
+}
 } // namespace Hdc

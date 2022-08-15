@@ -30,6 +30,8 @@
 #include "applypatch/partition_record.h"
 #include "fs_manager/mount.h"
 #include "include/updater/updater.h"
+#include "json_node.h"
+#include "log/dump.h"
 #include "log/log.h"
 #include "misc_info/misc_info.h"
 #include "package/pkg_manager.h"
@@ -85,7 +87,7 @@ static int DoFactoryReset(FactoryResetMode mode, const std::string &path)
     if (mode == USER_WIPE_DATA) {
         STAGE(UPDATE_STAGE_BEGIN) << "User FactoryReset";
         LOG(INFO) << "Begin erasing /data";
-        if (FormatPartition(path) != 0) {
+        if (FormatPartition(path, true) != 0) {
             LOG(ERROR) << "User level FactoryReset failed";
             STAGE(UPDATE_STAGE_FAIL) << "User FactoryReset";
             ERROR_CODE(CODE_FACTORY_RESET_FAIL);
@@ -122,9 +124,9 @@ UpdaterStatus UpdaterFromSdcard()
 #endif
     UPDATER_ERROR_CHECK(access(SDCARD_CARD_PKG_PATH, 0) == 0, "package is not exist",
         ShowText(g_logLabel, "Package is not exist!");
-        return UPDATE_CORRUPT);
+        return UPDATE_ERROR);
     PkgManager::PkgManagerPtr pkgManager = PkgManager::GetPackageInstance();
-    UPDATER_ERROR_CHECK(pkgManager != nullptr, "pkgManager is nullptr", return UPDATE_CORRUPT);
+    UPDATER_ERROR_CHECK(pkgManager != nullptr, "pkgManager is nullptr", return UPDATE_ERROR);
 
     STAGE(UPDATE_STAGE_BEGIN) << "UpdaterFromSdcard";
     LOG(INFO) << "UpdaterFromSdcard start, sdcard updaterPath : " << SDCARD_CARD_PKG_PATH;
@@ -144,17 +146,67 @@ UpdaterStatus UpdaterFromSdcard()
     return updateRet;
 }
 
+bool GetBatteryCapacity(int &capacity)
+{
+    const static std::vector<const char *> vec = {
+        "/sys/class/power_supply/battery/capacity",
+        "/sys/class/power_supply/Battery/capacity"
+    };
+    for (auto &it : vec) {
+        std::ifstream ifs { it };
+        if (!ifs.is_open()) {
+            continue;
+        }
+
+        int tmpCapacity = 0;
+        ifs >> tmpCapacity;
+        if ((ifs.fail()) || (ifs.bad())) {
+            continue;
+        }
+
+        capacity = tmpCapacity;
+        return true;
+    }
+
+    return false;
+}
+
 bool IsBatteryCapacitySufficient()
 {
-    return true;
+    constexpr auto levelIdx = "lowBatteryLevel";
+    constexpr auto jsonPath = "/etc/product_cfg.json";
+
+    int capacity = 0;
+    bool ret = GetBatteryCapacity(capacity);
+    if (!ret) {
+        return true; /* maybe no battery or err value return default true */
+    }
+
+    JsonNode node { Fs::path { jsonPath }};
+    auto item = node[levelIdx].As<int>();
+    if (!item.has_value()) {
+        return true; /* maybe no value return default true */
+    }
+
+    int lowLevel = *item;
+    if (lowLevel > 100 || lowLevel < 0) { /* full percent is 100 */
+        LOG(ERROR) << "load battery level error:" << lowLevel;
+        return false; /* config err not allow to update */
+    }
+
+    LOG(INFO) << "current capacity:" << capacity << ", low level:" << lowLevel;
+
+    return capacity > lowLevel;
 }
 
 static UpdaterStatus InstallUpdaterPackage(UpdaterParams &upParams, const std::vector<std::string> &args,
     PkgManager::PkgManagerPtr manager)
 {
+    UPDATER_INIT_RECORD;
     UpdaterStatus status = UPDATE_UNKNOWN;
     if (IsBatteryCapacitySufficient() == false) {
         g_logLabel->SetText("Battery is low.\n");
+        UPDATER_LAST_WORD(UPDATE_ERROR);
         LOG(ERROR) << "Battery is not sufficient for install package.";
         status = UPDATE_SKIP;
     } else {
@@ -194,8 +246,13 @@ static UpdaterStatus StartUpdaterEntry(PkgManager::PkgManagerPtr manager,
     if (upParams.updatePackage != "") {
         ShowUpdateFrame(true);
         status = InstallUpdaterPackage(upParams, args, manager);
-        WriteOtaResult(status);
-        UPDATER_CHECK_ONLY_RETURN(status == UPDATE_SUCCESS, return status);
+        if (status != UPDATE_SUCCESS) {
+            if (!CheckDumpResult()) {
+                UPDATER_LAST_WORD(status);
+            }
+            return status;
+        }
+        WriteDumpResult("pass");
     } else if (upParams.factoryWipeData) {
         LOG(INFO) << "Factory level FactoryReset begin";
         status = UPDATE_SUCCESS;
@@ -284,6 +341,7 @@ int UpdaterMain(int argc, char **argv)
     UpdaterStatus status = UPDATE_UNKNOWN;
     PkgManager::PkgManagerPtr manager = PkgManager::GetPackageInstance();
     UpdaterInit::GetInstance().InvokeEvent(UPDATER_PRE_INIT_EVENT);
+    Dump::GetInstance().RegisterDump("DumpHelperLog", std::make_unique<DumpHelperLog>());
     std::vector<std::string> args = ParseParams(argc, argv);
 
     LOG(INFO) << "Ready to start";
@@ -299,7 +357,7 @@ int UpdaterMain(int argc, char **argv)
         ShowUpdateFrame(false);
         // Wait for user input
         while (true) {
-            pause();
+            Utils::UsSleep(DISPLAY_TIME);
         }
         return 0;
     }

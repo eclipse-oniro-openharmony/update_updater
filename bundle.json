@@ -72,7 +72,6 @@
                 "//base/update/updater/services:updater",
                 "//base/update/updater/services/applypatch:libapplypatch",
                 "//base/update/updater/services/fs_manager:libfsmanager",
-	        "//base/update/updater/services/flashd:updater_flashd",
                 "//base/update/updater/utils:libutils",
                 "//base/update/updater/utils:updater_reboot",
                 "//base/update/updater/utils:write_updater",
@@ -104,6 +103,15 @@
                     "header": {
                         "header_files": [
                             "updaterkits/updaterkits.h"
+                        ],
+                        "header_base": "//base/update/updater/interfaces/kits/include"
+                    }
+                },
+                {
+                    "name": "//base/update/updater/interfaces/kits/diff_patch:libdiff_patch",
+                    "header": {
+                        "header_files": [
+                            "diff_patch/diff_patch_interface.h"
                         ],
                         "header_base": "//base/update/updater/interfaces/kits/include"
                     }

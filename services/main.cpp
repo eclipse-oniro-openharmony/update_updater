@@ -18,6 +18,7 @@
 #include "misc_info/misc_info.h"
 #include "updater/updater_const.h"
 #include "updater_main.h"
+#include "utils.h"
 
 using namespace Updater;
 
@@ -30,12 +31,10 @@ int main(int argc, char **argv)
         mode = BOOT_UPDATER;
     }
 
-    InitUpdaterLogger((mode == BOOT_FLASHD) ? "FLASHD" : "UPDATER", TMP_LOG, TMP_STAGE_LOG, TMP_ERROR_CODE_PATH);
+    std::string modeStr = (mode == BOOT_FLASHD) ? "FLASHD" : "UPDATER";
+    InitUpdaterLogger(modeStr, TMP_LOG, TMP_STAGE_LOG, TMP_ERROR_CODE_PATH);
     SetLogLevel(INFO);
     LoadFstab();
     STAGE(UPDATE_STAGE_OUT) << "Start " << ((mode == BOOT_FLASHD) ? "flashd" : "updater");
-    if (mode == BOOT_FLASHD) {
-        return Flashd::flashd_main(argc, argv);
-    }
     return Updater::UpdaterMain(argc, argv);
 }

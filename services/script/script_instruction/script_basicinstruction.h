@@ -16,8 +16,6 @@
 #define USCRIPT_BASIC_INSTRUCTION_H
 
 #include "script_instruction.h"
-#include "script_manager_impl.h"
-#include "script_utils.h"
 
 namespace BasicInstruction {
 class UScriptInstructionAbort : public Uscript::UScriptInstruction {

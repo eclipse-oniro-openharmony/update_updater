@@ -24,8 +24,8 @@
 
 namespace Hpackage {
 struct Pkcs7SignerInfo {
-    int32_t digestNid;
-    int32_t digestEncryptNid;
+    int32_t digestNid {};
+    int32_t digestEncryptNid {};
     std::vector<uint8_t> digestEncryptData;
 };
 

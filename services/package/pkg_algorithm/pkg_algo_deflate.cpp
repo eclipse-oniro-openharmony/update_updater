@@ -30,11 +30,17 @@ int32_t PkgAlgoDeflate::DeflateData(const PkgStreamPtr outStream, z_stream &zstr
     do {
         size_t deflateLen = 0;
         ret = deflate(&zstream, flush);
-        PKG_CHECK(ret >= Z_OK, return PKG_NOT_EXIST_ALGORITHM, "deflate finish error ret1 %d", ret);
+        if (ret < Z_OK) {
+            PKG_LOGE("deflate finish error ret1 %d", ret);
+            return PKG_NOT_EXIST_ALGORITHM;
+        }
         deflateLen += outBuffer.length - zstream.avail_out;
         if (deflateLen > 0) {
             int32_t ret1 = outStream->Write(outBuffer, deflateLen, destOffset);
-            PKG_CHECK(ret1 == PKG_SUCCESS, break, "error write data deflateLen: %zu", deflateLen);
+            if (ret1 != PKG_SUCCESS) {
+                PKG_LOGE("error write data deflateLen: %zu", deflateLen);
+                break;
+            }
             destOffset += deflateLen;
             zstream.next_out = outBuffer.buffer;
             zstream.avail_out = outBuffer.length;
@@ -144,9 +150,14 @@ int32_t PkgAlgoDeflate::Unpack(const PkgStreamPtr inStream, const PkgStreamPtr o
     PkgAlgorithmContext &context)
 {
     DigestAlgorithm::DigestAlgorithmPtr algorithm = PkgAlgorithmFactory::GetDigestAlgorithm(context.digestMethod);
-    PKG_CHECK(algorithm != nullptr, return PKG_NOT_EXIST_ALGORITHM, "Can not get digest algor");
-    PKG_CHECK(inStream != nullptr && outStream != nullptr,
-        return PKG_INVALID_PARAM, "Param context null!");
+    if (algorithm == nullptr) {
+        PKG_LOGE("Can not get digest algor");
+        return PKG_NOT_EXIST_ALGORITHM;
+    }
+    if (inStream == nullptr || outStream == nullptr) {
+        PKG_LOGE("Param context null!");
+        return PKG_INVALID_PARAM;
+    }
 
     return UnpackCalculate(context, inStream, outStream, algorithm);
 }
@@ -155,17 +166,26 @@ int32_t PkgAlgoDeflate::InitStream(z_stream &zstream, bool zip, PkgBuffer &inBuf
 {
     int32_t ret = PKG_SUCCESS;
     // init zlib stream
-    PKG_CHECK(!memset_s(&zstream, sizeof(z_stream), 0, sizeof(z_stream)), return PKG_NONE_MEMORY, "memset fail ");
+    if (memset_s(&zstream, sizeof(z_stream), 0, sizeof(z_stream)) != EOK) {
+        PKG_LOGE("memset fail");
+        return PKG_NONE_MEMORY;
+    }
     if (zip) {
         PKG_LOGI("InitStream level_:%d method_:%d windowBits_:%d memLevel_:%d strategy_:%d",
             level_, method_, windowBits_, memLevel_, strategy_);
         ret = deflateInit2(&zstream, level_, method_, windowBits_, memLevel_, strategy_);
-        PKG_CHECK(ret == Z_OK, return PKG_NOT_EXIST_ALGORITHM, "fail deflateInit2 ret %d", ret);
+        if (ret != Z_OK) {
+            PKG_LOGE("fail deflateInit2 ret %d", ret);
+            return PKG_NOT_EXIST_ALGORITHM;
+        }
         inBuffer.length = IN_BUFFER_SIZE;
         outBuffer.length = OUT_BUFFER_SIZE;
     } else {
         ret = inflateInit2(&zstream, windowBits_);
-        PKG_CHECK(ret == Z_OK, return PKG_NOT_EXIST_ALGORITHM, "fail inflateInit2");
+        if (ret != Z_OK) {
+            PKG_LOGE("fail deflateInit2");
+            return PKG_NOT_EXIST_ALGORITHM;
+        }
         inBuffer.length = IN_BUFFER_SIZE;
         outBuffer.length = OUT_BUFFER_SIZE;
     }
@@ -184,10 +204,16 @@ void PkgAlgoDeflate::ReleaseStream(z_stream &zstream, bool zip) const
     int32_t ret = Z_OK;
     if (zip) {
         ret = deflateEnd(&zstream);
-        PKG_CHECK(ret == Z_OK, return, "fail deflateEnd %d", ret);
+        if (ret != Z_OK) {
+            PKG_LOGE("fail deflateEnd %d", ret);
+            return;
+        }
     } else {
         ret = inflateEnd(&zstream);
-        PKG_CHECK(ret == Z_OK, return, "fail inflateEnd %d", ret);
+        if (ret != Z_OK) {
+            PKG_LOGE("fail inflateEnd %d", ret);
+            return;
+        }
     }
 }
 } // namespace Hpackage
