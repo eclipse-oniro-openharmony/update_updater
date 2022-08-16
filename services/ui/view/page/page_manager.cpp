@@ -151,10 +151,7 @@ Page &PageManager::operator[](const std::string &id) const
 {
     static BasePage dummy;
     auto it = pageMap_.find(id);
-    if (it == pageMap_.end()) {
-        return dummy;
-    }
-    if (it->second == nullptr) {
+    if (it == pageMap_.end() || it->second == nullptr) {
         return dummy;
     }
     return *(it->second);
