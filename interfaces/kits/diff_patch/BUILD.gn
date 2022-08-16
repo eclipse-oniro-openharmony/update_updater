@@ -37,4 +37,7 @@ ohos_shared_library("libdiff_patch_shared") {
   ]
 
   deps = [ "//base/update/updater/services/diffpatch/patch:libpatch" ]
+
+  subsystem_name = "updater"
+  part_name = "updater"
 }
