@@ -91,7 +91,7 @@ void BasePage::BuildCom(const UxViewInfo &viewInfo, int &minY)
         return;
     }
     // only map non-empty id
-    if(!comsMap_.emplace(view->GetViewId(), coms_.back().get()).second) {
+    if (!comsMap_.emplace(view->GetViewId(), coms_.back().get()).second) {
         LOG(ERROR) << "view id duplicated:" << view->GetViewId();
     }
 }

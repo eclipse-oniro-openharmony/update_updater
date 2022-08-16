@@ -26,11 +26,9 @@ namespace Updater {
 class ViewProxy final {
 public:
     ViewProxy() = default;
-    ViewProxy(std::unique_ptr<OHOS::UIView> view, const std::string &message) :
-        view_(std::move(view)), errMsg_(message) { }
-    ViewProxy(std::unique_ptr<OHOS::UIView> view) : view_(std::move(view)) { }
-    ViewProxy(ViewProxy &&) = default;
-    ViewProxy(const ViewProxy &) = delete;
+    ViewProxy(std::unique_ptr<OHOS::UIView> view, const std::string &message)
+        : view_(std::move(view)), errMsg_(message) { }
+    explicit ViewProxy(std::unique_ptr<OHOS::UIView> view) : view_(std::move(view)) { }
     ~ViewProxy() = default;
     OHOS::UIView *operator->() const
     {
