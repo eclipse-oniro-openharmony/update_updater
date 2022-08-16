@@ -31,4 +31,4 @@ void Page::UpdateFocus(bool isVisible)
     // clear focus
     OHOS::FocusManager::GetInstance()->ClearFocus();
 }
-}
+} // namespace Updater

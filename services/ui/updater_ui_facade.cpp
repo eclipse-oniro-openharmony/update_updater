@@ -184,4 +184,4 @@ void UpdaterUiFacade::SetLogoProgress()
         progressPage.progressPageId, progressPage.logoComId
     });
 }
-}
+} // namespace Updater

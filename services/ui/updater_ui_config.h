@@ -38,5 +38,5 @@ private:
     static bool LoadFocusCfg(const JsonNode &node);
     static bool isFocusEnable_;
 };
-}
+} // namespace Updater
 #endif

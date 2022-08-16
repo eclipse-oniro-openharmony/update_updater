@@ -38,5 +38,5 @@ private:
     static std::unordered_map<UpdaterMode, UiStrategyCfg> strategies_;
     static std::unordered_map<UpdaterMode, std::string> modeStr_;
 };
-}
+} // namespace Updater
 #endif

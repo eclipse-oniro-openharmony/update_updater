@@ -16,6 +16,7 @@
 #ifndef VIEW_PROXY_H
 #define VIEW_PROXY_H
 
+#include <memory>
 #include <string>
 #include <type_traits>
 #include "components/ui_view.h"
@@ -25,13 +26,17 @@ namespace Updater {
 class ViewProxy final {
 public:
     ViewProxy() = default;
-    ViewProxy(OHOS::UIView *view, const std::string &message) : view_(view), errMsg_(message) { }
+    ViewProxy(std::unique_ptr<OHOS::UIView> view, const std::string &message) :
+        view_(std::move(view)), errMsg_(message) { }
+    ViewProxy(std::unique_ptr<OHOS::UIView> view) : view_(std::move(view)) { }
+    ViewProxy(ViewProxy &&) = default;
+    ViewProxy(const ViewProxy &) = delete;
     ~ViewProxy() = default;
     OHOS::UIView *operator->() const
     {
         static OHOS::UIView dummy;
         if (view_ != nullptr) {
-            return view_;
+            return view_.get();
         }
         return &dummy;
     }
@@ -53,18 +58,18 @@ public:
             return &dummy;
         }
         if constexpr (std::is_same_v<OHOS::UIView, T>) {
-            return static_cast<T *>(view_);
+            return static_cast<T *>(view_.get());
         }
         if (dummy.GetViewType() != view_->GetViewType()) {
             errMsg = errMsg_ + " view's real type not matched";
             LOG(ERROR) << errMsg;
             return &dummy;
         }
-        return static_cast<T *>(view_);
+        return static_cast<T *>(view_.get());
     }
 private:
-    OHOS::UIView *view_ {nullptr};
+    std::unique_ptr<OHOS::UIView> view_ {nullptr};
     std::string errMsg_ {};
 };
-}
+} // namespace Updater
 #endif

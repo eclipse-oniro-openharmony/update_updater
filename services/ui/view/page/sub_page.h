@@ -28,10 +28,11 @@ public:
     std::string &GetPageId() override;
     void SetVisible(bool isVisible) override;
     bool IsVisible() const override;
-    OHOS::UIViewGroup *GetView() const override;
+    const std::unique_ptr<OHOS::UIViewGroup> &GetView() const override;
     bool IsValid() const override;
     bool IsValidCom(const std::string &id) const override;
-    ViewProxy operator[](const std::string &id) override;
+    ViewProxy &operator[](const std::string &id) override;
+    static bool IsPageInfoValid(const UxSubPageInfo &info);
 private:
     BasePage &basePage_;
     std::string pageId_;
@@ -39,5 +40,5 @@ private:
     bool isVisible_;
     UxBRGAPixel color_;
 };
-}
+} // namespace Updater
 #endif

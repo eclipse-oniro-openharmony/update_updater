@@ -32,6 +32,6 @@ private:
     class Impl;
     std::unique_ptr<Impl> pImpl_ {};
 };
-}
+} // namespace Updater
 
 #endif // LAYOUT_PARSER_H

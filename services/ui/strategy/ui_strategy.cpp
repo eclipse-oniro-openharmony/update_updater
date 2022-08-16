@@ -88,4 +88,4 @@ bool UiStrategy::LoadStrategy(const JsonNode &node)
     }
     return true;
 }
-}
+} // namespace Updater

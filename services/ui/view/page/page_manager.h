@@ -31,16 +31,18 @@ class PageManager final {
     DISALLOW_COPY_MOVE(PageManager);
 public:
     static PageManager &GetInstance();
-    void Init(std::vector<UxPageInfo> &pageInfos, std::string_view entry);
+    bool Init(std::vector<UxPageInfo> &pageInfos, std::string_view entry);
     void ShowPage(const std::string &id);
     void GoBack();
     bool IsValidCom(const ComInfo &pageComId) const;
     Page &operator[](const std::string &id) const;
     void ShowMainPage();
-    ViewProxy operator[](const ComInfo &comInfo) const;
+    ViewProxy &operator[](const ComInfo &comInfo) const;
 private:
     PageManager() = default;
     ~PageManager() = default;
+    void Reset();
+    void InitImpl(UxPageInfo &pageInfo, std::string_view entry);
     void EnQueuePage(Page *page);
     void BuildSubPages(const std::string &pageId, BasePage &basePage,
         std::vector<UxSubPageInfo> &subPageInfos, std::string_view entry);
@@ -52,5 +54,5 @@ private:
     Page *curPage_ {};
     Page *mainPage_ {};
 };
-}
+} // namespace Updater
 #endif

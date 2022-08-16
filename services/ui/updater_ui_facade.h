@@ -58,5 +58,5 @@ private:
     std::unique_ptr<ProgressStrategy> progress_ {};
     std::unique_ptr<LogoStrategy> logo_ {};
 };
-}
+} // namespace Updater
 #endif

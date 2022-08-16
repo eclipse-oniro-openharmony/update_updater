@@ -26,10 +26,19 @@ BasePage::BasePage()
 {
 }
 
-BasePage::BasePage(uint16_t width, uint16_t height)
+BasePage::BasePage(int16_t width, int16_t height)
     : width_ { width }, height_ { height }, root_ { std::make_unique<OHOS::UIViewGroup>() },
     coms_ {}, comsMap_ {}, pageId_ {}, extraMsg_ {}, color_ { 0, 0, 0, 255 }
 {
+}
+
+bool BasePage::IsPageInfoValid(const UxPageInfo &pageInfo)
+{
+    if (pageInfo.id.empty()) {
+        LOG(ERROR) << "page id is empty";
+        return false;
+    }
+    return true;
 }
 
 void BasePage::BuildPage(const UxPageInfo &pageInfo)
@@ -48,37 +57,53 @@ void BasePage::BuildPage(const UxPageInfo &pageInfo)
 void BasePage::BuildComs(const UxPageInfo &pageInfo)
 {
     const auto &infos = pageInfo.viewInfos;
-    coms_.resize(infos.size());
-    int16_t minY = INT16_MAX;
-    for (size_t i = 0; i < infos.size(); ++i) {
-        if (!ComponentFactory::CheckUxComponent(infos[i])) {
-            LOG(ERROR) << "component (" << infos[i].commonInfo.id << ") is invalid, please check your page config json";
-            continue;
-        }
-        coms_[i] = ComponentFactory::CreateUxComponent(infos[i]);
-        // set parent page into component's extraMsg(set by BuildPage), used by CallbackDecorator
-        coms_[i]->SetExtraMsg(&extraMsg_);
-        if (coms_[i]->GetViewId() == nullptr) {
-            LOG(ERROR) << "component is invalid, please check your page config json";
-            continue;
-        }
-        if (coms_[i]->IsFocusable() && infos[i].commonInfo.y < minY) {
-            minY = infos[i].commonInfo.y;
-            focusedView_ = coms_[i].get();
-        }
-        comsMap_[coms_[i]->GetViewId()] = coms_[i].get();
-        root_->Add(coms_[i].get());
+    coms_.reserve(infos.size());
+    int minY = INT_MAX;
+    for (auto &info : infos) {
+        BuildCom(info, minY);
     }
 }
 
-ViewProxy BasePage::operator[](const std::string &id)
+void BasePage::BuildCom(const UxViewInfo &viewInfo, int &minY)
 {
-    OHOS::UIView *ret = nullptr;
-    auto it = comsMap_.find(id);
-    if (it != comsMap_.end()) {
-        ret = it->second;
+    if (!ComponentFactory::CheckUxComponent(viewInfo)) {
+        LOG(ERROR) << "component (" << viewInfo.commonInfo.id
+            << ") is invalid, please check your page config json";
+        return;
     }
-    return ViewProxy(ret, pageId_ + "[" + id + "]");
+    auto upView = std::make_unique<ViewProxy>(ComponentFactory::CreateUxComponent(viewInfo),
+        std::string("component id:") + viewInfo.commonInfo.id + ", ");
+    auto &view = *upView.get();
+    if (view->GetViewId() == nullptr) {
+        LOG(ERROR) << "id is nullptr";
+        return;
+    }
+    // set parent page into component's extraMsg(set by BuildPage), used by CallbackDecorator
+    view->SetExtraMsg(&extraMsg_);
+    if (view->IsFocusable() && viewInfo.commonInfo.y < minY) {
+        minY = viewInfo.commonInfo.y;
+        focusedView_ = view.operator->();
+    }
+    coms_.push_back(std::move(upView));
+    root_->Add(view.operator->());
+    // empty id is allowed. id is needed only when get specific view by id
+    if (std::string(view->GetViewId()).empty()) {
+        return;
+    }
+    // only map non-empty id
+    if(!comsMap_.emplace(view->GetViewId(), coms_.back().get()).second) {
+        LOG(ERROR) << "view id duplicated:" << view->GetViewId();
+    }
+}
+
+ViewProxy &BasePage::operator[](const std::string &id)
+{
+    static ViewProxy dummy;
+    auto it = comsMap_.find(id);
+    if (it != comsMap_.end() && it->second != nullptr) {
+        return *it->second;
+    }
+    return dummy;
 }
 
 bool BasePage::IsValidCom(const std::string &id) const
@@ -120,12 +145,8 @@ bool BasePage::IsVisible() const
     return root_->IsVisible();
 }
 
-OHOS::UIViewGroup *BasePage::GetView() const
+const std::unique_ptr<OHOS::UIViewGroup> &BasePage::GetView() const
 {
-    if (root_ == nullptr) {
-        LOG(ERROR) << "root is null";
-        return nullptr;
-    }
-    return root_.get();
+    return root_;
 }
-}
+} // namespace Updater

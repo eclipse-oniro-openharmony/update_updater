@@ -48,5 +48,5 @@ public:
     ~BarProgress() override = default;
     void ShowProgress(float value) const override;
 };
-}
+} // namespace Updater
 #endif

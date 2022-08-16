@@ -39,7 +39,7 @@ private:
     std::string viewId_ = {};
     std::string epId_ = {};
     bool hasEp_ = false;
-    ViewProxy ep_ = {};
+    ImgViewAdapter *ep_ = {};
 };
 } // namespace Updater
 #endif // UPDATER_UI_PROGRESS_BAR_H

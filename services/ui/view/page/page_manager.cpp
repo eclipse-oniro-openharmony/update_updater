@@ -26,21 +26,32 @@ PageManager &PageManager::GetInstance()
     return instance;
 }
 
+void PageManager::InitImpl(UxPageInfo &pageInfo, std::string_view entry)
+{
+    if (!BasePage::IsPageInfoValid(pageInfo)) {
+        return;
+    }
+    auto basePage =
+        std::make_unique<BasePage>(Screen::GetInstance().GetWidth(), Screen::GetInstance().GetHeight());
+    basePage->BuildPage(pageInfo);
+    basePage->SetVisible(false);
+    OHOS::RootView::GetInstance()->Add(basePage->GetView().get());
+    BuildSubPages(basePage->GetPageId(), *basePage, pageInfo.subpages, entry);
+    if (!pageMap_.emplace(pageInfo.id, basePage.get()).second) {
+        LOG(ERROR) << "base page id duplicated:" << pageInfo.id;
+        return;
+    }
+    pages_.push_back(std::move(basePage));
+    if (pageInfo.id == entry) {
+        mainPage_ = pages_.back().get();
+    }
+}
+
 bool PageManager::Init(std::vector<UxPageInfo> &pageInfos, std::string_view entry)
 {
     Reset();
     for (auto &pageInfo : pageInfos) {
-        auto basePage =
-            std::make_unique<BasePage>(Screen::GetInstance().GetWidth(), Screen::GetInstance().GetHeight());
-        basePage->BuildPage(pageInfo);
-        basePage->SetVisible(false);
-        OHOS::RootView::GetInstance()->Add(basePage->GetView());
-        BuildSubPages(basePage->GetPageId(), *basePage, pageInfo.subpages, entry);
-        pages_.push_back(std::move(basePage));
-        pageMap_[pageInfo.id] = pages_.back().get();
-        if (pageInfo.id == entry) {
-            mainPage_ = pages_.back().get();
-        }
+        InitImpl(pageInfo, entry);
     }
     if (!IsValidPage(mainPage_)) {
         LOG(ERROR) << "entry " << entry << " is invalid ";
@@ -54,14 +65,20 @@ void PageManager::BuildSubPages(const std::string &pageId, BasePage &basePage,
     std::vector<UxSubPageInfo> &subPageInfos, std::string_view entry)
 {
     for (auto &subPageInfo : subPageInfos) {
+        if (!SubPage::IsPageInfoValid(subPageInfo)) {
+            continue;
+        }
         const std::string &subPageId = pageId + ":" + subPageInfo.id;
         auto subPage = std::make_unique<SubPage>(subPageInfo, basePage, subPageId);
+        if (!pageMap_.emplace(subPageId, subPage.get()).second) {
+            LOG(ERROR) << "sub page id duplicated:" << subPageId;
+            continue;
+        }
         pages_.push_back(std::move(subPage));
         LOG(INFO) << subPageId << " builded";
         if (subPageId == entry) {
             mainPage_ = pages_.back().get();
         }
-        pageMap_[subPageId] = pages_.back().get();
     }
 }
 
@@ -143,15 +160,15 @@ Page &PageManager::operator[](const std::string &id) const
     return *(it->second);
 }
 
-ViewProxy PageManager::operator[](const ComInfo &comInfo) const
+ViewProxy &PageManager::operator[](const ComInfo &comInfo) const
 {
     return (*this)[comInfo.pageId][comInfo.comId];
 }
 
 void PageManager::EnQueuePage(Page *page)
 {
-    if (page == nullptr) {
-        LOG(ERROR) << "enqueue null page";
+    if (!IsValidPage(page)) {
+        LOG(ERROR) << "enqueue invalid page";
         return;
     }
     pageQueue_.push_front(page);
@@ -168,4 +185,4 @@ void PageManager::Reset()
     curPage_ = nullptr;
     mainPage_ = nullptr;
 }
-}
+} // namespace Updater

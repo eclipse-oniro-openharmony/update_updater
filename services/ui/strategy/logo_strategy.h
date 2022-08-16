@@ -49,5 +49,5 @@ public:
     void Show() const override;
     void Hide() const override;
 };
-}
+} // namespace Updater
 #endif

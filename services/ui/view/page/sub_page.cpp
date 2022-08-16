@@ -35,6 +35,15 @@ SubPage::SubPage(UxSubPageInfo &subpageInfo, BasePage &basePage, const std::stri
     }
 }
 
+bool SubPage::IsPageInfoValid(const UxSubPageInfo &info)
+{
+    if (info.id.empty()) {
+        LOG(ERROR) << "sub page id is empty";
+        return false;
+    }
+    return true;
+}
+
 std::string &SubPage::GetPageId()
 {
     return pageId_;
@@ -43,7 +52,7 @@ std::string &SubPage::GetPageId()
 void SubPage::SetVisible(bool isVisible)
 {
     isVisible_ = isVisible;
-    auto view = basePage_.GetView();
+    const auto &view = basePage_.GetView();
     if (!view) {
         LOG(ERROR) << "basepage's view is nullptr";
         return;
@@ -66,7 +75,7 @@ bool SubPage::IsVisible() const
     return isVisible_;
 }
 
-OHOS::UIViewGroup *SubPage::GetView() const
+const std::unique_ptr<OHOS::UIViewGroup> &SubPage::GetView() const
 {
     return basePage_.GetView();
 }
@@ -81,8 +90,8 @@ bool SubPage::IsValidCom(const std::string &id) const
     return basePage_.IsValidCom(id);
 }
 
-ViewProxy SubPage::operator[](const std::string &id)
+ViewProxy &SubPage::operator[](const std::string &id)
 {
     return basePage_[id];
 }
-}
+} // namespace Updater

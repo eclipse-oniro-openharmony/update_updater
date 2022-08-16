@@ -52,7 +52,7 @@ void UpdaterUiEnv::Init()
     } ();
 }
 
-void UpdaterUiEnv::InitEngine() const
+void UpdaterUiEnv::InitEngine()
 {
     OHOS::GraphicStartUp::Init();
     GraphicEngine::GetInstance().Init(WHITE_BGCOLOR, OHOS::ColorMode::ARGB8888);
@@ -60,7 +60,7 @@ void UpdaterUiEnv::InitEngine() const
     LOG(INFO) << "UxInitEngine done";
 }
 
-void UpdaterUiEnv::InitConfig() const
+void UpdaterUiEnv::InitConfig()
 {
     // load pages, language resource, ui strategy
     if (!UpdaterUiConfig::Init()) {
@@ -68,24 +68,24 @@ void UpdaterUiEnv::InitConfig() const
     }
 }
 
-void UpdaterUiEnv::InitEvts() const
+void UpdaterUiEnv::InitEvts()
 {
     CallbackManager::Init(UpdaterUiConfig::GetFocusCfg());
 }
 
-void UpdaterUiEnv::InitInputDriver() const
+void UpdaterUiEnv::InitInputDriver()
 {
     HdfInit();
 }
 
 void UpdaterUiEnv::InitDisplayDriver()
 {
-    std::find_if(std::begin(BRIGHTNESS_FILES), std::end(BRIGHTNESS_FILES), [this] (auto filePair) {
+    static_cast<void>(std::find_if(std::begin(BRIGHTNESS_FILES), std::end(BRIGHTNESS_FILES), [] (auto filePair) {
         return InitBrightness(filePair.first, filePair.second);
-    });
+    }));
 }
 
-void UpdaterUiEnv::InitRootView() const
+void UpdaterUiEnv::InitRootView()
 {
     using namespace OHOS;
     RootView::GetInstance()->SetPosition(0, 0);
@@ -94,7 +94,7 @@ void UpdaterUiEnv::InitRootView() const
     RootView::GetInstance()->Invalidate();
 }
 
-bool UpdaterUiEnv::InitBrightness(const char *brightnessFile, const char *maxBrightnessFile) const
+bool UpdaterUiEnv::InitBrightness(const char *brightnessFile, const char *maxBrightnessFile)
 {
     if (access(brightnessFile, R_OK | W_OK) != 0 || access(maxBrightnessFile, R_OK) != 0) {
         LOG(ERROR) << "can't access brigntness file";
@@ -128,4 +128,4 @@ bool UpdaterUiEnv::InitBrightness(const char *brightnessFile, const char *maxBri
     }
     return true;
 }
-}
+} // namespace Updater

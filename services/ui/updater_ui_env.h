@@ -29,13 +29,13 @@ public:
     static void Init();
 private:
     static void InitDisplayDriver(); // input driver init
-    static void InitEngine() const; // Graphic UI engine init
-    static void InitConfig() const; // ui configs Init
-    static void InitInputDriver() const; // input driver init
-    static void InitEvts() const; // input event callback init
+    static void InitEngine(); // Graphic UI engine init
+    static void InitConfig(); // ui configs Init
+    static void InitInputDriver(); // input driver init
+    static void InitEvts(); // input event callback init
 
-    static bool InitBrightness(const char *brightnessFile, const char *maxBrightnessFile) const; // init brightness
-    static void InitRootView() const;
+    static bool InitBrightness(const char *brightnessFile, const char *maxBrightnessFile); // init brightness
+    static void InitRootView();
 };
-}
+} // namespace Updater
 #endif

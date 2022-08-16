@@ -17,6 +17,7 @@
 #define PAGE_H
 
 #include <string>
+#include <unordered_set>
 #include <vector>
 #include "components/ui_view_group.h"
 #include "view_api.h"
@@ -31,13 +32,13 @@ public:
     virtual std::string &GetPageId() = 0;
     virtual void SetVisible(bool isVisible) = 0;
     virtual bool IsVisible() const = 0;
-    virtual OHOS::UIViewGroup *GetView() const = 0;
+    virtual const std::unique_ptr<OHOS::UIViewGroup> &GetView() const = 0;
     virtual bool IsValid() const = 0;
     virtual bool IsValidCom(const std::string &id) const = 0;
-    virtual ViewProxy operator[](const std::string &id) = 0;
+    virtual ViewProxy &operator[](const std::string &id) = 0;
     void UpdateFocus(bool isVisible);
 protected:
     OHOS::UIView *focusedView_;
 };
-}
+} // namespace Updater
 #endif

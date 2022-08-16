@@ -96,7 +96,7 @@ std::string SelectConfig(const JsonNode &node)
     LOG(ERROR) << "no config matched";
     return "";
 }
-}
+} // namespace
 
 bool UpdaterUiConfig::isFocusEnable_ {false};
 
@@ -193,4 +193,4 @@ bool UpdaterUiConfig::LoadFocusCfg(const JsonNode &node)
     isFocusEnable_ = node[FOCUS_CFG_FIELD].As<bool>().value_or(false);
     return true;
 }
-}
+} // namespace Updater

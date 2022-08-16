@@ -75,4 +75,4 @@ void BarProgress::ShowProgress(float value) const
 {
     pgMgr_[id_].As<BoxProgressAdapter>()->SetValue(value);
 }
-}
+} // namespace Updater

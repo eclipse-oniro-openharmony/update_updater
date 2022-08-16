@@ -59,4 +59,4 @@ void ImageLogo::Hide() const
 {
     pgMgr_[id_]->SetVisible(false);
 }
-}
+} // namespace Updater
