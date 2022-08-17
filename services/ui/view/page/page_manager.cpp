@@ -75,12 +75,12 @@ void PageManager::BuildSubPages(const std::string &pageId, const std::shared_ptr
             continue;
         }
         const std::string &subPageId = pageId + ":" + subPageInfo.id;
-        auto subPage = Page::Create<SubPage>(subPageInfo, basePage, subPageId);
+        auto subPage = Page::Create<SubPage>(basePage, subPageId);
         if (subPage == nullptr) {
             LOG(ERROR) << "create sub page failed";
             continue;
         }
-        if (!subPage->BuildSubPage()) {
+        if (!subPage->BuildSubPage(subPageInfo)) {
             LOG(ERROR) << "build sub page failed";
             continue;
         }

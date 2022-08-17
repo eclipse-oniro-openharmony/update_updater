@@ -24,7 +24,7 @@ namespace Updater {
 class SubPage : public Page {
     friend class Page;
 public:
-    [[nodiscard]] bool BuildSubPage();
+    [[nodiscard]] bool BuildSubPage(UxSubPageInfo &subpageInfo);
     std::string GetPageId() override;
     void SetVisible(bool isVisible) override;
     bool IsVisible() const override;
@@ -35,7 +35,8 @@ public:
     static bool IsPageInfoValid(const UxSubPageInfo &info);
 private:
     SubPage();
-    SubPage(UxSubPageInfo &subpageInfo, const std::shared_ptr<Page> &basePage, const std::string &pageId);
+    SubPage(const std::shared_ptr<Page> &basePage, const std::string &pageId);
+    void Reset();
     std::shared_ptr<Page> basePage_;
     std::string pageId_;
     std::vector<std::string> comsId_;

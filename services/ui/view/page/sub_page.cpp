@@ -22,17 +22,25 @@ SubPage::SubPage() : basePage_ {}, pageId_ {}, comsId_ {}, isVisible_ {false}, c
 {
 }
 
-SubPage::SubPage(UxSubPageInfo &subpageInfo, const std::shared_ptr<Page> &basePage, const std::string &pageId)
-    : basePage_ {basePage}, pageId_ {pageId}, comsId_ {std::move(subpageInfo.coms)}, isVisible_ {false},
-    color_ {subpageInfo.bgColor}
+SubPage::SubPage(const std::shared_ptr<Page> &basePage, const std::string &pageId)
+    : basePage_ {basePage}, pageId_ {pageId}, comsId_ {}, isVisible_ {false}, color_ {0, 0, 0, 255}
 {
 }
 
-bool SubPage::BuildSubPage()
+void SubPage::Reset()
+{
+    isVisible_ = false;
+    focusedView_ = nullptr;
+}
+
+bool SubPage::BuildSubPage(UxSubPageInfo &subpageInfo)
 {
     if (!IsValid()) {
         return false;
     }
+    Reset();
+    color_ = subpageInfo.bgColor;
+    comsId_ = std::move(subpageInfo.coms);
     int minY = INT16_MAX;
     std::string focusedId {};
     for (auto &id : comsId_) {

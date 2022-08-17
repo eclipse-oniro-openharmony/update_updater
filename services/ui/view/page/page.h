@@ -24,7 +24,7 @@
 #include "view_proxy.h"
 
 namespace Updater {
-class Page : public std::enable_shared_from_this<Page> {
+class Page {
     DISALLOW_COPY_MOVE(Page);
 public:
     virtual ~Page() = default;

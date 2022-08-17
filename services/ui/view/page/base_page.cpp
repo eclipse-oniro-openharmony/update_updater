@@ -46,6 +46,7 @@ void BasePage::Reset()
     root_->RemoveAll();
     coms_.clear();
     comsMap_.clear();
+    focusedView_ = nullptr;
 }
 
 bool BasePage::BuildPage(const UxPageInfo &pageInfo)
@@ -94,9 +95,9 @@ bool BasePage::BuildCom(const UxViewInfo &viewInfo, int &minY)
     }
     coms_.push_back(std::move(upView));
     root_->Add(view.operator->());
-    // empty id is allowed. id is needed only when get specific view by id
+    // empty id is allowed. id is needed only when get specific view by id.
     if (std::string(view->GetViewId()).empty()) {
-        return false;
+        return true; // skip this view. build com success, but not save in map
     }
     // only map non-empty id
     if (!comsMap_.emplace(view->GetViewId(), coms_.back().get()).second) {
