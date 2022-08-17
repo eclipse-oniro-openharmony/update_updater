@@ -24,7 +24,7 @@
 namespace Updater {
 class LogoStrategy {
 public:
-    explicit LogoStrategy(const ComInfo &id) : id_ { id }, pgMgr_ { PageManager::GetInstance() } {}
+    explicit LogoStrategy(const ComInfo &id) : id_ {id}, pgMgr_ {PageManager::GetInstance()} {}
     virtual ~LogoStrategy() = default;
     virtual void Show() const = 0;
     virtual void Hide() const = 0;

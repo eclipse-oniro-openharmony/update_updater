@@ -24,7 +24,7 @@
 namespace Updater {
 class ProgressStrategy {
 public:
-    explicit ProgressStrategy(const ComInfo &id) : id_ { id }, pgMgr_ { PageManager::GetInstance() } {}
+    explicit ProgressStrategy(const ComInfo &id) : id_ {id}, pgMgr_ {PageManager::GetInstance()} {}
     virtual ~ProgressStrategy() = default;
     virtual void ShowProgress(float value) const = 0;
     void Show() const;

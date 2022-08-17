@@ -26,7 +26,7 @@ constexpr auto COMPONENT_MODULE = "coms";
 constexpr auto COMMON_LABEL = "Common";
 constexpr auto COMMON_TYPE = "type";
 
-const auto &GetSpecificInfoMap()
+inline const auto &GetSpecificInfoMap()
 {
     using namespace OHOS;
     const static std::unordered_map<std::string, std::function<SpecificInfo()>> specificInfoMap {
