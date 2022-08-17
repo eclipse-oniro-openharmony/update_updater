@@ -21,14 +21,14 @@
 namespace Updater {
 using namespace OHOS;
 BasePage::BasePage()
-    : width_ {}, height_ {}, root_ { std::make_unique<OHOS::UIViewGroup>() },
-    coms_ {}, comsMap_ {}, pageId_ {}, extraMsg_ {}, color_ { 0, 0, 0, 255 }
+    : width_ {}, height_ {}, root_ {std::make_unique<OHOS::UIViewGroup>()},
+    coms_ {}, comsMap_ {}, pageId_ {}, color_ {0, 0, 0, 255}
 {
 }
 
 BasePage::BasePage(int16_t width, int16_t height)
-    : width_ { width }, height_ { height }, root_ { std::make_unique<OHOS::UIViewGroup>() },
-    coms_ {}, comsMap_ {}, pageId_ {}, extraMsg_ {}, color_ { 0, 0, 0, 255 }
+    : width_ {width}, height_ {height}, root_ {std::make_unique<OHOS::UIViewGroup>()},
+    coms_ {}, comsMap_ {}, pageId_ {}, color_ {0, 0, 0, 255}
 {
 }
 
@@ -41,8 +41,16 @@ bool BasePage::IsPageInfoValid(const UxPageInfo &pageInfo)
     return true;
 }
 
-void BasePage::BuildPage(const UxPageInfo &pageInfo)
+void BasePage::Reset()
 {
+    root_->RemoveAll();
+    coms_.clear();
+    comsMap_.clear();
+}
+
+bool BasePage::BuildPage(const UxPageInfo &pageInfo)
+{
+    Reset();
     pageId_ = pageInfo.id;
     color_ = pageInfo.bgColor;
     root_->SetViewId(pageId_.c_str());
@@ -50,36 +58,36 @@ void BasePage::BuildPage(const UxPageInfo &pageInfo)
     root_->SetVisible(true);
     root_->SetStyle(OHOS::STYLE_BACKGROUND_COLOR, GetColor(color_));
     root_->SetStyle(OHOS::STYLE_BACKGROUND_OPA, color_.a);
-    extraMsg_.elementPtr = this;
-    BuildComs(pageInfo);
+    return BuildComs(pageInfo);
 }
 
-void BasePage::BuildComs(const UxPageInfo &pageInfo)
+bool BasePage::BuildComs(const UxPageInfo &pageInfo)
 {
     const auto &infos = pageInfo.viewInfos;
     coms_.reserve(infos.size());
     int minY = INT_MAX;
     for (auto &info : infos) {
-        BuildCom(info, minY);
+        if (!BuildCom(info, minY)) {
+            return false;
+        }
     }
+    return true;
 }
 
-void BasePage::BuildCom(const UxViewInfo &viewInfo, int &minY)
+bool BasePage::BuildCom(const UxViewInfo &viewInfo, int &minY)
 {
     if (!ComponentFactory::CheckUxComponent(viewInfo)) {
         LOG(ERROR) << "component (" << viewInfo.commonInfo.id
             << ") is invalid, please check your page config json";
-        return;
+        return false;
     }
     auto upView = std::make_unique<ViewProxy>(ComponentFactory::CreateUxComponent(viewInfo),
         std::string("component id:") + viewInfo.commonInfo.id + ", ");
     auto &view = *upView.get();
     if (view->GetViewId() == nullptr) {
         LOG(ERROR) << "id is nullptr";
-        return;
+        return false;
     }
-    // set parent page into component's extraMsg(set by BuildPage), used by CallbackDecorator
-    view->SetExtraMsg(&extraMsg_);
     if (view->IsFocusable() && viewInfo.commonInfo.y < minY) {
         minY = viewInfo.commonInfo.y;
         focusedView_ = view.operator->();
@@ -88,12 +96,13 @@ void BasePage::BuildCom(const UxViewInfo &viewInfo, int &minY)
     root_->Add(view.operator->());
     // empty id is allowed. id is needed only when get specific view by id
     if (std::string(view->GetViewId()).empty()) {
-        return;
+        return false;
     }
     // only map non-empty id
     if (!comsMap_.emplace(view->GetViewId(), coms_.back().get()).second) {
         LOG(ERROR) << "view id duplicated:" << view->GetViewId();
     }
+    return true;
 }
 
 ViewProxy &BasePage::operator[](const std::string &id)
@@ -116,7 +125,7 @@ bool BasePage::IsValid() const
     return root_ != nullptr;
 }
 
-std::string &BasePage::GetPageId()
+std::string BasePage::GetPageId()
 {
     return pageId_;
 }
@@ -145,8 +154,8 @@ bool BasePage::IsVisible() const
     return root_->IsVisible();
 }
 
-const std::unique_ptr<OHOS::UIViewGroup> &BasePage::GetView() const
+OHOS::UIViewGroup *BasePage::GetView() const
 {
-    return root_;
+    return root_.get();
 }
 } // namespace Updater

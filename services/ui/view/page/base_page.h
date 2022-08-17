@@ -25,29 +25,30 @@
 
 namespace Updater {
 class BasePage : public Page {
+    friend class Page;
+    friend class PageManager; // for create dummy page when operator[]
 public:
-    BasePage();
-    BasePage(int16_t width, int16_t height);
-    virtual ~BasePage() = default;
-    void BuildPage(const UxPageInfo &pageInfo);
-    std::string &GetPageId() override;
+    [[nodiscard]] bool BuildPage(const UxPageInfo &pageInfo);
+    std::string GetPageId() override;
     void SetVisible(bool isVisible) override;
     bool IsVisible() const override;
-    const std::unique_ptr<OHOS::UIViewGroup> &GetView() const override;
+    OHOS::UIViewGroup *GetView() const override;
     bool IsValid() const override;
     bool IsValidCom(const std::string &id) const override;
     ViewProxy &operator[](const std::string &id) override;
     static bool IsPageInfoValid(const UxPageInfo &pageInfo);
 private:
-    void BuildComs(const UxPageInfo &pageInfo);
-    void BuildCom(const UxViewInfo &viewInfo, int &minY);
+    BasePage();
+    BasePage(int16_t width, int16_t height);
+    void Reset();
+    [[nodiscard]] bool BuildComs(const UxPageInfo &pageInfo);
+    [[nodiscard]] bool BuildCom(const UxViewInfo &viewInfo, int &minY);
     int16_t width_;
     int16_t height_;
     std::unique_ptr<OHOS::UIViewGroup> root_;
     std::vector<std::unique_ptr<ViewProxy>> coms_;
     std::unordered_map<std::string_view, ViewProxy *> comsMap_;
     std::string pageId_;
-    OHOS::UIView::ViewExtraMsg extraMsg_;
     UxBRGAPixel color_;
 };
 } // namespace Updater

@@ -22,11 +22,11 @@ using namespace OHOS;
 UITextLanguageAlignment GetAlign(const std::string &align)
 {
     static const std::unordered_map<std::string, OHOS::UITextLanguageAlignment> alignMap {
-        { "left", TEXT_ALIGNMENT_LEFT },
-        { "right", TEXT_ALIGNMENT_RIGHT },
-        { "center", TEXT_ALIGNMENT_CENTER },
-        { "top", TEXT_ALIGNMENT_TOP },
-        { "bottom", TEXT_ALIGNMENT_BOTTOM }
+        {"left", TEXT_ALIGNMENT_LEFT},
+        {"right", TEXT_ALIGNMENT_RIGHT},
+        {"center", TEXT_ALIGNMENT_CENTER},
+        {"top", TEXT_ALIGNMENT_TOP},
+        {"bottom", TEXT_ALIGNMENT_BOTTOM}
     };
     if (auto it = alignMap.find(align); it != alignMap.end()) {
         return it->second;
@@ -40,8 +40,10 @@ std::string TranslateText(const std::string &id)
     constexpr std::string_view emptyContent = "[]";
     constexpr size_t idStartPos = 1;
     if (id.size() > emptyContent.size() && *id.begin() == '[' && *id.rbegin() == ']') {
+        // format is [tag], then find by tag
         return Lang::LanguageUI::GetInstance().Translate(id.substr(idStartPos, id.size() - emptyContent.size()));
     }
+    // format is not [tag], then directly return id
     return id;
 }
 

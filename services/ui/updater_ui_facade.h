@@ -23,6 +23,7 @@
 namespace Updater {
 class UpdaterUiFacade {
     DISALLOW_COPY_MOVE_ASSIGN(UpdaterUiFacade);
+    using StrategyMap = std::unordered_map<UpdaterMode, UiStrategyCfg>;
 public:
     UpdaterUiFacade();
     ~UpdaterUiFacade() = default;
@@ -46,17 +47,18 @@ public:
     void ShowProgressWarning(bool isShow) const;
     bool IsInProgress() const;
 private:
+    std::pair<bool, StrategyMap::const_iterator> CheckMode() const;
     void SetLogoVisible(bool isVisible) const;
     void SetProgressVisible(bool isVisible) const;
     void ShowMsg(const ComInfo &id, const std::string &tag, bool isClear) const;
     void ShowMsg(const ComInfo &id, const std::string &tag) const;
 
     void SetLogoProgress();
-    std::unordered_map<UpdaterMode, UiStrategyCfg> &strategies_;
+    const StrategyMap &strategies_;
     PageManager &pgMgr_;
     UpdaterMode mode_;
-    std::unique_ptr<ProgressStrategy> progress_ {};
-    std::unique_ptr<LogoStrategy> logo_ {};
+    std::unordered_map<UpdaterMode, std::unique_ptr<ProgressStrategy>> progressMap_ {};
+    std::unordered_map<UpdaterMode, std::unique_ptr<LogoStrategy>> logoMap_ {};
 };
 } // namespace Updater
 #endif

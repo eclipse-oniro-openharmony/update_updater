@@ -43,16 +43,16 @@ private:
     ~PageManager() = default;
     void Reset();
     void InitImpl(UxPageInfo &pageInfo, std::string_view entry);
-    void EnQueuePage(Page *page);
-    void BuildSubPages(const std::string &pageId, BasePage &basePage,
+    void EnQueuePage(const std::shared_ptr<Page> &page);
+    void BuildSubPages(const std::string &pageId, const std::shared_ptr<Page> & page,
         std::vector<UxSubPageInfo> &subPageInfos, std::string_view entry);
-    bool IsValidPage(const Page *pg) const;
+    bool IsValidPage(const std::shared_ptr<Page> &pg) const;
     static constexpr size_t MAX_PAGE_QUEUE_SZ = 3;
-    std::deque<Page *> pageQueue_ {};
-    std::unordered_map<std::string, Page *> pageMap_ {};
-    std::vector<std::unique_ptr<Page>> pages_ {};
-    Page *curPage_ {};
-    Page *mainPage_ {};
+    std::deque<std::shared_ptr<Page>> pageQueue_ {};
+    std::unordered_map<std::string, std::shared_ptr<Page>> pageMap_ {};
+    std::vector<std::shared_ptr<Page>> pages_ {};
+    std::shared_ptr<Page> curPage_ {};
+    std::shared_ptr<Page> mainPage_ {};
 };
 } // namespace Updater
 #endif

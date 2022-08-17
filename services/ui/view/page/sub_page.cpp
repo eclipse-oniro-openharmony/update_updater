@@ -18,21 +18,33 @@
 #include "log/log.h"
 
 namespace Updater {
-SubPage::SubPage(UxSubPageInfo &subpageInfo, BasePage &basePage, const std::string &pageId)
-    : basePage_(basePage), pageId_(pageId), comsId_(std::move(subpageInfo.coms)), isVisible_(false)
+SubPage::SubPage() : basePage_ {}, pageId_ {}, comsId_ {}, isVisible_ {false}, color_ {0, 0, 0, 255}
 {
-    color_ = subpageInfo.bgColor;
+}
+
+SubPage::SubPage(UxSubPageInfo &subpageInfo, const std::shared_ptr<Page> &basePage, const std::string &pageId)
+    : basePage_ {basePage}, pageId_ {pageId}, comsId_ {std::move(subpageInfo.coms)}, isVisible_ {false},
+    color_ {subpageInfo.bgColor}
+{
+}
+
+bool SubPage::BuildSubPage()
+{
+    if (!IsValid()) {
+        return false;
+    }
     int minY = INT16_MAX;
     std::string focusedId {};
     for (auto &id : comsId_) {
-        if (basePage.IsValidCom(id) && basePage[id]->IsFocusable() && basePage[id]->GetY() < minY) {
-            minY = basePage[id]->GetY();
+        if (basePage_->IsValidCom(id) && (*basePage_)[id]->IsFocusable() && (*basePage_)[id]->GetY() < minY) {
+            minY = (*basePage_)[id]->GetY();
             focusedId = id;
         }
     }
     if (!focusedId.empty()) {
-        focusedView_ = basePage[focusedId].As();
+        focusedView_ = (*basePage_)[focusedId].As();
     }
+    return true;
 }
 
 bool SubPage::IsPageInfoValid(const UxSubPageInfo &info)
@@ -44,22 +56,25 @@ bool SubPage::IsPageInfoValid(const UxSubPageInfo &info)
     return true;
 }
 
-std::string &SubPage::GetPageId()
+std::string SubPage::GetPageId()
 {
     return pageId_;
 }
 
 void SubPage::SetVisible(bool isVisible)
 {
+    if (!IsValid()) {
+        return;
+    }
     isVisible_ = isVisible;
-    const auto &view = basePage_.GetView();
-    if (!view) {
+    const auto &view = basePage_->GetView();
+    if (view == nullptr) {
         LOG(ERROR) << "basepage's view is nullptr";
         return;
     }
 
     for (const auto &id : comsId_) {
-        basePage_[id]->SetVisible(isVisible);
+        (*basePage_)[id]->SetVisible(isVisible);
     }
     view->SetVisible(isVisible);
     if (isVisible) {
@@ -75,23 +90,37 @@ bool SubPage::IsVisible() const
     return isVisible_;
 }
 
-const std::unique_ptr<OHOS::UIViewGroup> &SubPage::GetView() const
+OHOS::UIViewGroup *SubPage::GetView() const
 {
-    return basePage_.GetView();
+    if (!IsValid()) {
+        return nullptr;
+    }
+    return basePage_->GetView();
 }
 
 bool SubPage::IsValid() const
 {
-    return basePage_.IsValid();
+    if (basePage_ == nullptr || !basePage_->IsValid()) {
+        LOG(ERROR) << "basepage of subpage is null";
+        return false;
+    }
+    return true;
 }
 
 bool SubPage::IsValidCom(const std::string &id) const
 {
-    return basePage_.IsValidCom(id);
+    if (!IsValid()) {
+        return false;
+    }
+    return basePage_->IsValidCom(id);
 }
 
 ViewProxy &SubPage::operator[](const std::string &id)
 {
-    return basePage_[id];
+    static ViewProxy dummy;
+    if (!IsValid()) {
+        return dummy;
+    }
+    return (*basePage_)[id];
 }
 } // namespace Updater

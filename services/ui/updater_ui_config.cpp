@@ -137,7 +137,7 @@ bool UpdaterUiConfig::Init(const JsonNode &node)
     return res;
 }
 
-std::unordered_map<UpdaterMode, UiStrategyCfg> &UpdaterUiConfig::GetStrategy()
+const std::unordered_map<UpdaterMode, UiStrategyCfg> &UpdaterUiConfig::GetStrategy()
 {
     return UiStrategy::GetStrategy();
 }

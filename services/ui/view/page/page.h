@@ -24,21 +24,27 @@
 #include "view_proxy.h"
 
 namespace Updater {
-class Page {
+class Page : public std::enable_shared_from_this<Page> {
     DISALLOW_COPY_MOVE(Page);
 public:
-    Page() : focusedView_ {nullptr} {}
     virtual ~Page() = default;
-    virtual std::string &GetPageId() = 0;
+    virtual std::string GetPageId() = 0;
     virtual void SetVisible(bool isVisible) = 0;
-    virtual bool IsVisible() const = 0;
-    virtual const std::unique_ptr<OHOS::UIViewGroup> &GetView() const = 0;
-    virtual bool IsValid() const = 0;
-    virtual bool IsValidCom(const std::string &id) const = 0;
+    [[nodiscard]] virtual bool IsVisible() const = 0;
+    [[nodiscard]] virtual OHOS::UIViewGroup *GetView() const = 0;
+    [[nodiscard]] virtual bool IsValid() const = 0;
+    [[nodiscard]] virtual bool IsValidCom(const std::string &id) const = 0;
     virtual ViewProxy &operator[](const std::string &id) = 0;
     void UpdateFocus(bool isVisible);
+    template<typename T, typename ... Args>
+    static std::shared_ptr<T> Create(Args && ... args)
+    {
+        static_assert(std::is_base_of_v<Page, T>, "T should be derived class of Page");
+        return std::shared_ptr<T>(new(std::nothrow) T(std::forward<Args>(args)...));
+    }
 protected:
     OHOS::UIView *focusedView_;
+    Page() : focusedView_ {nullptr} {}
 };
 } // namespace Updater
 #endif

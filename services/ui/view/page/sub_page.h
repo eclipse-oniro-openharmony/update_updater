@@ -22,19 +22,21 @@
 
 namespace Updater {
 class SubPage : public Page {
+    friend class Page;
 public:
-    SubPage(UxSubPageInfo &subpageInfo, BasePage &basePage, const std::string &pageId);
-    virtual ~SubPage() = default;
-    std::string &GetPageId() override;
+    [[nodiscard]] bool BuildSubPage();
+    std::string GetPageId() override;
     void SetVisible(bool isVisible) override;
     bool IsVisible() const override;
-    const std::unique_ptr<OHOS::UIViewGroup> &GetView() const override;
+    OHOS::UIViewGroup *GetView() const override;
     bool IsValid() const override;
     bool IsValidCom(const std::string &id) const override;
     ViewProxy &operator[](const std::string &id) override;
     static bool IsPageInfoValid(const UxSubPageInfo &info);
 private:
-    BasePage &basePage_;
+    SubPage();
+    SubPage(UxSubPageInfo &subpageInfo, const std::shared_ptr<Page> &basePage, const std::string &pageId);
+    std::shared_ptr<Page> basePage_;
     std::string pageId_;
     std::vector<std::string> comsId_;
     bool isVisible_;

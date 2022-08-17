@@ -20,6 +20,14 @@
 #include "progress_bar.h"
 
 namespace Updater {
+enum UpdaterMode {
+    SDCARD = 0,
+    FACTORYRST,
+    REBOOTFACTORYRST,
+    OTA,
+    MODEMAX
+};
+
 void DoProgress();
 
 void ShowUpdateFrame(bool isShow);

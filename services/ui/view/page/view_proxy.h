@@ -42,8 +42,7 @@ public:
     T *As() const
     {
         std::string errMsg {};
-        T *ret = As<T>(errMsg);
-        return ret;
+        return As<T>(errMsg);
     }
     template<typename T = OHOS::UIView>
     T *As(std::string &errMsg) const

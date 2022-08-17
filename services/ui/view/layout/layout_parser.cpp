@@ -30,10 +30,10 @@ const auto &GetSpecificInfoMap()
 {
     using namespace OHOS;
     const static std::unordered_map<std::string, std::function<SpecificInfo()>> specificInfoMap {
-        { VIEW_TYPE_STRING[UI_IMAGE_VIEW], []() { return UxImageInfo {}; } },
-        { VIEW_TYPE_STRING[UI_BOX_PROGRESS], []() { return UxBoxProgressInfo {}; } },
-        { VIEW_TYPE_STRING[UI_LABEL], []() { return UxLabelInfo {}; } },
-        { VIEW_TYPE_STRING[UI_LABEL_BUTTON], []() { return UxLabelBtnInfo {}; } }
+        {VIEW_TYPE_STRING[UI_IMAGE_VIEW], [] () { return UxImageInfo {}; }},
+        {VIEW_TYPE_STRING[UI_BOX_PROGRESS], [] () { return UxBoxProgressInfo {}; }},
+        {VIEW_TYPE_STRING[UI_LABEL], [] () { return UxLabelInfo {}; }},
+        {VIEW_TYPE_STRING[UI_LABEL_BUTTON], [] () { return UxLabelBtnInfo {}; }}
     };
     return specificInfoMap;
 }
@@ -88,12 +88,13 @@ private:
         for (const auto &componentNode : componentNodes) {
             const JsonNode &comNode = componentNode.get();
             auto viewType = comNode[COMMON_TYPE].As<std::string>();
-            if (!viewType) {
+            if (viewType == std::nullopt) {
                 LOG(ERROR) << "Component don't have a type field";
                 return false;
             }
             const JsonNode &commonDefault = defaultNode[COMMON_LABEL];
             if (!Visit<SETVAL>(componentNode, commonDefault, info.commonInfo)) {
+                LOG(ERROR) << "set common info failed";
                 return false;
             }
 
@@ -103,13 +104,11 @@ private:
                 return false;
             }
             info.specificInfo = it->second();
-            auto ret = std::visit(
-                [&comNode, &defaultNode](auto &args) {
-                    const JsonNode &defaultComNode = defaultNode[Traits<std::decay_t<decltype(args)>>::STRUCT_KEY];
-                    return Visit<SETVAL>(comNode, defaultComNode, args);
-                },
-                info.specificInfo);
-            if (!ret) {
+            auto visitor = [&comNode, &defaultNode] (auto &args) {
+                const JsonNode &defaultComNode = defaultNode[Traits<std::decay_t<decltype(args)>>::STRUCT_KEY];
+                return Visit<SETVAL>(comNode, defaultComNode, args);
+            };
+            if (!std::visit(visitor, info.specificInfo)) {
                 return false;
             }
             vec.push_back(std::move(info));
@@ -133,6 +132,7 @@ bool LayoutParser::LoadLayout(const std::string &layoutFile, UxPageInfo &pageInf
 {
     return pImpl_->LoadLayout(layoutFile, pageInfo);
 }
+
 bool LayoutParser::LoadLayout(const std::vector<std::string> &layoutFiles, std::vector<UxPageInfo> &vec) const
 {
     return pImpl_->LoadLayout(layoutFiles, vec);

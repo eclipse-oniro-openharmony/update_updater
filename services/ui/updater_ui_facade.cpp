@@ -52,95 +52,141 @@ UpdaterMode UpdaterUiFacade::GetMode() const
     return mode_;
 }
 
+std::pair<bool, UpdaterUiFacade::StrategyMap::const_iterator> UpdaterUiFacade::CheckMode() const
+{
+    if (mode_ < 0 || mode_ >= MODEMAX) {
+        LOG(ERROR) << "mode invalid";
+        return {false, strategies_.cend()};
+    }
+    auto it = strategies_.find(mode_);
+    if (it == strategies_.end()) {
+        LOG(ERROR) << "mode has not a strategy for it";
+        return {false, strategies_.cend()};
+    }
+    return {true, it};
+}
+
 void UpdaterUiFacade::ShowLog(const std::string &tag, bool isClear) const
 {
-    ShowMsg(strategies_[mode_].labelLogId, tag, isClear);
+    if (auto [res, it] = CheckMode(); res) {
+        ShowMsg(it->second.labelLogId, tag, isClear);
+    }
 }
 
 void UpdaterUiFacade::ShowLogRes(const std::string &tag, bool isClear) const
 {
-    ShowMsg(strategies_[mode_].labelLogResId, tag, isClear);
+    if (auto [res, it] = CheckMode(); res) {
+        ShowMsg(it->second.labelLogResId, tag, isClear);
+    }
 }
 
 void UpdaterUiFacade::ShowUpdInfo(const std::string &tag, bool isClear) const
 {
-    ShowMsg(strategies_[mode_].labelUpdId, tag, isClear);
+    if (auto [res, it] = CheckMode(); res) {
+        ShowMsg(it->second.labelUpdId, tag, isClear);
+    }
 }
 
 void UpdaterUiFacade::ShowProgress(float value) const
 {
-    if (progress_ == nullptr) {
-        LOG(ERROR) << "progress is null, can't show progress";
+    if (!CheckMode().first) {
         return;
     }
-    progress_->ShowProgress(value);
+    if (auto it = progressMap_.find(mode_); it->second != nullptr) {
+        it->second->ShowProgress(value);
+        return;
+    }
+    LOG(ERROR) << "progress is null, can't show progress";
 }
 
 bool UpdaterUiFacade::IsInProgress() const
 {
-    return pgMgr_[strategies_[mode_].progressPage.progressPageId].IsVisible();
+    if (auto [res, it] = CheckMode(); res) {
+        return pgMgr_[it->second.progressPage.progressPageId].IsVisible();
+    }
+    return false;
 }
 
 void UpdaterUiFacade::SetLogoVisible(bool isVisible) const
 {
-    if (logo_ == nullptr) {
-        LOG(ERROR) << "logo is null, can't show logo";
+    if (!CheckMode().first) {
         return;
     }
-    isVisible ? logo_->Show() : logo_->Hide();
+    if (auto it = logoMap_.find(mode_); it->second != nullptr) {
+        isVisible ? it->second->Show() : it->second->Hide();
+        return;
+    }
+    LOG(ERROR) << "logo is null, can't show logo";
 }
 
 void UpdaterUiFacade::SetProgressVisible(bool isVisible) const
 {
-    if (progress_ == nullptr) {
-        LOG(ERROR) << "progress is null, can't show progress";
+    if (!CheckMode().first) {
         return;
     }
-    isVisible ? progress_->Show() : progress_->Hide();
+    if (auto it = progressMap_.find(mode_); it->second != nullptr) {
+        isVisible ? it->second->Show() : it->second->Hide();
+        return;
+    }
+    LOG(ERROR) << "progress is null, can't show progress";
 }
 
 void UpdaterUiFacade::ShowProgressWarning(bool isShow) const
 {
-    auto &progressPg = strategies_[mode_].progressPage;
-    pgMgr_[progressPg.progressPageId][progressPg.warningComId]->SetVisible(isShow);
+    if (auto [res, it] = CheckMode(); res) {
+        auto &progressPg = it->second.progressPage;
+        pgMgr_[progressPg.progressPageId][progressPg.warningComId]->SetVisible(isShow);
+    }
 }
 
 void UpdaterUiFacade::ShowProgressPage() const
 {
-    if (IsInProgress()) {
+    auto [res, it] = CheckMode();
+    if (IsInProgress() || !res) {
         return;
     }
     SetProgressVisible(true);
     SetLogoVisible(true);
     ShowProgress(0);
-    pgMgr_.ShowPage(strategies_[mode_].progressPage.progressPageId);
+    pgMgr_.ShowPage(it->second.progressPage.progressPageId);
     ShowProgressWarning(false);
 }
 
 void UpdaterUiFacade::ShowSuccessPage() const
 {
+    auto [res, it] = CheckMode();
+    if (!res) {
+        return;
+    }
     LOG(DEBUG) << "show success page";
     SetProgressVisible(false);
     SetLogoVisible(false);
     StopLongPressTimer();
-    pgMgr_.ShowPage(strategies_[mode_].resPage.successPageId);
+    pgMgr_.ShowPage(it->second.resPage.successPageId);
 }
 
 void UpdaterUiFacade::ShowFailedPage() const
 {
+    auto [res, it] = CheckMode();
+    if (!res) {
+        return;
+    }
     LOG(DEBUG) << "show failed page";
     SetProgressVisible(false);
     SetLogoVisible(false);
     StopLongPressTimer();
-    pgMgr_.ShowPage(strategies_[mode_].resPage.failPageId);
+    pgMgr_.ShowPage(it->second.resPage.failPageId);
 }
 
 void UpdaterUiFacade::ShowFactoryConfirmPage()
 {
+    auto [res, it] = CheckMode();
+    if (!res) {
+        return;
+    }
     LOG(DEBUG) << "show confirm page";
-    (void)SetMode(FACTORYRST);
     ClearLog();
-    pgMgr_.ShowPage(strategies_[mode_].confirmPageId);
+    pgMgr_.ShowPage(it->second.confirmPageId);
 }
 
 void UpdaterUiFacade::ShowMainpage() const
@@ -150,14 +196,20 @@ void UpdaterUiFacade::ShowMainpage() const
 
 void UpdaterUiFacade::ClearText() const
 {
+    auto [res, it] = CheckMode();
+    if (!res) {
+        return;
+    }
     ClearLog();
-    ShowMsg(strategies_[mode_].labelUpdId, "");
+    ShowMsg(it->second.labelUpdId, "");
 }
 
 void UpdaterUiFacade::ClearLog() const
 {
-    ShowMsg(strategies_[mode_].labelLogId, "");
-    ShowMsg(strategies_[mode_].labelLogResId, "");
+    if (auto [res, it] = CheckMode(); res) {
+        ShowMsg(it->second.labelLogId, "");
+        ShowMsg(it->second.labelLogResId, "");
+    }
 }
 
 void UpdaterUiFacade::ShowMsg(const ComInfo &id, const std::string &tag, bool isClear) const
@@ -176,12 +228,20 @@ void UpdaterUiFacade::ShowMsg(const ComInfo &id, const std::string &tag) const
 
 void UpdaterUiFacade::SetLogoProgress()
 {
-    ProgressPage &progressPage { strategies_[mode_].progressPage };
-    progress_ = ProgressStrategy::Factory(progressPage.progressType, {
-        progressPage.progressPageId, progressPage.progressComId
-    });
-    logo_ = LogoStrategy::Factory(progressPage.logoType, {
-        progressPage.progressPageId, progressPage.logoComId
-    });
+    auto [res, it] = CheckMode();
+    if (!res) {
+        return;
+    }
+    const ProgressPage &progressPage { it->second.progressPage };
+    if (progressMap_.find(mode_) == progressMap_.end()) {
+        progressMap_[mode_] = ProgressStrategy::Factory(progressPage.progressType, {
+            progressPage.progressPageId, progressPage.progressComId
+        });
+    }
+    if (logoMap_.find(mode_) == logoMap_.end()) {
+        logoMap_[mode_] = LogoStrategy::Factory(progressPage.logoType, {
+            progressPage.progressPageId, progressPage.logoComId
+        });
+    }
 }
 } // namespace Updater
