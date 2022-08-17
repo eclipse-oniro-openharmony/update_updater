@@ -16,6 +16,7 @@
 #define UPDATE_IUPDATE_INTERFACE_H
 
 #include <cstdio>
+#include <cstdint>
 
 namespace Updater {
 class IUpdateInterface {
