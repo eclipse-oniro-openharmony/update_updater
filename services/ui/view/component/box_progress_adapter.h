@@ -29,7 +29,7 @@ public:
     using SpecificInfoType = UxBoxProgressInfo;
     BoxProgressAdapter() = default;
     explicit BoxProgressAdapter(const UxViewInfo &info);
-    virtual ~BoxProgressAdapter() = default;
+    virtual ~BoxProgressAdapter() {}
     void SetValue(float value);
     void SetVisible(bool isVisible);
     [[nodiscard]] bool InitEp();
