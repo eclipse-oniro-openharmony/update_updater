@@ -14,6 +14,7 @@
  */
 
 #include "ui_strategy.h"
+#include <array>
 
 namespace Updater {
 std::ostream &operator<<(std::ostream &os, const UiStrategyCfg &info)
@@ -50,10 +51,10 @@ std::ostream &operator<<(std::ostream &os, const ProgressPage &info)
 
 std::unordered_map<UpdaterMode, UiStrategyCfg> UiStrategy::strategies_;
 std::unordered_map<UpdaterMode, std::string> UiStrategy::modeStr_ = {
-    { SDCARD, "sdcard" },
-    { FACTORYRST, "factoryRst" },
-    { REBOOTFACTORYRST, "rebootFactoryRst" },
-    { OTA, "ota" },
+    {UpdaterMode::SDCARD, "sdcard"},
+    {UpdaterMode::FACTORYRST, "factoryRst"},
+    {UpdaterMode::REBOOTFACTORYRST, "rebootFactoryRst"},
+    {UpdaterMode::OTA, "ota"},
 };
 
 std::unordered_map<UpdaterMode, UiStrategyCfg> &UiStrategy::GetStrategy()
@@ -79,7 +80,9 @@ bool UiStrategy::LoadStrategy(const JsonNode &node, UpdaterMode mode)
 
 bool UiStrategy::LoadStrategy(const JsonNode &node)
 {
-    for (auto mode : { OTA, FACTORYRST, SDCARD, REBOOTFACTORYRST }) {
+    constexpr std::array strategies {UpdaterMode::OTA, UpdaterMode::FACTORYRST,
+        UpdaterMode::SDCARD, UpdaterMode::REBOOTFACTORYRST};
+    for (auto mode : strategies) {
         if (!LoadStrategy(node, mode)) {
             LOG(ERROR) << "load strategy " << modeStr_[mode] << " failed";
             std::unordered_map<UpdaterMode, UiStrategyCfg>().swap(strategies_);
