@@ -24,27 +24,25 @@
 namespace Updater {
 void CallBackDecorator::operator()() const
 {
-    auto *page = view_.GetParent();
-    if (page == nullptr) {
-        LOG(ERROR) << "view hasn't a parent";
+    Page *pagePtr = static_cast<Page *>(view_.GetExtraMsg()->elementPtr);
+    if (pagePtr == nullptr) {
+        LOG(ERROR) << "view's extra msg is null";
         return;
     }
+    Page &page = *pagePtr;
     if (view_.GetViewId() == nullptr) {
         LOG(ERROR) << "view is invalid, please check your json config";
         return;
     }
     std::string id = view_.GetViewId();
-    std::string pageId {};
-    if (page->GetViewId() != nullptr) {
-        pageId = page->GetViewId();
-    }
+    std::string pageId = page.GetPageId();
     // page should be visible
-    if (!page->IsVisible()) {
+    if (!page.IsVisible()) {
         LOG(ERROR) << pageId << " is not visible";
         return;
     }
     // component should be visible
-    if (!view_.IsVisible()) {
+    if (!page[id]->IsVisible()) {
         LOG(ERROR) << id << " is not visible";
         return;
     }

@@ -29,15 +29,11 @@ class ImgViewAdapter::ImgAnimatorCallback final : public OHOS::AnimatorCallback 
     DISALLOW_COPY_MOVE(ImgAnimatorCallback);
 public:
     explicit ImgAnimatorCallback(ImgViewAdapter *view)
-        : animator_(nullptr), stop_(true)
+        : viewProxy_(view, "animator of type ImgViewAdapter "), animator_(nullptr), stop_(true)
     {
-        view_ = view;
-        if (view_ == nullptr) {
-            static ImgViewAdapter dummy;
-            view_ = &dummy;
-        }
+        view_ = viewProxy_.As<ImgViewAdapter>();
     }
-    ~ImgAnimatorCallback() = default;
+    ~ImgAnimatorCallback() {};
     void Init()
     {
         animator_ = std::make_unique<OHOS::Animator>(this, view_, 0, true);
@@ -65,6 +61,7 @@ public:
         return animator_.get();
     }
 protected:
+    ViewProxy viewProxy_;
     ImgViewAdapter *view_;
     std::unique_ptr<OHOS::Animator> animator_;
     bool stop_;
