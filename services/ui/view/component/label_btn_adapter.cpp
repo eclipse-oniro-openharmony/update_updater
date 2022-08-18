@@ -31,8 +31,12 @@ public:
 
     bool OnFocus(OHOS::UIView &view) override
     {
+        LabelBtnAdapter *button = nullptr;
+        if (view.GetViewType() != OHOS::UI_LABEL_BUTTON) {
+            return false;
+        }
+        button = static_cast<LabelBtnAdapter *>(&view);
         LOG(DEBUG) << "key OnFocus";
-        auto button = ViewProxy(&view, "OnFocus").As<LabelBtnAdapter>();
         button->SetLabelStyle(OHOS::STYLE_TEXT_COLOR, GetColor(focusedTxtcolor_));
         button->SetStyle(OHOS::STYLE_BACKGROUND_COLOR, GetColor(focusedBgcolor_));
         button->Invalidate();
@@ -41,8 +45,12 @@ public:
 
     bool OnBlur(OHOS::UIView &view) override
     {
+        LabelBtnAdapter *button = nullptr;
+        if (view.GetViewType() != OHOS::UI_LABEL_BUTTON) {
+            return false;
+        }
+        button = static_cast<LabelBtnAdapter *>(&view);
         LOG(DEBUG) << "key OnBlur";
-        auto button = ViewProxy(&view, "OnBlur").As<LabelBtnAdapter>();
         button->SetLabelStyle(OHOS::STYLE_TEXT_COLOR, GetColor(unfocusedTxtcolor_));
         button->SetStyle(OHOS::STYLE_BACKGROUND_COLOR, GetColor(unfocusedBgcolor_));
         button->Invalidate();

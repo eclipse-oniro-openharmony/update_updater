@@ -54,14 +54,13 @@ void BoxProgressAdapter::SetValue(float value)
         GraphicEngine::GetInstance().Flush();
     };
     OHOS::UIBoxProgress::SetValue(static_cast<int>((value / FULL_PERCENT_PROGRESS) * (progressWidth_ - 1)));
-    if (!hasEp_) {
+    if (!hasEp_ || ep_ == nullptr) {
         return;
     }
     auto pos = GetPosOfEp();
-    auto epView = ep_.As<ImgViewAdapter>();
-    epView->SetVisible(false);
-    epView->SetPosition(pos.x, pos.y);
-    epView->SetVisible(true);
+    ep_->SetVisible(false);
+    ep_->SetPosition(pos.x, pos.y);
+    ep_->SetVisible(true);
 }
 
 bool BoxProgressAdapter::InitEp()
@@ -74,11 +73,11 @@ bool BoxProgressAdapter::InitEp()
         return false;
     }
     auto child = this->GetParent()->GetChildById(epId_.c_str());
-    if (child == nullptr) {
-        LOG(ERROR) << "box progress has not an end point children";
+    if (child == nullptr || child->GetViewType() != OHOS::UI_IMAGE_VIEW) {
+        LOG(ERROR) << "box progress has not an end point children or is not a img view";
         return false;
     }
-    ep_ = ViewProxy(child, "progress bar");
+    ep_ = static_cast<ImgViewAdapter *>(child);
     return true;
 }
 
@@ -95,12 +94,11 @@ OHOS::Point BoxProgressAdapter::GetPosOfEp()
 void BoxProgressAdapter::SetVisible(bool isVisible)
 {
     OHOS::UIBoxProgress::SetVisible(isVisible);
-    if (!hasEp_) {
+    if (!hasEp_ || ep_ == nullptr) {
         return;
     }
-    auto epView = ep_.As<ImgViewAdapter>();
-    isVisible ?  epView->Start() : epView->Stop();
-    epView->SetVisible(isVisible);
-    epView->Invalidate();
+    isVisible ?  ep_->Start() : ep_->Stop();
+    ep_->SetVisible(isVisible);
+    ep_->Invalidate();
 }
 } // namespace Updater
