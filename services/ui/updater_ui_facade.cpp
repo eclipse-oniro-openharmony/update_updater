@@ -23,7 +23,7 @@
 
 namespace Updater {
 UpdaterUiFacade::UpdaterUiFacade()
-    : strategies_ {UpdaterUiConfig::GetStrategy()}, pgMgr_ {PageManager::GetInstance()}, mode_ {MODEMAX}
+    : strategies_ {UpdaterUiConfig::GetStrategy()}, pgMgr_ {PageManager::GetInstance()}, mode_ {UpdaterMode::MODEMAX}
 {
 }
 
@@ -35,7 +35,7 @@ UpdaterUiFacade &UpdaterUiFacade::GetInstance()
 
 [[nodiscard]] bool UpdaterUiFacade::SetMode(UpdaterMode mode)
 {
-    if (mode < 0 || mode > MODEMAX) {
+    if (mode < UpdaterMode::SDCARD || mode >= UpdaterMode::MODEMAX) {
         LOG(ERROR) << "updater mode invalid";
         return false;
     }
@@ -54,7 +54,7 @@ UpdaterMode UpdaterUiFacade::GetMode() const
 
 std::pair<bool, UpdaterUiFacade::StrategyMap::const_iterator> UpdaterUiFacade::CheckMode() const
 {
-    if (mode_ < 0 || mode_ >= MODEMAX) {
+    if (mode_ < UpdaterMode::SDCARD || mode_ >= UpdaterMode::MODEMAX) {
         LOG(ERROR) << "mode invalid";
         return {false, strategies_.cend()};
     }

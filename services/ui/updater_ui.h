@@ -15,12 +15,11 @@
 #ifndef UPDATE_UI_UPDATER_UI_H
 #define UPDATE_UI_UPDATER_UI_H
 
-#include <string>
 #include "text_label.h"
 #include "progress_bar.h"
 
 namespace Updater {
-enum UpdaterMode {
+enum class UpdaterMode {
     SDCARD = 0,
     FACTORYRST,
     REBOOTFACTORYRST,
