@@ -14,7 +14,6 @@
  */
 
 #include "view_api.h"
-
 #include "language/language_ui.h"
 
 namespace Updater {

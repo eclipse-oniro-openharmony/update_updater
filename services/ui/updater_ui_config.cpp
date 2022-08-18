@@ -14,7 +14,6 @@
  */
 
 #include "updater_ui_config.h"
-
 #include "common/screen.h"
 #include "control/callback_manager.h"
 #include "language/language_ui.h"

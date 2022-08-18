@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 #include "updater_ui_env.h"
-
 #include <chrono>
 #include <fstream>
 #include <map>

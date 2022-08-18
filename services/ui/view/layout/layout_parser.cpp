@@ -14,10 +14,9 @@
  */
 
 #include "layout_parser.h"
-
+#include "components/ui_view.h"
 #include "json_visitor.h"
 #include "log/log.h"
-#include "components/ui_view.h"
 
 namespace Updater {
 namespace {

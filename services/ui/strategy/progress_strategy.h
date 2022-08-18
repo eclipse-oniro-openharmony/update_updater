@@ -17,7 +17,6 @@
 #define PROGRESS_STRATEGY_H
 
 #include <memory>
-
 #include "page/page_manager.h"
 #include "updater_ui.h"
 

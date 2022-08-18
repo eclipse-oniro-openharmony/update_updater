@@ -15,6 +15,7 @@
 
 #ifndef UPDATER_UI_TRAITS_H
 #define UPDATER_UI_TRAITS_H
+
 #include "macros.h"
 #include "traits_util.h"
 

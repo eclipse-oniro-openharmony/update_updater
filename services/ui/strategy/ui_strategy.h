@@ -18,7 +18,6 @@
 
 #include <ostream>
 #include <string>
-
 #include "logo_strategy.h"
 #include "progress_strategy.h"
 #include "updater_ui_traits.h"

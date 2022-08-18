@@ -14,9 +14,7 @@
  */
 
 #include "logo_strategy.h"
-
 #include <functional>
-
 #include "component/box_progress_adapter.h"
 #include "component/img_view_adapter.h"
 #include "component/text_label_adapter.h"

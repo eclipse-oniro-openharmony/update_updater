@@ -17,7 +17,6 @@
 
 #include <memory>
 #include <vector>
-
 #include "driver/surface_dev.h"
 #include "macros.h"
 #include "updater_ui.h"

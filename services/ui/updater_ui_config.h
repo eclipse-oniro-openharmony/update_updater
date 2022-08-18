@@ -16,12 +16,11 @@
 #ifndef UPDATER_UI_CONFIG_H
 #define UPDATER_UI_CONFIG_H
 
+#include <filesystem>
+#include <unordered_map>
 #include "strategy/ui_strategy.h"
 #include "updater_ui.h"
 #include "view_api.h"
-
-#include <filesystem>
-#include <unordered_map>
 
 namespace Updater {
 class UpdaterUiConfig {

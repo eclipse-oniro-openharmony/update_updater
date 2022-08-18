@@ -23,7 +23,6 @@
 #include <utility>
 #include <variant>
 #include <vector>
-
 #include "common/text.h"
 #include "updater_ui_traits.h"
 
