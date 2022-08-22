@@ -1,0 +1,395 @@
+{
+    "id": "upd",
+    "bgColor" : {
+        "r":0,
+        "g":0,
+        "b":0,
+        "a":255
+    },
+    "subpages": [
+        {
+            "id": "update",
+            "coms": [
+                "OHOSIconDark_Image",
+                "ProgressUpdBoxDark_Progress",
+                "UpdateInfoDark_Label",
+                "PowerLongPressWarning_Image",
+                "FlashPointDark_Image"
+            ],
+            "bgColor" : {
+                "r":0,
+                "g":0,
+                "b":0,
+                "a":255
+            }
+        },
+        {
+            "id": "sdUpdate",
+            "coms": [
+                "OHOSIcon_Image",
+                "UpdBox_Progress",
+                "SDUpdateInfo_Label",
+                "PowerLongPressWarning_Image",
+                "FlashPoint_Image"
+            ],
+            "bgColor" : {
+                "r":241,
+                "g":243,
+                "b":245,
+                "a":255
+            }
+        },
+        {
+            "id": "reset",
+            "coms": [
+                "OHOSIcon_Image",
+                "UpdBox_Progress",
+                "RstInfo_Label",
+                "FlashPoint_Image"
+            ],
+            "bgColor" : {
+                "r":241,
+                "g":243,
+                "b":245,
+                "a":255
+            }
+        },
+        {
+            "id": "updateSuccess",
+            "coms": [
+                "SuccessIcon_Image",
+                "UpdateSuccessRes_Label",
+                "UpdateAutoReboot_Label"
+            ],
+            "bgColor" : {
+                "r":0,
+                "g":0,
+                "b":0,
+                "a":255
+            }
+        },
+        {
+            "id": "normalUpdateFailed",
+            "coms": [
+                "FailIcon_Image",
+                "FailReboot_Button",
+                "UpdateFailedRes_Label"
+            ],
+            "bgColor" : {
+                "r":0,
+                "g":0,
+                "b":0,
+                "a":255
+            }
+        },
+        {
+            "id": "updateFailedNoButton",
+            "coms": [
+                "FailIcon_Image",
+                "UpdateInfoDark_Label"
+            ],
+            "bgColor" : {
+                "r":0,
+                "g":0,
+                "b":0,
+                "a":255
+            }
+        },
+        {
+            "id": "FactoryRstFailed",
+            "coms": [
+                "FailIcon_Image",
+                "FactoryRstFailedRes_Label"
+            ],
+            "bgColor" : {
+                "r":0,
+                "g":0,
+                "b":0,
+                "a":255
+            }
+        }
+    ],
+    "default": {
+        "Common": {
+            "parent" : "root",
+            "visible": false
+        },
+        "UILabel": {
+            "bgColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 255
+            },
+            "fontColor": {
+                "r": 255,
+                "g": 255,
+                "b": 255,
+                "a": 230
+            },
+            "align" : "center"
+        },
+        "UIImageView": {
+            "imgCnt" : 1,
+            "updInterval": 0,
+            "filePrefix" : ""
+        },
+        "UILabelButton": {
+            "bgColor": {
+                "r": 0,
+                "g": 125,
+                "b": 255,
+                "a": 255
+            },
+            "txtColor": {
+                "r": 255,
+                "g": 255,
+                "b": 255,
+                "a": 255
+            },
+            "focusedBgColor": {
+                "r": 0,
+                "g": 125,
+                "b": 255,
+                "a": 255
+            },
+            "focusedTxtColor": {
+                "r": 255,
+                "g": 255,
+                "b": 255,
+                "a": 255
+            },
+            "focusable" : true
+        },
+        "UIBoxProgress": {
+            "defaultValue": 0,
+            "bgColor": {
+                "r": 205,
+                "g": 207,
+                "b": 208,
+                "a": 255
+            },
+            "fgColor": {
+                "r": 10,
+                "g": 89,
+                "b": 247,
+                "a": 255
+            },
+            "endPoint" : "",
+            "hasEp" : false
+        }
+    },
+    "coms": [
+        {
+            "type": "UIImageView",
+            "id": "OHOSIconDark_Image",
+            "x": 120,
+            "y": 426,
+            "w": 480,
+            "h": 60,
+            "resPath": "/resources/images/icon/darkOUCOHlogo.png"
+        },
+        {
+            "type": "UIImageView",
+            "id": "OHOSIcon_Image",
+            "x": 120,
+            "y": 426,
+            "w": 480,
+            "h": 60,
+            "resPath": "/resources/images/icon/lightOUCOHlogo.png"
+        },
+        {
+            "type": "UILabel",
+            "id": "UpdateInfoDark_Label",
+            "text": "[LABEL_UPD_INFO]",
+            "x": 229,
+            "y": 1037,
+            "w": 265,
+            "h": 43,
+            "fontSize": 32
+        },
+        {
+            "type": "UILabel",
+            "id": "SDUpdateInfo_Label",
+            "text": "[LABEL_UPD_SDCARD_INFO]",
+            "x": 120,
+            "y": 1037,
+            "w": 480,
+            "h": 43,
+            "fontSize": 32,
+            "bgColor": {
+                "r":241,
+                "g":243,
+                "b":245,
+                "a":255
+            },
+            "fontColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 230
+            }
+        },
+        {
+            "type": "UILabel",
+            "id": "RstInfo_Label",
+            "text": "[LABEL_RESET_PROGRESS_INFO]",
+            "x": 120,
+            "y": 1037,
+            "w": 480,
+            "h": 43,
+            "fontSize": 32,
+            "bgColor": {
+                "r":241,
+                "g":243,
+                "b":245,
+                "a":255
+            },
+            "fontColor": {
+                "r": 0,
+                "g": 0,
+                "b": 0,
+                "a": 230
+            }
+        },
+        {
+            "type": "UIImageView",
+            "id": "FailIcon_Image",
+            "x": 264,
+            "y": 426,
+            "w": 192,
+            "h": 192,
+            "resPath": "/resources/images/icon/icon_failed.png"
+        },
+        {
+            "type": "UIImageView",
+            "id": "SuccessIcon_Image",
+            "x": 264,
+            "y": 426,
+            "w": 192,
+            "h": 192,
+            "resPath": "/resources/images/icon/icon_ok.png"
+        },
+        {
+            "type": "UILabelButton",
+            "id": "FailReboot_Button",
+            "text": "[LABEL_UPD_FAIL_REBOOT]",
+            "x": 48,
+            "y": 1136,
+            "w": 624,
+            "h": 80,
+            "fontSize": 32
+        },
+        {
+            "type": "UILabel",
+            "id": "UpdateFailedRes_Label",
+            "text": "[LABEL_UPD_FAIL_TIP]",
+            "x": 297,
+            "y": 1037,
+            "w": 128,
+            "h": 43,
+            "fontSize": 32
+        },
+        {
+            "type": "UILabel",
+            "id": "UpdateSuccessRes_Label",
+            "text": "[LABEL_UPD_OK_DONE]",
+            "x": 295,
+            "y": 1037,
+            "w": 128,
+            "h": 43,
+            "fontSize": 32
+        },
+        {
+            "type": "UILabel",
+            "id": "UpdateAutoReboot_Label",
+            "text": "[LABEL_UPD_OK_REBOOT]",
+            "x": 218,
+            "y": 1096,
+            "w": 282,
+            "h": 38,
+            "fontSize": 28,
+            "fontColor": {
+                "r": 255,
+                "g": 255,
+                "b": 255,
+                "a": 150
+            }
+        },
+        {
+            "type": "UILabel",
+            "id": "FactoryRstFailedRes_Label",
+            "text": "[LOG_WIPE_FAIL]",
+            "x": 120,
+            "y": 1037,
+            "w": 480,
+            "h": 43,
+            "fontSize": 32
+        },
+        {
+            "type": "UIImageView",
+            "id": "PowerLongPressWarning_Image",
+            "x": 24,
+            "y": 48,
+            "w": 672,
+            "h": 144,
+            "resPath": "/resources/images/warn/tips.png"
+        },
+        {
+            "type": "UIBoxProgress",
+            "id": "UpdBox_Progress",
+            "x": 144,
+            "y": 548,
+            "w": 432,
+            "h": 4,
+            "endPoint" : "FlashPoint_Image",
+            "hasEp" : true
+        },
+        {
+            "type": "UIBoxProgress",
+            "id": "ProgressUpdBoxDark_Progress",
+            "x": 144,
+            "y": 548,
+            "w": 432,
+            "h": 4,
+            "bgColor": {
+                "r": 38,
+                "g": 38,
+                "b": 38,
+                "a": 255
+            },
+            "fgColor": {
+                "r": 180,
+                "g": 180,
+                "b": 180,
+                "a": 255
+            },
+            "endPoint" : "FlashPointDark_Image",
+            "hasEp" : true
+        },
+        {
+            "type": "UIImageView",
+            "id": "FlashPoint_Image",
+            "x": 805,
+            "y": 595,
+            "w": 90,
+            "h": 90,
+            "resPath": "/resources/images/progress/",
+            "filePrefix": "flash_",
+            "imgCnt" : 22,
+            "updInterval": 10
+        },
+        {
+            "type": "UIImageView",
+            "id": "FlashPointDark_Image",
+            "x": 805,
+            "y": 595,
+            "w": 90,
+            "h": 90,
+            "resPath": "/resources/images/progress/",
+            "filePrefix": "dark_flash_",
+            "imgCnt" : 22,
+            "updInterval": 10
+        }
+    ]
+}
