@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,35 +12,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef UPDATE_UI_UPDATER_UI_H
-#define UPDATE_UI_UPDATER_UI_H
 
-#include "text_label.h"
-#include "progress_bar.h"
+#include "page.h"
+#include "dock/focus_manager.h"
 
 namespace Updater {
-enum class UpdaterMode {
-    SDCARD = 0,
-    FACTORYRST,
-    REBOOTFACTORYRST,
-    OTA,
-    MODEMAX
-};
-
-void DoProgress();
-
-void ShowUpdateFrame(bool isShow);
-
-void UpdaterUiInit();
-
-void ShowText(TextLabel *label, std::string text);
-
-void DeleteView();
-
-TextLabel *GetUpdateInfoLabel();
-
-ProgressBar *GetProgressBar();
-
-void SetUpdateFlag(int updateFlag);
+void Page::UpdateFocus(bool isVisible)
+{
+    // record old focus to focusedView_
+    if (auto focused = OHOS::FocusManager::GetInstance()->GetFocusedView(); focused != nullptr) {
+        focusedView_ = focused;
+    }
+    if (isVisible) {
+        // set focus
+        OHOS::FocusManager::GetInstance()->RequestFocus(focusedView_);
+        return;
+    }
+    // clear focus
+    OHOS::FocusManager::GetInstance()->ClearFocus();
+}
 } // namespace Updater
-#endif /* UPDATE_UI_HOS_UPDATER_H */
