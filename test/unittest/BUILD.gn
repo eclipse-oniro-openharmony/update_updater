@@ -29,6 +29,34 @@ config("utest_config") {
   ldflags = [ "--coverage" ]
 }
 
+ohos_unittest("updater_utils_unittest") {
+  testonly = true
+  module_out_path = module_output_path
+  sources = [
+    "utils/utils_unittest.cpp",
+  ]
+
+  include_dirs = [
+    "//base/update/updater/utils/include/"
+  ]
+  deps = [
+    "//base/update/updater/utils:libutils"
+  ]
+  cflags_cc = [ "-fexceptions" ]
+
+  defines = [
+    "UPDATER_UT",
+    "BUILD_OHOS",
+    "HDC_DEBUG",
+    "HDC_SUPPORT_FLASHD",
+    "HARMONY_PROJECT",
+  ]
+
+  public_configs = [ ":utest_config" ]
+  install_enable = true
+  part_name = "updater"
+}
+
 ohos_unittest("updater_unittest") {
   testonly = true
   module_out_path = module_output_path
@@ -67,8 +95,7 @@ ohos_unittest("updater_unittest") {
     "updater_main_test/updater_main_unittest.cpp",
     "updater_test/updater_unittest.cpp",
     "updater_ui_test/updater_ui_unittest.cpp",
-    "updaterkits_test/updaterkits_unittest.cpp",
-    "utils/utils_unittest.cpp",
+    "updaterkits_test/updaterkits_unittest.cpp"
   ]
 
   sources += [
