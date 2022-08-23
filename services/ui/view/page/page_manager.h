@@ -44,7 +44,7 @@ private:
     void Reset();
     void InitImpl(UxPageInfo &pageInfo, std::string_view entry);
     void EnQueuePage(const std::shared_ptr<Page> &page);
-    void BuildSubPages(const std::string &pageId, const std::shared_ptr<Page> & page,
+    void BuildSubPages(const std::string &pageId, const std::shared_ptr<Page> &page,
         std::vector<UxSubPageInfo> &subPageInfos, std::string_view entry);
     bool IsValidPage(const std::shared_ptr<Page> &pg) const;
     static constexpr size_t MAX_PAGE_QUEUE_SZ = 3;
