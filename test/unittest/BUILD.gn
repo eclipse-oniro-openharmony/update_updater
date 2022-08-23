@@ -32,16 +32,10 @@ config("utest_config") {
 ohos_unittest("updater_utils_unittest") {
   testonly = true
   module_out_path = module_output_path
-  sources = [
-    "utils/utils_unittest.cpp",
-  ]
+  sources = [ "utils/utils_unittest.cpp" ]
 
-  include_dirs = [
-    "//base/update/updater/utils/include/"
-  ]
-  deps = [
-    "//base/update/updater/utils:libutils"
-  ]
+  include_dirs = [ "//base/update/updater/utils/include/" ]
+  deps = [ "//base/update/updater/utils:libutils" ]
   cflags_cc = [ "-fexceptions" ]
 
   defines = [
