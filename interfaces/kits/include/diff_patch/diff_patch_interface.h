@@ -18,10 +18,18 @@
 #include <string>
 
 namespace Updater {
-class DiffPatchInterface {
-public:
-    virtual ~DiffPatchInterface() {}
-    int32_t ApplyPatch(const std::string &patchFile, const std::string &oldfile, const std::string &newFile);
-};
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif
+#endif
+
+int32_t ApplyPatch(const std::string &patchFile, const std::string &oldfile, const std::string &newFile);
+
+#ifdef __cplusplus
+#if __cplusplus
 }
+#endif
+#endif
+} // namespace Updater
 #endif
