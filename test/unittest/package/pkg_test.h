@@ -79,7 +79,7 @@ protected:
             "Invalid file len %zu to load %s", fileLen, stream->GetFileName().c_str());
 
         size_t buffSize = 4096;
-        hpackage::PkgBuffer buff(buffSize);
+        Hpackage::PkgBuffer buff(buffSize);
         // 整包检查
         DigestAlgorithm::DigestAlgorithmPtr algorithm = PkgAlgorithmFactory::GetDigestAlgorithm(PKG_DIGEST_TYPE_SHA256);
         PKG_CHECK(algorithm != nullptr, pkgManager_->ClosePkgStream(stream); return -1,
@@ -98,7 +98,7 @@ protected:
             offset += readLen;
             readLen = 0;
         }
-        hpackage::PkgBuffer buffer(&digest, size);
+        Hpackage::PkgBuffer buffer(&digest, size);
         algorithm->Final(buffer);
         pkgManager_->ClosePkgStream(stream);
         return 0;

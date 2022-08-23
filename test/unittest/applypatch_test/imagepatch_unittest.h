@@ -36,10 +36,9 @@ namespace UpdaterUt {
 using namespace Updater;
 class FileWriter : public DataWriter {
 public:
-    virtual bool Write(const uint8_t *addr, size_t len, WriteMode mode, const std::string &partitionName)
+    virtual bool Write(const uint8_t *addr, size_t len, const void *context)
     {
-        UNUSED(partitionName);
-        UNUSED(mode);
+        UNUSED(context);
         write(fd_, addr, len);
 
         if (fsync(fd_) == -1) {
@@ -70,7 +69,7 @@ public:
     int TestGZipModeImagePatch() const;
     int TestLZ4ModeImagePatch() const;
     int TestNormalModeImagePatch() const;
-    int RunImageApplyPatch(updatepatch::PatchParam &param, const std::string &target,
+    int RunImageApplyPatch(UpdatePatch::PatchParam &param, const std::string &target,
         const std::string &expectedSHA256) const
     {
         mode_t mode = (S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
@@ -82,9 +81,9 @@ public:
         });
         std::unique_ptr<FileWriter> writer = std::make_unique<FileWriter>(fd, targetBlk);
         std::vector<uint8_t> empty;
-        int32_t ret = updatepatch::UpdatePatch::ApplyImagePatch(param, empty,
-            [&](size_t start, const updatepatch::BlockBuffer &data, size_t size) -> int {
-                bool ret = writer->Write(data.buffer, size, WRITE_BLOCK, "");
+        int32_t ret = UpdatePatch::UpdatePatch::ApplyImagePatch(param, empty,
+            [&](size_t start, const UpdatePatch::BlockBuffer &data, size_t size) -> int {
+                bool ret = writer->Write(data.buffer, size, nullptr);
                 return ret ? 0 : -1;
             }, expectedSHA256);
         close(fd);
@@ -96,7 +95,7 @@ protected:
     {
         LoadSpecificFstab("/data/updater/applypatch/etc/fstab.imagepatch");
         std::string basePath = "/data/updater/imgpatch";
-        updater::utils::MkdirRecursive(basePath, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
+        Updater::Utils::MkdirRecursive(basePath, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
     }
     void TearDown() {}
     void TestBody() {}

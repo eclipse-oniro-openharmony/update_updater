@@ -69,7 +69,7 @@ HWTEST_F(UpdateProcessorUnitTest, UpdateProcessor_001, TestSize.Level1)
     const string partitionName = "/rawwriter";
     const string devPath = GetBlockDeviceByMountPoint(partitionName);
     const string devDir = "/data/updater/ut/datawriter/";
-    updater::utils::MkdirRecursive(devDir, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
+    Updater::Utils::MkdirRecursive(devDir, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
     int fd = open(devPath.c_str(), O_CREAT | O_WRONLY | O_EXCL, 0664);
     printf("@@@ devPath = %s, fd=%d\n", devPath.c_str(), fd);
     if (fd < 0) {

@@ -177,12 +177,12 @@ public:
         return 0;
     }
 
-    int32_t CompressData(hpackage::PkgManager::FileInfoPtr info,
+    int32_t CompressData(Hpackage::PkgManager::FileInfoPtr info,
         const BlockBuffer &buffer, std::vector<uint8_t> &outData, size_t &bufferSize)
     {
-        hpackage::PkgManager *pkgManager = hpackage::PkgManager::GetPackageInstance();
+        Hpackage::PkgManager *pkgManager = Hpackage::PkgManager::GetPackageInstance();
         PATCH_CHECK(pkgManager != nullptr, return -1, "Can not get manager ");
-        hpackage::PkgManager::StreamPtr stream1 = nullptr;
+        Hpackage::PkgManager::StreamPtr stream1 = nullptr;
         pkgManager->CreatePkgStream(stream1, "gzip", [&outData, &bufferSize](const PkgBuffer &data,
             size_t size, size_t start, bool isFinish, const void *context) ->int {
                 if (isFinish) {
@@ -200,7 +200,7 @@ public:
         return 0;
     }
 
-    int DeflateAdapterTest(const std::string &fileName, hpackage::PkgManager::FileInfoPtr info)
+    int DeflateAdapterTest(const std::string &fileName, Hpackage::PkgManager::FileInfoPtr info)
     {
         std::vector<uint8_t> outData;
         size_t dataSize = 0;

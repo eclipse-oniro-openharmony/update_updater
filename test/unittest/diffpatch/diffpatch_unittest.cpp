@@ -21,7 +21,6 @@
 
 using namespace std;
 using namespace Hpackage;
-using namespace UpdatePatch;
 using namespace testing::ext;
 
 namespace {
@@ -38,10 +37,10 @@ public:
 public:
     std::string GeneraterHash(const std::string &fileName) const
     {
-        MemMapInfo data {};
+        UpdatePatch::MemMapInfo data {};
         int32_t ret = PatchMapFile(fileName, data);
         EXPECT_EQ(0, ret);
-        return GeneraterBufferHash({
+        return UpdatePatch::GeneraterBufferHash({
             data.memory, data.length
         });
     }
@@ -49,10 +48,10 @@ public:
     int BlockDiffPatchTest(const std::string &oldFile,
         const std::string &newFile, const std::string &patchFile, const std::string &restoreFile) const
     {
-        int32_t ret = updatepatch::UpdateDiff::DiffBlock(TEST_PATH_FROM + oldFile,
+        int32_t ret = UpdatePatch::UpdateDiff::DiffBlock(TEST_PATH_FROM + oldFile,
             TEST_PATH_FROM + newFile, TEST_PATH_FROM + patchFile);
         EXPECT_EQ(0, ret);
-        ret = updatepatch::UpdatePatch::ApplyPatch(TEST_PATH_FROM + patchFile,
+        ret = UpdatePatch::UpdatePatch::ApplyPatch(TEST_PATH_FROM + patchFile,
             TEST_PATH_FROM + oldFile, TEST_PATH_FROM + restoreFile);
         EXPECT_EQ(0, ret);
 
@@ -65,10 +64,10 @@ public:
     int ImgageDiffPatchFileTest(size_t limit, const std::string &oldFile,
         const std::string &newFile, const std::string &patchFile, const std::string &restoreFile) const
     {
-        int32_t ret = updatepatch::UpdateDiff::DiffImage(limit, TEST_PATH_FROM + oldFile,
+        int32_t ret = UpdatePatch::UpdateDiff::DiffImage(limit, TEST_PATH_FROM + oldFile,
             TEST_PATH_FROM + newFile, TEST_PATH_FROM + patchFile);
         EXPECT_EQ(0, ret);
-        ret = updatepatch::UpdatePatch::ApplyPatch(TEST_PATH_FROM + patchFile,
+        ret = UpdatePatch::UpdatePatch::ApplyPatch(TEST_PATH_FROM + patchFile,
             TEST_PATH_FROM + oldFile, TEST_PATH_FROM + restoreFile);
         EXPECT_EQ(0, ret);
 
@@ -80,12 +79,12 @@ public:
     }
 
     int32_t TestApplyPatch(const std::string &patchName, const std::string &oldName,
-        const std::string &expected, updatepatch::UpdatePatch::ImageProcessor writer) const
+        const std::string &expected, UpdatePatch::UpdatePatch::ImageProcessor writer) const
     {
         PATCH_DEBUG("UpdatePatch::ApplyPatch : %s ", patchName.c_str());
         std::vector<uint8_t> empty;
-        MemMapInfo patchData {};
-        MemMapInfo oldData {};
+        UpdatePatch::MemMapInfo patchData {};
+        UpdatePatch::MemMapInfo oldData {};
         int32_t ret = PatchMapFile(patchName, patchData);
         PATCH_CHECK(ret == 0, return -1, "Failed to read patch file");
         ret = PatchMapFile(oldName, oldData);
@@ -93,13 +92,14 @@ public:
 
         PATCH_LOGI("UpdatePatch::ApplyPatch patchData %zu oldData %zu ", patchData.length, oldData.length);
         // check if image patch
-        if (memcmp(patchData.memory, PKGDIFF_MAGIC.c_str(), PKGDIFF_MAGIC.size()) == 0) {
-            PatchParam param {};
+        if (memcmp(patchData.memory, UpdatePatch::PKGDIFF_MAGIC,
+            std::char_traits<char>::length(UpdatePatch::PKGDIFF_MAGIC)) == 0) {
+            UpdatePatch::PatchParam param {};
             param.patch = patchData.memory;
             param.patchSize = patchData.length;
             param.oldBuff = oldData.memory;
             param.oldSize = oldData.length;
-            ret = updatepatch::UpdatePatch::ApplyImagePatch(param, empty, writer, expected);
+            ret = UpdatePatch::UpdatePatch::ApplyImagePatch(param, empty, writer, expected);
             PATCH_CHECK(ret == 0, return -1, "Failed to apply image patch file");
         }
         return 0;
@@ -108,17 +108,18 @@ public:
     int ImgageDiffPatchFileTest2(size_t limit, const std::string &oldFile,
         const std::string &newFile, const std::string &patchFile, const std::string &restoreFile) const
     {
-        int32_t ret = updatepatch::UpdateDiff::DiffImage(limit, TEST_PATH_FROM + oldFile,
+        int32_t ret = UpdatePatch::UpdateDiff::DiffImage(limit, TEST_PATH_FROM + oldFile,
             TEST_PATH_FROM + newFile, TEST_PATH_FROM + patchFile);
         EXPECT_EQ(0, ret);
 
         std::string expected = GeneraterHash(TEST_PATH_FROM + newFile);
-        std::unique_ptr<FilePatchWriter> writer = std::make_unique<FilePatchWriter>(TEST_PATH_FROM + restoreFile);
+        std::unique_ptr<UpdatePatch::FilePatchWriter> writer =
+            std::make_unique<UpdatePatch::FilePatchWriter>(TEST_PATH_FROM + restoreFile);
         PATCH_CHECK(writer != nullptr, return -1, "Failed to create writer");
         writer->Init();
 
         ret = TestApplyPatch(TEST_PATH_FROM + patchFile, TEST_PATH_FROM + oldFile, expected,
-            [&](size_t start, const BlockBuffer &data, size_t size) -> int {
+            [&](size_t start, const UpdatePatch::BlockBuffer &data, size_t size) -> int {
                 return writer->Write(start, data, size);
             });
         EXPECT_EQ(0, ret);
@@ -133,29 +134,30 @@ public:
     {
         PATCH_DEBUG("UpdatePatch::ApplyPatch : %s ", patchName.c_str());
         std::vector<uint8_t> empty;
-        MemMapInfo patchData {};
-        MemMapInfo oldData {};
+        UpdatePatch::MemMapInfo patchData {};
+        UpdatePatch::MemMapInfo oldData {};
         int32_t ret = PatchMapFile(patchName, patchData);
         PATCH_CHECK(ret == 0, return -1, "Failed to read patch file");
         ret = PatchMapFile(oldName, oldData);
         PATCH_CHECK(ret == 0, return -1, "Failed to read old file");
 
         PATCH_LOGI("TestApplyBlockPatch patchData %zu oldData %zu ", patchData.length, oldData.length);
-        PatchBuffer patchInfo = {patchData.memory, 0, patchData.length};
-        BlockBuffer oldInfo = {oldData.memory, oldData.length};
+        UpdatePatch::PatchBuffer patchInfo = {patchData.memory, 0, patchData.length};
+        UpdatePatch::BlockBuffer oldInfo = {oldData.memory, oldData.length};
         if (isBuffer) {
             std::vector<uint8_t> newData;
-            ret = updatepatch::UpdatePatch::ApplyBlockPatch(patchInfo, oldInfo, newData);
+            ret = UpdatePatch::UpdatePatch::ApplyBlockPatch(patchInfo, oldInfo, newData);
             PATCH_CHECK(ret == 0, return -1, "Failed to apply block patch file");
             std::ofstream stream(newName, std::ios::out | std::ios::binary);
             PATCH_CHECK(!stream.fail(), return -1, "Failed to open %s", newName.c_str());
             stream.write(reinterpret_cast<const char*>(newData.data()), newData.size());
         } else {
-            std::unique_ptr<FilePatchWriter> writer = std::make_unique<FilePatchWriter>(newName);
+            std::unique_ptr<UpdatePatch::FilePatchWriter> writer =
+                std::make_unique<UpdatePatch::FilePatchWriter>(newName);
             PATCH_CHECK(writer != nullptr, return -1, "Failed to create writer");
             writer->Init();
 
-            ret = UpdatePatch::ApplyBlockPatch(patchInfo, oldInfo, writer.get());
+            ret = UpdatePatch::UpdatePatch::ApplyBlockPatch(patchInfo, oldInfo, writer.get());
             EXPECT_EQ(0, ret);
             writer->Finish();
         }
@@ -165,7 +167,7 @@ public:
     int BlockDiffPatchTest2(const std::string &oldFile,
         const std::string &newFile, const std::string &patchFile, const std::string &restoreFile, bool isBuffer) const
     {
-        int32_t ret = updatepatch::UpdateDiff::DiffBlock(TEST_PATH_FROM + oldFile,
+        int32_t ret = UpdatePatch::UpdateDiff::DiffBlock(TEST_PATH_FROM + oldFile,
             TEST_PATH_FROM + newFile, TEST_PATH_FROM + patchFile);
         EXPECT_EQ(0, ret);
 
@@ -389,6 +391,6 @@ HWTEST_F(DiffPatchUnitTest, BlockDiffPatchTest_2, TestSize.Level1)
 {
     std::vector<uint8_t> testDate;
     testDate.push_back('a');
-    EXPECT_EQ(0, WriteDataToFile("BlockDiffPatchTest_2.txt", testDate, testDate.size()));
+    EXPECT_EQ(0, UpdatePatch::WriteDataToFile("BlockDiffPatchTest_2.txt", testDate, testDate.size()));
 }
 }
