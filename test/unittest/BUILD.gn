@@ -111,7 +111,7 @@ ohos_unittest("updater_unittest") {
     "updater_main_test/updater_main_unittest.cpp",
     "updater_test/updater_unittest.cpp",
     "updater_ui_test/updater_ui_unittest.cpp",
-    "updaterkits_test/updaterkits_unittest.cpp"
+    "updaterkits_test/updaterkits_unittest.cpp",
   ]
 
   sources += [
