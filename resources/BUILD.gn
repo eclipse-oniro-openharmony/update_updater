@@ -69,7 +69,7 @@ updater_resouces_list = [
   "${product_name}/pages/confirm.json",
   "${product_name}/pages/menu.json",
   "${product_name}/pages/upd.json",
-  "${product_name}/string/string.json"
+  "${product_name}/string/string.json",
   "font.png",
   "icon_error.png",
   "progress_empty.png",
