@@ -46,8 +46,11 @@ ohos_static_library("libpatch") {
   ]
 
   deps = [
+    "//base/update/updater/services/log:libupdaterlog",
+    "//base/update/updater/services/package:libupdaterpackage",
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/bzip2:libbz2",
+    "//third_party/lz4:liblz4_static",
     "//third_party/zlib:libz",
   ]
 

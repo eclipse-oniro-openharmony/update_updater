@@ -17,6 +17,7 @@
 #include <openssl/evp.h>
 #include <openssl/sha.h>
 #include <unistd.h>
+#include "dump.h"
 #include "pkcs7_signed_data.h"
 #include "pkg_algorithm.h"
 #include "pkg_utils.h"
@@ -25,19 +26,19 @@
 
 namespace Hpackage {
 namespace {
-static constexpr uint32_t HASH_SOURCE_BLOCK_LEN = 4096;
-static constexpr uint32_t ZIP_EOCD_FIXED_PART_LEN = 22;
-static constexpr uint32_t PKG_FOOTER_SIZE = 6;
-static constexpr uint32_t PKG_HASH_CONTENT_LEN = SHA256_DIGEST_LENGTH;
+constexpr uint32_t HASH_SOURCE_BLOCK_LEN = 4096;
+constexpr uint32_t ZIP_EOCD_FIXED_PART_LEN = 22;
+constexpr uint32_t PKG_FOOTER_SIZE = 6;
+constexpr uint32_t PKG_HASH_CONTENT_LEN = SHA256_DIGEST_LENGTH;
 
-static int g_algIdAndNid[][2] = {
+int g_algIdAndNid[][2] = {
     {NID_sha256, PKG_DIGEST_TYPE_SHA256},
 };
 
-static int ConvertNidToMethod(int algId)
+int ConvertNidToMethod(int algId)
 {
     int nid = PKG_DIGEST_TYPE_NONE;
-    for (int i = 0; i < sizeof(g_algIdAndNid) / sizeof(g_algIdAndNid[0]); i++) {
+    for (unsigned long i = 0; i < sizeof(g_algIdAndNid) / sizeof(g_algIdAndNid[0]); i++) {
         if (algId == g_algIdAndNid[i][0]) {
             nid = g_algIdAndNid[i][1];
         }
@@ -111,8 +112,7 @@ int32_t SignPkg::CreateDigestBlock(std::vector<uint8_t> &digestBlock, const std:
     if (digest.empty()) {
         return PKG_INVALID_PARAM;
     }
-    size_t digestBlockLen = digest.size() + sizeof(uint32_t);
-    digestBlock.resize(digestBlockLen);
+    digestBlock.resize(sizeof(uint32_t));
 
     size_t offset = 0;
     WriteLE16(digestBlock.data(), EVP_MD_type(EVP_sha256()));
@@ -121,12 +121,7 @@ int32_t SignPkg::CreateDigestBlock(std::vector<uint8_t> &digestBlock, const std:
     offset += sizeof(uint16_t);
 
     PKG_CHECK(digestBlock.size() >= offset, return PKG_INVALID_PARAM, "digestBlock size ");
-    int32_t ret = memcpy_s(digestBlock.data() + offset,
-        digestBlock.size() - offset, digest.data(), digest.size());
-    if (ret != EOK) {
-        PKG_LOGE("Fail to memcpy_s digestData, dataLen: %d", digest.size());
-        return PKG_NONE_MEMORY;
-    }
+    digestBlock.insert(digestBlock.begin() + offset, digest.begin(), digest.end());
 
     return PKG_SUCCESS;
 }
@@ -160,7 +155,8 @@ int32_t PkgVerifyUtil::VerifyPkcs7SignedData(const PkgStreamPtr pkgStream,
     const size_t signatureStart, const size_t signatureSize)
 {
     size_t fileLen = pkgStream->GetFileLength();
-    PKG_CHECK(fileLen > signatureSize, return PKG_INVALID_PARAM, "Invalid signature size[%zu]", signatureSize);
+    PKG_CHECK(fileLen > signatureSize, UPDATER_LAST_WORD(PKG_INVALID_PARAM, fileLen, signatureSize);
+        return PKG_INVALID_PARAM, "Invalid signature size[%zu]", signatureSize);
 
     std::vector<uint8_t> digestBlock;
     std::vector<Pkcs7SignerInfo> signerInfos;
@@ -169,21 +165,24 @@ int32_t PkgVerifyUtil::VerifyPkcs7SignedData(const PkgStreamPtr pkgStream,
     PkgBuffer p7Data(p7DataLen);
     size_t readLen = 0;
     int32_t ret = pkgStream->Read(p7Data, signatureStart, p7DataLen, readLen);
-    PKG_CHECK(ret == PKG_SUCCESS, return ret, "read signature failed", pkgStream->GetFileName().c_str());
+    PKG_CHECK(ret == PKG_SUCCESS, UPDATER_LAST_WORD(PKG_INVALID_PARAM);
+        return ret, "read signature failed", pkgStream->GetFileName().c_str());
 
     Pkcs7SignedData pkcs7;
     ret = pkcs7.ParsePkcs7SignedData(p7Data.buffer, p7Data.length, digestBlock, signerInfos);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("ParsePkcs7SignedData() error, ret[%d]", ret);
+        UPDATER_LAST_WORD(PKG_INVALID_PARAM);
         return ret;
     }
 
     ret = ParseDigestBlock(digestBlock);
     if (ret != PKG_SUCCESS) {
+        UPDATER_LAST_WORD(PKG_INVALID_PARAM);
         PKG_LOGE("Parse digest block failed.");
         return ret;
     }
-    PKG_CHECK(fileLen > (signatureSize + ZIP_EOCD_FIXED_PART_LEN),
+    PKG_CHECK(fileLen > (signatureSize + ZIP_EOCD_FIXED_PART_LEN), UPDATER_LAST_WORD(PKG_INVALID_PARAM);
         return PKG_INVALID_PARAM, "Invalid signature srcDataLen");
     size_t srcDataLen = fileLen - signatureSize - ZIP_EOCD_FIXED_PART_LEN;
 
@@ -218,13 +217,7 @@ int32_t PkgVerifyUtil::ParseDigestBlock(const std::vector<uint8_t> &digestBlock)
         PKG_LOGE("Invalid digestLen[%zu] and digestBlock len[%zu]", digestBlock_.digestLen, digestBlock.size());
         return PKG_INVALID_DIGEST;
     }
-    digestBlock_.digestData.resize(digestBlock_.digestLen);
-    int32_t ret = memcpy_s(digestBlock_.digestData.data(), digestBlock_.digestLen,
-        digestBlock.data() + offset, digestBlock_.digestLen);
-    if (ret != EOK) {
-        PKG_LOGE("Fail to memcpy_s subBlock, dataLen: %d", digestBlock_.digestLen);
-        return PKG_INVALID_DIGEST;
-    }
+    digestBlock_.digestData.insert(digestBlock_.digestData.begin(), digestBlock.begin() + offset, digestBlock.end());
 
     return PKG_SUCCESS;
 }
@@ -251,7 +244,7 @@ int32_t PkgVerifyUtil::VerifyDigestEncryptData(const PkgStreamPtr srcData, const
 }
 
 int32_t PkgVerifyUtil::SingleDigestEncryptVerify(Pkcs7SignerInfo &signer,
-    const PkgStreamPtr srcData, const size_t dataLen) const
+    const PkgStreamPtr srcData, [[maybe_unused]] const size_t dataLen) const
 {
     uint8_t digestMethod = static_cast<uint8_t>(ConvertNidToMethod(signer.digestNid));
 
@@ -331,14 +324,14 @@ int32_t CalcSha256ByBlock(const PkgStreamPtr srcData, const size_t dataLen, std:
     while (remainLen >= blockLen) {
         ret = srcData->Read(buffer, offset, blockLen, readLen);
         PKG_CHECK(ret == PKG_SUCCESS, return ret, "Fail read data");
-        SHA256_Update(&ctx, buffer.buffer, blockLen);
-        offset += blockLen;
-        remainLen -= blockLen;
+        SHA256_Update(&ctx, buffer.buffer, readLen);
+        offset += readLen;
+        remainLen -= readLen;
     }
     if (remainLen > 0) {
         ret = srcData->Read(buffer, offset, remainLen, readLen);
         PKG_CHECK(ret == PKG_SUCCESS, return ret, "Fail read data");
-        SHA256_Update(&ctx, buffer.buffer, remainLen);
+        SHA256_Update(&ctx, buffer.buffer, readLen);
     }
 
     if (SHA256_Final(result.data(), &ctx) != 1) {

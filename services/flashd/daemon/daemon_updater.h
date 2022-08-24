@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,52 +12,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #ifndef HDC_DAEMON_UPDATER_H
 #define HDC_DAEMON_UPDATER_H
-#include <cstdlib>
 
-#include "securec.h"
+#include <unordered_map>
+
+#include "commander_factory.h"
 #include "transfer.h"
 
 namespace Hdc {
-#define FLASHDAEMON_CHECK(retCode, exper, ...) \
-    if (!(retCode)) { \
-        WRITE_LOG(LOG_FATAL, __VA_ARGS__); \
-        exper; \
-    }
-
 class DaemonUpdater : public HdcTransferBase {
 public:
+    DISALLOW_COPY_MOVE(DaemonUpdater);
     explicit DaemonUpdater(HTaskInfo hTaskInfo);
     virtual ~DaemonUpdater();
     bool CommandDispatch(const uint16_t command, uint8_t *payload, const int payloadSize) override;
-#ifdef UPDATER_UT
-    void DoTransferFinish();
-#endif
+
 private:
-    virtual void WhenTransferFinish(CtxFile *context) override;
-    void ProcessUpdateCheck(const uint8_t *payload, const int payloadSize);
-    void RunUpdateShell(uint8_t type, const std::string &options, const std::string &package);
-    void AsyncUpdateFinish(uint8_t type, int32_t retCode, const string &result);
-    void SendProgress(size_t dataLen);
-#ifdef UPDATER_UT
-    bool SendToAnother(const uint16_t command, uint8_t *bufPtr, const int size)
-    {
-        WRITE_LOG(LOG_DEBUG, "SendToAnother %d size %d", command, size);
-        return true;
-    }
-    void TaskFinish()
-    {
-        WRITE_LOG(LOG_DEBUG, "TaskFinish ");
-        return;
-    }
-#endif
-private:
-    double currSize_ = 0;
-    double totalSize_ = 0;
-    int32_t percentage_ = 0;
-    void* flashHandle_ = nullptr;
-    std::string errorMsg_ {};
+    void Init();
+    void CheckCommand(const uint8_t *payload, int payloadSize);
+    void DataCommand(const uint8_t *payload, int payloadSize) const;
+    void EraseCommand(const uint8_t *payload, int payloadSize);
+    void FormatCommand(const uint8_t *payload, int payloadSize);
+    bool SendToHost(Flashd::CmdType type, Flashd::UpdaterState state, const std::string &msg);
+    std::unique_ptr<Flashd::Commander> CreateCommander(const std::string &cmd);
+    bool IsDeviceLocked() const;
+
+    bool isInit_ = false;
+    std::unique_ptr<Flashd::Commander> commander_ = nullptr;
+    std::unordered_map<uint16_t, std::function<void(uint8_t *payload, int payloadSize)>> cmdFunc_;
+    static std::atomic<bool> isRunning_;
 };
 } // namespace Hdc
 #endif

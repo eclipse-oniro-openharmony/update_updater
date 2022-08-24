@@ -15,13 +15,13 @@
 
 #include "fs_manager/mount.h"
 #include <cerrno>
-#include <map>
 #include <string>
 #include <sys/mount.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <unistd.h>
 #include <vector>
+#include <linux/fs.h>
 #include "log/log.h"
 #include "utils.h"
 
@@ -129,7 +129,40 @@ int MountForPath(const std::string &path)
     return ret;
 }
 
-int FormatPartition(const std::string &path)
+void ErasePartition(const std::string &devPath)
+{
+    std::string realPath {};
+    if (!Utils::PathToRealPath(devPath, realPath)) {
+        LOG(ERROR) << "realpath failed:" << devPath;
+        return;
+    }
+    int fd = open(realPath.c_str(), O_RDWR | O_LARGEFILE);
+    if (fd == -1) {
+        LOG(ERROR) << "open failed:" << realPath;
+        return;
+    }
+
+    uint64_t size = 0;
+    int ret = ioctl(fd, BLKGETSIZE64, &size);
+    if (ret < 0) {
+        LOG(ERROR) << "get partition size failed:" << size;
+        close(fd);
+        return;
+    }
+
+    LOG(INFO) << "erase partition size:" << size;
+
+    uint64_t range[] { 0, size };
+    ret = ioctl(fd, BLKDISCARD, &range);
+    if (ret < 0) {
+        LOG(ERROR) << "erase partition failed";
+    }
+    close(fd);
+
+    return;
+}
+
+int FormatPartition(const std::string &path, bool isZeroErase)
 {
     FstabItem *item = FindFstabItemForPath(*g_fstab, path.c_str());
     if (item == nullptr) {
@@ -151,6 +184,11 @@ int FormatPartition(const std::string &path)
     if (UmountForPath(path) != 0) {
         return -1;
     }
+
+    if (isZeroErase) {
+        ErasePartition(item->deviceName);
+    }
+
     int ret = DoFormat(item->deviceName, item->fsType);
     if (ret != 0) {
         LOG(ERROR) << "Format " << path << " failed";
@@ -194,6 +232,9 @@ const std::string GetBlockDeviceByMountPoint(const std::string &mountPoint)
         return "";
     }
     std::string blockDevice = PARTITION_PATH + mountPoint;
+    if (mountPoint[0] != '/') {
+        blockDevice = PARTITION_PATH + "/" + mountPoint;
+    }
     if (g_fstab != nullptr) {
         FstabItem *item = FindFstabItemForMountPoint(*g_fstab, mountPoint.c_str());
         if (item != NULL) {

@@ -35,15 +35,15 @@ public:
         const Hpackage::PkgBuffer &p7Data, Hpackage::PkgStreamPtr inStream) const;
 
 private:
-    int32_t ParsePkgFooter(const uint8_t *footer, size_t length, uint16_t &commentAppendLen,
-        uint16_t &commentTotalLen) const;
+    int32_t ParsePkgFooter(const uint8_t *footer, size_t length, uint16_t &signCommentAppendLen,
+        uint16_t &signCommentTotalLen) const;
 
     int32_t WriteSourcePackageData(Hpackage::PkgStreamPtr outStream, Hpackage::PkgStreamPtr inStream,
         size_t wirteLen) const;
 
     int32_t WriteFooter(Hpackage::PkgStreamPtr outStream, uint16_t zipCommentLen, size_t &offset) const;
 
-    int32_t CheckZipEocd(const uint8_t *eocd, size_t length, uint16_t commentTotalLen) const;
+    int32_t CheckZipEocd(const uint8_t *eocd, size_t length, uint16_t signCommentTotalLen) const;
 };
 } // namespace Hpackage
 #endif

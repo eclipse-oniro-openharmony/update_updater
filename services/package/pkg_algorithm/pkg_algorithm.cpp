@@ -29,7 +29,10 @@ int32_t PkgAlgorithm::ReadData(const PkgStreamPtr inStream, size_t offset, PkgBu
     size_t remainBytes = (remainSize > buffer.length) ? buffer.length : remainSize;
     if (remainBytes != 0) {
         int32_t ret = inStream->Read(buffer, offset, remainBytes, readBytes);
-        PKG_CHECK(ret == PKG_SUCCESS, return ret, "fail deflate write data ");
+        if (ret != PKG_SUCCESS) {
+            PKG_LOGE("fail deflate write data ");
+            return ret;
+        }
     }
     remainSize -= readBytes;
     readLen = readBytes;
@@ -45,8 +48,10 @@ int32_t PkgAlgorithm::FinalDigest(DigestAlgorithm::DigestAlgorithmPtr algorithm,
         if (check && memcmp(digest.buffer, context.digest, DIGEST_MAX_LEN) != 0) {
             return PKG_INVALID_DIGEST;
         }
-        PKG_CHECK(!memcpy_s(context.digest, sizeof(context.digest), digest.buffer, DIGEST_MAX_LEN),
-            return PKG_NONE_MEMORY, "FinalDigest memcpy failed");
+        if (memcpy_s(context.digest, sizeof(context.digest), digest.buffer, DIGEST_MAX_LEN) != EOK) {
+            PKG_LOGE("FinalDigest memcpy failed");
+            return PKG_NONE_MEMORY;
+        }
     }
     return PKG_SUCCESS;
 }
@@ -55,7 +60,10 @@ int32_t PkgAlgorithm::Pack(const PkgStreamPtr inStream, const PkgStreamPtr outSt
     PkgAlgorithmContext &context)
 {
     DigestAlgorithm::DigestAlgorithmPtr algorithm = PkgAlgorithmFactory::GetDigestAlgorithm(context.digestMethod);
-    PKG_CHECK(algorithm != nullptr, return PKG_NOT_EXIST_ALGORITHM, "Can not get digest algor");
+    if (algorithm == nullptr) {
+        PKG_LOGE("Can not get digest algor");
+        return PKG_NOT_EXIST_ALGORITHM;
+    }
     algorithm->Init();
 
     PkgBuffer buffer(MAX_BUFFER_SIZE);
@@ -66,10 +74,16 @@ int32_t PkgAlgorithm::Pack(const PkgStreamPtr inStream, const PkgStreamPtr outSt
     size_t readLen = 0;
     while (remainSize > 0) {
         ret = ReadData(inStream, srcOffset, buffer, remainSize, readLen);
-        PKG_CHECK(ret == PKG_SUCCESS, break, "Fail read data ");
+        if (ret != PKG_SUCCESS) {
+            PKG_LOGE("Fail read data ");
+            break;
+        }
 
         ret = outStream->Write(buffer, readLen, destOffset);
-        PKG_CHECK(ret == PKG_SUCCESS, break, "Fail write data ");
+        if (ret != PKG_SUCCESS) {
+            PKG_LOGE("Fail write data ");
+            break;
+        }
 
         algorithm->Update(buffer, readLen);
         srcOffset += readLen;
@@ -77,9 +91,14 @@ int32_t PkgAlgorithm::Pack(const PkgStreamPtr inStream, const PkgStreamPtr outSt
     }
 
     ret = FinalDigest(algorithm, context, true);
-    PKG_CHECK(ret == 0, return ret, "Check digest fail");
-    PKG_CHECK(srcOffset - context.srcOffset == context.unpackedSize, return PKG_INVALID_STREAM,
-        "original size error %zu %zu", srcOffset, context.unpackedSize);
+    if (ret != 0) {
+        PKG_LOGE("Check digest fail");
+        return ret;
+    }
+    if (srcOffset - context.srcOffset != context.unpackedSize) {
+        PKG_LOGE("original size error %zu %zu", srcOffset, context.unpackedSize);
+        return PKG_INVALID_DIGEST;
+    }
     context.packedSize = destOffset - context.destOffset;
     return ret;
 }
@@ -88,7 +107,10 @@ int32_t PkgAlgorithm::Unpack(const PkgStreamPtr inStream, const PkgStreamPtr out
     PkgAlgorithmContext &context)
 {
     DigestAlgorithm::DigestAlgorithmPtr algorithm = PkgAlgorithmFactory::GetDigestAlgorithm(context.digestMethod);
-    PKG_CHECK(algorithm != nullptr, return PKG_NOT_EXIST_ALGORITHM, "Can not get digest algor");
+    if (algorithm == nullptr) {
+        PKG_LOGE("Can not get digest algor");
+        return PKG_NOT_EXIST_ALGORITHM;
+    }
     algorithm->Init();
     PkgBuffer buffer(MAX_BUFFER_SIZE);
     int32_t ret = PKG_SUCCESS;
@@ -98,10 +120,16 @@ int32_t PkgAlgorithm::Unpack(const PkgStreamPtr inStream, const PkgStreamPtr out
     size_t readLen = 0;
     while (remainSize > 0) {
         ret = ReadData(inStream, srcOffset, buffer, remainSize, readLen);
-        PKG_CHECK(ret == PKG_SUCCESS, break, "Fail read data ");
+        if (ret != PKG_SUCCESS) {
+            PKG_LOGE("Fail read data ");
+            break;
+        }
 
         ret = outStream->Write(buffer, readLen, destOffset);
-        PKG_CHECK(ret == PKG_SUCCESS, break, "Fail write data ");
+        if (ret != PKG_SUCCESS) {
+            PKG_LOGE("Fail write data ");
+            break;
+        }
 
         algorithm->Update(buffer, readLen);
         srcOffset += readLen;
@@ -109,32 +137,49 @@ int32_t PkgAlgorithm::Unpack(const PkgStreamPtr inStream, const PkgStreamPtr out
     }
 
     ret = FinalDigest(algorithm, context, true);
-    PKG_CHECK(ret == 0, return ret, "Check digest fail");
-    PKG_CHECK(destOffset - context.destOffset == context.packedSize, return PKG_INVALID_STREAM,
-        "original size error %zu %zu", destOffset, context.packedSize);
+    if (ret != 0) {
+        PKG_LOGE("Check digest fail");
+        return ret;
+    }
+    if (destOffset - context.destOffset != context.packedSize) {
+        PKG_LOGE("original size error %zu %zu", destOffset, context.packedSize);
+        return PKG_INVALID_DIGEST;
+    }
     context.unpackedSize = srcOffset - context.srcOffset;
     return ret;
 }
 
 PkgAlgorithm::PkgAlgorithmPtr PkgAlgorithmFactory::GetAlgorithm(const PkgManager::FileInfoPtr config)
 {
-    PKG_CHECK(config != nullptr, return nullptr, "Fail to get algorithm ");
+    if (config == nullptr) {
+        PKG_LOGE("Fail to get algorithm ");
+        return nullptr;
+    }
     switch (config->packMethod) {
         case PKG_COMPRESS_METHOD_ZIP:
         case PKG_COMPRESS_METHOD_GZIP: {
-            PKG_CHECK(config != nullptr, return nullptr, "Invalid param config");
+            if (config == nullptr) {
+                PKG_LOGE("Invalid param config");
+                return nullptr;
+            }
             const ZipFileInfo *info = (ZipFileInfo *)config;
             return std::make_shared<PkgAlgoDeflate>(*info);
         }
         case PKG_COMPRESS_METHOD_NONE:
             return std::make_shared<PkgAlgorithm>();
         case PKG_COMPRESS_METHOD_LZ4: {
-            PKG_CHECK(config != nullptr, return nullptr, "Invalid param config");
+            if (config == nullptr) {
+                PKG_LOGE("Invalid param config");
+                return nullptr;
+            }
             const Lz4FileInfo *info = (Lz4FileInfo *)config;
             return std::make_shared<PkgAlgorithmLz4>(*info);
         }
         case PKG_COMPRESS_METHOD_LZ4_BLOCK: {
-            PKG_CHECK(config != nullptr, return nullptr, "Invalid param config");
+            if (config == nullptr) {
+                PKG_LOGE("Invalid param config");
+                return nullptr;
+            }
             const Lz4FileInfo *info = (Lz4FileInfo *)config;
             return std::make_shared<PkgAlgorithmBlockLz4>(*info);
         }

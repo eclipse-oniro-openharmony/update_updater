@@ -54,23 +54,38 @@ int32_t Crc32Algorithm::Init()
 
 int32_t Crc32Algorithm::Update(const PkgBuffer &buffer, size_t size)
 {
-    PKG_CHECK(buffer.buffer != nullptr, return PKG_INVALID_PARAM, "Param null!");
+    if (buffer.buffer == nullptr) {
+        PKG_LOGE("Param null!");
+        return PKG_INVALID_PARAM;
+    }
     crc32_ = crc32(crc32_, buffer.buffer, size);
     return PKG_SUCCESS;
 }
 
 int32_t Crc32Algorithm::Final(PkgBuffer &result)
 {
-    PKG_CHECK(result.buffer != nullptr, return PKG_INVALID_PARAM, "Param null!");
-    PKG_CHECK(result.length == sizeof(uint32_t), return PKG_INVALID_PARAM, "Invalid size %zu", result.length);
+    if (result.buffer == nullptr) {
+        PKG_LOGE("Param null!");
+        return PKG_INVALID_PARAM;
+    }
+    if (result.length != sizeof(uint32_t)) {
+        PKG_LOGE("Invalid size %zu", result.length);
+        return PKG_INVALID_PARAM;
+    }
     WriteLE32(result.buffer, crc32_);
     return PKG_SUCCESS;
 }
 
 int32_t Crc32Algorithm::Calculate(PkgBuffer &result, const PkgBuffer &buffer, size_t size)
 {
-    PKG_CHECK(result.buffer != nullptr && buffer.buffer != nullptr, return PKG_INVALID_PARAM, "Param null!");
-    PKG_CHECK(result.length == sizeof(uint32_t), return PKG_INVALID_PARAM, "Invalid size %zu", result.length);
+    if (result.buffer == nullptr || buffer.buffer == nullptr) {
+        PKG_LOGE("Param null!");
+        return PKG_INVALID_PARAM;
+    }
+    if (result.length != sizeof(uint32_t)) {
+        PKG_LOGE("Invalid size %zu", result.length);
+        return PKG_INVALID_PARAM;
+    }
     auto crc = reinterpret_cast<uint32_t *>(result.buffer);
     // Generate CRC32 of file.
     *crc = crc32(*crc, buffer.buffer, size);
@@ -85,24 +100,34 @@ int32_t Sha256Algorithm::Init()
 
 int32_t Sha256Algorithm::Update(const PkgBuffer &buffer, size_t size)
 {
-    PKG_CHECK(buffer.buffer != nullptr, return PKG_INVALID_PARAM, "Param null!");
+    if (buffer.buffer == nullptr) {
+        PKG_LOGE("Param null!");
+        return PKG_INVALID_PARAM;
+    }
     SHA256_Update(&sha256Ctx_, buffer.buffer, size);
     return PKG_SUCCESS;
 }
 
 int32_t Sha256Algorithm::Final(PkgBuffer &result)
 {
-    PKG_CHECK(result.buffer != nullptr && result.length == DIGEST_SHA256_LEN,
-        return PKG_INVALID_PARAM, "Param context null!");
+    if (result.buffer == nullptr || result.length != DIGEST_SHA256_LEN) {
+        PKG_LOGE("Param context null!");
+        return PKG_INVALID_PARAM;
+    }
     SHA256_Final(result.buffer, &sha256Ctx_);
     return PKG_SUCCESS;
 }
 
 int32_t Sha256Algorithm::Calculate(PkgBuffer &result, const PkgBuffer &buffer, size_t size)
 {
-    PKG_CHECK(result.buffer != nullptr && result.length == DIGEST_SHA256_LEN,
-        return PKG_INVALID_PARAM, "Param context null!");
-    PKG_CHECK(buffer.buffer != nullptr, return PKG_INVALID_PARAM, "Param null!");
+    if (result.buffer == nullptr || result.length != DIGEST_SHA256_LEN) {
+        PKG_LOGE("Param context null!");
+        return PKG_INVALID_PARAM;
+    }
+    if (buffer.buffer == nullptr) {
+        PKG_LOGE("Param null!");
+        return PKG_INVALID_PARAM;
+    }
     SHA256_Init(&sha256Ctx_);
     SHA256_Update(&sha256Ctx_, buffer.buffer, size);
     SHA256_Final(result.buffer, &sha256Ctx_);
@@ -117,24 +142,34 @@ int32_t Sha384Algorithm::Init()
 
 int32_t Sha384Algorithm::Update(const PkgBuffer &buffer, size_t size)
 {
-    PKG_CHECK(buffer.buffer != nullptr, return PKG_INVALID_PARAM, "Param null!");
+    if (buffer.buffer == nullptr) {
+        PKG_LOGE("Param null!");
+        return PKG_INVALID_PARAM;
+    }
     SHA384_Update(&shaCtx_, buffer.buffer, size);
     return PKG_SUCCESS;
 }
 
 int32_t Sha384Algorithm::Final(PkgBuffer &result)
 {
-    PKG_CHECK(result.buffer != nullptr && result.length == DIGEST_SHA384_LEN,
-        return PKG_INVALID_PARAM, "Param context null!");
+    if (result.buffer == nullptr || result.length != DIGEST_SHA384_LEN) {
+        PKG_LOGE("Param context null!");
+        return PKG_INVALID_PARAM;
+    }
     SHA384_Final(result.buffer, &shaCtx_);
     return PKG_SUCCESS;
 }
 
 int32_t Sha384Algorithm::Calculate(PkgBuffer &result, const PkgBuffer &buffer, size_t size)
 {
-    PKG_CHECK(result.buffer != nullptr && result.length == DIGEST_SHA384_LEN,
-        return PKG_INVALID_PARAM, "Param context null!");
-    PKG_CHECK(buffer.buffer != nullptr, return PKG_INVALID_PARAM, "Param null!");
+    if (result.buffer == nullptr || result.length != DIGEST_SHA384_LEN) {
+        PKG_LOGE("Param context null!");
+        return PKG_INVALID_PARAM;
+    }
+    if (buffer.buffer == nullptr) {
+        PKG_LOGE("Param null!");
+        return PKG_INVALID_PARAM;
+    }
     SHA512_Init(&shaCtx_);
     SHA384_Update(&shaCtx_, buffer.buffer, size);
     SHA384_Final(result.buffer, &shaCtx_);

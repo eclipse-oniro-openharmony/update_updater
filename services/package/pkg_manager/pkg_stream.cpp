@@ -13,10 +13,7 @@
  * limitations under the License.
  */
 #include "pkg_stream.h"
-#include <cerrno>
 #include <cstdio>
-#include <cstdlib>
-#include <memory>
 #include "pkg_manager.h"
 #include "pkg_utils.h"
 #include "securec.h"
@@ -65,67 +62,122 @@ FileStream::~FileStream()
 
 int32_t FileStream::Read(const PkgBuffer &data, size_t offset, size_t needRead, size_t &readLen)
 {
-    PKG_CHECK(stream_ != nullptr, return PKG_INVALID_STREAM, "Invalid stream");
-    PKG_CHECK(data.length >= needRead, return PKG_INVALID_STREAM, "Invalid stream");
+    if (stream_ == nullptr) {
+        PKG_LOGE("Invalid stream");
+        return PKG_INVALID_STREAM;
+    }
+    if (data.length < needRead) {
+        PKG_LOGE("Invalid stream");
+        return PKG_INVALID_STREAM;
+    }
     readLen = 0;
-    size_t len = GetFileLength();
-    fseek(stream_, offset, SEEK_SET);
-    PKG_CHECK(offset <= len, return PKG_INVALID_STREAM, "Invalid offset");
-    len = fread(data.buffer, 1, needRead, stream_);
-    readLen = len;
+    if (fseek(stream_, offset, SEEK_SET) != 0) {
+        PKG_LOGE("read data fail");
+        return PKG_INVALID_STREAM;
+    }
+    if (offset > GetFileLength()) {
+        PKG_LOGE("Invalid offset");
+        return PKG_INVALID_STREAM;
+    }
+    readLen = fread(data.buffer, 1, needRead, stream_);
+    if (readLen == 0) {
+        PKG_LOGE("read data fail");
+        return PKG_INVALID_STREAM;
+    }
     return PKG_SUCCESS;
 }
 
 int32_t FileStream::Write(const PkgBuffer &data, size_t size, size_t offset)
 {
-    PKG_CHECK(streamType_ == PkgStreamType_Write, return PKG_INVALID_STREAM, "Invalid stream type");
-    PKG_CHECK(stream_ != nullptr, return PKG_INVALID_STREAM, "Invalid stream");
-    fseek(stream_, offset, SEEK_SET);
-    size_t len = fwrite(data.buffer, size, 1, stream_);
-    PKG_CHECK(len == 1, return PKG_INVALID_STREAM, "Write buffer fail");
+    if (streamType_ != PkgStreamType_Write) {
+        PKG_LOGE("Invalid stream type");
+        return PKG_INVALID_STREAM;
+    }
+    if (stream_ == nullptr) {
+        PKG_LOGE("Invalid stream");
+        return PKG_INVALID_STREAM;
+    }
+    if (fseek(stream_, offset, SEEK_SET) != 0) {
+        PKG_LOGE("write data fail");
+        return PKG_INVALID_STREAM;
+    }
+    if (fwrite(data.buffer, size, 1, stream_) != 1) {
+        PKG_LOGE("Write buffer fail");
+        return PKG_INVALID_STREAM;
+    }
     PostDecodeProgress(POST_TYPE_DECODE_PKG, size, nullptr);
     return PKG_SUCCESS;
 }
 
 size_t FileStream::GetFileLength()
 {
-    PKG_CHECK(stream_ != nullptr, return 0, "Invalid stream");
+    if (stream_ == nullptr) {
+        PKG_LOGE("Invalid stream");
+        return 0;
+    }
     if (fileLength_ == 0) {
-        PKG_CHECK(Seek(0, SEEK_END) == 0, return -1, "Invalid stream");
+        if (Seek(0, SEEK_END) != 0) {
+            PKG_LOGE("Invalid stream");
+            return -1;
+        }
         off64_t ret = ftello64(stream_);
-        PKG_CHECK(ret >= 0, return PKG_INVALID_STREAM, "ftell64 failed");
+        if (ret < 0) {
+            PKG_LOGE("ftell64 failed");
+            return PKG_INVALID_STREAM;
+        }
         fileLength_ = static_cast<size_t>(ret);
-        fseek(stream_, 0, SEEK_SET);
+        if (fseek(stream_, 0, SEEK_SET) != 0) {
+            PKG_LOGE("fseek failed");
+            return PKG_INVALID_STREAM;
+        }
     }
     return fileLength_;
 }
 
 int32_t FileStream::Seek(long int offset, int whence)
 {
-    PKG_CHECK(stream_ != nullptr, return PKG_INVALID_STREAM, "Invalid stream");
+    if (stream_ == nullptr) {
+        PKG_LOGE("Invalid stream");
+        return PKG_INVALID_STREAM;
+    }
     return fseek(stream_, offset, whence);
 }
 
 int32_t FileStream::Flush(size_t size)
 {
-    PKG_CHECK(stream_ != nullptr, return PKG_INVALID_STREAM, "Invalid stream");
+    if (stream_ == nullptr) {
+        PKG_LOGE("Invalid stream");
+        return PKG_INVALID_STREAM;
+    }
     if (fileLength_ == 0) {
         fileLength_ = size;
     }
-    (void)fseek(stream_, 0, SEEK_END);
+    if (fseek(stream_, 0, SEEK_END) != 0) {
+        PKG_LOGE("fseek failed");
+        return PKG_INVALID_STREAM;
+    }
     off64_t ret = ftello64(stream_);
-    PKG_CHECK(ret >= 0, return PKG_INVALID_STREAM, "ftell64 failed");
+    if (ret < 0) {
+        PKG_LOGE("ftell64 failed");
+        return PKG_INVALID_STREAM;
+    }
     fileLength_ = static_cast<size_t>(ret);
     if (size != fileLength_) {
         PKG_LOGE("Flush size %zu local size:%zu", size, fileLength_);
     }
-    PKG_CHECK(fflush(stream_) == 0, return PKG_INVALID_STREAM, "Invalid stream");
+    if (fflush(stream_) != 0) {
+        PKG_LOGE("Invalid stream");
+        return PKG_INVALID_STREAM;
+    }
     return PKG_SUCCESS;
 }
 
 MemoryMapStream::~MemoryMapStream()
 {
-    PKG_CHECK(memMap_ != nullptr, return, "Invalid memory map");
+    if (memMap_ == nullptr) {
+        PKG_LOGE("Invalid memory map");
+        return;
+    }
     if (streamType_ == PkgStreamType_MemoryMap) {
         ReleaseMemory(memMap_, memSize_);
     }
@@ -133,28 +185,50 @@ MemoryMapStream::~MemoryMapStream()
 
 int32_t MemoryMapStream::Read(const PkgBuffer &data, size_t start, size_t needRead, size_t &readLen)
 {
-    PKG_CHECK(memMap_ != nullptr, return PKG_INVALID_STREAM, "Invalid memory map");
-    PKG_CHECK(start <= memSize_, return PKG_INVALID_STREAM, "Invalid start");
-    PKG_CHECK(data.length >= needRead, return PKG_INVALID_STREAM, "Invalid start");
+    if (memMap_ == nullptr) {
+        PKG_LOGE("Invalid memory map");
+        return PKG_INVALID_STREAM;
+    }
+    if (start > memSize_) {
+        PKG_LOGE("Invalid start");
+        return PKG_INVALID_STREAM;
+    }
+    if (data.length < needRead) {
+        PKG_LOGE("Invalid start");
+        return PKG_INVALID_STREAM;
+    }
 
     MemoryMapStream::Seek(start, SEEK_SET);
     size_t copyLen = GetFileLength() - start;
     readLen = ((copyLen > needRead) ? needRead : copyLen);
-    PKG_CHECK(!memcpy_s(data.buffer, needRead, memMap_ + currOffset_, readLen), return PKG_NONE_MEMORY,
-        "Memcpy failed size:%zu, start:%zu copyLen:%zu %zu", needRead, start, copyLen, readLen);
+    if (memcpy_s(data.buffer, needRead, memMap_ + currOffset_, readLen) != EOK) {
+        PKG_LOGE("Memcpy failed size:%zu, start:%zu copyLen:%zu %zu", needRead, start, copyLen, readLen);
+        return PKG_NONE_MEMORY;
+    }
     return PKG_SUCCESS;
 }
 
 int32_t MemoryMapStream::Write(const PkgBuffer &data, size_t size, size_t start)
 {
-    PKG_CHECK(memMap_ != nullptr, return PKG_INVALID_STREAM, "Invalid memory map");
-    PKG_CHECK(start <= memSize_, return PKG_INVALID_STREAM, "Invalid start");
+    if (memMap_ == nullptr) {
+        PKG_LOGE("Invalid memory map");
+        return PKG_INVALID_STREAM;
+    }
+    if (start > memSize_) {
+        PKG_LOGE("Invalid start");
+        return PKG_INVALID_STREAM;
+    }
 
     currOffset_ = start;
     size_t copyLen = memSize_ - start;
-    PKG_CHECK(copyLen >= size, return PKG_INVALID_STREAM, "Write fail copyLen %zu, %zu", copyLen, size);
-    int32_t ret = memcpy_s(memMap_ + currOffset_, memSize_ - currOffset_, data.buffer, size);
-    PKG_CHECK(ret == PKG_SUCCESS, return PKG_INVALID_STREAM, "Write fail");
+    if (copyLen < size) {
+        PKG_LOGE("Write fail copyLen %zu, %zu", copyLen, size);
+        return PKG_INVALID_STREAM;
+    }
+    if (memcpy_s(memMap_ + currOffset_, memSize_ - currOffset_, data.buffer, size) != EOK) {
+        PKG_LOGE("Write fail");
+        return PKG_INVALID_STREAM;
+    }
     PostDecodeProgress(POST_TYPE_DECODE_PKG, size, nullptr);
     return PKG_SUCCESS;
 }
@@ -162,18 +236,35 @@ int32_t MemoryMapStream::Write(const PkgBuffer &data, size_t size, size_t start)
 int32_t MemoryMapStream::Seek(long int offset, int whence)
 {
     if (whence == SEEK_SET) {
-        PKG_CHECK(offset >= 0, return PKG_INVALID_STREAM, "Invalid offset");
-        PKG_CHECK(static_cast<size_t>(offset) <= memSize_, return PKG_INVALID_STREAM, "Invalid offset");
+        if (offset < 0) {
+            PKG_LOGE("Invalid offset");
+            return PKG_INVALID_STREAM;
+        }
+        if (static_cast<size_t>(offset) > memSize_) {
+            PKG_LOGE("Invalid offset");
+            return PKG_INVALID_STREAM;
+        }
         currOffset_ = static_cast<size_t>(offset);
     } else if (whence == SEEK_CUR) {
-        PKG_CHECK(static_cast<size_t>(offset) <= (memSize_ - currOffset_), return PKG_INVALID_STREAM,
-            "Invalid offset");
+        if (static_cast<size_t>(offset) > (memSize_ - currOffset_)) {
+            PKG_LOGE("Invalid offset");
+            return PKG_INVALID_STREAM;
+        }
         currOffset_ += static_cast<size_t>(offset);
     } else {
-        PKG_CHECK(offset <= 0, return PKG_INVALID_STREAM, "Invalid offset");
+        if (offset > 0) {
+            PKG_LOGE("Invalid offset");
+            return PKG_INVALID_STREAM;
+        }
         auto memSize = static_cast<long long>(memSize_);
-        PKG_CHECK((memSize + offset) <= memSize, return PKG_INVALID_STREAM, "Invalid offset");
-        PKG_CHECK((memSize + offset) >= 0, return PKG_INVALID_STREAM, "Invalid offset");
+        if (memSize + offset > memSize) {
+            PKG_LOGE("Invalid offset");
+            return PKG_INVALID_STREAM;
+        }
+        if (memSize + offset < 0) {
+            PKG_LOGE("Invalid offset");
+            return PKG_INVALID_STREAM;
+        }
         currOffset_ = static_cast<size_t>(memSize + offset);
     }
     return PKG_SUCCESS;

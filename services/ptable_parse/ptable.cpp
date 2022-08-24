@@ -136,7 +136,7 @@ bool Ptable::MemReadWithOffset(const std::string &filePath, const uint64_t offse
     }
 
     fin.seekg(offset, std::ios::beg);
-    if (fin.tellg() != offset) {
+    if (fin.tellg() != static_cast<long long>(offset)) {
         LOG(ERROR) << "seekp 0x" << std::hex << offset << " bytes in " << filePath <<
             " failed. Now is in 0x" << std::hex << fin.tellg() << std::dec;
         fin.close();
@@ -156,7 +156,7 @@ bool Ptable::MemReadWithOffset(const std::string &filePath, const uint64_t offse
 uint32_t Ptable::Reflect(uint32_t data, const uint32_t len)
 {
     uint32_t ref = 0;
-    for (auto i = 0; i < len; i++) {
+    for (uint32_t i = 0; i < len; i++) {
         if (data & 0x1) {
             ref |= (1 << ((len - 1) - i));
         }
@@ -177,10 +177,10 @@ uint32_t Ptable::CalculateCrc32(const uint8_t *buffer, const uint32_t len)
     uint32_t regs = 0xFFFFFFFF; // init to all ones
     const uint32_t regsMask = 0xFFFFFFFF; // ensure only 32 bit answer
     uint32_t regsMsb;
-    for (auto i = 0; i < len; i++) {
+    for (uint32_t i = 0; i < len; i++) {
         uint32_t dataByte = buffer[i];
         dataByte = Reflect(dataByte, 8); // 8:length of unit (i.e. byte)
-        for (auto j = 0; j < byteLen; j++) {
+        for (uint32_t j = 0; j < byteLen; j++) {
             msb = dataByte >> (byteLen - 1); // get MSB
             msb &= 1; // ensure just 1 bit
             regsMsb = (regs >> 31) & 1; // 31:32-1, MSB of regs
@@ -487,4 +487,4 @@ bool Ptable::GetPartionInfoByName(const std::string &partitionName, PtnInfo &ptn
     LOG(ERROR) << "get partition info failed! Not found partition:" << partitionName;
     return false;
 }
-} // namespace updater
+} // namespace Updater
