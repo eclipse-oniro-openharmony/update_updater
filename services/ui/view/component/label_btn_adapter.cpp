@@ -16,6 +16,7 @@
 #include "dock/focus_manager.h"
 #include "log/log.h"
 #include "page/view_proxy.h"
+#include "updater_ui_const.h"
 
 namespace Updater {
 struct LabelBtnAdapter::LabelBtnOnFocusListener : public OHOS::UIView::OnFocusListener {
@@ -78,7 +79,7 @@ LabelBtnAdapter::LabelBtnAdapter(const UxViewInfo &info)
     this->SetVisible(commonPtr->visible);
     this->SetViewId(viewId_.c_str());
     this->SetText(TranslateText(specPtr->text).c_str());
-    this->SetFont(DEFAULT_VECTOR_FONT_FILENAME, specPtr->fontSize);
+    this->SetFont(FONT_NAME, specPtr->fontSize);
     this->SetLabelStyle(OHOS::STYLE_TEXT_COLOR, OHOS::Color::GetColorFromRGB(
         specPtr->txtColor.r, specPtr->txtColor.g, specPtr->txtColor.b).full);
     this->SetLabelStyle(OHOS::STYLE_TEXT_OPA, specPtr->txtColor.a);

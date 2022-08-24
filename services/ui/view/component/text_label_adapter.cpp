@@ -15,6 +15,7 @@
 #include "language/language_ui.h"
 #include "log/log.h"
 #include "text_label_adapter.h"
+#include "updater_ui_const.h"
 
 namespace Updater {
 TextLabelAdapter::TextLabelAdapter(const UxViewInfo &info)
@@ -27,7 +28,7 @@ TextLabelAdapter::TextLabelAdapter(const UxViewInfo &info)
     this->SetViewId(viewId_.c_str());
     this->SetAlign(GetAlign(specPtr->align), OHOS::TEXT_ALIGNMENT_CENTER);
     this->SetText(TranslateText(specPtr->text).c_str());
-    this->SetFont(DEFAULT_VECTOR_FONT_FILENAME, specPtr->fontSize);
+    this->SetFont(DEFAULT_FONT_FILENAME, specPtr->fontSize);
     this->SetStyle(OHOS::STYLE_TEXT_COLOR, OHOS::Color::GetColorFromRGB(
         specPtr->fontColor.r, specPtr->fontColor.g, specPtr->fontColor.b).full);
     this->SetStyle(OHOS::STYLE_TEXT_OPA, specPtr->fontColor.a);
