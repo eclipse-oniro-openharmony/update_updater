@@ -25,8 +25,7 @@
 
 namespace Updater {
 namespace {
-auto &g_uiFacade = UpdaterUiFacade::GetInstance();
-constexpr uint32_t DISPLAY_TIME = 1 * 1000 * 1000; /* 1s*/
+constexpr uint32_t DISPLAY_TIME = 1 * 1000 * 1000; /* 1s */
 constexpr uint32_t FAIL_DELAY = 5 * 1000 * 1000;
 constexpr uint32_t SUCCESS_DELAY = 3 * 1000 * 1000;
 constexpr int CALLBACK_DELAY = 20 * 1000; /* 20ms */
@@ -47,6 +46,11 @@ void ExitCallback()
 {
     std::lock_guard<std::mutex> lck(g_mtx);
     g_isInCallback = false;
+}
+
+inline UpdaterUiFacade &GetFacade()
+{
+    return UpdaterUiFacade::GetInstance();
 }
 
 /**
@@ -79,13 +83,13 @@ void DoProgress()
     constexpr int progressValueStep = static_cast<int>(0.3 * ratio);
     constexpr int maxProgressValue = static_cast<int>(100 * ratio);
     int progressvalueTmp = 0;
-    if (g_uiFacade.GetMode() != UpdaterMode::FACTORYRST && g_uiFacade.GetMode() != UpdaterMode::REBOOTFACTORYRST) {
+    if (GetFacade().GetMode() != UpdaterMode::FACTORYRST && GetFacade().GetMode() != UpdaterMode::REBOOTFACTORYRST) {
         return;
     }
-    g_uiFacade.ShowProgress(0);
+    GetFacade().ShowProgress(0);
     while (progressvalueTmp <= maxProgressValue) {
         progressvalueTmp = progressvalueTmp + progressValueStep;
-        g_uiFacade.ShowProgress(progressvalueTmp / ratio);
+        GetFacade().ShowProgress(progressvalueTmp / ratio);
         Utils::UsSleep(minSleepMs);
         if (progressvalueTmp >= maxProgressValue) {
             Utils::UsSleep(maxSleepMs);
@@ -110,10 +114,10 @@ void OnLabelResetEvt()
 {
     LOG(INFO) << "On Label Reset";
     CALLBACK_GUARD;
-    if (!g_uiFacade.SetMode(UpdaterMode::FACTORYRST)) {
+    if (!GetFacade().SetMode(UpdaterMode::FACTORYRST)) {
         return;
     }
-    g_uiFacade.ShowFactoryConfirmPage();
+    GetFacade().ShowFactoryConfirmPage();
 }
 
 void OnLabelSDCardEvt()
@@ -122,16 +126,16 @@ void OnLabelSDCardEvt()
     std::thread {
         [] () {
             CALLBACK_GUARD;
-            if (!g_uiFacade.SetMode(UpdaterMode::SDCARD)) {
+            if (!GetFacade().SetMode(UpdaterMode::SDCARD)) {
                 return;
             }
             Utils::UsSleep(CALLBACK_DELAY);
-            g_uiFacade.ClearText();
-            g_uiFacade.ShowProgress(0);
-            g_uiFacade.ShowLog(TR(LOG_SDCARD_NOTMOVE));
+            GetFacade().ClearText();
+            GetFacade().ShowProgress(0);
+            GetFacade().ShowLog(TR(LOG_SDCARD_NOTMOVE));
             Utils::UsSleep(DISPLAY_TIME);
             if (UpdaterFromSdcard() != UPDATE_SUCCESS) {
-                g_uiFacade.ShowMainpage();
+                GetFacade().ShowMainpage();
                 return;
             }
             PostUpdater(false);
@@ -146,19 +150,19 @@ void OnLabelSDCardNoDelayEvt()
     std::thread {
         [] () {
             CALLBACK_GUARD;
-            if (!g_uiFacade.SetMode(UpdaterMode::SDCARD)) {
+            if (!GetFacade().SetMode(UpdaterMode::SDCARD)) {
                 return;
             }
             Utils::UsSleep(CALLBACK_DELAY);
             if (auto res = UpdaterFromSdcard(); res != UPDATE_SUCCESS) {
-                g_uiFacade.ShowLogRes(res == UPDATE_CORRUPT ? TR(LOGRES_VERIFY_FAILED) : TR(LOGRES_UPDATE_FAILED));
-                g_uiFacade.ShowFailedPage();
+                GetFacade().ShowLogRes(res == UPDATE_CORRUPT ? TR(LOGRES_VERIFY_FAILED) : TR(LOGRES_UPDATE_FAILED));
+                GetFacade().ShowFailedPage();
                 Utils::UsSleep(FAIL_DELAY);
-                g_uiFacade.ShowMainpage();
+                GetFacade().ShowMainpage();
                 return;
             }
-            g_uiFacade.ShowLogRes(TR(LABEL_UPD_OK_DONE));
-            g_uiFacade.ShowSuccessPage();
+            GetFacade().ShowLogRes(TR(LABEL_UPD_OK_DONE));
+            GetFacade().ShowSuccessPage();
             Utils::UsSleep(SUCCESS_DELAY);
             PostUpdater(false);
             Utils::DoReboot("");
@@ -180,21 +184,21 @@ void OnLabelOkEvt()
         [] () {
             CALLBACK_GUARD;
             Utils::UsSleep(CALLBACK_DELAY);
-            g_uiFacade.ShowMainpage();
-            g_uiFacade.ClearText();
-            g_uiFacade.ShowLog(TR(LOG_WIPE_DATA));
-            if (!g_uiFacade.SetMode(UpdaterMode::FACTORYRST)) {
+            GetFacade().ShowMainpage();
+            GetFacade().ClearText();
+            GetFacade().ShowLog(TR(LOG_WIPE_DATA));
+            if (!GetFacade().SetMode(UpdaterMode::FACTORYRST)) {
                 return;
             }
-            g_uiFacade.ShowProgress(0);
-            g_uiFacade.ShowProgressPage();
+            GetFacade().ShowProgress(0);
+            GetFacade().ShowProgressPage();
             DoProgress();
             if (FactoryReset(USER_WIPE_DATA, "/data") == 0) {
-                g_uiFacade.ShowLog(TR(LOG_WIPE_DONE));
-                g_uiFacade.ShowSuccessPage();
+                GetFacade().ShowLog(TR(LOG_WIPE_DONE));
+                GetFacade().ShowSuccessPage();
             } else {
-                g_uiFacade.ShowLog(TR(LOG_WIPE_FAIL));
-                g_uiFacade.ShowFailedPage();
+                GetFacade().ShowLog(TR(LOG_WIPE_FAIL));
+                GetFacade().ShowFailedPage();
             }
         }
     }.detach();
@@ -206,21 +210,21 @@ void OnConfirmRstEvt()
     std::thread {
         [] () {
             CALLBACK_GUARD;
-            if (!g_uiFacade.SetMode(UpdaterMode::FACTORYRST)) {
+            if (!GetFacade().SetMode(UpdaterMode::FACTORYRST)) {
                 return;
             }
-            g_uiFacade.ShowUpdInfo(TR(LABEL_RESET_PROGRESS_INFO));
-            g_uiFacade.ShowProgressPage();
+            GetFacade().ShowUpdInfo(TR(LABEL_RESET_PROGRESS_INFO));
+            GetFacade().ShowProgressPage();
             DoProgress();
             if (FactoryReset(USER_WIPE_DATA, "/data") != 0) {
-                g_uiFacade.ShowLogRes(TR(LOG_WIPE_FAIL));
-                g_uiFacade.ShowFailedPage();
+                GetFacade().ShowLogRes(TR(LOG_WIPE_FAIL));
+                GetFacade().ShowFailedPage();
                 Utils::UsSleep(FAIL_DELAY);
-                g_uiFacade.ShowMainpage();
+                GetFacade().ShowMainpage();
             } else {
-                g_uiFacade.ShowUpdInfo(TR(LOGRES_WIPE_FINISH));
+                GetFacade().ShowUpdInfo(TR(LOGRES_WIPE_FINISH));
                 Utils::UsSleep(DISPLAY_TIME);
-                g_uiFacade.ShowSuccessPage();
+                GetFacade().ShowSuccessPage();
             }
         }
     }.detach();
@@ -244,16 +248,16 @@ void OnMenuClearCacheEvt()
     std::thread {
         [] () {
             CALLBACK_GUARD;
-            g_uiFacade.ClearText();
-            if (!g_uiFacade.SetMode(UpdaterMode::FACTORYRST)) {
+            GetFacade().ClearText();
+            if (!GetFacade().SetMode(UpdaterMode::FACTORYRST)) {
                 return;
             }
             Utils::UsSleep(CALLBACK_DELAY);
-            g_uiFacade.ShowUpdInfo(TR(LOG_CLEAR_CAHCE));
-            g_uiFacade.ShowProgressPage();
+            GetFacade().ShowUpdInfo(TR(LOG_CLEAR_CAHCE));
+            GetFacade().ShowProgressPage();
             ClearMisc();
             DoProgress();
-            g_uiFacade.ShowMainpage();
+            GetFacade().ShowMainpage();
         }
     }.detach();
 }
@@ -261,7 +265,7 @@ void OnMenuClearCacheEvt()
 void StartLongPressTimer()
 {
     static int downCount { 0 };
-    if (!g_uiFacade.IsInProgress()) {
+    if (!GetFacade().IsInProgress()) {
         return;
     }
     ++downCount;
@@ -279,7 +283,7 @@ void StartLongPressTimer()
             return;
         }
         // show warning
-        g_uiFacade.ShowProgressWarning(true);
+        GetFacade().ShowProgressWarning(true);
     }};
     t.detach();
 }
@@ -291,6 +295,6 @@ void StopLongPressTimer()
     // page and release power key in other page
     g_timerStopped = true;
     // hide warning
-    g_uiFacade.ShowProgressWarning(false);
+    GetFacade().ShowProgressWarning(false);
 }
 } // namespace Updater
