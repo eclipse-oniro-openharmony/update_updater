@@ -27,15 +27,15 @@
 #include <unistd.h>
 #include <vector>
 #include "fs_manager/mount.h"
+#include "language/language_ui.h"
 #include "log/dump.h"
 #include "log/log.h"
 #include "package/pkg_manager.h"
 #include "package/packages_info.h"
-#include "progress_bar.h"
-#include "text_label.h"
 #include "updater/updater_const.h"
 #include "updater_main.h"
 #include "updater_ui.h"
+#include "updater_ui_facade.h"
 #include "utils.h"
 
 namespace Updater {
@@ -172,7 +172,8 @@ UpdaterStatus IsSpaceCapacitySufficient(const std::string &packagePath)
     uint64_t totalFreeSize = freeSpaceSize * blockSize;
     if (totalFreeSize <= static_cast<uint64_t>(info->unpackedSize + MAX_LOG_SPACE)) {
         LOG(ERROR) << "Can not update, free space is not enough";
-        ShowText(GetUpdateInfoLabel(), "free space is not enough...");
+        UpdaterUiFacade::GetInstance().ShowUpdInfo(TR(UPD_SPACE_NOTENOUGH), true);
+        std::this_thread::sleep_for(std::chrono::milliseconds(UI_SHOW_DURATION));
         return UPDATE_ERROR;
     }
     return UPDATE_SUCCESS;
@@ -186,11 +187,10 @@ void ProgressSmoothHandler()
         g_tmpProgressValue += increase;
         if (g_tmpProgressValue >= FULL_PERCENT_PROGRESS || increase == 0) {
             break;
+        } else {
+            UpdaterUiFacade::GetInstance().ShowProgress(g_tmpProgressValue);
+            std::this_thread::sleep_for(std::chrono::milliseconds(SHOW_FULL_PROGRESS_TIME));
         }
-        if (GetProgressBar() != nullptr) {
-            GetProgressBar()->SetProgressValue(g_tmpProgressValue);
-        }
-        std::this_thread::sleep_for(std::chrono::milliseconds(SHOW_FULL_PROGRESS_TIME));
     }
 }
 }
@@ -224,30 +224,25 @@ UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, cons
     int retryCount, PackageUpdateMode updateMode)
 {
     UPDATER_INIT_RECORD;
-    if (GetProgressBar() != nullptr) {
-        GetProgressBar()->Hide();
-    }
-    ShowUpdateFrame(true);
+    UpdaterUiFacade::GetInstance().ShowProgressPage();
     UPDATER_ERROR_CHECK(pkgManager != nullptr, "Fail to GetPackageInstance", UPDATER_LAST_WORD(UPDATE_CORRUPT);
         return UPDATE_CORRUPT);
-    TextLabel *updateInfoLabel = GetUpdateInfoLabel();
-    UPDATER_ERROR_CHECK(updateInfoLabel != nullptr, "Fail to updateInfoLabel", return UPDATE_CORRUPT);
     UPDATER_CHECK_ONLY_RETURN(SetupPartitions(updateMode) == 0,
-        ShowText(GetUpdateInfoLabel(), "Install failed...");
+        UpdaterUiFacade::GetInstance().ShowUpdInfo(TR(UPD_SETPART_FAIL), true);
         UPDATER_LAST_WORD(UPDATE_ERROR);
         return UPDATE_ERROR);
 
     LOG(INFO) << "Verify package...";
-    updateInfoLabel->SetText("Verify package...");
+    UpdaterUiFacade::GetInstance().ShowUpdInfo(TR(UPD_VERIFYPKG));
 
     UPDATER_ERROR_CHECK(access(packagePath.c_str(), 0) == 0, "package is not exist",
-        ShowText(GetUpdateInfoLabel(), "package is not exist");
+        UpdaterUiFacade::GetInstance().ShowUpdInfo(TR(UPD_NOPKG), true);
         UPDATER_LAST_WORD(UPDATE_ERROR);
         return UPDATE_ERROR);
 
     int32_t verifyret = OtaUpdatePreCheck(pkgManager, packagePath);
-    UPDATER_ERROR_CHECK(verifyret == PKG_SUCCESS, "Verify ota package Fail...",
-        ShowText(GetUpdateInfoLabel(), "Verify ota package Fail...");
+    UPDATER_ERROR_CHECK(verifyret == PKG_SUCCESS, "package verify failed",
+        UpdaterUiFacade::GetInstance().ShowUpdInfo(TR(UPD_VERIFYPKGFAIL), true);
         UPDATER_LAST_WORD(UPDATE_CORRUPT);
         return UPDATE_CORRUPT);
 
@@ -267,7 +262,8 @@ UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, cons
 
     verifyret = GetUpdatePackageInfo(pkgManager, packagePath);
     UPDATER_ERROR_CHECK(verifyret == PKG_SUCCESS, "Verify package Fail...",
-        ShowText(GetUpdateInfoLabel(), "Verify package Fail..."); return UPDATE_CORRUPT);
+        UpdaterUiFacade::GetInstance().ShowUpdInfo(TR(UPD_VERIFYFAIL), true);
+        return UPDATE_CORRUPT);
     LOG(INFO) << "Package verified. start to install package...";
     int32_t versionRet = UpdatePreProcess(pkgManager, packagePath);
     UPDATER_ERROR_CHECK(versionRet == PKG_SUCCESS, "Version Check Fail...", return UPDATE_CORRUPT);
@@ -283,14 +279,12 @@ UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, cons
     UpdaterStatus updateRet = StartUpdaterProc(pkgManager, packagePath, retryCount, maxTemperature);
     if (updateRet == UPDATE_SUCCESS) {
         ProgressSmoothHandler();
-        if (GetProgressBar() != nullptr) {
-            GetProgressBar()->SetProgressValue(FULL_PERCENT_PROGRESS);
-        }
-        updateInfoLabel->SetText("Update success, reboot now");
+        UpdaterUiFacade::GetInstance().ShowProgress(FULL_PERCENT_PROGRESS);
+        UpdaterUiFacade::GetInstance().ShowUpdInfo(TR(UPD_OK));
         std::this_thread::sleep_for(std::chrono::milliseconds(SHOW_FULL_PROGRESS_TIME));
         LOG(INFO)<< "update success , do reboot now";
     } else {
-        updateInfoLabel->SetText("Install failed.");
+        UpdaterUiFacade::GetInstance().ShowUpdInfo(TR(UPD_INSTALL_FAIL));
         LOG(ERROR) << "Install package failed.";
     }
     return updateRet;
@@ -311,45 +305,44 @@ void SetProgress(const std::vector<std::string> &output)
     if (frac >= FULL_EPSINON && g_tmpValue + g_percentage < FULL_PERCENT_PROGRESS) {
         g_tmpValue += g_percentage;
         g_tmpProgressValue = g_tmpValue;
+        UpdaterUiFacade::GetInstance().ShowProgress(g_tmpProgressValue);
         return;
     }
     g_tmpProgressValue = tmpProgressValue + g_tmpValue;
     if (g_tmpProgressValue == 0) {
         return;
     }
-    if (GetProgressBar() != nullptr) {
-        GetProgressBar()->SetProgressValue(g_tmpProgressValue);
-    }
+    UpdaterUiFacade::GetInstance().ShowProgress(g_tmpProgressValue);
 }
 
 void HandleChildOutput(const std::string &buffer, int32_t bufferLen, bool &retryUpdate)
 {
     UPDATER_CHECK_ONLY_RETURN(bufferLen != 0, return);
-    TextLabel *updateInfoLabel = GetUpdateInfoLabel();
-    UPDATER_ERROR_CHECK(updateInfoLabel != nullptr, "Fail to updateInfoLabel", return);
-
     std::string str = buffer;
     std::vector<std::string> output = SplitString(str, ":");
     UPDATER_ERROR_CHECK(output.size() >= 1, "check output fail", return);
     auto outputHeader = Trim(output[0]);
-    if (outputHeader == "ui_log" || outputHeader == "write_log") {
+    if (outputHeader == "ui_log") {
         UPDATER_ERROR_CHECK(output.size() >= DEFAULT_PROCESS_NUM, "check output fail", return);
-        LOG(INFO) << Trim(output[1]);
+        auto outputInfo = Trim(output[1]);
+    } else if (outputHeader == "write_log") {
+        UPDATER_ERROR_CHECK(output.size() >= DEFAULT_PROCESS_NUM, "check output fail", return);
+        auto outputInfo = Trim(output[1]);
+        LOG(INFO) << outputInfo;
     } else if (outputHeader == "retry_update") {
         retryUpdate = true;
     } else if (outputHeader == "show_progress") {
         UPDATER_ERROR_CHECK(output.size() >= DEFAULT_PROCESS_NUM, "check output fail", return);
         g_tmpValue = g_tmpProgressValue;
         auto outputInfo = Trim(output[1]);
+        float frac;
         std::vector<std::string> progress = SplitString(outputInfo, ",");
         if (progress.size() != DEFAULT_PROCESS_NUM) {
             LOG(ERROR) << "show progress with wrong arguments";
         } else {
-            if (GetProgressBar() != nullptr) {
-                GetProgressBar()->Show();
-            }
-            updateInfoLabel->SetText("Start to install package.");
-            g_percentage = static_cast<int>(std::stof(progress[0]) * FULL_PERCENT_PROGRESS);
+            UpdaterUiFacade::GetInstance().ShowUpdInfo(TR(UPD_INSTALL_START));
+            frac = std::stof(progress[0]);
+            g_percentage = static_cast<int>(frac * FULL_PERCENT_PROGRESS);
         }
     } else if (outputHeader == "set_progress") {
         SetProgress(output);
@@ -375,9 +368,7 @@ UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, const std::
         "Updater: cannot extract updater binary from update package.", UPDATER_LAST_WORD(UPDATE_CORRUPT);
         return UPDATE_CORRUPT);
     g_tmpProgressValue = 0;
-    if (GetProgressBar() != nullptr) {
-        GetProgressBar()->SetProgressValue(0);
-    }
+    UpdaterUiFacade::GetInstance().ShowProgress(g_tmpProgressValue);
     pid_t pid = fork();
     UPDATER_CHECK_ONLY_RETURN(pid >= 0, ERROR_CODE(CODE_FORK_FAIL);
         UPDATER_LAST_WORD(UPDATE_ERROR);

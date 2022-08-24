@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,525 +13,284 @@
  * limitations under the License.
  */
 #include "updater_ui.h"
-#include <cstdio>
-#include "animation_label.h"
-#include "frame.h"
-#include "input_event.h"
+#include <mutex>
+#include <thread>
+#include "language/language_ui.h"
 #include "log/log.h"
-#include "progress_bar.h"
-#include "securec.h"
-#include "surface_dev.h"
+#include "page/page_manager.h"
+#include "scope_guard.h"
 #include "updater_main.h"
-#include "updater_ui_const.h"
+#include "updater_ui_facade.h"
 #include "utils.h"
-#include "view.h"
 
 namespace Updater {
-using Utils::String2Int;
-
-constexpr int LABEL_HEIGHT = 13;
-constexpr int MAX_IMGS = 62;
-constexpr int DIALIG_COLOR_A = 0xAA;
-constexpr int DIALOG_COLOR = 0x00;
-
-int g_updateFlag = 0;
-int g_textLabelNum = 0;
-
-Frame *g_menuFrame;
-Frame *g_updateFrame;
-TextLabel *g_textLabel0;
-TextLabel *g_textLabel2;
-TextLabel *g_textLabel3;
-TextLabel *g_logLabel;
-TextLabel *g_logResultLabel;
-TextLabel *g_updateInfoLabel;
-AnimationLable *g_anmimationLabel;
-ProgressBar *g_progressBar;
-
-TextLabel *g_dialogTitle;
-TextLabel *g_dialogNote;
-TextLabel *g_dialogNoteNext;
-TextLabel *g_dialogCancalBtn;
-TextLabel *g_dialogOkBtn;
-SurfaceDev *g_sfDev;
-
-static void ClearText()
+namespace {
+auto &g_uiFacade = UpdaterUiFacade::GetInstance();
+constexpr uint32_t DISPLAY_TIME = 1 * 1000 * 1000; /* 1s*/
+constexpr uint32_t FAIL_DELAY = 5 * 1000 * 1000;
+constexpr uint32_t SUCCESS_DELAY = 3 * 1000 * 1000;
+constexpr int CALLBACK_DELAY = 20 * 1000; /* 20ms */
+std::mutex g_mtx;
+bool g_isInCallback { false };
+bool g_timerStopped { false };
+bool IsAlreadyInCallback()
 {
-    if (g_logLabel != nullptr) {
-        g_logLabel->SetText("");
+    std::lock_guard<std::mutex> lck(g_mtx);
+    if (!g_isInCallback) {
+        return false;
     }
-    if (g_logResultLabel != nullptr) {
-        g_logResultLabel->SetText("");
-    }
-    if (g_updateInfoLabel != nullptr) {
-        g_updateInfoLabel->SetText("");
-    }
+    g_isInCallback = true;
+    return true;
 }
 
-void ShowText(TextLabel *label, std::string text)
+void ExitCallback()
 {
-    if (label != nullptr) {
-        ClearText();
-        label->SetText(text.c_str());
-    }
+    std::lock_guard<std::mutex> lck(g_mtx);
+    g_isInCallback = false;
 }
 
-static void HideDialog()
-{
-    if (!g_menuFrame->IsVisiable()) {
-        return;
+/**
+ * avoid calling multipule callback simultaneously.
+ * When defining a new callback, should place a
+ * CALLBACK_GUARD at the beginning of callback function
+ */
+#define CALLBACK_GUARD           \
+    if (IsAlreadyInCallback()) { \
+        return;                  \
+    }                            \
+    ON_SCOPE_EXIT(exitCallback)  \
+    {                            \
+        ExitCallback();          \
     }
-    if (g_dialogTitle != nullptr) {
-        g_dialogTitle->Hide();
-    }
-    if (g_dialogNote != nullptr) {
-        g_dialogNote->Hide();
-    }
-    if (g_dialogNoteNext != nullptr) {
-        g_dialogNoteNext->Hide();
-    }
-    if (g_dialogCancalBtn != nullptr) {
-        g_dialogCancalBtn->Hide();
-    }
-    if (g_dialogOkBtn != nullptr) {
-        g_dialogOkBtn->Hide();
-    }
-}
+}  // namespace
 
-static void ShowDialog()
+std::ostream &operator<<(std::ostream &os, const ComInfo &com)
 {
-    if (!g_menuFrame->IsVisiable()) {
-        return;
-    }
-    if (g_dialogTitle != nullptr) {
-        g_dialogTitle->Show();
-    }
-    if (g_dialogNote != nullptr) {
-        g_dialogNote->Show();
-    }
-    if (g_dialogNoteNext != nullptr) {
-        g_dialogNoteNext->Show();
-    }
-    if (g_dialogCancalBtn != nullptr) {
-        g_dialogCancalBtn->Show();
-    }
-    if (g_dialogOkBtn != nullptr) {
-        g_dialogOkBtn->Show();
-    }
-}
-
-static void ShowMenu()
-{
-    if (g_menuFrame == nullptr) {
-        return;
-    }
-    if (g_textLabel0 != nullptr) {
-        g_textLabel0->Show();
-    }
-    if (g_textLabel2 != nullptr) {
-        g_textLabel2->Show();
-    }
-    if (g_textLabel3 != nullptr) {
-        g_textLabel3->Show();
-    }
-    g_menuFrame->Show();
-}
-
-static void HideMenu()
-{
-    if (g_menuFrame == nullptr) {
-        return;
-    }
-    if (g_textLabel0 != nullptr) {
-        g_textLabel0->Hide();
-    }
-    if (g_textLabel2 != nullptr) {
-        g_textLabel2->Hide();
-    }
-    if (g_textLabel3 != nullptr) {
-        g_textLabel3->Hide();
-    }
-    g_menuFrame->Hide();
-}
-
-void OnKeyEvent(int viewId)
-{
-    if (!g_menuFrame->IsVisiable()) {
-        return;
-    }
-    ClearText();
-    if (viewId == g_textLabel0->GetViewId() && g_textLabel0->IsVisiable()) {
-        HideDialog();
-        PostUpdater(true);
-        Utils::DoReboot("");
-    } else if (viewId == g_textLabel2->GetViewId() && g_textLabel2->IsVisiable()) {
-        ShowDialog();
-    } else if (viewId == g_textLabel3->GetViewId() && g_textLabel3->IsVisiable()) {
-        HideDialog();
-        UpdaterStatus status = UpdaterFromSdcard();
-        if (status != UPDATE_SUCCESS) {
-            ShowUpdateFrame(false);
-            ShowMenu();
-            return;
-        }
-        PostUpdater(true);
-        Utils::DoReboot("");
-    } else if (viewId == g_dialogCancalBtn->GetViewId() && g_dialogCancalBtn->IsVisiable()) {
-        HideDialog();
-    } else if (viewId == g_dialogOkBtn->GetViewId() && g_dialogOkBtn->IsVisiable()) {
-        HideDialog();
-        HideMenu();
-        g_logLabel->SetText("Wipe data");
-        g_updateFlag = 1;
-        ShowUpdateFrame(true);
-        DoProgress();
-        int ret = FactoryReset(USER_WIPE_DATA, "/data");
-        if (ret != 0) {
-            g_logLabel->SetText("Wipe data failed");
-        } else {
-            g_logLabel->SetText("Wipe data done");
-        }
-        ShowUpdateFrame(false);
-        ShowMenu();
-    }
-}
-
-void LoadImgs()
-{
-    for (int i = 0; i < MAX_IMGS; i++) {
-        std::string nameBuf;
-        if (i < LOOP_TOP_PICTURES) {
-            nameBuf = "/resources/loop0000";
-            nameBuf.append(std::to_string(i)).append(".png");
-        } else {
-            nameBuf = "/resources/loop000";
-            nameBuf.append(std::to_string(i)).append(".png");
-        }
-        g_anmimationLabel->AddImg(nameBuf);
-    }
-}
-
-void ShowUpdateFrame(bool isShow)
-{
-    const int sleepMs = 300 * 100;
-    if (isShow) {
-        g_menuFrame->Hide();
-        g_updateInfoLabel->SetText("");
-        g_updateFrame->Show();
-        g_anmimationLabel->Start();
-        return;
-    }
-    usleep(sleepMs);
-    g_anmimationLabel->Stop();
-    g_progressBar->Show();
-    g_updateFrame->Hide();
-    g_menuFrame->Show();
-    g_updateFlag = 0;
+    os << "pageId: " << com.pageId << " comId: " << com.comId;
+    return os;
 }
 
 void DoProgress()
 {
-    const int sleepMs = 300 * 1000;
-    const int maxSleepMs = 1000 * 1000;
-    const int progressValueStep = 10;
-    const int maxProgressValue = 100;
-    std::string progressValue;
+    constexpr int maxSleepMs = 1000 * 1000;
+    constexpr int minSleepMs = 3000;
+    constexpr float ratio = 10.0;
+    // if 100 as fullpercent, then 0.3 per step
+    constexpr int progressValueStep = static_cast<int>(0.3 * ratio);
+    constexpr int maxProgressValue = static_cast<int>(100 * ratio);
     int progressvalueTmp = 0;
-    if (!g_updateFlag) {
+    if (g_uiFacade.GetMode() != UpdaterMode::FACTORYRST && g_uiFacade.GetMode() != UpdaterMode::REBOOTFACTORYRST) {
         return;
     }
-    g_progressBar->SetProgressValue(0);
+    g_uiFacade.ShowProgress(0);
     while (progressvalueTmp <= maxProgressValue) {
-        if (!(g_updateInfoLabel->IsVisiable()) || !(g_progressBar->IsVisiable()) ||
-            !(g_updateFrame->IsVisiable())) {
-            LOG(INFO) <<"is not visable in  updater_frame";
+        progressvalueTmp = progressvalueTmp + progressValueStep;
+        g_uiFacade.ShowProgress(progressvalueTmp / ratio);
+        Utils::UsSleep(minSleepMs);
+        if (progressvalueTmp >= maxProgressValue) {
+            Utils::UsSleep(maxSleepMs);
+            return;
         }
-        usleep(sleepMs);
-        if (g_updateFlag == 1) {
-            progressvalueTmp = progressvalueTmp + progressValueStep;
-            g_progressBar->SetProgressValue(progressvalueTmp);
-            if (progressvalueTmp >= maxProgressValue) {
-                usleep(maxSleepMs);
+    }
+}
+
+void OnRebootEvt()
+{
+    LOG(INFO) << "On Label Reboot";
+    std::thread {
+        [] () {
+            CALLBACK_GUARD;
+            PostUpdater(false);
+            Utils::DoReboot("");
+        }
+    }.detach();
+}
+
+void OnLabelResetEvt()
+{
+    LOG(INFO) << "On Label Reset";
+    CALLBACK_GUARD;
+    if (!g_uiFacade.SetMode(UpdaterMode::FACTORYRST)) {
+        return;
+    }
+    g_uiFacade.ShowFactoryConfirmPage();
+}
+
+void OnLabelSDCardEvt()
+{
+    LOG(INFO) << "On Label SDCard";
+    std::thread {
+        [] () {
+            CALLBACK_GUARD;
+            if (!g_uiFacade.SetMode(UpdaterMode::SDCARD)) {
                 return;
             }
+            Utils::UsSleep(CALLBACK_DELAY);
+            g_uiFacade.ClearText();
+            g_uiFacade.ShowProgress(0);
+            g_uiFacade.ShowLog(TR(LOG_SDCARD_NOTMOVE));
+            Utils::UsSleep(DISPLAY_TIME);
+            if (UpdaterFromSdcard() != UPDATE_SUCCESS) {
+                g_uiFacade.ShowMainpage();
+                return;
+            }
+            PostUpdater(false);
+            Utils::DoReboot("");
         }
-    }
+    }.detach();
 }
 
-struct FocusInfo {
-    bool focus;
-    bool focusable;
-};
-
-struct Bold {
-    bool top;
-    bool bottom;
-};
-
-static void TextLabelInit(TextLabel *t, const std::string &text, struct Bold bold,
-    struct FocusInfo focus, View::BRGA888Pixel color)
+void OnLabelSDCardNoDelayEvt()
 {
-    if (t != nullptr) {
-        t->SetText(text.c_str());
-        t->SetOutLineBold(bold.top, bold.bottom);
-        t->OnFocus(focus.focus);
-        t->SetBackgroundColor(&color);
-        t->SetFocusAble(focus.focusable);
-    }
+    LOG(INFO) << "On Label SDCard";
+    std::thread {
+        [] () {
+            CALLBACK_GUARD;
+            if (!g_uiFacade.SetMode(UpdaterMode::SDCARD)) {
+                return;
+            }
+            Utils::UsSleep(CALLBACK_DELAY);
+            if (auto res = UpdaterFromSdcard(); res != UPDATE_SUCCESS) {
+                g_uiFacade.ShowLogRes(res == UPDATE_CORRUPT ? TR(LOGRES_VERIFY_FAILED) : TR(LOGRES_UPDATE_FAILED));
+                g_uiFacade.ShowFailedPage();
+                Utils::UsSleep(FAIL_DELAY);
+                g_uiFacade.ShowMainpage();
+                return;
+            }
+            g_uiFacade.ShowLogRes(TR(LABEL_UPD_OK_DONE));
+            g_uiFacade.ShowSuccessPage();
+            Utils::UsSleep(SUCCESS_DELAY);
+            PostUpdater(false);
+            Utils::DoReboot("");
+        }
+    }.detach();
 }
 
-static void InitDialogButton(int height, int width, View::BRGA888Pixel bgColor)
+void OnLabelCancelEvt()
 {
-    const int okStartY = 450;
-    const int cancelNextStartY = 451;
-    g_dialogOkBtn = new TextLabel(0, okStartY, width, DIALOG_OK_WIDTH, g_menuFrame);
-    g_dialogOkBtn->Hide();
-    struct FocusInfo info {false, false};
-    struct Bold bold {false, false};
-    g_dialogOkBtn->SetViewId(DIALOG_OK_ID);
-    info = {false, false};
-    bold = {false, false};
-    TextLabelInit(g_dialogOkBtn, "Continue", bold, info, bgColor);
-    if (!g_dialogOkBtn) {
-        LOG(ERROR) << "g_dialogOkBtn is null";
+    CALLBACK_GUARD;
+    LOG(INFO) << "On Label Cancel";
+    PageManager::GetInstance().GoBack();
+}
+
+void OnLabelOkEvt()
+{
+    LOG(INFO) << "On Label Ok";
+    std::thread {
+        [] () {
+            CALLBACK_GUARD;
+            Utils::UsSleep(CALLBACK_DELAY);
+            g_uiFacade.ShowMainpage();
+            g_uiFacade.ClearText();
+            g_uiFacade.ShowLog(TR(LOG_WIPE_DATA));
+            if (!g_uiFacade.SetMode(UpdaterMode::FACTORYRST)) {
+                return;
+            }
+            g_uiFacade.ShowProgress(0);
+            g_uiFacade.ShowProgressPage();
+            DoProgress();
+            if (FactoryReset(USER_WIPE_DATA, "/data") == 0) {
+                g_uiFacade.ShowLog(TR(LOG_WIPE_DONE));
+                g_uiFacade.ShowSuccessPage();
+            } else {
+                g_uiFacade.ShowLog(TR(LOG_WIPE_FAIL));
+                g_uiFacade.ShowFailedPage();
+            }
+        }
+    }.detach();
+}
+
+void OnConfirmRstEvt()
+{
+    LOG(INFO) << "On Label Ok";
+    std::thread {
+        [] () {
+            CALLBACK_GUARD;
+            if (!g_uiFacade.SetMode(UpdaterMode::FACTORYRST)) {
+                return;
+            }
+            g_uiFacade.ShowUpdInfo(TR(LABEL_RESET_PROGRESS_INFO));
+            g_uiFacade.ShowProgressPage();
+            DoProgress();
+            if (FactoryReset(USER_WIPE_DATA, "/data") != 0) {
+                g_uiFacade.ShowLogRes(TR(LOG_WIPE_FAIL));
+                g_uiFacade.ShowFailedPage();
+                Utils::UsSleep(FAIL_DELAY);
+                g_uiFacade.ShowMainpage();
+            } else {
+                g_uiFacade.ShowUpdInfo(TR(LOGRES_WIPE_FINISH));
+                Utils::UsSleep(DISPLAY_TIME);
+                g_uiFacade.ShowSuccessPage();
+            }
+        }
+    }.detach();
+}
+
+void OnMenuShutdownEvt()
+{
+    LOG(INFO) << "On btn shutdown";
+    std::thread {
+        [] () {
+            CALLBACK_GUARD;
+            LOG(DEBUG) << "shutdown";
+            Utils::DoShutdown();
+        }
+    }.detach();
+}
+
+void OnMenuClearCacheEvt()
+{
+    LOG(INFO) << "On clear cache";
+    std::thread {
+        [] () {
+            CALLBACK_GUARD;
+            g_uiFacade.ClearText();
+            if (!g_uiFacade.SetMode(UpdaterMode::FACTORYRST)) {
+                return;
+            }
+            Utils::UsSleep(CALLBACK_DELAY);
+            g_uiFacade.ShowUpdInfo(TR(LOG_CLEAR_CAHCE));
+            g_uiFacade.ShowProgressPage();
+            ClearMisc();
+            DoProgress();
+            g_uiFacade.ShowMainpage();
+        }
+    }.detach();
+}
+
+void StartLongPressTimer()
+{
+    static int downCount { 0 };
+    if (!g_uiFacade.IsInProgress()) {
         return;
     }
-    g_dialogOkBtn->SetOnClickCallback(OnKeyEvent);
-
-    g_dialogCancalBtn = new TextLabel(DIALOG_CANCEL_X, cancelNextStartY, DIALOG_OK_WIDTH, DIALOG_OK_WIDTH, g_menuFrame);
-    g_dialogCancalBtn->Hide();
-    info = {false, false};
-    bold = {false, false};
-    TextLabelInit(g_dialogCancalBtn, "Cancel", bold, info, bgColor);
-    if (!g_dialogCancalBtn) {
-        LOG(ERROR) << "g_dialogCancalBtn is null";
-        return;
-    }
-    g_dialogCancalBtn->SetViewId(DIALOG_CANCEL_ID);
-    g_dialogCancalBtn->SetOnClickCallback(OnKeyEvent);
+    ++downCount;
+    g_timerStopped = false;
+    using namespace std::literals::chrono_literals;
+    std::thread t { [lastdownCount = downCount] () {
+        constexpr auto threshold = 2s;
+        std::this_thread::sleep_for(threshold);
+        /**
+         * When the downCount of the last power key press changes,
+         * it means that the last press has been released before
+         * the timeout, then you can exit the callback directly
+         */
+        if (g_timerStopped || lastdownCount != downCount) {
+            return;
+        }
+        // show warning
+        g_uiFacade.ShowProgressWarning(true);
+    }};
+    t.detach();
 }
 
-static void DialogInit(int height, int width)
+void StopLongPressTimer()
 {
-    if (g_menuFrame == nullptr) {
-        LOG(ERROR) << "Frame is null";
-        return;
-    }
-    const int titleHeight = 100;
-    const int titleStartX = 250;
-    const int noteStartY = 350;
-    const int noteNextStartY = 400;
-    View::BRGA888Pixel color;
-    color.r = DIALOG_COLOR;
-    color.g = DIALOG_COLOR;
-    color.b = DIALOG_COLOR;
-    color.a = DIALIG_COLOR_A;
-    g_dialogTitle = new TextLabel(0, titleStartX, width, titleHeight, g_menuFrame);
-    g_dialogTitle->SetTextAlignmentMethod(TextLabel::AlignmentMethod::ALIGN_CENTER,
-        TextLabel::AlignmentMethod::ALIGN_CENTER);
-    g_dialogTitle->Hide();
-    struct FocusInfo info {false, false};
-    struct Bold bold {false, false};
-    TextLabelInit(g_dialogTitle, "Tip", bold, info, color);
-    if (!g_dialogTitle) {
-        LOG(ERROR) << "g_dialogTitle is null";
-        return;
-    }
-
-    g_dialogNote = new TextLabel(0, noteStartY, width, HEIGHT4, g_menuFrame);
-    g_dialogNote->Hide();
-    info = {false, false};
-    bold = {false, false};
-    TextLabelInit(g_dialogNote, "Delete user date now...", bold, info, color);
-    if (!g_dialogNote) {
-        LOG(ERROR) << "g_dialogNote is null";
-        return;
-    }
-
-    g_dialogNoteNext = new TextLabel(0, noteNextStartY, width, HEIGHT4, g_menuFrame);
-    g_dialogNoteNext->Hide();
-    info = {false, false};
-    bold = {false, false};
-    TextLabelInit(g_dialogNoteNext, "Do you want to continue?", bold, info, color);
-    if (!g_dialogNoteNext) {
-        LOG(ERROR) << "g_dialogNoteNext is null";
-        return;
-    }
-    InitDialogButton(width, height, color);
+    // no need to judge whether in progress page,
+    // because may press power key in progress
+    // page and release power key in other page
+    g_timerStopped = true;
+    // hide warning
+    g_uiFacade.ShowProgressWarning(false);
 }
-
-static void MenuItemInit(int height, int width, View::BRGA888Pixel bgColor)
-{
-    if (g_menuFrame == nullptr) {
-        LOG(ERROR) << "Frame is null";
-        return;
-    }
-    g_textLabel0 = new TextLabel(0, height * LABEL0_OFFSET / LABEL_HEIGHT, width, height /
-        LABEL_HEIGHT, g_menuFrame);
-    struct FocusInfo info {false, true};
-    struct Bold bold {true, false};
-    TextLabelInit(g_textLabel0, "Reboot to normal system", bold, info, bgColor);
-    if (!g_textLabel0) {
-        LOG(ERROR) << "g_textLabel0 is null";
-        return;
-    }
-    g_textLabel0->SetOnClickCallback(OnKeyEvent);
-    g_textLabelNum++;
-
-    g_textLabel2 = new TextLabel(0, height * LABEL1_OFFSET / LABEL_HEIGHT, width, height /
-        LABEL_HEIGHT, g_menuFrame);
-    info = {false, true};
-    bold = {false, false};
-    TextLabelInit(g_textLabel2, "Userdata reset", bold, info, bgColor);
-    if (!g_textLabel2) {
-        LOG(ERROR) << "g_textLabel2 is null";
-        return;
-    }
-    g_textLabel2->SetOnClickCallback(OnKeyEvent);
-    g_textLabelNum++;
-
-    g_textLabel3 = new TextLabel(0, height * LABEL2_OFFSET / LABEL_HEIGHT, width, height /
-        LABEL_HEIGHT, g_menuFrame);
-    info = {false, true};
-    bold = {false, true};
-    TextLabelInit(g_textLabel3, "Update from SD Card", bold, info, bgColor);
-    if (!g_textLabel3) {
-        LOG(ERROR) << "g_textLabel3 is null";
-        return;
-    }
-    g_textLabel3->SetOnClickCallback(OnKeyEvent);
-    g_textLabelNum++;
-    g_textLabel0->SetViewId(LABEL_ID_0);
-    g_textLabel2->SetViewId(LABEL_ID_1);
-    g_textLabel3->SetViewId(LABEL_ID_2);
-}
-
-void UpdaterUiInit()
-{
-    constexpr char alpha = 0xff;
-    int screenH = 0;
-    int screenW = 0;
-    g_sfDev = new SurfaceDev(SurfaceDev::DevType::DRM_DEVICE);
-    g_sfDev->GetScreenSize(screenW, screenH);
-    View::BRGA888Pixel bgColor {0x00, 0x00, 0x00, alpha};
-
-    g_menuFrame = new Frame(screenW, screenH, View::PixelFormat::BGRA888, g_sfDev);
-    g_menuFrame->SetBackgroundColor(&bgColor);
-    g_menuFrame->Hide();
-
-    MenuItemInit(screenH, screenW, bgColor);
-    DialogInit(screenH, screenW);
-
-    g_logLabel = new TextLabel(START_X1, START_Y1, WIDTH1, HEIGHT1, g_menuFrame);
-    struct FocusInfo info {false, false};
-    struct Bold bold {false, false};
-    TextLabelInit(g_logLabel, "", bold, info, bgColor);
-
-    g_logResultLabel = new TextLabel(START_X2, START_Y2, WIDTH2, HEIGHT2, g_menuFrame);
-    TextLabelInit(g_logResultLabel, "", bold, info, bgColor);
-
-    g_updateFrame = new Frame(screenW, screenH, View::PixelFormat::BGRA888, g_sfDev);
-    g_updateFrame->SetBackgroundColor(&bgColor);
-    g_updateFrame->Hide();
-
-    g_anmimationLabel = new AnimationLable(START_X_SCALE, START_Y_SCALE,
-            screenW * WIDTH_SCALE1 / WIDTH_SCALE2, screenH / MEDIAN_NUMBER, g_updateFrame);
-    g_anmimationLabel->SetBackgroundColor(&bgColor);
-    LoadImgs();
-    g_progressBar = new ProgressBar(START_X3, START_Y3, WIDTH3, HEIGHT3, g_updateFrame);
-    g_progressBar->Hide();
-
-    g_updateInfoLabel = new TextLabel(START_X5, START_Y5, screenW, HEIGHT5, g_updateFrame);
-    g_updateInfoLabel->SetOutLineBold(false, false);
-    g_updateInfoLabel->SetBackgroundColor(&bgColor);
-    HdfInit();
-}
-
-static void DeleteOtherView()
-{
-    if (g_updateInfoLabel != nullptr) {
-        delete g_updateInfoLabel;
-        g_updateInfoLabel = nullptr;
-    }
-    if (g_anmimationLabel != nullptr) {
-        delete g_anmimationLabel;
-        g_anmimationLabel = nullptr;
-    }
-    if (g_progressBar != nullptr) {
-        delete g_progressBar;
-        g_progressBar = nullptr;
-    }
-    if (g_dialogTitle != nullptr) {
-        delete g_dialogTitle;
-        g_dialogTitle = nullptr;
-    }
-    if (g_dialogNote != nullptr) {
-        delete g_dialogNote;
-        g_dialogNote = nullptr;
-    }
-    if (g_dialogNoteNext != nullptr) {
-        delete g_dialogNoteNext;
-        g_dialogNoteNext = nullptr;
-    }
-    if (g_dialogCancalBtn != nullptr) {
-        delete g_dialogCancalBtn;
-        g_dialogCancalBtn = nullptr;
-    }
-    if (g_dialogOkBtn != nullptr) {
-        delete g_dialogOkBtn;
-        g_dialogOkBtn = nullptr;
-    }
-    if (g_logResultLabel != nullptr) {
-        delete g_logResultLabel;
-        g_logResultLabel = nullptr;
-    }
-}
-
-void DeleteView()
-{
-    DeleteOtherView();
-    if (g_textLabel0 != nullptr) {
-        delete g_textLabel0;
-        g_textLabel0 = nullptr;
-    }
-    if (g_textLabel2 != nullptr) {
-        delete g_textLabel2;
-        g_textLabel2 = nullptr;
-    }
-    if (g_textLabel3 != nullptr) {
-        delete g_textLabel3;
-        g_textLabel3 = nullptr;
-    }
-    if (g_logLabel == nullptr) {
-        delete g_logLabel;
-        g_logLabel = nullptr;
-    }
-    if (g_updateFrame != nullptr) {
-        delete g_updateFrame;
-        g_updateFrame = nullptr;
-    }
-    if (g_menuFrame != nullptr) {
-        delete g_menuFrame;
-        g_menuFrame = nullptr;
-    }
-    if (g_sfDev != nullptr) {
-        delete g_sfDev;
-        g_sfDev = nullptr;
-    }
-}
-
-TextLabel *GetUpdateInfoLabel()
-{
-    return g_updateInfoLabel;
-}
-
-ProgressBar *GetProgressBar()
-{
-    return g_progressBar;
-}
-
-void SetUpdateFlag(int updateFlag)
-{
-    g_updateFlag = updateFlag;
-}
-} // namespace updater
+} // namespace Updater

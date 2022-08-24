@@ -19,7 +19,7 @@
 namespace Updater {
 constexpr int START_X1 = 0;
 constexpr int START_Y1 = 850;
-constexpr int WIDTH1 = 480;
+constexpr int WIDTH1 = 680;
 constexpr int HEIGHT1 = 30;
 constexpr int START_X2 = 0;
 constexpr int START_Y2 = 900;
@@ -43,9 +43,11 @@ constexpr int LOOP_TOP_PICTURES = 10;
 constexpr int INVALID_EVENT = -1;
 constexpr int PRESS_EVENT = 0;
 constexpr int RELEASE_EVENT = 1;
+constexpr int LABEL_HEIGHT = 13;
 constexpr int LABEL0_OFFSET = 0;
 constexpr int LABEL1_OFFSET = 1;
 constexpr int LABEL2_OFFSET = 2;
+constexpr int LABEL3_OFFSET = 3;
 constexpr int LABEL_ID_0 = 100;
 constexpr int LABEL_ID_1 = 101;
 constexpr int LABEL_ID_2 = 102;
@@ -53,8 +55,10 @@ constexpr int DIALOG_OK_ID = 200;
 constexpr int DIALOG_CANCEL_ID = 201;
 constexpr int DIALOG_CANCEL_X = 340;
 constexpr int DIALOG_OK_WIDTH = 150;
-constexpr int SCREEN_WIDTH = 720;
-constexpr int SCREEN_HEIGHT = 1280;
 constexpr int MEDIAN_NUMBER = 2;
-} // namespace updater
+constexpr int FAKE_WIDTH = 480;
+constexpr int FAKE_HEIGHT = 960;
+constexpr const char *FB_DEV_PATH = "/dev/graphics/fb0";
+constexpr const char *DRM_DEV_PATH = "/dev/dri/card0";
+} // namespace Updater
 #endif /* UPDATE_UI_HOS_UPDATER_H */

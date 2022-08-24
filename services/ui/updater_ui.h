@@ -15,8 +15,11 @@
 #ifndef UPDATE_UI_UPDATER_UI_H
 #define UPDATE_UI_UPDATER_UI_H
 
-#include "text_label.h"
-#include "progress_bar.h"
+#include <ostream>
+#include <string>
+#include <string_view>
+#include "json_visitor.h"
+#include "macros.h"
 
 namespace Updater {
 enum class UpdaterMode {
@@ -26,21 +29,19 @@ enum class UpdaterMode {
     OTA,
     MODEMAX
 };
-
+std::ostream &operator<<(std::ostream &os, const ComInfo &com);
 void DoProgress();
-
-void ShowUpdateFrame(bool isShow);
-
-void UpdaterUiInit();
-
-void ShowText(TextLabel *label, std::string text);
-
-void DeleteView();
-
-TextLabel *GetUpdateInfoLabel();
-
-ProgressBar *GetProgressBar();
-
-void SetUpdateFlag(int updateFlag);
+void OnLabelOkEvt();
+void OnRebootEvt();
+void OnLabelResetEvt();
+void OnLabelSDCardEvt();
+void OnLabelCancelEvt();
+void OnUpdFailReboot();
+void OnMenuShutdownEvt();
+void OnLabelSDCardNoDelayEvt();
+void OnConfirmRstEvt();
+void OnMenuClearCacheEvt();
+void StartLongPressTimer();
+void StopLongPressTimer();
 } // namespace Updater
 #endif /* UPDATE_UI_HOS_UPDATER_H */
