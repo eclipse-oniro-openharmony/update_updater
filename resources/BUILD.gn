@@ -14,7 +14,7 @@
 import("//build/ohos.gni")
 
 updater_resouces_list = [
-  "font/HarmonyOS_Sans_SC_Regular_Small.otf",
+  "font/HarmonyOS_Sans_SC_Regular_Small.ttf",
   "${product_name}/images/icon/darkOUCOHlogo.png",
   "${product_name}/images/icon/lightOUCOHlogo.png",
   "${product_name}/images/icon/icon_failed.png",
@@ -145,10 +145,12 @@ foreach(file, updater_resouces_list) {
   ohos_prebuilt_etc(_name) {
     source = "//base/update/updater/resources/$file"
     module_install_dir = "resources"
-    if (file == "font/HarmonyOS_Sans_SC_Regular_Small.otf") {
+    if (file == "font/HarmonyOS_Sans_SC_Regular_Small.ttf") {
       module_install_dir = "user/data"
     } else if (get_path_info(file, "dir") != "") {
-      module_install_dir = get_path_info(string_replace(file, "${product_name}", "resources"), "dir")
+      module_install_dir =
+          get_path_info(string_replace(file, "${product_name}", "resources"),
+                        "dir")
     }
     install_images = [ "updater" ]
     part_name = "updater"
