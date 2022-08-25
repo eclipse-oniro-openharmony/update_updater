@@ -38,11 +38,11 @@ namespace {
 constexpr int32_t SCRIPT_TEST_PRIORITY_NUM = 3;
 constexpr int32_t SCRIPT_TEST_LAST_PRIORITY = 2;
 
-class TestScriptInstructionSparseImageWrite : public uscript::UScriptInstruction {
+class TestScriptInstructionSparseImageWrite : public Uscript::UScriptInstruction {
 public:
     TestScriptInstructionSparseImageWrite() {}
     virtual ~TestScriptInstructionSparseImageWrite() {}
-    int32_t Execute(uscript::UScriptEnv &env, uscript::UScriptContext &context) override
+    int32_t Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context) override
     {
         // 从参数中获取分区信息
         std::string partitionName;
@@ -80,7 +80,7 @@ public:
 
 class UTestScriptEnv : public UScriptEnv {
 public:
-    explicit UTestScriptEnv(hpackage::PkgManager::PkgManagerPtr pkgManager) : UScriptEnv(pkgManager) {}
+    explicit UTestScriptEnv(Hpackage::PkgManager::PkgManagerPtr pkgManager) : UScriptEnv(pkgManager) {}
     ~UTestScriptEnv()
     {
         if (factory_ != nullptr) {
