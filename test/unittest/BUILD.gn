@@ -31,6 +31,8 @@ config("utest_config") {
 
 ohos_unittest("updater_unittest") {
   testonly = true
+  resource_config_file =
+      "//base/update/updater/test/unittest/test_data/ohos_test.xml"
   module_out_path = module_output_path
   sources = [
     "applypatch_test/blockset_unittest.cpp",
@@ -43,8 +45,6 @@ ohos_unittest("updater_unittest") {
     "fs_manager/do_partition_unittest.cpp",
     "log_test/log_unittest.cpp",
     "misc_info_test/misc_info_unittest.cpp",
-    "package/pkg_manager_unittest.cpp",
-    "package/pkg_package_unittest.cpp",
     "script/basic_instruction_unittest.cpp",
     "script/script_instruction_unittest.cpp",
     "script/script_interpreter_unittest.cpp",
@@ -52,7 +52,7 @@ ohos_unittest("updater_unittest") {
     "updater_binary/update_image_block_test.cpp",
     "updater_binary/updater_binary_unittest.cpp",
     "updaterkits_test/updaterkits_unittest.cpp",
-    "utils/utils_unittest.cpp"
+    "utils/utils_unittest.cpp",
   ]
 
   sources += [
@@ -113,8 +113,8 @@ ohos_unittest("updater_unittest") {
     "//base/update/updater/services/script/yacc/lexer.cpp",
     "//base/update/updater/services/script/yacc/parser.cpp",
     "//base/update/updater/services/updater_binary/update_image_block.cpp",
-    "//base/update/updater/services/updater_binary/update_partitions.cpp",
     "//base/update/updater/services/updater_binary/update_image_patch.cpp",
+    "//base/update/updater/services/updater_binary/update_partitions.cpp",
     "//base/update/updater/services/updater_binary/update_processor.cpp",
     "//base/update/updater/services/updater_utils.cpp",
     "//base/update/updater/utils/utils.cpp",

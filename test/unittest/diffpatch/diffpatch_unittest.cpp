@@ -40,9 +40,7 @@ public:
         UpdatePatch::MemMapInfo data {};
         int32_t ret = PatchMapFile(fileName, data);
         EXPECT_EQ(0, ret);
-        return UpdatePatch::GeneraterBufferHash({
-            data.memory, data.length
-        });
+        return UpdatePatch::GeneraterBufferHash({data.memory, data.length});
     }
 
     int BlockDiffPatchTest(const std::string &oldFile,
