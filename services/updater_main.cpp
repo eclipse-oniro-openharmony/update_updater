@@ -139,7 +139,7 @@ UpdaterStatus UpdaterFromSdcard()
 #endif
     if (access(SDCARD_CARD_PKG_PATH, 0) != 0) {
         LOG(ERROR) << "package is not exist";
-        UpdaterUiFacade::GetInstance().ShowLog(TR(LOG_NOPKG), true);
+        ShowText(g_logLabel, "package is not exist!");
         return UPDATE_ERROR;
     }
     PkgManager::PkgManagerPtr pkgManager = PkgManager::GetPackageInstance();
