@@ -15,12 +15,16 @@
 
 #include "update_commander.h"
 
+#include <unordered_map>
+
 #include "datetime_ex.h"
 #include "flashd_define.h"
 #include "flashd_utils.h"
 #include "fs_manager/mount.h"
 #include "package/pkg_manager.h"
 #include "updater/updater.h"
+#include "updater/updater_const.h"
+#include "updaterkits/updaterkits.h"
 #include "utils.h"
 
 namespace Flashd {
@@ -98,75 +102,45 @@ bool UpdateCommander::DoUpdate(const uint8_t *payload, int payloadSize)
 
     currentSize_ += writeSize;
     if (currentSize_ >= fileSize_) {
+        SafeCloseFile(fd_);
         auto useSec = static_cast<double>(OHOS::GetMicroTickCount() - startTime_) / OHOS::SEC_TO_MICROSEC;
-        FLASHD_LOGI("update write success, size = %u bytes, %.3lf s", fileSize_, useSec);
-
-        if (ExecUpdate(filePath_)) {
-            FLASHD_LOGI("update success");
-            NotifySuccess(CmdType::UPDATE);
-            return true;
-        }
-        FLASHD_LOGE("update fail");
-        NotifyFail(CmdType::UPDATE);
-        return false;
+        FLASHD_LOGI("update write file success, size = %u bytes, %.3lf s", fileSize_, useSec);
+        NotifySuccess(CmdType::UPDATE);
+        return true;
     }
     UpdateProgress(CmdType::UPDATE);
-
     return true;
 }
 
-bool UpdateCommander::ExecUpdate(const std::string &packageName) const
+bool UpdateCommander::ExecUpdate() const
 {
-    FLASHD_LOGI("packageName is %s", packageName.c_str());
-    if (access(packageName.c_str(), 0) != 0) {
-        FLASHD_LOGE("package is not exist");
-        return false;
-    }
-
-    auto pkgManager = Hpackage::PkgManager::GetPackageInstance();
-    if (pkgManager == nullptr) {
-        FLASHD_LOGE("pkgManager is null");
-        return false;
-    }
-
-    uint64_t pkgLen = 0;
-    pkgManager->SetPkgDecodeProgress([&](int type, size_t writeLen, const void *context) { pkgLen += writeLen; });
-
-    std::vector<std::string> components;
-    if (auto ret = pkgManager->LoadPackage(packageName, Updater::Utils::GetCertName(), components); ret != 0) {
-        Hpackage::PkgManager::ReleasePackageInstance(pkgManager);
-        FLASHD_LOGE("LoadPackage fail, ret = %d", ret);
-        return false;
-    }
-
-    if (auto ret = Updater::UpdatePreProcess(pkgManager, packageName); ret != 0) {
-        Hpackage::PkgManager::ReleasePackageInstance(pkgManager);
-        FLASHD_LOGE("UpdatePreProcess fail, ret = %d", ret);
-        return false;
-    }
-
-#ifdef UPDATER_USE_PTABLE
-    if (!Updater::PtableProcess(pkgManager, Updater::HOTA_UPDATE)) {
-        Hpackage::PkgManager::ReleasePackageInstance(pkgManager);
-        FLASHD_LOGE("PtableProcess fail");
-        return false;
-    }
-#endif
-
-    if (auto ret = Updater::ExecUpdate(pkgManager, 0, nullptr); ret != 0) {
-        FLASHD_LOGE("ExecUpdate fail, ret = %d", ret);
-        Hpackage::PkgManager::ReleasePackageInstance(pkgManager);
-        return false;
-    }
-
-    Hpackage::PkgManager::ReleasePackageInstance(pkgManager);
-    FLASHD_LOGI("Update success and pkgLen is = %llu", pkgLen);
-    return true;
+    const std::string miscFile = "/dev/block/by-name/misc";
+    return RebootAndInstallUpgradePackage(miscFile, filePath_);
 }
 
 void UpdateCommander::PostCommand()
 {
-    Updater::PostUpdater(true);
-    Updater::Utils::DoReboot("");
+    SaveLog();
+    if (!ExecUpdate()) {
+        FLASHD_LOGE("ExecUpdate failed");
+    }
+}
+
+void UpdateCommander::SaveLog() const
+{
+    const std::unordered_map<std::string, std::string> logMap = {
+        { Updater::TMP_LOG, Updater::UPDATER_LOG },
+        { Updater::TMP_ERROR_CODE_PATH, Updater::ERROR_CODE_PATH },
+        { FLASHD_HDC_LOG_PATH, Updater::UPDATER_HDC_LOG },
+        { Updater::TMP_STAGE_LOG, Updater::UPDATER_STAGE_LOG },
+    };
+    constexpr mode_t mode = 0640;
+
+    for (const auto &iter : logMap) {
+        if (!Updater::Utils::CopyUpdaterLogs(iter.first, iter.second)) {
+            FLASHD_LOGW("Copy %s failed!", GetFileName(iter.second).c_str());
+        }
+        chmod((iter.second).c_str(), mode);
+    }
 }
 } // namespace Flashd
