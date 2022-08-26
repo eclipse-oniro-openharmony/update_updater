@@ -24,42 +24,73 @@ namespace Updater {
 bool WriteUpdaterMessage(const std::string &path, const UpdateMessage &boot)
 {
     char *realPath = realpath(path.c_str(), NULL);
-    UPDATER_FILE_CHECK(realPath != nullptr, "realPath is NULL", return false);
+    if (realPath == nullptr) {
+        LOG(ERROR) << "realPath is NULL" << " : " << strerror(errno);
+        return false;
+    }
     FILE* fp = fopen(realPath, "rb+");
     free(realPath);
-    UPDATER_FILE_CHECK(fp != nullptr, "WriteUpdaterMessage fopen failed", return false);
+    if (fp == nullptr) {
+        LOG(ERROR) << "WriteUpdaterMessage fopen failed" << " : " << strerror(errno);
+        return false;
+    }
 
     size_t ret = fwrite(&boot, sizeof(UpdateMessage), 1, fp);
-    UPDATER_FILE_CHECK(ret == 1, "WriteUpdaterMessage fwrite failed", fclose(fp); return false);
+    if (ret != 1) {
+        LOG(ERROR) << "WriteUpdaterMessage fwrite failed" << " : " << strerror(errno);
+        fclose(fp);
+        return false;
+    }
 
     int res = fclose(fp);
-    UPDATER_FILE_CHECK(res == 0, "WriteUpdaterMessage fclose failed", return false);
+    if (res != 0) {
+        LOG(ERROR) << "WriteUpdaterMessage fclose failed" << " : " << strerror(errno);
+        return false;
+    }
     return true;
 }
 
 bool ReadUpdaterMessage(const std::string &path, UpdateMessage &boot)
 {
     char *realPath = realpath(path.c_str(), NULL);
-    UPDATER_FILE_CHECK(realPath != nullptr, "realPath is NULL", return false);
+    if (realPath == nullptr) {
+        LOG(ERROR) << "realPath is NULL" << " : " << strerror(errno);
+        return false;
+    }
     FILE* fp = fopen(realPath, "rb");
     free(realPath);
-    UPDATER_FILE_CHECK(fp != nullptr, "ReadUpdaterMessage fopen failed", return false);
+    if (fp == nullptr) {
+        LOG(ERROR) << "ReadUpdaterMessage fopen failed" << " : " << strerror(errno);
+        return false;
+    }
 
     struct UpdateMessage tempBoot {};
     size_t ret = fread(&tempBoot, sizeof(UpdateMessage), 1, fp);
-    UPDATER_FILE_CHECK(ret == 1, "ReadUpdaterMessage fwrite failed", fclose(fp); return false);
+    if (ret != 1) {
+        LOG(ERROR) << "ReadUpdaterMessage fwrite failed" << " : " << strerror(errno);
+        fclose(fp);
+        return false;
+    }
 
     int res = fclose(fp);
-    UPDATER_FILE_CHECK(res == 0, "ReadUpdaterMessage fclose failed", return false);
-    UPDATER_FILE_CHECK(!memcpy_s(&boot, sizeof(UpdateMessage), &tempBoot, sizeof(UpdateMessage)),
-        "ReadUpdaterMessage memcpy failed", return false);
+    if (res != 0) {
+        LOG(ERROR) << "ReadUpdaterMessage fclose failed" << " : " << strerror(errno);
+        return false;
+    }
+    if (memcpy_s(&boot, sizeof(UpdateMessage), &tempBoot, sizeof(UpdateMessage)) != EOK) {
+        LOG(ERROR) << "ReadUpdaterMessage memcpy failed" << " : " << strerror(errno);
+        return false;
+    }
     return true;
 }
 
 bool WriteUpdaterMiscMsg(const UpdateMessage &boot)
 {
     auto path = GetBlockDeviceByMountPoint(MISC_PATH);
-    UPDATER_INFO_CHECK(!path.empty(), "cannot get block device of partition", path = MISC_FILE);
+    if (path.empty()) {
+        LOG(INFO) << "cannot get block device of partition";
+        path = MISC_FILE;
+    }
     LOG(INFO) << "WriteUpdaterMiscMsg::misc path : " << path;
     return WriteUpdaterMessage(path, boot);
 }
@@ -67,8 +98,10 @@ bool WriteUpdaterMiscMsg(const UpdateMessage &boot)
 bool ReadUpdaterMiscMsg(UpdateMessage &boot)
 {
     auto path = GetBlockDeviceByMountPoint(MISC_PATH);
-    UPDATER_INFO_CHECK(!path.empty(), "cannot get block device of partition", path = MISC_FILE);
-    LOG(INFO) << "ReadUpdaterMiscMsg::misc path : " << path;
+    if (path.empty()) {
+        LOG(INFO) << "cannot get block device of partition";
+        path = MISC_FILE;
+    }
     return ReadUpdaterMessage(path, boot);
 }
 } // Updater

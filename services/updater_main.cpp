@@ -65,21 +65,33 @@ static void SetRetryCountToMisc(int retryCount, const std::vector<std::string> a
 {
     struct UpdateMessage msg {};
     char buffer[20];
-    UPDATER_ERROR_CHECK(!strncpy_s(msg.command, sizeof(msg.command), "boot_updater", strlen("boot_updater") + 1),
-        "SetRetryCountToMisc strncpy_s failed", return);
+    if (strncpy_s(msg.command, sizeof(msg.command), "boot_updater", strlen("boot_updater") + 1) != EOK) {
+        LOG(ERROR) << "SetRetryCountToMisc strncpy_s failed";
+        return;
+    }
     for (const auto& arg : args) {
         if (arg.find("--retry_count") == std::string::npos) {
-            UPDATER_ERROR_CHECK(!strncat_s(msg.update, sizeof(msg.update), arg.c_str(), strlen(arg.c_str()) + 1),
-                "SetRetryCountToMisc strncat_s failed", return);
-            UPDATER_ERROR_CHECK(!strncat_s(msg.update, sizeof(msg.update), "\n", strlen("\n") + 1),
-                "SetRetryCountToMisc strncat_s failed", return);
+            if (strncat_s(msg.update, sizeof(msg.update), arg.c_str(), strlen(arg.c_str()) + 1) != EOK) {
+                LOG(ERROR) << "SetRetryCountToMisc strncat_s failed";
+                return;
+            }
+            if (strncat_s(msg.update, sizeof(msg.update), "\n", strlen("\n") + 1) != EOK) {
+                LOG(ERROR) << "SetRetryCountToMisc strncat_s failed";
+                return;
+            }
         }
     }
-    UPDATER_ERROR_CHECK(snprintf_s(buffer, sizeof(buffer), sizeof(buffer) - 1, "--retry_count=%d", retryCount) != -1,
-        "SetRetryCountToMisc snprintf_s failed", return);
-    UPDATER_ERROR_CHECK(!strncat_s(msg.update, sizeof(msg.update), buffer, strlen(buffer) + 1),
-        "SetRetryCountToMisc strncat_s failed", return);
-    UPDATER_ERROR_CHECK_NOT_RETURN(WriteUpdaterMiscMsg(msg) == true, "Write command to misc failed.");
+    if (snprintf_s(buffer, sizeof(buffer), sizeof(buffer) - 1, "--retry_count=%d", retryCount) == -1) {
+        LOG(ERROR) << "SetRetryCountToMisc snprintf_s failed";
+        return;
+    }
+    if (strncat_s(msg.update, sizeof(msg.update), buffer, strlen(buffer) + 1) != EOK) {
+        LOG(ERROR) << "SetRetryCountToMisc strncat_s failed";
+        return;
+    }
+    if (WriteUpdaterMiscMsg(msg) != true) {
+        LOG(ERROR) << "Write command to misc failed.";
+    }
 }
 
 static int DoFactoryReset(FactoryResetMode mode, const std::string &path)
@@ -119,14 +131,22 @@ UpdaterStatus UpdaterFromSdcard()
     }
     if (MountForPath(SDCARD_PATH) != 0) {
         int ret = mount(sdcardStr.c_str(), SDCARD_PATH, "vfat", 0, NULL);
-        UPDATER_WARING_CHECK(ret == 0, "MountForPath /sdcard failed!", return UPDATE_ERROR);
+        if (ret != 0) {
+            LOG(WARNING) << "MountForPath /sdcard failed!";
+            return UPDATE_ERROR;
+        }
     }
 #endif
-    UPDATER_ERROR_CHECK(access(SDCARD_CARD_PKG_PATH, 0) == 0, "package is not exist",
-        ShowText(g_logLabel, "Package is not exist!");
-        return UPDATE_ERROR);
+    if (access(SDCARD_CARD_PKG_PATH, 0) != 0) {
+        LOG(ERROR) << "package is not exist";
+        UpdaterUiFacade::GetInstance().ShowLog(TR(LOG_NOPKG), true);
+        return UPDATE_ERROR;
+    }
     PkgManager::PkgManagerPtr pkgManager = PkgManager::GetPackageInstance();
-    UPDATER_ERROR_CHECK(pkgManager != nullptr, "pkgManager is nullptr", return UPDATE_ERROR);
+    if (pkgManager == nullptr) {
+        LOG(ERROR) << "pkgManager is nullptr";
+        return UPDATE_ERROR;
+    }
 
     STAGE(UPDATE_STAGE_BEGIN) << "UpdaterFromSdcard";
     LOG(INFO) << "UpdaterFromSdcard start, sdcard updaterPath : " << SDCARD_CARD_PKG_PATH;
@@ -173,8 +193,8 @@ bool GetBatteryCapacity(int &capacity)
 
 bool IsBatteryCapacitySufficient()
 {
-    constexpr auto levelIdx = "lowBatteryLevel";
-    constexpr auto jsonPath = "/etc/product_cfg.json";
+    static constexpr auto levelIdx = "lowBatteryLevel";
+    static constexpr auto jsonPath = "/etc/product_cfg.json";
 
     int capacity = 0;
     bool ret = GetBatteryCapacity(capacity);
@@ -213,8 +233,10 @@ static UpdaterStatus InstallUpdaterPackage(UpdaterParams &upParams, const std::v
         STAGE(UPDATE_STAGE_BEGIN) << "Install package";
         if (upParams.retryCount == 0) {
             // First time enter updater, record retryCount in case of abnormal reset.
-            UPDATER_ERROR_CHECK(PartitionRecord::GetInstance().ClearRecordPartitionOffset() == true,
-                "ClearRecordPartitionOffset failed", return UPDATE_ERROR);
+            if (!PartitionRecord::GetInstance().ClearRecordPartitionOffset()) {
+                LOG(ERROR) << "ClearRecordPartitionOffset failed";
+                return UPDATE_ERROR;
+            }
             SetRetryCountToMisc(upParams.retryCount + 1, args);
         }
         UPDATER_CHECK_ONLY_RETURN(SetupPartitions() == 0, ShowText(GetUpdateInfoLabel(), "Setup partitions failed");
@@ -330,9 +352,10 @@ static UpdaterStatus StartUpdater(PkgManager::PkgManagerPtr manager, const std::
     }
     optind = 1;
     // Sanity checks
-    UPDATER_WARING_CHECK((upParams.factoryWipeData && upParams.userWipeData) == false,
-        "Factory level reset and user level reset both set. use user level reset.", upParams.factoryWipeData = false);
-
+    if (upParams.factoryWipeData && upParams.userWipeData) {
+        LOG(WARNING) << "Factory level reset and user level reset both set. use user level reset.";
+        upParams.factoryWipeData = false;
+    }
     return StartUpdaterEntry(manager, args, upParams);
 }
 

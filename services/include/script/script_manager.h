@@ -59,5 +59,5 @@ public:
     static ScriptManager* GetScriptManager(UScriptEnv *env);
     static void ReleaseScriptManager();
 };
-} // namespace uscript
+} // namespace Uscript
 #endif

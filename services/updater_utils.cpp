@@ -45,8 +45,8 @@ static bool IsDir(const std::string &path)
 static bool DeleteUpdaterPath(const std::string &path)
 {
     auto pDir = std::unique_ptr<DIR, decltype(&closedir)>(opendir(path.c_str()), closedir);
-    UPDATER_INFO_CHECK_NOT_RETURN(pDir != nullptr, "Can not open dir");
     if (pDir == nullptr) {
+        LOG(INFO) << "Can not open dir";
         return true;
     }
     struct dirent *dp = nullptr;
@@ -71,20 +71,30 @@ static bool DeleteUpdaterPath(const std::string &path)
 bool ClearMisc()
 {
     struct UpdateMessage cleanBoot {};
-    UPDATER_ERROR_CHECK(WriteUpdaterMiscMsg(cleanBoot) == true,
-        "ClearMisc clear boot message to misc failed", return false);
+    if (!WriteUpdaterMiscMsg(cleanBoot)) {
+        LOG(ERROR) << "ClearMisc clear boot message to misc failed";
+        return false;
+    }
     auto miscBlockDev = GetBlockDeviceByMountPoint(MISC_PATH);
-    UPDATER_INFO_CHECK(!miscBlockDev.empty(), "cannot get block device of partition", miscBlockDev = MISC_FILE);
+    if (miscBlockDev.empty()) {
+        LOG(INFO) << "cannot get block device of partition";
+        miscBlockDev = MISC_FILE;
+    }
     LOG(INFO) << "ClearMisc::misc path : " << miscBlockDev;
     auto fp = std::unique_ptr<FILE, decltype(&fclose)>(fopen(miscBlockDev.c_str(), "rb+"), fclose);
-    UPDATER_FILE_CHECK(fp != nullptr, "WriteVersionCode fopen failed", return false);
+    if (fp == nullptr) {
+        LOG(ERROR) << "WriteVersionCode fopen failed" << " : " << strerror(errno);
+        return false;
+    }
     if (fseek(fp.get(), PARTITION_RECORD_OFFSET, SEEK_SET) != 0) {
         LOG(ERROR) << "ClearMisc fseek failed";
         return false;
     }
     off_t clearOffset = 0;
-    UPDATER_FILE_CHECK(fwrite(&clearOffset, sizeof(off_t), 1, fp.get()) == 1,
-        "ClearMisc write misc initOffset 0 failed", return false);
+    if (fwrite(&clearOffset, sizeof(off_t), 1, fp.get()) != 1) {
+        LOG(ERROR) << "ClearMisc write misc initOffset 0 failed" << " : " << strerror(errno);
+        return false;
+    }
 
     struct PartitionRecordInfo cleanPartition {};
     for (size_t tmpOffset = 0; tmpOffset < PARTITION_UPDATER_RECORD_MSG_SIZE; tmpOffset +=
@@ -93,8 +103,10 @@ bool ClearMisc()
             LOG(ERROR) << "ClearMisc fseek failed";
             return false;
         }
-        UPDATER_FILE_CHECK(fwrite(&cleanPartition, sizeof(PartitionRecordInfo), 1, fp.get()) == 1,
-            "ClearMisc write misc cleanPartition failed", return false);
+        if (fwrite(&cleanPartition, sizeof(PartitionRecordInfo), 1, fp.get()) != 1) {
+            LOG(ERROR) << "ClearMisc write misc cleanPartition failed" << " : " << strerror(errno);
+            return false;
+        }
     }
     return true;
 }
@@ -161,13 +173,15 @@ std::vector<std::string> ParseParams(int argc, char **argv)
 {
     struct UpdateMessage boot {};
     // read from misc
-    UPDATER_ERROR_CHECK_NOT_RETURN(ReadUpdaterMiscMsg(boot) == true,
-        "ReadUpdaterMessage MISC_FILE failed!");
+    if (!ReadUpdaterMiscMsg(boot)) {
+        LOG(ERROR) << "ReadUpdaterMessage MISC_FILE failed!";
+    }
     // if boot.update is empty, read from command.The Misc partition may have dirty data,
     // so strlen(boot.update) is not used, which can cause system exceptions.
     if (boot.update[0] == '\0' && !access(COMMAND_FILE, 0)) {
-        UPDATER_ERROR_CHECK_NOT_RETURN(ReadUpdaterMessage(COMMAND_FILE, boot) == true,
-                                       "ReadUpdaterMessage COMMAND_FILE failed!");
+        if (!ReadUpdaterMessage(COMMAND_FILE, boot)) {
+            LOG(ERROR) << "ReadUpdaterMessage COMMAND_FILE failed!";
+        }
     }
     STAGE(UPDATE_STAGE_OUT) << "Init Params: " << boot.update;
     std::vector<std::string> parseParams(argv, argv + argc);

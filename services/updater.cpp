@@ -111,14 +111,16 @@ int UpdatePreProcess(PkgManager::PkgManagerPtr pkgManager, const std::string &pa
         return PKG_INVALID_VERSION;
     }
     PackagesInfoPtr pkginfomanager = PackagesInfo::GetPackagesInfoInstance();
-    UpgradePkgInfo* outPkgInfo = (UpgradePkgInfo*)pkgManager->GetPackageInfo(path);
-    if (pkginfomanager == nullptr || outPkgInfo == nullptr) {
+    const char *verPtr = GetDisplayVersion();
+    if ((pkginfomanager == nullptr) || (verPtr == nullptr)) {
         LOG(ERROR) << "Fail to GetPackageInstance";
         return PKG_INVALID_VERSION;
     }
+    std::string verStr(verPtr);
+    LOG(INFO) << "current version:" << verStr;
     std::vector<std::string> targetVersions = pkginfomanager->GetOTAVersion(pkgManager, "/version_list", G_WORK_PATH);
     for (size_t i = 0; i < targetVersions.size(); i++) {
-        ret = outPkgInfo->softwareVersion.compare(targetVersions[i]);
+        ret = verStr.compare(targetVersions[i]);
         if (ret == 0) {
             break;
         }
@@ -149,22 +151,37 @@ int UpdatePreProcess(PkgManager::PkgManagerPtr pkgManager, const std::string &pa
 UpdaterStatus IsSpaceCapacitySufficient(const std::string &packagePath)
 {
     PkgManager::PkgManagerPtr pkgManager = Hpackage::PkgManager::CreatePackageInstance();
-    UPDATER_ERROR_CHECK(pkgManager != nullptr, "pkgManager is nullptr", return UPDATE_CORRUPT);
+    if (pkgManager == nullptr) {
+        LOG(ERROR) << "pkgManager is nullptr";
+        return UPDATE_CORRUPT;
+    }
     std::vector<std::string> fileIds;
     int ret = pkgManager->LoadPackageWithoutUnPack(packagePath, fileIds);
-    UPDATER_ERROR_CHECK(ret == PKG_SUCCESS, "LoadPackageWithoutUnPack failed",
-        PkgManager::ReleasePackageInstance(pkgManager); return UPDATE_CORRUPT);
+    if (ret != PKG_SUCCESS) {
+        LOG(ERROR) << "LoadPackageWithoutUnPack failed";
+        PkgManager::ReleasePackageInstance(pkgManager);
+        return UPDATE_CORRUPT;
+    }
 
     const FileInfo *info = pkgManager->GetFileInfo("update.bin");
-    UPDATER_ERROR_CHECK(info != nullptr, "update.bin is not exist",
-        PkgManager::ReleasePackageInstance(pkgManager); return UPDATE_CORRUPT);
+    if (info == nullptr) {
+        LOG(ERROR) << "update.bin is not exist";
+        PkgManager::ReleasePackageInstance(pkgManager);
+        return UPDATE_CORRUPT;
+    }
     PkgManager::ReleasePackageInstance(pkgManager);
 
     struct statvfs64 updaterVfs;
     if (access("/sdcard/updater", 0) == 0) {
-        UPDATER_ERROR_CHECK(statvfs64("/sdcard", &updaterVfs) >= 0, "Statvfs read /sdcard error!", return UPDATE_ERROR);
+        if (statvfs64("/sdcard", &updaterVfs) < 0) {
+            LOG(ERROR) << "Statvfs read /sdcard error!";
+            return UPDATE_ERROR;
+        }
     } else {
-        UPDATER_ERROR_CHECK(statvfs64("/data", &updaterVfs) >= 0, "Statvfs read /data error!", return UPDATE_ERROR);
+        if (statvfs64("/data", &updaterVfs) < 0) {
+            LOG(ERROR) << "Statvfs read /data error!";
+            return UPDATE_ERROR;
+        }
     }
 
     auto freeSpaceSize = static_cast<uint64_t>(updaterVfs.f_bfree);
@@ -299,7 +316,10 @@ UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, cons
 namespace {
 void SetProgress(const std::vector<std::string> &output)
 {
-    UPDATER_ERROR_CHECK(output.size() >= DEFAULT_PROCESS_NUM, "check output fail", return);
+    if (output.size() < DEFAULT_PROCESS_NUM) {
+        LOG(ERROR) << "check output fail";
+        return;
+    }
     auto outputInfo = Trim(output[1]);
     float frac = std::stof(output[1]);
     int tmpProgressValue = 0;
@@ -330,15 +350,31 @@ void HandleChildOutput(const std::string &buffer, int32_t bufferLen, bool &retry
 
     std::string str = buffer;
     std::vector<std::string> output = SplitString(str, ":");
-    UPDATER_ERROR_CHECK(output.size() >= 1, "check output fail", return);
+    if (output.size() < 1) {
+        LOG(ERROR) << "check output fail";
+        return;
+    }
     auto outputHeader = Trim(output[0]);
-    if (outputHeader == "ui_log" || outputHeader == "write_log") {
-        UPDATER_ERROR_CHECK(output.size() >= DEFAULT_PROCESS_NUM, "check output fail", return);
-        LOG(INFO) << Trim(output[1]);
+    if (outputHeader == "ui_log") {
+        if (output.size() < DEFAULT_PROCESS_NUM) {
+            LOG(ERROR) << "check output fail";
+            return;
+        }
+        auto outputInfo = Trim(output[1]);
+    } else if (outputHeader == "write_log") {
+        if (output.size() < DEFAULT_PROCESS_NUM) {
+            LOG(ERROR) << "check output fail";
+            return;
+        }
+        auto outputInfo = Trim(output[1]);
+        LOG(INFO) << outputInfo;
     } else if (outputHeader == "retry_update") {
         retryUpdate = true;
     } else if (outputHeader == "show_progress") {
-        UPDATER_ERROR_CHECK(output.size() >= DEFAULT_PROCESS_NUM, "check output fail", return);
+        if (output.size() < DEFAULT_PROCESS_NUM) {
+            LOG(ERROR) << "check output fail";
+            return;
+        }
         g_tmpValue = g_tmpProgressValue;
         auto outputInfo = Trim(output[1]);
         std::vector<std::string> progress = SplitString(outputInfo, ",");
