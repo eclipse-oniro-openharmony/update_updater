@@ -76,7 +76,6 @@ ohos_executable("updater") {
     "//third_party/openssl:libcrypto_static",
     "//third_party/openssl:ssl_source",
     "//third_party/zlib:libz",
-    "//base/startup/syspara_lite/interfaces/innerkits/native/syspara:syspara",
     "//base/startup/syspara_lite/hals/parameter:sysparam_hal",
   ]
 
@@ -90,6 +89,13 @@ ohos_executable("updater") {
   if (defined(updater_custom_lib)) {
     deps += updater_custom_lib
   }
+
+  # force link invisible function
+  ldflags = [ "-Wl,--whole-archive" ]
+  foreach(lib, updater_force_link_libs) {
+    ldflags += [ "${lib}" ]
+  }
+  ldflags += [ "-Wl,--no-whole-archive" ]
 
   external_deps = [ "init:libbegetutil" ]
   install_images = [ "updater" ]
