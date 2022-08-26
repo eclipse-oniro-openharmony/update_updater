@@ -57,6 +57,7 @@ ohos_executable("updater") {
   ]
 
   deps = [
+    "//base/startup/syspara_lite/hals/parameter:sysparam_hal",
     "//base/update/updater/interfaces/kits/misc_info:libmiscinfo",
     "//base/update/updater/interfaces/kits/packages:libpackageExt",
     "//base/update/updater/services/applypatch:libapplypatch",
@@ -76,7 +77,6 @@ ohos_executable("updater") {
     "//third_party/openssl:libcrypto_static",
     "//third_party/openssl:ssl_source",
     "//third_party/zlib:libz",
-    "//base/startup/syspara_lite/hals/parameter:sysparam_hal",
   ]
 
   if (defined(use_ptable)) {
