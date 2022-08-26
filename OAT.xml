@@ -61,8 +61,9 @@ Note:If the text contains special characters, please escape them according to th
             <policy name="projectPolicy" desc="">
                 <!--policyitem type="compatibility" name="curl" path=".*" rule="may" group="defaultGroup" filefilter="defaultPolicyFilter" desc=""/-->			
                 <!--policyitem type="compatibility" name="GPL-2.0+" path=".*" desc="不使用或者使用但是是独立进程，被X进程调用，自研进程不受GPL影响"/>			
-	            <policyitem type="license" name="LGPL" path=".*" desc="未使用，或者使用了，被X进程以动态链接方式调用"/>
-				<policyitem type="copyright" name="xxx" path=".*" rule="may" group="defaultGroup" filefilter="copyrightPolicyFilter" desc="xxxx开发代码"/-->		        
+                <policyitem type="license" name="LGPL" path=".*" desc="未使用，或者使用了，被X进程以动态链接方式调用"/>
+                <policyitem type="copyright" name="xxx" path=".*" rule="may" group="defaultGroup" filefilter="copyrightPolicyFilter" desc="xxxx开发代码"/-->
+                <policyitem type="license" name="HarmonyOS Sans Fonts License Agreement" path="resources/font/.*" desc="Font license "/>
             </policy>
         </policylist>
         <filefilterlist>			
@@ -73,15 +74,32 @@ Note:If the text contains special characters, please escape them according to th
             </filefilter>
             <filefilter name="binaryFileTypePolicyFilter" desc="Filters for binary file policies" >
                 <filteritem type="filepath" name="resources/.*.png" desc="升级服务应用的资源文件"/>
+                <filteritem type="filepath" name="resources/font/.*" desc="升级服务应用的经过裁剪的开源字库文件"/>
+                <filteritem type="filepath" name="resources/rk3568/images/icon/.*.png" desc="升级服务应用的资源文件"/>
+                <filteritem type="filepath" name="resources/rk3568/images/progress/.*.png" desc="升级服务应用的资源文件"/>
+                <filteritem type="filepath" name="resources/rk3568/images/warn/.*.png" desc="升级服务应用的资源文件"/>
                 <filteritem type="filepath" name="test/fuzztest/fuzz_src_data/.*" desc="升级功能Fuzz测试的资源文件"/>
-		<filteritem type="filepath" name="test/unittest/test_data/.*" desc="升级功能UT测试的资源文件"/>
-		<filteritem type="filepath" name="prebuild/ohos-sdk/windows/toolchains/ohflash.exe" desc="HDC flashd 功能客户端可执行文件"/>
+                <filteritem type="filepath" name="test/unittest/test_data/.*" desc="升级功能UT测试的资源文件"/>
+                <filteritem type="filepath" name="prebuild/ohos-sdk/windows/toolchains/ohflash.exe" desc="HDC flashd 功能客户端可执行文件"/>
             </filefilter>
             <filefilter name="defaultFilter" desc="Files not to check">
                 <filteritem type="filepath" name="test/fuzztest/.*" desc="升级功能Fuzz测试的资源文件"/>
                 <filteritem type="filepath" name="test/unittest/test_data/.*" desc="升级功能UT测试的资源文件"/>
             </filefilter>
         </filefilterlist>
-	
+        <licensefile>LICENSE_Fonts</licensefile>
+        <licensematcherlist>
+            <licensematcher name="HarmonyOS Sans Fonts License Agreement" desc="">
+                <licensetext name="
+                    HarmonyOS Sans Fonts License Agreement
+                    THIS HARMONYOS SANS FONTS LICENSE AGREEMENT (&gt;AGREEMENT&gt;) IS A LEGAL AGREEMENT BETWEEN YOU (EITHER
+                    A SINGLE INDIVIDUAL, OR SINGLE LEGAL ENTITY) AND HUAWEI DEVICE CO., LTD. (&gt; LICENSOR&gt;) FOR THE USE OF
+                    THE HARMONYOS SANS FONTS ACCOMPANYING THIS AGREEMENT. BY DOWNLOADING, COPYING OR OTHERWISE USING HARMONYOS
+                    SANS FONTS YOU INDICATE THAT YOU AGREE TO BE BOUND BY ALL OF THE TERMS OF THIS AGREEMENT. IF YOU DO NOT
+                    AGREE TO THE TERMS OF THIS AGREEMENT, YOU MAY NOT DOWNLOAD, COPY OR OTHERWISE USE THE HARMONYOS SANS FONTS,
+                    AND YOU SHALL PROMPTLY DESTROY AND DELETE ALL THE HARMONYOS SANS FONTS.
+                 " desc=""/>
+            </licensematcher>
+        </licensematcherlist>
     </oatconfig>
 </configuration>
