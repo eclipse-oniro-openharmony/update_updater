@@ -70,9 +70,13 @@ Note:If the text contains special characters, please escape them according to th
 				<filteritem type="filepath" name="adapter/.*" desc="adapter目录下是自研代码"/>		
 				<filteritem type="filepath" name="services/etc/updater_init.cfg" desc="升级服务应用的资源文件"/>
 				<filteritem type="filepath" name="resources/.*.png" desc="升级服务应用的资源文件"/>
+                <filteritem type="filepath" name="resources/font/.*.ttf" desc="升级服务应用的经过裁剪的开源字库文件"/>
             </filefilter>
             <filefilter name="binaryFileTypePolicyFilter" desc="Filters for binary file policies" >
                 <filteritem type="filepath" name="resources/.*.png" desc="升级服务应用的资源文件"/>
+                <filteritem type="filepath" name="resources/rk3568/images/icon/.*.png" desc="升级服务应用的图片资源文件"/>
+                <filteritem type="filepath" name="resources/rk3568/images/progress/.*.png" desc="升级服务应用的图片资源文件"/>
+                <filteritem type="filepath" name="resources/rk3568/images/warn/.*.png" desc="升级服务应用的图片资源文件"/>
                 <filteritem type="filepath" name="test/fuzztest/fuzz_src_data/.*" desc="升级功能Fuzz测试的资源文件"/>
 		<filteritem type="filepath" name="test/unittest/test_data/.*" desc="升级功能UT测试的资源文件"/>
 		<filteritem type="filepath" name="prebuild/ohos-sdk/windows/toolchains/ohflash.exe" desc="HDC flashd 功能客户端可执行文件"/>
