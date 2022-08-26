@@ -91,11 +91,13 @@ ohos_executable("updater") {
   }
 
   # force link invisible function
-  ldflags = [ "-Wl,--whole-archive" ]
-  foreach(lib, updater_force_link_libs) {
-    ldflags += [ "${lib}" ]
+  if (defined(updater_force_link_libs)) {
+    ldflags = [ "-Wl,--whole-archive" ]
+    foreach(lib, updater_force_link_libs) {
+      ldflags += [ "${lib}" ]
+    }
+    ldflags += [ "-Wl,--no-whole-archive" ]
   }
-  ldflags += [ "-Wl,--no-whole-archive" ]
 
   external_deps = [ "init:libbegetutil" ]
   install_images = [ "updater" ]
