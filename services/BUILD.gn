@@ -53,6 +53,7 @@ ohos_executable("updater") {
     "//base/update/updater/services/ui",
     "//base/update/updater/services/ui/view",
     "//base/update/updater/services/include",
+    "//base/startup/syspara_lite/interfaces/innerkits/native/syspara/include",
   ]
 
   deps = [
@@ -75,6 +76,8 @@ ohos_executable("updater") {
     "//third_party/openssl:libcrypto_static",
     "//third_party/openssl:ssl_source",
     "//third_party/zlib:libz",
+    "//base/startup/syspara_lite/interfaces/innerkits/native/syspara:syspara",
+    "//base/startup/syspara_lite/hals/parameter:sysparam_hal",
   ]
 
   if (defined(use_ptable)) {

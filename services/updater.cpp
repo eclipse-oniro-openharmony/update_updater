@@ -31,6 +31,7 @@
 #include "log/log.h"
 #include "package/pkg_manager.h"
 #include "package/packages_info.h"
+#include "parameter.h"
 #include "progress_bar.h"
 #include "text_label.h"
 #include "updater/updater_const.h"
