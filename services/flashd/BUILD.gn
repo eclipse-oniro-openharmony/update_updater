@@ -12,7 +12,6 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import("//vendor/huawei/${product_name}/updater_config/build_cfg.gni")
 
 FLASHD_PATH = "//base/update/updater/services/flashd"
 HDC_PATH = "//developtools/hdc/src"
