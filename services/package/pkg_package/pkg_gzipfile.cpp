@@ -113,10 +113,14 @@ int32_t GZipFileEntry::Pack(PkgStreamPtr inStream, size_t startOffset, size_t &e
 {
     PkgAlgorithm::PkgAlgorithmPtr algorithm = PkgAlgorithmFactory::GetAlgorithm(&fileInfo_.fileInfo);
     PkgStreamPtr outStream = pkgFile_->GetPkgStream();
-    PKG_CHECK(fileInfo_.fileInfo.dataOffset == startOffset, return PKG_INVALID_PARAM,
-        "start offset error for %s", fileInfo_.fileInfo.identity.c_str());
-    PKG_CHECK(algorithm != nullptr && outStream != nullptr && inStream != nullptr, return PKG_INVALID_PARAM,
-        "outStream or inStream null for %s", fileInfo_.fileInfo.identity.c_str());
+    if (fileInfo_.fileInfo.dataOffset != startOffset) {
+        PKG_LOGE("start offset error for %s", fileInfo_.fileInfo.identity.c_str());
+        return PKG_INVALID_PARAM;
+    }
+    if (algorithm == nullptr || outStream == nullptr || inStream == nullptr) {
+        PKG_LOGE("outStream or inStream null for %s", fileInfo_.fileInfo.identity.c_str());
+        return PKG_INVALID_PARAM;
+    }
     fileInfo_.fileInfo.dataOffset = startOffset;
     PkgAlgorithmContext context = {
         {0, startOffset},
@@ -124,7 +128,10 @@ int32_t GZipFileEntry::Pack(PkgStreamPtr inStream, size_t startOffset, size_t &e
         0, fileInfo_.fileInfo.digestMethod
     };
     int32_t ret = algorithm->Pack(inStream, outStream, context);
-    PKG_CHECK(ret == PKG_SUCCESS, return ret, "Fail Compress for %s", fileInfo_.fileInfo.identity.c_str());
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("Fail Compress for %s", fileInfo_.fileInfo.identity.c_str());
+        return ret;
+    }
     fileInfo_.fileInfo.packedSize = context.packedSize;
 
     /*
@@ -137,7 +144,10 @@ int32_t GZipFileEntry::Pack(PkgStreamPtr inStream, size_t startOffset, size_t &e
     WriteLE32(buffer.buffer, context.crc);
     WriteLE32(buffer.buffer + sizeof(uint32_t), fileInfo_.fileInfo.unpackedSize);
     ret = outStream->Write(buffer, BLOCK_SIZE, fileInfo_.fileInfo.dataOffset + fileInfo_.fileInfo.packedSize);
-    PKG_CHECK(ret == PKG_SUCCESS, return ret, "Fail write header for %s", fileInfo_.fileInfo.identity.c_str());
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("Fail write header for %s", fileInfo_.fileInfo.identity.c_str());
+        return ret;
+    }
     encodeLen = fileInfo_.fileInfo.packedSize + BLOCK_SIZE;
     PKG_LOGI("Pack packedSize:%zu unpackedSize: %zu offset: %zu %zu", fileInfo_.fileInfo.packedSize,
         fileInfo_.fileInfo.unpackedSize, fileInfo_.fileInfo.headerOffset, fileInfo_.fileInfo.dataOffset);
@@ -209,8 +219,10 @@ int32_t GZipFileEntry::DecodeHeader(const PkgBuffer &buffer, size_t headerOffset
     size_t &decodeLen)
 {
     PkgStreamPtr inStream = pkgFile_->GetPkgStream();
-    PKG_CHECK(inStream != nullptr && buffer.buffer != nullptr, return PKG_INVALID_PARAM,
-        "outStream or inStream null for %s", fileInfo_.fileInfo.identity.c_str());
+    if (inStream == nullptr || buffer.buffer == nullptr) {
+        PKG_LOGE("outStream or inStream null for %s", fileInfo_.fileInfo.identity.c_str());
+        return PKG_INVALID_PARAM;
+    }
     size_t offset = sizeof(GZipHeader);
 
     uint8_t flags = *(buffer.buffer + offsetof(GZipHeader, flags));
@@ -241,7 +253,10 @@ int32_t GZipFileEntry::DecodeHeader(const PkgBuffer &buffer, size_t headerOffset
     size_t readLen = 0;
     size_t blockOffset = inStream->GetFileLength() - BLOCK_SIZE;
     int32_t ret = inStream->Read(buffer, blockOffset, buffer.length, readLen);
-    PKG_CHECK(ret == PKG_SUCCESS, return ret, "Fail to read file %s", inStream->GetFileName().c_str());
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("Fail to read file %s", inStream->GetFileName().c_str());
+        return ret;
+    }
     fileInfo_.fileInfo.unpackedSize = ReadLE32(buffer.buffer + sizeof(uint32_t));
     fileInfo_.fileInfo.packedSize = blockOffset - fileInfo_.fileInfo.dataOffset;
     PKG_LOGI("GZipFileEntry::DecodeHeader dataOffset %zu, packedSize: %zu %zu", fileInfo_.fileInfo.dataOffset,
@@ -252,22 +267,39 @@ int32_t GZipFileEntry::DecodeHeader(const PkgBuffer &buffer, size_t headerOffset
 
 int32_t GZipPkgFile::AddEntry(const PkgManager::FileInfoPtr file, const PkgStreamPtr inStream)
 {
-    PKG_CHECK(file != nullptr && inStream != nullptr, return PKG_INVALID_PARAM, "Fail to check input param");
-    PKG_CHECK(CheckState({PKG_FILE_STATE_IDLE, PKG_FILE_STATE_WORKING}, PKG_FILE_STATE_CLOSE),
-        return PKG_INVALID_STATE, "error state curr %d ", state_);
+    if (file == nullptr || inStream == nullptr) {
+        PKG_LOGE("Fail to check input param");
+        return PKG_INVALID_PARAM;
+    }
+    if (!CheckState({PKG_FILE_STATE_IDLE, PKG_FILE_STATE_WORKING}, PKG_FILE_STATE_CLOSE)) {
+        PKG_LOGE("error state curr %d ", state_);
+        return PKG_INVALID_STATE;
+    }
     PKG_LOGI("Add file %s to package", file->identity.c_str());
 
     GZipFileEntry *entry = static_cast<GZipFileEntry *>(AddPkgEntry(file->identity));
-    PKG_CHECK(entry != nullptr, return PKG_NONE_MEMORY, "Fail create pkg node for %s", file->identity.c_str());
+    if (entry == nullptr) {
+        PKG_LOGE("Fail create pkg node for %s", file->identity.c_str());
+        return PKG_NONE_MEMORY;
+    }
     int32_t ret = entry->Init(file, inStream);
-    PKG_CHECK(ret == PKG_SUCCESS, return ret, "Fail init entry for %s", file->identity.c_str());
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("Fail init entry for %s", file->identity.c_str());
+        return ret;
+    }
 
     size_t encodeLen = 0;
     ret = entry->EncodeHeader(inStream, currentOffset_, encodeLen);
-    PKG_CHECK(ret == PKG_SUCCESS, return ret, "Fail encode header for %s", file->identity.c_str());
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("Fail encode header for %s", file->identity.c_str());
+        return ret;
+    }
     currentOffset_ += encodeLen;
     ret = entry->Pack(inStream, currentOffset_, encodeLen);
-    PKG_CHECK(ret == PKG_SUCCESS, return ret, "Fail Pack for %s", file->identity.c_str());
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("Fail Pack for %s", file->identity.c_str());
+        return ret;
+    }
     currentOffset_ += encodeLen;
     pkgStream_->Flush(currentOffset_);
     return PKG_SUCCESS;
@@ -282,25 +314,37 @@ int32_t GZipPkgFile::SavePackage(size_t &offset)
 int32_t GZipPkgFile::LoadPackage(std::vector<std::string> &fileNames, VerifyFunction verifier)
 {
     UNUSED(verifier);
-    PKG_CHECK(CheckState({ PKG_FILE_STATE_IDLE }, PKG_FILE_STATE_WORKING), return PKG_INVALID_STATE,
-        "error state curr %d ", state_);
+    if (!CheckState({ PKG_FILE_STATE_IDLE }, PKG_FILE_STATE_WORKING)) {
+        PKG_LOGE("error state curr %d ", state_);
+        return PKG_INVALID_STATE;
+    }
     PKG_LOGI("LoadPackage %s ", pkgStream_->GetFileName().c_str());
     size_t srcOffset = 0;
     size_t readLen = 0;
     PkgBuffer buffer(BUFFER_SIZE);
     int32_t ret = pkgStream_->Read(buffer, srcOffset, buffer.length, readLen);
-    PKG_CHECK(ret == PKG_SUCCESS, return ret, "Fail to read file %s", pkgStream_->GetFileName().c_str());
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("Fail to read file %s", pkgStream_->GetFileName().c_str());
+        return ret;
+    }
 
     GZipHeader *header = (GZipHeader *)buffer.buffer;
     // Check magic number
-    PKG_CHECK(header->magic == GZIP_MAGIC, return PKG_INVALID_FILE, "Invalid gzip file %s",
-        pkgStream_->GetFileName().c_str());
+    if (header->magic != GZIP_MAGIC) {
+        PKG_LOGE("Invalid gzip file %s", pkgStream_->GetFileName().c_str());
+        return PKG_INVALID_FILE;
+    }
     // Does not support encryption
-    PKG_CHECK((header->flags & ENCRYPTED) == 0, return PKG_INVALID_FILE, "Not support encrypted ");
+    if ((header->flags & ENCRYPTED) != 0) {
+        PKG_LOGE("Not support encrypted ");
+        return PKG_INVALID_FILE;
+    }
 
     GZipFileEntry *entry = new GZipFileEntry(this, nodeId_++);
-    PKG_CHECK(entry != nullptr, return PKG_LZ4_FINISH,
-        "Fail create gzip node for %s", pkgStream_->GetFileName().c_str());
+    if (entry == nullptr) {
+        PKG_LOGE("Fail create gzip node for %s", pkgStream_->GetFileName().c_str());
+        return PKG_LZ4_FINISH;
+    }
     ret = entry->DecodeHeader(buffer, srcOffset, srcOffset, readLen);
     srcOffset += readLen;
 

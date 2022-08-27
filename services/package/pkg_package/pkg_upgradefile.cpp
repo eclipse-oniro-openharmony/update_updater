@@ -48,7 +48,10 @@ constexpr size_t BUFFER_SIZE = 4 * 1024 * 1024;
 int32_t UpgradeFileEntry::Init(const PkgManager::FileInfoPtr fileInfo, PkgStreamPtr inStream)
 {
     int32_t ret = PkgEntry::Init(&fileInfo_.fileInfo, fileInfo, inStream);
-    PKG_CHECK(ret == PKG_SUCCESS, return PKG_INVALID_PARAM, "Fail to check input param");
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("Fail to check input param");
+        return PKG_INVALID_PARAM;
+    }
     ComponentInfo *info = (ComponentInfo *)fileInfo;
     if (info != nullptr) {
         fileInfo_.version = info->version;
@@ -57,8 +60,10 @@ int32_t UpgradeFileEntry::Init(const PkgManager::FileInfoPtr fileInfo, PkgStream
         fileInfo_.type = info->type;
         fileInfo_.compFlags = info->compFlags;
         fileInfo_.originalSize = info->originalSize;
-        PKG_CHECK(!memcpy_s(fileInfo_.digest, sizeof(fileInfo_.digest), info->digest, sizeof(info->digest)),
-            return PKG_NONE_MEMORY, "UpgradeFileEntry memcpy failed");
+        if (memcpy_s(fileInfo_.digest, sizeof(fileInfo_.digest), info->digest, sizeof(info->digest)) != EOK) {
+            PKG_LOGE("UpgradeFileEntry memcpy failed");
+            return PKG_NONE_MEMORY;
+        }
     }
     return PKG_SUCCESS;
 }
@@ -177,10 +182,9 @@ int32_t UpgradePkgFile::LoadPackage(std::vector<std::string> &fileNames, VerifyF
     // Allocate buffer with smallest package size
     size_t buffSize = UPGRADE_FILE_HEADER_LEN + sizeof(UpgradeCompInfo) +
         GetUpgradeSignatureLen() + UPGRADE_RESERVE_LEN;
-    if (fileLen < buffSize) {
-        PKG_LOGE("Invalid file %s fileLen:%zu ", pkgStream_->GetFileName().c_str(), fileLen);
-        return PKG_INVALID_FILE;
-    }
+    PKG_CHECK(fileLen > 0 && fileLen >= buffSize,
+        return PKG_INVALID_FILE, "Invalid file %s fileLen:%zu ", pkgStream_->GetFileName().c_str(), fileLen);
+
     DigestAlgorithm::DigestAlgorithmPtr algorithm = nullptr;
     // Parse header
     PkgBuffer buffer(buffSize);
@@ -232,7 +236,10 @@ int32_t UpgradePkgFile::Verify(size_t start, DigestAlgorithm::DigestAlgorithmPtr
         size_t remainBytes = pkgStream_->GetFileLength() - offset;
         remainBytes = ((remainBytes > buffSize) ? buffSize : remainBytes);
         ret = pkgStream_->Read(buffer, offset, remainBytes, readBytes);
-        PKG_CHECK(ret == PKG_SUCCESS, return ret, "Fail to read data ");
+        if (ret != PKG_SUCCESS) {
+            PKG_LOGE("Fail to read data ");
+            return ret;
+        }
         algorithm->Update(buffer, readBytes);
         pkgManager_->PostDecodeProgress(POST_TYPE_VERIFY_PKG, remainBytes, nullptr);
     }
@@ -240,7 +247,10 @@ int32_t UpgradePkgFile::Verify(size_t start, DigestAlgorithm::DigestAlgorithmPtr
     PkgBuffer digest(GetDigestLen());
     algorithm->Final(digest);
     ret = verifier(&pkgInfo_.pkgInfo, digest.data, signData);
-    PKG_CHECK(ret == 0, return PKG_INVALID_SIGNATURE, "Fail to verifier signature");
+    if (ret != 0) {
+        PKG_LOGE("Fail to verifier signature");
+        return PKG_INVALID_SIGNATURE;
+    }
     return 0;
 }
 
@@ -399,22 +409,31 @@ int32_t UpgradeFileEntry::Pack(PkgStreamPtr inStream, size_t startOffset, size_t
 {
     PkgAlgorithm::PkgAlgorithmPtr algorithm = PkgAlgorithmFactory::GetAlgorithm(&fileInfo_.fileInfo);
     PkgStreamPtr outStream = pkgFile_->GetPkgStream();
-    PKG_CHECK(algorithm != nullptr && outStream != nullptr && inStream != nullptr, return PKG_INVALID_PARAM,
-        "outStream or inStream null for %s", fileName_.c_str());
+    if (algorithm == nullptr || outStream == nullptr || inStream == nullptr) {
+        PKG_LOGE("outStream or inStream null for %s", fileName_.c_str());
+        return PKG_INVALID_PARAM;
+    }
 
     PkgAlgorithmContext context = {
         {0, startOffset},
         {fileInfo_.fileInfo.packedSize, fileInfo_.fileInfo.unpackedSize},
         0, fileInfo_.fileInfo.digestMethod
     };
-    PKG_CHECK(!memcpy_s(context.digest, sizeof(context.digest), fileInfo_.digest, sizeof(fileInfo_.digest)),
-        return PKG_NONE_MEMORY, "UpgradeFileEntry pack memcpy failed");
+    if (memcpy_s(context.digest, sizeof(context.digest), fileInfo_.digest, sizeof(fileInfo_.digest)) != EOK) {
+        PKG_LOGE("UpgradeFileEntry pack memcpy failed");
+        return PKG_NONE_MEMORY;
+    }
     int32_t ret = algorithm->Pack(inStream, outStream, context);
-    PKG_CHECK(ret == PKG_SUCCESS, return ret, "Fail Compress for %s", fileName_.c_str());
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("Fail Compress for %s", fileName_.c_str());
+        return ret;
+    }
 
     // Fill digest and compressed size of file
-    PKG_CHECK(!memcpy_s(fileInfo_.digest, sizeof(fileInfo_.digest), context.digest, sizeof(context.digest)),
-        return PKG_NONE_MEMORY, "UpgradeFileEntry pack memcpy failed");
+    if (memcpy_s(fileInfo_.digest, sizeof(fileInfo_.digest), context.digest, sizeof(context.digest)) != EOK) {
+        PKG_LOGE("UpgradeFileEntry pack memcpy failed");
+        return PKG_NONE_MEMORY;
+    }
     fileInfo_.fileInfo.packedSize = context.packedSize;
     dataOffset_ = startOffset;
     encodeLen = fileInfo_.fileInfo.packedSize;
@@ -427,9 +446,14 @@ int32_t UpgradeFileEntry::DecodeHeader(const PkgBuffer &buffer, size_t headerOff
     size_t &decodeLen)
 {
     PkgStreamPtr inStream = pkgFile_->GetPkgStream();
-    PKG_CHECK(inStream != nullptr, return PKG_INVALID_PARAM, "outStream or inStream null for %s", fileName_.c_str());
-    PKG_CHECK(buffer.length >= sizeof(UpgradeCompInfo),
-        return PKG_INVALID_PKG_FORMAT, "Fail to check buffer %zu", buffer.length);
+    if (inStream == nullptr) {
+        PKG_LOGE("outStream or inStream null for %s", fileName_.c_str());
+        return PKG_INVALID_PARAM;
+    }
+    if (buffer.length < sizeof(UpgradeCompInfo)) {
+        PKG_LOGE("Fail to check buffer %zu", buffer.length);
+        return PKG_INVALID_PKG_FORMAT;
+    }
 
     UpgradeCompInfo *info = reinterpret_cast<UpgradeCompInfo *>(buffer.buffer);
     fileInfo_.fileInfo.packedSize = ReadLE32(buffer.buffer + offsetof(UpgradeCompInfo, size));
@@ -438,7 +462,10 @@ int32_t UpgradeFileEntry::DecodeHeader(const PkgBuffer &buffer, size_t headerOff
     fileInfo_.fileInfo.packMethod = PKG_COMPRESS_METHOD_NONE;
     fileInfo_.fileInfo.digestMethod = PKG_DIGEST_TYPE_NONE;
     int32_t ret = memcpy_s(fileInfo_.digest, sizeof(fileInfo_.digest), info->digest, sizeof(info->digest));
-    PKG_CHECK(ret == EOK, return ret, "Fail to memcpy_s ret: %d", ret);
+    if (ret != EOK) {
+        PKG_LOGE("Fail to memcpy_s ret: %d", ret);
+        return ret;
+    }
     PkgFile::ConvertBufferToString(fileInfo_.fileInfo.identity, {info->address, sizeof(info->address)});
     PkgFile::ConvertBufferToString(fileInfo_.version, {info->version, sizeof(info->version)});
     fileName_ = fileInfo_.fileInfo.identity;
@@ -459,20 +486,31 @@ int32_t UpgradeFileEntry::DecodeHeader(const PkgBuffer &buffer, size_t headerOff
 int32_t UpgradeFileEntry::Unpack(PkgStreamPtr outStream)
 {
     PkgAlgorithm::PkgAlgorithmPtr algorithm = PkgAlgorithmFactory::GetAlgorithm(&fileInfo_.fileInfo);
-    PKG_CHECK(algorithm != nullptr, return PKG_INVALID_PARAM, "can not algorithm for %s", fileName_.c_str());
+    if (algorithm == nullptr) {
+        PKG_LOGE("can not algorithm for %s", fileName_.c_str());
+        return PKG_INVALID_PARAM;
+    }
 
     PkgStreamPtr inStream = pkgFile_->GetPkgStream();
-    PKG_CHECK(outStream != nullptr && inStream != nullptr, return PKG_INVALID_PARAM,
-        "outStream or inStream null for %s", fileName_.c_str());
+    if (outStream == nullptr || inStream == nullptr) {
+        PKG_LOGE("outStream or inStream null for %s", fileName_.c_str());
+        return PKG_INVALID_PARAM;
+    }
     PkgAlgorithmContext context = {
         {this->dataOffset_, 0},
         {fileInfo_.fileInfo.packedSize, fileInfo_.fileInfo.unpackedSize},
         0, fileInfo_.fileInfo.digestMethod
     };
     int32_t ret = memcpy_s(context.digest, sizeof(context.digest), fileInfo_.digest, sizeof(fileInfo_.digest));
-    PKG_CHECK(ret == EOK, return ret, "Fail to memcpy_s ret: %d", ret);
+    if (ret != EOK) {
+        PKG_LOGE("Fail to memcpy_s ret: %d", ret);
+        return ret;
+    }
     ret = algorithm->Unpack(inStream, outStream, context);
-    PKG_CHECK(ret == PKG_SUCCESS, return ret, "Fail Decompress for %s", fileName_.c_str());
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("Fail Decompress for %s", fileName_.c_str());
+        return ret;
+    }
     PKG_LOGI("Unpack %s data offset:%zu packedSize:%zu unpackedSize:%zu", fileName_.c_str(), dataOffset_,
         fileInfo_.fileInfo.packedSize, fileInfo_.fileInfo.unpackedSize);
     outStream->Flush(fileInfo_.fileInfo.unpackedSize);

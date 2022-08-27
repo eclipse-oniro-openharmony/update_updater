@@ -68,17 +68,24 @@ PkgEntryPtr PkgFile::AddPkgEntry(const std::string &fileName)
 int32_t PkgFile::ExtractFile(const PkgEntryPtr node, PkgStreamPtr output)
 {
     PKG_LOGI("ExtractFile %s", output->GetFileName().c_str());
-    PKG_CHECK(CheckState({PKG_FILE_STATE_WORKING}, PKG_FILE_STATE_WORKING),
-        return PKG_INVALID_STATE, "error state curr %d ", state_);
+    if (!CheckState({PKG_FILE_STATE_WORKING}, PKG_FILE_STATE_WORKING)) {
+        PKG_LOGE("error state curr %d ", state_);
+        return PKG_INVALID_STATE;
+    }
     auto entry = static_cast<PkgEntryPtr>(node);
-    PKG_CHECK(entry != nullptr, return PKG_INVALID_PARAM, "error get entry %s", pkgStream_->GetFileName().c_str());
+    if (entry == nullptr) {
+        PKG_LOGE("error get entry %s", pkgStream_->GetFileName().c_str());
+        return PKG_INVALID_PARAM;
+    }
     return entry->Unpack(output);
 }
 
 PkgEntryPtr PkgFile::FindPkgEntry(const std::string &fileName)
 {
-    PKG_CHECK(CheckState({PKG_FILE_STATE_WORKING}, PKG_FILE_STATE_WORKING), return nullptr,
-        "error state curr %d ", state_);
+    if (!CheckState({PKG_FILE_STATE_WORKING}, PKG_FILE_STATE_WORKING)) {
+        PKG_LOGE("error state curr %d ", state_);
+        return nullptr;
+    }
     std::multimap<std::string, PkgEntryPtr>::iterator iter = pkgEntryMapFileName_.find(fileName);
     if (iter != pkgEntryMapFileName_.end()) {
         return (*iter).second;
@@ -112,7 +119,10 @@ int32_t PkgFile::ConvertBufferToString(std::string &fileName, const PkgBuffer &b
 
 int32_t PkgFile::ConvertStringToBuffer(const std::string &fileName, const PkgBuffer &buffer, size_t &realLen)
 {
-    PKG_CHECK(buffer.length >= fileName.size(), return PKG_INVALID_PARAM, "Invalid buffer");
+    if (buffer.length < fileName.size()) {
+        PKG_LOGE("Invalid buffer");
+        return PKG_INVALID_PARAM;
+    }
     for (uint32_t i = 0; i < fileName.size(); ++i) {
         buffer.buffer[i] = static_cast<uint8_t>(fileName[i]);
         (realLen)++;
@@ -123,8 +133,10 @@ int32_t PkgFile::ConvertStringToBuffer(const std::string &fileName, const PkgBuf
 int32_t PkgEntry::Init(PkgManager::FileInfoPtr localFileInfo, const PkgManager::FileInfoPtr fileInfo,
     PkgStreamPtr inStream)
 {
-    PKG_CHECK(localFileInfo != nullptr && fileInfo != nullptr && inStream != nullptr,
-        return PKG_INVALID_PARAM, "Failed to check input param");
+    if (localFileInfo == nullptr || fileInfo == nullptr || inStream == nullptr) {
+        PKG_LOGE("Failed to check input param");
+        return PKG_INVALID_PARAM;
+    }
 
     fileName_.assign(inStream->GetFileName());
     localFileInfo->identity.assign(fileInfo->identity);
@@ -142,7 +154,10 @@ int32_t PkgEntry::Init(PkgManager::FileInfoPtr localFileInfo, const PkgManager::
     if (localFileInfo->packedSize == 0) {
         localFileInfo->packedSize = inStream->GetFileLength();
     }
-    PKG_CHECK(localFileInfo->unpackedSize != 0, return PKG_INVALID_PARAM, "Failed to check unpackedSize = 0");
+    if (localFileInfo->unpackedSize == 0) {
+        PKG_LOGE("Failed to check unpackedSize = 0");
+        return PKG_INVALID_PARAM;
+    }
     if (localFileInfo->modifiedTime == 0) {
         time(&localFileInfo->modifiedTime);
     }
@@ -157,7 +172,10 @@ void PkgFile::AddSignData(uint8_t digestMethod, size_t currOffset, size_t &signO
     }
     std::vector<uint8_t> buffer(SIGN_SHA256_LEN + SIGN_SHA384_LEN, 0);
     int32_t ret = pkgStream_->Write(buffer, buffer.size(), currOffset);
-    PKG_CHECK(ret == PKG_SUCCESS, return, "Fail write sign for %s", pkgStream_->GetFileName().c_str());
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("Fail write sign for %s", pkgStream_->GetFileName().c_str());
+        return;
+    }
     pkgStream_->Flush(currOffset + buffer.size());
     PKG_LOGI("SavePackage success file length: %zu signOffset %zu", pkgStream_->GetFileLength(), signOffset);
 }

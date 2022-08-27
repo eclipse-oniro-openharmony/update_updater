@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,65 +21,25 @@
 #include "pkg_stream.h"
 
 namespace Hpackage {
-struct DigestBlock {
-    uint16_t algorithmId;
-    uint16_t digestLen;
-    std::vector<uint8_t> digestData;
-};
-
 class PkgVerifyUtil {
 public:
-    explicit PkgVerifyUtil(const std::string &publicKey) : pubKey_(publicKey) {}
+    PkgVerifyUtil() {}
 
     ~PkgVerifyUtil() {}
 
-    int32_t VerifyPkcs7SignedData(const Hpackage::PkgStreamPtr pkgStream, const size_t signatureStart,
-        const size_t signatureSize);
+    int32_t VerifyPackageSign(const Hpackage::PkgStreamPtr PkgStream) const;
 
 private:
-    int32_t VerifySignedData(const Hpackage::PkgStreamPtr srcData, const size_t dataLen,
-        std::vector<Pkcs7SignerInfo> &signerInfos) const;
+    int32_t GetSignature(const PkgStreamPtr pkgStream, size_t &signatureSize,
+        std::vector<uint8_t> &signature) const;
 
-    int32_t ParseDigestBlock(const std::vector<uint8_t> &digestBlock);
+    int32_t ParsePackage(const PkgStreamPtr pkgStream, size_t &signatureStart,
+        size_t &signatureSize) const;
 
-    int32_t VerifyDigestEncryptData(const Hpackage::PkgStreamPtr srcData, const size_t dataLen,
-        std::vector<Pkcs7SignerInfo> &signerInfos) const;
+    int32_t Pkcs7verify(std::vector<uint8_t> &signature, std::vector<uint8_t> &hash) const;
 
-    int32_t SingleDigestEncryptVerify(Pkcs7SignerInfo &signer,
-        const Hpackage::PkgStreamPtr srcData, const size_t dataLen) const;
-
-    int32_t VerifyPackageDigest(const std::vector<uint8_t> &digestEncryptData,
-    const std::vector<uint8_t> &digest, const uint8_t digestMethod) const;
-
-    int32_t HashCheck(const Hpackage::PkgStreamPtr srcData, const size_t dataLen) const;
-
-private:
-    std::string pubKey_;
-    DigestBlock digestBlock_ {};
+    int32_t HashCheck(const PkgStreamPtr srcData, const size_t dataLen,
+        const std::vector<uint8_t> &hash) const;
 };
-
-class SignPkg {
-public:
-    SignPkg(Hpackage::PkgStreamPtr inStream, const std::string &keyPath, uint32_t signMethod)
-        : pkgStream_(inStream), privateKey_(keyPath), signMethod_(signMethod) {}
-
-    ~SignPkg() {}
-
-    int32_t SignPackage(Hpackage::PkgStreamPtr outStream) const;
-
-private:
-    int32_t SignPackageDigest(std::vector<uint8_t> &digest, std::vector<uint8_t> &signData) const;
-
-    int32_t CreateSignResult(std::vector<uint8_t> &digestBlock, std::vector<uint8_t> &signedData) const;
-
-    int32_t CreateDigestBlock(std::vector<uint8_t> &digestBlock, const std::vector<uint8_t> &digest) const;
-
-private:
-    Hpackage::PkgStreamPtr pkgStream_;
-    std::string privateKey_;
-    uint32_t signMethod_;
-};
-
-int32_t CalcSha256ByBlock(const Hpackage::PkgStreamPtr srcData, const size_t dataLen, std::vector<uint8_t> &result);
 } // namespace Hpackage
 #endif

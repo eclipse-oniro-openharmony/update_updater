@@ -76,22 +76,37 @@ std::vector<std::string> PackagesInfo::GetOTAVersion(Hpackage::PkgManager::PkgMa
     const std::string &versionList, const std::string &versionPath)
 {
     vector<string> tmpVersionList;
-    PKG_CHECK(manager != nullptr, return tmpVersionList, "manager is null");
+    if (manager == nullptr) {
+        PKG_LOGE("manager is null");
+        return tmpVersionList;
+    }
 
     PkgManager::StreamPtr outStream = nullptr;
     const string pattern = "\n";
     const FileInfo *info = manager->GetFileInfo(versionList);
-    PKG_CHECK(info != nullptr, return tmpVersionList, "Can not get file info %s", versionList.c_str());
+    if (info == nullptr) {
+        PKG_LOGE("Can not get file info %s", versionList.c_str());
+        return tmpVersionList;
+    }
     int32_t ret = manager->CreatePkgStream(outStream, versionList, info->unpackedSize,
         PkgStream::PkgStreamType_MemoryMap);
-    PKG_CHECK(outStream, return tmpVersionList, "Create stream fail %s", versionList.c_str());
+    if (outStream == nullptr) {
+        PKG_LOGE("Create stream fail %s", versionList.c_str());
+        return tmpVersionList;
+    }
     ret = manager->ExtractFile(versionList, outStream);
-    PKG_CHECK(ret == PKG_SUCCESS, manager->ClosePkgStream(outStream);
-        return tmpVersionList, "ExtractFile versionList fail ");
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("ExtractFile versionList fail ");
+        manager->ClosePkgStream(outStream);
+        return tmpVersionList;
+    }
     PkgBuffer data = {};
     ret = outStream->GetBuffer(data);
-    PKG_CHECK(ret == PKG_SUCCESS, manager->ClosePkgStream(outStream);
-        return tmpVersionList, "ExtractFile fail %s", versionList.c_str());
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("ExtractFile fail %s", versionList.c_str());
+        manager->ClosePkgStream(outStream);
+        return tmpVersionList;
+    }
     std::string str(reinterpret_cast<char*>(data.buffer), data.length);
     tmpVersionList = SplitString(str, pattern);
     manager->ClosePkgStream(outStream);
@@ -102,19 +117,31 @@ std::vector<std::string> PackagesInfo::GetBoardID(Hpackage::PkgManager::PkgManag
     const std::string &boardIdName, const std::string &boardListPath)
 {
     vector<string> boardlist;
-    PKG_CHECK(manager != nullptr, return boardlist, "manager is null");
+    if (manager == nullptr) {
+        PKG_LOGE("manager is null");
+        return boardlist;
+    }
     (void)boardListPath;
     PkgManager::StreamPtr outStream = nullptr;
     const FileInfo *info = manager->GetFileInfo(boardIdName);
-    PKG_CHECK(info != nullptr, return boardlist, "Can not get file info %s", boardIdName.c_str());
+    if (info == nullptr) {
+        PKG_LOGE("Can not get file info %s", boardIdName.c_str());
+        return boardlist;
+    }
     int32_t ret = manager->CreatePkgStream(outStream, boardIdName, info->unpackedSize,
         PkgStream::PkgStreamType_MemoryMap);
-    PKG_CHECK(outStream, return boardlist, "Create stream fail %s", boardIdName.c_str());
+    if (outStream == nullptr) {
+        PKG_LOGE("Create stream fail %s", boardIdName.c_str());
+        return boardlist;
+    }
     ret = manager->ExtractFile(boardIdName, outStream);
     PkgBuffer data = {};
     ret = outStream->GetBuffer(data);
-    PKG_CHECK(ret == PKG_SUCCESS, manager->ClosePkgStream(outStream);
-        return boardlist, "ExtractFile fail %s", boardIdName.c_str());
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("ExtractFile fail %s", boardIdName.c_str());
+        manager->ClosePkgStream(outStream);
+        return boardlist;
+    }
     std::string str(reinterpret_cast<char*>(data.buffer), data.length);
     boardlist = SplitString(str, "\n");
     manager->ClosePkgStream(outStream);
