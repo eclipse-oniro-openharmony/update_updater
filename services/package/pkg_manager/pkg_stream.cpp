@@ -259,11 +259,7 @@ int32_t MemoryMapStream::Seek(long int offset, int whence)
             return PKG_INVALID_STREAM;
         }
         auto memSize = static_cast<long long>(memSize_);
-        if (memSize + offset > memSize) {
-            PKG_LOGE("Invalid offset");
-            return PKG_INVALID_STREAM;
-        }
-        if (memSize + offset > 0) {
+        if (memSize + offset < 0) {
             PKG_LOGE("Invalid offset");
             return PKG_INVALID_STREAM;
         }

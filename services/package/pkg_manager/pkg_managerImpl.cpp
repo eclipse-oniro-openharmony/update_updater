@@ -314,8 +314,11 @@ int32_t PkgManagerImpl::LoadPackage(const std::string &packagePath, const std::s
         return PKG_INVALID_FILE;
     }
     int32_t ret = SetSignVerifyKeyName(keyPath);
-    PKG_CHECK(ret == PKG_SUCCESS,  UPDATER_LAST_WORD(ret); return ret, "Invalid keyname");
-
+    if (ret != PKG_SUCCESS) {
+        UPDATER_LAST_WORD(ret);
+        PKG_LOGE("Invalid keyname");
+        return ret;
+    }
     // Check if package already loaded
     for (auto iter : pkgFiles_) {
         PkgFilePtr pkgFile = iter;
@@ -323,19 +326,25 @@ int32_t PkgManagerImpl::LoadPackage(const std::string &packagePath, const std::s
             return PKG_SUCCESS;
         }
     }
-
     PkgFile::PkgType pkgType = GetPkgTypeByName(packagePath);
     ret = PKG_INVALID_FILE;
     unzipToFile_ = ((pkgType == PkgFile::PKG_TYPE_GZIP) ? true : unzipToFile_);
     if (pkgType == PkgFile::PKG_TYPE_UPGRADE) {
         ret = LoadPackage(packagePath, fileIds, pkgType);
-        PKG_CHECK(ret == PKG_SUCCESS, ClearPkgFile();  UPDATER_LAST_WORD(ret);
-            return ret, "Parse %s fail ", packagePath.c_str());
+        if (ret != PKG_SUCCESS) {
+            ClearPkgFile();
+            UPDATER_LAST_WORD(ret);
+            PKG_LOGE("Parse %s fail ", packagePath.c_str());
+            return ret;
+        }
     } else if (pkgType != PkgFile::PKG_TYPE_NONE) {
         std::vector<std::string> innerFileNames;
         ret = LoadPackage(packagePath, innerFileNames, pkgType);
-        PKG_CHECK(ret == PKG_SUCCESS, ClearPkgFile(); return ret, "Unzip %s fail ", packagePath.c_str());
-
+        if (ret != PKG_SUCCESS) {
+            ClearPkgFile();
+            PKG_LOGE("Unzip %s fail ", packagePath.c_str());
+            return ret;
+        }
         std::string path = GetFilePath(packagePath);
         for (auto name : innerFileNames) {
             pkgType = GetPkgTypeByName(name);
@@ -512,8 +521,6 @@ void PkgManagerImpl::ClosePkgStream(StreamPtr &stream)
 
 int32_t PkgManagerImpl::CreatePkgStream(PkgStreamPtr &stream, const std::string &fileName, size_t size, int32_t type)
 {
-    // First assign a NULL value to the outgoing parameter 'stream',
-    // avoid the caller from passing in a non-empty scene
     stream = nullptr;
     if (type == PkgStream::PkgStreamType_Write || type == PkgStream::PkgStreamType_Read) {
         static char const *modeFlags[] = { "rb", "wb+" };
@@ -522,16 +529,17 @@ int32_t PkgManagerImpl::CreatePkgStream(PkgStreamPtr &stream, const std::string 
             UPDATER_LAST_WORD(PKG_INVALID_FILE);
             return PKG_INVALID_FILE;
         }
-        int32_t ret = CheckFile(fileName);
-        PKG_CHECK(ret == PKG_SUCCESS, UPDATER_LAST_WORD(ret); return ret, "Fail to check file %s ", fileName.c_str());
-
+        if (CheckFile(fileName) != PKG_SUCCESS) {
+            UPDATER_LAST_WORD(PKG_INVALID_FILE);
+            PKG_LOGE("Fail to check file %s ", fileName.c_str());
+            return PKG_INVALID_FILE;
+        }
         if (pkgStreams_.find(fileName) != pkgStreams_.end()) {
             PkgStreamPtr mapStream = pkgStreams_[fileName];
             mapStream->AddRef();
             stream = mapStream;
             return PKG_SUCCESS;
         }
-
         FILE *file = nullptr;
         if (type == PkgStream::PkgStreamType_Read) {
             file = fopen(realPath, modeFlags[type]);
@@ -644,7 +652,7 @@ int32_t PkgManagerImpl::VerifyPackage(const std::string &packagePath, const std:
         PKG_LOGE("Verify file %s fail", packagePath.c_str());
         return ret;
     }
-    PKG_LOGW("Verify file %s success", packagePath.c_str());
+    PKG_LOGI("Verify file %s success", packagePath.c_str());
     return ret;
 }
 

@@ -62,4 +62,6 @@ ohos_static_library("libupdaterpackage") {
   ]
 
   configs = [ ":package_config" ]
+  subsystem_name = "updater"
+  part_name = "updater"
 }
