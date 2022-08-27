@@ -35,19 +35,30 @@ namespace Updater {
 BlockSet::BlockSet(std::vector<BlockPair> &&pairs)
 {
     blockSize_ = 0;
-    UPDATER_ERROR_CHECK(!pairs.empty(), "Invalid block.", return);
+    if (pairs.empty()) {
+        LOG(ERROR) << "Invalid block.";
+        return;
+    }
 
     for (const auto &pair : pairs) {
-        UPDATER_CHECK_ONLY_RETURN(CheckReliablePair(pair), return);
+        if (!CheckReliablePair(pair)) {
+            return;
+        }
         PushBack(pair);
     }
 }
 
 bool BlockSet::CheckReliablePair(BlockPair pair)
 {
-    UPDATER_ERROR_CHECK(pair.first < pair.second, "Invalid number of block size", return false);
+    if (pair.first >= pair.second) {
+        LOG(ERROR) << "Invalid number of block size";
+        return false;
+    }
     size_t size = pair.second - pair.first;
-    UPDATER_ERROR_CHECK(blockSize_ < (SIZE_MAX - size), "Block size overflow", return false);
+    if (blockSize_ >= (SIZE_MAX - size)) {
+        LOG(ERROR) << "Block size overflow";
+        return false;
+    }
     return true;
 }
 
@@ -65,7 +76,10 @@ void BlockSet::ClearBlocks()
 
 bool BlockSet::ParserAndInsert(const std::string &blockStr)
 {
-    UPDATER_ERROR_CHECK(blockStr != "", "Invalid argument, this argument is empty", return false);
+    if (blockStr == "") {
+        LOG(ERROR) << "Invalid argument, this argument is empty";
+        return false;
+    }
     std::vector<std::string> pairs = SplitString(blockStr, ",");
     return ParserAndInsert(pairs);
 }
@@ -73,15 +87,24 @@ bool BlockSet::ParserAndInsert(const std::string &blockStr)
 bool BlockSet::ParserAndInsert(const std::vector<std::string> &blockToken)
 {
     ClearBlocks();
-    UPDATER_ERROR_CHECK(!blockToken.empty(), "Invalid block token argument", return false);
-    UPDATER_ERROR_CHECK(blockToken.size() >= 3, "Too small blocks_ in argument", return false);
+    if (blockToken.empty()) {
+        LOG(ERROR) << "Invalid block token argument";
+        return false;
+    }
+    if (blockToken.size() < 3) { // 3:blockToken.size() < 3 means too small blocks_ in argument
+        LOG(ERROR) << "Too small blocks_ in argument";
+        return false;
+    }
     // Get number of blockToken
     unsigned long long int blockPairSize;
     std::vector<std::string> bt = blockToken;
     std::vector<std::string>::iterator bp = bt.begin();
     blockPairSize = String2Int<unsigned long long int>(*bp, N_DEC);
-    UPDATER_ERROR_CHECK(blockPairSize != 0 && blockPairSize % 2 == 0 &&
-        blockPairSize == bt.size() - 1, "Invalid number in block token", return false);
+    if (blockPairSize == 0 || blockPairSize % 2 != 0 || // 2:Check whether blockPairSize is valid.
+        blockPairSize != bt.size() - 1) {
+        LOG(ERROR) << "Invalid number in block token";
+        return false;
+    }
 
     while (++bp != bt.end()) {
         size_t first = String2Int<size_t>(*bp++, N_DEC);
@@ -131,9 +154,15 @@ size_t BlockSet::ReadDataFromBlock(int fd, std::vector<uint8_t> &buffer)
     int ret;
     for (; it != blocks_.end(); ++it) {
         ret = lseek64(fd, static_cast<off64_t>(it->first * H_BLOCK_SIZE), SEEK_SET);
-        UPDATER_ERROR_CHECK(ret != -1, "Fail to seek", return -1);
+        if (ret == -1) {
+            LOG(ERROR) << "Fail to seek";
+            return -1;
+        }
         size_t size = (it->second - it->first) * H_BLOCK_SIZE;
-        UPDATER_ERROR_CHECK(Utils::ReadFully(fd, buffer.data() + pos, size), "Fail to read", return -1);
+        if (!Utils::ReadFully(fd, buffer.data() + pos, size)) {
+            LOG(ERROR) << "Fail to read";
+            return -1;
+        }
         pos += size;
     }
     return pos;
@@ -150,17 +179,26 @@ size_t BlockSet::WriteDataToBlock(int fd, std::vector<uint8_t> &buffer)
 #ifndef UPDATER_UT
         uint64_t arguments[] = {static_cast<uint64_t>(offset), writeSize};
         ret = ioctl(fd, BLKDISCARD, &arguments);
-        UPDATER_ERROR_CHECK(ret != -1 || errno == EOPNOTSUPP, "Error to write block set to memory", return -1);
+        if (ret == -1 && errno != EOPNOTSUPP) {
+            LOG(ERROR) << "Error to write block set to memory";
+            return -1;
+        }
 #endif
         ret = lseek64(fd, offset, SEEK_SET);
-        UPDATER_ERROR_CHECK(ret != -1, "BlockSet::WriteDataToBlock Fail to seek", return -1);
+        if (ret == -1) {
+            LOG(ERROR) << "BlockSet::WriteDataToBlock Fail to seek";
+            return -1;
+        }
         if (Utils::WriteFully(fd, buffer.data() + pos, writeSize) == false) {
             LOG(ERROR) << "Write data to block error, errno : " << errno;
             return -1;
         }
         pos += writeSize;
     }
-    UPDATER_ERROR_CHECK(fsync(fd) != -1, "Failed to fsync", return -1);
+    if (fsync(fd) == -1) {
+        LOG(ERROR) << "Failed to fsync";
+        return -1;
+    }
     return pos;
 }
 
@@ -179,7 +217,9 @@ int32_t BlockSet::VerifySha256(const std::vector<uint8_t> &buffer, const size_t 
     uint8_t digest[SHA256_DIGEST_LENGTH];
     SHA256(buffer.data(), size * H_BLOCK_SIZE, digest);
     std::string hexdigest = Utils::ConvertSha256Hex(digest, SHA256_DIGEST_LENGTH);
-    UPDATER_CHECK_ONLY_RETURN(hexdigest != expected, return 0);
+    if (hexdigest == expected) {
+        return 0;
+    }
     return -1;
 }
 
@@ -207,8 +247,11 @@ void BlockSet::MoveBlock(std::vector<uint8_t> &target, const BlockSet& locations
     for (auto it = locations.CrBegin(); it != locations.CrEnd(); it++) {
         size_t blocks = it->second - it->first;
         start -= blocks;
-        UPDATER_ERROR_CHECK(!memmove_s(td + (it->first * H_BLOCK_SIZE), blocks * H_BLOCK_SIZE, sd + (start *
-            H_BLOCK_SIZE), blocks * H_BLOCK_SIZE), "MoveBlock memmove_s failed!", return);
+        if (memmove_s(td + (it->first * H_BLOCK_SIZE), blocks * H_BLOCK_SIZE, sd + (start *
+            H_BLOCK_SIZE), blocks * H_BLOCK_SIZE) != EOK) {
+                LOG(ERROR) << "MoveBlock memmove_s failed!";
+                return;
+            }
     }
 }
 
@@ -226,9 +269,13 @@ int32_t BlockSet::LoadSourceBuffer(const Command &cmd, size_t &pos, std::vector<
         isOverlap = IsTwoBlocksOverlap(srcBlk, *this);
         // read source data
         LOG(INFO) << "new start to read source block ...";
-        UPDATER_CHECK_ONLY_RETURN(srcBlk.ReadDataFromBlock(cmd.GetFileDescriptor(), sourceBuffer) > 0, return -1);
+        if (srcBlk.ReadDataFromBlock(cmd.GetFileDescriptor(), sourceBuffer) <= 0) {
+            return -1;
+        }
         std::string nextArgv = cmd.GetArgumentByPos(pos++);
-        UPDATER_CHECK_ONLY_RETURN(nextArgv != "", return 1);
+        if (nextArgv == "") {
+            return 1;
+        }
         BlockSet locations;
         locations.ParserAndInsert(nextArgv);
         MoveBlock(sourceBuffer, locations, sourceBuffer);
@@ -237,10 +284,16 @@ int32_t BlockSet::LoadSourceBuffer(const Command &cmd, size_t &pos, std::vector<
     std::string lastArg = cmd.GetArgumentByPos(pos++);
     while (lastArg != "") {
         std::vector<std::string> tokens = SplitString(lastArg, ":");
-        UPDATER_ERROR_CHECK(tokens.size() == H_CMD_ARGS_LIMIT, "invalid parameter", return -1);
+        if (tokens.size() != H_CMD_ARGS_LIMIT) {
+            LOG(ERROR) << "invalid parameter";
+            return -1;
+        }
         std::vector<uint8_t> stash;
         auto ret = Store::LoadDataFromStore(storeBase, tokens[H_ZERO_NUMBER], stash);
-        UPDATER_ERROR_CHECK(ret != -1, "Failed to load tokens", return -1);
+        if (ret == -1) {
+            LOG(ERROR) << "Failed to load tokens";
+            return -1;
+        }
         BlockSet locations;
         locations.ParserAndInsert(tokens[1]);
         MoveBlock(sourceBuffer, locations, stash);
@@ -255,8 +308,9 @@ int32_t BlockSet::LoadTargetBuffer(const Command &cmd, std::vector<uint8_t> &buf
 {
     bool isOverlap = false;
     auto ret = LoadSourceBuffer(cmd, pos, buffer, isOverlap, blockSize);
-    UPDATER_CHECK_ONLY_RETURN(ret == 1,
-    return ret);
+    if (ret != 1) {
+        return ret;
+    }
     std::string storeBase = TransferManager::GetTransferManagerInstance()->GetGlobalParams()->storeBase;
     std::string storePath = storeBase + "/" + srcHash;
     struct stat storeStat {};
@@ -264,11 +318,16 @@ int32_t BlockSet::LoadTargetBuffer(const Command &cmd, std::vector<uint8_t> &buf
     if (VerifySha256(buffer, blockSize, srcHash) == 0) {
         if (isOverlap && res != 0) {
             ret = Store::WriteDataToStore(storeBase, srcHash, buffer, blockSize * H_BLOCK_SIZE);
-            UPDATER_ERROR_CHECK(ret == 0, "failed to stash overlapping source blocks", return -1);
+            if (ret != 0) {
+                LOG(ERROR) << "failed to stash overlapping source blocks";
+                return -1;
+            }
         }
         return 0;
     }
-    UPDATER_CHECK_ONLY_RETURN(Store::LoadDataFromStore(storeBase, srcHash, buffer) != 0, return 0);
+    if (Store::LoadDataFromStore(storeBase, srcHash, buffer) == 0) {
+        return 0;
+    }
     return -1;
 }
 
@@ -276,7 +335,10 @@ int32_t BlockSet::WriteZeroToBlock(int fd, bool isErase)
 {
     std::vector<uint8_t> buffer;
     buffer.resize(H_BLOCK_SIZE);
-    UPDATER_ERROR_CHECK(!memset_s(buffer.data(), H_BLOCK_SIZE, 0, H_BLOCK_SIZE), "memset_s failed", return -1);
+    if (memset_s(buffer.data(), H_BLOCK_SIZE, 0, H_BLOCK_SIZE) != EOK) {
+        LOG(ERROR) << "memset_s failed";
+        return -1;
+    }
 
     auto iter = blocks_.begin();
     while (iter != blocks_.end()) {
@@ -286,20 +348,29 @@ int32_t BlockSet::WriteZeroToBlock(int fd, bool isErase)
         size_t writeSize = (iter->second - iter->first) * H_BLOCK_SIZE;
         uint64_t arguments[2] = {static_cast<uint64_t>(offset), writeSize};
         ret = ioctl(fd, BLKDISCARD, &arguments);
-        UPDATER_ERROR_CHECK(ret != -1 || errno == EOPNOTSUPP, "Error to write block set to memory", return -1);
+        if (ret == -1 && errno != EOPNOTSUPP) {
+            LOG(ERROR) << "Error to write block set to memory";
+            return -1;
+        }
 #endif
         if (isErase) {
             iter++;
             continue;
         }
         ret = lseek64(fd, offset, SEEK_SET);
-        UPDATER_ERROR_CHECK(ret != -1, "BlockSet::WriteZeroToBlock Fail to seek", return -1);
+        if (ret == -1) {
+            LOG(ERROR) << "BlockSet::WriteZeroToBlock Fail to seek";
+            return -1;
+        }
         for (size_t pos = iter->first; pos < iter->second; pos++) {
-            if (Utils::WriteFully(fd, buffer.data(), H_BLOCK_SIZE) == false) {
-                UPDATER_CHECK_ONLY_RETURN(errno != EIO, return 1);
-                LOG(ERROR) << "BlockSet::WriteZeroToBlock Write 0 to block error, errno : " << errno;
-                return -1;
+            if (Utils::WriteFully(fd, buffer.data(), H_BLOCK_SIZE)) {
+                continue;
             }
+            if (errno == EIO) {
+                return 1;
+            }
+            LOG(ERROR) << "BlockSet::WriteZeroToBlock Write 0 to block error";
+            return -1;
         }
         iter++;
     }
@@ -323,26 +394,38 @@ int32_t BlockSet::WriteDiffToBlock(const Command &cmd, std::vector<uint8_t> &src
             reinterpret_cast<u_char*>(srcBuffer.data()), srcBuffSize, reinterpret_cast<u_char*>(patchBuff), length
         };
         std::unique_ptr<BlockWriter> writer = std::make_unique<BlockWriter>(cmd.GetFileDescriptor(), *this);
-        UPDATER_ERROR_CHECK(writer.get() != nullptr, "Cannot create block writer, pkgdiff patch abort!", return -1);
-        int32_t ret = UpdatePatch::UpdatePatch::ApplyImagePatch(patchParam, empty,
+        if (writer.get() == nullptr) {
+            LOG(ERROR) << "Cannot create block writer, pkgdiff patch abort!";
+            return -1;
+        }
+        int32_t ret = UpdatePatch::UpdateApplyPatch::ApplyImagePatch(patchParam, empty,
             [&](size_t start, const UpdatePatch::BlockBuffer &data, size_t size) -> int {
                 bool ret = writer->Write(data.buffer, size, nullptr);
                 return ret ? 0 : -1;
             }, cmd.GetArgumentByPos(pos + 1));
         writer.reset();
-        UPDATER_ERROR_CHECK(ret == 0, "Fail to ApplyImagePatch", return -1);
+        if (ret != 0) {
+            LOG(ERROR) << "Fail to ApplyImagePatch";
+            return -1;
+        }
     } else {
         LOG(DEBUG) << "Run bsdiff patch.";
         UpdatePatch::PatchBuffer patchInfo = {patchBuff, 0, length};
         std::unique_ptr<BlockWriter> writer = std::make_unique<BlockWriter>(cmd.GetFileDescriptor(), *this);
-        UPDATER_ERROR_CHECK(writer.get() != nullptr, "Cannot create block writer, pkgdiff patch abort!", return -1);
-        auto ret = UpdatePatch::UpdatePatch::ApplyBlockPatch(patchInfo, {srcBuffer.data(), srcBuffSize},
+        if (writer.get() == nullptr) {
+            LOG(ERROR) << "Cannot create block writer, pkgdiff patch abort!";
+            return -1;
+        }
+        auto ret = UpdatePatch::UpdateApplyPatch::ApplyBlockPatch(patchInfo, {srcBuffer.data(), srcBuffSize},
             [&](size_t start, const UpdatePatch::BlockBuffer &data, size_t size) -> int {
                 bool ret = writer->Write(data.buffer, size, nullptr);
                 return ret ? 0 : -1;
             }, cmd.GetArgumentByPos(pos + 1));
         writer.reset();
-        UPDATER_ERROR_CHECK(ret == 0, "Fail to ApplyBlockPatch", return -1);
+        if (ret != 0) {
+            LOG(ERROR) << "Fail to ApplyBlockPatch";
+            return -1;
+        }
     }
     if (fsync(cmd.GetFileDescriptor()) == -1) {
         LOG(ERROR) << "Failed to sync restored data";

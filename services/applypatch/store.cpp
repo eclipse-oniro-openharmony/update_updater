@@ -31,42 +31,67 @@ namespace Updater {
 int32_t Store::DoFreeSpace(const std::string &directoryPath)
 {
     std::vector<std::string> files;
-    UPDATER_ERROR_CHECK(GetFilesFromDirectory(directoryPath, files, true) > 0,
-                        "Failed to get files for free space", return -1);
+    if (GetFilesFromDirectory(directoryPath, files, true) <= 0) {
+        LOG(ERROR) << "Failed to get files for free space";
+        return -1;
+    }
     for (const auto &file : files) {
-        UPDATER_ERROR_CHECK(DeleteFile(file.c_str()) != -1, "Failed to delete in do free space", continue);
+        if (DeleteFile(file.c_str()) == -1) {
+            LOG(ERROR) << "Failed to delete in do free space";
+            continue;
+        }
     }
     return 0;
 }
 
 int32_t Store::FreeStore(const std::string &dirPath, const std::string &fileName)
 {
-    UPDATER_CHECK_ONLY_RETURN(!dirPath.empty(), return -1);
+    if (dirPath.empty()) {
+        return -1;
+    }
     std::string path;
     if (!fileName.empty()) {
         path = dirPath + "/";
     }
-    UPDATER_CHECK_ONLY_RETURN(DeleteFile(path.c_str()) == -1, return 0);
+    if (DeleteFile(path.c_str()) != -1) {
+        return 0;
+    }
     LOG(ERROR) << "Failed to delete " << path;
     return -1;
 }
 
 int32_t Store::CreateNewSpace(const std::string &path, bool needClear)
 {
-    UPDATER_ERROR_CHECK_NOT_RETURN(!path.empty(), "path is empty.");
+    if (path.empty()) {
+        LOG(ERROR) << "path is empty.";
+    }
     std::string dirPath = path + '/';
     struct stat fileStat {};
     LOG(INFO) << "Create dir " << dirPath;
     if (stat(dirPath.c_str(), &fileStat) == -1) {
-        UPDATER_ERROR_CHECK(errno == ENOENT, "Create new space, failed to stat", return -1);
-        UPDATER_ERROR_CHECK(MkdirRecursive(dirPath, S_IRWXU) == 0, "Failed to make store", return -1);
-        UPDATER_ERROR_CHECK(chown(dirPath.c_str(), O_USER_GROUP_ID, O_USER_GROUP_ID) == 0,
-                             "Failed to chown store", return -1);
+        if (errno != ENOENT) {
+            LOG(ERROR) << "Create new space, failed to stat";
+            return -1;
+        }
+        if (MkdirRecursive(dirPath, S_IRWXU) != 0) {
+            LOG(ERROR) << "Failed to make store";
+            return -1;
+        }
+        if (chown(dirPath.c_str(), O_USER_GROUP_ID, O_USER_GROUP_ID) != 0) {
+            LOG(ERROR) << "Failed to chown store";
+            return -1;
+        }
     } else {
-        UPDATER_CHECK_ONLY_RETURN(needClear, return 0);
+        if (!needClear) {
+            return 0;
+        }
         std::vector<std::string> files {};
-        UPDATER_CHECK_ONLY_RETURN(GetFilesFromDirectory(dirPath, files) >= 0, return -1);
-        UPDATER_CHECK_ONLY_RETURN(!files.empty(), return 0);
+        if (GetFilesFromDirectory(dirPath, files) < 0) {
+            return -1;
+        }
+        if (files.empty()) {
+            return 0;
+        }
         std::vector<std::string>::iterator iter = files.begin();
         while (iter != files.end()) {
             if (DeleteFile(*iter) == 0) {
@@ -82,7 +107,9 @@ int32_t Store::CreateNewSpace(const std::string &path, bool needClear)
 int32_t Store::WriteDataToStore(const std::string &dirPath, const std::string &fileName,
     const std::vector<uint8_t> &buffer, int size)
 {
-    UPDATER_CHECK_ONLY_RETURN(!dirPath.empty(), return -1);
+    if (dirPath.empty()) {
+        return -1;
+    }
     std::string pathTmp;
     if (!fileName.empty()) {
         pathTmp = dirPath + "/";
@@ -91,20 +118,36 @@ int32_t Store::WriteDataToStore(const std::string &dirPath, const std::string &f
     pathTmp = pathTmp + fileName;
 
     int fd = open(pathTmp.c_str(), O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
-    UPDATER_ERROR_CHECK(fd != -1, "Failed to create store", return -1);
-    UPDATER_ERROR_CHECK(fchown(fd, O_USER_GROUP_ID, O_USER_GROUP_ID) == 0,
-        "Failed to chown", close(fd); return -1);
+    if (fd == -1) {
+        LOG(ERROR) << "Failed to create store";
+        return -1;
+    }
+    if (fchown(fd, O_USER_GROUP_ID, O_USER_GROUP_ID) != 0) {
+        LOG(ERROR) << "Failed to chown";
+        close(fd);
+        return -1;
+    }
     LOG(INFO) << "Writing " << size << " blocks to " << path;
     if (size < 0 || !WriteFully(fd, buffer.data(), static_cast<size_t>(size))) {
-        UPDATER_CHECK_ONLY_RETURN(errno != EIO, close(fd); return 1);
+        if (errno == EIO) {
+            close(fd);
+            return 1;
+        }
         LOG(ERROR) << "Write to stash failed";
         close(fd);
         return -1;
     }
-    UPDATER_ERROR_CHECK(fsync(fd) != -1, "Failed to fsync", close(fd); return -1);
+    if (fsync(fd) == -1) {
+        LOG(ERROR) << "Failed to fsync";
+        close(fd);
+        return -1;
+    }
     close(fd);
     int fdd = open(dirPath.c_str(), O_RDONLY | O_DIRECTORY);
-    UPDATER_ERROR_CHECK(fdd != -1, "Failed to open", return -1);
+    if (fdd == -1) {
+        LOG(ERROR) << "Failed to open";
+        return -1;
+    }
     close(fdd);
     return 0;
 }
@@ -118,14 +161,27 @@ int32_t Store::LoadDataFromStore(const std::string &dirPath, const std::string &
         path = path + "/" + fileName;
     }
     struct stat fileStat {};
-    UPDATER_WARING_CHECK(stat(path.c_str(), &fileStat) != -1, "Failed to stat", return -1);
-    UPDATER_ERROR_CHECK((fileStat.st_size % H_BLOCK_SIZE) == 0, "Not multiple of block size 4096", return -1);
+    if (stat(path.c_str(), &fileStat) == -1) {
+        LOG(WARNING) << "Failed to stat";
+        return -1;
+    }
+    if (fileStat.st_size % H_BLOCK_SIZE != 0) {
+        LOG(ERROR) << "Not multiple of block size 4096";
+        return -1;
+    }
 
     int fd = open(path.c_str(), O_RDONLY);
-    UPDATER_ERROR_CHECK(fd != -1, "Failed to create", return -1);
+    if (fd == -1) {
+        LOG(ERROR) << "Failed to create";
+        return -1;
+    }
     buffer.resize(fileStat.st_size);
-    UPDATER_ERROR_CHECK(ReadFully(fd, buffer.data(), fileStat.st_size), "Failed to read store data",
-            close(fd); fd = -1; return -1);
+    if (!ReadFully(fd, buffer.data(), fileStat.st_size)) {
+        LOG(ERROR) << "Failed to read store data";
+        close(fd);
+        fd = -1;
+        return -1;
+    }
     close(fd);
     fd = -1;
     return 0;

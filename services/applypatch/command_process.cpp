@@ -77,7 +77,10 @@ CommandResult ZeroAndEraseCommandFn::Execute(const Command &params)
     }
     if (isErase) {
         struct stat statBlock {};
-        UPDATER_ERROR_CHECK(fstat(params.GetFileDescriptor(), &statBlock) != -1, "Failed to fstat", return FAILED);
+        if (fstat(params.GetFileDescriptor(), &statBlock) == -1) {
+            LOG(ERROR) << "Failed to fstat";
+            return FAILED;
+        }
 #ifndef UPDATER_UT
         if (!S_ISBLK(statBlock.st_mode)) {
             LOG(ERROR) << "Invalid block device";
@@ -153,9 +156,9 @@ CommandResult FreeCommandFn::Execute(const Command &params)
     std::string shaStr = params.GetArgumentByPos(1);
     blocksetMap.erase(shaStr);
     std::string storeBase = TransferManager::GetTransferManagerInstance()->GetGlobalParams()->storeBase;
-    UPDATER_CHECK_ONLY_RETURN(!(TransferManager::GetTransferManagerInstance()->GetGlobalParams()->storeCreated),
-        return CommandResult(Store::FreeStore(storeBase, shaStr)));
-
+    if (TransferManager::GetTransferManagerInstance()->GetGlobalParams()->storeCreated != 0) {
+        return CommandResult(Store::FreeStore(storeBase, shaStr));
+    }
     return SUCCESS;
 }
 
@@ -171,13 +174,19 @@ CommandResult StashCommandFn::Execute(const Command &params)
     buffer.resize(srcBlockSize * H_BLOCK_SIZE);
     std::string storeBase = TransferManager::GetTransferManagerInstance()->GetGlobalParams()->storeBase;
     LOG(INFO) << "Confirm whether the block is stored";
-    UPDATER_INFO_CHECK(Store::LoadDataFromStore(storeBase, shaStr, buffer) != 0, "The stash has been stored, skipped",
-        return SUCCESS);
+    if (Store::LoadDataFromStore(storeBase, shaStr, buffer) == 0) {
+        LOG(INFO) << "The stash has been stored, skipped";
+        return SUCCESS;
+    }
     LOG(INFO) << "Read block data to buffer";
-    UPDATER_ERROR_CHECK(srcBlk.ReadDataFromBlock(params.GetFileDescriptor(), buffer) > 0,
-        "Error to load block data", return FAILED);
+    if (srcBlk.ReadDataFromBlock(params.GetFileDescriptor(), buffer) <= 0) {
+        LOG(ERROR) << "Error to load block data";
+        return FAILED;
+    }
     blocksetMap[shaStr] = srcBlk;
-    UPDATER_CHECK_ONLY_RETURN(srcBlk.VerifySha256(buffer, srcBlockSize, shaStr) == 0, return FAILED);
+    if (srcBlk.VerifySha256(buffer, srcBlockSize, shaStr) != 0) {
+        return FAILED;
+    }
     LOG(INFO) << "store " << srcBlockSize << " blocks to " << shaStr;
     int ret = Store::WriteDataToStore(storeBase, shaStr, buffer, srcBlockSize * H_BLOCK_SIZE);
     return CommandResult(ret);

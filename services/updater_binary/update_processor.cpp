@@ -40,7 +40,6 @@ using namespace Updater;
 namespace Updater {
 size_t UScriptInstructionRawImageWrite::totalSize_ = 0;
 size_t UScriptInstructionRawImageWrite::readSize_ = 0;
-const std::string PREFIX_PARTITION_NODE = "/dev/block/by-name/";
 
 UpdaterEnv::~UpdaterEnv()
 {
@@ -190,15 +189,20 @@ int32_t UScriptInstructionRawImageWrite::Execute(Uscript::UScriptEnv &env, Uscri
 int ExecUpdate(PkgManager::PkgManagerPtr pkgManager, int retry, PostMessageFunction postMessage)
 {
     UpdaterEnv* env = new UpdaterEnv(pkgManager, postMessage, retry);
-    UPDATER_ERROR_CHECK(env != nullptr, "Fail to create env", UPDATER_LAST_WORD(EXIT_PARSE_SCRIPT_ERROR);
-        return EXIT_PARSE_SCRIPT_ERROR);
+    if (env == nullptr) {
+        LOG(ERROR) << "Fail to creat env";
+        UPDATER_LAST_WORD(EXIT_PARSE_SCRIPT_ERROR);
+        return EXIT_PARSE_SCRIPT_ERROR;
+    }
     int ret = 0;
     ScriptManager* scriptManager = ScriptManager::GetScriptManager(env);
-    UPDATER_ERROR_CHECK(scriptManager != nullptr, "Fail to create scriptManager",
+    if (scriptManager == nullptr) {
+        LOG(ERROR) << "Fail to creat scriptManager";
         ScriptManager::ReleaseScriptManager();
         delete env;
         UPDATER_LAST_WORD(EXIT_PARSE_SCRIPT_ERROR);
-        return EXIT_PARSE_SCRIPT_ERROR);
+        return EXIT_PARSE_SCRIPT_ERROR;
+    }
 
     UpdaterInit::GetInstance().InvokeEvent(UPDATER_BINARY_INIT_DONE_EVENT);
 
@@ -247,25 +251,32 @@ int ProcessUpdater(bool retry, int pipeFd, const std::string &packagePath, const
     UpdaterInit::GetInstance().InvokeEvent(UPDATER_BINARY_INIT_EVENT);
     Dump::GetInstance().RegisterDump("DumpHelperLog", std::make_unique<DumpHelperLog>());
     FILE *pipeWrite = fdopen(pipeFd, "w");
-    UPDATER_ERROR_CHECK(pipeWrite != nullptr, "Fail to fdopen", UPDATER_LAST_WORD(EXIT_INVALID_ARGS);
-        return EXIT_INVALID_ARGS);
+    if (pipeWrite == nullptr) {
+        LOG(ERROR) << "Fail to fdopen";
+        UPDATER_LAST_WORD(EXIT_INVALID_ARGS);
+        return EXIT_INVALID_ARGS;
+    }
     // line buffered, make sure parent read per line.
     setlinebuf(pipeWrite);
     PkgManager::PkgManagerPtr pkgManager = PkgManager::GetPackageInstance();
     if (pkgManager == nullptr) {
         LOG(ERROR) << "Fail to GetPackageInstance";
         fclose(pipeWrite);
+        pipeWrite = nullptr;
         UPDATER_LAST_WORD(EXIT_INVALID_ARGS);
         return EXIT_INVALID_ARGS;
     }
 
     std::vector<std::string> components;
     int32_t ret = pkgManager->LoadPackage(packagePath, keyPath, components);
-    UPDATER_ERROR_CHECK(ret == PKG_SUCCESS, "Fail to load package",
+    if (ret != PKG_SUCCESS) {
+        LOG(ERROR) << "Fail to load package";
         fclose(pipeWrite);
+        pipeWrite = nullptr;
         PkgManager::ReleasePackageInstance(pkgManager);
         UPDATER_LAST_WORD(EXIT_INVALID_ARGS);
-        return EXIT_INVALID_ARGS);
+        return EXIT_INVALID_ARGS;
+	}
 #ifdef UPDATER_USE_PTABLE
     PackagePtable& packagePtb = PackagePtable::GetInstance();
     packagePtb.LoadPartitionInfo(pkgManager);
@@ -280,6 +291,7 @@ int ProcessUpdater(bool retry, int pipeFd, const std::string &packagePath, const
     PkgManager::ReleasePackageInstance(pkgManager);
 #ifndef UPDATER_UT
     fclose(pipeWrite);
+    pipeWrite = nullptr;
 #endif
     return ret;
 }

@@ -31,7 +31,10 @@ uint32_t g_tmpFileId = 0;
 int32_t NormalImagePatch::ApplyImagePatch(const PatchParam &param, size_t &startOffset)
 {
     size_t offset = startOffset;
-    PATCH_CHECK((offset + PATCH_NORMAL_MIN_HEADER_LEN) <= param.patchSize, return -1, "Failed to check datalen");
+    if (offset + PATCH_NORMAL_MIN_HEADER_LEN > param.patchSize) {
+        PATCH_LOGE("Failed to check datalen");
+        return -1;
+    }
 
     size_t srcStart = static_cast<size_t>(ReadLE<int64_t>(param.patch + offset));
     offset += sizeof(int64_t);
@@ -40,12 +43,18 @@ int32_t NormalImagePatch::ApplyImagePatch(const PatchParam &param, size_t &start
     size_t patchOffset = static_cast<size_t>(ReadLE<int64_t>(param.patch + offset));
     offset += sizeof(int64_t);
     PATCH_LOGI("ApplyImagePatch srcStart %zu srcLen %zu patchOffset: %zu", srcStart, srcLen, patchOffset);
-    PATCH_CHECK(srcStart + srcLen <= param.oldSize, return -1, "Failed to check datalen");
+    if (srcStart + srcLen > param.oldSize) {
+        PATCH_LOGE("Failed to check datalen");
+        return -1;
+    }
 
     PatchBuffer patchInfo = {param.patch, patchOffset, param.patchSize};
     BlockBuffer oldInfo = {param.oldBuff + srcStart, srcLen};
-    int32_t ret = UpdatePatch::ApplyBlockPatch(patchInfo, oldInfo, writer_);
-    PATCH_CHECK(ret == 0, return -1, "Failed to apply bsdiff patch");
+    int32_t ret = UpdateApplyPatch::ApplyBlockPatch(patchInfo, oldInfo, writer_);
+    if (ret != 0) {
+        PATCH_LOGE("Failed to apply bsdiff patch");
+        return -1;
+    }
     startOffset = offset;
     return 0;
 }
@@ -53,14 +62,23 @@ int32_t NormalImagePatch::ApplyImagePatch(const PatchParam &param, size_t &start
 int32_t RowImagePatch::ApplyImagePatch(const PatchParam &param, size_t &startOffset)
 {
     size_t offset = startOffset;
-    PATCH_CHECK((offset + sizeof(int32_t)) <= param.patchSize, return -1, "Failed to check datalen");
+    if (offset + sizeof(int32_t) > param.patchSize) {
+        PATCH_LOGE("Failed to check datalen");
+        return -1;
+    }
     size_t dataLen = static_cast<size_t>(ReadLE<uint32_t>(param.patch + offset));
-    PATCH_CHECK(offset + dataLen <= param.patchSize, return -1, "Failed to check datalen");
+    if (offset + dataLen > param.patchSize) {
+        PATCH_LOGE("Failed to check datalen");
+        return -1;
+    }
     offset += sizeof(uint32_t);
 
     BlockBuffer data = {param.patch + offset, dataLen};
     int32_t ret = writer_->Write(0, data, dataLen);
-    PATCH_CHECK(ret == 0, return -1, "Failed to write chunk");
+    if (ret != 0) {
+        PATCH_LOGE("Failed to write chunk");
+        return -1;
+    }
     PATCH_LOGI("RowImagePatch startOffset %zu dataLen %zu", startOffset, dataLen);
     PATCH_DEBUG("ApplyImagePatch hash %zu %s",  dataLen, GeneraterBufferHash(data).c_str());
     startOffset = offset + dataLen;
@@ -95,7 +113,7 @@ int32_t CompressedImagePatch::ApplyImagePatch(const PatchParam &param, size_t &s
 
     // apply patch
     PatchBuffer patchInfo = {param.patch, header.patchOffset, param.patchSize};
-    ret = UpdatePatch::ApplyBlockPatch(patchInfo, stream, zipWriter.get());
+    ret = UpdateApplyPatch::ApplyBlockPatch(patchInfo, stream, zipWriter.get());
     PATCH_CHECK(ret == 0, return -1, "Failed to apply bsdiff patch");
 
     // compress new data
@@ -147,7 +165,10 @@ int32_t CompressedImagePatch::DecompressData(PkgBuffer buffer,
 
 int32_t ZipImagePatch::ReadHeader(const PatchParam &param, PatchHeader &header, size_t &offset)
 {
-    PATCH_CHECK((offset + PATCH_DEFLATE_MIN_HEADER_LEN) <= param.patchSize, return -1, "Failed to check datalen");
+    if (offset + PATCH_DEFLATE_MIN_HEADER_LEN > param.patchSize) {
+        PATCH_LOGE("Failed to check datalen");
+        return -1;
+    }
     header.srcStart = static_cast<size_t>(ReadLE<uint64_t>(param.patch + offset));
     offset += sizeof(uint64_t);
     header.srcLength = static_cast<size_t>(ReadLE<uint64_t>(param.patch + offset));
@@ -178,7 +199,10 @@ int32_t ZipImagePatch::ReadHeader(const PatchParam &param, PatchHeader &header, 
 std::unique_ptr<Hpackage::FileInfo> ZipImagePatch::GetFileInfo() const
 {
     Hpackage::ZipFileInfo *fileInfo = new ZipFileInfo;
-    PATCH_CHECK(fileInfo != nullptr, return nullptr, "Failed to new file info");
+    if (fileInfo == nullptr) {
+        PATCH_LOGE("Failed to new file info");
+        return nullptr;
+    }
     fileInfo->fileInfo.packMethod = PKG_COMPRESS_METHOD_ZIP;
     fileInfo->fileInfo.digestMethod = PKG_DIGEST_TYPE_NONE;
     fileInfo->fileInfo.packedSize = 0;
@@ -194,7 +218,10 @@ std::unique_ptr<Hpackage::FileInfo> ZipImagePatch::GetFileInfo() const
 
 int32_t Lz4ImagePatch::ReadHeader(const PatchParam &param, PatchHeader &header, size_t &offset)
 {
-    PATCH_CHECK((offset + PATCH_LZ4_MIN_HEADER_LEN) <= param.patchSize, return -1, "Failed to check datalen");
+    if (offset + PATCH_LZ4_MIN_HEADER_LEN > param.patchSize) {
+        PATCH_LOGE("Failed to check datalen");
+        return -1;
+    }
     header.srcStart = static_cast<size_t>(ReadLE<uint64_t>(param.patch + offset));
     offset += sizeof(uint64_t);
     header.srcLength = static_cast<size_t>(ReadLE<uint64_t>(param.patch + offset));
@@ -226,7 +253,10 @@ int32_t Lz4ImagePatch::ReadHeader(const PatchParam &param, PatchHeader &header, 
 std::unique_ptr<Hpackage::FileInfo> Lz4ImagePatch::GetFileInfo() const
 {
     Hpackage::Lz4FileInfo *fileInfo = new Lz4FileInfo;
-    PATCH_CHECK(fileInfo != nullptr, return nullptr, "Failed to new file info");
+    if (fileInfo == nullptr) {
+        PATCH_LOGE("Failed to new file info");
+        return nullptr;
+    }
     fileInfo->fileInfo.packMethod = (method_ == LZ4B_MAGIC) ? PKG_COMPRESS_METHOD_LZ4_BLOCK : PKG_COMPRESS_METHOD_LZ4;
     fileInfo->fileInfo.digestMethod = PKG_DIGEST_TYPE_NONE;
     fileInfo->fileInfo.packedSize = 0;
@@ -250,7 +280,10 @@ int32_t CompressedFileRestore::Init()
     } else if (fileInfo_->packMethod == PKG_COMPRESS_METHOD_LZ4_BLOCK) {
         deflateAdapter_.reset(new Lz4BlockAdapter(writer_, 0, fileInfo_));
     }
-    PATCH_CHECK(deflateAdapter_ != nullptr, return -1, "Failed to create zip adapter");
+    if (deflateAdapter_ == nullptr) {
+        PATCH_LOGE("Failed to create zip adapter");
+        return -1;
+    }
     return deflateAdapter_->Open();
 }
 
@@ -268,7 +301,10 @@ int32_t CompressedFileRestore::Write(size_t start, const BlockBuffer &buffer, si
 int32_t CompressedFileRestore::CompressData(size_t &originalSize, size_t &compressSize)
 {
     int32_t ret = deflateAdapter_->FlushData(compressSize);
-    PATCH_CHECK(ret == 0, return -1, "Failed to flush data");
+    if (ret != 0) {
+        PATCH_LOGE("Failed to flush data");
+        return -1;
+    }
     originalSize = dataSize_;
 
     std::vector<uint8_t> digest(SHA256_DIGEST_LENGTH);

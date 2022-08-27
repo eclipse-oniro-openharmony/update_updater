@@ -98,10 +98,8 @@ int UpdatePartitions::DoNewPartitions(PartitonList &newPartList)
 int32_t UpdatePartitions::Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context)
 {
     LOG(INFO) << "enter UpdatePartitions::Execute ";
-    if (context.GetParamCount() != 1) {
-        LOG(ERROR) << "Invalid UpdatePartitions::Execute param";
-        return USCRIPT_INVALID_PARAM;
-    }
+    UPDATER_ERROR_CHECK(context.GetParamCount() == 1,
+        "Invalid UpdatePartitions::Execute param", return USCRIPT_INVALID_PARAM);
     std::string filePath;
     int32_t ret = context.GetParam(0, filePath);
     if (ret != USCRIPT_SUCCESS) {
@@ -140,8 +138,10 @@ int32_t UpdatePartitions::Execute(Uscript::UScriptEnv &env, Uscript::UScriptCont
         return USCRIPT_ERROR_EXECUTE;
     }
     PartitonList newPartList {};
-    UPDATER_CHECK_ONLY_RETURN(ParsePartitionInfo(std::string(partitionInfo), newPartList),
-        env.GetPkgManager()->ClosePkgStream(outStream); return USCRIPT_ABOART);
+    if (ParsePartitionInfo(std::string(partitionInfo), newPartList) == 0) {
+        env.GetPkgManager()->ClosePkgStream(outStream);
+        return USCRIPT_ABOART;
+    }
     if (newPartList.empty()) {
         LOG(ERROR) << "Partition is empty ";
         env.GetPkgManager()->ClosePkgStream(outStream);

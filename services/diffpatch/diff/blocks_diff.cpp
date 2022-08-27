@@ -45,19 +45,28 @@ int32_t BlocksDiff::MakePatch(const std::string &oldFileName, const std::string 
 {
     PATCH_LOGI("BlocksDiff::MakePatch %s ", patchFileName.c_str());
     std::fstream patchFile(patchFileName, std::ios::out | std::ios::trunc | std::ios::binary);
-    PATCH_CHECK(!patchFile.fail(), return -1, "Failed to open %s", strerror(errno));
+    if (patchFile.fail()) {
+        PATCH_LOGE("Failed to open %s", strerror(errno));
+        return -1;
+    }
 
     MemMapInfo oldBuffer {};
     MemMapInfo newBuffer {};
     int32_t ret = PatchMapFile(oldFileName, oldBuffer);
     int32_t ret1 = PatchMapFile(newFileName, newBuffer);
-    PATCH_CHECK((ret == 0 && ret1 == 0), return -1, "Failed to open %s", newFileName.c_str());
+    if (ret != 0 || ret1 != 0) {
+        PATCH_LOGE("Failed to open %s", newFileName.c_str());
+        return -1;
+    }
     BlockBuffer newInfo = {newBuffer.memory, newBuffer.length};
     BlockBuffer oldInfo = {oldBuffer.memory, oldBuffer.length};
     std::unique_ptr<BlocksDiff> blockdiff = std::make_unique<BlocksStreamDiff>(patchFile, 0);
     size_t patchSize = 0;
     ret = blockdiff->MakePatch(newInfo, oldInfo, patchSize);
-    PATCH_CHECK(ret == PATCH_SUCCESS, return ret, "Failed to generate patch");
+    if (ret != PATCH_SUCCESS) {
+        PATCH_LOGE("Failed to generate patch");
+        return ret;
+    }
     PATCH_DEBUG("MakePatch %zu", static_cast<size_t>(patchFile.tellp()));
     patchFile.close();
     PATCH_LOGI("BlocksDiff::MakePatch success %zu", patchSize);
@@ -72,8 +81,14 @@ int32_t BlocksDiff::MakePatch(const BlockBuffer &newInfo,
     }
     std::unique_ptr<BlocksDiff> blockdiff = std::make_unique<BlocksBufferDiff>(patchData, offset);
     int32_t ret = blockdiff->MakePatch(newInfo, oldInfo, patchSize);
-    PATCH_CHECK(ret == PATCH_SUCCESS, return ret, "Failed to generate patch");
-    PATCH_CHECK(patchData.size() >= patchSize, return -1, "Failed to make block patch");
+    if (ret != PATCH_SUCCESS) {
+        PATCH_LOGE("Failed to generate patch");
+        return ret;
+    }
+    if (patchData.size() < patchSize) {
+        PATCH_LOGE("Failed to make block patch");
+        return -1;
+    }
     patchData.resize(patchSize);
     PATCH_LOGI("BlocksDiff::MakePatch success %zu", patchSize);
     return ret;
@@ -85,7 +100,10 @@ int32_t BlocksDiff::MakePatch(const BlockBuffer &newInfo,
     std::unique_ptr<BlocksDiff> blockdiff = std::make_unique<BlocksStreamDiff>(
         patchFile, static_cast<size_t>(patchFile.tellp()));
     int32_t ret = blockdiff->MakePatch(newInfo, oldInfo, patchSize);
-    PATCH_CHECK(ret == PATCH_SUCCESS, return ret, "Failed to generate patch");
+    if (ret != PATCH_SUCCESS) {
+        PATCH_LOGE("Failed to generate patch");
+        return ret;
+    }
     PATCH_LOGI("BlocksDiff::MakePatch success %zu patchFile %zu",
         patchSize, static_cast<size_t>(patchFile.tellp()));
     return ret;
@@ -95,17 +113,25 @@ int32_t BlocksDiff::MakePatch(const BlockBuffer &newInfo, const BlockBuffer &old
 {
     if (suffixArray_ == nullptr) {
         suffixArray_.reset(new SuffixArray<int32_t>());
-        PATCH_CHECK(suffixArray_ != nullptr, return -1, "Failed to create SuffixArray");
+        if (suffixArray_ == nullptr) {
+            PATCH_LOGE("Failed to create SuffixArray");
+            return -1;
+        }
         suffixArray_->Init(oldInfo);
     }
 
     std::vector<ControlData> controlDatas;
     int32_t ret = GetCtrlDatas(newInfo, oldInfo, controlDatas);
-    PATCH_CHECK(ret == 0, return ret, "Failed to get control data");
-
+    if (ret != 0) {
+        PATCH_LOGE("Failed to get control data");
+        return ret;
+    }
     patchSize = 0;
     ret = WritePatchHeader(0, 0, 0, patchSize);
-    PATCH_CHECK(ret == 0, return ret, "Failed to write patch header");
+    if (ret != 0) {
+        PATCH_LOGE("Failed to write patch header");
+        return ret;
+    }
 
     size_t controlSize = patchSize;
     ret = WriteControlData(controlDatas, patchSize);
@@ -126,8 +152,10 @@ int32_t BlocksDiff::MakePatch(const BlockBuffer &newInfo, const BlockBuffer &old
     // write real data
     size_t headerLen = 0;
     ret = WritePatchHeader(controlSize, diffDataSize, newInfo.length, headerLen);
-    PATCH_CHECK(ret == 0, return ret, "Failed to write patch header");
-
+    if (ret != 0) {
+        PATCH_LOGE("Failed to write patch header");
+        return ret;
+    }
     PATCH_DEBUG("MakePatch success patchSize:%zu controlSize:%zu diffDataSize:%zu, extraDataSize:%zu",
         patchSize, controlSize, diffDataSize, extraDataSize);
     return 0;
@@ -137,7 +165,10 @@ std::unique_ptr<DeflateAdapter> BlocksBufferDiff::CreateBZip2Adapter(size_t patc
 {
     std::unique_ptr<DeflateAdapter> bzip2Adapter = std::make_unique<BZipBuffer2Adapter>(patchData_,
         offset_ + patchOffset);
-    PATCH_CHECK(bzip2Adapter != nullptr, return nullptr, "Failed to create bzip2Adapter");
+    if (bzip2Adapter == nullptr) {
+        PATCH_LOGE("Failed to create bzip2Adapter");
+        return nullptr;
+    }
     bzip2Adapter->Open();
     return bzip2Adapter;
 }
@@ -145,7 +176,10 @@ std::unique_ptr<DeflateAdapter> BlocksBufferDiff::CreateBZip2Adapter(size_t patc
 std::unique_ptr<DeflateAdapter> BlocksStreamDiff::CreateBZip2Adapter(size_t patchOffset)
 {
     std::unique_ptr<DeflateAdapter> bzip2Adapter = std::make_unique<BZip2StreamAdapter>(stream_);
-    PATCH_CHECK(bzip2Adapter != nullptr, return nullptr, "Failed to create bzip2Adapter");
+    if (bzip2Adapter == nullptr) {
+        PATCH_LOGE("Failed to create bzip2Adapter");
+        return nullptr;
+    }
     bzip2Adapter->Open();
     return bzip2Adapter;
 }
@@ -154,7 +188,10 @@ int32_t BlocksBufferDiff::WritePatchHeader(int64_t controlSize,
     int64_t diffDataSize, int64_t newSize, size_t &headerLen)
 {
     headerLen = std::char_traits<char>::length(BSDIFF_MAGIC) + sizeof(int64_t) + sizeof(int64_t) + sizeof(int64_t);
-    PATCH_CHECK(patchData_.size() > headerLen + offset_, return -1, "Invalid patch size");
+    if (patchData_.size() <= headerLen + offset_) {
+        PATCH_LOGE("Invalid patch size");
+        return -1;
+    }
 
     int32_t ret = memcpy_s(patchData_.data() + offset_, patchData_.size(), BSDIFF_MAGIC,
         std::char_traits<char>::length(BSDIFF_MAGIC));
@@ -304,7 +341,10 @@ int32_t BlocksDiff::GetCtrlDatas(const BlockBuffer &newInfo,
 int32_t BlocksDiff::WriteControlData(const std::vector<ControlData> controlDatas, size_t &patchSize)
 {
     std::unique_ptr<DeflateAdapter> bzip2Adapter = CreateBZip2Adapter(patchSize);
-    PATCH_CHECK(bzip2Adapter != nullptr, return -1, "Failed to create bzip2Adapter");
+    if (bzip2Adapter == nullptr) {
+        PATCH_LOGE("Failed to create bzip2Adapter");
+        return -1;
+    }
     bzip2Adapter->Open();
     int32_t ret = 0;
     uint8_t buffer[sizeof(int64_t)] = {0};
@@ -314,13 +354,22 @@ int32_t BlocksDiff::WriteControlData(const std::vector<ControlData> controlDatas
     for (size_t i = 0; i < controlDatas.size(); i++) {
         WriteLE64(srcData, controlDatas[i].diffLength);
         ret = bzip2Adapter->WriteData(srcData);
-        PATCH_CHECK(ret == 0, return ret, "Failed to write data");
+        if (ret != 0) {
+            PATCH_LOGE("Failed to write data");
+            return ret;
+        }
         WriteLE64(srcData, controlDatas[i].extraLength);
         ret = bzip2Adapter->WriteData(srcData);
-        PATCH_CHECK(ret == 0, return ret, "Failed to write data");
+        if (ret != 0) {
+            PATCH_LOGE("Failed to write data");
+            return ret;
+        }
         WriteLE64(srcData, controlDatas[i].offsetIncrement);
         ret = bzip2Adapter->WriteData(srcData);
-        PATCH_CHECK(ret == 0, return ret, "Failed to write data");
+        if (ret != 0) {
+            PATCH_LOGE("WriteControlData : Failed to write data");
+            return ret;
+        }
     }
     size_t dataSize = 0;
     ret = bzip2Adapter->FlushData(dataSize);
@@ -334,7 +383,10 @@ int32_t BlocksDiff::WriteDiffData(const std::vector<ControlData> controlDatas, s
 {
     PATCH_DEBUG("WriteDiffData patchSize %zu", patchSize);
     std::unique_ptr<DeflateAdapter> bzip2Adapter = CreateBZip2Adapter(patchSize);
-    PATCH_CHECK(bzip2Adapter != nullptr, return -1, "Failed to create bzip2Adapter");
+    if (bzip2Adapter == nullptr) {
+        PATCH_LOGE("Failed to create bzip2Adapter");
+        return -1;
+    }
     bzip2Adapter->Open();
 
     std::vector<uint8_t> diffData(IGMDIFF_LIMIT_UNIT, 0);
@@ -354,7 +406,10 @@ int32_t BlocksDiff::WriteDiffData(const std::vector<ControlData> controlDatas, s
 
             BlockBuffer srcData = {reinterpret_cast<uint8_t*>(diffData.data()), static_cast<size_t>(cpyLen)};
             ret = bzip2Adapter->WriteData(srcData);
-            PATCH_CHECK(ret == 0, return ret, "Failed to write data");
+            if (ret != 0) {
+                PATCH_LOGE("Failed to write data");
+                return ret;
+            }
             offset += cpyLen;
         }
     }
@@ -370,7 +425,10 @@ int32_t BlocksDiff::WriteExtraData(const std::vector<ControlData> controlDatas, 
 {
     PATCH_DEBUG("WriteExtraData patchSize %zu ", patchSize);
     std::unique_ptr<DeflateAdapter> bzip2Adapter = CreateBZip2Adapter(patchSize);
-    PATCH_CHECK(bzip2Adapter != nullptr, return -1, "Failed to create bzip2Adapter");
+    if (bzip2Adapter == nullptr) {
+        PATCH_LOGE("Failed to create bzip2Adapter");
+        return -1;
+    }
     bzip2Adapter->Open();
     int32_t ret = 0;
     for (size_t i = 0; i < controlDatas.size(); i++) {
@@ -379,7 +437,10 @@ int32_t BlocksDiff::WriteExtraData(const std::vector<ControlData> controlDatas, 
         }
         BlockBuffer srcData = {controlDatas[i].extraNewStart, static_cast<size_t>(controlDatas[i].extraLength)};
         ret = bzip2Adapter->WriteData(srcData);
-        PATCH_CHECK(ret == 0, return ret, "Failed to write data");
+        if (ret != 0) {
+            PATCH_LOGE("WriteExtraData : Failed to write data");
+            return ret;
+        }
     }
     size_t dataSize = 0;
     ret = bzip2Adapter->FlushData(dataSize);

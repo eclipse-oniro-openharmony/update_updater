@@ -33,14 +33,26 @@ bool PartitionRecord::IsPartitionUpdated(const std::string &partitionName)
     uint8_t buffer[PARTITION_UPDATER_RECORD_MSG_SIZE];
     if (!miscBlockDevice.empty()) {
         char *realPath = realpath(miscBlockDevice.c_str(), NULL);
-        UPDATER_FILE_CHECK(realPath != nullptr, "realPath is NULL", return false);
+        if (realPath == nullptr) {
+            LOG(ERROR) << "realPath is NULL" << " : " << strerror(errno);
+            return false;
+        }
         int fd = open(realPath, O_RDONLY | O_EXCL | O_CLOEXEC | O_BINARY);
         free(realPath);
-        UPDATER_FILE_CHECK(fd >= 0, "PartitionRecord: Open misc to recording partition failed", return false);
-        UPDATER_CHECK_FILE_OP(lseek(fd, PARTITION_RECORD_START, SEEK_CUR) >= 0,
-            "PartitionRecord: Seek misc to specific offset failed", fd, return false);
-        UPDATER_CHECK_FILE_OP(read(fd, buffer, PARTITION_UPDATER_RECORD_MSG_SIZE) == PARTITION_UPDATER_RECORD_MSG_SIZE,
-            "PartitionRecord: Read from misc partition failed", fd, return false);
+        if (fd < 0) {
+            LOG(ERROR) << "PartitionRecord: Open misc to recording partition failed" << " : " << strerror(errno);
+            return false;
+        }
+        if (lseek(fd, PARTITION_RECORD_START, SEEK_CUR) < 0) {
+            LOG(ERROR) << "PartitionRecord: Seek misc to specific offset failed" << " : " << strerror(errno);
+            close(fd);
+            return false;
+        }
+        if (read(fd, buffer, PARTITION_UPDATER_RECORD_MSG_SIZE) != PARTITION_UPDATER_RECORD_MSG_SIZE) {
+            LOG(ERROR) << "PartitionRecord: Read from misc partition failed" << " : " << strerror(errno);
+            close(fd);
+            return false;
+        }
         for (uint8_t *p = buffer; p < buffer + PARTITION_UPDATER_RECORD_MSG_SIZE; p += sizeof(PartitionRecordInfo)) {
             PartitionRecordInfo *pri = reinterpret_cast<PartitionRecordInfo*>(p);
             if (strcmp(pri->partitionName, partitionName.c_str()) == 0) {
@@ -62,10 +74,16 @@ bool PartitionRecord::RecordPartitionUpdateStatus(const std::string &partitionNa
     auto miscBlockDevice = GetMiscPartitionPath();
     if (!miscBlockDevice.empty()) {
         char *realPath = realpath(miscBlockDevice.c_str(), NULL);
-        UPDATER_FILE_CHECK(realPath != nullptr, "realPath is NULL", return false);
+        if (realPath == nullptr) {
+            LOG(ERROR) << "realPath is NULL" << " : " << strerror(errno);
+            return false;
+        }
         int fd = open(realPath, O_RDWR | O_EXCL | O_CLOEXEC | O_BINARY);
         free(realPath);
-        UPDATER_FILE_CHECK(fd >= 0, "PartitionRecord: Open misc to recording partition failed", return false);
+        if (fd < 0) {
+            LOG(ERROR) << "PartitionRecord: Open misc to recording partition failed" << " : " << strerror(errno);
+            return false;
+        }
         off_t newOffset = 0;
         UPDATER_CHECK_FILE_OP(lseek(fd, PARTITION_RECORD_OFFSET, SEEK_SET) >= 0,
                 "PartitionRecord: Seek misc to record offset failed", fd, return false);
@@ -106,13 +124,22 @@ bool PartitionRecord::ClearRecordPartitionOffset()
     auto miscBlockDevice = GetMiscPartitionPath();
     if (!miscBlockDevice.empty()) {
         int fd = open(miscBlockDevice.c_str(), O_RDWR | O_EXCL | O_CLOEXEC | O_BINARY);
-        UPDATER_FILE_CHECK(fd >= 0, "Open misc to recording partition failed", return false);
-        UPDATER_CHECK_FILE_OP(lseek(fd, PARTITION_RECORD_OFFSET, SEEK_SET) >= 0,
-            "Seek misc to specific offset failed", fd, return false);
+        if (fd < 0) {
+            LOG(ERROR) << "Open misc to recording partition failed" << " : " << strerror(errno);
+            return false;
+        }
+        if (lseek(fd, PARTITION_RECORD_OFFSET, SEEK_SET) < 0) {
+            LOG(ERROR) << "Seek misc to specific offset failed" << " : " << strerror(errno);
+            close(fd);
+            return false;
+        }
 
         off_t initOffset = 0;
-        UPDATER_CHECK_FILE_OP(write(fd, &initOffset, sizeof(off_t)) == static_cast<ssize_t>(sizeof(off_t)),
-            "StartUpdater: Write misc initOffset 0 failed", fd, return false);
+        if (write(fd, &initOffset, sizeof(off_t)) != static_cast<ssize_t>(sizeof(off_t))) {
+            LOG(ERROR) << "StartUpdater: Write misc initOffset 0 failed" << " : " << strerror(errno);
+            close(fd);
+            return false;
+        }
         fsync(fd);
         close(fd);
     }

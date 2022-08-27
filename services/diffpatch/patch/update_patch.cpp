@@ -24,20 +24,32 @@
 
 using namespace Hpackage;
 namespace UpdatePatch {
-int32_t UpdatePatch::ApplyImagePatch(const PatchParam &param, const std::vector<uint8_t> &bonusData,
+int32_t UpdateApplyPatch::ApplyImagePatch(const PatchParam &param, const std::vector<uint8_t> &bonusData,
     ImageProcessor writer, const std::string& expected)
 {
-    PATCH_CHECK(writer != nullptr, return -1, "processor is null");
+    if (writer == nullptr) {
+        PATCH_LOGE("ApplyImagePatch : processor is null");
+        return -1;
+    }
     std::unique_ptr<ImagePatchWriter> patchWriter = std::make_unique<ImagePatchWriter>(writer, expected, "");
-    PATCH_CHECK(patchWriter != nullptr, return -1, "Failed to create patch writer");
+    if (patchWriter == nullptr) {
+        PATCH_LOGE("ApplyImagePatch : Failed to create patch writer");
+        return -1;
+    }
     int32_t ret = patchWriter->Init();
-    PATCH_CHECK(ret == 0, return -1, "Failed to init patch writer");
+    if (ret != 0) {
+        PATCH_LOGE("ApplyImagePatch : Failed to init patch writer");
+        return -1;
+    }
     ret = ApplyImagePatch(param, patchWriter.get(), bonusData);
-    PATCH_CHECK(ret == 0, return -1, "Failed to apply image patch");
+    if (ret != 0) {
+        PATCH_LOGE("ApplyImagePatch : Failed to apply image patch");
+        return -1;
+    }
     return patchWriter->Finish();
 }
 
-int32_t UpdatePatch::ApplyImagePatch(const PatchParam &param,
+int32_t UpdateApplyPatch::ApplyImagePatch(const PatchParam &param,
     UpdatePatchWriterPtr writer, const std::vector<uint8_t> &bonusData)
 {
     PATCH_CHECK(writer != nullptr, return -1, "check param fail ");
@@ -80,77 +92,127 @@ int32_t UpdatePatch::ApplyImagePatch(const PatchParam &param,
     return 0;
 }
 
-int32_t UpdatePatch::ApplyBlockPatch(const PatchBuffer &patchInfo,
+int32_t UpdateApplyPatch::ApplyBlockPatch(const PatchBuffer &patchInfo,
     const BlockBuffer &oldInfo, std::vector<uint8_t> &newData)
 {
     std::unique_ptr<BlocksBufferPatch> patch = std::make_unique<BlocksBufferPatch>(patchInfo, oldInfo, newData);
-    PATCH_CHECK(patch != nullptr, return -1, "Failed to  creare patch ");
+    if (patch == nullptr) {
+        PATCH_LOGE("Failed to  creare patch ");
+        return -1;
+    }
     return patch->ApplyPatch();
 }
 
-int32_t UpdatePatch::ApplyBlockPatch(const PatchBuffer &patchInfo,
+int32_t UpdateApplyPatch::ApplyBlockPatch(const PatchBuffer &patchInfo,
     const BlockBuffer &oldInfo, UpdatePatchWriterPtr writer)
 {
     PkgManager* pkgManager = Hpackage::PkgManager::GetPackageInstance();
-    PATCH_CHECK(pkgManager != nullptr, return -1, "Failed to get pkg manager");
+    if (pkgManager == nullptr) {
+        PATCH_LOGE("Failed to get pkg manager");
+        return -1;
+    }
 
     Hpackage::PkgManager::StreamPtr stream = nullptr;
     int32_t ret = pkgManager->CreatePkgStream(stream, "", {oldInfo.buffer, oldInfo.length});
-    PATCH_CHECK(stream != nullptr, pkgManager->ClosePkgStream(stream); return -1, "Failed to create stream");
+    if (stream == nullptr) {
+        PATCH_LOGE("Failed to create stream");
+        pkgManager->ClosePkgStream(stream);
+        return -1;
+    }
 
     std::unique_ptr<BlocksStreamPatch> patch = std::make_unique<BlocksStreamPatch>(patchInfo, stream, writer);
-    PATCH_CHECK(patch != nullptr, pkgManager->ClosePkgStream(stream); return -1, "Failed to  creare patch ");
+    if (patch == nullptr) {
+        PATCH_LOGE("Failed to  creare patch ");
+        pkgManager->ClosePkgStream(stream);
+        return -1;
+    }
     ret = patch->ApplyPatch();
     pkgManager->ClosePkgStream(stream);
     return ret;
 }
 
-int32_t UpdatePatch::ApplyBlockPatch(const PatchBuffer &patchInfo,
+int32_t UpdateApplyPatch::ApplyBlockPatch(const PatchBuffer &patchInfo,
     const BlockBuffer &oldInfo, ImageProcessor writer, const std::string& expected)
 {
-    PATCH_CHECK(writer != nullptr, return -1, "processor is null");
+    if (writer == nullptr) {
+        PATCH_LOGE("ApplyBlockPatch : processor is null");
+        return -1;
+    }
     std::unique_ptr<ImagePatchWriter> patchWriter = std::make_unique<ImagePatchWriter>(writer, expected, "");
-    PATCH_CHECK(patchWriter != nullptr, return -1, "Failed to create patch writer");
+    if (patchWriter == nullptr) {
+        PATCH_LOGE("ApplyBlockPatch : Failed to create patch writer");
+        return -1;
+    }
     int32_t ret = patchWriter->Init();
-    PATCH_CHECK(ret == 0, return -1, "Failed to init patch writer");
+    if (ret != 0) {
+        PATCH_LOGE("ApplyBlockPatch : Failed to init patch writer");
+        return -1;
+    }
 
     PkgManager* pkgManager = Hpackage::PkgManager::GetPackageInstance();
-    PATCH_CHECK(pkgManager != nullptr, return -1, "Failed to get pkg manager");
+    if (pkgManager == nullptr) {
+        PATCH_LOGE("ApplyBlockPatch ::Failed to get pkg manager");
+        return -1;
+    }
 
     Hpackage::PkgManager::StreamPtr stream = nullptr;
     ret = pkgManager->CreatePkgStream(stream, "", {oldInfo.buffer, oldInfo.length});
-    PATCH_CHECK(stream != nullptr, pkgManager->ClosePkgStream(stream); return -1, "Failed to create stream");
+    if (stream == nullptr) {
+        PATCH_LOGE("Failed to create stream");
+        pkgManager->ClosePkgStream(stream);
+        return -1;
+    }
 
     std::unique_ptr<BlocksStreamPatch> patch = std::make_unique<BlocksStreamPatch>(patchInfo,
         stream, patchWriter.get());
-    PATCH_CHECK(patch != nullptr, pkgManager->ClosePkgStream(stream); return -1, "Failed to  creare patch ");
+    if (patch == nullptr) {
+        PATCH_LOGE("Failed to  creare patch ");
+        pkgManager->ClosePkgStream(stream);
+        return -1;
+    }
     ret = patch->ApplyPatch();
     pkgManager->ClosePkgStream(stream);
-    PATCH_CHECK(ret == 0, return -1, "Failed to applay patch ");
+    if (ret != 0) {
+        PATCH_LOGE("Failed to applay patch ");
+        return -1;
+    }
     return patchWriter->Finish();
 }
 
-int32_t UpdatePatch::ApplyBlockPatch(const PatchBuffer &patchInfo,
+int32_t UpdateApplyPatch::ApplyBlockPatch(const PatchBuffer &patchInfo,
     Hpackage::PkgManager::StreamPtr stream, UpdatePatchWriterPtr writer)
 {
     std::unique_ptr<BlocksStreamPatch> patch = std::make_unique<BlocksStreamPatch>(patchInfo, stream, writer);
-    PATCH_CHECK(patch != nullptr, return -1, "Failed to  creare patch ");
+    if (patch == nullptr) {
+        PATCH_LOGE("Failed to  creare patch ");
+        return -1;
+    }
     return patch->ApplyPatch();
 }
 
-int32_t UpdatePatch::ApplyPatch(const std::string &patchName, const std::string &oldName, const std::string &newName)
+int32_t UpdateApplyPatch::ApplyPatch(const std::string &patchName,
+    const std::string &oldName, const std::string &newName)
 {
     PATCH_DEBUG("UpdatePatch::ApplyPatch : %s ", patchName.c_str());
     std::vector<uint8_t> empty;
     MemMapInfo patchData {};
     MemMapInfo oldData {};
     int32_t ret = PatchMapFile(patchName, patchData);
-    PATCH_CHECK(ret == 0, return -1, "Failed to read patch file");
+    if (ret != 0) {
+        PATCH_LOGE("ApplyPatch : Failed to read patch file");
+        return -1;
+    }
     ret = PatchMapFile(oldName, oldData);
-    PATCH_CHECK(ret == 0, return -1, "Failed to read old file");
+    if (ret != 0) {
+        PATCH_LOGE("ApplyPatch : Failed to read old file");
+        return -1;
+    }
     PATCH_LOGI("UpdatePatch::ApplyPatch patchData %zu oldData %zu ", patchData.length, oldData.length);
     std::unique_ptr<FilePatchWriter> writer = std::make_unique<FilePatchWriter>(newName);
-    PATCH_CHECK(writer != nullptr, return -1, "Failed to create writer");
+    if (writer == nullptr) {
+        PATCH_LOGE("Failed to create writer");
+        return -1;
+    }
     writer->Init();
 
     // check if image patch
@@ -160,13 +222,19 @@ int32_t UpdatePatch::ApplyPatch(const std::string &patchName, const std::string 
         param.patchSize = patchData.length;
         param.oldBuff = oldData.memory;
         param.oldSize = oldData.length;
-        ret = UpdatePatch::UpdatePatch::ApplyImagePatch(param, writer.get(), empty);
-        PATCH_CHECK(ret == 0, return -1, "Failed to apply image patch file");
+        ret = UpdatePatch::UpdateApplyPatch::ApplyImagePatch(param, writer.get(), empty);
+        if (ret != 0) {
+            PATCH_LOGE("Failed to apply image patch file");
+            return -1;
+        }
     } else if (memcmp(patchData.memory, BSDIFF_MAGIC, std::char_traits<char>::length(BSDIFF_MAGIC)) == 0) { // bsdiff
         PatchBuffer patchInfo = {patchData.memory, 0, patchData.length};
         BlockBuffer oldInfo = {oldData.memory, oldData.length};
         ret = ApplyBlockPatch(patchInfo, oldInfo, writer.get());
-        PATCH_CHECK(ret == 0, return -1, "Failed to apply block patch");
+        if (ret != 0) {
+            PATCH_LOGE("Failed to apply block patch");
+            return -1;
+        }
     } else {
         PATCH_LOGE("Invalid patch file");
         return -1;
@@ -177,8 +245,14 @@ int32_t UpdatePatch::ApplyPatch(const std::string &patchName, const std::string 
 
 int32_t ImagePatchWriter::Init()
 {
-    PATCH_CHECK(!init_, return -1, "Has beed init");
-    PATCH_CHECK(writer_ != nullptr, return -1, "Writer is null");
+    if (init_) {
+        PATCH_LOGE("Has beed init");
+        return -1;
+    }
+    if (writer_ == nullptr) {
+        PATCH_LOGE("Writer is null");
+        return -1;
+    }
     SHA256_Init(&sha256Ctx_);
     init_ = true;
     return 0;
@@ -186,7 +260,10 @@ int32_t ImagePatchWriter::Init()
 
 int32_t ImagePatchWriter::Write(size_t start, const BlockBuffer &buffer, size_t len)
 {
-    PATCH_CHECK(init_, return -1, "Failed to check init");
+    if (!init_) {
+        PATCH_LOGE("Failed to check init");
+        return -1;
+    }
     if (len == 0) {
         return 0;
     }
@@ -196,7 +273,10 @@ int32_t ImagePatchWriter::Write(size_t start, const BlockBuffer &buffer, size_t 
 
 int32_t ImagePatchWriter::Finish()
 {
-    PATCH_CHECK(init_, return -1, "Failed to check init");
+    if (!init_) {
+        PATCH_LOGE("Failed to check init");
+        return -1;
+    }
     std::vector<uint8_t> digest(SHA256_DIGEST_LENGTH);
     SHA256_Final(digest.data(), &sha256Ctx_);
     BlockBuffer data = {  digest.data(), digest.size() };
@@ -208,10 +288,16 @@ int32_t ImagePatchWriter::Finish()
 
 int32_t FilePatchWriter::Init()
 {
-    PATCH_CHECK(!init_, return -1, "Has beed init");
+    if (init_) {
+        PATCH_LOGE("Has beed init");
+        return -1;
+    }
     if (!stream_.is_open()) {
         stream_.open(newFileName_, std::ios::out | std::ios::binary);
-        PATCH_CHECK(!stream_.fail(), return -1, "Failed to open %s", newFileName_.c_str());
+        if (stream_.fail()) {
+            PATCH_LOGE("Failed to open %s", newFileName_.c_str());
+            return -1;
+        }
     }
     init_ = true;
     return 0;
@@ -219,13 +305,19 @@ int32_t FilePatchWriter::Init()
 
 int32_t FilePatchWriter::Write(size_t start, const BlockBuffer &buffer, size_t len)
 {
-    PATCH_CHECK(init_, return -1, "Failed to check init");
+    if (!init_) {
+        PATCH_LOGE("Failed to check init");
+        return -1;
+    }
     if (len == 0) {
         return 0;
     }
     if (!stream_.is_open()) {
         stream_.open(newFileName_, std::ios::out | std::ios::binary);
-        PATCH_CHECK(!stream_.fail(), return -1, "Failed to open %s", newFileName_.c_str());
+        if (stream_.fail()) {
+            PATCH_LOGE("Failed to open %s", newFileName_.c_str());
+            return -1;
+        }
     }
     stream_.write(reinterpret_cast<const char*>(buffer.buffer), len);
     return 0;
@@ -233,7 +325,10 @@ int32_t FilePatchWriter::Write(size_t start, const BlockBuffer &buffer, size_t l
 
 int32_t FilePatchWriter::Finish()
 {
-    PATCH_CHECK(init_, return -1, "Failed to check init");
+    if (!init_) {
+        PATCH_LOGE("Failed to check init");
+        return -1;
+    }
     PATCH_LOGI("FilePatchWriter %zu", static_cast<size_t>(stream_.tellp()));
     stream_.close();
     init_ = false;
