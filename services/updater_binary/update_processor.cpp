@@ -276,7 +276,7 @@ int ProcessUpdater(bool retry, int pipeFd, const std::string &packagePath, const
         PkgManager::ReleasePackageInstance(pkgManager);
         UPDATER_LAST_WORD(EXIT_INVALID_ARGS);
         return EXIT_INVALID_ARGS;
-	}
+    }
 #ifdef UPDATER_USE_PTABLE
     PackagePtable& packagePtb = PackagePtable::GetInstance();
     packagePtb.LoadPartitionInfo(pkgManager);
