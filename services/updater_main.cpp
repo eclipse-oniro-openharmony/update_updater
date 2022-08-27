@@ -42,12 +42,14 @@
 #include "ui/updater_ui_env.h"
 #include "updater/updater_const.h"
 #include "updater_ui_facade.h"
+#include "updater_ui_tools.h"
 #include "utils.h"
 
 namespace Updater {
 using Utils::String2Int;
 using namespace Hpackage;
 using namespace Updater::Utils;
+using namespace std::literals::chrono_literals;
 
 constexpr struct option OPTIONS[] = {
     { "update_package", required_argument, nullptr, 0 },
@@ -349,6 +351,8 @@ int UpdaterMain(int argc, char **argv)
             UpdaterUiFacade::GetInstance().ShowFailedPage();
         } else {
             UpdaterUiFacade::GetInstance().ShowMainpage();
+            std::this_thread::sleep_for(50ms); /* wait for page flush 50ms */
+            UpdaterUiTools::SaveUxBuffToFile("/tmp/mainpage.png");
         }
         // Wait for user input
         while (true) {

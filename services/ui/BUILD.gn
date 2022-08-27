@@ -49,6 +49,7 @@ ohos_static_library("libui") {
     "updater_ui.cpp",
     "updater_ui_env.cpp",
     "updater_ui_facade.cpp",
+    "updater_ui_tools.cpp",
     "language/language_ui.cpp",
   ]
 
@@ -96,7 +97,4 @@ ohos_static_library("libui") {
     "//third_party/libpng:libpng",
     "//third_party/cJSON:cjson_static"
   ]
-
-  subsystem_name = "updater"
-  part_name = "updater"
 }

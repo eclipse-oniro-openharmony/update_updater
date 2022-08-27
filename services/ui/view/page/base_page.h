@@ -49,7 +49,7 @@ private:
     std::vector<std::unique_ptr<ViewProxy>> coms_;
     std::unordered_map<std::string_view, ViewProxy *> comsMap_;
     std::string pageId_;
-    UxBRGAPixel color_;
+    OHOS::ColorType color_;
 };
 } // namespace Updater
 #endif

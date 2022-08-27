@@ -22,13 +22,13 @@ namespace Updater {
 using namespace OHOS;
 BasePage::BasePage()
     : width_ {}, height_ {}, root_ {std::make_unique<OHOS::UIViewGroup>()},
-    coms_ {}, comsMap_ {}, pageId_ {}, color_ {0, 0, 0, 255}
+    coms_ {}, comsMap_ {}, pageId_ {}, color_ {Color::Black()}
 {
 }
 
 BasePage::BasePage(int16_t width, int16_t height)
     : width_ {width}, height_ {height}, root_ {std::make_unique<OHOS::UIViewGroup>()},
-    coms_ {}, comsMap_ {}, pageId_ {}, color_ {0, 0, 0, 255}
+    coms_ {}, comsMap_ {}, pageId_ {}, color_ {Color::Black()}
 {
 }
 
@@ -36,6 +36,10 @@ bool BasePage::IsPageInfoValid(const UxPageInfo &pageInfo)
 {
     if (pageInfo.id.empty()) {
         LOG(ERROR) << "page id is empty";
+        return false;
+    }
+	if (!CheckColor(pageInfo.bgColor)) {
+        LOG(ERROR) << "page color not valid, bgcolor: " << pageInfo.bgColor;
         return false;
     }
     return true;
@@ -53,12 +57,12 @@ bool BasePage::BuildPage(const UxPageInfo &pageInfo)
 {
     Reset();
     pageId_ = pageInfo.id;
-    color_ = pageInfo.bgColor;
+    color_ = StrToColor(pageInfo.bgColor);
     root_->SetViewId(pageId_.c_str());
     root_->SetPosition(0, 0, width_, height_);
     root_->SetVisible(true);
-    root_->SetStyle(OHOS::STYLE_BACKGROUND_COLOR, GetColor(color_));
-    root_->SetStyle(OHOS::STYLE_BACKGROUND_OPA, color_.a);
+    root_->SetStyle(OHOS::STYLE_BACKGROUND_COLOR, color_.full);
+    root_->SetStyle(OHOS::STYLE_BACKGROUND_OPA, color_.alpha);
     return BuildComs(pageInfo);
 }
 
@@ -140,8 +144,8 @@ void BasePage::SetVisible(bool isVisible)
     root_->SetVisible(isVisible);
     if (isVisible) {
         // change background
-        root_->SetStyle(OHOS::STYLE_BACKGROUND_COLOR, GetColor(color_));
-        root_->SetStyle(OHOS::STYLE_BACKGROUND_OPA, color_.a);
+        root_->SetStyle(OHOS::STYLE_BACKGROUND_COLOR, color_.full);
+        root_->SetStyle(OHOS::STYLE_BACKGROUND_OPA, color_.alpha);
     }
     UpdateFocus(isVisible);
 }

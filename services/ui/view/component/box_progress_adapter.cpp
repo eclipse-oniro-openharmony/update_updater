@@ -28,11 +28,14 @@ BoxProgressAdapter::BoxProgressAdapter(const UxViewInfo &info)
     this->SetVisible(commonPtr->visible);
     this->SetViewId(viewId_.c_str());
     this->SetValue(specPtr->defaultValue);
-    this->SetBackgroundStyle(OHOS::STYLE_BACKGROUND_COLOR, OHOS::Color::GetColorFromRGB(
-        specPtr->bgColor.r, specPtr->bgColor.g, specPtr->bgColor.b).full);
-    this->SetStyle(OHOS::STYLE_BACKGROUND_OPA, specPtr->bgColor.a);
-    this->SetForegroundStyle(OHOS::STYLE_BACKGROUND_COLOR, OHOS::Color::GetColorFromRGB(
-        specPtr->fgColor.r, specPtr->fgColor.g, specPtr->fgColor.b).full);
+
+    auto bgColor = StrToColor(specPtr->bgColor);
+    this->SetBackgroundStyle(OHOS::STYLE_BACKGROUND_COLOR, bgColor.full);
+    this->SetBackgroundStyle(OHOS::STYLE_BACKGROUND_OPA, bgColor.alpha);
+
+    auto fgColor = StrToColor(specPtr->fgColor);
+    this->SetForegroundStyle(OHOS::STYLE_BACKGROUND_COLOR, fgColor.full);
+    this->SetForegroundStyle(OHOS::STYLE_BACKGROUND_OPA, fgColor.alpha);
     this->SetRange(progressWidth_ - 1, 0);
     hasEp_ = specPtr->hasEp;
     epId_ = specPtr->endPoint;
@@ -42,6 +45,12 @@ bool BoxProgressAdapter::IsValid(const UxBoxProgressInfo &info)
 {
     if (info.defaultValue > MAX_PROGRESS_VALUE) {
         LOG(ERROR) << "progress viewinfo check failed, defaultValue: " << info.defaultValue;
+        return false;
+    }
+
+    if (!CheckColor(info.bgColor) || !CheckColor(info.fgColor)) {
+        LOG(ERROR) << "progress viewinfo check failed, bgColor:" << info.bgColor <<
+            " fgColor:" << info.fgColor;
         return false;
     }
 
