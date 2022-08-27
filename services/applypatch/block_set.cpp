@@ -400,7 +400,7 @@ int32_t BlockSet::WriteDiffToBlock(const Command &cmd, std::vector<uint8_t> &src
         }
         int32_t ret = UpdatePatch::UpdateApplyPatch::ApplyImagePatch(patchParam, empty,
             [&](size_t start, const UpdatePatch::BlockBuffer &data, size_t size) -> int {
-                return writer->Write(data.buffer, size, nullptr) ? 0 : -1;
+                return (writer->Write(data.buffer, size, nullptr)) ? 0 : -1;
             }, cmd.GetArgumentByPos(pos + 1));
         writer.reset();
         if (ret != 0) {
@@ -417,7 +417,7 @@ int32_t BlockSet::WriteDiffToBlock(const Command &cmd, std::vector<uint8_t> &src
         }
         auto ret = UpdatePatch::UpdateApplyPatch::ApplyBlockPatch(patchInfo, {srcBuffer.data(), srcBuffSize},
             [&](size_t start, const UpdatePatch::BlockBuffer &data, size_t size) -> int {
-                return writer->Write(data.buffer, size, nullptr) ? 0 : -1;
+                return (writer->Write(data.buffer, size, nullptr)) ? 0 : -1;
             }, cmd.GetArgumentByPos(pos + 1));
         writer.reset();
         if (ret != 0) {

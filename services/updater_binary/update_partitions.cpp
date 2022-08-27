@@ -98,8 +98,10 @@ int UpdatePartitions::DoNewPartitions(PartitonList &newPartList)
 int32_t UpdatePartitions::Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context)
 {
     LOG(INFO) << "enter UpdatePartitions::Execute ";
-    UPDATER_ERROR_CHECK(context.GetParamCount() == 1,
-        "Invalid UpdatePartitions::Execute param", return USCRIPT_INVALID_PARAM);
+    if (context.GetParamCount() != 1) {
+        LOG(ERROR) << "Invalid UpdatePartitions::Execute param";
+        return USCRIPT_INVALID_PARAM;
+    }
     std::string filePath;
     int32_t ret = context.GetParam(0, filePath);
     if (ret != USCRIPT_SUCCESS) {
