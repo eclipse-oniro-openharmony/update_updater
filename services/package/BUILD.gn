@@ -49,9 +49,11 @@ ohos_static_library("libupdaterpackage") {
     "$SUBSYSTEM_DIR/pkg_package/pkg_pkgfile.cpp",
     "$SUBSYSTEM_DIR/pkg_package/pkg_upgradefile.cpp",
     "$SUBSYSTEM_DIR/pkg_package/pkg_zipfile.cpp",
-    "$SUBSYSTEM_DIR/pkg_verify/pkcs7_signed_data.cpp",
     "$SUBSYSTEM_DIR/pkg_verify/pkg_verify_util.cpp",
+    "$SUBSYSTEM_DIR/pkg_verify/pkcs7_signed_data.cpp",
     "$SUBSYSTEM_DIR/pkg_verify/zip_pkg_parse.cpp",
+    "$SUBSYSTEM_DIR/pkg_verify/openssl_util.cpp",
+    "$SUBSYSTEM_DIR/pkg_verify/cert_verify.cpp",
   ]
 
   deps = [
@@ -60,6 +62,4 @@ ohos_static_library("libupdaterpackage") {
   ]
 
   configs = [ ":package_config" ]
-  subsystem_name = "updater"
-  part_name = "updater"
 }
