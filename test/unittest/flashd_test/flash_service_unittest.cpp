@@ -52,7 +52,7 @@ public:
 public:
     int TestFindAllDevice()
     {
-        updater::LoadFstab();
+        Updater::LoadFstab();
         std::string errorMsg;
         std::shared_ptr<flashd::FlashService> flash = std::make_shared<flashd::FlashService>(errorMsg);
         if (flash == nullptr) {

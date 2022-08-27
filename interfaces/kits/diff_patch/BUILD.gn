@@ -25,3 +25,19 @@ ohos_static_library("libdiff_patch") {
 
   deps = [ "//base/update/updater/services/diffpatch/patch:libpatch" ]
 }
+
+ohos_shared_library("libdiff_patch_shared") {
+  sources = [ "diff_patch_interface.cpp" ]
+
+  include_dirs = [
+    "//base/update/updater/interfaces/kits/include",
+    "//base/update/updater/services/include",
+    "//base/update/updater/services/include/patch",
+    "//third_party/openssl/include",
+  ]
+
+  deps = [ "//base/update/updater/services/diffpatch/patch:libpatch" ]
+
+  subsystem_name = "updater"
+  part_name = "updater"
+}

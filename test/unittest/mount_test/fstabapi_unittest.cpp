@@ -142,7 +142,7 @@ HWTEST_F(FstabApiUnitTest, GetMountFlags_unitest, TestSize.Level1)
     }
     const int bufferSize = 512;
     char fsSpecificOptions[bufferSize] = {0};
-    unsigned long flags = GetMountFlags(item->mountOptions, fsSpecificOptions, bufferSize);
+    unsigned long flags = GetMountFlags(item->mountOptions, fsSpecificOptions, bufferSize, mp.c_str());
     EXPECT_EQ(flags, static_cast<unsigned long>(MS_NOSUID | MS_NODEV | MS_NOATIME));
     ReleaseFstab(fstab);
     fstab = nullptr;

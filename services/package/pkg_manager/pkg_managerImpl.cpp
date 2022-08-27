@@ -648,7 +648,7 @@ int32_t PkgManagerImpl::VerifyPackage(const std::string &packagePath, const std:
 
     verifyCallback(ret, VERIFY_FINSH_PERCENT);
     PKG_CHECK(ret == PKG_SUCCESS, return ret, "Verify file %s fail", packagePath.c_str());
-    PKG_LOGW("Verify file %s success", packagePath.c_str());
+    PKG_LOGI("Verify file %s success", packagePath.c_str());
     return ret;
 }
 
