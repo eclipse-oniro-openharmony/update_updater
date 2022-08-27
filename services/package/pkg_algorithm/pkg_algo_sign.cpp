@@ -22,6 +22,7 @@
 #include <openssl/pem.h>
 #include <openssl/rsa.h>
 #include <openssl/sha.h>
+#include "openssl_util.h"
 #include "pkg_algorithm.h"
 #include "pkg_utils.h"
 
@@ -109,113 +110,45 @@ int32_t SignAlgorithmEcc::SignBuffer(const PkgBuffer &buffer, std::vector<uint8_
     return ((ret == 1) ? PKG_SUCCESS : PKG_INVALID_SIGNATURE);
 }
 
-bool VerifyAlgorithm::CheckRsaKey(const RSA *rsakey) const
+X509 *SignAlgorithm::GetPubkey() const
 {
-    const BIGNUM *rsaN = nullptr;
-    const BIGNUM *rsaE = nullptr;
-    RSA_get0_key(rsakey, &rsaN, &rsaE, nullptr);
-    auto modulusbits = BN_num_bits(rsaN);
-    if (modulusbits != 2048) { // Modulus should be 2048 bits long.
-        PKG_LOGE("Modulus should be 2048 bits long, actual:%d\n ", modulusbits);
-        return false;
-    }
-    BN_ULONG exponent = BN_get_word(rsaE);
-    if (exponent != 3 && exponent != 65537) { // Public exponent should be 3 or 65537.
-        PKG_LOGE("Public exponent should be 3 or 65537, actual:%d \n", exponent);
-        return false;
-    }
-    return true;
-}
-
-bool VerifyAlgorithm::CheckEccKey(const EC_KEY *eccKey) const
-{
-    const EC_GROUP *eccgroup = EC_KEY_get0_group(eccKey);
-    if (eccgroup == nullptr) {
-        PKG_LOGE("Failed to get the ec_group from the ecKey");
-        return false;
-    }
-    auto eccdegree = EC_GROUP_get_degree(eccgroup);
-    if (eccdegree != 256) { // Field size of the ec key should be 256 bits long.
-        PKG_LOGE("Field size of the ec key should be 256 bits long, actual:%d ", eccdegree);
-        return false;
-    }
-    return true;
-}
-
-bool VerifyAlgorithm::LoadPubKey(const std::string &keyfile, struct CertKeySt &certs) const
-{
-    BIO *certbio = BIO_new_file(keyfile.c_str(), "r");
+    BIO *certbio = BIO_new_file(keyName_.c_str(), "r");
     if (certbio == nullptr) {
         PKG_LOGE("Failed to create BIO");
-        return false;
+        return nullptr;
     }
-
-    X509 *rcert = PEM_read_bio_X509(certbio, nullptr, 0, nullptr);
-    BIO_free(certbio);
+    X509 *rcert = PEM_read_bio_X509(certbio, nullptr, nullptr, nullptr);
     if (rcert == nullptr) {
-        PKG_LOGE("Failed to read x509 certificate ");
-        return false;
+        PKG_LOGE("Failed to read x509 certificate");
+        BIO_free(certbio);
+        return nullptr;
     }
-    int nid = X509_get_signature_nid(rcert);
-    if (nid != NID_sha256WithRSAEncryption && nid != NID_ecdsa_with_SHA256) {
-        PKG_LOGE("Unrecognized nid %d", nid);
-        X509_free(rcert);
-        return false;
-    }
-
-    certs.hashLen = SHA256_DIGEST_LENGTH;
-    EVP_PKEY *pubKey = X509_get_pubkey(rcert);
-    if (pubKey == nullptr) {
-        PKG_LOGE("Failed to extract the public key from x509 certificate %s", keyfile.c_str());
-        X509_free(rcert);
-        return false;
-    }
-
-    bool ret = false;
-    int keyType = EVP_PKEY_id(pubKey);
-    if (keyType == EVP_PKEY_RSA) {
-        certs.keyType = KEY_TYPE_RSA;
-        certs.rsa = EVP_PKEY_get1_RSA(pubKey);
-        PKG_CHECK(certs.rsa != nullptr, X509_free(rcert); return false, "Failed to get rsa");
-        ret = CheckRsaKey(certs.rsa);
-        PKG_CHECK(ret == true, RSA_free(certs.rsa); X509_free(rcert); return false, "Check rsa key failed");
-    }
-    if (keyType == EVP_PKEY_EC) {
-        certs.keyType = KEY_TYPE_EC;
-        certs.ecKey = EVP_PKEY_get1_EC_KEY(pubKey);
-        PKG_CHECK(certs.ecKey != nullptr, X509_free(rcert); return false, "Failed to get ec key");
-        ret = CheckEccKey(certs.ecKey);
-        PKG_CHECK(ret == true, EC_KEY_free(certs.ecKey); X509_free(rcert); return false, "Check ec key failed");
-    }
-    EVP_PKEY_free(pubKey);
-    certs.cert = rcert;
-    return ret;
+    BIO_free(certbio);
+    return rcert;
 }
 
-int32_t VerifyAlgorithm::VerifyBuffer(const std::vector<uint8_t> &digest, const std::vector<uint8_t> &signature)
+int32_t SignAlgorithm::VerifyDigest(const std::vector<uint8_t> &digest, const std::vector<uint8_t> &signature)
 {
-    struct CertKeySt certs {};
-    bool isValid = LoadPubKey(keyName_, certs);
-    if (!isValid) {
-        PKG_LOGE("Failed to load public key");
+    X509 *rcert = GetPubkey();
+    if (rcert == nullptr) {
+        PKG_LOGE("get pubkey fail");
         return PKG_INVALID_SIGNATURE;
     }
-
-    int hashNid = NID_sha1;
-    if (certs.hashLen == SHA256_DIGEST_LENGTH) {
-        hashNid = NID_sha256;
+    EVP_PKEY *pubKey = X509_get_pubkey(rcert);
+    if (pubKey == nullptr) {
+        X509_free(rcert);
+        PKG_LOGE("get pubkey from cert fail");
+        return PKG_INVALID_SIGNATURE;
     }
-    int ret = 0;
-    if (certs.keyType == KEY_TYPE_RSA) {
-        ret = RSA_verify(hashNid, digest.data(), digest.size(), signature.data(), signature.size(), certs.rsa);
-        RSA_free(certs.rsa);
-    } else if (certs.keyType == KEY_TYPE_EC && certs.hashLen == SHA256_DIGEST_LENGTH) {
-        uint32_t dataLen = ReadLE32(signature.data());
-        ret = ECDSA_verify(0, digest.data(), digest.size(), signature.data() + sizeof(uint32_t), dataLen, certs.ecKey);
-        EC_KEY_free(certs.ecKey);
+    int nid = EVP_MD_type(EVP_sha256());
+    int ret = VerifyDigestByPubKey(pubKey, nid, digest, signature);
+    if (ret != 0) {
+        X509_free(rcert);
+        PKG_LOGE("Failed to verify digest by pubKey");
+        return PKG_INVALID_SIGNATURE;
     }
-    X509_free(certs.cert);
-    return ((ret == 1) ? PKG_SUCCESS : PKG_INVALID_SIGNATURE);
+    X509_free(rcert);
+    return 0;
 }
 
 SignAlgorithm::SignAlgorithmPtr PkgAlgorithmFactory::GetSignAlgorithm(const std::string &path,

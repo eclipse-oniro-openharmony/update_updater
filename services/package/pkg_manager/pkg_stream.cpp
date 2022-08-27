@@ -44,7 +44,7 @@ bool PkgStreamImpl::IsRef() const
     return refCount_ == 0;
 }
 
-void PkgStreamImpl::PostDecodeProgress(int type, size_t writeDataLen, const void *context)
+void PkgStreamImpl::PostDecodeProgress(int type, size_t writeDataLen, const void *context) const
 {
     if (pkgManager_ != nullptr) {
         pkgManager_->PostDecodeProgress(type, writeDataLen, context);
@@ -101,7 +101,8 @@ int32_t FileStream::Write(const PkgBuffer &data, size_t size, size_t offset)
         PKG_LOGE("write data fail");
         return PKG_INVALID_STREAM;
     }
-    if (fwrite(data.buffer, size, 1, stream_) != 1) {
+    size_t len = fwrite(data.buffer, size, 1, stream_);
+    if (len != 1) {
         PKG_LOGE("Write buffer fail");
         return PKG_INVALID_STREAM;
     }
@@ -225,7 +226,8 @@ int32_t MemoryMapStream::Write(const PkgBuffer &data, size_t size, size_t start)
         PKG_LOGE("Write fail copyLen %zu, %zu", copyLen, size);
         return PKG_INVALID_STREAM;
     }
-    if (memcpy_s(memMap_ + currOffset_, memSize_ - currOffset_, data.buffer, size) != EOK) {
+    int32_t ret = memcpy_s(memMap_ + currOffset_, memSize_ - currOffset_, data.buffer, size);
+    if (ret != PKG_SUCCESS) {
         PKG_LOGE("Write fail");
         return PKG_INVALID_STREAM;
     }
@@ -261,7 +263,7 @@ int32_t MemoryMapStream::Seek(long int offset, int whence)
             PKG_LOGE("Invalid offset");
             return PKG_INVALID_STREAM;
         }
-        if (memSize + offset < 0) {
+        if (memSize + offset > 0) {
             PKG_LOGE("Invalid offset");
             return PKG_INVALID_STREAM;
         }

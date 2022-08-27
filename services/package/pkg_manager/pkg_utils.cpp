@@ -26,7 +26,10 @@ constexpr uint32_t TM_YEAR_BITS = 9;
 constexpr uint32_t TM_MON_BITS = 5;
 constexpr uint32_t TM_MIN_BITS = 5;
 constexpr uint32_t TM_HOUR_BITS = 11;
+constexpr uint32_t BYTE_SIZE = 8;
 constexpr uint32_t MAX_MEM_SIZE = 1 << 29;
+constexpr uint32_t SECOND_BUFFER = 2;
+constexpr uint32_t THIRD_BUFFER = 3;
 constexpr uint8_t SHIFT_RIGHT_FOUR_BITS = 4;
 
 using namespace Updater::Utils;
@@ -43,12 +46,18 @@ std::string GetFilePath(const std::string &fileName)
 size_t GetFileSize(const std::string &fileName)
 {
     char *realPath = realpath(fileName.c_str(), NULL);
-    PKG_CHECK(realPath != nullptr, return 0, "realPath is null");
+    if (realPath == nullptr) {
+        PKG_LOGE("realPath is null");
+        return 0;
+    }
     FILE *fp = fopen(realPath, "r");
     free(realPath);
-    PKG_CHECK(fp != nullptr, return 0, "Invalid file %s", fileName.c_str());
+    if (fp == nullptr) {
+        PKG_LOGE("Invalid file %s", fileName.c_str());
+        return 0;
+    }
 
-    if (fseek(fp, 0, SEEK_END) != 0) {
+    if (fseek(fp, 0, SEEK_END) < 0) {
         PKG_LOGE("return value of fseek < 0");
         fclose(fp);
         return 0;
@@ -82,23 +91,35 @@ int32_t CheckFile(const std::string &fileName)
     }
     // If the path writable
     int ret = access(path.c_str(), R_OK | W_OK);
-    PKG_CHECK(ret != -1, return PKG_NONE_PERMISSION, "file %s no permission ", fileName.c_str());
+    if (ret == -1) {
+        PKG_LOGE("file %s no permission ", fileName.c_str());
+        return PKG_NONE_PERMISSION;
+    }
     return PKG_SUCCESS;
 }
 
 uint8_t *MapMemory(const std::string &fileName, size_t size)
 {
-    PKG_CHECK(size <= MAX_MEM_SIZE, return nullptr, "Size bigger for alloc memory");
+    if (size > MAX_MEM_SIZE) {
+        PKG_LOGE("Size bigger for alloc memory");
+        return nullptr;
+    }
     void *mappedData = nullptr;
     // Map the file to memory
     mappedData = mmap(nullptr, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_POPULATE | MAP_ANON, -1, 0);
-    PKG_CHECK(mappedData != MAP_FAILED, return nullptr, "Failed to mmap file %s ", fileName.c_str());
+    if (mappedData == MAP_FAILED) {
+        PKG_LOGE("Failed to mmap file %s ", fileName.c_str());
+        return nullptr;
+    }
     return static_cast<uint8_t *>(mappedData);
 }
 
 void ReleaseMemory(uint8_t *memMap, size_t size)
 {
-    PKG_CHECK(size > 0 && memMap != nullptr, return, "Size must > 0");
+    if (size <= 0 || memMap == nullptr) {
+        PKG_LOGE("Size must > 0");
+        return;
+    }
     // Flush memory and release memory.
     msync(static_cast<void *>(memMap), size, MS_ASYNC);
     munmap(memMap, size);
@@ -108,7 +129,10 @@ std::string GetCurrPath()
 {
     std::string path;
     char *buffer = getcwd(nullptr, 0);
-    PKG_CHECK(buffer != nullptr, return "./", "getcwd error");
+    if (buffer == nullptr) {
+        PKG_LOGE("getcwd error");
+        return "./";
+    }
     path.assign(buffer);
     free(buffer);
     return path + "/";
@@ -137,7 +161,15 @@ uint32_t ReadLE32(const uint8_t *buff)
         PKG_LOGE("buff is null");
         return 0;
     }
-    return le32toh(*(reinterpret_cast<const uint32_t *>(buff)));    
+    size_t offset = 0;
+    uint32_t value32 = buff[0];
+    offset += BYTE_SIZE;
+    value32 += static_cast<uint32_t>(static_cast<uint32_t>(buff[1]) << offset);
+    offset +=  BYTE_SIZE;
+    value32 += static_cast<uint32_t>(static_cast<uint32_t>(buff[SECOND_BUFFER]) << offset);
+    offset += BYTE_SIZE;
+    value32 += static_cast<uint32_t>(static_cast<uint32_t>(buff[THIRD_BUFFER]) << offset);
+    return value32;
 }
 
 uint64_t ReadLE64(const uint8_t *buff)
@@ -146,7 +178,10 @@ uint64_t ReadLE64(const uint8_t *buff)
         PKG_LOGE("buff is null");
         return 0;
     }
-    return le64toh(*(reinterpret_cast<const uint64_t *>(buff)));   
+    uint32_t low = ReadLE32(buff);
+    uint32_t high = ReadLE32(buff + sizeof(uint32_t));
+    uint64_t value = ((static_cast<uint64_t>(high)) << (BYTE_SIZE * sizeof(uint32_t))) | low;
+    return value;
 }
 
 void WriteLE32(uint8_t *buff, uint32_t value)
@@ -155,7 +190,14 @@ void WriteLE32(uint8_t *buff, uint32_t value)
         PKG_LOGE("buff is null");
         return;
     }
-    *(reinterpret_cast<uint32_t *>(buff)) = htole32(value);
+    size_t offset = 0;
+    buff[0] = static_cast<uint8_t>(value);
+    offset += BYTE_SIZE;
+    buff[1] = static_cast<uint8_t>(value >> offset);
+    offset += BYTE_SIZE;
+    buff[SECOND_BUFFER] = static_cast<uint8_t>(value >> offset);
+    offset += BYTE_SIZE;
+    buff[THIRD_BUFFER] = static_cast<uint8_t>(value >> offset);
 }
 
 uint16_t ReadLE16(const uint8_t *buff)
@@ -164,7 +206,9 @@ uint16_t ReadLE16(const uint8_t *buff)
         PKG_LOGE("buff is null");
         return 0;
     }
-    return le16toh(*(reinterpret_cast<const uint16_t *>(buff)));  
+    uint16_t value16 = buff[0];
+    value16 += static_cast<uint16_t>(buff[1] << BYTE_SIZE);
+    return value16;
 }
 
 void WriteLE16(uint8_t *buff, uint16_t value)
@@ -173,7 +217,8 @@ void WriteLE16(uint8_t *buff, uint16_t value)
         PKG_LOGE("buff is null");
         return;
     }
-    *(reinterpret_cast<uint16_t *>(buff)) = htole16(value);
+    buff[0] = static_cast<uint8_t>(value);
+    buff[1] = static_cast<uint8_t>(value >> BYTE_SIZE);
 }
 
 std::string ConvertShaHex(const std::vector<uint8_t> &shaDigest)
