@@ -38,7 +38,7 @@ bool BasePage::IsPageInfoValid(const UxPageInfo &pageInfo)
         LOG(ERROR) << "page id is empty";
         return false;
     }
-	if (!CheckColor(pageInfo.bgColor)) {
+    if (!CheckColor(pageInfo.bgColor)) {
         LOG(ERROR) << "page color not valid, bgcolor: " << pageInfo.bgColor;
         return false;
     }

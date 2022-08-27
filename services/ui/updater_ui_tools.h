@@ -16,7 +16,6 @@
 #ifndef UPDATER_UI_TOOLS_H
 #define UPDATER_UI_TOOLS_H
 
-#include <cstdint>
 #include <string>
 
 namespace Updater {

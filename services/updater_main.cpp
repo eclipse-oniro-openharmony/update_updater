@@ -51,6 +51,7 @@ using namespace Hpackage;
 using namespace Updater::Utils;
 using namespace std::literals::chrono_literals;
 
+constexpr int DISPLAY_TIME = 1000 * 1000;
 constexpr struct option OPTIONS[] = {
     { "update_package", required_argument, nullptr, 0 },
     { "retry_count", required_argument, nullptr, 0 },

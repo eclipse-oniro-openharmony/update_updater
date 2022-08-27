@@ -12,9 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "text_label_adapter.h"
 #include "language/language_ui.h"
 #include "log/log.h"
-#include "text_label_adapter.h"
 #include "updater_ui_const.h"
 
 namespace Updater {
@@ -32,11 +32,9 @@ TextLabelAdapter::TextLabelAdapter(const UxViewInfo &info)
     auto fontColor = StrToColor(specPtr->fontColor);
     this->SetStyle(OHOS::STYLE_TEXT_COLOR, fontColor.full);
     this->SetStyle(OHOS::STYLE_TEXT_OPA, fontColor.alpha);
-
     auto bgColor = StrToColor(specPtr->bgColor);
     this->SetStyle(OHOS::STYLE_BACKGROUND_COLOR, bgColor.full);
     this->SetStyle(OHOS::STYLE_BACKGROUND_OPA, bgColor.alpha);
-
 }
 
 bool TextLabelAdapter::IsValid(const UxLabelInfo &info)
