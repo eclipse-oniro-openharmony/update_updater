@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "openssl_util.h"
 #include <openssl/pem.h>
 #include <openssl/sha.h>
 #include <openssl/x509.h>
