@@ -14,9 +14,7 @@
  */
 
 #include "cert_verify.h"
-
 #include "dump.h"
-#include "openssl_util.h"
 #include "pkg_utils.h"
 
 using namespace std;
