@@ -19,6 +19,6 @@
 namespace Updater {
 int32_t ApplyPatch(const std::string &patchFile, const std::string &oldfile, const std::string &newFile)
 {
-    return UpdatePatch::UpdatePatch::ApplyPatch(patchFile, oldfile, newFile);
+    return UpdatePatch::UpdateApplyPatch::ApplyPatch(patchFile, oldfile, newFile);
 }
 } // namespace Updater
