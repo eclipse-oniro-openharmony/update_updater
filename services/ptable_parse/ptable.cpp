@@ -15,8 +15,6 @@
 
 #include "ptable.h"
 
-#include <fstream>
-#include <iostream>
 #include <map>
 #include <sys/stat.h>
 
