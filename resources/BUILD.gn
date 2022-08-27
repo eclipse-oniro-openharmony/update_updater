@@ -13,7 +13,7 @@
 
 import("//build/ohos.gni")
 
-updater_resouces_list = [
+updater_resources_list = [
   "font.png",
   "icon_error.png",
   "progress_empty.png",
@@ -82,13 +82,81 @@ updater_resouces_list = [
   "loop00061.png",
 ]
 
+if (product_name == "rk3568") {
+  updater_resources_list += [
+    "font/HarmonyOS_Sans_SC_Regular_Small.ttf",
+    "${product_name}/images/icon/darkOUCOHlogo.png",
+    "${product_name}/images/icon/lightOUCOHlogo.png",
+    "${product_name}/images/icon/icon_failed.png",
+    "${product_name}/images/icon/icon_ok.png",
+    "${product_name}/images/warn/tips.png",
+    "${product_name}/images/progress/dark_flash_00000.png",
+    "${product_name}/images/progress/dark_flash_00001.png",
+    "${product_name}/images/progress/dark_flash_00002.png",
+    "${product_name}/images/progress/dark_flash_00003.png",
+    "${product_name}/images/progress/dark_flash_00004.png",
+    "${product_name}/images/progress/dark_flash_00005.png",
+    "${product_name}/images/progress/dark_flash_00006.png",
+    "${product_name}/images/progress/dark_flash_00007.png",
+    "${product_name}/images/progress/dark_flash_00008.png",
+    "${product_name}/images/progress/dark_flash_00009.png",
+    "${product_name}/images/progress/dark_flash_00010.png",
+    "${product_name}/images/progress/dark_flash_00011.png",
+    "${product_name}/images/progress/dark_flash_00012.png",
+    "${product_name}/images/progress/dark_flash_00013.png",
+    "${product_name}/images/progress/dark_flash_00014.png",
+    "${product_name}/images/progress/dark_flash_00015.png",
+    "${product_name}/images/progress/dark_flash_00016.png",
+    "${product_name}/images/progress/dark_flash_00017.png",
+    "${product_name}/images/progress/dark_flash_00018.png",
+    "${product_name}/images/progress/dark_flash_00019.png",
+    "${product_name}/images/progress/dark_flash_00020.png",
+    "${product_name}/images/progress/dark_flash_00021.png",
+    "${product_name}/images/progress/flash_00000.png",
+    "${product_name}/images/progress/flash_00001.png",
+    "${product_name}/images/progress/flash_00002.png",
+    "${product_name}/images/progress/flash_00003.png",
+    "${product_name}/images/progress/flash_00004.png",
+    "${product_name}/images/progress/flash_00005.png",
+    "${product_name}/images/progress/flash_00006.png",
+    "${product_name}/images/progress/flash_00007.png",
+    "${product_name}/images/progress/flash_00008.png",
+    "${product_name}/images/progress/flash_00009.png",
+    "${product_name}/images/progress/flash_00010.png",
+    "${product_name}/images/progress/flash_00011.png",
+    "${product_name}/images/progress/flash_00012.png",
+    "${product_name}/images/progress/flash_00013.png",
+    "${product_name}/images/progress/flash_00014.png",
+    "${product_name}/images/progress/flash_00015.png",
+    "${product_name}/images/progress/flash_00016.png",
+    "${product_name}/images/progress/flash_00017.png",
+    "${product_name}/images/progress/flash_00018.png",
+    "${product_name}/images/progress/flash_00019.png",
+    "${product_name}/images/progress/flash_00020.png",
+    "${product_name}/images/progress/flash_00021.png",
+    "${product_name}/pages/config.json",
+    "${product_name}/pages/rk3568.json",
+    "${product_name}/pages/confirm.json",
+    "${product_name}/pages/menu.json",
+    "${product_name}/pages/upd.json",
+    "${product_name}/string/string.json",
+  ]
+}
+
 updater_resources_target = []
 
-foreach(file, updater_resouces_list) {
+foreach(file, updater_resources_list) {
   _name = "$file"
   ohos_prebuilt_etc(_name) {
     source = "//base/update/updater/resources/$file"
     module_install_dir = "resources"
+    if (file == "font/HarmonyOS_Sans_SC_Regular_Small.ttf") {
+      module_install_dir = "user/data"
+    } else if (get_path_info(file, "dir") != ".") {
+      module_install_dir =
+          get_path_info(string_replace(file, "${product_name}", "resources"),
+                        "dir")
+    }
     install_images = [ "updater" ]
     part_name = "updater"
   }

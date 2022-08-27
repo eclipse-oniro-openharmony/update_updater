@@ -34,11 +34,11 @@ public:
 
 HWTEST_F(UtilsUnitTest, updater_utils_test_001, TestSize.Level0)
 {
-    string emptyStr = utils::Trim("");
+    string emptyStr = Utils::Trim("");
     EXPECT_STREQ(emptyStr.c_str(), "");
-    emptyStr = utils::Trim("   ");
+    emptyStr = Utils::Trim("   ");
     EXPECT_STREQ(emptyStr.c_str(), "");
-    emptyStr = utils::Trim("aa   ");
+    emptyStr = Utils::Trim("aa   ");
     EXPECT_STREQ(emptyStr.c_str(), "aa");
 }
 
@@ -46,30 +46,30 @@ HWTEST_F(UtilsUnitTest, updater_utils_test_002, TestSize.Level0)
 {
     uint8_t a[1] = {0};
     a[0] = 1;
-    string newStr = utils::ConvertSha256Hex(a, 1);
+    string newStr = Utils::ConvertSha256Hex(a, 1);
     EXPECT_STREQ(newStr.c_str(), "01");
 }
 
 HWTEST_F(UtilsUnitTest, updater_utils_test_003, TestSize.Level0)
 {
     string str = "aaa\nbbb";
-    vector<string> newStr = utils::SplitString(str, "\n");
+    vector<string> newStr = Utils::SplitString(str, "\n");
     EXPECT_EQ(newStr[0], "aaa");
     EXPECT_EQ(newStr[1], "bbb");
 }
 
 HWTEST_F(UtilsUnitTest, updater_utils_test_004, TestSize.Level0)
 {
-    EXPECT_EQ(utils::MkdirRecursive("/data/xx?xx", S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH), 0);
+    EXPECT_EQ(Utils::MkdirRecursive("/data/xx?xx", S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH), 0);
 }
 
 HWTEST_F(UtilsUnitTest, updater_utils_test_005, TestSize.Level0)
 {
     string input = "";
-    int output = utils::String2Int<int>(input, 10);
+    int output = Utils::String2Int<int>(input, 10);
     EXPECT_EQ(output, 0);
     input = "0x01";
-    output = utils::String2Int<int>(input, 10);
+    output = Utils::String2Int<int>(input, 10);
     EXPECT_EQ(output, 1);
 }
 
@@ -77,6 +77,6 @@ HWTEST_F(UtilsUnitTest, updater_utils_test_006, TestSize.Level0)
 {
     std::vector<std::string> files;
     string path = "/data";
-    utils::GetFilesFromDirectory(path, files, true);
+    Utils::GetFilesFromDirectory(path, files, true);
 }
 } // updater_ut

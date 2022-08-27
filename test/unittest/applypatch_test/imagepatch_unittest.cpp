@@ -63,13 +63,13 @@ int ImagePatchTest::TestZipModeImagePatch() const
     std::string sourceData;
     auto rc = ReadContentFromFile("/data/updater/applypatch/source.zip", sourceData);
     EXPECT_TRUE(rc);
-    std::string fileName = hpackage::GetName("/data/updater/applypatch/source.zip");
+    std::string fileName = Hpackage::GetName("/data/updater/applypatch/source.zip");
     printf("filename: %s\n", fileName.c_str());
     std::string patchFile = "/data/updater/applypatch/zip-patch-file";
     std::string patchContent;
     rc = ReadContentFromFile(patchFile, patchContent);
     EXPECT_TRUE(rc);
-    updatepatch::PatchParam param = {
+    UpdatePatch::PatchParam param = {
         reinterpret_cast<uint8_t *>(sourceData.data()), sourceData.size(),
         reinterpret_cast<uint8_t *>(patchContent.data()), patchContent.size()
     };
@@ -86,7 +86,7 @@ int ImagePatchTest::TestNormalModeImagePatch() const
     std::string patchContent;
     rc = ReadContentFromFile(patchFile, patchContent);
     EXPECT_TRUE(rc);
-    updatepatch::PatchParam param = {
+    UpdatePatch::PatchParam param = {
         reinterpret_cast<uint8_t *>(sourceData.data()), sourceData.size(),
         reinterpret_cast<uint8_t *>(patchContent.data()), patchContent.size()
     };
@@ -102,7 +102,7 @@ int ImagePatchTest::TestGZipModeImagePatch() const
     std::string patchContent;
     rc = ReadContentFromFile("/data/updater/applypatch/TestGZipModeImagePatch.gz.patch", patchContent);
     EXPECT_TRUE(rc);
-    updatepatch::PatchParam param = {
+    UpdatePatch::PatchParam param = {
         reinterpret_cast<uint8_t *>(sourceData.data()), sourceData.size(),
         reinterpret_cast<uint8_t *>(patchContent.data()), patchContent.size()
     };
@@ -119,7 +119,7 @@ int ImagePatchTest::TestLZ4ModeImagePatch() const
     std::string patchContent;
     rc = ReadContentFromFile("/data/updater/diffpatch/PatchLz4test_lz4.img_patch", patchContent);
     EXPECT_TRUE(rc);
-    updatepatch::PatchParam param = {
+    UpdatePatch::PatchParam param = {
         reinterpret_cast<uint8_t *>(sourceData.data()), sourceData.size(),
         reinterpret_cast<uint8_t *>(patchContent.data()), patchContent.size()
     };

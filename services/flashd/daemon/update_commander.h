@@ -29,7 +29,8 @@ public:
 
 private:
     bool DoUpdate(const uint8_t *buffer, int bufferSize);
-    bool ExecUpdate(const std::string &filePath) const;
+    bool ExecUpdate() const;
+    void SaveLog() const;
     std::string filePath_ = "";
     int fd_ = -1;
 };

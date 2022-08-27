@@ -504,7 +504,7 @@ public:
         return 0;
     }
 
-    void TestDecompressLz4plus(hpackage::Lz4FileInfo &lz4Info)
+    void TestDecompressLz4plus(Hpackage::Lz4FileInfo &lz4Info)
     {
         pkgManager_ = static_cast<PkgManagerImpl*>(PkgManager::GetPackageInstance());
         EXPECT_NE(pkgManager_, nullptr);
@@ -518,7 +518,7 @@ public:
         lz4Info.blockIndependence = 0;
     }
 
-    int TestDecompressLz4(hpackage::Lz4FileInfo &lz4Info,
+    int TestDecompressLz4(Hpackage::Lz4FileInfo &lz4Info,
         std::vector<uint8_t> &uncompressedData, std::vector<uint8_t> &digest)
     {
         std::string testFileName = TEST_PATH_FROM + "../diffpatch/PatchLz4test_new.lz4";
@@ -544,8 +544,8 @@ public:
                 return PKG_SUCCESS;
             }, nullptr);
 
-        std::unique_ptr<hpackage::PkgStream, std::function<void(hpackage::PkgManager::StreamPtr)>> outStream(stream,
-            [&](hpackage::PkgManager::StreamPtr stream) {
+        std::unique_ptr<Hpackage::PkgStream, std::function<void(Hpackage::PkgManager::StreamPtr)>> outStream(stream,
+            [&](Hpackage::PkgManager::StreamPtr stream) {
             pkgManager_->ClosePkgStream(stream);
         });
         PKG_CHECK(outStream != nullptr, close(fd); return -1, "Can not create stream ");
@@ -555,7 +555,7 @@ public:
 
         size_t addrOffset = 4;
         TestDecompressLz4plus(lz4Info);
-        hpackage::PkgBuffer buffer(static_cast<uint8_t*>(mappedData) + addrOffset, fileSize);
+        Hpackage::PkgBuffer buffer(static_cast<uint8_t*>(mappedData) + addrOffset, fileSize);
         int32_t ret = pkgManager_->DecompressBuffer(&lz4Info.fileInfo, buffer, outStream.get());
 
         // 生成摘要，检查数据完整
@@ -572,7 +572,7 @@ public:
         return 0;
     }
 
-    void TestDecompressGzipInitFile(hpackage::ZipFileInfo &zipInfo, size_t &offset,
+    void TestDecompressGzipInitFile(Hpackage::ZipFileInfo &zipInfo, size_t &offset,
         size_t &fileSize, void *mappedData)
     {
         int32_t zipMethod = 8;
@@ -609,7 +609,7 @@ public:
         return;
     }
 
-    int TestDecompressGzip(hpackage::ZipFileInfo &zipInfo, std::vector<uint8_t> &uncompressedData,
+    int TestDecompressGzip(Hpackage::ZipFileInfo &zipInfo, std::vector<uint8_t> &uncompressedData,
         std::vector<uint8_t> &digest)
     {
         std::string testFileName = TEST_PATH_FROM + "../applypatch/TestDecompressGzip.new.gz";
@@ -636,8 +636,8 @@ public:
                 return PKG_SUCCESS;
             }, nullptr);
 
-        std::unique_ptr<hpackage::PkgStream, std::function<void(hpackage::PkgManager::StreamPtr)>> outStream(stream,
-            [&](hpackage::PkgManager::StreamPtr stream) {
+        std::unique_ptr<Hpackage::PkgStream, std::function<void(Hpackage::PkgManager::StreamPtr)>> outStream(stream,
+            [&](Hpackage::PkgManager::StreamPtr stream) {
             pkgManager_->ClosePkgStream(stream);
         });
         PKG_CHECK(outStream != nullptr, close(fd); return -1, "Can not create stream ");
@@ -650,7 +650,7 @@ public:
         size_t offset = 10;
         TestDecompressGzipInitFile(zipInfo, offset, fileSize, mappedData);
 
-        hpackage::PkgBuffer data(reinterpret_cast<uint8_t*>(mappedData) + offset, fileSize);
+        Hpackage::PkgBuffer data(reinterpret_cast<uint8_t*>(mappedData) + offset, fileSize);
         int32_t ret = pkgManager_->DecompressBuffer(&zipInfo.fileInfo, data, outStream.get());
 
         // 生成摘要，检查数据完整
@@ -668,7 +668,7 @@ public:
         return 0;
     }
 
-    int TestCompressBuffer(hpackage::FileInfo &info, std::vector<uint8_t> uncompressedData,
+    int TestCompressBuffer(Hpackage::FileInfo &info, std::vector<uint8_t> uncompressedData,
         std::vector<uint8_t> digest)
     {
         pkgManager_ = static_cast<PkgManagerImpl*>(PkgManager::GetPackageInstance());
@@ -688,12 +688,12 @@ public:
                 return PKG_SUCCESS;
             }, nullptr);
 
-        std::unique_ptr<hpackage::PkgStream, std::function<void(hpackage::PkgManager::StreamPtr)>> outStream(stream,
-            [&](hpackage::PkgManager::StreamPtr stream) {
+        std::unique_ptr<Hpackage::PkgStream, std::function<void(Hpackage::PkgManager::StreamPtr)>> outStream(stream,
+            [&](Hpackage::PkgManager::StreamPtr stream) {
             pkgManager_->ClosePkgStream(stream);
         });
         PKG_CHECK(outStream != nullptr, return -1, "Can not create stream ");
-        hpackage::PkgBuffer buffer(uncompressedData.data(), info.unpackedSize);
+        Hpackage::PkgBuffer buffer(uncompressedData.data(), info.unpackedSize);
         int32_t ret = pkgManager_->CompressBuffer(&info, buffer, outStream.get());
         PKG_LOGE("GetGZipUncompressedData packedSize:%zu unpackedSize:%zu",
             info.packedSize, info.unpackedSize);
@@ -709,7 +709,7 @@ public:
 HWTEST_F(PkgMangerTest, TestGZipBuffer, TestSize.Level1)
 {
     PkgMangerTest test;
-    hpackage::ZipFileInfo zipInfo;
+    Hpackage::ZipFileInfo zipInfo;
     std::vector<uint8_t> digest(32);
     std::vector<uint8_t> uncompressedData;
     EXPECT_EQ(0, test.TestDecompressGzip(zipInfo, uncompressedData, digest));
@@ -728,7 +728,7 @@ HWTEST_F(PkgMangerTest, TestGZipBuffer, TestSize.Level1)
 HWTEST_F(PkgMangerTest, TestLz4Buffer, TestSize.Level1)
 {
     PkgMangerTest test;
-    hpackage::Lz4FileInfo lz4Info;
+    Hpackage::Lz4FileInfo lz4Info;
     std::vector<uint8_t> digest(32);
     std::vector<uint8_t> uncompressedData;
     EXPECT_EQ(0, test.TestDecompressLz4(lz4Info, uncompressedData, digest));

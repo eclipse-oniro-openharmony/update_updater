@@ -40,7 +40,7 @@ public:
     int AllCmdUnitTestMove(int &fd, std::vector<std::string> &allCmd, TransferManager &tm);
     void FillTransferHeader(std::vector<std::string> &command, const std::string &headerBuffer) const
     {
-        std::vector<std::string> headInfos = updater::utils::SplitString(headerBuffer);
+        std::vector<std::string> headInfos = Updater::Utils::SplitString(headerBuffer);
         for (const auto &headInfo : headInfos) {
             command.push_back(headInfo);
         }
@@ -69,7 +69,7 @@ bool AllCmdUnitTest::GetTransferContents(const std::string &transferFile, std::s
         return false;
     }
     contents.clear();
-    bool rc = updater::utils::ReadFileToString(fd, contents);
+    bool rc = Updater::Utils::ReadFileToString(fd, contents);
     close(fd);
     return rc;
 }
@@ -115,7 +115,7 @@ HWTEST_F(AllCmdUnitTest, allCmd_test_001, TestSize.Level1)
     // Cover all correct transfer data, expect all commands return correctly.
     bool rc = GetTransferContents("/data/updater/applypatch/cmd_001_correct.transfer.list", transferContents);
     EXPECT_TRUE(rc);
-    std::vector<std::string> transferLines = updater::utils::SplitString(transferContents, "\n");
+    std::vector<std::string> transferLines = Updater::Utils::SplitString(transferContents, "\n");
     std::cout << "Dump transfer lines: " << std::endl;
     for (const auto &line : transferLines) {
         std::cout << line << std::endl;
@@ -173,7 +173,7 @@ HWTEST_F(AllCmdUnitTest, allCmd_test_002, TestSize.Level1)
     mode_t dirMode = S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH;
     TransferManager::GetTransferManagerInstance()->GetGlobalParams()->storeBase = "/tmp/cmdtest";
     Store::DoFreeSpace(TransferManager::GetTransferManagerInstance()->GetGlobalParams()->storeBase);
-    utils::MkdirRecursive(TransferManager::GetTransferManagerInstance()->GetGlobalParams()->storeBase, dirMode);
+    Utils::MkdirRecursive(TransferManager::GetTransferManagerInstance()->GetGlobalParams()->storeBase, dirMode);
     std::vector<uint8_t> buffer(bufferSize, 0);
     int fd = open(filePath.c_str(), O_RDWR | O_CREAT, dirMode);
     if (fd < 0) {
@@ -196,7 +196,7 @@ HWTEST_F(AllCmdUnitTest, allCmd_test_002, TestSize.Level1)
     result = tm->CommandsParser(fd, allCmd);
     EXPECT_TRUE(result);
     Store::DoFreeSpace(TransferManager::GetTransferManagerInstance()->GetGlobalParams()->storeBase);
-    utils::MkdirRecursive(TransferManager::GetTransferManagerInstance()->GetGlobalParams()->storeBase, mode);
+    Utils::MkdirRecursive(TransferManager::GetTransferManagerInstance()->GetGlobalParams()->storeBase, mode);
 
     EXPECT_EQ(AllCmdUnitTestMove(fd, allCmd, *tm), 0);
     unlink(filePath.c_str());

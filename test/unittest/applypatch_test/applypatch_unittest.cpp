@@ -72,23 +72,23 @@ HWTEST_F(ApplyPatchUnitTest, updater_RawWriter, TestSize.Level1)
     std::string partitionName = "/rawwriter";
     std::unique_ptr<DataWriter> writer = DataWriter::CreateDataWriter(mode, partitionName);
     EXPECT_NE(writer, nullptr);
-    bool ret = writer->Write(addr, 0, mode, partitionName);
+    bool ret = writer->Write(addr, 0, nullptr);
     EXPECT_FALSE(ret);
 
     addr = buf;
-    ret = writer->Write(addr, 0, mode, partitionName);
+    ret = writer->Write(addr, 0, nullptr);
     EXPECT_FALSE(ret);
 
-    ret = writer->Write(buf, BUFFER_LEN, mode, partitionName);
+    ret = writer->Write(buf, BUFFER_LEN, nullptr);
     EXPECT_FALSE(ret);
 
     int mRet = memcpy_s(buf, BUFFER_LEN, "hello, world", BUFFER_LEN);
     EXPECT_EQ(mRet, 0);
     auto devPath = GetBlockDeviceByMountPoint(partitionName);
     const std::string devDir = "/data/updater/ut/datawriter";
-    updater::utils::MkdirRecursive(devDir, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
+    Updater::Utils::MkdirRecursive(devDir, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
     close(open(devPath.c_str(), O_CREAT | O_WRONLY | O_EXCL, 0664));
-    ret = writer->Write(buf, BUFFER_LEN, mode, partitionName);
+    ret = writer->Write(buf, BUFFER_LEN, nullptr);
     EXPECT_TRUE(ret);
 
     int fd  = open(devPath.c_str(), O_RDONLY);
@@ -100,33 +100,6 @@ HWTEST_F(ApplyPatchUnitTest, updater_RawWriter, TestSize.Level1)
 
     auto result = memcmp(buf, buffer, BUFFER_LEN);
     EXPECT_EQ(result, 0);
-    DataWriter::ReleaseDataWriter(writer);
-}
-
-HWTEST_F(ApplyPatchUnitTest, updater_DataWriterOpenPartition, TestSize.Level1)
-{
-    WriteMode mode = WRITE_RAW;
-    std::string partitionName = "";
-    partitionName = "non_exist";
-    std::unique_ptr<DataWriter> writer = DataWriter::CreateDataWriter(mode, partitionName);
-    EXPECT_NE(writer, nullptr);
-    int ret = writer->OpenPartition(partitionName);
-    EXPECT_EQ(ret, -1);
-    DataWriter::ReleaseDataWriter(writer);
-
-    partitionName = "/rawwriter";
-    auto devPath = GetBlockDeviceByMountPoint(partitionName);
-    int fd = open(devPath.c_str(), O_CREAT | O_WRONLY | O_EXCL, 0664);
-    if (fd < 0) {
-        printf("Open %s failed", devPath.c_str());
-        FAIL();
-        return;
-    }
-    close(fd);
-    writer = DataWriter::CreateDataWriter(mode, partitionName);
-    EXPECT_NE(writer, nullptr);
-    ret = writer->OpenPartition(partitionName);
-    EXPECT_GT(ret, 0);
     DataWriter::ReleaseDataWriter(writer);
 }
 

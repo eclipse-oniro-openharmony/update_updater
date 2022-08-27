@@ -60,12 +60,13 @@ ohos_source_set("flashd_deamon") {
     "//third_party/libuv:uv_static",
     "//third_party/lz4:liblz4_static",
     "//third_party/openssl:libcrypto_static",
+    "//utils/native/base:utils",
   ]
 
   deps += [ "//developtools/hdc:hdc_hash_gen" ]
-  external_deps = [ "c_utils:utils" ]
+
   if (use_musl) {
-    external_deps += [ "init:libbegetutil" ]
+    external_deps = [ "init:libbegetutil" ]
   }
 
   include_dirs = [
@@ -83,7 +84,7 @@ ohos_source_set("flashd_deamon") {
     "//base/update/updater/services/include/log",
     "//base/update/updater/interfaces/kits/include",
     "//base/update/updater/utils/include",
-    "//base/startup/init_lite/services/include/param",
+    "//base/startup/init/services/include/param",
     "//base/startup/syspara_lite/interfaces/kits",
     "//third_party/bounds_checking_function/include",
     "//third_party/lz4/lib",
@@ -96,8 +97,6 @@ ohos_source_set("flashd_deamon") {
     include_dirs += [ "//third_party/selinux/libselinux/include" ]
     defines += [ "SURPPORT_SELINUX" ]
   }
-  subsystem_name = "updater"
-  part_name = "updater"
 }
 
 ohos_static_library("libflashd") {
@@ -125,6 +124,7 @@ ohos_static_library("libflashd") {
   deps = [
     ":flashd_deamon",
     "//base/update/updater/interfaces/kits/misc_info:libmiscinfo",
+    "//base/update/updater/interfaces/kits/updaterkits:libupdaterkits",
     "//base/update/updater/services/applypatch:libapplypatch",
     "//base/update/updater/services/diffpatch/patch:libpatch",
     "//base/update/updater/services/fs_manager:libfsmanager",
@@ -140,6 +140,7 @@ ohos_static_library("libflashd") {
     "//third_party/lz4:liblz4_static",
     "//third_party/openssl:libcrypto_static",
     "//third_party/zlib:libz",
+    "//utils/native/base:utils",
   ]
 
   if (defined(binary_custom_lib)) {
@@ -162,7 +163,7 @@ ohos_static_library("libflashd") {
     "//base/update/updater/services/ptable_parse",
     "//base/update/updater/utils/include",
     "//base/update/updater/utils/json",
-    "//base/startup/init_lite/services/include/param",
+    "//base/startup/init/services/include/param",
     "//third_party/bounds_checking_function/include",
     "//third_party/cJSON",
     "//third_party/openssl/include",
@@ -170,73 +171,14 @@ ohos_static_library("libflashd") {
     "//third_party/libuv",
   ]
 
-  external_deps = [
-    "c_utils:utils",
-    "init:libbegetutil",
-  ]
-
-  part_name = "updater"
-}
-
-ohos_executable("ohflash") {
-  libs = []
-  configs = [ ":flashd_hdc_config" ]
-  defines = [
-    "HDC_HOST",
-    "HARMONY_PROJECT",
-  ]
-  if (is_mac) {
-    defines += [ "HOST_MAC" ]
-  }
-  cflags_cc = [
-    "-Wno-error",
-    "-Wno-error=unused-variable",
-    "-Wno-unused-variable",
-  ]
-  sources = [
-    "${FLASHD_PATH}/host/client.cpp",
-    "${FLASHD_PATH}/host/host_updater.cpp",
-    "${FLASHD_PATH}/host/main.cpp",
-    "${FLASHD_PATH}/host/server.cpp",
-    "${FLASHD_PATH}/host/server_for_client.cpp",
-    "${FLASHD_PATH}/host/translate.cpp",
-    "${HDC_PATH}/host/host_app.cpp",
-    "${HDC_PATH}/host/host_forward.cpp",
-    "${HDC_PATH}/host/host_tcp.cpp",
-    "${HDC_PATH}/host/host_unity.cpp",
-    "${HDC_PATH}/host/host_usb.cpp",
-  ]
-  sources += common_sources
-
-  deps = [
-    "//third_party/bounds_checking_function:libsec_static",
-    "//third_party/libusb:libusb",
-    "//third_party/libuv:uv_static",
-    "//third_party/lz4:liblz4_static",
-    "//third_party/openssl:libcrypto_static",
-  ]
-
-  deps += [ "//third_party/libusb:libusb" ]
-  deps += [ "//developtools/hdc:hdc_hash_gen" ]
-  include_dirs = [
-    "${FLASHD_PATH}/host",
-    "${HDC_PATH}/host",
-    "${FLASHD_PATH}/common",
-    "${HDC_PATH}/common",
-    "//third_party/bounds_checking_function/include",
-    "//third_party/lz4/lib",
-    "//third_party/openssl/include",
-    "//third_party/libuv",
-  ]
-
-  if (!(is_mingw || is_mac) && build_selinux) {
+  if (build_selinux) {
     deps += [ "//third_party/selinux:libselinux" ]
     include_dirs += [ "//third_party/selinux/libselinux/include" ]
     defines += [ "SURPPORT_SELINUX" ]
   }
+
   external_deps = [ "init:libbegetutil" ]
 
-  subsystem_name = "updater"
   part_name = "updater"
 }
 

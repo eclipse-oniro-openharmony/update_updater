@@ -17,8 +17,7 @@
 #include "update_patch.h"
 
 namespace Updater {
-int32_t DiffPatchInterface::ApplyPatch(const std::string &patchFile,
-    const std::string &oldfile, const std::string &newFile)
+int32_t ApplyPatch(const std::string &patchFile, const std::string &oldfile, const std::string &newFile)
 {
     return UpdatePatch::UpdatePatch::ApplyPatch(patchFile, oldfile, newFile);
 }

@@ -51,7 +51,7 @@ void UpdaterMainUnitTest::TearDown(void)
 void UpdaterMainUnitTest::SetUpTestCase(void)
 {
     cout << "SetUpTestCase" << endl;
-    updater::utils::MkdirRecursive("/data/sdcard/updater", S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
+    Updater::Utils::MkdirRecursive("/data/sdcard/updater", S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
     LoadSpecificFstab("/data/updater/main_data/updater.tab");
     if (MountForPath("/data") != 0) {
         cout << "MountForPath failed" << endl;
