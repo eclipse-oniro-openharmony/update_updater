@@ -1,11 +1,6 @@
 {
     "id": "upd",
-    "bgColor" : {
-        "r":0,
-        "g":0,
-        "b":0,
-        "a":255
-    },
+    "bgColor" : "#000000ff",
     "subpages": [
         {
             "id": "update",
@@ -16,12 +11,7 @@
                 "PowerLongPressWarning_Image",
                 "FlashPointDark_Image"
             ],
-            "bgColor" : {
-                "r":0,
-                "g":0,
-                "b":0,
-                "a":255
-            }
+            "bgColor" : "#000000ff"
         },
         {
             "id": "sdUpdate",
@@ -32,12 +22,7 @@
                 "PowerLongPressWarning_Image",
                 "FlashPoint_Image"
             ],
-            "bgColor" : {
-                "r":241,
-                "g":243,
-                "b":245,
-                "a":255
-            }
+            "bgColor" : "#f1f3f5ff"
         },
         {
             "id": "reset",
@@ -47,12 +32,7 @@
                 "RstInfo_Label",
                 "FlashPoint_Image"
             ],
-            "bgColor" : {
-                "r":241,
-                "g":243,
-                "b":245,
-                "a":255
-            }
+            "bgColor" : "#f1f3f5ff"
         },
         {
             "id": "updateSuccess",
@@ -61,12 +41,7 @@
                 "UpdateSuccessRes_Label",
                 "UpdateAutoReboot_Label"
             ],
-            "bgColor" : {
-                "r":0,
-                "g":0,
-                "b":0,
-                "a":255
-            }
+            "bgColor" : "#000000ff"
         },
         {
             "id": "normalUpdateFailed",
@@ -75,12 +50,7 @@
                 "FailReboot_Button",
                 "UpdateFailedRes_Label"
             ],
-            "bgColor" : {
-                "r":0,
-                "g":0,
-                "b":0,
-                "a":255
-            }
+            "bgColor" : "#000000ff"
         },
         {
             "id": "updateFailedNoButton",
@@ -88,12 +58,7 @@
                 "FailIcon_Image",
                 "UpdateInfoDark_Label"
             ],
-            "bgColor" : {
-                "r":0,
-                "g":0,
-                "b":0,
-                "a":255
-            }
+            "bgColor" : "#000000ff"
         },
         {
             "id": "FactoryRstFailed",
@@ -101,32 +66,16 @@
                 "FailIcon_Image",
                 "FactoryRstFailedRes_Label"
             ],
-            "bgColor" : {
-                "r":0,
-                "g":0,
-                "b":0,
-                "a":255
-            }
+            "bgColor" : "#000000ff"
         }
     ],
     "default": {
         "Common": {
-            "parent" : "root",
             "visible": false
         },
         "UILabel": {
-            "bgColor": {
-                "r": 0,
-                "g": 0,
-                "b": 0,
-                "a": 255
-            },
-            "fontColor": {
-                "r": 255,
-                "g": 255,
-                "b": 255,
-                "a": 230
-            },
+            "bgColor": "#000000ff",
+            "fontColor": "#ffffffe6",
             "align" : "center"
         },
         "UIImageView": {
@@ -135,46 +84,16 @@
             "filePrefix" : ""
         },
         "UILabelButton": {
-            "bgColor": {
-                "r": 0,
-                "g": 125,
-                "b": 255,
-                "a": 255
-            },
-            "txtColor": {
-                "r": 255,
-                "g": 255,
-                "b": 255,
-                "a": 255
-            },
-            "focusedBgColor": {
-                "r": 0,
-                "g": 125,
-                "b": 255,
-                "a": 255
-            },
-            "focusedTxtColor": {
-                "r": 255,
-                "g": 255,
-                "b": 255,
-                "a": 255
-            },
+            "bgColor": "#007dffff",
+            "txtColor": "#ffffffff",
+            "focusedBgColor": "#007dffff",
+            "focusedTxtColor": "#ffffffff",
             "focusable" : true
         },
         "UIBoxProgress": {
             "defaultValue": 0,
-            "bgColor": {
-                "r": 205,
-                "g": 207,
-                "b": 208,
-                "a": 255
-            },
-            "fgColor": {
-                "r": 10,
-                "g": 89,
-                "b": 247,
-                "a": 255
-            },
+            "bgColor": "#cdcfd0ff",
+            "fgColor": "#0a59f7ff",
             "endPoint" : "",
             "hasEp" : false
         }
@@ -217,18 +136,8 @@
             "w": 480,
             "h": 43,
             "fontSize": 32,
-            "bgColor": {
-                "r":241,
-                "g":243,
-                "b":245,
-                "a":255
-            },
-            "fontColor": {
-                "r": 0,
-                "g": 0,
-                "b": 0,
-                "a": 230
-            }
+            "bgColor": "#f1f3f5ff",
+            "fontColor": "#000000e6"
         },
         {
             "type": "UILabel",
@@ -239,18 +148,8 @@
             "w": 480,
             "h": 43,
             "fontSize": 32,
-            "bgColor": {
-                "r":241,
-                "g":243,
-                "b":245,
-                "a":255
-            },
-            "fontColor": {
-                "r": 0,
-                "g": 0,
-                "b": 0,
-                "a": 230
-            }
+            "bgColor": "#f1f3f5ff",
+            "fontColor": "#000000e6"
         },
         {
             "type": "UIImageView",
@@ -309,12 +208,7 @@
             "w": 282,
             "h": 38,
             "fontSize": 28,
-            "fontColor": {
-                "r": 255,
-                "g": 255,
-                "b": 255,
-                "a": 150
-            }
+            "fontColor": "#ffffff96"
         },
         {
             "type": "UILabel",
@@ -352,18 +246,8 @@
             "y": 548,
             "w": 432,
             "h": 4,
-            "bgColor": {
-                "r": 38,
-                "g": 38,
-                "b": 38,
-                "a": 255
-            },
-            "fgColor": {
-                "r": 180,
-                "g": 180,
-                "b": 180,
-                "a": 255
-            },
+            "bgColor": "#262626ff",
+            "fgColor": "#b4b4b4ff",
             "endPoint" : "FlashPointDark_Image",
             "hasEp" : true
         },

@@ -54,22 +54,16 @@ DEFINE_STRUCT_TRAIT(UxViewCommonInfo, "Common",
     (int, w),
     (int, h),
     (std::string, id),
-    (std::string, parent),
     (std::string, type),
     (bool, visible)
 );
-DEFINE_STRUCT_TRAIT(UxBRGAPixel, "Color",
-    (uint8_t, r),
-    (uint8_t, g),
-    (uint8_t, b),
-    (uint8_t, a)
-);
+
 DEFINE_STRUCT_TRAIT(UxLabelInfo, "UILabel",
     (uint8_t, fontSize),
     (std::string, text),
     (std::string, align),
-    (UxBRGAPixel, fontColor),
-    (UxBRGAPixel, bgColor)
+    (std::string, fontColor),
+    (std::string, bgColor)
 );
 DEFINE_STRUCT_TRAIT(UxImageInfo, "UIImageView",
     (std::string, resPath),
@@ -79,23 +73,23 @@ DEFINE_STRUCT_TRAIT(UxImageInfo, "UIImageView",
 );
 DEFINE_STRUCT_TRAIT(UxBoxProgressInfo, "UIBoxProgress",
     (uint32_t, defaultValue),
-    (UxBRGAPixel, fgColor),
-    (UxBRGAPixel, bgColor),
+    (std::string, fgColor),
+    (std::string, bgColor),
     (std::string, endPoint),
     (bool, hasEp)
 );
 DEFINE_STRUCT_TRAIT(UxLabelBtnInfo, "UILabelButton",
     (uint8_t, fontSize),
     (std::string, text),
-    (UxBRGAPixel, txtColor),
-    (UxBRGAPixel, bgColor),
-    (UxBRGAPixel, focusedTxtColor),
-    (UxBRGAPixel, focusedBgColor),
+    (std::string, txtColor),
+    (std::string, bgColor),
+    (std::string, focusedTxtColor),
+    (std::string, focusedBgColor),
     (bool, focusable)
 );
 DEFINE_STRUCT_TRAIT(UxSubPageInfo, "subpages",
     (std::string, id),
-    (UxBRGAPixel, bgColor),
+    (std::string, bgColor),
     (std::vector<std::string>, coms)
 );
 DEFINE_STRUCT_TRAIT(PagePath, "",
@@ -113,7 +107,7 @@ struct UxViewInfo {
 
 struct UxPageInfo {
     std::string id {};
-    UxBRGAPixel bgColor {};
+    std::string bgColor {};
     std::vector<UxViewInfo> viewInfos {};
     std::vector<UxSubPageInfo> subpages {};
 };
@@ -125,7 +119,7 @@ struct UxPageInfo {
  */
 DEFINE_TRAIT(UxPageInfo, "",
     (std::string, id),
-    (UxBRGAPixel, bgColor),
+    (std::string, bgColor),
     (std::vector<UxSubPageInfo>, subpages)
 );
 // define struct for load language resources in ui config file

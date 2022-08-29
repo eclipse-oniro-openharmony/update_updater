@@ -30,7 +30,7 @@
 #include "applypatch/partition_record.h"
 #include "fs_manager/mount.h"
 #include "include/updater/updater.h"
-#include "json_node.h"
+#include "language/language_ui.h"
 #include "log/dump.h"
 #include "log/log.h"
 #include "misc_info/misc_info.h"
@@ -38,19 +38,18 @@
 #include "pkg_manager.h"
 #include "pkg_utils.h"
 #include "securec.h"
-#include "ui/frame.h"
-#include "ui/text_label.h"
 #include "ui/updater_ui.h"
+#include "ui/updater_ui_env.h"
 #include "updater/updater_const.h"
+#include "updater_ui_facade.h"
+#include "updater_ui_tools.h"
 #include "utils.h"
 
 namespace Updater {
 using Utils::String2Int;
 using namespace Hpackage;
 using namespace Updater::Utils;
-
-extern TextLabel *g_logLabel;
-extern TextLabel *g_logResultLabel;
+using namespace std::literals::chrono_literals;
 
 constexpr int DISPLAY_TIME = 1000 * 1000;
 constexpr struct option OPTIONS[] = {
@@ -110,11 +109,8 @@ UpdaterStatus UpdaterFromSdcard()
     // sdcard fsType only support ext4/vfat
     std::string sdcardStr = GetBlockDeviceByMountPoint(SDCARD_PATH);
     if (!IsSDCardExist(sdcardStr)) {
-        if (errno == ENOENT) {
-            ShowText(g_logLabel, "Cannot detect SdCard!");
-        } else {
-            ShowText(g_logLabel, "Detecting SdCard abnormally!");
-        }
+        UpdaterUiFacade::GetInstance().ShowLog(
+            (errno == ENOENT) ? TR(LOG_SDCARD_NOTFIND) : TR(LOG_SDCARD_ABNORMAL), true);
         return UPDATE_ERROR;
     }
     if (MountForPath(SDCARD_PATH) != 0) {
@@ -123,7 +119,7 @@ UpdaterStatus UpdaterFromSdcard()
     }
 #endif
     UPDATER_ERROR_CHECK(access(SDCARD_CARD_PKG_PATH, 0) == 0, "package is not exist",
-        ShowText(g_logLabel, "Package is not exist!");
+        UpdaterUiFacade::GetInstance().ShowLog(TR(LOG_NOPKG), true);
         return UPDATE_ERROR);
     PkgManager::PkgManagerPtr pkgManager = PkgManager::GetPackageInstance();
     UPDATER_ERROR_CHECK(pkgManager != nullptr, "pkgManager is nullptr", return UPDATE_ERROR);
@@ -131,12 +127,11 @@ UpdaterStatus UpdaterFromSdcard()
     STAGE(UPDATE_STAGE_BEGIN) << "UpdaterFromSdcard";
     LOG(INFO) << "UpdaterFromSdcard start, sdcard updaterPath : " << SDCARD_CARD_PKG_PATH;
 
-    g_logLabel->SetText("Don't remove SD Card!");
-    Utils::UsSleep(DISPLAY_TIME);
+    UpdaterUiFacade::GetInstance().ShowLog(TR(LOG_SDCARD_NOTMOVE));
     UpdaterStatus updateRet = DoInstallUpdaterPackage(pkgManager, SDCARD_CARD_PKG_PATH, 0, SDCARD_UPDATE);
     if (updateRet != UPDATE_SUCCESS) {
         std::this_thread::sleep_for(std::chrono::milliseconds(UI_SHOW_DURATION));
-        g_logLabel->SetText("SD Card update failed!");
+        UpdaterUiFacade::GetInstance().ShowLog(TR(LOG_SDCARD_FAIL));
         STAGE(UPDATE_STAGE_FAIL) << "UpdaterFromSdcard failed";
     } else {
         LOG(INFO) << "Update from SD Card successfully!";
@@ -205,7 +200,8 @@ static UpdaterStatus InstallUpdaterPackage(UpdaterParams &upParams, const std::v
     UPDATER_INIT_RECORD;
     UpdaterStatus status = UPDATE_UNKNOWN;
     if (IsBatteryCapacitySufficient() == false) {
-        g_logLabel->SetText("Battery is low.\n");
+        UpdaterUiFacade::GetInstance().ShowUpdInfo(TR(LOG_LOWPOWER));
+        std::this_thread::sleep_for(std::chrono::milliseconds(UI_SHOW_DURATION));
         UPDATER_LAST_WORD(UPDATE_ERROR);
         LOG(ERROR) << "Battery is not sufficient for install package.";
         status = UPDATE_SKIP;
@@ -217,23 +213,24 @@ static UpdaterStatus InstallUpdaterPackage(UpdaterParams &upParams, const std::v
                 "ClearRecordPartitionOffset failed", return UPDATE_ERROR);
             SetRetryCountToMisc(upParams.retryCount + 1, args);
         }
-        UPDATER_CHECK_ONLY_RETURN(SetupPartitions() == 0, ShowText(GetUpdateInfoLabel(), "Setup partitions failed");
+        UPDATER_CHECK_ONLY_RETURN(SetupPartitions() == 0,
+            UpdaterUiFacade::GetInstance().ShowUpdInfo(TR(UPD_SETPART_FAIL), true);
             return UPDATE_ERROR);
         status = DoInstallUpdaterPackage(manager, upParams.updatePackage, upParams.retryCount, HOTA_UPDATE);
         if (status != UPDATE_SUCCESS) {
             std::this_thread::sleep_for(std::chrono::milliseconds(UI_SHOW_DURATION));
-            std::string errMsg = ((status == UPDATE_SPACE_NOTENOUGH) ? "Free space is not enough" : "Update failed!");
-            g_logLabel->SetText(errMsg.c_str());
+            UpdaterUiFacade::GetInstance().ShowLog(TR(LOG_UPDFAIL));
             STAGE(UPDATE_STAGE_FAIL) << "Install failed";
             if (status == UPDATE_RETRY && upParams.retryCount < MAX_RETRY_COUNT) {
                 upParams.retryCount += 1;
-                g_logLabel->SetText("Retry installation");
+                UpdaterUiFacade::GetInstance().ShowFailedPage();
                 SetRetryCountToMisc(upParams.retryCount, args);
                 Utils::DoReboot("updater");
             }
         } else {
             LOG(INFO) << "Install package success.";
             STAGE(UPDATE_STAGE_SUCCESS) << "Install package";
+            UpdaterUiFacade::GetInstance().ShowSuccessPage();
         }
     }
     return status;
@@ -244,7 +241,7 @@ static UpdaterStatus StartUpdaterEntry(PkgManager::PkgManagerPtr manager,
 {
     UpdaterStatus status = UPDATE_UNKNOWN;
     if (upParams.updatePackage != "") {
-        ShowUpdateFrame(true);
+        UpdaterUiFacade::GetInstance().ShowProgressPage();
         status = InstallUpdaterPackage(upParams, args, manager);
         if (status != UPDATE_SUCCESS) {
             if (!CheckDumpResult()) {
@@ -254,33 +251,26 @@ static UpdaterStatus StartUpdaterEntry(PkgManager::PkgManagerPtr manager,
         }
         WriteDumpResult("pass");
     } else if (upParams.factoryWipeData) {
+        UpdaterUiFacade::GetInstance().ShowProgressPage();
         LOG(INFO) << "Factory level FactoryReset begin";
         status = UPDATE_SUCCESS;
-        SetUpdateFlag(1);
-        ShowUpdateFrame(true);
         DoProgress();
         UPDATER_ERROR_CHECK(FactoryReset(FACTORY_WIPE_DATA, "/data") == 0, "FactoryReset factory level failed",
             status = UPDATE_ERROR);
-
-        ShowUpdateFrame(false);
-        if (status != UPDATE_SUCCESS) {
-            g_logResultLabel->SetText("Factory reset failed");
-        } else {
-            g_logResultLabel->SetText("Factory reset done");
-        }
+        UpdaterUiFacade::GetInstance().ShowLogRes(
+            (status != UPDATE_SUCCESS) ? TR(LOGRES_FACTORY_FAIL) : TR(LOGRES_FACTORY_DONE));
     } else if (upParams.userWipeData) {
+        UpdaterUiFacade::GetInstance().ShowProgressPage();
         LOG(INFO) << "User level FactoryReset begin";
         status = UPDATE_SUCCESS;
-        SetUpdateFlag(1);
-        ShowUpdateFrame(true);
         DoProgress();
         UPDATER_ERROR_CHECK(FactoryReset(USER_WIPE_DATA, "/data") == 0, "FactoryReset user level failed",
             status = UPDATE_ERROR);
-        ShowUpdateFrame(false);
         if (status != UPDATE_SUCCESS) {
-            g_logResultLabel->SetText("Wipe data failed");
+            UpdaterUiFacade::GetInstance().ShowLogRes(TR(LOGRES_WIPE_FAIL));
         } else {
-            g_logResultLabel->SetText("Wipe data finished");
+            UpdaterUiFacade::GetInstance().ShowSuccessPage();
+            UpdaterUiFacade::GetInstance().ShowLogRes(TR(LOGRES_WIPE_FINISH));
             PostUpdater(true);
             std::this_thread::sleep_for(std::chrono::milliseconds(UI_SHOW_DURATION));
         }
@@ -309,13 +299,17 @@ static UpdaterStatus StartUpdater(PkgManager::PkgManagerPtr manager, const std::
                 std::string option = OPTIONS[optionIndex].name;
                 if (option == "update_package") {
                     upParams.updatePackage = optarg;
+                    (void)UpdaterUiFacade::GetInstance().SetMode(UpdaterMode::OTA);
                     mode = HOTA_UPDATE;
                 } else if (option == "retry_count") {
                     upParams.retryCount = atoi(optarg);
+                    (void)UpdaterUiFacade::GetInstance().SetMode(UpdaterMode::OTA);
                     mode = HOTA_UPDATE;
                 } else if (option == "factory_wipe_data") {
+                    (void)UpdaterUiFacade::GetInstance().SetMode(UpdaterMode::REBOOTFACTORYRST);
                     upParams.factoryWipeData = true;
                 } else if (option == "user_wipe_data") {
+                    (void)UpdaterUiFacade::GetInstance().SetMode(UpdaterMode::REBOOTFACTORYRST);
                     upParams.userWipeData = true;
                 }
                 break;
@@ -346,7 +340,7 @@ int UpdaterMain(int argc, char **argv)
 
     LOG(INFO) << "Ready to start";
 #ifndef UPDATER_UT
-    UpdaterUiInit();
+    UpdaterUiEnv::Init();
 #endif
     UpdaterInit::GetInstance().InvokeEvent(UPDATER_INIT_EVENT);
     PackageUpdateMode mode = UNKNOWN_UPDATE;
@@ -354,7 +348,13 @@ int UpdaterMain(int argc, char **argv)
     std::this_thread::sleep_for(std::chrono::milliseconds(UI_SHOW_DURATION));
 #ifndef UPDATER_UT
     if (status != UPDATE_SUCCESS && status != UPDATE_SKIP) {
-        ShowUpdateFrame(false);
+        if (mode == HOTA_UPDATE) {
+            UpdaterUiFacade::GetInstance().ShowFailedPage();
+        } else {
+            UpdaterUiFacade::GetInstance().ShowMainpage();
+            std::this_thread::sleep_for(50ms); /* wait for page flush 50ms */
+            UpdaterUiTools::SaveUxBuffToFile("/tmp/mainpage.png");
+        }
         // Wait for user input
         while (true) {
             Utils::UsSleep(DISPLAY_TIME);

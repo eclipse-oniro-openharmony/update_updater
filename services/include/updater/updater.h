@@ -61,6 +61,8 @@ void PostUpdater(bool clearMisc);
 
 std::vector<std::string> ParseParams(int argc, char **argv);
 
+bool ClearMisc();
+
 int GetBootMode(int &mode);
 } // Updater
 #endif /* UPDATER_UPDATER_H */

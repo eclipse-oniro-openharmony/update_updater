@@ -13,16 +13,44 @@
 
 import("//build/ohos.gni")
 ohos_static_library("libui") {
+  defines = [
+    "ENABLE_BITMAP_FONT = 0",
+    "ENABLE_ICU = 0",
+    "ENABLE_MULTI_FONT = 0",
+    "ENABLE_SHAPING = 0",
+    "ENABLE_STATIC_FONT = 0",
+    "ENABLE_VECTOR_FONT = 1",
+  ]
+
   sources = [
-    "animation_label.cpp",
-    "drm_driver.cpp",
-    "frame.cpp",
-    "input_event.cpp",
-    "progress_bar.cpp",
-    "surface_dev.cpp",
-    "text_label.cpp",
+    "control/callback_manager.cpp",
+    "control/event_listener.cpp",
+    "control/event_manager.cpp",
+    "driver/drm_driver.cpp",
+    "driver/fbdev_driver.cpp",
+    "driver/graphic_engine.cpp",
+    "driver/input_event.cpp",
+    "driver/surface_dev.cpp",
+    "language/language_ui.cpp",
+    "strategy/logo_strategy.cpp",
+    "strategy/progress_strategy.cpp",
+    "strategy/ui_strategy.cpp",
     "updater_ui.cpp",
-    "view.cpp",
+    "updater_ui_config.cpp",
+    "updater_ui_env.cpp",
+    "updater_ui_facade.cpp",
+    "updater_ui_tools.cpp",
+    "view/component/box_progress_adapter.cpp",
+    "view/component/component_factory.cpp",
+    "view/component/img_view_adapter.cpp",
+    "view/component/label_btn_adapter.cpp",
+    "view/component/text_label_adapter.cpp",
+    "view/layout/layout_parser.cpp",
+    "view/page/base_page.cpp",
+    "view/page/page.cpp",
+    "view/page/page_manager.cpp",
+    "view/page/sub_page.cpp",
+    "view/view_api.cpp",
   ]
 
   include_dirs = [
@@ -31,22 +59,42 @@ ohos_static_library("libui") {
     "//third_party/libdrm",
     "//base/update/updater/services/include/log",
     "//base/update/updater/services/include",
+    "//drivers/hdf_core/framework/ability/sbuf/include",
+    "//drivers/hdf_core/framework/include/platform",
+    "//drivers/hdf_core/framework/include/core",
+    "//drivers/hdf_core/framework/include/osal",
+    "//drivers/hdf_core/framework/include/utils",
+    "//drivers/hdf_core/framework/include/config",
+    "//drivers/hdf_core/framework/include",
+    "//drivers/hdf_core/adapter/uhdf2/hdi",
+    "//drivers/peripheral/input/hal/include",
+    "//drivers/peripheral/input/interfaces/include",
     "//base/update/updater/utils/include",
+    "//base/update/updater/utils/json",
     "//base/update/updater/services",
     "//base/update/updater/interfaces/kits/include",
+    "//base/update/updater/services/ui",
+    "//base/update/updater/services/ui/include",
+    "//base/update/updater/services/ui/control",
+    "//base/update/updater/services/ui/driver",
+    "//base/update/updater/services/ui/view",
+    "//base/update/updater/services/ui/language",
+    "//foundation/graphic/ui/frameworks",
+    "//foundation/graphic/ui/interfaces/kits",
+    "//foundation/graphic/ui/interfaces/innerkits",
+    "//foundation/graphic/utils/interfaces/kits",
+    "//foundation/graphic/utils/interfaces/innerkits",
   ]
 
   deps = [
     "//base/update/updater/interfaces/kits/packages:libpackageExt",
     "//base/update/updater/services/log:libupdaterlog",
     "//base/update/updater/utils:libutils",
+    "//drivers/peripheral/input/hal:hdi_input",
+    "//foundation/graphic/ui/ext/updater:libupdater_layout",
     "//third_party/bounds_checking_function:libsec_static",
+    "//third_party/cJSON:cjson_static",
     "//third_party/libdrm:libdrm",
     "//third_party/libpng:libpng",
   ]
-
-  external_deps = [ "drivers_interface_input:hdi_input" ]
-
-  subsystem_name = "updater"
-  part_name = "updater"
 }

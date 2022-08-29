@@ -45,7 +45,7 @@ bool CanonicalPagePath(PagePath &pagePath)
 std::ostream &operator<<(std::ostream &os, const UxViewCommonInfo &info)
 {
     os << "x=" << info.x << ", y=" << info.y << ", w=" << info.w << ", h=" << info.h << ", id=";
-    os << info.id << ", parent=" << info.parent << ", type=" << info.type << ", visible=" << info.visible;
+    os << info.id << ", type=" << info.type << ", visible=" << info.visible;
     return os;
 }
 

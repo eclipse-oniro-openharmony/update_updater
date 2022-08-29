@@ -19,6 +19,7 @@
 #include "draw/draw_utils.h"
 #include "font/ui_font_header.h"
 #include "log/log.h"
+#include "updater_ui_const.h"
 #include "utils.h"
 
 namespace Updater {
@@ -60,8 +61,8 @@ void GraphicEngine::InitFontEngine() const
     constexpr uint32_t uiFontMemAlignment = 4;
     static uint32_t fontMemBaseAddr[OHOS::MIN_FONT_PSRAM_LENGTH / uiFontMemAlignment];
     OHOS::GraphicStartUp::InitFontEngine(reinterpret_cast<uintptr_t>(fontMemBaseAddr), OHOS::MIN_FONT_PSRAM_LENGTH,
-        VECTOR_FONT_DIR, DEFAULT_VECTOR_FONT_FILENAME);
-    LOG(INFO) << "InitFontEngine VECTOR_FONT_DIR: " << VECTOR_FONT_DIR << DEFAULT_VECTOR_FONT_FILENAME;
+        VECTOR_FONT_DIR, DEFAULT_FONT_FILENAME);
+    LOG(INFO) << "InitFontEngine VECTOR_FONT_DIR: " << VECTOR_FONT_DIR << DEFAULT_FONT_FILENAME;
 }
 
 void GraphicEngine::InitImageDecodeAbility() const

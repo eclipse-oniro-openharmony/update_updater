@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -12,17 +12,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef UPDATER_UI_INPUT_EVENT_H
-#define UPDATER_UI_INPUT_EVENT_H
-#include <linux/input.h>
-#include "frame.h"
-#include "input_manager.h"
-#include "updater_ui.h"
+
+#ifndef UPDATE_UI_UPDATER_UI_CONST_H
+#define UPDATE_UI_UPDATER_UI_CONST_H
 
 namespace Updater {
-void TouchToKey(const int dx, const int dy);
-int HandleInputEvent(const struct input_event *iev);
-void ReportEventPkgCallback(const InputEventPackage **pkgs, const uint32_t count, uint32_t devIndex);
-int HdfInit();
-} // namespace updater
-#endif // UPDATER_UI_INPUT_EVENT_H
+constexpr const char *DEFAULT_FONT_FILENAME = "HarmonyOS_Sans_SC_Regular_Small.ttf";
+constexpr const char *FB_DEV_PATH = "/dev/graphics/fb0";
+constexpr const char *DRM_DEV_PATH = "/dev/dri/card0";
+} // namespace Updater
+#endif /* UPDATE_UI_HOS_UPDATER_H */
