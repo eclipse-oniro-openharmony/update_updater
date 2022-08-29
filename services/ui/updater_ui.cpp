@@ -56,9 +56,9 @@ inline UpdaterUiFacade &GetFacade()
 /**
  * avoid calling multipule callback simultaneously.
  * When defining a new callback, should place a
- * CALLBACK_GUARD at the beginning of callback function
+ * CALLBACK_GUARD_RETURN at the beginning of callback function
  */
-#define CALLBACK_GUARD           \
+#define CALLBACK_GUARD_RETURN    \
     if (IsAlreadyInCallback()) { \
         return;                  \
     }                            \
@@ -103,7 +103,7 @@ void OnRebootEvt()
     LOG(INFO) << "On Label Reboot";
     std::thread {
         [] () {
-            CALLBACK_GUARD;
+            CALLBACK_GUARD_RETURN;
             PostUpdater(false);
             Utils::DoReboot("");
         }
@@ -113,7 +113,7 @@ void OnRebootEvt()
 void OnLabelResetEvt()
 {
     LOG(INFO) << "On Label Reset";
-    CALLBACK_GUARD;
+    CALLBACK_GUARD_RETURN;
     if (!GetFacade().SetMode(UpdaterMode::FACTORYRST)) {
         return;
     }
@@ -125,7 +125,7 @@ void OnLabelSDCardEvt()
     LOG(INFO) << "On Label SDCard";
     std::thread {
         [] () {
-            CALLBACK_GUARD;
+            CALLBACK_GUARD_RETURN;
             if (!GetFacade().SetMode(UpdaterMode::SDCARD)) {
                 return;
             }
@@ -149,7 +149,7 @@ void OnLabelSDCardNoDelayEvt()
     LOG(INFO) << "On Label SDCard";
     std::thread {
         [] () {
-            CALLBACK_GUARD;
+            CALLBACK_GUARD_RETURN;
             if (!GetFacade().SetMode(UpdaterMode::SDCARD)) {
                 return;
             }
@@ -172,7 +172,7 @@ void OnLabelSDCardNoDelayEvt()
 
 void OnLabelCancelEvt()
 {
-    CALLBACK_GUARD;
+    CALLBACK_GUARD_RETURN;
     LOG(INFO) << "On Label Cancel";
     PageManager::GetInstance().GoBack();
 }
@@ -182,7 +182,7 @@ void OnLabelOkEvt()
     LOG(INFO) << "On Label Ok";
     std::thread {
         [] () {
-            CALLBACK_GUARD;
+            CALLBACK_GUARD_RETURN;
             Utils::UsSleep(CALLBACK_DELAY);
             GetFacade().ShowMainpage();
             GetFacade().ClearText();
@@ -209,7 +209,7 @@ void OnConfirmRstEvt()
     LOG(INFO) << "On Label Ok";
     std::thread {
         [] () {
-            CALLBACK_GUARD;
+            CALLBACK_GUARD_RETURN;
             if (!GetFacade().SetMode(UpdaterMode::FACTORYRST)) {
                 return;
             }
@@ -235,7 +235,7 @@ void OnMenuShutdownEvt()
     LOG(INFO) << "On btn shutdown";
     std::thread {
         [] () {
-            CALLBACK_GUARD;
+            CALLBACK_GUARD_RETURN;
             LOG(DEBUG) << "shutdown";
             Utils::DoShutdown();
         }
@@ -247,7 +247,7 @@ void OnMenuClearCacheEvt()
     LOG(INFO) << "On clear cache";
     std::thread {
         [] () {
-            CALLBACK_GUARD;
+            CALLBACK_GUARD_RETURN;
             GetFacade().ClearText();
             if (!GetFacade().SetMode(UpdaterMode::FACTORYRST)) {
                 return;
