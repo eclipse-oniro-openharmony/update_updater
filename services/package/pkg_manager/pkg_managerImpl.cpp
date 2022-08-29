@@ -628,13 +628,15 @@ int32_t PkgManagerImpl::VerifyPackage(const std::string &packagePath, const std:
     const std::string &version, const PkgBuffer &digest, VerifyCallback verifyCallback)
 {
     int32_t ret = SetSignVerifyKeyName(keyPath);
-    PKG_CHECK(ret == PKG_SUCCESS, return ret, "Invalid keyname");
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("Invalid keyname");
+        return ret;
+    }
 
     PkgFile::PkgType type = GetPkgTypeByName(packagePath);
     if (type != PkgFile::PKG_TYPE_UPGRADE) {
-        ret = VerifyOtaPackage(packagePath, keyPath);
+        ret = VerifyOtaPackage(packagePath);
     } else if (digest.buffer != nullptr) {
-        // update.bin include signature information, verify entire file.
         ret = VerifyBinFile(packagePath, keyPath, version, digest);
     } else {
         PkgManager::PkgManagerPtr pkgManager = PkgManager::GetPackageInstance();
@@ -645,9 +647,11 @@ int32_t PkgManagerImpl::VerifyPackage(const std::string &packagePath, const std:
         std::vector<std::string> components;
         ret = pkgManager->LoadPackage(packagePath, keyPath, components);
     }
-
     verifyCallback(ret, VERIFY_FINSH_PERCENT);
-    PKG_CHECK(ret == PKG_SUCCESS, return ret, "Verify file %s fail", packagePath.c_str());
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("Verify file %s fail", packagePath.c_str());
+        return ret;
+    }
     PKG_LOGI("Verify file %s success", packagePath.c_str());
     return ret;
 }
@@ -722,7 +726,7 @@ int32_t PkgManagerImpl::Verify(uint8_t digestMethod, const std::vector<uint8_t> 
         PKG_LOGE("Invalid sign algo");
         return PKG_INVALID_SIGNATURE;
     }
-    return signAlgorithm->VerifyBuffer(digest, signature);
+    return signAlgorithm->VerifyDigest(digest, signature);
 }
 
 int32_t PkgManagerImpl::Sign(PkgStreamPtr stream, size_t offset, const PkgInfoPtr &info)
@@ -857,21 +861,8 @@ void PkgManagerImpl::PostDecodeProgress(int type, size_t writeDataLen, const voi
     }
 }
 
-int32_t PkgManagerImpl::VerifyOtaPackage(const std::string &packagePath, const std::string &keyPath)
+int32_t PkgManagerImpl::VerifyOtaPackage(const std::string &packagePath)
 {
-    size_t signatureStart = 0;
-    size_t signatureSize = 0;
-    char realPath[PATH_MAX + 1] = {0};
-    if (realpath(keyPath.c_str(), realPath) == nullptr) {
-        UPDATER_LAST_WORD(PKG_INVALID_FILE);
-        return PKG_INVALID_FILE;
-    }
-    if (access(realPath, F_OK) != 0) {
-        PKG_LOGE("%s does not exist!", keyPath.c_str());
-        UPDATER_LAST_WORD(PKG_INVALID_FILE);
-        return PKG_INVALID_FILE;
-    }
-
     PkgStreamPtr pkgStream = nullptr;
     int32_t ret = CreatePkgStream(pkgStream, packagePath, 0, PkgStream::PkgStreamType_Read);
     if (ret != PKG_SUCCESS) {
@@ -880,17 +871,8 @@ int32_t PkgManagerImpl::VerifyOtaPackage(const std::string &packagePath, const s
         return ret;
     }
 
-    ZipPkgParse zipParse;
-    ret = zipParse.ParseZipPkg(pkgStream, signatureStart, signatureSize);
-    if (ret != PKG_SUCCESS) {
-        PKG_LOGE("Parse zip package signature failed.");
-        UPDATER_LAST_WORD(ret);
-        ClosePkgStream(pkgStream);
-        return ret;
-    }
-
-    PkgVerifyUtil verifyUtil(keyPath);
-    ret = verifyUtil.VerifyPkcs7SignedData(pkgStream, signatureStart, signatureSize);
+    PkgVerifyUtil verifyUtil;
+    ret = verifyUtil.VerifyPackageSign(pkgStream);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("Verify zpkcs7 signature failed.");
         UPDATER_LAST_WORD(ret);
@@ -899,45 +881,6 @@ int32_t PkgManagerImpl::VerifyOtaPackage(const std::string &packagePath, const s
     }
 
     ClosePkgStream(pkgStream);
-    return PKG_SUCCESS;
-}
-
-int32_t PkgManagerImpl::CreateSignContent(const std::string &packagePath, const std::string &signedPackage,
-    const std::string &keyPath, PkgInfoPtr header)
-{
-    int32_t ret = SetSignVerifyKeyName(keyPath);
-    if (ret != PKG_SUCCESS) {
-        return ret;
-    }
-    if (access(packagePath.c_str(), F_OK) != 0) {
-        PKG_LOGE("%s does not exist!", packagePath.c_str());
-        return PKG_INVALID_FILE;
-    }
-    PkgStreamPtr outStream = nullptr;
-    ret = CreatePkgStream(outStream, signedPackage, 0, PkgStream::PkgStreamType_Write);
-    if (ret != PKG_SUCCESS) {
-        PKG_LOGE("CreatePackage fail %s", signedPackage.c_str());
-        return ret;
-    }
-    PkgStreamPtr inStream = nullptr;
-    ret = CreatePkgStream(inStream, packagePath, 0, PkgStream::PkgStreamType_Read);
-    if (ret != PKG_SUCCESS) {
-        PKG_LOGE("CreatePackage fail %s", packagePath.c_str());
-        ClosePkgStream(outStream);
-        return ret;
-    }
-
-    SignPkg signPkg(inStream, keyPath, header->signMethod);
-    ret = signPkg.SignPackage(outStream);
-    if (ret != PKG_SUCCESS) {
-        ClosePkgStream(inStream);
-        ClosePkgStream(outStream);
-        PKG_LOGE("sign package failed, ret[%d]", ret);
-        return ret;
-    }
-
-    ClosePkgStream(inStream);
-    ClosePkgStream(outStream);
     return PKG_SUCCESS;
 }
 

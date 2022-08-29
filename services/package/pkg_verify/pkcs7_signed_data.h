@@ -16,14 +16,15 @@
 #ifndef PKCS7_SIGNED_DATA_H
 #define PKCS7_SIGNED_DATA_H
 
-#include <openssl/evp.h>
+#include <vector>
 #include <openssl/pkcs7.h>
-#include <openssl/rsa.h>
-#include <openssl/sha.h>
+#include <openssl/x509.h>
 #include "pkg_manager.h"
 
 namespace Hpackage {
 struct Pkcs7SignerInfo {
+    X509_NAME *issuerName = nullptr;
+    ASN1_INTEGER *serialNumber = nullptr;
     int32_t digestNid {};
     int32_t digestEncryptNid {};
     std::vector<uint8_t> digestEncryptData;
@@ -31,43 +32,31 @@ struct Pkcs7SignerInfo {
 
 class Pkcs7SignedData {
 public:
-    Pkcs7SignedData();
+    Pkcs7SignedData() : pkcs7_(nullptr), digest_(), signerInfos_() {}
 
     ~Pkcs7SignedData();
 
-    int32_t BuildPkcs7SignedData(Hpackage::PkgBuffer &p7Data, uint32_t signMethod,
-        const std::vector<uint8_t> &digestBlock, const std::vector<uint8_t> &signedData);
+    int32_t GetHashFromSignBlock(const uint8_t *srcData, const size_t dataLen,
+        std::vector<uint8_t> &hash);
 
-    int32_t ParsePkcs7SignedData(const uint8_t *sourceData, uint32_t sourceDataLen,
-        std::vector<uint8_t> &digestBlock, std::vector<Pkcs7SignerInfo> &signerInfos);
+    int32_t ParsePkcs7Data(const uint8_t *srcData, const size_t dataLen);
 
-private:
-    int32_t UpdateDigestBlock(const std::vector<uint8_t> &digestBlock);
-
-    int32_t UpdateSignerInfo(const std::vector<uint8_t> &signedData, uint32_t signMethod);
-
-    ASN1_OBJECT *GetSignAlgorithmObj(uint32_t signMethod);
-
-    int32_t PutDataToBuffer(Hpackage::PkgBuffer &p7Data);
+    int32_t Verify() const;
 
 private:
-    int32_t VerifyInit(const uint8_t *sourceData, uint32_t sourceDataLen);
-
-    int32_t DoParse(std::vector<uint8_t> &digestBlock, std::vector<Pkcs7SignerInfo> &signerInfos);
-
-    int32_t ParseSignedData(std::vector<uint8_t> &digestBlock, std::vector<Pkcs7SignerInfo> &signerInfos);
-
-    int32_t ParseContentInfo(std::vector<uint8_t> &digestBlock, const PKCS7_SIGNED *signData);
-
-    int32_t ParseSignerInfos(std::vector<Pkcs7SignerInfo> &signerInfos);
-
+    int32_t Init(const uint8_t *sourceData, const uint32_t sourceDataLen);
+    int32_t DoParse();
+    int32_t ParseContentInfo(std::vector<uint8_t> &digestBlock) const;
+    int32_t GetDigestFromContentInfo(std::vector<uint8_t> &digestBlock);
+    int32_t SignerInfosParse();
     int32_t SignerInfoParse(PKCS7_SIGNER_INFO *p7SignerInfo, Pkcs7SignerInfo &signerInfo);
-
-    int32_t ParseSignerInfoX509Algo(int32_t &algoNid, const X509_ALGOR *x509Algo);
+    int32_t Pkcs7SignleSignerVerify(const Pkcs7SignerInfo &signerInfo) const;
+    int32_t VerifyDigest(X509 *cert, const Pkcs7SignerInfo &signer) const;
 
 private:
     PKCS7 *pkcs7_;
-    BIO *p7Bio_;
+    std::vector<uint8_t> digest_;
+    std::vector<Pkcs7SignerInfo> signerInfos_;
 };
 } // namespace Hpackage
 #endif

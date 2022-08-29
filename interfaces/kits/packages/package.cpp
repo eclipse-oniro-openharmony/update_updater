@@ -55,8 +55,10 @@ int32_t GetUpgradePkgInfo(UpgradePkgInfo *upgradePackageInfo,
     for (uint32_t i = 0; i < pkgInfoExt->entryCount; i++) {
         files[i].first.assign(compInfo[i].filePath);
         ComponentInfo* info = &files[i].second;
-        UPDATER_ERROR_CHECK(!memcpy_s(info->digest, sizeof(info->digest), compInfo[i].digest, sizeof(info->digest)),
-            "GetUpgradePkgInfo memcpy failed", return PKG_NONE_MEMORY);
+        if (memcpy_s(info->digest, sizeof(info->digest), compInfo[i].digest, sizeof(info->digest)) != EOK) {
+            LOG(ERROR) << "GetUpgradePkgInfo memcpy failed";
+            return PKG_NONE_MEMORY;
+        }
         info->fileInfo.identity.assign(compInfo[i].componentAddr);
         info->fileInfo.unpackedSize = compInfo[i].size;
         info->fileInfo.packedSize = compInfo[i].size;
@@ -114,14 +116,6 @@ int32_t GetLz4PkgInfo(PkgManager::PkgInfoPtr pkgInfo,
         info->blockIndependence = 0;
     }
     return PKG_SUCCESS;
-}
-
-void GetSignContentInfo(PkgInfo *pkgInfo, const UpgradePkgInfoExt *pkgInfoExt)
-{
-    pkgInfo->signMethod = pkgInfoExt->signMethod;
-    pkgInfo->digestMethod = pkgInfoExt->digestMethod;
-    pkgInfo->entryCount = pkgInfoExt->entryCount;
-    pkgInfo->pkgType = pkgInfoExt->pkgType;
 }
 }
 
@@ -210,8 +204,8 @@ int32_t VerifyPackageWithCallback(const std::string &packagePath,
     return ret;
 }
 
-int32_t CreatePackageL1(const UpgradePkgInfoExt *pkgInfo, ComponentInfoExt comp[],
-    const char *path, uint32_t *offset, const char **hashCode)
+int32_t CreatePackageL1(const UpgradePkgInfoExt *pkgInfo, ComponentInfoExt *comp,
+    const char *path, uint32_t *offset, char **hashCode)
 {
     PkgManager::PkgManagerPtr manager = PkgManager::GetPackageInstance();
     if (pkgInfo == nullptr || path == nullptr || hashCode == nullptr || manager == nullptr || offset == nullptr) {
@@ -236,32 +230,3 @@ int32_t CreatePackageL1(const UpgradePkgInfoExt *pkgInfo, ComponentInfoExt comp[
     PkgManager::ReleasePackageInstance(manager);
     return ret;
 }
-
-int32_t CreateSignContent(const UpgradePkgInfoExt *pkgInfoExt, const char *packagePath,
-    const char *signedPackage, const char *keyPath)
-{
-    if (pkgInfoExt == nullptr || packagePath == nullptr || signedPackage == nullptr ||
-        keyPath == nullptr) {
-        LOG(ERROR) << "Check param fail ";
-        return PKG_INVALID_PARAM;
-    }
-    PkgManager::PkgManagerPtr manager = PkgManager::GetPackageInstance();
-    if (manager == nullptr) {
-        LOG(ERROR) << "Get package instance fail ";
-        return PKG_INVALID_PARAM;
-    }
-
-    PkgInfo info;
-    GetSignContentInfo(&info, pkgInfoExt);
-
-    int32_t ret = manager->CreateSignContent(packagePath, signedPackage, keyPath, &info);
-    if (ret != PKG_SUCCESS) {
-        LOG(ERROR) << "Sign Package fail ";
-        PkgManager::ReleasePackageInstance(manager);
-        return ret;
-    }
-
-    PkgManager::ReleasePackageInstance(manager);
-    return ret;
-}
-

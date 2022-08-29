@@ -322,6 +322,7 @@ UScriptValuePtr IntegerValue::Computer(int32_t action, UScriptValuePtr value)
     }                                                                                        \
 } while (0)
 
+
 UScriptValuePtr FloatValue::Computer(int32_t action, UScriptValuePtr value)
 {
     UScriptValuePtr rightValue = UScriptValue::GetRightCompluteValue(value);

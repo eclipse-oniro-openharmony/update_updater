@@ -270,10 +270,7 @@ public:
     virtual int32_t LoadPackage(const std::string &packagePath, const std::string &keyPath,
         std::vector<std::string> &fileIds) = 0;
 
-    virtual int32_t CreateSignContent(const std::string &packagePath, const std::string &signedPackage,
-        const std::string &keyPath, PkgInfoPtr header) = 0;
-
-    virtual int32_t VerifyOtaPackage(const std::string &packagePath, const std::string &keyPath) = 0;
+    virtual int32_t VerifyOtaPackage(const std::string &packagePath) = 0;
 
     virtual int32_t VerifyBinFile(const std::string &packagePath, const std::string &keyPath,
         const std::string &version, const PkgBuffer &digest) = 0;

@@ -39,11 +39,7 @@ size_t DigestAlgorithm::GetSignatureLen(int8_t digestMethod)
 
 uint8_t DigestAlgorithm::GetDigestMethod(std::string version)
 {
-    if (version == "3") {
-        return PKG_DIGEST_TYPE_SHA384;
-    } else {
-        return PKG_DIGEST_TYPE_SHA256;
-    }
+    return PKG_DIGEST_TYPE_SHA256;
 }
 
 int32_t Crc32Algorithm::Init()
