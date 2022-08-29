@@ -33,7 +33,9 @@
 #include "package/pkg_manager.h"
 #include "package/packages_info.h"
 #include "parameter.h"
+#ifdef UPDATER_USE_PTABLE
 #include "ptable_parse/ptable_manager.h"
+#endif
 #include "updater/updater_const.h"
 #include "updater_main.h"
 #include "updater_ui.h"
