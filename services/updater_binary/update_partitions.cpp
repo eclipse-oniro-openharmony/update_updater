@@ -140,8 +140,10 @@ int32_t UpdatePartitions::Execute(Uscript::UScriptEnv &env, Uscript::UScriptCont
         return USCRIPT_ERROR_EXECUTE;
     }
     PartitonList newPartList {};
-    UPDATER_CHECK_ONLY_RETURN(ParsePartitionInfo(std::string(partitionInfo), newPartList),
-        env.GetPkgManager()->ClosePkgStream(outStream); return USCRIPT_ABOART);
+    if (ParsePartitionInfo(std::string(partitionInfo), newPartList) == 0) {
+        env.GetPkgManager()->ClosePkgStream(outStream);
+        return USCRIPT_ABOART;
+    }
     if (newPartList.empty()) {
         LOG(ERROR) << "Partition is empty ";
         env.GetPkgManager()->ClosePkgStream(outStream);

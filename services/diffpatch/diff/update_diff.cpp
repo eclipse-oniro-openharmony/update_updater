@@ -51,13 +51,22 @@ const Hpackage::FileInfo *ImageParser::GetFileInfo(const std::string &fileName) 
 int32_t ImageParser::Parse(const std::string &packageName)
 {
     pkgManager_ = Hpackage::PkgManager::CreatePackageInstance();
-    PATCH_CHECK(pkgManager_ != nullptr, return PATCH_INVALID_PARAM, "Failed to get pkg manager");
+    if (pkgManager_ == nullptr) {
+        PATCH_LOGE("Failed to get pkg manager");
+        return PATCH_INVALID_PARAM;
+    }
     int32_t ret = PatchMapFile(packageName, memMap_);
-    PATCH_CHECK(ret == 0, return -1, "Failed to read file");
+    if (ret != 0) {
+        PATCH_LOGE("Failed to read file");
+        return -1;
+    }
 
     PkgBuffer buffer {memMap_.memory, memMap_.length};
     ret = pkgManager_->CreatePkgStream(stream_, packageName, buffer);
-    PATCH_CHECK(ret == 0, return -1, "Failed to create pkg stream");
+    if (ret != 0) {
+        PATCH_LOGE("Failed to create pkg stream");
+        return -1;
+    }
 
     // parse img and get image type
     type_ = PKG_PACK_TYPE_ZIP;
@@ -82,7 +91,10 @@ int32_t ImageParser::Parse(const std::string &packageName)
 int32_t ImageParser::Extract(const std::string &fileName, std::vector<uint8_t> &buffer)
 {
     PATCH_DEBUG("ImageParser::Extract %s", fileName.c_str());
-    PATCH_CHECK(pkgManager_ != nullptr, return PATCH_INVALID_PARAM, "Failed to get pkg manager");
+    if (pkgManager_ == nullptr) {
+        PATCH_LOGE("Failed to get pkg manager");
+        return PATCH_INVALID_PARAM;
+    }
     size_t bufferSize = 0;
     Hpackage::PkgManager::StreamPtr outStream = nullptr;
     int32_t ret = pkgManager_->CreatePkgStream(outStream, fileName,
@@ -97,15 +109,23 @@ int32_t ImageParser::Extract(const std::string &fileName, std::vector<uint8_t> &
             }
             return memcpy_s(buffer.data() + start, buffer.size(), data.buffer, size);
         }, nullptr);
-    PATCH_CHECK(ret == 0, return -1, "Failed to extract data");
+    if (ret != 0) {
+        PATCH_LOGE("Failed to extract data");
+        return -1;
+    }
 
     ret = pkgManager_->ExtractFile(fileName, outStream);
     pkgManager_->ClosePkgStream(outStream);
 
     const FileInfo *fileInfo = pkgManager_->GetFileInfo(fileName);
-    PATCH_CHECK(fileInfo != nullptr, return -1, "Failed to get file info");
-    PATCH_CHECK(fileInfo->unpackedSize == bufferSize, return -1,
-        "Failed to check uncompress data size %zu %zu", fileInfo->unpackedSize, bufferSize);
+    if (fileInfo == nullptr) {
+        PATCH_LOGE("Failed to get file info");
+        return -1;
+    }
+    if (fileInfo->unpackedSize != bufferSize) {
+        PATCH_LOGE("Failed to check uncompress data size %zu %zu", fileInfo->unpackedSize, bufferSize);
+        return -1;
+    }
     return ret;
 }
 
@@ -118,11 +138,20 @@ int32_t UpdateDiff::MakePatch(const std::string &oldFileName,
 
     newParser_.reset(new ImageParser());
     oldParser_.reset(new ImageParser());
-    PATCH_CHECK(newParser_ != nullptr, return -1, "Failed to create new parser");
-    PATCH_CHECK(oldParser_ != nullptr, return -1, "Failed to create old parser");
+    if (newParser_ == nullptr) {
+        PATCH_LOGE("Failed to create new parser");
+        return -1;
+    }
+    if (oldParser_ == nullptr) {
+        PATCH_LOGE("Failed to create old parser");
+        return -1;
+    }
     int32_t ret = newParser_->Parse(newFileName);
     int32_t ret1 = oldParser_->Parse(oldFileName);
-    PATCH_CHECK((ret == 0 && ret1 == 0), return -1, "Failed to parse image");
+    if (ret != 0 || ret1 != 0) {
+        PATCH_LOGE("Failed to parse image");
+        return -1;
+    }
 
     std::unique_ptr<ImageDiff> imageDiff = nullptr;
     PATCH_DEBUG("UpdateDiff::MakePatch type: %d %d", newParser_->GetType(), oldParser_->GetType());
@@ -154,7 +183,10 @@ int32_t UpdateDiff::DiffImage(size_t limit, const std::string &oldFileName,
     const std::string &newFileName, const std::string &patchFileName)
 {
     auto updateDiff = std::make_unique<UpdateDiff>(limit, false);
-    PATCH_CHECK(updateDiff != nullptr, return -1, "Failed to create update diff");
+    if (updateDiff == nullptr) {
+        PATCH_LOGE("Failed to create update diff");
+        return -1;
+    }
     return updateDiff->MakePatch(oldFileName, newFileName, patchFileName);
 }
 
@@ -162,7 +194,10 @@ int32_t UpdateDiff::DiffBlock(const std::string &oldFileName,
     const std::string &newFileName, const std::string &patchFileName)
 {
     auto updateDiff = std::make_unique<UpdateDiff>(0, true);
-    PATCH_CHECK(updateDiff != nullptr, return -1, "Failed to create update diff");
+    if (updateDiff == nullptr) {
+        PATCH_LOGE("Failed to create update diff");
+        return -1;
+    }
     return updateDiff->MakePatch(oldFileName, newFileName, patchFileName);
 }
 } // namespace UpdatePatch

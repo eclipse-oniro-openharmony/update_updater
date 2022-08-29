@@ -39,7 +39,9 @@ bool RawWriter::Write(const uint8_t *addr, size_t len, [[maybe_unused]] const vo
         }
     }
 
-    UPDATER_CHECK_ONLY_RETURN(WriteInternal(fd_, addr, len) >= 0, return false);
+    if (WriteInternal(fd_, addr, len) < 0) {
+        return false;
+    }
     return true;
 }
 
@@ -49,11 +51,17 @@ int RawWriter::WriteInternal(int fd, const uint8_t *data, size_t len)
     size_t rest = len;
 
     int ret = lseek64(fd, offset_, SEEK_SET);
-    UPDATER_FILE_CHECK(ret != -1, "RawWriter: failed to seek file to " << offset_, return -1);
+    if (ret == -1) {
+        LOG(ERROR) << "RawWriter: failed to seek file to " << offset_ << " : " << strerror(errno);
+        return -1;
+    }
 
     while (rest > 0) {
         written = write(fd, data, rest);
-        UPDATER_FILE_CHECK(written >= 0, "RawWriter: failed to write data of len " << len, return -1);
+        if (written < 0) {
+            LOG(ERROR) << "RawWriter: failed to write data of len " << len << " : " << strerror(errno);
+            return -1;
+        }
         data += written;
         rest -= static_cast<size_t>(written);
     }

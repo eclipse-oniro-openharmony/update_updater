@@ -37,12 +37,22 @@ int DataWriter::OpenPath(const std::string &path)
         LOG(ERROR) << "Datawriter: " << path << " is not writable.";
         return -1;
     }
-    char realPath[PATH_MAX + 1] = {0};
-    char *get = realpath(path.c_str(), realPath);
-    UPDATER_FILE_CHECK(get != nullptr, "realPath is NULL", return -1);
+    char *realPath = realpath(path.c_str(), NULL);
+    if (realPath == nullptr) {
+        LOG(ERROR) << "realPath is NULL" << " : " << strerror(errno);
+        return -1;
+    }
     int fd = open(realPath, O_RDWR | O_LARGEFILE);
-    UPDATER_FILE_CHECK(fd >= 0, "Datawriter: open block device " << path << " failed ", return fd);
-    UPDATER_CHECK_FILE_OP(lseek(fd, 0, SEEK_SET) != -1, "Datawriter: seek " << path << "failed ", fd, fd = -1);
+    free(realPath);
+    if (fd < 0) {
+        LOG(ERROR) << "Datawriter: open block device " << path << " failed " << " : " << strerror(errno);
+        return fd;
+    }
+    if (lseek(fd, 0, SEEK_SET) == -1) {
+        LOG(ERROR) << "Datawriter: seek " << path << "failed " << " : " << strerror(errno);
+        close(fd);
+        fd = -1;
+    }
     return fd;
 }
 

@@ -53,11 +53,16 @@ static int ExtractNewData(const PkgBuffer &buffer, size_t size, size_t start, bo
         pthread_mutex_unlock(&info->mutex);
         size_t toWrite = std::min(size, info->writer->GetBlocksSize() - info->writer->GetTotalWritten());
         // No more data to write.
-        UPDATER_CHECK_ONLY_RETURN(toWrite != 0, break);
+        if (toWrite == 0) {
+            break;
+        }
         bool ret = info->writer->Write(addr, toWrite, nullptr);
         std::ostringstream logMessage;
         logMessage << "Write " << toWrite << " byte(s) failed";
-        UPDATER_ERROR_CHECK(ret == true, logMessage.str(), return Hpackage::PKG_INVALID_STREAM);
+        if (!ret) {
+            LOG(ERROR) << logMessage.str();
+            return Hpackage::PKG_INVALID_STREAM;
+        }
         size -= toWrite;
         addr += toWrite;
 
@@ -141,8 +146,10 @@ struct UpdateBlockInfo {
 static int32_t GetUpdateBlockInfo(struct UpdateBlockInfo &infos, Uscript::UScriptEnv &env,
     Uscript::UScriptContext &context)
 {
-    UPDATER_ERROR_CHECK(context.GetParamCount() == 4, "Invalid param",
-    return ReturnAndPushParam(USCRIPT_INVALID_PARAM, context));
+    if (context.GetParamCount() != 4) { // 4:Determine the number of parameters
+        LOG(ERROR) << "Invalid param";
+        return ReturnAndPushParam(USCRIPT_INVALID_PARAM, context);
+    }
 
     // Get partition Name first.
     // Use partition name as zip file name. ${partition name}.zip
@@ -150,19 +157,33 @@ static int32_t GetUpdateBlockInfo(struct UpdateBlockInfo &infos, Uscript::UScrip
     // Try to unzip ${partition name}.zip， extract transfer.list, net.dat, patch.dat
     size_t pos = 0;
     int32_t ret = context.GetParam(pos++, infos.partitionName);
-    UPDATER_ERROR_CHECK(ret == USCRIPT_SUCCESS, "Error to get param 1", return ret);
+    if (ret != USCRIPT_SUCCESS) {
+        LOG(ERROR) << "Error to get param 1";
+        return ret;
+    }
     ret = context.GetParam(pos++, infos.transferName);
-    UPDATER_ERROR_CHECK(ret == USCRIPT_SUCCESS, "Error to get param 2", return ret);
+    if (ret != USCRIPT_SUCCESS) {
+        LOG(ERROR) << "Error to get param 2";
+        return ret;
+    }
     ret = context.GetParam(pos++, infos.newDataName);
-    UPDATER_ERROR_CHECK(ret == USCRIPT_SUCCESS, "Error to get param 3", return ret);
+    if (ret != USCRIPT_SUCCESS) {
+        LOG(ERROR) << "Error to get param 3";
+        return ret;
+    }
     ret = context.GetParam(pos++, infos.patchDataName);
-    UPDATER_ERROR_CHECK(ret == USCRIPT_SUCCESS, "Error to get param 4", return ret);
+    if (ret != USCRIPT_SUCCESS) {
+        LOG(ERROR) << "Error to get param 4";
+        return ret;
+    }
 
     LOG(INFO) << "ExecuteUpdateBlock::updating  " << infos.partitionName << " ...";
     infos.devPath = GetBlockDeviceByMountPoint(infos.partitionName);
     LOG(INFO) << "ExecuteUpdateBlock::updating  dev path : " << infos.devPath;
-    UPDATER_ERROR_CHECK(!infos.devPath.empty(), "cannot get block device of partition",
-        return ReturnAndPushParam(USCRIPT_ERROR_EXECUTE, context));
+    if (infos.devPath.empty()) {
+        LOG(ERROR) << "cannot get block device of partition";
+        return ReturnAndPushParam(USCRIPT_ERROR_EXECUTE, context);
+    }
     return USCRIPT_SUCCESS;
 }
 
@@ -177,11 +198,15 @@ static int32_t ExecuteTransferCommand(int fd, const std::vector<std::string> &li
     globalParams->retryFile = std::string("/data/updater") + partitionName + "_retry";
     LOG(INFO) << "Store base path is " << globalParams->storeBase;
     int32_t ret = Store::CreateNewSpace(globalParams->storeBase, !globalParams->env->IsRetry());
-    UPDATER_ERROR_CHECK(ret != -1, "Error to create new store space",
-    return ReturnAndPushParam(USCRIPT_ERROR_EXECUTE, context));
+    if (ret == -1) {
+        LOG(ERROR) << "Error to create new store space";
+        return ReturnAndPushParam(USCRIPT_ERROR_EXECUTE, context);
+    }
     globalParams->storeCreated = ret;
 
-    UPDATER_CHECK_ONLY_RETURN(tm->CommandsParser(fd, lines), return USCRIPT_ERROR_EXECUTE);
+    if (!tm->CommandsParser(fd, lines)) {
+        return USCRIPT_ERROR_EXECUTE;
+    }
     pthread_mutex_lock(&writerThreadInfo->mutex);
     if (writerThreadInfo->readyToWrite) {
         LOG(WARNING) << "New data writer thread is still available...";
@@ -193,7 +218,9 @@ static int32_t ExecuteTransferCommand(int fd, const std::vector<std::string> &li
     ret = pthread_join(globalParams->thread, nullptr);
     std::ostringstream logMessage;
     logMessage << "pthread join returned with " << ret;
-    UPDATER_WARNING_CHECK_NOT_RETURN(ret == 0, logMessage.str());
+    if (ret != 0) {
+        LOG(WARNING) << logMessage.str();
+    }
     if (globalParams->storeCreated != -1) {
         Store::DoFreeSpace(globalParams->storeBase);
     }
@@ -222,15 +249,24 @@ static int32_t ExtractDiffPackageAndLoad(const UpdateBlockInfo &infos, Uscript::
     Hpackage::PkgManager::StreamPtr outStream = nullptr;
     LOG(DEBUG) << "partitionName is " << infos.partitionName;
     const FileInfo *info = env.GetPkgManager()->GetFileInfo(infos.partitionName);
-    UPDATER_ERROR_CHECK(info != nullptr, "Error to get file info", return USCRIPT_ERROR_EXECUTE);
+    if (info == nullptr) {
+        LOG(ERROR) << "Error to get file info";
+        return USCRIPT_ERROR_EXECUTE;
+    }
     std::string diffPackage = std::string("/data/updater") + infos.partitionName;
     int32_t ret = env.GetPkgManager()->CreatePkgStream(outStream,
         diffPackage, info->unpackedSize, PkgStream::PkgStreamType_Write);
-    UPDATER_ERROR_CHECK(outStream != nullptr, "Error to create output stream", return USCRIPT_ERROR_EXECUTE);
+    if (outStream == nullptr) {
+        LOG(ERROR) << "Error to create output stream";
+        return USCRIPT_ERROR_EXECUTE;
+    }
 
     ret = env.GetPkgManager()->ExtractFile(infos.partitionName, outStream);
-    UPDATER_ERROR_CHECK(ret == USCRIPT_SUCCESS, "Error to extract file",
-        env.GetPkgManager()->ClosePkgStream(outStream); return USCRIPT_ERROR_EXECUTE);
+    if (ret != USCRIPT_SUCCESS) {
+        LOG(ERROR) << "Error to extract file";
+        env.GetPkgManager()->ClosePkgStream(outStream);
+        return USCRIPT_ERROR_EXECUTE;
+    }
     env.GetPkgManager()->ClosePkgStream(outStream);
     std::string diffPackageZip = diffPackage + ".zip";
     if (rename(diffPackage.c_str(), diffPackageZip.c_str()) != 0) {
@@ -240,8 +276,10 @@ static int32_t ExtractDiffPackageAndLoad(const UpdateBlockInfo &infos, Uscript::
     LOG(DEBUG) << "Rename " << diffPackage << " to zip\nExtract " << diffPackage << " done\nReload " << diffPackageZip;
     std::vector<std::string> diffPackageComponents;
     ret = env.GetPkgManager()->LoadPackage(diffPackageZip, Updater::Utils::GetCertName(), diffPackageComponents);
-    UPDATER_ERROR_CHECK(diffPackageComponents.size() >= 1, "Diff package is empty",
-        return ReturnAndPushParam(USCRIPT_ERROR_EXECUTE, context));
+    if (diffPackageComponents.size() < 1) {
+        LOG(ERROR) << "Diff package is empty";
+        return ReturnAndPushParam(USCRIPT_ERROR_EXECUTE, context);
+    }
     return USCRIPT_SUCCESS;
 }
 
@@ -249,8 +287,11 @@ static int32_t DoExecuteUpdateBlock(const UpdateBlockInfo &infos, Uscript::UScri
     Hpackage::PkgManager::StreamPtr &outStream, const std::vector<std::string> &lines, Uscript::UScriptContext &context)
 {
     int fd = open(infos.devPath.c_str(), O_RDWR | O_LARGEFILE);
-    UPDATER_ERROR_CHECK (fd != -1, "Failed to open block",
-        env.GetPkgManager()->ClosePkgStream(outStream); return USCRIPT_ERROR_EXECUTE);
+    if (fd == -1) {
+        LOG(ERROR) << "Failed to open block";
+        env.GetPkgManager()->ClosePkgStream(outStream);
+        return USCRIPT_ERROR_EXECUTE;
+    }
     int32_t ret = ExecuteTransferCommand(fd, lines, env, context, infos.partitionName);
     fsync(fd);
     close(fd);
@@ -329,8 +370,9 @@ int32_t UScriptInstructionBlockCheck::Execute(Uscript::UScriptEnv &env, Uscript:
 {
     UPDATER_ERROR_CHECK(context.GetParamCount() == 1, "Invalid param",
         return ReturnAndPushParam(USCRIPT_INVALID_PARAM, context));
-    UPDATER_CHECK_ONLY_RETURN(!env.IsRetry(), return ReturnAndPushParam(USCRIPT_SUCCESS, context));
-
+    if (env.IsRetry()) {
+        return ReturnAndPushParam(USCRIPT_SUCCESS, context);
+    }
     std::string partitionName;
     int32_t ret = context.GetParam(0, partitionName);
     UPDATER_ERROR_CHECK(ret == USCRIPT_SUCCESS, "Failed to get param",

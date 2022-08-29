@@ -49,7 +49,7 @@ public:
         int32_t ret = UpdatePatch::UpdateDiff::DiffBlock(TEST_PATH_FROM + oldFile,
             TEST_PATH_FROM + newFile, TEST_PATH_FROM + patchFile);
         EXPECT_EQ(0, ret);
-        ret = UpdatePatch::UpdatePatch::ApplyPatch(TEST_PATH_FROM + patchFile,
+        ret = UpdatePatch::UpdateApplyPatch::ApplyPatch(TEST_PATH_FROM + patchFile,
             TEST_PATH_FROM + oldFile, TEST_PATH_FROM + restoreFile);
         EXPECT_EQ(0, ret);
 
@@ -65,7 +65,7 @@ public:
         int32_t ret = UpdatePatch::UpdateDiff::DiffImage(limit, TEST_PATH_FROM + oldFile,
             TEST_PATH_FROM + newFile, TEST_PATH_FROM + patchFile);
         EXPECT_EQ(0, ret);
-        ret = UpdatePatch::UpdatePatch::ApplyPatch(TEST_PATH_FROM + patchFile,
+        ret = UpdatePatch::UpdateApplyPatch::ApplyPatch(TEST_PATH_FROM + patchFile,
             TEST_PATH_FROM + oldFile, TEST_PATH_FROM + restoreFile);
         EXPECT_EQ(0, ret);
 
@@ -77,9 +77,9 @@ public:
     }
 
     int32_t TestApplyPatch(const std::string &patchName, const std::string &oldName,
-        const std::string &expected, UpdatePatch::UpdatePatch::ImageProcessor writer) const
+        const std::string &expected, UpdatePatch::UpdateApplyPatch::ImageProcessor writer) const
     {
-        PATCH_DEBUG("UpdatePatch::ApplyPatch : %s ", patchName.c_str());
+        PATCH_DEBUG("UpdateApplyPatch::ApplyPatch : %s ", patchName.c_str());
         std::vector<uint8_t> empty;
         UpdatePatch::MemMapInfo patchData {};
         UpdatePatch::MemMapInfo oldData {};
@@ -88,7 +88,7 @@ public:
         ret = PatchMapFile(oldName, oldData);
         PATCH_CHECK(ret == 0, return -1, "Failed to read old file");
 
-        PATCH_LOGI("UpdatePatch::ApplyPatch patchData %zu oldData %zu ", patchData.length, oldData.length);
+        PATCH_LOGI("UpdateApplyPatch::ApplyPatch patchData %zu oldData %zu ", patchData.length, oldData.length);
         // check if image patch
         if (memcmp(patchData.memory, UpdatePatch::PKGDIFF_MAGIC,
             std::char_traits<char>::length(UpdatePatch::PKGDIFF_MAGIC)) == 0) {
@@ -97,7 +97,7 @@ public:
             param.patchSize = patchData.length;
             param.oldBuff = oldData.memory;
             param.oldSize = oldData.length;
-            ret = UpdatePatch::UpdatePatch::ApplyImagePatch(param, empty, writer, expected);
+            ret = UpdatePatch::UpdateApplyPatch::ApplyImagePatch(param, empty, writer, expected);
             PATCH_CHECK(ret == 0, return -1, "Failed to apply image patch file");
         }
         return 0;
@@ -130,7 +130,7 @@ public:
     int32_t TestApplyBlockPatch(const std::string &patchName,
         const std::string &oldName, const std::string &newName, bool isBuffer) const
     {
-        PATCH_DEBUG("UpdatePatch::ApplyPatch : %s ", patchName.c_str());
+        PATCH_DEBUG("UpdateApplyPatch::ApplyPatch : %s ", patchName.c_str());
         std::vector<uint8_t> empty;
         UpdatePatch::MemMapInfo patchData {};
         UpdatePatch::MemMapInfo oldData {};
@@ -144,7 +144,7 @@ public:
         UpdatePatch::BlockBuffer oldInfo = {oldData.memory, oldData.length};
         if (isBuffer) {
             std::vector<uint8_t> newData;
-            ret = UpdatePatch::UpdatePatch::ApplyBlockPatch(patchInfo, oldInfo, newData);
+            ret = UpdatePatch::UpdateApplyPatch::ApplyBlockPatch(patchInfo, oldInfo, newData);
             PATCH_CHECK(ret == 0, return -1, "Failed to apply block patch file");
             std::ofstream stream(newName, std::ios::out | std::ios::binary);
             PATCH_CHECK(!stream.fail(), return -1, "Failed to open %s", newName.c_str());
@@ -155,7 +155,7 @@ public:
             PATCH_CHECK(writer != nullptr, return -1, "Failed to create writer");
             writer->Init();
 
-            ret = UpdatePatch::UpdatePatch::ApplyBlockPatch(patchInfo, oldInfo, writer.get());
+            ret = UpdatePatch::UpdateApplyPatch::ApplyBlockPatch(patchInfo, oldInfo, writer.get());
             EXPECT_EQ(0, ret);
             writer->Finish();
         }

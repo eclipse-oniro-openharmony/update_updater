@@ -42,7 +42,13 @@ ohos_executable("updater_binary") {
   configs = [ ":updater_config" ]
 
   ldflags = [ "-Wl -std=c++11" ]
-
+  if (defined(binary_force_link_libs)) {
+    ldflags += [ "-Wl,--whole-archive" ]
+    foreach(lib, binary_force_link_libs) {
+      ldflags += [ "${lib}" ]
+    }
+    ldflags += [ "-Wl,--no-whole-archive" ]
+  }
   deps = [
     "//base/update/updater/interfaces/kits/misc_info:libmiscinfo",
     "//base/update/updater/services/applypatch:libapplypatch",

@@ -48,7 +48,7 @@ public:
 
 using UpdatePatchWriterPtr = UpdatePatchWriter *;
 
-class UpdatePatch {
+class UpdateApplyPatch {
 public:
     using ImageProcessor = std::function<int(size_t start, const BlockBuffer &data, size_t size)>;
 
@@ -84,7 +84,7 @@ private:
 
 class ImagePatchWriter : public UpdatePatchWriter {
 public:
-    ImagePatchWriter(UpdatePatch::ImageProcessor writer,
+    ImagePatchWriter(UpdateApplyPatch::ImageProcessor writer,
         const std::string &expected, const std::string &partitionName) : UpdatePatchWriter(),
         writer_(writer), expected_(expected), partitionName_(partitionName) {}
     ~ImagePatchWriter() override {}
@@ -95,7 +95,7 @@ public:
 private:
     bool init_ { false };
     SHA256_CTX sha256Ctx_ {};
-    UpdatePatch::ImageProcessor writer_;
+    UpdateApplyPatch::ImageProcessor writer_;
     std::string expected_;
     std::string partitionName_;
 };

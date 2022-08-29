@@ -81,7 +81,7 @@ public:
         });
         std::unique_ptr<FileWriter> writer = std::make_unique<FileWriter>(fd, targetBlk);
         std::vector<uint8_t> empty;
-        int32_t ret = UpdatePatch::UpdatePatch::ApplyImagePatch(param, empty,
+        int32_t ret = UpdatePatch::UpdateApplyPatch::ApplyImagePatch(param, empty,
             [&](size_t start, const UpdatePatch::BlockBuffer &data, size_t size) -> int {
                 bool ret = writer->Write(data.buffer, size, nullptr);
                 return ret ? 0 : -1;

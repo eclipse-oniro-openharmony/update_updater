@@ -51,12 +51,18 @@ static size_t GetHeaderSize(const ImageBlock &block)
 int32_t ImageDiff::MakePatch(const std::string &patchName)
 {
     PATCH_LOGI("ImageDiff::MakePatch %s limit_:%d", patchName.c_str(), limit_);
-    PATCH_CHECK(newParser_ != nullptr && oldParser_ != nullptr, return -1, "Invalid parser");
+    if (newParser_ == nullptr || oldParser_ == nullptr) {
+        PATCH_LOGE("Invalid parser");
+        return -1;
+    }
     BlockBuffer newBuffer;
     BlockBuffer olduffer;
     int32_t ret = newParser_->GetPkgBuffer(newBuffer);
     int32_t ret1 = oldParser_->GetPkgBuffer(olduffer);
-    PATCH_CHECK((ret == 0 && ret1 == 0), return -1, "Failed to get pkgbuffer");
+    if (ret != 0 || ret1 != 0) {
+        PATCH_LOGE("Failed to get pkgbuffer");
+        return -1;
+    }
 
     PATCH_LOGI("ImageDiff::MakePatch newBuffer %zu %zu ", newBuffer.length, olduffer.length);
 
@@ -71,7 +77,10 @@ int32_t ImageDiff::MakePatch(const std::string &patchName)
         PatchBuffer oldInfo = { olduffer.buffer, 0, olduffer.length };
         PatchBuffer newInfo = { newBuffer.buffer, 0, newBuffer.length };
         ret = SplitImage(oldInfo, newInfo);
-        PATCH_CHECK(ret == 0, return -1, "Failed to split imgage");
+        if (ret != 0) {
+            PATCH_LOGE("Failed to split imgage");
+            return ret;
+        }
     }
     return DiffImage(patchName);
 }
@@ -111,7 +120,10 @@ int32_t ImageDiff::WriteHeader(std::ofstream &patchFile,
             BlockBuffer newInfo = { block.newInfo.buffer + block.newInfo.start, block.newInfo.length };
             BlockBuffer oldInfo = { block.oldInfo.buffer + block.oldInfo.start, block.oldInfo.length };
             ret = MakeBlockPatch(block, blockPatchFile, newInfo, oldInfo, patchSize);
-            PATCH_CHECK(ret == 0, return -1, "Failed to make block patch");
+            if (ret != 0) {
+                PATCH_LOGE("Failed to make block patch");
+                return -1;
+            }
             PATCH_LOGI("WriteHeader BLOCK_NORMAL patchOffset %zu oldInfo %ld %ld newInfo:%zu %zu patch %zu %zu",
                 static_cast<size_t>(patchFile.tellp()),
                 block.oldInfo.start, block.oldInfo.length, block.newInfo.start, block.newInfo.length,
@@ -145,13 +157,19 @@ int32_t ImageDiff::MakeBlockPatch(ImageBlock &block, std::fstream &blockPatchFil
     if (!usePatchFile_) {
         std::vector<uint8_t> patchData;
         int32_t ret = BlocksDiff::MakePatch(newInfo, oldInfo, patchData, 0, patchSize);
-        PATCH_CHECK(ret == 0, return -1, "Failed to make block patch");
+        if (ret != 0) {
+            PATCH_LOGE("Failed to make block patch");
+            return -1;
+        }
         BlockBuffer patchBuffer = {patchData.data(), patchSize};
         PATCH_DEBUG("MakeBlockPatch hash %zu %s", patchSize, GeneraterBufferHash(patchBuffer).c_str());
         block.patchData = std::move(patchData);
     } else {
         int32_t ret = BlocksDiff::MakePatch(newInfo, oldInfo, blockPatchFile, patchSize);
-        PATCH_CHECK(ret == 0, return -1, "Failed to make block patch");
+        if (ret != 0) {
+            PATCH_LOGE("Failed to make block patch");
+            return -1;
+        }
         PATCH_LOGI("MakeBlockPatch patch %zu patch %zu",
             patchSize, static_cast<size_t>(blockPatchFile.tellp()));
     }
@@ -191,8 +209,10 @@ int32_t ImageDiff::DiffImage(const std::string &patchName)
 {
     std::fstream blockPatchFile;
     std::ofstream patchFile(patchName, std::ios::out | std::ios::trunc | std::ios::binary);
-    PATCH_CHECK(!patchFile.fail(), return -1, "Failed to open %s", patchName.c_str());
-
+    if (patchFile.fail()) {
+        PATCH_LOGE("Failed to open %s", patchName.c_str());
+        return -1;
+    }
     patchFile.write(PKGDIFF_MAGIC, std::char_traits<char>::length(PKGDIFF_MAGIC));
     size_t dataOffset = std::char_traits<char>::length(PKGDIFF_MAGIC);
     uint32_t size = static_cast<uint32_t>(updateBlocks_.size());
@@ -209,7 +229,10 @@ int32_t ImageDiff::DiffImage(const std::string &patchName)
 
     if (usePatchFile_) {
         blockPatchFile.open(patchName + ".bspatch", std::ios::in | std::ios::out | std::ios::trunc | std::ios::binary);
-        PATCH_CHECK(!blockPatchFile.fail(), return -1, "Failed to open bspatch %s", patchName.c_str());
+        if (blockPatchFile.fail()) {
+            PATCH_LOGE("Failed to open bspatch %s", patchName.c_str());
+            return -1;
+        }
     }
 
     for (size_t index = 0; index < updateBlocks_.size(); index++) {
@@ -217,11 +240,17 @@ int32_t ImageDiff::DiffImage(const std::string &patchName)
             index, static_cast<size_t>(patchFile.tellp()), dataOffset);
         patchFile.write(reinterpret_cast<const char*>(&updateBlocks_[index].type), sizeof(uint32_t));
         int32_t ret = WriteHeader(patchFile, blockPatchFile, dataOffset, updateBlocks_[index]);
-        PATCH_CHECK(ret == 0, return -1, "Failed to write header");
+        if (ret != 0) {
+            PATCH_LOGE("Failed to write header");
+            return -1;
+        }
     }
 
     int32_t ret = WritePatch(patchFile, blockPatchFile);
-    PATCH_CHECK(ret == 0, return -1, "Failed to write patch");
+    if (ret != 0) {
+        PATCH_LOGE("Failed to write patch");
+        return -1;
+    }
     PATCH_LOGI("DiffImage success patchOffset %zu %s", static_cast<size_t>(patchFile.tellp()), patchName.c_str());
     patchFile.close();
     return 0;
@@ -230,12 +259,18 @@ int32_t ImageDiff::DiffImage(const std::string &patchName)
 int32_t CompressedImageDiff::MakePatch(const std::string &patchName)
 {
     PATCH_DEBUG("CompressedImageDiff::MakePatch %s limit_:%d", patchName.c_str(), limit_);
-    PATCH_CHECK(newParser_ != nullptr && oldParser_ != nullptr, return -1, "Invalid parser");
+    if (newParser_ == nullptr || oldParser_ == nullptr) {
+        PATCH_LOGE("Invalid parser");
+        return -1;
+    }
     BlockBuffer newBuffer;
     BlockBuffer oldBuffer;
     int32_t ret = newParser_->GetPkgBuffer(newBuffer);
     int32_t ret1 = oldParser_->GetPkgBuffer(oldBuffer);
-    PATCH_CHECK((ret == 0 && ret1 == 0), return -1, "Failed to get pkgbuffer");
+    if (ret != 0 || ret1 != 0) {
+        PATCH_LOGE("Failed to get pkgbuffer");
+        return -1;
+    }
 
     if (limit_ != 0 && newBuffer.length >= limit_) {
         PatchBuffer oldInfo = { oldBuffer.buffer, 0, oldBuffer.length };
@@ -336,7 +371,10 @@ int32_t ZipImageDiff::WriteHeader(std::ofstream &patchFile,
         BlockBuffer oldInfo = { block.srcOriginalData.data(), block.srcOriginalLength };
         BlockBuffer newInfo = { block.destOriginalData.data(), block.destOriginalLength };
         ret = MakeBlockPatch(block, blockPatchFile, newInfo, oldInfo, patchSize);
-        PATCH_CHECK(ret == 0, return -1, "Failed to make block patch");
+        if (ret != 0) {
+            PATCH_LOGE("Failed to make block patch");
+            return -1;
+        }
 
         PATCH_LOGI("WriteHeader BLOCK_DEFLATE patchoffset %zu dataOffset:%zu patchData:%zu",
             static_cast<size_t>(patchFile.tellp()), dataOffset, patchSize);
@@ -366,7 +404,10 @@ int32_t ZipImageDiff::WriteHeader(std::ofstream &patchFile,
 int32_t ZipImageDiff::TestAndSetConfig(const BlockBuffer &buffer, const std::string &fileName)
 {
     const FileInfo *fileInfo = newParser_->GetFileInfo(fileName);
-    PATCH_CHECK(fileInfo != nullptr, return -1, "Failed to get file info");
+    if (fileInfo == nullptr) {
+        PATCH_LOGE("Failed to get file info");
+        return -1;
+    }
     ZipFileInfo *info = (ZipFileInfo *)fileInfo;
     method_ = info->method;
     level_ = info->level;
@@ -376,7 +417,10 @@ int32_t ZipImageDiff::TestAndSetConfig(const BlockBuffer &buffer, const std::str
 
     BlockBuffer orgNewBuffer;
     int32_t ret = newParser_->GetPkgBuffer(orgNewBuffer);
-    PATCH_CHECK(ret == 0, return -1, "Failed to get pkgbuffer");
+    if (ret != 0) {
+        PATCH_LOGE("Failed to get pkgbuffer");
+        return -1;
+    }
     ZipFileInfo zipInfo {};
     zipInfo.fileInfo.packMethod = info->fileInfo.packMethod;
     zipInfo.method = info->method;
@@ -417,7 +461,10 @@ int32_t Lz4ImageDiff::WriteHeader(std::ofstream &patchFile,
         BlockBuffer oldInfo = { block.srcOriginalData.data(), block.srcOriginalLength };
         BlockBuffer newInfo = { block.destOriginalData.data(), block.destOriginalLength };
         ret = MakeBlockPatch(block, blockPatchFile, newInfo, oldInfo, patchSize);
-        PATCH_CHECK(ret == 0, return -1, "Failed to make block patch");
+        if (ret != 0) {
+            PATCH_LOGE("Failed to make block patch");
+            return -1;
+        }
 
         PATCH_LOGI("WriteHeader BLOCK_LZ4 patchoffset %zu dataOffset:%zu %zu",
             static_cast<size_t>(patchFile.tellp()), dataOffset, patchSize);
@@ -498,7 +545,10 @@ int32_t CompressedImageDiff::CompressData(Hpackage::PkgManager::FileInfoPtr info
     const BlockBuffer &buffer, std::vector<uint8_t> &outData, size_t &bufferSize) const
 {
     Hpackage::PkgManager *pkgManager = Hpackage::PkgManager::GetPackageInstance();
-    PATCH_CHECK(pkgManager != nullptr, return -1, "Can not get manager ");
+    if (pkgManager == nullptr) {
+        PATCH_LOGE("Can not get manager ");
+        return -1;
+    }
     Hpackage::PkgManager::StreamPtr stream1 = nullptr;
     pkgManager->CreatePkgStream(stream1, "gzip",
         [&outData, &bufferSize](const PkgBuffer &data,
@@ -513,7 +563,10 @@ int32_t CompressedImageDiff::CompressData(Hpackage::PkgManager::FileInfoPtr info
             return memcpy_s(outData.data() + start, outData.size(), data.buffer, size);
         }, nullptr);
     int32_t ret = pkgManager->CompressBuffer(info, {buffer.buffer, buffer.length}, stream1);
-    PATCH_CHECK(ret == 0, return -1, "Can not Compress buff ");
+    if (ret != 0) {
+        PATCH_LOGE("Can not Compress buff ");
+        return -1;
+    }
     PATCH_DEBUG("UpdateDiff::MakePatch totalSize: %zu", bufferSize);
     return 0;
 }

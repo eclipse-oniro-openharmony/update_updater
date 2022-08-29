@@ -43,12 +43,20 @@ Lz4Adapter::Lz4Adapter(UpdatePatchWriterPtr outStream, size_t offset, const PkgM
 
 int32_t Lz4FrameAdapter::Open()
 {
-    PATCH_CHECK(!init_, return 0, "Has been open");
+    if (init_) {
+        PATCH_LOGE("Has been open");
+        return 0;
+    }
     LZ4F_preferences_t preferences;
     LZ4F_errorCode_t errorCode = LZ4F_createCompressionContext(&compressionContext_, LZ4F_VERSION);
-    PATCH_CHECK(!LZ4F_isError(errorCode), return -1,
-        "Failed to create compress context %s", LZ4F_getErrorName(errorCode));
-    PATCH_CHECK(!memset_s(&preferences, sizeof(preferences), 0, sizeof(preferences)), return -1, "Memset failed");
+    if (LZ4F_isError(errorCode)) {
+        PATCH_LOGE("Failed to create compress context %s", LZ4F_getErrorName(errorCode));
+        return -1;
+    }
+    if (memset_s(&preferences, sizeof(preferences), 0, sizeof(preferences)) != EOK) {
+        PATCH_LOGE("Memset failed");
+        return -1;
+    }
     preferences.autoFlush = static_cast<uint32_t>(autoFlush_);
     preferences.compressionLevel = compressionLevel_;
     preferences.frameInfo.blockMode = ((blockIndependence_ == 0) ? LZ4F_blockLinked : LZ4F_blockIndependent);
@@ -60,7 +68,10 @@ int32_t Lz4FrameAdapter::Open()
     blockSize = (blockSize > LZ4B_BLOCK_SIZE) ? LZ4B_BLOCK_SIZE : blockSize;
     inData_.resize(blockSize);
     size_t outBuffSize = LZ4F_compressBound(blockSize, &preferences);
-    PATCH_CHECK(outBuffSize > 0, return -1, "BufferSize must > 0");
+    if (outBuffSize <= 0) {
+        PATCH_LOGE("BufferSize must > 0");
+        return -1;
+    }
     buffer_.resize(outBuffSize);
 
     PATCH_LOGI("frameInfo blockSizeID %d compressionLevel_: %d blockIndependence_:%d %d %d blockSize %zu %zu %zu",
@@ -70,7 +81,10 @@ int32_t Lz4FrameAdapter::Open()
 
     /* write package header */
     size_t dataSize = LZ4F_compressBegin(compressionContext_, buffer_.data(), buffer_.size(), &preferences);
-    PATCH_CHECK(!LZ4F_isError(dataSize), return -1, "Failed to generate header %s", LZ4F_getErrorName(dataSize));
+    if (LZ4F_isError(dataSize)) {
+        PATCH_LOGE("Failed to generate header %s", LZ4F_getErrorName(dataSize));
+        return -1;
+    }
     int32_t ret = outStream_->Write(offset_, {buffer_.data(), dataSize}, dataSize);
     PATCH_CHECK(ret == 0, return -1, "Failed to deflate data");
     offset_ += dataSize;
@@ -80,10 +94,15 @@ int32_t Lz4FrameAdapter::Open()
 
 int32_t Lz4FrameAdapter::Close()
 {
-    PATCH_CHECK(init_, return 0, "Has been close");
+    if (!init_) {
+        PATCH_LOGE("Has been close");
+        return 0;
+    }
     LZ4F_errorCode_t errorCode = LZ4F_freeCompressionContext(compressionContext_);
-    PATCH_CHECK(!LZ4F_isError(errorCode), return -1,
-        "Failed to free compress context %s", LZ4F_getErrorName(errorCode));
+    if (LZ4F_isError(errorCode)) {
+        PATCH_LOGE("Failed to free compress context %s", LZ4F_getErrorName(errorCode));
+        return -1;
+    }
     init_ = false;
     return 0;
 }
@@ -94,16 +113,25 @@ int32_t Lz4FrameAdapter::WriteData(const BlockBuffer &srcData)
     int32_t ret = 0;
     if ((currDataSize_ + srcData.length) < inData_.size()) {
         ret = memcpy_s(inData_.data() + currDataSize_, inData_.size(), srcData.buffer, srcData.length);
-        PATCH_CHECK(ret == 0, return -1, "Failed to copy data ");
+        if (ret != 0) {
+            PATCH_LOGE("Failed to copy data ");
+            return -1;
+        }
         currDataSize_ += srcData.length;
     } else {
         size_t hasCopyLen = inData_.size() - currDataSize_;
         ret = memcpy_s(inData_.data() + currDataSize_, inData_.size(), srcData.buffer, hasCopyLen);
-        PATCH_CHECK(ret == 0, return -1, "Failed to copy data ");
+        if (ret != 0) {
+            PATCH_LOGE("Failed to copy data ");
+            return -1;
+        }
 
         BlockBuffer data = {inData_.data(), inData_.size()};
         ret = CompressData(data);
-        PATCH_CHECK(ret == 0, return -1, "Failed compress data ");
+        if (ret != 0) {
+            PATCH_LOGE("Failed to compress data ");
+            return -1;
+        }
 
         size_t remainLen = srcData.length - hasCopyLen;
         currDataSize_ = 0;
@@ -111,12 +139,18 @@ int32_t Lz4FrameAdapter::WriteData(const BlockBuffer &srcData)
             size_t length = (blockSize <= remainLen) ? blockSize : remainLen;
             BlockBuffer data = {srcData.buffer + srcData.length - remainLen, length};
             ret = CompressData(data);
-            PATCH_CHECK(ret == 0, return -1, "Failed compress data ");
+            if (ret != 0) {
+                PATCH_LOGE("Failed compress data ");
+                return -1;
+            }
             remainLen -= length;
         }
         if (remainLen > 0) {
             ret = memcpy_s(inData_.data(), inData_.size(), srcData.buffer + srcData.length - remainLen, remainLen);
-            PATCH_CHECK(ret == 0, return -1, "Failed to copy data ");
+            if (ret != 0) {
+                PATCH_LOGE("Failed to copy data ");
+                return -1;
+            }
             currDataSize_ = remainLen;
         }
     }
@@ -128,11 +162,17 @@ int32_t Lz4FrameAdapter::CompressData(const BlockBuffer &srcData)
     int32_t ret = 0;
     size_t dataSize = LZ4F_compressUpdate(compressionContext_,
         buffer_.data(), buffer_.size(), srcData.buffer, srcData.length, nullptr);
-    PATCH_CHECK(!LZ4F_isError(dataSize), return -1, "Failed to compress update %s", LZ4F_getErrorName(dataSize));
+    if (LZ4F_isError(dataSize)) {
+        PATCH_LOGE("Failed to compress update %s", LZ4F_getErrorName(dataSize));
+        return -1;
+    }
 
     if (dataSize > 0) {
         ret = outStream_->Write(offset_, {buffer_.data(), dataSize}, dataSize);
-        PATCH_CHECK(ret == 0, return -1, "Failed write data ");
+        if (ret != 0) {
+            PATCH_LOGE("Failed write data ");
+            return -1;
+        }
     }
     offset_ += dataSize;
     return ret;
@@ -143,13 +183,21 @@ int32_t Lz4FrameAdapter::FlushData(size_t &offset)
     if (currDataSize_ > 0) {
         BlockBuffer data = {inData_.data(), currDataSize_};
         int32_t ret = CompressData(data);
-        PATCH_CHECK(ret == 0, return -1, "Failed to compress data ");
+        if (ret != 0) {
+            PATCH_LOGE("Failed to compress data ");
+            return -1;
+        }
     }
     size_t dataSize = LZ4F_compressEnd(compressionContext_, buffer_.data(), buffer_.size(), nullptr);
-    PATCH_CHECK(!LZ4F_isError(dataSize), return -1,
-        "Failed to compress update end %s", LZ4F_getErrorName(dataSize));
+    if (LZ4F_isError(dataSize)) {
+        PATCH_LOGE("Failed to compress update end %s", LZ4F_getErrorName(dataSize));
+        return -1;
+    }
     int32_t ret = outStream_->Write(offset_, {buffer_.data(), dataSize}, dataSize);
-    PATCH_CHECK(ret == 0, return -1, "Failed to deflate data");
+    if (ret != 0) {
+        PATCH_LOGE("Failed to deflate data");
+        return -1;
+    }
     offset_ += dataSize;
     offset = offset_;
     return ret;
@@ -157,7 +205,10 @@ int32_t Lz4FrameAdapter::FlushData(size_t &offset)
 
 int32_t Lz4BlockAdapter::Open()
 {
-    PATCH_CHECK(!init_, return 0, "Has been open");
+    if (init_) {
+        PATCH_LOGE("Has been open");
+        return 0;
+    }
     size_t blockSize = LZ4_BLOCK_SIZE(blockSizeID_);
     blockSize = (blockSize > LZ4B_BLOCK_SIZE) ? LZ4B_BLOCK_SIZE : blockSize;
     inData_.resize(blockSize);
@@ -168,12 +219,21 @@ int32_t Lz4BlockAdapter::Open()
 
     /* write package */
     int bufferSize = LZ4_compressBound(LZ4_BLOCK_SIZE(blockSizeID_));
-    PATCH_CHECK(bufferSize >= 0, return -1, "Buffer size should >= 0");
+    if (bufferSize < 0) {
+        PATCH_LOGE("Buffer size should >= 0");
+        return -1;
+    }
     buffer_.resize(static_cast<size_t>(bufferSize));
     int32_t ret = memcpy_s(buffer_.data(), buffer_.size(), &LZ4B_MAGIC_NUMBER, sizeof(int32_t));
-    PATCH_CHECK(ret == 0, return -1, "Failed to memcpy ");
+    if (ret != 0) {
+        PATCH_LOGE("Failed to memcpy ");
+        return -1;
+    }
     ret = outStream_->Write(offset_, {buffer_.data(), sizeof(int32_t)}, sizeof(int32_t));
-    PATCH_CHECK(ret == 0, return -1, "Failed to deflate data");
+    if (ret != 0) {
+        PATCH_LOGE("Failed to deflate data ");
+        return -1;
+    }
     offset_ += sizeof(int32_t);
     init_ = true;
     return ret;
@@ -181,7 +241,10 @@ int32_t Lz4BlockAdapter::Open()
 
 int32_t Lz4BlockAdapter::Close()
 {
-    PATCH_CHECK(init_, return 0, "Has been close");
+    if (!init_) {
+        PATCH_LOGE("Has been close");
+        return 0;
+    }
     init_ = false;
     return 0;
 }
@@ -200,16 +263,25 @@ int32_t Lz4BlockAdapter::CompressData(const BlockBuffer &srcData)
             (int32_t)srcData.length, (int32_t)(buffer_.size() - LZ4B_REVERSED_LEN),
             compressionLevel_);
     }
-    PATCH_CHECK(dataSize > 0, return -1, "Failed to compress data dataSize %d ", dataSize);
+    if (dataSize <= 0) {
+        PATCH_LOGE("Failed to compress data dataSize %d ", dataSize);
+        return -1;
+    }
 
     // Write block to buffer.
     // Buffer format: <block size> + <block contents>
     int32_t ret = memcpy_s(buffer_.data(), buffer_.size(), &dataSize, sizeof(int32_t));
-    PATCH_CHECK(ret == 0, return -1, "Failed to memcpy ");
+    if (ret != 0) {
+        PATCH_LOGE("Failed to memcpy ");
+        return -1;
+    }
     dataSize += LZ4B_REVERSED_LEN;
 
     ret = outStream_->Write(offset_, {buffer_.data(), static_cast<size_t>(dataSize)}, static_cast<size_t>(dataSize));
-    PATCH_CHECK(ret == 0, return -1, "Failed write data ");
+    if (ret != 0) {
+        PATCH_LOGE("Failed to write data ");
+        return -1;
+    }
     offset_ += static_cast<size_t>(dataSize);
     return ret;
 }
@@ -219,7 +291,10 @@ int32_t Lz4BlockAdapter::FlushData(size_t &offset)
     if (currDataSize_ > 0) {
         BlockBuffer data = {inData_.data(), currDataSize_};
         int32_t ret = CompressData(data);
-        PATCH_CHECK(ret == 0, return -1, "Failed to compress data ");
+        if (ret != 0) {
+            PATCH_LOGE("Failed to compress data ");
+            return -1;
+        }
     }
     offset = offset_;
     return 0;
