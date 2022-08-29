@@ -212,8 +212,7 @@ void DoReboot(const std::string& rebootTarget, const std::string &extData)
         } else {
             UPDATER_ERROR_CHECK(!memset_s(msg.update, MAX_UPDATE_SIZE, 0, MAX_UPDATE_SIZE), "Memset_s failed", return);
         }
-        ret = WriteUpdaterMiscMsg(msg);
-        if (ret != true) {
+        if (!WriteUpdaterMiscMsg(msg)) {
             LOG(INFO) << "DoReboot: WriteUpdaterMiscMsg empty error";
             return;
         }
