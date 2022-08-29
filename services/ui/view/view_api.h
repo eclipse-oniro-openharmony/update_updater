@@ -29,6 +29,7 @@
 namespace Updater {
 OHOS::UITextLanguageAlignment GetAlign(const std::string &align);
 std::string TranslateText(const std::string &id);
-uint32_t GetColor(const UxBRGAPixel &color);
+bool CheckColor(const std::string &color);
+OHOS::ColorType StrToColor(const std::string &color);
 }  // namespace Updater
 #endif

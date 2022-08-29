@@ -32,7 +32,8 @@ public:
     void SetText(const std::string &txt);
     static bool IsValid(const UxLabelBtnInfo &info);
 private:
-    void InitFocus(const UxLabelBtnInfo *specPtr);
+    void InitFocus(const OHOS::ColorType &txtColor, const OHOS::ColorType &bgColor,
+        const OHOS::ColorType &focusedTxtColor, const OHOS::ColorType &focusedBgColor);
     std::string viewId_ {};
     std::unique_ptr<LabelBtnOnFocusListener> focusListener_ {};
 };

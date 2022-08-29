@@ -18,12 +18,13 @@
 #include "log/log.h"
 
 namespace Updater {
-SubPage::SubPage() : basePage_ {}, pageId_ {}, comsId_ {}, isVisible_ {false}, color_ {0, 0, 0, 255}
+using namespace OHOS;
+SubPage::SubPage() : basePage_ {}, pageId_ {}, comsId_ {}, isVisible_ {false}, color_ {Color::Black()}
 {
 }
 
 SubPage::SubPage(const std::shared_ptr<Page> &basePage, const std::string &pageId)
-    : basePage_ {basePage}, pageId_ {pageId}, comsId_ {}, isVisible_ {false}, color_ {0, 0, 0, 255}
+    : basePage_ {basePage}, pageId_ {pageId}, comsId_ {}, isVisible_ {false}, color_ {Color::Black()}
 {
 }
 
@@ -39,7 +40,7 @@ bool SubPage::BuildSubPage(UxSubPageInfo &subpageInfo)
         return false;
     }
     Reset();
-    color_ = subpageInfo.bgColor;
+    color_ = StrToColor(subpageInfo.bgColor);
     comsId_ = std::move(subpageInfo.coms);
     int minY = INT16_MAX;
     std::string focusedId {};
@@ -59,6 +60,11 @@ bool SubPage::IsPageInfoValid(const UxSubPageInfo &info)
 {
     if (info.id.empty()) {
         LOG(ERROR) << "sub page id is empty";
+        return false;
+    }
+
+    if (!CheckColor(info.bgColor)) {
+        LOG(ERROR) << "sub page color not valid, bgcolor: " << info.bgColor;
         return false;
     }
     return true;
@@ -87,8 +93,8 @@ void SubPage::SetVisible(bool isVisible)
     view->SetVisible(isVisible);
     if (isVisible) {
         // change background
-        view->SetStyle(OHOS::STYLE_BACKGROUND_COLOR, GetColor(color_));
-        view->SetStyle(OHOS::STYLE_BACKGROUND_OPA, color_.a);
+        view->SetStyle(OHOS::STYLE_BACKGROUND_COLOR, color_.full);
+        view->SetStyle(OHOS::STYLE_BACKGROUND_OPA, color_.alpha);
     }
     UpdateFocus(isVisible);
 }

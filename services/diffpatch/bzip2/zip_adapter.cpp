@@ -34,12 +34,21 @@ ZipAdapter::ZipAdapter(UpdatePatchWriterPtr outStream, size_t offset, const PkgM
 
 int32_t ZipAdapter::Open()
 {
-    PATCH_CHECK(!init_, return 0, "Has been open");
-    PATCH_CHECK(!memset_s(&zstream_, sizeof(zstream_), 0, sizeof(z_stream)), return -1, "Failed to memset stream");
+    if (init_) {
+        PATCH_LOGE("Has been open");
+        return 0;
+    }
+    if (memset_s(&zstream_, sizeof(zstream_), 0, sizeof(z_stream)) != EOK) {
+        PATCH_LOGE("Failed to memset stream");
+        return -1;
+    }
     PATCH_DEBUG("Open level_:%d method_:%d windowBits_:%d memLevel_:%d strategy_:%d",
         level_, method_, windowBits_, memLevel_, strategy_);
     int32_t ret = deflateInit2(&zstream_, level_, method_, windowBits_, memLevel_, strategy_);
-    PATCH_CHECK(ret == Z_OK, return -1, "Failed to deflateInit2 ret %d", ret);
+    if (ret != Z_OK) {
+        PATCH_LOGE("Failed to deflateInit2 ret %d", ret);
+        return -1;
+    }
     buffer_.resize(BUFFER_SIZE);
     init_ = true;
     return ret;
@@ -47,9 +56,15 @@ int32_t ZipAdapter::Open()
 
 int32_t ZipAdapter::Close()
 {
-    PATCH_CHECK(init_, return 0, "Has been close");
+    if (!init_) {
+        PATCH_LOGE("Has been close");
+        return 0;
+    }
     int32_t ret = deflateEnd(&zstream_);
-    PATCH_CHECK(ret == Z_OK, return ret, "Failed to deflateEnd %d", ret);
+    if (ret != Z_OK) {
+        PATCH_LOGE("Failed to deflateEnd %d", ret);
+        return -1;
+    }
     init_ = false;
     return ret;
 }
@@ -67,7 +82,10 @@ int32_t ZipAdapter::WriteData(const BlockBuffer &srcData)
         deflateLen = buffer_.size() -  zstream_.avail_out;
         if (deflateLen > 0) {
             ret = outStream_->Write(offset_, {buffer_.data(), deflateLen}, deflateLen);
-            PATCH_CHECK(ret == 0, return -1, "Failed to deflate data");
+            if (ret != 0) {
+                PATCH_LOGE("Failed to deflate data");
+                return -1;
+            }
             offset_ += deflateLen;
 
             zstream_.next_out = reinterpret_cast<unsigned char*>(buffer_.data());
@@ -77,8 +95,14 @@ int32_t ZipAdapter::WriteData(const BlockBuffer &srcData)
             break;
         }
     } while (ret == Z_OK);
-    PATCH_CHECK(ret == Z_OK, return ret, "Failed to write data ret %d", ret);
-    PATCH_CHECK(zstream_.avail_in == 0, return ret, "Failed to write data");
+    if (ret != Z_OK) {
+        PATCH_LOGE("WriteData : Failed to write data ret %d", ret);
+        return ret;
+    }
+    if (zstream_.avail_in != 0) {
+        PATCH_LOGE("WriteData : Failed to write data");
+        return ret;
+    }
     return ret;
 }
 
@@ -95,7 +119,10 @@ int32_t ZipAdapter::FlushData(size_t &offset)
         deflateLen = buffer_.size() -  zstream_.avail_out;
         if (deflateLen > 0) {
             ret = outStream_->Write(offset_, {buffer_.data(), deflateLen}, deflateLen);
-            PATCH_CHECK(ret == 0, return 01, "Failed to deflate data");
+            if (ret != 0) {
+                PATCH_LOGE("Failed to deflate data");
+                return 1;
+            }
             offset_ += deflateLen;
 
             zstream_.next_out = reinterpret_cast<unsigned char*>(buffer_.data());
@@ -106,8 +133,14 @@ int32_t ZipAdapter::FlushData(size_t &offset)
             break;
         }
     } while (ret == Z_OK);
-    PATCH_CHECK(ret == Z_OK, return ret, "Failed to write data ret %d", ret);
-    PATCH_CHECK(zstream_.avail_in == 0, return ret, "Failed to write data");
+    if (ret != Z_OK) {
+        PATCH_LOGE("FlushData : Failed to write data ret %d", ret);
+        return ret;
+    }
+    if (zstream_.avail_in != 0) {
+        PATCH_LOGE("FlushData : Failed to write data");
+        return ret;
+    }
     offset = offset_;
     return ret;
 }

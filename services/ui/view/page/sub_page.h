@@ -41,7 +41,7 @@ private:
     std::string pageId_;
     std::vector<std::string> comsId_;
     bool isVisible_;
-    UxBRGAPixel color_;
+    OHOS::ColorType color_;
 };
 } // namespace Updater
 #endif

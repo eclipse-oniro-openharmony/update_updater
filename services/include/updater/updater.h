@@ -63,6 +63,8 @@ bool ClearMisc();
 
 std::vector<std::string> ParseParams(int argc, char **argv);
 
+bool ClearMisc();
+
 int GetBootMode(int &mode);
 
 int OtaUpdatePreCheck(Hpackage::PkgManager::PkgManagerPtr pkgManager, const std::string &packagePath);

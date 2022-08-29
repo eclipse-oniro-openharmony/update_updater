@@ -15,6 +15,7 @@
 
 #include "view_api.h"
 #include "language/language_ui.h"
+#include "utils.h"
 
 namespace Updater {
 using namespace OHOS;
@@ -46,8 +47,39 @@ std::string TranslateText(const std::string &id)
     return id;
 }
 
-uint32_t GetColor(const UxBRGAPixel &color)
+bool CheckColor(const std::string &color)
 {
-    return OHOS::Color::GetColorFromRGB(color.r, color.g, color.b).full;
+    constexpr char colorBegin = '#';
+    constexpr std::size_t len = 9ul; // #rrggbbaa
+    if (color.empty() || color[0] != colorBegin || color.size() != len) {
+        LOG(ERROR) << "color format error: " << color;
+        return false;
+    }
+    if (std::find_if_not(std::next(begin(color)), end(color), [](unsigned char c) { return isxdigit(c) != 0; }) !=
+        end(color)) {
+        LOG(ERROR) << "color format error: " << color;
+        return false;
+    }
+    return true;
+}
+
+/*
+ * should call CheckColor before StrToColor. when directly calling StrToColor,
+ * invalid color will be regarded as black color;
+ */
+OHOS::ColorType StrToColor(const std::string &hexColor)
+{
+    std::size_t startPos = 1ul;
+    auto getNextField = [&startPos, &hexColor] () {
+        constexpr std::size_t width = 2ul;
+        uint8_t ret = (startPos > hexColor.size()) ? 0 : Utils::String2Int<uint8_t>(hexColor.substr(startPos, width));
+        startPos += width;
+        return ret;
+    };
+    auto r = getNextField();
+    auto g = getNextField();
+    auto b = getNextField();
+    auto a = getNextField();
+    return OHOS::Color::GetColorFromRGBA(r, g, b, a);
 }
 }

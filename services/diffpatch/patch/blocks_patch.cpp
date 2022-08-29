@@ -41,24 +41,40 @@ int32_t BlocksPatch::ApplyPatch()
     int64_t controlDataSize = 0;
     int64_t diffDataSize = 0;
     int32_t ret = ReadHeader(controlDataSize, diffDataSize, newSize_);
-    PATCH_CHECK(ret == 0, return -1, "Failed to read header ");
+    if (ret != 0) {
+        PATCH_LOGE("Failed to read header ");
+        return -1;
+    }
 
     while (newOffset_ < newSize_) {
         ControlData ctrlData {};
         int32_t ret = ReadControlData(ctrlData);
-        PATCH_CHECK(ret == 0, return ret, "Failed to read control data");
-        PATCH_CHECK(newOffset_ + ctrlData.diffLength <= newSize_, return PATCH_INVALID_PATCH,
-            "Failed to check new offset %ld %zu", ctrlData.diffLength, newOffset_);
+        if (ret != 0) {
+            PATCH_LOGE("Failed to read control data");
+            return ret;
+        }
+        if (newOffset_ + ctrlData.diffLength > newSize_) {
+            PATCH_LOGE("Failed to check new offset %ld %zu", ctrlData.diffLength, newOffset_);
+            return PATCH_INVALID_PATCH;
+        }
 
         ret = RestoreDiffData(ctrlData);
-        PATCH_CHECK(ret == 0, return ret, "Failed to read diff data");
+        if (ret != 0) {
+            PATCH_LOGE("Failed to read diff data");
+            return ret;
+        }
         oldOffset_ += ctrlData.diffLength;
         newOffset_ += ctrlData.diffLength;
-        PATCH_CHECK(newOffset_ + ctrlData.extraLength <= newSize_, return PATCH_INVALID_PATCH,
-            "Failed to check new offset %ld %zu", ctrlData.diffLength, newOffset_);
+        if (newOffset_ + ctrlData.extraLength > newSize_) {
+            PATCH_LOGE("Failed to check new offset %ld %zu", ctrlData.diffLength, newOffset_);
+            return PATCH_INVALID_PATCH;
+        }
 
         ret = RestoreExtraData(ctrlData);
-        PATCH_CHECK(ret == 0, return ret, "Failed to read extra data");
+        if (ret != 0) {
+            PATCH_LOGE("Failed to read extra data");
+            return ret;
+        }
 
         newOffset_ += ctrlData.extraLength;
         oldOffset_ += ctrlData.offsetIncrement;
@@ -73,14 +89,19 @@ int32_t BlocksPatch::ApplyPatch()
 int32_t BlocksPatch::ReadHeader(int64_t &controlDataSize, int64_t &diffDataSize, int64_t &newSize)
 {
     PATCH_LOGI("BlocksPatch::ApplyPatch %zu %zu", patchInfo_.start, patchInfo_.length);
-    PATCH_CHECK(patchInfo_.buffer != nullptr && patchInfo_.length > PATCH_MIN, return -1, "Invalid parm");
+    if (patchInfo_.buffer == nullptr || patchInfo_.length <= PATCH_MIN) {
+        PATCH_LOGE("Invalid parm");
+        return -1;
+    }
     BlockBuffer patchData = {patchInfo_.buffer + patchInfo_.start, patchInfo_.length - patchInfo_.start};
     PATCH_LOGI("Restore patch hash %zu %s",
         patchInfo_.length - patchInfo_.start, GeneraterBufferHash(patchData).c_str());
     uint8_t *header = patchInfo_.buffer + patchInfo_.start;
     // Compare header
-    PATCH_CHECK(memcmp(header, BSDIFF_MAGIC, std::char_traits<char>::length(BSDIFF_MAGIC)) == 0,
-        return -1, "Corrupt patch, patch head != BSDIFF40");
+    if (memcmp(header, BSDIFF_MAGIC, std::char_traits<char>::length(BSDIFF_MAGIC)) != 0) {
+        PATCH_LOGE("Corrupt patch, patch head != BSDIFF40");
+        return -1;
+    }
 
     /* Read lengths from header */
     size_t offset = std::char_traits<char>::length(BSDIFF_MAGIC);
@@ -91,8 +112,14 @@ int32_t BlocksPatch::ReadHeader(int64_t &controlDataSize, int64_t &diffDataSize,
     newSize = ReadLE64(header + offset);
     offset += sizeof(int64_t);
 
-    PATCH_CHECK(controlDataSize >= 0, return -1, "Invalid control data size");
-    PATCH_CHECK(newSize >= 0, return -1, "Invalid new data size");
+    if (controlDataSize < 0) {
+        PATCH_LOGE("Invalid control data size");
+        return -1;
+    }
+    if (newSize < 0) {
+        PATCH_LOGE("Invalid new data size");
+        return -1;
+    }
     PATCH_CHECK(diffDataSize >= 0 && (diffDataSize + controlDataSize) <= static_cast<int64_t>(patchInfo_.length),
         return -1, "Invalid patch data size");
 
@@ -116,13 +143,22 @@ int32_t BlocksPatch::ReadControlData(ControlData &ctrlData)
     std::vector<uint8_t> data(sizeof(int64_t), 0);
     BlockBuffer info = {data.data(), sizeof(int64_t)};
     int32_t ret = controlDataReader_->ReadData(info);
-    PATCH_CHECK(ret == 0, return ret, "Failed to read diffLength");
+    if (ret != 0) {
+        PATCH_LOGE("Failed to read diffLength");
+        return ret;
+    }
     ctrlData.diffLength = ReadLE64(info.buffer);
     ret = controlDataReader_->ReadData(info);
-    PATCH_CHECK(ret == 0, return ret, "Failed to read extraLength");
+    if (ret != 0) {
+        PATCH_LOGE("Failed to read extraLength");
+        return ret;
+    }
     ctrlData.extraLength = ReadLE64(info.buffer);
     ret = controlDataReader_->ReadData(info);
-    PATCH_CHECK(ret == 0, return ret, "Failed to read offsetIncrement");
+    if (ret != 0) {
+        PATCH_LOGE("Failed to read offsetIncrement");
+        return ret;
+    }
     ctrlData.offsetIncrement = ReadLE64(info.buffer);
     return 0;
 }
@@ -130,7 +166,10 @@ int32_t BlocksPatch::ReadControlData(ControlData &ctrlData)
 int32_t BlocksBufferPatch::ReadHeader(int64_t &controlDataSize, int64_t &diffDataSize, int64_t &newSize)
 {
     int32_t ret = BlocksPatch::ReadHeader(controlDataSize, diffDataSize, newSize);
-    PATCH_CHECK(ret == 0, return -1, "Failed to read header");
+    if (ret != 0) {
+        PATCH_LOGE("Failed to read header");
+        return -1;
+    }
     PATCH_LOGI("ReadHeader controlDataSize: %ld %ld %ld", controlDataSize, diffDataSize, newSize);
     newData_.resize(newSize);
     return 0;
@@ -143,7 +182,10 @@ int32_t BlocksBufferPatch::RestoreDiffData(const ControlData &ctrlData)
     }
     BlockBuffer diffData = {newData_.data() + newOffset_, static_cast<size_t>(ctrlData.diffLength)};
     int32_t ret = diffDataReader_->ReadData(diffData);
-    PATCH_CHECK(ret == 0, return ret, "Failed to read diff data");
+    if (ret != 0) {
+        PATCH_LOGE("Failed to read diff data");
+        return ret;
+    }
 
     for (int64_t i = 0; i < ctrlData.diffLength; i++) {
         if (((oldOffset_ + i) >= 0) && (static_cast<size_t>(oldOffset_ + i) < oldInfo_.length)) {
@@ -160,7 +202,10 @@ int32_t BlocksBufferPatch::RestoreExtraData(const ControlData &ctrlData)
     }
     BlockBuffer extraData = {newData_.data() + newOffset_, static_cast<size_t>(ctrlData.extraLength)};
     int32_t ret = extraDataReader_->ReadData(extraData);
-    PATCH_CHECK(ret == 0, return ret, "Failed to read extra data");
+    if (ret != 0) {
+        PATCH_LOGE("Failed to read extra data");
+        return ret;
+    }
     return 0;
 }
 
@@ -172,7 +217,10 @@ int32_t BlocksStreamPatch::RestoreDiffData(const ControlData &ctrlData)
     std::vector<uint8_t> diffData(ctrlData.diffLength);
     BlockBuffer diffBuffer = {diffData.data(), diffData.size()};
     int32_t ret = diffDataReader_->ReadData(diffBuffer);
-    PATCH_CHECK(ret == 0, return ret, "Failed to read diff data");
+    if (ret != 0) {
+        PATCH_LOGE("Failed to read diff data");
+        return ret;
+    }
 
     size_t oldOffset = static_cast<size_t>(oldOffset_);
     size_t oldLength = stream_->GetFileLength();
@@ -180,13 +228,18 @@ int32_t BlocksStreamPatch::RestoreDiffData(const ControlData &ctrlData)
     if (stream_->GetStreamType() == PkgStream::PkgStreamType_MemoryMap ||
         stream_->GetStreamType() == PkgStream::PkgStreamType_Buffer) {
         ret = stream_->GetBuffer(buffer);
-        PATCH_CHECK(ret == 0, return ret, "Failed to get old buffer");
+        if (ret != 0) {
+            PATCH_LOGE("Failed to get old buffer");
+            return ret;
+        }
     } else {
         std::vector<uint8_t> oldData(ctrlData.diffLength);
         size_t readLen = 0;
         ret = stream_->Read(buffer, oldOffset_, ctrlData.diffLength, readLen);
-        PATCH_CHECK(ret == 0 && readLen == static_cast<size_t>(ctrlData.diffLength),
-            return ret, "Failed to get old buffer");
+        if (ret != 0 || readLen != static_cast<size_t>(ctrlData.diffLength)) {
+            PATCH_LOGE("Failed to get old buffer");
+            return ret;
+        }
         oldOffset = 0;
     }
     for (int64_t i = 0; i < ctrlData.diffLength; i++) {
@@ -206,7 +259,10 @@ int32_t BlocksStreamPatch::RestoreExtraData(const ControlData &ctrlData)
     std::vector<uint8_t> extraData(ctrlData.extraLength);
     BlockBuffer extraBuffer = {extraData.data(), static_cast<size_t>(ctrlData.extraLength)};
     int32_t ret = extraDataReader_->ReadData(extraBuffer);
-    PATCH_CHECK(ret == 0, return ret, "Failed to read extra data");
+    if (ret != 0) {
+        PATCH_LOGE("Failed to read extra data");
+        return ret;
+    }
     // write
     return writer_->Write(newOffset_, extraBuffer, static_cast<size_t>(ctrlData.extraLength));
 }

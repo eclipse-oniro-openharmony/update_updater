@@ -12,9 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "text_label_adapter.h"
 #include "language/language_ui.h"
 #include "log/log.h"
-#include "text_label_adapter.h"
+#include "updater_ui_const.h"
 
 namespace Updater {
 TextLabelAdapter::TextLabelAdapter(const UxViewInfo &info)
@@ -27,13 +28,13 @@ TextLabelAdapter::TextLabelAdapter(const UxViewInfo &info)
     this->SetViewId(viewId_.c_str());
     this->SetAlign(GetAlign(specPtr->align), OHOS::TEXT_ALIGNMENT_CENTER);
     this->SetText(TranslateText(specPtr->text).c_str());
-    this->SetFont(DEFAULT_VECTOR_FONT_FILENAME, specPtr->fontSize);
-    this->SetStyle(OHOS::STYLE_TEXT_COLOR, OHOS::Color::GetColorFromRGB(
-        specPtr->fontColor.r, specPtr->fontColor.g, specPtr->fontColor.b).full);
-    this->SetStyle(OHOS::STYLE_TEXT_OPA, specPtr->fontColor.a);
-    this->SetStyle(OHOS::STYLE_BACKGROUND_COLOR, OHOS::Color::GetColorFromRGB(
-        specPtr->bgColor.r, specPtr->bgColor.g, specPtr->bgColor.b).full);
-    this->SetStyle(OHOS::STYLE_BACKGROUND_OPA, specPtr->bgColor.a);
+    this->SetFont(DEFAULT_FONT_FILENAME, specPtr->fontSize);
+    auto fontColor = StrToColor(specPtr->fontColor);
+    this->SetStyle(OHOS::STYLE_TEXT_COLOR, fontColor.full);
+    this->SetStyle(OHOS::STYLE_TEXT_OPA, fontColor.alpha);
+    auto bgColor = StrToColor(specPtr->bgColor);
+    this->SetStyle(OHOS::STYLE_BACKGROUND_COLOR, bgColor.full);
+    this->SetStyle(OHOS::STYLE_BACKGROUND_OPA, bgColor.alpha);
 }
 
 bool TextLabelAdapter::IsValid(const UxLabelInfo &info)
@@ -43,6 +44,11 @@ bool TextLabelAdapter::IsValid(const UxLabelInfo &info)
         return false;
     }
 
+    if (!CheckColor(info.bgColor) || !CheckColor(info.fontColor)) {
+        LOG(ERROR) << "label viewinfo check failed, bgColor:" << info.bgColor <<
+            " fontColor:" << info.fontColor;
+        return false;
+    }
     return true;
 }
 

@@ -26,7 +26,10 @@ namespace UpdatePatch {
 int32_t WriteDataToFile(const std::string &fileName, const std::vector<uint8_t> &data, size_t dataSize)
 {
     std::ofstream patchFile(fileName, std::ios::out | std::ios::binary);
-    PATCH_CHECK(patchFile, return -1, "Failed to open %s", fileName.c_str());
+    if (!patchFile) {
+        PATCH_LOGE("Failed to open %s", fileName.c_str());
+        return -1;
+    }
     patchFile.write(reinterpret_cast<const char*>(data.data()), dataSize);
     patchFile.close();
     return PATCH_SUCCESS;
@@ -36,19 +39,31 @@ int32_t PatchMapFile(const std::string &fileName, MemMapInfo &info)
 {
     char realPath[PATH_MAX] = {0x00};
     char *get = realpath(fileName.c_str(), realPath);
-    PATCH_CHECK(get != nullptr, return -1, "Failed to get realpath %s", fileName.c_str());
+    if (get == nullptr) {
+        PATCH_LOGE("Failed to get realpath %s", fileName.c_str());
+        return -1;
+    }
     info.fd = open(realPath, O_RDONLY);
-    PATCH_CHECK(info.fd >= 0, return -1, "Failed to open file %s", fileName.c_str());
+    if (info.fd < 0) {
+        PATCH_LOGE("Failed to open file %s", fileName.c_str());
+        return -1;
+    }
     struct stat st {};
     int32_t ret = fstat(info.fd, &st);
-    PATCH_CHECK(ret >= 0, return ret, "Failed to fstat");
+    if (ret < 0) {
+        PATCH_LOGE("Failed to fstat");
+        return ret;
+    }
     if (S_ISBLK(st.st_mode)) {
         st.st_size = lseek(info.fd, 0, SEEK_END);
         lseek(info.fd, 0, SEEK_SET);
     }
 
     info.memory = static_cast<uint8_t*>(mmap(nullptr, st.st_size, PROT_READ, MAP_PRIVATE, info.fd, 0));
-    PATCH_CHECK(info.memory != nullptr, return -1, "Failed to memory map");
+    if (info.memory == nullptr) {
+        PATCH_LOGE("Failed to memory map");
+        return -1;
+    }
     info.length = static_cast<size_t>(st.st_size);
     return PATCH_SUCCESS;
 }

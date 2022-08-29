@@ -23,7 +23,10 @@ int32_t BZip2Adapter::Open()
 {
     (void)memset_s(&stream_, sizeof(bz_stream), 0, sizeof(bz_stream));
     int32_t ret = BZ2_bzCompressInit(&stream_, BLOCK_SIZE_BEST, 0, 0);
-    PATCH_CHECK(ret == BZ_OK, return ret, "Failed to bzcompressinit %d", ret);
+    if (ret != BZ_OK) {
+        PATCH_LOGE("Failed to bzcompressinit %d", ret);
+        return ret;
+    }
     init_ = true;
     return ret;
 }
@@ -34,7 +37,10 @@ int32_t BZip2Adapter::Close()
         return PATCH_SUCCESS;
     }
     int32_t ret = BZ2_bzCompressEnd(&stream_);
-    PATCH_CHECK(ret == BZ_OK, return ret, "Failed to bz_compressEnd %d", ret);
+    if (ret != BZ_OK) {
+        PATCH_LOGE("Failed to bz_compressEnd %d", ret);
+        return ret;
+    }
     init_ = false;
     return ret;
 }
@@ -57,8 +63,14 @@ int32_t BZipBuffer2Adapter::WriteData(const BlockBuffer &srcData)
             break;
         }
     } while (ret == BZ_RUN_OK);
-    PATCH_CHECK(ret == BZ_RUN_OK, return ret, "Failed to write data ret %d", ret);
-    PATCH_CHECK(stream_.avail_in == 0, return ret, "Failed to write data");
+    if (ret != BZ_RUN_OK) {
+        PATCH_LOGE("BZipBuffer2Adapter::WriteData : Failed to write data ret %d", ret);
+        return ret;
+    }
+    if (stream_.avail_in != 0) {
+        PATCH_LOGE("BZipBuffer2Adapter::WriteData : Failed to write data");
+        return ret;
+    }
     dataSize_ += stream_.next_out - next;
     return PATCH_SUCCESS;
 }
@@ -83,7 +95,10 @@ int32_t BZipBuffer2Adapter::FlushData(size_t &dataSize)
             stream_.next_out = next;
         }
     }
-    PATCH_CHECK(ret == BZ_RUN_OK || ret == BZ_STREAM_END, return ret, "Failed to write data %d", ret);
+    if (ret != BZ_RUN_OK && ret != BZ_STREAM_END) {
+        PATCH_LOGE("Failed to write data %d", ret);
+        return ret;
+    }
     dataSize_ += stream_.next_out - next;
     PATCH_DEBUG("FlushData offset_ %zu dataSize_ %zu ", offset_, dataSize_);
     dataSize = dataSize_;
@@ -116,8 +131,14 @@ int32_t BZip2StreamAdapter::WriteData(const BlockBuffer &srcData)
             break;
         }
     } while (ret == BZ_RUN_OK);
-    PATCH_CHECK(ret == BZ_RUN_OK, return ret, "Failed to write data ret %d", ret);
-    PATCH_CHECK(stream_.avail_in == 0, return ret, "Failed to write data");
+    if (ret != BZ_RUN_OK) {
+        PATCH_LOGE("BZip2StreamAdapter::WriteData : Failed to write data ret %d", ret);
+        return ret;
+    }
+    if (stream_.avail_in != 0) {
+        PATCH_LOGE("BZip2StreamAdapter::WriteData : Failed to write data");
+        return ret;
+    }
     if (stream_.avail_out != buffer_.size()) {
         outStream_.write(buffer_.data(), stream_.next_out - reinterpret_cast<char*>(buffer_.data()));
     }
@@ -142,7 +163,10 @@ int32_t BZip2StreamAdapter::FlushData(size_t &dataSize)
             stream_.next_out = reinterpret_cast<char*>(buffer_.data());
         }
     }
-    PATCH_CHECK(ret == BZ_RUN_OK || ret == BZ_STREAM_END, return ret, "Failed to write data %d", ret);
+    if (ret != BZ_RUN_OK && ret != BZ_STREAM_END) {
+        PATCH_LOGE("Failed to write data %d", ret);
+        return ret;
+    }
     if (stream_.avail_out != buffer_.size()) {
         outStream_.write(buffer_.data(), stream_.next_out - reinterpret_cast<char*>(buffer_.data()));
     }
@@ -154,13 +178,22 @@ int32_t BZip2StreamAdapter::FlushData(size_t &dataSize)
 
 int32_t BZip2BufferReadAdapter::Open()
 {
-    PATCH_CHECK(!init_, return -1, "State error %d", init_);
-    PATCH_CHECK(dataLength_ <= buffer_.length, return -1, "Invalid buffer length");
+    if (init_) {
+        PATCH_LOGE("State error %d", init_);
+        return -1;
+    }
+    if (dataLength_ > buffer_.length) {
+        PATCH_LOGE("Invalid buffer length");
+        return -1;
+    }
 
     PATCH_DEBUG("BZip2BufferReadAdapter::Open %zu dataLength_ %zu", offset_, dataLength_);
     memset_s(&stream_, sizeof(bz_stream), 0, sizeof(bz_stream));
     int32_t ret = BZ2_bzDecompressInit(&stream_, 0, 0);
-    PATCH_CHECK(ret == BZ_OK, return -1, "Failed to open read mem ret %d", ret);
+    if (ret != BZ_OK) {
+        PATCH_LOGE("Failed to open read mem ret %d", ret);
+        return -1;
+    }
     stream_.avail_in = static_cast<unsigned int>(dataLength_);
     stream_.next_in  = reinterpret_cast<char*>(buffer_.buffer + offset_);
 
@@ -175,14 +208,20 @@ int32_t BZip2BufferReadAdapter::Close()
     }
     int32_t ret = 0;
     ret = BZ2_bzDecompressEnd(&stream_);
-    PATCH_CHECK(ret == BZ_OK, return -1, "Failed to close read mem ret %d", ret);
+    if (ret != BZ_OK) {
+        PATCH_LOGE("Failed to close read mem ret %d", ret);
+        return -1;
+    }
     init_ = false;
     return PATCH_SUCCESS;
 }
 
 int32_t BZip2BufferReadAdapter::ReadData(BlockBuffer &info)
 {
-    PATCH_CHECK(init_, return -1, "State error %d", init_);
+    if (!init_) {
+        PATCH_LOGE("State error %d", init_);
+        return -1;
+    }
     int32_t ret = 0;
     size_t readLen = 0;
     stream_.next_out = reinterpret_cast<char*>(info.buffer);
@@ -193,12 +232,18 @@ int32_t BZip2BufferReadAdapter::ReadData(BlockBuffer &info)
             readLen = info.length - stream_.avail_out;
             break;
         }
-        PATCH_CHECK(ret == BZ_OK, return -1, "Failed to decompress ret %d", ret);
+        if (ret != BZ_OK) {
+            PATCH_LOGE("Failed to decompress ret %d", ret);
+            return -1;
+        }
         if (stream_.avail_out == 0) {
             readLen = info.length;
             break;
         }
-        PATCH_CHECK(stream_.avail_in != 0, return -1, "Not enough buffer to decompress");
+        if (stream_.avail_in == 0) {
+            PATCH_LOGE("Not enough buffer to decompress");
+            return -1;
+        }
     }
     if (readLen < info.length) {
         PATCH_LOGE("Failed to read mem ret %zu length %zu", readLen, info.length);

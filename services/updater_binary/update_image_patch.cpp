@@ -90,7 +90,7 @@ std::string USInstrImagePatch::GetFileHash(const std::string &file)
 int32_t USInstrImagePatch::ApplyPatch(const ImagePatchPara &para, const std::string &patchFile)
 {
     std::string newFile = UPDATER_PATH + para.partName + ".new";
-    int32_t ret = UpdatePatch::UpdatePatch::ApplyPatch(patchFile, para.devPath, newFile);
+    int32_t ret = UpdatePatch::UpdateApplyPatch::ApplyPatch(patchFile, para.devPath, newFile);
     if (ret != UpdatePatch::PATCH_SUCCESS) {
         UPDATER_LAST_WORD(ret);
         LOG(ERROR) << "ApplyPatch error:" << ret;

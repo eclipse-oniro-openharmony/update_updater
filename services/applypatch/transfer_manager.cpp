@@ -66,7 +66,7 @@ bool TransferManager::CommandsParser(int fd, const std::vector<std::string> &con
     }
     std::unique_ptr<Command> cmd;
     size_t initBlock = 0;
-    while (ct != context.end()) {
+    for (; ct != context.end(); ct++) {
         cmd = std::make_unique<Command>();
         UPDATER_ERROR_CHECK(cmd != nullptr, "Failed to parse command line.", return false);
         if (!cmd->Init(*ct) || cmd->GetCommandType() == CommandType::LAST || globalParams->env == nullptr) {
@@ -112,11 +112,19 @@ bool TransferManager::RegisterForRetry(const std::string &cmd)
 {
     std::string path = globalParams->retryFile;
     int fd = open(path.c_str(), O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
-    UPDATER_ERROR_CHECK(fd != -1, "Failed to create", return false);
-    UPDATER_ERROR_CHECK(fchown(fd, O_USER_GROUP_ID, O_USER_GROUP_ID) == 0,
-        "Failed to chown", close(fd); return -1);
+    if (fd == -1) {
+        LOG(ERROR) << "Failed to create";
+        return false;
+    }
+    if (fchown(fd, O_USER_GROUP_ID, O_USER_GROUP_ID) != 0) {
+        LOG(ERROR) << "Failed to chown";
+        close(fd);
+        return -1;
+    }
     bool ret = Utils::WriteStringToFile(fd, cmd);
-    UPDATER_ERROR_CHECK_NOT_RETURN(ret, "Write retry flag error");
+    if (ret == false) {
+        LOG(ERROR) << "Write retry flag error";
+    }
     fsync(fd);
     close(fd);
     return ret;
@@ -126,10 +134,15 @@ std::string TransferManager::ReloadForRetry() const
 {
     std::string path = globalParams->retryFile;
     int fd = open(path.c_str(), O_RDONLY);
-    UPDATER_ERROR_CHECK(fd >= 0, "Failed to open", return "");
+    if (fd < 0) {
+        LOG(ERROR) << "Failed to open";
+        return "";
+    }
     (void)lseek(fd, 0, SEEK_SET);
     std::string cmd = "";
-    UPDATER_ERROR_CHECK_NOT_RETURN(Utils::ReadFileToString(fd, cmd), "Error to read retry flag");
+    if (!Utils::ReadFileToString(fd, cmd)) {
+        LOG(ERROR) << "Error to read retry flag";
+    }
     close(fd);
     return cmd;
 }
@@ -152,7 +165,9 @@ bool TransferManager::CheckResult(const CommandResult result, const std::string 
             break;
         case NEED_RETRY:
             LOG(INFO) << "Running command need retry!";
-            UPDATER_CHECK_ONLY_RETURN(!globalParams->env, globalParams->env->PostMessage("retry_update", cmd));
+            if (globalParams->env != nullptr) {
+                globalParams->env->PostMessage("retry_update", cmd);
+            }
             return false;
         case FAILED:
         default:
