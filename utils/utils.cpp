@@ -38,7 +38,6 @@ namespace Updater {
 using namespace Hpackage;
 
 namespace Utils {
-constexpr uint32_t MAX_PATH_LEN = 256;
 constexpr uint8_t SHIFT_RIGHT_FOUR_BITS = 4;
 constexpr int USER_ROOT_AUTHORITY = 0;
 constexpr int GROUP_SYS_AUTHORITY = 1000;
@@ -47,7 +46,10 @@ constexpr int USECONDS_PER_SECONDS = 1000000; // 1s = 1000000us
 constexpr int NANOSECS_PER_USECONDS = 1000; // 1us = 1000ns
 int32_t DeleteFile(const std::string& filename)
 {
-    UPDATER_ERROR_CHECK (!filename.empty(), "Invalid filename", return -1);
+    if (filename.empty()) {
+        LOG(ERROR) << "Invalid filename";
+        return -1;
+    }
     if (unlink(filename.c_str()) == -1 && errno != ENOENT) {
         LOG(ERROR) << "unlink " << filename << " failed";
         return -1;
@@ -61,22 +63,31 @@ int MkdirRecursive(const std::string &pathName, mode_t mode)
     struct stat info {};
     while (true) {
         slashPos = pathName.find_first_of("/", slashPos);
-        UPDATER_CHECK_ONLY_RETURN(slashPos != std::string::npos, break);
+        if (slashPos == std::string::npos) {
+            break;
+        }
         if (slashPos == 0) {
             slashPos++;
             continue;
         }
-        UPDATER_ERROR_CHECK(slashPos <= MAX_PATH_LEN, "path too long for mkdir", return -1);
+        if (slashPos > PATH_MAX) {
+            LOG(ERROR) << "path too long for mkdir";
+            return -1;
+        }
         auto subDir = pathName.substr(0, slashPos);
         std::cout << "subDir : " << subDir << std::endl;
         if (stat(subDir.c_str(), &info) != 0) {
             int ret = mkdir(subDir.c_str(), mode);
-            UPDATER_CHECK_ONLY_RETURN(!(ret && errno != EEXIST), return ret);
+            if (ret && errno != EEXIST) {
+                return ret;
+            }
         }
         slashPos++;
     }
     int ret = mkdir(pathName.c_str(), mode);
-    UPDATER_CHECK_ONLY_RETURN(!(ret && errno != EEXIST), return ret);
+    if (ret && errno != EEXIST) {
+        return ret;
+    }
     return 0;
 }
 
@@ -84,7 +95,10 @@ int64_t GetFilesFromDirectory(const std::string &path, std::vector<std::string> 
     bool isRecursive)
 {
     struct stat sb {};
-    UPDATER_ERROR_CHECK (stat(path.c_str(), &sb) != -1, "Failed to stat", return -1);
+    if (stat(path.c_str(), &sb) == -1) {
+        LOG(ERROR) << "Failed to stat";
+        return -1;
+    }
     DIR *dirp = opendir(path.c_str());
     struct dirent *dp;
     int64_t totalSize = 0;
@@ -199,7 +213,7 @@ void DoReboot(const std::string& rebootTarget, const std::string &extData)
             UPDATER_ERROR_CHECK(!memset_s(msg.update, MAX_UPDATE_SIZE, 0, MAX_UPDATE_SIZE), "Memset_s failed", return);
         }
         ret = WriteUpdaterMiscMsg(msg);
-        if (!ret) {
+        if (ret != true) {
             LOG(INFO) << "DoReboot: WriteUpdaterMiscMsg empty error";
             return;
         }
@@ -261,7 +275,10 @@ bool ReadFully(int fd, void *data, size_t size)
     size_t remaining = size;
     while (remaining > 0) {
         ssize_t sread = read(fd, p, remaining);
-        UPDATER_ERROR_CHECK (sread > 0, "Utils::ReadFully run error", return false);
+        if (sread <= 0) {
+            LOG(ERROR) << "Utils::ReadFully run error";
+            return false;
+        }
         p += sread;
         remaining -= static_cast<size_t>(sread);
     }
@@ -279,7 +296,9 @@ bool ReadFileToString(int fd, std::string &content)
     auto p = reinterpret_cast<char *>(content.data());
     while (remaining > 0) {
         n = read(fd, p, remaining);
-        UPDATER_CHECK_ONLY_RETURN (n > 0, return false);
+        if (n <= 0) {
+            return false;
+        }
         p += n;
         remaining -= static_cast<size_t>(n);
     }
@@ -292,7 +311,9 @@ bool WriteStringToFile(int fd, const std::string& content)
     size_t remaining = content.size();
     while (remaining > 0) {
         ssize_t n = write(fd, p, remaining);
-        UPDATER_CHECK_ONLY_RETURN (n != -1, return false);
+        if (n == -1) {
+            return false;
+        }
         p += n;
         remaining -= static_cast<size_t>(n);
     }
@@ -330,7 +351,10 @@ std::string GetLocalBoardId()
 void CompressLogs(const std::string &name)
 {
     PkgManager::PkgManagerPtr pkgManager = PkgManager::GetPackageInstance();
-    UPDATER_ERROR_CHECK(pkgManager != nullptr, "pkgManager is nullptr", return);
+    if (pkgManager == nullptr) {
+        LOG(ERROR) << "pkgManager is nullptr";
+        return;
+    }
     std::vector<std::pair<std::string, ZipFileInfo>> files;
     // Build the zip file to be packaged
     std::vector<std::string> testFileNames;
@@ -358,30 +382,44 @@ void CompressLogs(const std::string &name)
         std::strftime(realTime, sizeof(realTime), "%H_%M_%S", localTime);
     }
     char pkgName[MAX_LOG_NAME_SIZE];
-    UPDATER_CHECK_ONLY_RETURN(snprintf_s(pkgName, MAX_LOG_NAME_SIZE, MAX_LOG_NAME_SIZE - 1,
-        "/data/updater/log/%s_%s.zip", realName.c_str(), realTime) != -1, return);
+    if (snprintf_s(pkgName, MAX_LOG_NAME_SIZE, MAX_LOG_NAME_SIZE - 1,
+        "/data/updater/log/%s_%s.zip", realName.c_str(), realTime) == -1) {
+        return;
+    }
     int32_t ret = pkgManager->CreatePackage(pkgName, GetCertName(), &pkgInfo, files);
-    UPDATER_CHECK_ONLY_RETURN(ret != 0, return);
-    UPDATER_CHECK_ONLY_RETURN(DeleteFile(name) == 0, return);
+    if (ret != 0) {
+        LOG(WARNING) << "CompressLogs failed";
+        return;
+    }
+    (void)DeleteFile(name);
 }
 
 bool CopyUpdaterLogs(const std::string &sLog, const std::string &dLog)
 {
     UPDATER_WARING_CHECK(MountForPath(UPDATER_LOG_DIR) == 0, "MountForPath /data/log failed!", return false);
     if (access(UPDATER_LOG_DIR, 0) != 0) {
-        UPDATER_ERROR_CHECK(!MkdirRecursive(UPDATER_LOG_DIR, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH),
-            "MkdirRecursive error!", return false);
-        UPDATER_ERROR_CHECK(chown(UPDATER_PATH, USER_ROOT_AUTHORITY, GROUP_SYS_AUTHORITY) == 0,
-            "Chown failed!", return false);
-        UPDATER_ERROR_CHECK(chmod(UPDATER_PATH, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) == 0,
-            "Chmod failed!", return false);
+        if (MkdirRecursive(UPDATER_LOG_DIR, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) != 0) {
+            LOG(ERROR) << "MkdirRecursive error!";
+            return false;
+        }
+        if (chown(UPDATER_PATH, USER_ROOT_AUTHORITY, GROUP_SYS_AUTHORITY) != EOK &&
+            chmod(UPDATER_PATH, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != EOK) {
+                LOG(ERROR) << "Chmod failed!";
+                return false;
+        }
     }
 
     FILE* dFp = fopen(dLog.c_str(), "ab+");
-    UPDATER_ERROR_CHECK(dFp != nullptr, "open log failed", return false);
-
+    if (dFp == nullptr) {
+        LOG(ERROR) << "open log failed";
+        return false;
+    }
     FILE* sFp = fopen(sLog.c_str(), "r");
-    UPDATER_ERROR_CHECK(sFp != nullptr, "open log failed", fclose(dFp); return false);
+    if (sFp == nullptr) {
+        LOG(ERROR) << "open log failed";
+        fclose(dFp);
+        return false;
+    }
 
     char buf[MAX_LOG_BUF_SIZE];
     size_t bytes;
@@ -422,8 +460,10 @@ bool CheckDumpResult()
 void WriteDumpResult(const std::string &result)
 {
     if (access(UPDATER_PATH, 0) != 0) {
-        UPDATER_ERROR_CHECK(!MkdirRecursive(UPDATER_PATH, 0755), // 0755: -rwxr-xr-x
-            "MkdirRecursive error!", return);
+        if (MkdirRecursive(UPDATER_PATH, 0755) != 0) { // 0755: -rwxr-xr-x
+            LOG(ERROR) << "MkdirRecursive error!";
+            return;
+        }
     }
     LOG(INFO) << "WriteDumpResult: " << result;
     const std::string resultPath = std::string(UPDATER_PATH) + "/" + std::string(UPDATER_RESULT_FILE);
@@ -436,11 +476,9 @@ void WriteDumpResult(const std::string &result)
     if (sprintf_s(buf, MAX_RESULT_BUFF_SIZE - 1, "%s\n", result.c_str()) < 0) {
         LOG(WARNING) << "sprintf status fialed";
     }
-
     if (fwrite(buf, 1, strlen(buf) + 1, fp) <= 0) {
         LOG(WARNING) << "write result file failed, err:" << errno;
     }
-
     if (fclose(fp) != 0) {
         LOG(WARNING) << "close result file failed";
     }
