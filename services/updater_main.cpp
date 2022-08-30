@@ -39,11 +39,11 @@
 #include "pkg_manager.h"
 #include "pkg_utils.h"
 #include "securec.h"
-#include "updater_ui.h"
-#include "updater_ui_env.h"
+#include "ui/updater_ui.h"
+#include "ui/updater_ui_env.h"
+#include "updater/updater_const.h"
 #include "updater_ui_facade.h"
 #include "updater_ui_tools.h"
-#include "updater/updater_const.h"
 #include "utils.h"
 
 namespace Updater {
@@ -52,6 +52,7 @@ using namespace Hpackage;
 using namespace Updater::Utils;
 using namespace std::literals::chrono_literals;
 
+constexpr int DISPLAY_TIME = 1000 * 1000;
 constexpr struct option OPTIONS[] = {
     { "update_package", required_argument, nullptr, 0 },
     { "retry_count", required_argument, nullptr, 0 },
@@ -369,7 +370,7 @@ int UpdaterMain(int argc, char **argv)
 
     LOG(INFO) << "Ready to start";
 #ifndef UPDATER_UT
-    UpdaterUiEnv::GetInstance().Init();
+    UpdaterUiEnv::Init();
 #endif
     UpdaterInit::GetInstance().InvokeEvent(UPDATER_INIT_EVENT);
     PackageUpdateMode mode = UNKNOWN_UPDATE;
