@@ -14,216 +14,121 @@
  */
 
 #include "pkcs7_signed_data.h"
-#include <iostream>
 #include <openssl/asn1.h>
 #include <openssl/bio.h>
-#include <openssl/evp.h>
-#include <openssl/pem.h>
-#include <openssl/pkcs12.h>
 #include <openssl/pkcs7.h>
 #include <openssl/rsa.h>
 #include <openssl/sha.h>
 #include <openssl/x509.h>
+#include "cert_verify.h"
+#include "dump.h"
+#include "openssl_util.h"
 #include "pkg_utils.h"
 
 namespace Hpackage {
-Pkcs7SignedData::Pkcs7SignedData()
+namespace {
+constexpr size_t g_digestAlgoLength[][2] = {
+    {NID_sha256, SHA256_DIGEST_LENGTH},
+};
+
+size_t GetDigestLength(const size_t digestNid)
 {
-    pkcs7_ = nullptr;
-    p7Bio_ = nullptr;
+    for (size_t i = 0; i < sizeof(g_digestAlgoLength) / sizeof(g_digestAlgoLength[0]); i++) {
+        if (digestNid == g_digestAlgoLength[i][0]) {
+            return g_digestAlgoLength[i][1];
+        }
+    }
+    return 0;
+}
 }
 
 Pkcs7SignedData::~Pkcs7SignedData()
 {
-    if (p7Bio_ != nullptr) {
-        BIO_free(p7Bio_);
-        p7Bio_ = nullptr;
-    }
     if (pkcs7_ != nullptr) {
         PKCS7_free(pkcs7_);
         pkcs7_ = nullptr;
     }
 }
 
-int32_t Pkcs7SignedData::BuildPkcs7SignedData(PkgBuffer &p7Data, uint32_t signMethod,
-    const std::vector<uint8_t> &digestBlock, const std::vector<uint8_t> &signedData)
+int32_t Pkcs7SignedData::GetHashFromSignBlock(const uint8_t *srcData, const size_t dataLen,
+    std::vector<uint8_t> &hash)
 {
-    if (digestBlock.empty() || signedData.empty()) {
-        return PKG_INVALID_PARAM;
-    }
-    pkcs7_ = PKCS7_new();
-    if (pkcs7_ == nullptr) {
-        PKG_LOGE("new PKCS7 data failed.");
-        return PKG_INVALID_STREAM;
-    }
-
-    int32_t ret = PKCS7_set_type(pkcs7_, NID_pkcs7_signed);
-    if (ret <= 0) {
-        PKG_LOGE("set PKCS7 data type failed.");
-        return ret;
-    }
-    PKCS7_set_detached(pkcs7_, 0);
-
-    ret = UpdateDigestBlock(digestBlock);
-    if (ret != PKG_SUCCESS) {
-        PKG_LOGE("update digest block failed.");
-        return ret;
-    }
-    ret = UpdateSignerInfo(signedData, signMethod);
-    if (ret != PKG_SUCCESS) {
-        PKG_LOGE("update signer info failed.");
+    int32_t ret = ParsePkcs7Data(srcData, dataLen);
+    if (ret != 0) {
+        PKG_LOGE("parse pkcs7 data fail");
         return ret;
     }
 
-    return PutDataToBuffer(p7Data);
+    ret = Verify();
+    if (ret != 0) {
+        PKG_LOGE("verify pkcs7 data fail");
+        return ret;
+    }
+    hash.assign(digest_.begin(), digest_.end());
+
+    return 0;
 }
 
-int32_t Pkcs7SignedData::UpdateDigestBlock(const std::vector<uint8_t> &digestBlock)
+int32_t Pkcs7SignedData::ParsePkcs7Data(const uint8_t *srcData, const size_t dataLen)
 {
-    int32_t ret = PKCS7_content_new(pkcs7_, NID_pkcs7_data);
-    if (ret <= 0) {
-        PKG_LOGE("new PKCS7 content failed.");
-        return ret;
+    if (srcData == nullptr || dataLen == 0) {
+        return -1;
+    }
+    if (Init(srcData, dataLen) != 0) {
+        PKG_LOGE("init pkcs7 data fail");
+        return -1;
     }
 
-    p7Bio_ = PKCS7_dataInit(pkcs7_, nullptr);
-    if (p7Bio_ == nullptr) {
-        PKG_LOGE("Pkcs7 data init failed.");
-        return PKG_NONE_MEMORY;
-    }
-    ret = BIO_write(p7Bio_, digestBlock.data(), digestBlock.size());
-    if (ret <= 0) {
-        PKG_LOGE("bio write digest block failed.");
-        return ret;
-    }
-    (void)BIO_flush(p7Bio_);
-    ret = PKCS7_dataFinal(pkcs7_, p7Bio_);
-    if (ret <= 0) {
-        PKG_LOGE("Pkcs7 data final failed.");
-        return ret;
-    }
-
-    return PKG_SUCCESS;
+    return DoParse();
 }
 
-int32_t Pkcs7SignedData::UpdateSignerInfo(const std::vector<uint8_t> &signedData, uint32_t signMethod)
+int32_t Pkcs7SignedData::Verify() const
 {
-    PKCS7_SIGNER_INFO *p7Si = PKCS7_SIGNER_INFO_new();
-    if (p7Si == nullptr) {
-        PKG_LOGE("new pkcs7 signed info failed.");
-        return PKG_INVALID_STREAM;
+    if (digest_.empty()) {
+        return -1;
+    }
+    int32_t ret = -1;
+    for (auto &signerInfo : signerInfos_) {
+        ret = Pkcs7SignleSignerVerify(signerInfo);
+        if (ret == 0) {
+            PKG_LOGI("p7sourceData check success");
+            break;
+        }
+        PKG_LOGI("p7sourceData continue");
     }
 
-    ASN1_OBJECT *digObj = OBJ_nid2obj(EVP_MD_type(EVP_sha256()));
-    X509_ALGOR_set0(p7Si->digest_alg, digObj, V_ASN1_NULL, NULL);
-
-    ASN1_OBJECT *signObj = GetSignAlgorithmObj(signMethod);
-    if (signObj != nullptr) {
-        X509_ALGOR_set0(p7Si->digest_enc_alg, signObj, V_ASN1_NULL, NULL);
-    }
-
-    int32_t ret = ASN1_STRING_set(p7Si->enc_digest, signedData.data(), signedData.size());
-    if (ret <= 0) {
-        PKG_LOGE("Set signer info enc_digest failed.");
-        PKCS7_SIGNER_INFO_free(p7Si);
-        return ret;
-    }
-
-    ret = sk_PKCS7_SIGNER_INFO_push(pkcs7_->d.sign->signer_info, p7Si);
-    if (ret <= 0) {
-        PKG_LOGE("Set signer info failed.");
-        PKCS7_SIGNER_INFO_free(p7Si);
-        return ret;
-    }
-
-    return PKG_SUCCESS;
+    return ret;
 }
 
-ASN1_OBJECT *Pkcs7SignedData::GetSignAlgorithmObj(uint32_t signMethod)
+int32_t Pkcs7SignedData::Init(const uint8_t *sourceData, const uint32_t sourceDataLen)
 {
-    switch (signMethod) {
-        case PKG_SIGN_METHOD_RSA:
-            return OBJ_nid2obj(NID_sha256WithRSAEncryption);
-        case PKG_SIGN_METHOD_ECDSA:
-            return OBJ_nid2obj(NID_ecdsa_with_SHA256);
-        default:
-            PKG_LOGE("Invalid sign method.");
-            return nullptr;
-    }
-
-    return nullptr;
-}
-
-int32_t Pkcs7SignedData::PutDataToBuffer(PkgBuffer &p7Data)
-{
-    int32_t p7DataLen = i2d_PKCS7(pkcs7_, NULL);
-    PKG_CHECK(p7DataLen > 0, return PKG_INVALID_STREAM, "Invalid p7DataLen");
-    uint8_t *outBuf = new(std::nothrow) uint8_t[p7DataLen]();
-    PKG_CHECK(outBuf != nullptr, return PKG_INVALID_STREAM, "malloc mem failed.");
-
-    BIO *p7OutBio = BIO_new(BIO_s_mem());
-    PKG_CHECK(p7OutBio != nullptr, delete [] outBuf; return PKG_INVALID_STREAM, "BIO new failed.");
-
-    int32_t ret = i2d_PKCS7_bio(p7OutBio, pkcs7_);
-    PKG_CHECK(ret > 0, delete [] outBuf; BIO_free(p7OutBio); return ret, "i2d_PKCS7_bio failed.");
-
-    (void)BIO_read(p7OutBio, outBuf, p7DataLen);
-    p7Data.buffer = outBuf;
-    p7Data.length = static_cast<size_t>(p7DataLen);
-
-    BIO_free(p7OutBio);
-    return PKG_SUCCESS;
-}
-
-int32_t Pkcs7SignedData::ParsePkcs7SignedData(const uint8_t *sourceData, uint32_t sourceDataLen,
-    std::vector<uint8_t> &digestBlock, std::vector<Pkcs7SignerInfo> &signerInfos)
-{
-    int32_t ret = VerifyInit(sourceData, sourceDataLen);
-    if (ret != PKG_SUCCESS) {
-        PKG_LOGE("Init pkcs7 data failed.!");
-        return ret;
-    }
-
-    return DoParse(digestBlock, signerInfos);
-}
-
-int32_t Pkcs7SignedData::VerifyInit(const uint8_t *sourceData, uint32_t sourceDataLen)
-{
-    if (sourceData == nullptr || sourceDataLen == 0) {
-        return PKG_INVALID_PARAM;
-    }
-
-    p7Bio_ = BIO_new(BIO_s_mem());
-    if (p7Bio_ == nullptr) {
+    BIO *p7Bio = BIO_new(BIO_s_mem());
+    if (p7Bio == nullptr) {
         PKG_LOGE("BIO_new error!");
-        return PKG_INVALID_STREAM;
+        return -1;
     }
-    (void)BIO_write(p7Bio_, sourceData, sourceDataLen);
+    if (BIO_write(p7Bio, sourceData, sourceDataLen) != sourceDataLen) {
+        PKG_LOGE("BIO_write error!");
+        BIO_free(p7Bio);
+        return -1;
+    }
 
-    pkcs7_ = d2i_PKCS7_bio(p7Bio_, nullptr);
+    pkcs7_ = d2i_PKCS7_bio(p7Bio, nullptr);
     if (pkcs7_ == nullptr) {
         PKG_LOGE("d2i_PKCS7_bio failed!");
-        return PKG_INVALID_STREAM;
+        BIO_free(p7Bio);
+        return -1;
     }
 
-    return PKG_SUCCESS;
-}
-
-int32_t Pkcs7SignedData::DoParse(std::vector<uint8_t> &digestBlock, std::vector<Pkcs7SignerInfo> &signerInfos)
-{
-    int32_t p7Type = OBJ_obj2nid(pkcs7_->type);
-    if (p7Type != NID_pkcs7_signed) {
-        PKG_LOGE("Invalid pkcs7 data type %d!", p7Type);
-        return PKG_INVALID_PKG_FORMAT;
+    int32_t type = OBJ_obj2nid(pkcs7_->type);
+    if (type != NID_pkcs7_signed) {
+        PKG_LOGE("Invalid pkcs7 data type %d", type);
+        BIO_free(p7Bio);
+        return -1;
     }
 
-    PKCS7_SIGNED *signData = pkcs7_->d.sign;
-    if (signData == nullptr) {
-        PKG_LOGE("Invalid pkcs7 signed data!");
-        return PKG_INVALID_PKG_FORMAT;
-    }
-
-    return ParseSignedData(digestBlock, signerInfos);
+    BIO_free(p7Bio);
+    return 0;
 }
 
 /*
@@ -236,16 +141,22 @@ int32_t Pkcs7SignedData::DoParse(std::vector<uint8_t> &digestBlock, std::vector<
  *     CONTET_SPECIFIC[1](0xA1) crls [1] IMPLICIT CertificateRevocationLists OPTIONAL,
  *     SET(0x31)                signerInfos SignerInfos }
  */
-int32_t Pkcs7SignedData::ParseSignedData(std::vector<uint8_t> &digestBlock,
-    std::vector<Pkcs7SignerInfo> &signerInfos)
+int32_t Pkcs7SignedData::DoParse()
 {
-    int32_t ret = ParseContentInfo(digestBlock, pkcs7_->d.sign);
-    if (ret != PKG_SUCCESS) {
-        PKG_LOGE("Parse pkcs7 content info failed!");
-        return ret;
+    std::vector<uint8_t> contentInfo;
+    int32_t ret = ParseContentInfo(contentInfo);
+    if (ret != 0) {
+        PKG_LOGE("parse pkcs7 contentInfo fail");
+        return -1;
     }
 
-    return ParseSignerInfos(signerInfos);
+    ret = GetDigestFromContentInfo(contentInfo);
+    if (ret != 0) {
+        PKG_LOGE("invalid pkcs7 contentInfo fail");
+        return -1;
+    }
+
+    return SignerInfosParse();
 }
 
 /*
@@ -257,41 +168,51 @@ int32_t Pkcs7SignedData::ParseSignedData(std::vector<uint8_t> &digestBlock,
  * tools.ietf.org/html/rfc2315#section-8
  *     Data ::= OCTET STRING
  */
-int32_t Pkcs7SignedData::ParseContentInfo(std::vector<uint8_t> &digestBlock, const PKCS7_SIGNED *signData)
+int32_t Pkcs7SignedData::ParseContentInfo(std::vector<uint8_t> &digestBlock) const
 {
+    PKCS7_SIGNED *signData = pkcs7_->d.sign;
     if (signData == nullptr) {
-        return PKG_INVALID_PARAM;
+        PKG_LOGE("invalid pkcs7 signed data!");
+        return -1;
     }
+
     PKCS7 *contentInfo = signData->contents;
     if (contentInfo == nullptr) {
-        PKG_LOGE("Invalid pkcs7 signed data!");
-        return PKG_INVALID_PKG_FORMAT;
+        PKG_LOGE("pkcs7 content is nullptr!");
+        return -1;
     }
-    int32_t type = OBJ_obj2nid(contentInfo->type);
-    if (type != NID_pkcs7_data) {
-        PKG_LOGE("Invalid pkcs7 signed data %d!", type);
-        return PKG_INVALID_PKG_FORMAT;
-    }
-
-    const uint8_t *digest = ASN1_STRING_get0_data(contentInfo->d.data);
-    if (digest == nullptr) {
-        PKG_LOGE("Get asn1 obj string failed!");
-        return PKG_INVALID_PKG_FORMAT;
-    }
-    int32_t digestLen = ASN1_STRING_length(contentInfo->d.data);
-    if (digestLen <= 0) {
-        PKG_LOGE("Invalid asn1 obj string len %d!", digestLen);
-        return PKG_INVALID_PKG_FORMAT;
+    if (OBJ_obj2nid(contentInfo->type) != NID_pkcs7_data) {
+        PKG_LOGE("invalid pkcs7 signed data type");
+        return -1;
     }
 
-    digestBlock.resize(digestLen);
-    int32_t ret = memcpy_s(digestBlock.data(), digestLen, digest, digestLen);
-    if (ret != EOK) {
-        PKG_LOGE("Fail to memcpy_s digestBlock, digestLen%d", digestLen);
-        return PKG_NONE_MEMORY;
+    if (GetASN1OctetStringData(contentInfo->d.data, digestBlock) != 0) {
+        PKG_LOGE("get pkcs7 contentInfo fail");
+        return -1;
     }
 
-    return PKG_SUCCESS;
+    return 0;
+}
+
+int32_t Pkcs7SignedData::GetDigestFromContentInfo(std::vector<uint8_t> &digestBlock)
+{
+    if (digestBlock.size() <= sizeof(uint32_t)) {
+        PKG_LOGE("invalid digest block info.");
+        return -1;
+    }
+
+    size_t offset = 0;
+    size_t algoId = static_cast<size_t>(ReadLE16(digestBlock.data() + offset));
+    offset += static_cast<size_t>(sizeof(uint16_t));
+    size_t digestLen = static_cast<size_t>(ReadLE16(digestBlock.data() + offset));
+    offset += static_cast<size_t>(sizeof(uint16_t));
+    if ((GetDigestLength(algoId) != digestLen) || ((digestLen + offset) != digestBlock.size())) {
+        PKG_LOGE("invalid digestLen[%zu] and digestBlock len[%zu]", digestLen, digestBlock.size());
+        return -1;
+    }
+    digest_.assign(digestBlock.begin() + offset, digestBlock.end());
+
+    return 0;
 }
 
 /*
@@ -305,89 +226,114 @@ int32_t Pkcs7SignedData::ParseContentInfo(std::vector<uint8_t> &digestBlock, con
  *     OCTET_STRING(0x30)        encryptedDigest EncryptedDigest,
  *     CONTET_SPECIFIC[1](0xA1)  unauthenticatedAttributes [1] IMPLICIT Attributes OPTIONAL }
  */
-int32_t Pkcs7SignedData::ParseSignerInfos(std::vector<Pkcs7SignerInfo> &signerInfos)
+int32_t Pkcs7SignedData::SignerInfosParse()
 {
-    if (PKCS7_get_signer_info(pkcs7_) == nullptr) {
-        PKG_LOGE("Get pkcs7 signers info failed!");
-        return PKG_INVALID_PKG_FORMAT;
+    STACK_OF(PKCS7_SIGNER_INFO) *p7SignerInfos = PKCS7_get_signer_info(pkcs7_);
+    if (p7SignerInfos == nullptr) {
+        PKG_LOGE("get pkcs7 signers info failed!");
+        return -1;
     }
 
-    int signerInfoNum = sk_PKCS7_SIGNER_INFO_num(PKCS7_get_signer_info(pkcs7_));
+    int signerInfoNum = sk_PKCS7_SIGNER_INFO_num(p7SignerInfos);
     if (signerInfoNum <= 0) {
-        PKG_LOGE("Invalid signers info num %d!", signerInfoNum);
-        return PKG_INVALID_PKG_FORMAT;
+        PKG_LOGE("invalid signers info num %d!", signerInfoNum);
+        return -1;
     }
 
     for (int i = 0; i < signerInfoNum; i++) {
-        PKCS7_SIGNER_INFO *p7SiTmp = sk_PKCS7_SIGNER_INFO_value(PKCS7_get_signer_info(pkcs7_), i);
+        PKCS7_SIGNER_INFO *p7SiTmp = sk_PKCS7_SIGNER_INFO_value(p7SignerInfos, i);
         Pkcs7SignerInfo signer;
         int32_t ret = SignerInfoParse(p7SiTmp, signer);
-        if (ret != PKG_SUCCESS) {
+        if (ret != 0) {
             PKG_LOGE("SignerInfoParse failed!");
             continue;
         }
-        signerInfos.push_back(std::move(signer));
+        signerInfos_.push_back(std::move(signer));
     }
 
-    return PKG_SUCCESS;
+    return 0;
 }
 
 int32_t Pkcs7SignedData::SignerInfoParse(PKCS7_SIGNER_INFO *p7SignerInfo, Pkcs7SignerInfo &signerInfo)
 {
     if (p7SignerInfo == nullptr) {
-        return PKG_INVALID_PARAM;
+        return -1;
     }
-    int32_t ret = ParseSignerInfoX509Algo(signerInfo.digestNid, p7SignerInfo->digest_alg);
-    if (ret != PKG_SUCCESS) {
+    PKCS7_ISSUER_AND_SERIAL *p7IssuerAndSerial = p7SignerInfo->issuer_and_serial;
+    if (p7IssuerAndSerial == nullptr) {
+        PKG_LOGE("signer cert info is nullptr!");
+        UPDATER_LAST_WORD(-1);
+        return -1;
+    }
+    signerInfo.issuerName = p7IssuerAndSerial->issuer;
+    signerInfo.serialNumber = p7IssuerAndSerial->serial;
+
+    int32_t ret = GetX509AlgorithmNid(p7SignerInfo->digest_alg, signerInfo.digestNid);
+    if (ret != 0) {
         PKG_LOGE("Parse signer info digest_alg failed!");
         return ret;
     }
-    ret = ParseSignerInfoX509Algo(signerInfo.digestEncryptNid, p7SignerInfo->digest_enc_alg);
-    if (ret != PKG_SUCCESS) {
+    ret = GetX509AlgorithmNid(p7SignerInfo->digest_enc_alg, signerInfo.digestEncryptNid);
+    if (ret != 0) {
         PKG_LOGE("Parse signer info digest_enc_alg failed!");
         return ret;
     }
 
-    const uint8_t *encDigest = ASN1_STRING_get0_data(p7SignerInfo->enc_digest);
-    if (encDigest == nullptr) {
-        PKG_LOGE("Get asn1 obj string failed!");
-        return PKG_INVALID_PKG_FORMAT;
-    }
-    int32_t encDigestLen = ASN1_STRING_length(p7SignerInfo->enc_digest);
-    if (encDigestLen <= 0) {
-        PKG_LOGE("Invalid asn1 obj string len %d!", encDigestLen);
-        return PKG_INVALID_PKG_FORMAT;
+    ret = GetASN1OctetStringData(p7SignerInfo->enc_digest, signerInfo.digestEncryptData);
+    if (ret != 0) {
+        PKG_LOGE("parse signer info enc_digest failed!");
+        return ret;
     }
 
-    signerInfo.digestEncryptData.resize(encDigestLen);
-    ret = memcpy_s(signerInfo.digestEncryptData.data(),
-        signerInfo.digestEncryptData.size(), encDigest, encDigestLen);
-    if (ret != EOK) {
-        PKG_LOGE("Fail to memcpy_s digestEncryptData, encDigestLen %d", encDigestLen);
-        return PKG_NONE_MEMORY;
-    }
-
-    return PKG_SUCCESS;
+    return 0;
 }
 
-int32_t Pkcs7SignedData::ParseSignerInfoX509Algo(int32_t &algoNid, const X509_ALGOR *x509Algo)
+int32_t Pkcs7SignedData::Pkcs7SignleSignerVerify(const Pkcs7SignerInfo &signerInfo) const
 {
-    if (x509Algo == nullptr) {
-        return PKG_INVALID_PARAM;
+    if (pkcs7_ == nullptr) {
+        UPDATER_LAST_WORD(-1);
+        return -1;
+    }
+    STACK_OF(X509) *certStack = pkcs7_->d.sign->cert;
+    if (certStack == nullptr) {
+        PKG_LOGE("certStack is empty!");
+        return -1;
     }
 
-    const ASN1_OBJECT *algObj = nullptr;
-    X509_ALGOR_get0(&algObj, nullptr, nullptr, x509Algo);
-    if (algObj == nullptr) {
-        PKG_LOGE("Signer info ASN1_OBJECT null!");
-        return PKG_INVALID_PKG_FORMAT;
-    }
-    algoNid = OBJ_obj2nid(algObj);
-    if (algoNid <= 0) {
-        PKG_LOGE("Invalid Signer info ASN1_OBJECT!");
-        return PKG_INVALID_PKG_FORMAT;
+    X509 *cert = X509_find_by_issuer_and_serial(certStack, signerInfo.issuerName, signerInfo.serialNumber);
+    if (cert == nullptr) {
+        PKG_LOGE("cert is empty");
+        return -1;
     }
 
-    return PKG_SUCCESS;
+    if (CertVerify::GetInstance().CheckCertChain(certStack, cert) != 0) {
+        PKG_LOGE("public cert check fail");
+        return -1;
+    }
+
+    return VerifyDigest(cert, signerInfo);
+}
+
+int32_t Pkcs7SignedData::VerifyDigest(X509 *cert, const Pkcs7SignerInfo &signer) const
+{
+    if (cert == nullptr) {
+        return -1;
+    }
+
+    size_t digestLen = GetDigestLength(signer.digestNid);
+    if (digestLen == 0 || digest_.size() != digestLen) {
+        PKG_LOGE("invalid digest length %zu", digestLen);
+        UPDATER_LAST_WORD(-1, digestLen);
+        return -1;
+    }
+
+    EVP_PKEY *pubKey = X509_get_pubkey(cert);
+    if (pubKey == nullptr) {
+        PKG_LOGE("get pubkey from cert fail");
+        UPDATER_LAST_WORD(-1);
+        return -1;
+    }
+
+    return VerifyDigestByPubKey(pubKey, signer.digestNid, digest_, signer.digestEncryptData);
 }
 } // namespace Hpackage

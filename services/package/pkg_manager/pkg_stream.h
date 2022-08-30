@@ -48,13 +48,13 @@ public:
 
     virtual int32_t Write(const PkgBuffer &data, size_t size, size_t start) = 0;
 
-    virtual int32_t Seek(long int sizeT, int whence) = 0;
+    virtual int32_t Seek(long int offset, int whence) = 0;
 
     virtual int32_t Flush(size_t size) = 0;
 
     const std::string GetFileName() const override;
 
-    int32_t GetStreamType() const override
+    virtual int32_t GetStreamType() const override
     {
         return PkgStreamType_Read;
     };
@@ -68,7 +68,7 @@ public:
     static PkgStreamPtr ConvertPkgStream(PkgManager::StreamPtr stream);
 
 protected:
-    void PostDecodeProgress(int type, size_t writeDataLen, const void *context);
+    void PostDecodeProgress(int type, size_t writeDataLen, const void *context) const;
     std::string fileName_;
 
 private:
@@ -172,7 +172,10 @@ public:
 
     int32_t Write(const PkgBuffer &data, size_t size, size_t start) override
     {
-        PKG_CHECK(processor_ != nullptr, return PKG_INVALID_STREAM, "processor not exist");
+        if (processor_ == nullptr) {
+            PKG_LOGE("processor not exist");
+            return PKG_INVALID_STREAM;
+        }
         int ret = processor_(data, size, start, false, context_);
         PostDecodeProgress(POST_TYPE_DECODE_PKG, size, nullptr);
         return ret;
@@ -198,7 +201,10 @@ public:
     int32_t Flush(size_t size) override
     {
         UNUSED(size);
-        PKG_CHECK(processor_ != nullptr, return PKG_INVALID_STREAM, "processor not exist");
+        if (processor_ == nullptr) {
+            PKG_LOGE("processor not exist");
+            return PKG_INVALID_STREAM;
+        }
         PkgBuffer data = {};
         return processor_(data, 0, 0, true, context_);
     }

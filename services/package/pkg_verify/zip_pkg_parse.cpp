@@ -25,14 +25,15 @@ struct Footer {
     uint16_t signDataSize;
 };
 
-static constexpr uint32_t SOURCE_DATA_WRITE_BLOCK_LEN = 4096;
-static constexpr uint32_t ZIP_EOCD_LEN_EXCLUDE_COMMENT = 20;
-static constexpr uint32_t ZIP_EOCD_FIXED_PART_LEN = 22;
-static constexpr uint32_t PKG_FOOTER_SIZE = 6;
-static constexpr uint32_t PKG_ZIP_EOCD_MIN_LEN = ZIP_EOCD_FIXED_PART_LEN + PKG_FOOTER_SIZE;
-static constexpr uint32_t ZIP_EOCD_SIGNATURE = 0x06054b50;
-static constexpr uint16_t PKG_ZIP_EOCD_FOOTER_FLAG = 0xFFFF;
-static const uint8_t ZIP_EOCD_SIGNATURE_BIG_ENDIAN[4] = {0x50, 0x4b, 0x05, 0x06};
+namespace {
+constexpr uint32_t ZIP_EOCD_LEN_EXCLUDE_COMMENT = 20;
+constexpr uint32_t ZIP_EOCD_FIXED_PART_LEN = 22;
+constexpr uint32_t PKG_FOOTER_SIZE = 6;
+constexpr uint32_t PKG_ZIP_EOCD_MIN_LEN = ZIP_EOCD_FIXED_PART_LEN + PKG_FOOTER_SIZE;
+constexpr uint32_t ZIP_EOCD_SIGNATURE = 0x06054b50;
+constexpr uint16_t PKG_ZIP_EOCD_FOOTER_FLAG = 0xFFFF;
+const uint8_t ZIP_EOCD_SIGNATURE_BIG_ENDIAN[4] = {0x50, 0x4b, 0x05, 0x06};
+}
 
 /*
  * ZIP:  File Entry(1..n) + CD(1..n) + EOCD(1)
@@ -164,110 +165,5 @@ int32_t ZipPkgParse::CheckZipEocd(const uint8_t *eocd, size_t length,
     }
 
     return PKG_SUCCESS;
-}
-
-int32_t ZipPkgParse::CheckZipPkg(const PkgStreamPtr pkgStream) const
-{
-    if (pkgStream == nullptr) {
-        return PKG_INVALID_FILE;
-    }
-    size_t fileLen = pkgStream->GetFileLength();
-    if (fileLen <= ZIP_EOCD_FIXED_PART_LEN) {
-        PKG_LOGE("Invalid file len %zu", fileLen);
-        return PKG_INVALID_FILE;
-    }
-
-    PkgBuffer zipEocd(ZIP_EOCD_FIXED_PART_LEN);
-    size_t eocdStart = fileLen - ZIP_EOCD_FIXED_PART_LEN;
-    size_t readLen = 0;
-    int32_t ret = pkgStream->Read(zipEocd, eocdStart, ZIP_EOCD_FIXED_PART_LEN, readLen);
-    if (ret != PKG_SUCCESS) {
-        PKG_LOGE("read eocd failed %s", pkgStream->GetFileName().c_str());
-        return PKG_INVALID_FILE;
-    }
-
-    uint32_t eocdSignature = ReadLE32(zipEocd.buffer);
-    if (eocdSignature != ZIP_EOCD_SIGNATURE) {
-        PKG_LOGE("Zip pkg has been signed.");
-        return PKG_INVALID_FILE;
-    }
-
-    return PKG_SUCCESS;
-}
-
-int32_t ZipPkgParse::WriteZipSignedData(PkgStreamPtr outStream, const PkgBuffer &p7Data, PkgStreamPtr inStream) const
-{
-    size_t offset = 0;
-    size_t fileSize = inStream->GetFileLength();
-    size_t srcDataLen = fileSize - sizeof(uint16_t);
-    int32_t ret = WriteSourcePackageData(outStream, inStream, srcDataLen);
-    if (ret != PKG_SUCCESS) {
-        PKG_LOGE("Fail to write src data");
-        return ret;
-    }
-    offset += srcDataLen;
-
-    uint16_t zipCommentLen = p7Data.length + PKG_FOOTER_SIZE;
-    std::vector<uint8_t> buff(sizeof(uint16_t));
-    WriteLE16(buff.data(), zipCommentLen);
-    PkgBuffer buffer(buff);
-    ret = outStream->Write(buffer, sizeof(uint16_t), offset);
-    if (ret != PKG_SUCCESS) {
-        PKG_LOGE("Fail to write zip eocd comment len");
-        return ret;
-    }
-    offset += sizeof(uint16_t);
-
-    ret = outStream->Write(p7Data, p7Data.length, offset);
-    if (ret != PKG_SUCCESS) {
-        PKG_LOGE("Fail to write pkcs7 signed data");
-        return ret;
-    }
-    offset += p7Data.length;
-
-    return WriteFooter(outStream, zipCommentLen, offset);
-}
-
-int32_t ZipPkgParse::WriteSourcePackageData(PkgStreamPtr outStream, PkgStreamPtr inStream, size_t wirteLen) const
-{
-    size_t offset = 0;
-    size_t remainLen = wirteLen;
-    size_t blockLen = SOURCE_DATA_WRITE_BLOCK_LEN;
-    PkgBuffer buffer(blockLen);
-    size_t readLen = 0;
-    int32_t ret = PKG_SUCCESS;
-    while (remainLen >= blockLen) {
-        ret = inStream->Read(buffer, offset, blockLen, readLen);
-        PKG_CHECK(ret == PKG_SUCCESS, return ret, "Fail read data");
-        ret = outStream->Write(buffer, readLen, offset);
-        PKG_CHECK(ret == PKG_SUCCESS, return ret, "Fail write data");
-
-        offset += readLen;
-        remainLen -= readLen;
-    }
-    if (remainLen > 0) {
-        ret = inStream->Read(buffer, offset, remainLen, readLen);
-        PKG_CHECK(ret == PKG_SUCCESS, return ret, "Fail read data");
-        ret = outStream->Write(buffer, readLen, offset);
-        PKG_CHECK(ret == PKG_SUCCESS, return ret, "Fail write data");
-    }
-
-    return ret;
-}
-
-int32_t ZipPkgParse::WriteFooter(PkgStreamPtr outStream, uint16_t zipCommentLen, size_t &offset) const
-{
-    Footer footer = {0};
-    footer.signDataStart = zipCommentLen;
-    footer.signDataFlag = 0xFFFF;
-    footer.signDataSize = zipCommentLen;
-
-    std::vector<uint8_t> buff(sizeof(Footer));
-    WriteLE16(buff.data() + offsetof(Footer, signDataStart), footer.signDataStart);
-    WriteLE16(buff.data() + offsetof(Footer, signDataFlag), footer.signDataFlag);
-    WriteLE16(buff.data() + offsetof(Footer, signDataSize), footer.signDataSize);
-    PkgBuffer buffer(buff);
-
-    return outStream->Write(buffer, sizeof(Footer), offset);
 }
 } // namespace Hpackage

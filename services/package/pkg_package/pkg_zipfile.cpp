@@ -40,22 +40,36 @@ constexpr int32_t DEF_MEM_LEVEL = 8;
 
 int32_t ZipPkgFile::AddEntry(const PkgManager::FileInfoPtr file, const PkgStreamPtr inStream)
 {
-    PKG_CHECK(CheckState({PKG_FILE_STATE_IDLE, PKG_FILE_STATE_WORKING}, PKG_FILE_STATE_WORKING),
-        return PKG_INVALID_STATE, "Error state curr %d ", state_);
-    PKG_CHECK(file != nullptr && inStream != nullptr, return PKG_INVALID_PARAM, "AddEntry failed, invalid param");
+    if (!CheckState({PKG_FILE_STATE_IDLE, PKG_FILE_STATE_WORKING}, PKG_FILE_STATE_WORKING)) {
+        PKG_LOGE("Error state curr %d ", state_);
+        return PKG_INVALID_STATE;
+    }
+    if (file == nullptr || inStream == nullptr) {
+        PKG_LOGE("AddEntry failed, invalid param");
+        return PKG_INVALID_PARAM;
+    }
     PKG_LOGI("ZipPkgFile::AddEntry %s ", file->identity.c_str());
 
     int32_t ret = PKG_SUCCESS;
     ZipFileEntry* entry = (ZipFileEntry*)AddPkgEntry(file->identity);
-    PKG_CHECK(entry != nullptr, return PKG_NONE_MEMORY, "Failed to create pkg node for %s", file->identity.c_str());
+    if (entry == nullptr) {
+        PKG_LOGE("Failed to create pkg node for %s", file->identity.c_str());
+        return PKG_NONE_MEMORY;
+    }
     entry->Init(file, inStream);
 
     size_t encodeLen = 0;
     ret = entry->EncodeHeader(inStream, currentOffset_, encodeLen);
-    PKG_CHECK(ret == PKG_SUCCESS, return ret, "Failed to encode for %s", file->identity.c_str());
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("Failed to encode for %s", file->identity.c_str());
+        return ret;
+    }
     currentOffset_ += encodeLen;
     ret = entry->Pack(inStream, currentOffset_, encodeLen);
-    PKG_CHECK(ret == PKG_SUCCESS, return ret, "Failed to pack for %s", file->identity.c_str());
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("Failed to pack for %s", file->identity.c_str());
+        return ret;
+    }
     currentOffset_ += encodeLen;
     return PKG_SUCCESS;
 }
@@ -63,13 +77,18 @@ int32_t ZipPkgFile::AddEntry(const PkgManager::FileInfoPtr file, const PkgStream
 int32_t ZipPkgFile::SavePackage(size_t &signOffset)
 {
     UNUSED(signOffset);
-    PKG_CHECK(CheckState({PKG_FILE_STATE_WORKING}, PKG_FILE_STATE_CLOSE),
-        return PKG_INVALID_STATE, "error state curr %d ", state_);
+    if (!CheckState({PKG_FILE_STATE_WORKING}, PKG_FILE_STATE_CLOSE)) {
+        PKG_LOGE("error state curr %d ", state_);
+        return PKG_INVALID_STATE;
+    }
     int32_t ret = PKG_SUCCESS;
     size_t offset = currentOffset_;
     for (auto &it : pkgEntryMapId_) {
         ZipFileEntry* entry = (ZipFileEntry*)it.second;
-        PKG_CHECK(entry != nullptr, return PKG_INVALID_PARAM, "Failed to write CentralDirEntry");
+        if (entry == nullptr) {
+            PKG_LOGE("Failed to write CentralDirEntry");
+            return PKG_INVALID_PARAM;
+        }
         size_t encodeLen = 0;
         entry->EncodeCentralDirEntry(pkgStream_, offset, encodeLen);
         offset += encodeLen;
@@ -86,8 +105,10 @@ int32_t ZipPkgFile::SavePackage(size_t &signOffset)
     WriteLE16(buff.data() + offsetof(EndCentralDir, commentLen), 0);
     PkgBuffer buffer(buff);
     ret = pkgStream_->Write(buffer, sizeof(EndCentralDir), offset);
-    PKG_CHECK(ret == PKG_SUCCESS, return ret, "Failed to write CentralDirEntry for %s",
-        pkgStream_->GetFileName().c_str());
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("Failed to write CentralDirEntry for %s", pkgStream_->GetFileName().c_str());
+        return ret;
+    }
     currentOffset_ = offset + sizeof(EndCentralDir);
     pkgStream_->Flush(currentOffset_);
     return PKG_SUCCESS;
@@ -185,16 +206,25 @@ int32_t ZipPkgFile::ParseFileEntries(std::vector<std::string> &fileNames,
     PkgBuffer buffer(buffLen);
 
     for (int32_t i = 0; i < endDir.totalEntries; i++) {
-        PKG_CHECK(fileLen > currentPos, return PKG_INVALID_FILE, "too small to be zip");
+        if (fileLen <= currentPos) {
+            PKG_LOGE("too small to be zip");
+            return PKG_INVALID_FILE;
+        }
 
         ZipFileEntry* entry = new ZipFileEntry(this, nodeId_++);
-        PKG_CHECK(entry != nullptr, return PKG_NONE_MEMORY, "Failed to create zip node for %s",
-            pkgStream_->GetFileName().c_str());
+        if (entry == nullptr) {
+            PKG_LOGE("Failed to create zip node for %s", pkgStream_->GetFileName().c_str());
+            return PKG_NONE_MEMORY;
+        }
 
         // 从文件中解析出文件头信息，保存在entry中
         size_t decodeLen = 0;
         ret = entry->DecodeHeader(buffer, currentPos, 0, decodeLen);
-        PKG_CHECK(ret == PKG_SUCCESS, delete entry; return ret, "DecodeHeader failed");
+        if (ret != PKG_SUCCESS) {
+            PKG_LOGE("DecodeHeader failed");
+            delete entry;
+            return ret;
+        }
 
         // 保存entry文件
         pkgEntryMapId_.insert(std::pair<uint32_t, PkgEntryPtr>(entry->GetNodeId(), (PkgEntryPtr)entry));
@@ -308,8 +338,10 @@ int32_t ZipFileEntry::EncodeCentralDirEntry(const PkgStreamPtr stream, size_t st
     centralDir->localHeaderOffset = fileInfo_.fileInfo.headerOffset;
     PkgBuffer buffer(buff);
     int32_t ret = stream->Write(buffer, sizeof(CentralDirEntry) + realLen, startOffset);
-    PKG_CHECK(ret == PKG_SUCCESS, return ret,
-        "Failed to write CentralDirEntry for %s", fileInfo_.fileInfo.identity.c_str());
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("Failed to write CentralDirEntry for %s", fileInfo_.fileInfo.identity.c_str());
+        return ret;
+    }
     encodeLen = sizeof(CentralDirEntry) + realLen;
     return PKG_SUCCESS;
 }
@@ -317,7 +349,10 @@ int32_t ZipFileEntry::EncodeCentralDirEntry(const PkgStreamPtr stream, size_t st
 int32_t ZipFileEntry::EncodeLocalFileHeader(uint8_t *buffer, size_t bufferLen, bool hasDataDesc,
     size_t nameLen)
 {
-    PKG_CHECK(bufferLen >= sizeof(LocalFileHeader), return PKG_INVALID_PARAM, "invalid buffer for decode");
+    if (bufferLen < sizeof(LocalFileHeader)) {
+        PKG_LOGE("invalid buffer for decode");
+        return PKG_INVALID_PARAM;
+    }
 
     LocalFileHeader* header = reinterpret_cast<LocalFileHeader*>(buffer);
     header->signature = LOCAL_HEADER_SIGNATURE;
@@ -355,8 +390,10 @@ int32_t ZipFileEntry::EncodeDataDescriptor(const PkgStreamPtr stream, size_t sta
     dataDesc.uncompressedSize = fileInfo_.fileInfo.unpackedSize;
     PkgBuffer buffer((uint8_t *)&dataDesc, sizeof(dataDesc));
     ret = stream->Write(buffer, sizeof(dataDesc), offset);
-    PKG_CHECK(ret == PKG_SUCCESS, return ret,
-        "Failed to write DataDescriptor for %s", fileInfo_.fileInfo.identity.c_str());
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("Failed to write DataDescriptor for %s", fileInfo_.fileInfo.identity.c_str());
+        return ret;
+    }
     offset += sizeof(dataDesc);
     encodeLen = offset - startOffset;
     return ret;
@@ -441,23 +478,37 @@ int32_t ZipFileEntry::DecodeLocalFileHeaderCheck(PkgStreamPtr inStream, const Pk
     if ((flags & GPBDD_FLAG_MASK) == GPBDD_FLAG_MASK) {
         currentPos += fileInfo_.fileInfo.packedSize;
         int ret = inStream->Read(data, currentPos, data.length, readLen);
-        PKG_CHECK(ret == PKG_SUCCESS, return ret, "parse entry read centralDir failed");
-        PKG_CHECK(readLen >= sizeof(DataDescriptor),
-            return PKG_INVALID_PKG_FORMAT, "data not not enough %zu", readLen);
+        if (ret != PKG_SUCCESS) {
+            PKG_LOGE("parse entry read centralDir failed");
+            return ret;
+        }
+        if (readLen < sizeof(DataDescriptor)) {
+            PKG_LOGE("data not not enough %zu", readLen);
+            return PKG_INVALID_PKG_FORMAT;
+        }
 
         uint32_t signature = ReadLE32(data.buffer + offsetof(DataDescriptor, signature));
-        PKG_CHECK(signature == DATA_DESC_SIGNATURE, return PKG_INVALID_PKG_FORMAT,
-            "check DataDescriptor signature failed");
+        if (signature != DATA_DESC_SIGNATURE) {
+            PKG_LOGE("check DataDescriptor signature failed");
+            return PKG_INVALID_PKG_FORMAT;
+        }
         crc32 = ReadLE32(data.buffer + offsetof(DataDescriptor, crc));
         packedSize = ReadLE32(data.buffer + offsetof(DataDescriptor, compressedSize));
         unpackedSize = ReadLE32(data.buffer + offsetof(DataDescriptor, uncompressedSize));
     }
-    PKG_CHECK(crc32_ == crc32, return PKG_INVALID_PKG_FORMAT, "check crc %u %u failed", crc32_, crc32);
+    if (crc32_ != crc32) {
+        PKG_LOGE("check crc %u %u failed", crc32_, crc32);
+        return PKG_INVALID_PKG_FORMAT;
+    }
     if (packedSize != UINT32_MAX) {
-        PKG_CHECK(fileInfo_.fileInfo.packedSize == static_cast<size_t>(packedSize), return PKG_INVALID_PKG_FORMAT,
-            "check packedSize %zu %u failed", fileInfo_.fileInfo.packedSize, packedSize);
-        PKG_CHECK(fileInfo_.fileInfo.unpackedSize == static_cast<size_t>(unpackedSize), return PKG_INVALID_PKG_FORMAT,
-            "check unpackedSize %zu %u failed", fileInfo_.fileInfo.unpackedSize, unpackedSize);
+        if (fileInfo_.fileInfo.packedSize != static_cast<size_t>(packedSize)) {
+            PKG_LOGE("check packedSize %zu %u failed", fileInfo_.fileInfo.packedSize, packedSize);
+            return PKG_INVALID_PKG_FORMAT;
+        }
+        if (fileInfo_.fileInfo.unpackedSize != static_cast<size_t>(unpackedSize)) {
+            PKG_LOGE("check unpackedSize %zu %u failed", fileInfo_.fileInfo.unpackedSize, unpackedSize);
+            return PKG_INVALID_PKG_FORMAT;
+        }
     }
     return PKG_SUCCESS;
 }
@@ -497,26 +548,35 @@ int32_t ZipFileEntry::DecodeLocalFileHeader(PkgStreamPtr inStream, const PkgBuff
 
     // 检查解析的是否正确
     ret = DecodeLocalFileHeaderCheck(inStream, data, currentPos + currLen);
-    PKG_ONLY_CHECK(ret == PKG_SUCCESS, return ret);
+    if (ret != PKG_SUCCESS) {
+        return ret;
+    }
     return PKG_SUCCESS;
 }
 
 int32_t ZipFileEntry::Unpack(PkgStreamPtr outStream)
 {
     PkgAlgorithm::PkgAlgorithmPtr algorithm = PkgAlgorithmFactory::GetAlgorithm(&fileInfo_.fileInfo);
-    PKG_CHECK(algorithm != nullptr, return PKG_INVALID_PARAM,
-        "can not algorithm for %s", fileInfo_.fileInfo.identity.c_str());
+    if (algorithm == nullptr) {
+        PKG_LOGE("ZipFileEntry::Unpack : can not algorithm for %s", fileInfo_.fileInfo.identity.c_str());
+        return PKG_INVALID_PARAM;
+    }
 
     PkgStreamPtr inStream = pkgFile_->GetPkgStream();
-    PKG_CHECK(outStream != nullptr && inStream != nullptr, return PKG_INVALID_PARAM,
-        "outStream or inStream null for %s", fileInfo_.fileInfo.identity.c_str());
+    if (outStream == nullptr || inStream == nullptr) {
+        PKG_LOGE("ZipFileEntry::Unpack : outStream or inStream null for %s", fileInfo_.fileInfo.identity.c_str());
+        return PKG_INVALID_PARAM;
+    }
     PkgAlgorithmContext context = {
         {this->fileInfo_.fileInfo.dataOffset, 0},
         {fileInfo_.fileInfo.packedSize, fileInfo_.fileInfo.unpackedSize},
         crc32_, fileInfo_.fileInfo.digestMethod
     };
     int32_t ret = algorithm->Unpack(inStream, outStream, context);
-    PKG_CHECK(ret == PKG_SUCCESS, return ret, "Failed to decompress for %s", fileInfo_.fileInfo.identity.c_str());
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("Failed to decompress for %s", fileInfo_.fileInfo.identity.c_str());
+        return ret;
+    }
     PKG_LOGI("packedSize: %zu unpackedSize: %zu  offset header: %zu data: %zu", fileInfo_.fileInfo.packedSize,
         fileInfo_.fileInfo.unpackedSize, fileInfo_.fileInfo.headerOffset, fileInfo_.fileInfo.dataOffset);
     outStream->Flush(fileInfo_.fileInfo.unpackedSize);
@@ -541,21 +601,34 @@ int32_t ZipFileEntry::DecodeHeader(const PkgBuffer &buff, size_t startOffset, si
     size_t &decodeLen)
 {
     PkgStreamPtr inStream = pkgFile_->GetPkgStream();
-    PKG_CHECK(inStream != nullptr, return PKG_INVALID_PARAM,
-        "outStream or inStream null for %s", fileInfo_.fileInfo.identity.c_str());
+    if (inStream == nullptr) {
+        PKG_LOGE("outStream or inStream null for %s", fileInfo_.fileInfo.identity.c_str());
+        return PKG_INVALID_PARAM;
+    }
 
-    PKG_CHECK(startOffset < (std::numeric_limits<size_t>::max() - buff.length), return PKG_INVALID_PKG_FORMAT,
-        "check centralDir len failed");
+    if (startOffset >= (std::numeric_limits<size_t>::max() - buff.length)) {
+        PKG_LOGE("check centralDir len failed");
+        return PKG_INVALID_PKG_FORMAT;
+    }
     size_t readLen = 0;
     int32_t ret = inStream->Read(buff, startOffset, buff.length, readLen);
-    PKG_CHECK(ret == PKG_SUCCESS, return ret, "parse entry read centralDir failed");
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("parse entry read centralDir failed");
+        return ret;
+    }
     PkgBuffer centralBuff(buff.buffer, readLen);
     ret = DecodeCentralDirEntry(inStream, centralBuff, startOffset, decodeLen);
-    PKG_CHECK(ret == PKG_SUCCESS, return ret, "decode CentralDir failed");
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("decode CentralDir failed");
+        return ret;
+    }
 
     size_t headerLen = 0;
     ret = DecodeLocalFileHeader(inStream, buff, fileInfo_.fileInfo.headerOffset, headerLen);
-    PKG_CHECK(ret == PKG_SUCCESS, return ret, "decode LocalFileHeader failed");
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("decode LocalFileHeader failed");
+        return ret;
+    }
     fileInfo_.fileInfo.packMethod = PKG_DIGEST_TYPE_CRC;
     fileInfo_.fileInfo.digestMethod = PKG_COMPRESS_METHOD_ZIP;
     fileInfo_.fileInfo.dataOffset = fileInfo_.fileInfo.headerOffset + headerLen;
@@ -573,7 +646,10 @@ int32_t ZipFileEntry::Init(const PkgManager::FileInfoPtr fileInfo, PkgStreamPtr 
     fileInfo_.memLevel = DEF_MEM_LEVEL;
     fileInfo_.strategy = Z_DEFAULT_STRATEGY;
     int32_t ret = PkgEntry::Init(&fileInfo_.fileInfo, fileInfo, inStream);
-    PKG_CHECK(ret == PKG_SUCCESS, return PKG_INVALID_PARAM, "Failed to check input param");
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("Failed to check input param");
+        return PKG_INVALID_PARAM;
+    }
     ZipFileInfo* info = (ZipFileInfo*)fileInfo;
     if (info != nullptr && info->method != -1) {
         fileInfo_.level = info->level;

@@ -22,7 +22,10 @@ namespace Hpackage {
 int32_t Lz4FileEntry::Init(const PkgManager::FileInfoPtr fileInfo, PkgStreamPtr inStream)
 {
     int32_t ret = PkgEntry::Init(&fileInfo_.fileInfo, fileInfo, inStream);
-    PKG_CHECK(ret == PKG_SUCCESS, return PKG_INVALID_PARAM, "Fail to check input param");
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("Fail to check input param");
+        return PKG_INVALID_PARAM;
+    }
     Lz4FileInfo *info = (Lz4FileInfo *)fileInfo;
     if (info != nullptr) {
         fileInfo_.compressionLevel = info->compressionLevel;
@@ -45,10 +48,14 @@ int32_t Lz4FileEntry::Pack(PkgStreamPtr inStream, size_t startOffset, size_t &en
 {
     PkgAlgorithm::PkgAlgorithmPtr algorithm = PkgAlgorithmFactory::GetAlgorithm(&fileInfo_.fileInfo);
     PkgStreamPtr outStream = pkgFile_->GetPkgStream();
-    PKG_CHECK(fileInfo_.fileInfo.headerOffset == startOffset, return PKG_INVALID_PARAM, "start offset error for %s",
-        fileInfo_.fileInfo.identity.c_str());
-    PKG_CHECK(algorithm != nullptr && outStream != nullptr && inStream != nullptr, return PKG_INVALID_PARAM,
-        "outStream or inStream null for %s", fileInfo_.fileInfo.identity.c_str());
+    if (fileInfo_.fileInfo.headerOffset != startOffset) {
+        PKG_LOGE("start offset error for %s", fileInfo_.fileInfo.identity.c_str());
+        return PKG_INVALID_PARAM;
+    }
+    if (algorithm == nullptr || outStream == nullptr || inStream == nullptr) {
+        PKG_LOGE("outStream or inStream null for %s", fileInfo_.fileInfo.identity.c_str());
+        return PKG_INVALID_PARAM;
+    }
     fileInfo_.fileInfo.dataOffset = startOffset;
     PkgAlgorithmContext context = {
         {0, startOffset},
@@ -56,7 +63,10 @@ int32_t Lz4FileEntry::Pack(PkgStreamPtr inStream, size_t startOffset, size_t &en
         0, fileInfo_.fileInfo.digestMethod
     };
     int32_t ret = algorithm->Pack(inStream, outStream, context);
-    PKG_CHECK(ret == PKG_SUCCESS, return ret, "Fail Compress for %s", fileInfo_.fileInfo.identity.c_str());
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("Fail Compress for %s", fileInfo_.fileInfo.identity.c_str());
+        return ret;
+    }
     fileInfo_.fileInfo.packedSize = context.packedSize;
     encodeLen = fileInfo_.fileInfo.packedSize;
     PKG_LOGI("Pack packedSize:%zu unpackedSize: %zu offset: %zu %zu", fileInfo_.fileInfo.packedSize,
@@ -67,19 +77,26 @@ int32_t Lz4FileEntry::Pack(PkgStreamPtr inStream, size_t startOffset, size_t &en
 int32_t Lz4FileEntry::Unpack(PkgStreamPtr outStream)
 {
     PkgAlgorithm::PkgAlgorithmPtr algorithm = PkgAlgorithmFactory::GetAlgorithm(&fileInfo_.fileInfo);
-    PKG_CHECK(algorithm != nullptr, return PKG_INVALID_PARAM, "can not algorithm for %s",
-        fileInfo_.fileInfo.identity.c_str());
+    if (algorithm == nullptr) {
+        PKG_LOGE("Lz4FileEntry::Unpack : can not algorithm for %s", fileInfo_.fileInfo.identity.c_str());
+        return PKG_INVALID_PARAM;
+    }
 
     PkgStreamPtr inStream = pkgFile_->GetPkgStream();
-    PKG_CHECK(outStream != nullptr && inStream != nullptr, return PKG_INVALID_PARAM,
-        "outStream or inStream null for %s", fileInfo_.fileInfo.identity.c_str());
+    if (outStream == nullptr || inStream == nullptr) {
+        PKG_LOGE("Lz4FileEntry::Unpack : outStream or inStream null for %s", fileInfo_.fileInfo.identity.c_str());
+        return PKG_INVALID_PARAM;
+    }
     PkgAlgorithmContext context = {
         {fileInfo_.fileInfo.dataOffset, 0},
         {fileInfo_.fileInfo.packedSize, fileInfo_.fileInfo.unpackedSize},
         0, fileInfo_.fileInfo.digestMethod
     };
     int32_t ret = algorithm->Unpack(inStream, outStream, context);
-    PKG_CHECK(ret == PKG_SUCCESS, return ret, "Failed decompress for %s", fileInfo_.fileInfo.identity.c_str());
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("Failed decompress for %s", fileInfo_.fileInfo.identity.c_str());
+        return ret;
+    }
     fileInfo_.fileInfo.packedSize = context.packedSize;
     fileInfo_.fileInfo.unpackedSize = context.unpackedSize;
     PKG_LOGI("packedSize: %zu unpackedSize: %zu  offset header: %zu data: %zu", fileInfo_.fileInfo.packedSize,
@@ -111,23 +128,39 @@ int32_t Lz4FileEntry::DecodeHeader(const PkgBuffer &buffer, size_t headerOffset,
 
 int32_t Lz4PkgFile::AddEntry(const PkgManager::FileInfoPtr file, const PkgStreamPtr inStream)
 {
-    PKG_CHECK(file != nullptr && inStream != nullptr, return PKG_INVALID_PARAM, "Fail to check input param");
-    PKG_CHECK(CheckState({ PKG_FILE_STATE_IDLE,
-        PKG_FILE_STATE_WORKING
-    }, PKG_FILE_STATE_CLOSE), return PKG_INVALID_STATE, "error state curr %d ", state_);
+    if (file == nullptr || inStream == nullptr) {
+        PKG_LOGE("Fail to check input param");
+        return PKG_INVALID_PARAM;
+    }
+    if (!CheckState({ PKG_FILE_STATE_IDLE, PKG_FILE_STATE_WORKING }, PKG_FILE_STATE_CLOSE)) {
+        PKG_LOGE("error state curr %d ", state_);
+        return PKG_INVALID_STATE;
+    }
     PKG_LOGI("Add file %s to package", file->identity.c_str());
 
     Lz4FileEntry *entry = static_cast<Lz4FileEntry *>(AddPkgEntry(file->identity));
-    PKG_CHECK(entry != nullptr, return PKG_NONE_MEMORY, "Fail create pkg node for %s", file->identity.c_str());
+    if (entry == nullptr) {
+        PKG_LOGE("Fail create pkg node for %s", file->identity.c_str());
+        return PKG_NONE_MEMORY;
+    }
     int32_t ret = entry->Init(file, inStream);
-    PKG_CHECK(ret == PKG_SUCCESS, return ret, "Fail init entry for %s", file->identity.c_str());
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("Fail init entry for %s", file->identity.c_str());
+        return ret;
+    }
 
     size_t encodeLen = 0;
     ret = entry->EncodeHeader(inStream, currentOffset_, encodeLen);
-    PKG_CHECK(ret == PKG_SUCCESS, return ret, "Fail encode header for %s", file->identity.c_str());
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("Fail encode header for %s", file->identity.c_str());
+        return ret;
+    }
     currentOffset_ += encodeLen;
     ret = entry->Pack(inStream, currentOffset_, encodeLen);
-    PKG_CHECK(ret == PKG_SUCCESS, return ret, "Fail Pack for %s", file->identity.c_str());
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("Fail Pack for %s", file->identity.c_str());
+        return ret;
+    }
     currentOffset_ += encodeLen;
     PKG_LOGI("offset:%zu ", currentOffset_);
     pkgStream_->Flush(currentOffset_);
@@ -143,16 +176,24 @@ int32_t Lz4PkgFile::SavePackage(size_t &offset)
 int32_t Lz4PkgFile::LoadPackage(std::vector<std::string> &fileNames, VerifyFunction verifier)
 {
     UNUSED(verifier);
-    PKG_CHECK(CheckState({ PKG_FILE_STATE_IDLE }, PKG_FILE_STATE_WORKING), return PKG_INVALID_STATE,
-        "error state curr %d ", state_);
+    if (!CheckState({ PKG_FILE_STATE_IDLE }, PKG_FILE_STATE_WORKING)) {
+        PKG_LOGE("error state curr %d ", state_);
+        return PKG_INVALID_STATE;
+    }
     PKG_LOGI("LoadPackage %s ", pkgStream_->GetFileName().c_str());
 
     size_t srcOffset = 0;
     size_t readLen = 0;
     PkgBuffer buffer(sizeof(PkgAlgorithmLz4::LZ4B_MAGIC_NUMBER));
     int32_t ret = pkgStream_->Read(buffer, srcOffset, buffer.length, readLen);
-    PKG_CHECK(ret == PKG_SUCCESS, return ret, "Fail to read buffer");
-    PKG_CHECK(readLen == sizeof(PkgAlgorithmLz4::LZ4B_MAGIC_NUMBER), return PKG_LZ4_FINISH, "Fail to read buffer");
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("Fail to read buffer");
+        return ret;
+    }
+    if (readLen != sizeof(PkgAlgorithmLz4::LZ4B_MAGIC_NUMBER)) {
+        PKG_LOGE("Fail to read buffer");
+        return PKG_LZ4_FINISH;
+    }
 
     srcOffset += sizeof(PkgAlgorithmLz4::LZ4B_MAGIC_NUMBER);
     uint32_t magicNumber = ReadLE32(buffer.buffer);
@@ -161,8 +202,10 @@ int32_t Lz4PkgFile::LoadPackage(std::vector<std::string> &fileNames, VerifyFunct
     if (magicNumber == PkgAlgorithmLz4::LZ4S_MAGIC_NUMBER ||
         magicNumber == PkgAlgorithmLz4::LZ4B_MAGIC_NUMBER) {
         Lz4FileEntry *entry = new Lz4FileEntry(this, nodeId_++);
-        PKG_CHECK(entry != nullptr, return PKG_LZ4_FINISH, "Fail create upgrade node for %s",
-            pkgStream_->GetFileName().c_str());
+        if (entry == nullptr) {
+            PKG_LOGE("Fail create upgrade node for %s", pkgStream_->GetFileName().c_str());
+            return PKG_LZ4_FINISH;
+        }
         ret = entry->DecodeHeader(buffer, 0, srcOffset, readLen);
         srcOffset += readLen;
 

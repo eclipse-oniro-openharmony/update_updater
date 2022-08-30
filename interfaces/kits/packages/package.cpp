@@ -204,8 +204,8 @@ int32_t VerifyPackageWithCallback(const std::string &packagePath,
     return ret;
 }
 
-int32_t CreatePackageL1(const UpgradePkgInfoExt *pkgInfo, ComponentInfoExt comp[],
-    const char *path, uint32_t *offset, const char **hashCode)
+int32_t CreatePackageL1(const UpgradePkgInfoExt *pkgInfo, ComponentInfoExt *comp,
+    const char *path, uint32_t *offset, char **hashCode)
 {
     PkgManager::PkgManagerPtr manager = PkgManager::GetPackageInstance();
     if (pkgInfo == nullptr || path == nullptr || hashCode == nullptr || manager == nullptr || offset == nullptr) {

@@ -74,13 +74,10 @@ public:
 
     int32_t CreatePkgStream(StreamPtr &stream, const std::string &fileName, const PkgBuffer &buffer) override;
 
-    int32_t VerifyOtaPackage(const std::string &packagePath, const std::string &keyPath) override;
+    int32_t VerifyOtaPackage(const std::string &packagePath) override;
 
     int32_t VerifyBinFile(const std::string &packagePath, const std::string &keyPath,
         const std::string &version, const PkgBuffer &digest) override;
-
-    int32_t CreateSignContent(const std::string &packagePath, const std::string &signedPackage,
-        const std::string &keyPath, PkgInfoPtr header) override;
 
     void SetPkgDecodeProgress(PkgDecodeProgress decodeProgress) override
     {

@@ -163,11 +163,10 @@ int32_t ScriptInstructionHelper::RegisterUserInstruction(const std::string &inst
     ret = AddInstruction(instrName, instr);
     if (ret != USCRIPT_SUCCESS) {
         USCRIPT_LOGE("Fail to add instruction for %s", instrName.c_str());
+        return ret;
     }
 
     USCRIPT_LOGI("RegisterUserInstruction %s successfull", instrName.c_str());
-    delete instr;
-    instr = nullptr;
-    return ret;
+    return USCRIPT_SUCCESS;
 }
 } // namespace Uscript

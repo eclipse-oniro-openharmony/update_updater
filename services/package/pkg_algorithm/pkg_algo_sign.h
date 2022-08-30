@@ -49,9 +49,11 @@ public:
     virtual ~SignAlgorithm() {}
 
     virtual int32_t SignBuffer(const PkgBuffer &buffer, std::vector<uint8_t> &sign, size_t &signLen) const = 0;
-    virtual int32_t VerifyBuffer(const std::vector<uint8_t> &digest, const std::vector<uint8_t> &signature) = 0;
+
+    int32_t VerifyDigest(const std::vector<uint8_t> &digest, const std::vector<uint8_t> &signature);
 
 protected:
+    X509 *GetPubkey() const;
     std::string keyName_ {};
     uint8_t digestMethod_ = PKG_DIGEST_TYPE_SHA256;
 };
@@ -69,15 +71,6 @@ public:
         UNUSED(signLen);
         return PKG_INVALID_SIGNATURE;
     }
-
-    int32_t VerifyBuffer(const std::vector<uint8_t> &digest, const std::vector<uint8_t> &signature) override;
-
-private:
-    bool CheckEccKey(const EC_KEY *eccKey) const;
-
-    bool CheckRsaKey(const RSA *rsakey) const;
-
-    bool LoadPubKey(const std::string &filename, struct CertKeySt &certs) const;
 };
 
 class SignAlgorithmRsa : public SignAlgorithm {
@@ -87,13 +80,6 @@ public:
     ~SignAlgorithmRsa() override {}
 
     int32_t SignBuffer(const PkgBuffer &buffer, std::vector<uint8_t> &sign, size_t &signLen) const override;
-
-    int32_t VerifyBuffer(const std::vector<uint8_t> &digest, const std::vector<uint8_t> &signature) override
-    {
-        UNUSED(digest);
-        UNUSED(signature);
-        return PKG_INVALID_SIGNATURE;
-    }
 };
 
 class SignAlgorithmEcc : public SignAlgorithm {
@@ -103,13 +89,6 @@ public:
     ~SignAlgorithmEcc() override {}
 
     int32_t SignBuffer(const PkgBuffer &buffer, std::vector<uint8_t> &sign, size_t &signLen) const override;
-
-    int32_t VerifyBuffer(const std::vector<uint8_t> &digest, const std::vector<uint8_t> &signature) override
-    {
-        UNUSED(digest);
-        UNUSED(signature);
-        return PKG_INVALID_SIGNATURE;
-    }
 };
 } // namespace Hpackage
 #endif

@@ -75,8 +75,10 @@ std::vector<std::string> ScriptFunction::GetParamNames(ScriptInterpreter &inter,
     for (auto expression : params_->GetParams()) {
         std::string varName;
         ret = IdentifierExpression::GetIdentifierName(expression, varName);
-        INTERPRETER_CHECK(inter, context, ret == USCRIPT_SUCCESS, return names, "Fail to get param name %s",
-            functionName_.c_str());
+        if (ret != USCRIPT_SUCCESS) {
+            INTERPRETER_LOGE(inter, context, "Fail to get param name %s", functionName_.c_str());
+            return names;
+        }
         names.push_back(varName);
     }
     return names;
