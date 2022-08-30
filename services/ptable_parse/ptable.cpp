@@ -80,7 +80,7 @@ bool Ptable::ParsePtableDataNode(const JsonNode &ptableDataNode)
 
 bool Ptable::ParsePtableData()
 {
-    memset_s(&ptableData_, sizeof(ptableData_), 0, sizeof(ptableData_));
+    (void)memset_s(&ptableData_, sizeof(ptableData_), 0, sizeof(ptableData_));
     std::ifstream ifs(std::string {PTABLE_CONFIG_PATH});
     if (!ifs.is_open()) {
         LOG(ERROR) << PTABLE_CONFIG_PATH << " not exist";
