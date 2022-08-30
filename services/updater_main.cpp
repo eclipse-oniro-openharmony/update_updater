@@ -28,6 +28,7 @@
 #include <unistd.h>
 #include <vector>
 #include "applypatch/partition_record.h"
+#include "cert_verify.h"
 #include "fs_manager/mount.h"
 #include "include/updater/updater.h"
 #include "language/language_ui.h"
@@ -38,11 +39,11 @@
 #include "pkg_manager.h"
 #include "pkg_utils.h"
 #include "securec.h"
-#include "ui/updater_ui.h"
-#include "ui/updater_ui_env.h"
-#include "updater/updater_const.h"
+#include "updater_ui.h"
+#include "updater_ui_env.h"
 #include "updater_ui_facade.h"
 #include "updater_ui_tools.h"
+#include "updater/updater_const.h"
 #include "utils.h"
 
 namespace Updater {
@@ -51,7 +52,6 @@ using namespace Hpackage;
 using namespace Updater::Utils;
 using namespace std::literals::chrono_literals;
 
-constexpr int DISPLAY_TIME = 1000 * 1000;
 constexpr struct option OPTIONS[] = {
     { "update_package", required_argument, nullptr, 0 },
     { "retry_count", required_argument, nullptr, 0 },
@@ -235,9 +235,10 @@ static UpdaterStatus InstallUpdaterPackage(UpdaterParams &upParams, const std::v
             }
             SetRetryCountToMisc(upParams.retryCount + 1, args);
         }
-        UPDATER_CHECK_ONLY_RETURN(SetupPartitions() == 0,
+        if (SetupPartitions() != 0) {
             UpdaterUiFacade::GetInstance().ShowUpdInfo(TR(UPD_SETPART_FAIL), true);
-            return UPDATE_ERROR);
+            return UPDATE_ERROR;
+        }
         status = DoInstallUpdaterPackage(manager, upParams.updatePackage, upParams.retryCount, HOTA_UPDATE);
         if (status != UPDATE_SUCCESS) {
             std::this_thread::sleep_for(std::chrono::milliseconds(UI_SHOW_DURATION));
@@ -277,8 +278,10 @@ static UpdaterStatus StartUpdaterEntry(PkgManager::PkgManagerPtr manager,
         LOG(INFO) << "Factory level FactoryReset begin";
         status = UPDATE_SUCCESS;
         DoProgress();
-        UPDATER_ERROR_CHECK(FactoryReset(FACTORY_WIPE_DATA, "/data") == 0, "FactoryReset factory level failed",
-            status = UPDATE_ERROR);
+        if (FactoryReset(FACTORY_WIPE_DATA, "/data") != 0) {
+            LOG(ERROR) << "FactoryReset factory level failed";
+            status = UPDATE_ERROR;
+        }
         UpdaterUiFacade::GetInstance().ShowLogRes(
             (status != UPDATE_SUCCESS) ? TR(LOGRES_FACTORY_FAIL) : TR(LOGRES_FACTORY_DONE));
     } else if (upParams.userWipeData) {
@@ -286,8 +289,10 @@ static UpdaterStatus StartUpdaterEntry(PkgManager::PkgManagerPtr manager,
         LOG(INFO) << "User level FactoryReset begin";
         status = UPDATE_SUCCESS;
         DoProgress();
-        UPDATER_ERROR_CHECK(FactoryReset(USER_WIPE_DATA, "/data") == 0, "FactoryReset user level failed",
-            status = UPDATE_ERROR);
+        if (FactoryReset(USER_WIPE_DATA, "/data") != 0) {
+            LOG(ERROR) << "FactoryReset user level failed";
+            status = UPDATE_ERROR;
+        }
         if (status != UPDATE_SUCCESS) {
             UpdaterUiFacade::GetInstance().ShowLogRes(TR(LOGRES_WIPE_FAIL));
         } else {
@@ -359,11 +364,12 @@ int UpdaterMain(int argc, char **argv)
     PkgManager::PkgManagerPtr manager = PkgManager::GetPackageInstance();
     UpdaterInit::GetInstance().InvokeEvent(UPDATER_PRE_INIT_EVENT);
     Dump::GetInstance().RegisterDump("DumpHelperLog", std::make_unique<DumpHelperLog>());
+    CertVerify::GetInstance().RegisterCertHelper(std::make_unique<SingleCertHelper>());
     std::vector<std::string> args = ParseParams(argc, argv);
 
     LOG(INFO) << "Ready to start";
 #ifndef UPDATER_UT
-    UpdaterUiEnv::Init();
+    UpdaterUiEnv::GetInstance().Init();
 #endif
     UpdaterInit::GetInstance().InvokeEvent(UPDATER_INIT_EVENT);
     PackageUpdateMode mode = UNKNOWN_UPDATE;

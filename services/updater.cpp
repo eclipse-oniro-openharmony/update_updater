@@ -84,7 +84,7 @@ int OtaUpdatePreCheck(PkgManager::PkgManagerPtr pkgManager, const std::string &p
     UPDATER_INIT_RECORD;
     if (pkgManager == nullptr) {
         LOG(ERROR) << "Fail to GetPackageInstance";
-        UPDATER_LAST_WORD(UPDATE_CORRUPT);
+        UPDATER_LAST_WORD(PKG_INVALID_FILE);
         return UPDATE_CORRUPT;
     }
     char realPath[PATH_MAX + 1] = {0};
@@ -115,14 +115,16 @@ int UpdatePreProcess(PkgManager::PkgManagerPtr pkgManager, const std::string &pa
         return PKG_INVALID_VERSION;
     }
     PackagesInfoPtr pkginfomanager = PackagesInfo::GetPackagesInfoInstance();
-    UpgradePkgInfo* outPkgInfo = (UpgradePkgInfo*)pkgManager->GetPackageInfo(path);
-    if (pkginfomanager == nullptr || outPkgInfo == nullptr) {
+    const char *verPtr = GetDisplayVersion();
+    if ((pkginfomanager == nullptr) || (verPtr == nullptr)) {
         LOG(ERROR) << "Fail to GetPackageInstance";
         return PKG_INVALID_VERSION;
     }
+    std::string verStr(verPtr);
+    LOG(INFO) << "current version:" << verStr;
     std::vector<std::string> targetVersions = pkginfomanager->GetOTAVersion(pkgManager, "/version_list", G_WORK_PATH);
     for (size_t i = 0; i < targetVersions.size(); i++) {
-        ret = outPkgInfo->softwareVersion.compare(targetVersions[i]);
+        ret = verStr.compare(targetVersions[i]);
         if (ret == 0) {
             break;
         }
