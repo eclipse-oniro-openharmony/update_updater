@@ -12,7 +12,6 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import("//vendor/${product_company}/${product_name}/updater_config/build_cfg.gni")
 
 SUBSYSTEM_DIR = "//base/update/updater"
 
