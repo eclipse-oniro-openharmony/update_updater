@@ -16,7 +16,7 @@
 #ifndef UPDATER_UFS_PTABLE_H
 #define UPDATER_UFS_PTABLE_H
 #include <iostream>
-#include <ptable.h>
+#include "ptable.h"
 
 namespace Updater {
 class UfsPtable : public Ptable {

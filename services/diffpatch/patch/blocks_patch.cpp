@@ -15,6 +15,7 @@
 
 #include "blocks_patch.h"
 #include <cstdio>
+#include <endian.h>
 #include <iostream>
 #include <vector>
 #include "diffpatch.h"
