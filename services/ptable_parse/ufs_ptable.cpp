@@ -33,7 +33,7 @@ uint32_t UfsPtable::GetDeviceLunNum()
 uint64_t UfsPtable::GetDeviceLunCapacity(const uint32_t lunIndex)
 {
     char lunIndexName = 'a' + lunIndex;
-    std::string capacityPath = PREFIX_SYS_CLASS_BLOCK + lunIndexName + "/size";
+    std::string capacityPath = std::string(PREFIX_SYS_CLASS_BLOCK) + lunIndexName + "/size";
     uint64_t capacity = 0;
     GetCapacity(capacityPath, capacity);
     return capacity;
@@ -47,7 +47,7 @@ void UfsPtable::SetDeviceLunNum()
     uint32_t lunIndex;
     for (lunIndex = 0; lunIndex < MAX_LUN_NUMBERS; lunIndex++) {
         char lunIndexName = 'a' + lunIndex;
-        std::string ufsNode = PREFIX_UFS_NODE + lunIndexName;
+        std::string ufsNode = std::string(PREFIX_UFS_NODE) + lunIndexName;
         if (!CheckFileExist(ufsNode)) {
             LOG(ERROR) << "file " << ufsNode << " is not exist";
             break;
@@ -245,7 +245,7 @@ bool UfsPtable::ReadAndCheckMbr(const uint32_t lunIndex, const uint32_t blockSiz
         return false;
     }
     char lunIndexName = 'a' + lunIndex;
-    std::string ufsNode = PREFIX_UFS_NODE + lunIndexName;
+    std::string ufsNode = std::string(PREFIX_UFS_NODE) + lunIndexName;
     if (!MemReadWithOffset(ufsNode, 0, buffer, blockSize)) {
         LOG(ERROR) << "read " << blockSize << " bytes from ufsNode " << ufsNode << " failed!";
         delete [] buffer;
@@ -277,7 +277,7 @@ bool UfsPtable::LoadPartitionInfoFromLun(const uint32_t lunIndex, const uint32_t
         return false;
     }
     char lunIndexName = 'a' + lunIndex;
-    std::string ufsNode = PREFIX_UFS_NODE + lunIndexName;
+    std::string ufsNode = std::string(PREFIX_UFS_NODE) + lunIndexName;
 
     uint8_t *buffer = new(std::nothrow) uint8_t[imgLen]();
     if (buffer == nullptr) {
@@ -340,7 +340,7 @@ bool UfsPtable::WritePartitionTable()
     for (uint32_t i = 0; i < ufsPtnDataInfo_.size(); i++) {
         uint64_t writeDataLen = ufsPtnDataInfo_[i].writeDataLen;
         char lunIndexName = 'a' + ufsPtnDataInfo_[i].lunIndex;
-        std::string ufsNode = PREFIX_UFS_NODE + lunIndexName;
+        std::string ufsNode = std::string(PREFIX_UFS_NODE) + lunIndexName;
         LOG(INFO) << "ufs node name:" << ufsNode << ", writeDataLen = " << writeDataLen;
 
         if (!ufsPtnDataInfo_[i].isGptVaild) {

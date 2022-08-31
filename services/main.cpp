@@ -40,6 +40,7 @@ int main(int argc, char **argv)
     Flashd::SetParameter(modePara, "1");
 
     if (mode == BOOT_FLASHD) {
+        Utils::UsSleep(3000 * 1000); // 3000 * 1000 : wait 3s
         return Flashd::flashd_main(argc, argv);
     }
     return Updater::UpdaterMain(argc, argv);

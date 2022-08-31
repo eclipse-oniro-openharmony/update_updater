@@ -59,10 +59,14 @@ bool IsSDCardExist(const std::string &sdcard_path);
 
 void PostUpdater(bool clearMisc);
 
+bool ClearMisc();
+
 std::vector<std::string> ParseParams(int argc, char **argv);
 
 bool ClearMisc();
 
 int GetBootMode(int &mode);
+
+int OtaUpdatePreCheck(Hpackage::PkgManager::PkgManagerPtr pkgManager, const std::string &packagePath);
 } // Updater
 #endif /* UPDATER_UPDATER_H */

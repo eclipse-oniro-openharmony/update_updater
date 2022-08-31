@@ -147,9 +147,6 @@ int32_t VerifyPackage(const char *packagePath, const char *keyPath,
 int32_t VerifyPackageWithCallback(const std::string &packagePath, const std::string &keyPath,
     std::function<void(int32_t result, uint32_t percent)> cb);
 
-int32_t CreateSignContent(const UpgradePkgInfoExt *pkgInfoExt, const char *packagePath,
-    const char *signedPackage, const char *keyPath);
-
 #ifdef __cplusplus
 }
 #endif

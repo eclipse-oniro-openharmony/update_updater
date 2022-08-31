@@ -15,21 +15,24 @@
 
 #include "ptable.h"
 
+#include <map>
+#include <sys/stat.h>
+
 #include "applypatch/data_writer.h"
 #include "log/log.h"
 #include "securec.h"
 
 namespace Updater {
-const std::string PTABLE_CONFIG_PATH = "/etc/ptable_data.json";
-const std::string PTABLE_DATA_LABEL = "ptableData";
-const std::string EMMC_GPT_DATA_LEN_LABEL = "emmcGptDataLen";
-const std::string LBA_LEN_LABEL = "lbaLen";
-const std::string GPT_HEADER_LEN_LABEL = "gptHeaderLen";
-const std::string BLOCK_SIZE_LABEL = "blockSize";
-const std::string IMG_LUN_SIZE_LABEL = "imgLuSize";
-const std::string START_LUN_NUM_LABEL = "startLunNumber";
-const std::string WRITE_DEVICE_LUN_SIZE_LABEL = "writeDeviceLunSize";
-const std::string DEFAULT_LUN_NUM_LABEL = "defaultLunNum";
+constexpr const char *PTABLE_CONFIG_PATH = "/etc/ptable_data.json";
+constexpr const char *PTABLE_DATA_LABEL = "ptableData";
+constexpr const char *EMMC_GPT_DATA_LEN_LABEL = "emmcGptDataLen";
+constexpr const char *LBA_LEN_LABEL = "lbaLen";
+constexpr const char *GPT_HEADER_LEN_LABEL = "gptHeaderLen";
+constexpr const char *BLOCK_SIZE_LABEL = "blockSize";
+constexpr const char *IMG_LUN_SIZE_LABEL = "imgLuSize";
+constexpr const char *START_LUN_NUM_LABEL = "startLunNumber";
+constexpr const char *WRITE_DEVICE_LUN_SIZE_LABEL = "writeDeviceLunSize";
+constexpr const char *DEFAULT_LUN_NUM_LABEL = "defaultLunNum";
 
 std::vector<Ptable::PtnInfo> Ptable::GetPtablePartitionInfo() const
 {
@@ -468,6 +471,29 @@ bool Ptable::WriteBufferToPath(const std::string &path, const uint64_t offset,
     }
     DataWriter::ReleaseDataWriter(writer);
     return true;
+}
+
+void Ptable::SetPartitionName(const std::string &name, uint8_t *data, const uint32_t size)
+{
+    if (data == nullptr || size == 0) {
+        LOG(ERROR) << "invalid input";
+        return;
+    }
+    // convert utf8 to utf16, 2 bytes for 1 charactor of partition name
+    if (name.length() * 2 >= MAX_GPT_NAME_SIZE) {
+        LOG(ERROR) << "name size too large";
+        return;
+    }
+
+    char utf16Name[MAX_GPT_NAME_SIZE] = {0};
+    for (uint32_t i = 0; i <= name.length(); i++) {
+        // convert utf8 to utf16, 2 bytes for 1 charactor of partition name
+        utf16Name[i * 2] = static_cast<char>(tolower(name[i]));
+    }
+    if (memcpy_s(data, size, utf16Name, sizeof(utf16Name)) != EOK) {
+        LOG(ERROR) << "copy name failed";
+    }
+    return;
 }
 
 bool Ptable::GetPartionInfoByName(const std::string &partitionName, PtnInfo &ptnInfo, int32_t &index)
