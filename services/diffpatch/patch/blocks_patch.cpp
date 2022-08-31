@@ -33,7 +33,7 @@ static int64_t ReadLE64(const uint8_t *buffer)
     }
 
     uint64_t result = 0;
-    (void)memcpy_s(&result, sizeof(uint64_t), buffer, sizeof(uint64_t)); 
+    (void)memcpy_s(&result, sizeof(uint64_t), buffer, sizeof(uint64_t));
     return static_cast<int64_t>(le64toh(result));
 }
 
