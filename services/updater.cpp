@@ -355,14 +355,20 @@ void HandleChildOutput(const std::string &buffer, int32_t bufferLen, bool &retry
     }
     auto outputHeader = Trim(output[0]);
     if (outputHeader == "write_log") {
-        UPDATER_ERROR_CHECK(output.size() >= DEFAULT_PROCESS_NUM, "check output fail", return);
+        if (output.size() < DEFAULT_PROCESS_NUM) {
+            LOG(ERROR) << "check output fail";
+            return;
+        }
         auto outputInfo = Trim(output[1]);
         LOG(INFO) << outputInfo;
     } else if (outputHeader == "retry_update") {
         retryUpdate = true;
 #ifdef UPDATER_UI_SUPPORT
     } else if (outputHeader == "ui_log") {
-        UPDATER_ERROR_CHECK(output.size() >= DEFAULT_PROCESS_NUM, "check output fail", return);
+        if (output.size() < DEFAULT_PROCESS_NUM) {
+            LOG(ERROR) << "check output fail";
+            return;
+        }
         auto outputInfo = Trim(output[1]);
     } else if (outputHeader == "show_progress") {
         if (output.size() < DEFAULT_PROCESS_NUM) {
