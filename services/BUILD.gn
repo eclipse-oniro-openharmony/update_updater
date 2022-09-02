@@ -36,15 +36,6 @@ ohos_executable("updater") {
     "//base/update/updater/services/package/pkg_verify",
     "//base/update/updater/services/include/log",
     "//base/update/updater/utils/json",
-    "//drivers/hdf_core/framework/ability/sbuf/include",
-    "//drivers/hdf_core/framework/include/platform",
-    "//drivers/hdf_core/framework/include/core",
-    "//drivers/hdf_core/framework/include/osal",
-    "//drivers/hdf_core/framework/include/utils",
-    "//drivers/hdf_core/framework/include/config",
-    "//drivers/hdf_core/framework/include",
-    "//drivers/peripheral/input/hal/include",
-    "//drivers/peripheral/input/interfaces/include",
     "//foundation/graphic/ui/frameworks",
     "//foundation/graphic/ui/interfaces/kits",
     "//foundation/graphic/ui/interfaces/innerkits",
@@ -69,7 +60,6 @@ ohos_executable("updater") {
     "//base/update/updater/services/log:libupdaterlog",
     "//base/update/updater/services/package:libupdaterpackage",
     "//base/update/updater/services/ui:libui",
-    "//drivers/peripheral/input/hal:hdi_input",
     "//third_party/bounds_checking_function:libsec_shared",
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/bzip2:libbz2",
@@ -90,6 +80,7 @@ ohos_executable("updater") {
   # add updater custom library
   if (defined(updater_custom_lib)) {
     deps += updater_custom_lib
+    deps += [ "//drivers/peripheral/adapter/input/hal:hdi_input_adapter" ]
   }
 
   # force link invisible function
