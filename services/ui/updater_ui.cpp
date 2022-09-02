@@ -149,7 +149,7 @@ void OnLabelSDCardNoDelayEvt()
 {
     LOG(INFO) << "On Label SDCard";
     auto sdParam = "updater.sdcard.configs";
-    Flashd:SetParameter(sdParam, "1");
+    Flashd::SetParameter(sdParam, "1");
     std::thread {
         [] () {
             CALLBACK_GUARD_RETURN;
