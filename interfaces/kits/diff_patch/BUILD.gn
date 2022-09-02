@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
+import("//base/update/updater/updater_common.gni")
 
 ohos_static_library("libdiff_patch") {
   sources = [ "diff_patch_interface.cpp" ]

@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
+import("//base/update/updater/updater_common.gni")
 
 config("updater_config") {
   visibility = [ ":*" ]

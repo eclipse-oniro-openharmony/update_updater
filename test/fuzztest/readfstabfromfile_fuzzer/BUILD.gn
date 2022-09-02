@@ -14,6 +14,7 @@
 #####################hydra-fuzz###################
 import("//build/config/features.gni")
 import("//build/ohos.gni")
+import("//base/update/updater/updater_common.gni")
 import("//build/test.gni")
 module_output_path = "updater/read_fstab_from_file"
 

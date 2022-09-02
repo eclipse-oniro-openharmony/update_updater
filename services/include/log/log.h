@@ -18,11 +18,15 @@
 #include <cstring>
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <string>
+#include <unordered_map>
 #include "error_code.h"
+#include "hilog/log.h"
 
 namespace Updater {
 constexpr size_t MAX_LOG_SPACE = 4 * 5 * 1024 * 1024;
+constexpr int MAX_TIME_SIZE = 20;
 #define __FILE_NAME__   (strrchr((__FILE__), '/') ? strrchr((__FILE__), '/') + 1 : (__FILE__))
 #define LOG(level) UpdaterLogger(level).OutputUpdaterLog((__FILE_NAME__), (__LINE__))
 #define STAGE(stage) StageLogger(stage).OutputUpdaterStage()
@@ -118,6 +122,9 @@ public:
     std::ostream& OutputUpdaterLog(const std::string &path, int line);
 private:
     int level_;
+    std::stringstream oss_;
+    char realTime_[MAX_TIME_SIZE] = {0};
+    std::unordered_map<int, std::string> logLevelMap_;
 };
 
 class StageLogger {
