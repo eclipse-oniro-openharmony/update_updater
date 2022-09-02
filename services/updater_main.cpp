@@ -39,11 +39,8 @@
 #include "pkg_manager.h"
 #include "pkg_utils.h"
 #include "securec.h"
-#include "ui/updater_ui.h"
-#include "ui/updater_ui_env.h"
 #include "updater/updater_const.h"
 #include "updater_ui_facade.h"
-#include "updater_ui_tools.h"
 #include "utils.h"
 
 namespace Updater {
@@ -52,7 +49,7 @@ using namespace Hpackage;
 using namespace Updater::Utils;
 using namespace std::literals::chrono_literals;
 
-constexpr int DISPLAY_TIME = 1000 * 1000;
+[[maybe_unused]] constexpr int DISPLAY_TIME = 1000 * 1000;
 constexpr struct option OPTIONS[] = {
     { "update_package", required_argument, nullptr, 0 },
     { "retry_count", required_argument, nullptr, 0 },
@@ -151,7 +148,7 @@ UpdaterStatus UpdaterFromSdcard()
     UpdaterUiFacade::GetInstance().ShowLog(TR(LOG_SDCARD_NOTMOVE));
     UpdaterStatus updateRet = DoInstallUpdaterPackage(pkgManager, SDCARD_CARD_PKG_PATH, 0, SDCARD_UPDATE);
     if (updateRet != UPDATE_SUCCESS) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(UI_SHOW_DURATION));
+        UpdaterUiFacade::GetInstance().Sleep(UI_SHOW_DURATION);
         UpdaterUiFacade::GetInstance().ShowLog(TR(LOG_SDCARD_FAIL));
         STAGE(UPDATE_STAGE_FAIL) << "UpdaterFromSdcard failed";
     } else {
@@ -222,7 +219,7 @@ static UpdaterStatus InstallUpdaterPackage(UpdaterParams &upParams, const std::v
     UpdaterStatus status = UPDATE_UNKNOWN;
     if (IsBatteryCapacitySufficient() == false) {
         UpdaterUiFacade::GetInstance().ShowUpdInfo(TR(LOG_LOWPOWER));
-        std::this_thread::sleep_for(std::chrono::milliseconds(UI_SHOW_DURATION));
+        UpdaterUiFacade::GetInstance().Sleep(UI_SHOW_DURATION);
         UPDATER_LAST_WORD(UPDATE_ERROR);
         LOG(ERROR) << "Battery is not sufficient for install package.";
         status = UPDATE_SKIP;
@@ -242,7 +239,7 @@ static UpdaterStatus InstallUpdaterPackage(UpdaterParams &upParams, const std::v
         }
         status = DoInstallUpdaterPackage(manager, upParams.updatePackage, upParams.retryCount, HOTA_UPDATE);
         if (status != UPDATE_SUCCESS) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(UI_SHOW_DURATION));
+            UpdaterUiFacade::GetInstance().Sleep(UI_SHOW_DURATION);
             UpdaterUiFacade::GetInstance().ShowLog(TR(LOG_UPDFAIL));
             STAGE(UPDATE_STAGE_FAIL) << "Install failed";
             if (status == UPDATE_RETRY && upParams.retryCount < MAX_RETRY_COUNT) {
@@ -361,7 +358,7 @@ static UpdaterStatus StartUpdater(PkgManager::PkgManagerPtr manager, const std::
 
 int UpdaterMain(int argc, char **argv)
 {
-    UpdaterStatus status = UPDATE_UNKNOWN;
+    [[maybe_unused]] UpdaterStatus status = UPDATE_UNKNOWN;
     PkgManager::PkgManagerPtr manager = PkgManager::GetPackageInstance();
     UpdaterInit::GetInstance().InvokeEvent(UPDATER_PRE_INIT_EVENT);
     Dump::GetInstance().RegisterDump("DumpHelperLog", std::make_unique<DumpHelperLog>());
@@ -369,21 +366,21 @@ int UpdaterMain(int argc, char **argv)
     std::vector<std::string> args = ParseParams(argc, argv);
 
     LOG(INFO) << "Ready to start";
-#ifndef UPDATER_UT
-    UpdaterUiEnv::Init();
+#if !defined(UPDATER_UT) && defined(UPDATER_UI_SUPPORT)
+    UpdaterUiFacade::GetInstance().InitEnv();
 #endif
     UpdaterInit::GetInstance().InvokeEvent(UPDATER_INIT_EVENT);
     PackageUpdateMode mode = UNKNOWN_UPDATE;
     status = StartUpdater(manager, args, argv, mode);
-    std::this_thread::sleep_for(std::chrono::milliseconds(UI_SHOW_DURATION));
-#ifndef UPDATER_UT
+#if !defined(UPDATER_UT) && defined(UPDATER_UI_SUPPORT)
+    UpdaterUiFacade::GetInstance().Sleep(UI_SHOW_DURATION);
     if (status != UPDATE_SUCCESS && status != UPDATE_SKIP) {
         if (mode == HOTA_UPDATE) {
             UpdaterUiFacade::GetInstance().ShowFailedPage();
         } else {
             UpdaterUiFacade::GetInstance().ShowMainpage();
-            std::this_thread::sleep_for(50ms); /* wait for page flush 50ms */
-            UpdaterUiTools::SaveUxBuffToFile("/tmp/mainpage.png");
+            UpdaterUiFacade::GetInstance().Sleep(50); /* wait for page flush 50ms */
+            UpdaterUiFacade::GetInstance().SaveScreen("/tmp/mainpage.png");
         }
         // Wait for user input
         while (true) {

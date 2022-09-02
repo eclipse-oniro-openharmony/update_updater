@@ -16,6 +16,7 @@
 #include "updater_ui_facade.h"
 #include "component/text_label_adapter.h"
 #include "updater_ui_config.h"
+#include "updater_ui_tools.h"
 
 namespace Updater {
 UpdaterUiFacade::UpdaterUiFacade()
@@ -23,10 +24,23 @@ UpdaterUiFacade::UpdaterUiFacade()
 {
 }
 
+#ifdef UPDATER_UI_SUPPORT
 UpdaterUiFacade &UpdaterUiFacade::GetInstance()
 {
     static UpdaterUiFacade instance;
     return instance;
+}
+#else
+UpdaterUiFacadeEmpty &UpdaterUiFacade::GetInstance()
+{
+    static UpdaterUiFacade instance;
+    return instance;
+}
+#endif
+
+void UpdaterUiFacade::InitEnv() const
+{
+    UpdaterUiEnv::GetInstance().Init();
 }
 
 [[nodiscard]] bool UpdaterUiFacade::SetMode(UpdaterMode mode)
@@ -239,5 +253,15 @@ void UpdaterUiFacade::SetLogoProgress()
             progressPage.progressPageId, progressPage.logoComId
         });
     }
+}
+
+void UpdaterUiFacade::Sleep(int ms) const
+{
+    std::this_thread::sleep_for(std::chrono::milliseconds(ms));
+}
+
+void UpdaterUiFacade::SaveScreen() const
+{
+    UpdaterUiTools::SaveUxBuffToFile("/tmp/mainpage.png");
 }
 } // namespace Updater

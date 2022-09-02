@@ -145,6 +145,10 @@ if (product_name == "rk3568") {
 
 updater_resources_target = []
 
+if (!updater_ui_support) {
+  updater_resources_list = []
+}
+
 foreach(file, updater_resources_list) {
   _name = "$file"
   ohos_prebuilt_etc(_name) {
