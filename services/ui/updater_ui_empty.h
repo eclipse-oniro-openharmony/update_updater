@@ -20,10 +20,11 @@
 #include <string>
 #include "updater_ui.h"
 
+namespace Updater {
 class UpdaterUiEmpty {
 public:
     void InitEnv() const {}
-    [[non_discard]] bool SetMode(UpdaterMode mode)
+    [[nodiscard]] bool SetMode(UpdaterMode mode)
     {
         return true;
     }
@@ -50,5 +51,5 @@ public:
     void Sleep(int ms) const {}
     void SaveScreen() const {}
 };
-
+} // namespace Updater
 #endif
