@@ -19,9 +19,9 @@
 #include "macros.h"
 #include "strategy/ui_strategy.h"
 #include "updater_ui.h"
+#include "updater_ui_empty.h"
 
 namespace Updater {
-class UpdaterUiFacadeEmpty;
 class UpdaterUiFacade {
     DISALLOW_COPY_MOVE(UpdaterUiFacade);
     using StrategyMap = std::unordered_map<UpdaterMode, UiStrategyCfg>;
@@ -31,7 +31,7 @@ public:
 #ifdef UPDATER_UI_SUPPORT
     static UpdaterUiFacade &GetInstance();
 #else
-    static UpdaterUiFacadeEmpty &GetInstance();
+    static UpdaterUiEmpty &GetInstance();
 #endif
 
     void InitEnv() const;
@@ -69,37 +69,6 @@ private:
     UpdaterMode mode_;
     std::unordered_map<UpdaterMode, std::unique_ptr<ProgressStrategy>> progressMap_ {};
     std::unordered_map<UpdaterMode, std::unique_ptr<LogoStrategy>> logoMap_ {};
-};
-
-class UpdaterUiFacadeEmpty {
-public:
-    void InitEnv() const {}
-    [[non_discard]] bool SetMode(UpdaterMode mode)
-    {
-        return true;
-    }
-    UpdaterMode GetMode() const
-    {
-        return UpdaterMode::MODEMAX;
-    }
-    void ShowLog(const std::string &tag, bool isClear = false) const {}
-    void ShowLogRes(const std::string &tag, bool isClear = false) const {}
-    void ShowUpdInfo(const std::string &tag, bool isClear = false) const {}
-    void ClearText() const {}
-    void ClearLog() const {}
-    void ShowProgress(float value) const {}
-    void ShowProgressPage() const {}
-    void ShowSuccessPage() const {}
-    void ShowFailedPage() const {}
-    void ShowFactoryConfirmPage() {}
-    void ShowMainpage() const {}
-    void ShowProgressWarning(bool isShow) const {}
-    bool IsInProgress() const
-    {
-        return false;
-    }
-    void Sleep(int ms) const {}
-    void SaveScreen() const {}
 };
 } // namespace Updater
 #endif
