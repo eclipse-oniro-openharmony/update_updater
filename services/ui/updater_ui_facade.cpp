@@ -16,6 +16,7 @@
 #include "updater_ui_facade.h"
 #include "component/text_label_adapter.h"
 #include "updater_ui_config.h"
+#include "updater_ui_env.h"
 #include "updater_ui_tools.h"
 
 namespace Updater {
@@ -40,7 +41,7 @@ UpdaterUiEmpty &UpdaterUiFacade::GetInstance()
 
 void UpdaterUiFacade::InitEnv() const
 {
-    UpdaterUiEnv::GetInstance().Init();
+    UpdaterUiEnv::Init();
 }
 
 [[nodiscard]] bool UpdaterUiFacade::SetMode(UpdaterMode mode)

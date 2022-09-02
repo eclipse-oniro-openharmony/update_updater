@@ -380,7 +380,7 @@ int UpdaterMain(int argc, char **argv)
         } else {
             UpdaterUiFacade::GetInstance().ShowMainpage();
             UpdaterUiFacade::GetInstance().Sleep(50); /* wait for page flush 50ms */
-            UpdaterUiFacade::GetInstance().SaveScreen("/tmp/mainpage.png");
+            UpdaterUiFacade::GetInstance().SaveScreen();
         }
         // Wait for user input
         while (true) {
