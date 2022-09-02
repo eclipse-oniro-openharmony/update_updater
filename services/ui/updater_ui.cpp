@@ -15,6 +15,7 @@
 #include "updater_ui.h"
 #include <mutex>
 #include <thread>
+#include "flashd/flashd.h"
 #include "language/language_ui.h"
 #include "log/log.h"
 #include "page/page_manager.h"
