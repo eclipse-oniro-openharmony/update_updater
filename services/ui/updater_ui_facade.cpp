@@ -14,6 +14,7 @@
  */
 
 #include "updater_ui_facade.h"
+#include <thread>
 #include "component/text_label_adapter.h"
 #include "updater_ui_config.h"
 #include "updater_ui_env.h"
