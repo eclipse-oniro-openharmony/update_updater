@@ -38,7 +38,6 @@
 #endif
 #include "updater/updater_const.h"
 #include "updater_main.h"
-#include "updater_ui.h"
 #include "updater_ui_facade.h"
 #include "utils.h"
 
@@ -194,7 +193,7 @@ UpdaterStatus IsSpaceCapacitySufficient(const std::string &packagePath)
     if (totalFreeSize <= static_cast<uint64_t>(info->unpackedSize + MAX_LOG_SPACE)) {
         LOG(ERROR) << "Can not update, free space is not enough";
         UpdaterUiFacade::GetInstance().ShowUpdInfo(TR(UPD_SPACE_NOTENOUGH), true);
-        std::this_thread::sleep_for(std::chrono::milliseconds(UI_SHOW_DURATION));
+        UpdaterUiFacade::GetInstance().Sleep(UI_SHOW_DURATION);
         return UPDATE_ERROR;
     }
     return UPDATE_SUCCESS;
@@ -203,6 +202,7 @@ UpdaterStatus IsSpaceCapacitySufficient(const std::string &packagePath)
 namespace {
 void ProgressSmoothHandler()
 {
+#ifdef UPDATER_UI_SUPPORT
     while (g_tmpProgressValue < FULL_PERCENT_PROGRESS) {
         int increase = (FULL_PERCENT_PROGRESS - g_tmpProgressValue) / PROGRESS_VALUE_CONST;
         g_tmpProgressValue += increase;
@@ -210,9 +210,10 @@ void ProgressSmoothHandler()
             break;
         } else {
             UpdaterUiFacade::GetInstance().ShowProgress(g_tmpProgressValue);
-            std::this_thread::sleep_for(std::chrono::milliseconds(SHOW_FULL_PROGRESS_TIME));
+            UpdaterUiFacade::GetInstance().Sleep(SHOW_FULL_PROGRESS_TIME);
         }
     }
+#endif
 }
 }
 
@@ -302,7 +303,7 @@ UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, cons
         ProgressSmoothHandler();
         UpdaterUiFacade::GetInstance().ShowProgress(FULL_PERCENT_PROGRESS);
         UpdaterUiFacade::GetInstance().ShowUpdInfo(TR(UPD_OK));
-        std::this_thread::sleep_for(std::chrono::milliseconds(SHOW_FULL_PROGRESS_TIME));
+        UpdaterUiFacade::GetInstance().Sleep(SHOW_FULL_PROGRESS_TIME);
         LOG(INFO)<< "update success , do reboot now";
     } else {
         UpdaterUiFacade::GetInstance().ShowUpdInfo(TR(UPD_INSTALL_FAIL));
@@ -312,6 +313,7 @@ UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, cons
 }
 
 namespace {
+#ifdef UPDATER_UI_SUPPORT
 void SetProgress(const std::vector<std::string> &output)
 {
     if (output.size() < DEFAULT_PROCESS_NUM) {
@@ -338,6 +340,7 @@ void SetProgress(const std::vector<std::string> &output)
     }
     UpdaterUiFacade::GetInstance().ShowProgress(g_tmpProgressValue);
 }
+#endif
 
 void HandleChildOutput(const std::string &buffer, int32_t bufferLen, bool &retryUpdate)
 {
@@ -351,13 +354,7 @@ void HandleChildOutput(const std::string &buffer, int32_t bufferLen, bool &retry
         return;
     }
     auto outputHeader = Trim(output[0]);
-    if (outputHeader == "ui_log") {
-        if (output.size() < DEFAULT_PROCESS_NUM) {
-            LOG(ERROR) << "check output fail";
-            return;
-        }
-        auto outputInfo = Trim(output[1]);
-    } else if (outputHeader == "write_log") {
+    if (outputHeader == "write_log") {
         if (output.size() < DEFAULT_PROCESS_NUM) {
             LOG(ERROR) << "check output fail";
             return;
@@ -366,6 +363,13 @@ void HandleChildOutput(const std::string &buffer, int32_t bufferLen, bool &retry
         LOG(INFO) << outputInfo;
     } else if (outputHeader == "retry_update") {
         retryUpdate = true;
+#ifdef UPDATER_UI_SUPPORT
+    } else if (outputHeader == "ui_log") {
+        if (output.size() < DEFAULT_PROCESS_NUM) {
+            LOG(ERROR) << "check output fail";
+            return;
+        }
+        auto outputInfo = Trim(output[1]);
     } else if (outputHeader == "show_progress") {
         if (output.size() < DEFAULT_PROCESS_NUM) {
             LOG(ERROR) << "check output fail";
@@ -386,6 +390,7 @@ void HandleChildOutput(const std::string &buffer, int32_t bufferLen, bool &retry
         SetProgress(output);
     } else {
         LOG(WARNING) << "Child process returns unexpected message.";
+#endif
     }
 }
 }
