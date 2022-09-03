@@ -179,6 +179,12 @@ ohos_static_library("libflashd") {
     defines += [ "SURPPORT_SELINUX" ]
   }
 
+  if (defined(use_ptable)) {
+    include_dirs = [ "//base/update/updater/services/ptable_parse" ]
+    deps += [ "//base/update/updater/services/ptable_parse:libptableparse" ]
+    defines = [ "UPDATER_USE_PTABLE" ]
+  }
+
   external_deps = [ "init:libbegetutil" ]
 
   part_name = "updater"
