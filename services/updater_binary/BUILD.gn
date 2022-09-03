@@ -12,8 +12,7 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import(
-    "//vendor/${product_company}/${product_name}/updater_config/build_cfg.gni")
+import("//base/update/updater/updater_default_cfg.gni")
 
 config("updater_config") {
   visibility = [ ":*" ]
