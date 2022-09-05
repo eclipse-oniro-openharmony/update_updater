@@ -15,6 +15,7 @@
 
 #include "fs_manager/mount.h"
 #include <cerrno>
+#include <fcntl.h>
 #include <string>
 #include <sys/mount.h>
 #include <sys/stat.h>

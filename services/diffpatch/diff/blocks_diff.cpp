@@ -15,6 +15,7 @@
 
 #include "blocks_diff.h"
 #include <cstdio>
+#include <endian.h>
 #include <iostream>
 #include <vector>
 #include "update_diff.h"

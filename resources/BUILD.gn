@@ -81,11 +81,11 @@ updater_resources_list = [
   "loop00059.png",
   "loop00060.png",
   "loop00061.png",
+  "font/HarmonyOS_Sans_SC_Regular_Small.ttf",
 ]
 
 if (product_name == "rk3568") {
   updater_resources_list += [
-    "font/HarmonyOS_Sans_SC_Regular_Small.ttf",
     "${product_name}/images/icon/darkOUCOHlogo.png",
     "${product_name}/images/icon/lightOUCOHlogo.png",
     "${product_name}/images/icon/icon_failed.png",

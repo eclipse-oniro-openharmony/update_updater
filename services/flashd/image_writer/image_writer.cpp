@@ -102,7 +102,8 @@ std::unique_ptr<FlashdWriter> FlashdImageWriter::GetWriter(const std::string &pa
     return nullptr;
 }
 
-bool FlashdImageWriter::IsRawImage(const std::string &partition, const uint8_t *data, size_t len) const
+bool FlashdImageWriter::IsRawImage(const std::string &partition, [[maybe_unused]] const uint8_t *data,
+    [[maybe_unused]] size_t len) const
 {
     // default raw
     LOG(INFO) << partition << " is raw instruction";

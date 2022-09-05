@@ -235,7 +235,10 @@ void PackagePtable::LoadPartitionInfo([[maybe_unused]] Hpackage::PkgManager *pkg
     }
 
     uint32_t imgBufSize = pPtable_->GetDefaultImageSize();
-    PKG_CHECK(imgBufSize > 0, return, "Invalid imgBufSize");
+    if (imgBufSize <= 0) {
+        LOG(ERROR) << "Invalid imgBufSize";
+        return;
+    }
     uint8_t *imageBuf = new(std::nothrow) uint8_t[imgBufSize]();
 
     if (imageBuf == nullptr) {
