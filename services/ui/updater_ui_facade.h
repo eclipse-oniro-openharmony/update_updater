@@ -37,7 +37,7 @@ public:
      * which may cause undefined behavior. This will happen when you define UPDATER_UI_SUPPORT
      * in one translation unit but don't define UPDATER_UI_SUPPORT in another. So when adding
      * an extra parameter in UpdaterUiEmpty &GetInstance(), linker will regard these two function
-     * as different and report an undefined symbol error which is safer.
+     * as different and report an undefined symbol error which would be safer.
      */
     static UpdaterUiEmpty &GetInstance([[maybe_unused]] bool extra = false);
 #endif
