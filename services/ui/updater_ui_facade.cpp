@@ -33,7 +33,7 @@ UpdaterUiFacade &UpdaterUiFacade::GetInstance()
     return instance;
 }
 #else
-UpdaterUiEmpty &UpdaterUiFacade::GetInstance()
+UpdaterUiEmpty &UpdaterUiFacade::GetInstance(bool extra)
 {
     static UpdaterUiEmpty instance;
     return instance;
