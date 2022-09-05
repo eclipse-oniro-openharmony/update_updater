@@ -14,9 +14,12 @@
  */
 
 #include "diffpatch.h"
+#ifndef __WIN32
+#include <linux/limits.h>
+#include <sys/mman.h>
+#endif
 #include <cstdlib>
 #include <fcntl.h>
-#include <sys/mman.h>
 #include <sys/stat.h>
 #include <unistd.h>
 #include <vector>
@@ -37,9 +40,12 @@ int32_t WriteDataToFile(const std::string &fileName, const std::vector<uint8_t> 
 
 int32_t PatchMapFile(const std::string &fileName, MemMapInfo &info)
 {
-    char realPath[PATH_MAX] = {0x00};
-    char *get = realpath(fileName.c_str(), realPath);
-    if (get == nullptr) {
+    char realPath[PATH_MAX] = { 0 };
+#ifdef _WIN32
+    if (_fullpath(realPath, fileName.c_str(), PATH_MAX) == nullptr) {
+#else
+    if (realpath(fileName.c_str(), realPath) == nullptr) {
+#endif
         PATCH_LOGE("Failed to get realpath %s", fileName.c_str());
         return -1;
     }

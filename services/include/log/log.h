@@ -22,6 +22,10 @@
 #include "error_code.h"
 
 namespace Updater {
+#ifdef __WIN32
+#undef ERROR
+#endif
+
 constexpr size_t MAX_LOG_SPACE = 4 * 5 * 1024 * 1024;
 #define __FILE_NAME__   (strrchr((__FILE__), '/') ? strrchr((__FILE__), '/') + 1 : (__FILE__))
 #define LOG(level) UpdaterLogger(level).OutputUpdaterLog((__FILE_NAME__), (__LINE__))

@@ -19,6 +19,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <map>
+#include <memory>
 #include <sstream>
 #include <stack>
 #include <string>

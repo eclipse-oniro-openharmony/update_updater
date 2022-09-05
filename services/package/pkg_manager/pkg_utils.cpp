@@ -13,14 +13,23 @@
  * limitations under the License.
  */
 #include "pkg_utils.h"
+#ifdef __WIN32
+#include <windows.h>
+#else
+#include <linux/limits.h>
+#include <sys/mman.h>
+#endif
 #include <cstring>
 #include <fcntl.h>
-#include <sys/mman.h>
 #include <sys/stat.h>
 #include <unistd.h>
 #include "utils.h"
 
 namespace Hpackage {
+#ifdef __WIN32
+#undef ERROR
+#endif
+
 constexpr int32_t MIN_YEAR = 80;
 constexpr uint32_t TM_YEAR_BITS = 9;
 constexpr uint32_t TM_MON_BITS = 5;
@@ -45,13 +54,16 @@ std::string GetFilePath(const std::string &fileName)
 
 size_t GetFileSize(const std::string &fileName)
 {
-    char *realPath = realpath(fileName.c_str(), NULL);
-    if (realPath == nullptr) {
+    char realPath[PATH_MAX] = { 0 };
+#ifdef _WIN32
+    if (_fullpath(realPath, fileName.c_str(), PATH_MAX) == nullptr) {
+#else
+    if (realpath(fileName.c_str(), realPath) == nullptr) {
+#endif
         PKG_LOGE("realPath is null");
         return 0;
     }
     FILE *fp = fopen(realPath, "r");
-    free(realPath);
     if (fp == nullptr) {
         PKG_LOGE("Invalid file %s", fileName.c_str());
         return 0;
@@ -87,7 +99,11 @@ int32_t CheckFile(const std::string &fileName)
         return PKG_SUCCESS;
     }
     if (access(path.c_str(), F_OK) == -1) {
+#ifdef __WIN32
+        mkdir(path.c_str());
+#else
         mkdir(path.c_str(), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
+#endif
     }
     // If the path writable
     int ret = access(path.c_str(), R_OK | W_OK);
@@ -142,7 +158,11 @@ void ExtraTimeAndDate(time_t when, uint16_t &date, uint16_t &time)
 {
     when = static_cast<time_t>((static_cast<unsigned long>(when) + 1) & (~1));
     struct tm nowTime {};
+#ifdef __WIN32
+    localtime_s(&nowTime, &when);
+#else
     localtime_r(&when, &nowTime);
+#endif
     int year = nowTime.tm_year;
     if (year < MIN_YEAR) {
         year = MIN_YEAR;
@@ -235,3 +255,37 @@ std::string ConvertShaHex(const std::vector<uint8_t> &shaDigest)
     return haxSha256;
 }
 } // namespace Hpackage
+
+#ifdef _WIN32
+void *mmap([[maybe_unused]] void *addr, [[maybe_unused]] size_t length,
+    [[maybe_unused]] int prot, [[maybe_unused]] int flags, int fd, [[maybe_unused]] size_t offset)
+{
+    HANDLE FileHandle = reinterpret_cast<HANDLE>(_get_osfhandle(fd));
+    if (FileHandle == INVALID_HANDLE_VALUE) {
+        return MAP_FAILED;
+    }
+    HANDLE FileMappingHandle = ::CreateFileMappingW(FileHandle, 0, PAGE_READONLY, 0, 0, 0);
+    if (FileMappingHandle == nullptr) {
+        PKG_LOGE("CreateFileMappingW Failed");
+        return MAP_FAILED;
+    }
+    void *mapAddr = ::MapViewOfFile(FileMappingHandle, FILE_MAP_READ, 0, 0, 0);
+    if (mapAddr == nullptr) {
+        PKG_LOGE("MapViewOfFile Failed");
+        ::CloseHandle(FileMappingHandle);
+        return MAP_FAILED;
+    }
+    ::CloseHandle(FileMappingHandle);
+    return mapAddr;
+}
+
+int msync(void *addr, size_t len, [[maybe_unused]] int flags)
+{
+    return FlushViewOfFile(addr, len);
+}
+
+int munmap(void *addr, [[maybe_unused]] size_t len)
+{
+    return !UnmapViewOfFile(addr);
+}
+#endif

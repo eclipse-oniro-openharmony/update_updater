@@ -22,6 +22,10 @@
 using namespace Hpackage;
 
 namespace UpdatePatch {
+#ifdef __WIN32
+#undef ERROR
+#endif
+
 ImageParser::~ImageParser()
 {
     Hpackage::PkgManager::ReleasePackageInstance(pkgManager_);

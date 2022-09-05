@@ -27,6 +27,10 @@ namespace Hpackage {
 
 #define UNUSED(x) (void)(x)
 
+#ifdef __WIN32
+#undef ERROR
+#endif
+
 std::string GetCurrPath();
 size_t GetFileSize(const std::string &fileName);
 std::string GetFilePath(const std::string &fileName);
@@ -72,4 +76,21 @@ enum {
     PKG_LZ4_FINISH,
 };
 } // namespace Hpackage
+
+#ifdef _WIN32
+#define HAVE_MMAP 1
+#define MAP_ANON 0x20
+#define MAP_POPULATE 0x08000
+#define MAP_PRIVATE 0x02
+#define MS_ASYNC 1
+#define PROT_NONE 0x0
+#define PROT_READ 0x1
+#define PROT_WRITE 0x2
+#define PROT_EXEC 0x4
+#define MAP_FAILED ((void *) -1)
+
+void *mmap(void *addr, size_t length, int prot, int flags, int fd, size_t offset);
+int msync(void *addr, size_t len, int flags);
+int munmap(void *addr, size_t len);
+#endif // _WIN32
 #endif // PKG_UTILS_H
