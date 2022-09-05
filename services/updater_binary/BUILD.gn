@@ -76,7 +76,7 @@ ohos_executable("updater_binary") {
     defines = [ "UPDATER_USE_PTABLE" ]
   }
 
-  external_deps = [ "init:libbegetutil" ]
+  external_deps += [ "init:libbegetutil" ]
 
   install_enable = true
   install_images = [

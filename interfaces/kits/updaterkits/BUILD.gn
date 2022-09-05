@@ -29,7 +29,7 @@ ohos_static_library("libupdaterkits") {
     "//third_party/bounds_checking_function:libsec_static",
   ]
 
-  external_deps = [ "init:libbegetutil" ]
+  external_deps += [ "init:libbegetutil" ]
   subsystem_name = "updater"
   part_name = "updater"
 }

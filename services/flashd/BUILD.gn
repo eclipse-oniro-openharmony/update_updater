@@ -67,7 +67,7 @@ ohos_source_set("flashd_deamon") {
   deps += [ "//developtools/hdc:hdc_hash_gen" ]
 
   if (use_musl) {
-    external_deps = [ "init:libbegetutil" ]
+    external_deps += [ "init:libbegetutil" ]
   }
 
   include_dirs = [
@@ -178,7 +178,7 @@ ohos_static_library("libflashd") {
     defines += [ "SURPPORT_SELINUX" ]
   }
 
-  external_deps = [ "init:libbegetutil" ]
+  external_deps += [ "init:libbegetutil" ]
 
   part_name = "updater"
 }
