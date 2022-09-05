@@ -15,6 +15,7 @@ module_output_path = "updater/extract_and_execute_script"
 
 #####################hydra-fuzz###################
 import("//build/config/features.gni")
+import("//base/update/updater/updater_default_cfg.gni")
 import("//build/test.gni")
 
 ##############################fuzztest##########################################
@@ -59,7 +60,7 @@ ohos_fuzztest("ExtractAndExecuteScriptFuzzTest") {
     "//third_party/openssl:ssl_source",
     "//third_party/zlib:libz",
   ]
-  external_deps = [ "c_utils:utils" ]
+  external_deps += [ "c_utils:utils" ]
 
   cflags = [
     "-g",

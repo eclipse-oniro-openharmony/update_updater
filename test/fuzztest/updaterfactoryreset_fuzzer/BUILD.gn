@@ -15,6 +15,7 @@ module_output_path = "updater/updater_factory_reset"
 
 #####################hydra-fuzz###################
 import("//build/config/features.gni")
+import("//base/update/updater/updater_default_cfg.gni")
 import("//build/test.gni")
 
 ##############################fuzztest##########################################
@@ -53,7 +54,7 @@ ohos_fuzztest("UpdaterFactoryResetFuzzTest") {
     "//third_party/zlib:libz",
   ]
 
-  external_deps = [ "init:libbegetutil" ]
+  external_deps += [ "init:libbegetutil" ]
 
   cflags = [
     "-g",

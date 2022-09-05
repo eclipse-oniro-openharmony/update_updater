@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//base/update/updater/updater_default_cfg.gni")
 import("//build/test.gni")
 
 module_output_path = "updater/updater_test"
@@ -202,7 +203,7 @@ ohos_unittest("updater_unittest") {
     "//base/update/updater/test/unittest:test_update_binary_abnormal",
   ]
 
-  external_deps = [ "init:libbegetutil" ]
+  external_deps += [ "init:libbegetutil" ]
 
   cflags_cc = [ "-fexceptions" ]
 
