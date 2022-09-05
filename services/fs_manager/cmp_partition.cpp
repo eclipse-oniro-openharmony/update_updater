@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include "fs_manager/cmp_partition.h"
 #include "log/log.h"
 
@@ -62,7 +61,9 @@ static PartitionChangeType ComparePartition(const PartitonList &plist, struct Pa
 
 static int TraversePartitionList(const PartitonList &nlist, const PartitonList &olist, PartitonList &ulist)
 {
-    UPDATER_CHECK_ONLY_RETURN(!nlist.empty() && !olist.empty(), return 0);
+    if (nlist.empty() || olist.empty()) {
+        return 0;
+    }
 
     ulist.clear();
     PartitionChangeType changeType = NOT_CHANGE;
@@ -78,7 +79,9 @@ static int TraversePartitionList(const PartitonList &nlist, const PartitonList &
 
 int RegisterUpdaterPartitionList(const PartitonList &nlist, const PartitonList &olist)
 {
-    UPDATER_CHECK_ONLY_RETURN(!nlist.empty() && !olist.empty(), return 0);
+    if (nlist.empty() || olist.empty()) {
+        return 0;
+    }
 
     g_updaterPlist.clear();
     int ret = TraversePartitionList(nlist, olist, g_updaterPlist);
@@ -88,11 +91,15 @@ int RegisterUpdaterPartitionList(const PartitonList &nlist, const PartitonList &
 
 int GetRegisterUpdaterPartitionList(PartitonList &ulist)
 {
-    UPDATER_CHECK_ONLY_RETURN(!g_updaterPlist.empty(), return 1);
+    if (g_updaterPlist.empty()) {
+        return 1;
+    }
 
     ulist.clear();
     ulist.assign(g_updaterPlist.begin(), g_updaterPlist.end());
-    UPDATER_CHECK_ONLY_RETURN(!ulist.empty(), return 0);
+    if (ulist.empty()) {
+        return 0;
+    }
     return 1;
 }
 } // namespace Updater

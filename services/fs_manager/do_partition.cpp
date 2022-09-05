@@ -47,8 +47,9 @@ static int BlkpgPartCommand(const Partition &part, struct blkpg_partition &pg, i
 #ifndef UPDATER_UT
     ret = ioctl(part.partfd, BLKPG, &args);
 #endif
-    UPDATER_ERROR_CHECK_NOT_RETURN(ret >= 0, "ioctl of partition " << part.partName <<
-        " with operation " << op << " failed");
+    if (ret < 0) {
+        LOG(ERROR) << "ioctl of partition " << part.partName << " with operation " << op << " failed";
+    }
     return ret;
 }
 
@@ -56,11 +57,14 @@ static int DoUmountDiskPartition(const Partition &part)
 {
     std::string partName = std::string("/") + part.partName;
     int ret = UmountForPath(partName);
-    UPDATER_ERROR_CHECK(ret != -1, "Umount " << partName << " failed: " << errno, return 0);
+    if (ret == -1) {
+        LOG(ERROR) << "Umount " << partName << " failed: " << errno;
+        return 0;
+    }
     return 1;
 }
 
-static int DoFsync(const BlockDevice &dev)
+static void DoFsync(const BlockDevice &dev)
 {
     BlockSpecific* bs = BLOCK_SPECIFIC(&dev);
     int status;
@@ -71,20 +75,23 @@ static int DoFsync(const BlockDevice &dev)
             break;
         }
     }
-    return 1;
 }
 
 static int BlockSync(const Disk &disk)
 {
-    UPDATER_CHECK_ONLY_RETURN(!disk.dev->readOnly, return 0);
-    UPDATER_CHECK_ONLY_RETURN(DoFsync(*(disk.dev)), return 0);
+    if (disk.dev->readOnly) {
+        return 0;
+    }
+    DoFsync(*(disk.dev));
     return 1;
 }
 
 static int BlkpgRemovePartition(const Partition &part)
 {
     struct blkpg_partition blkPart {};
-    UPDATER_CHECK_ONLY_RETURN(memset_s(&blkPart, sizeof(blkPart), 0, sizeof(blkPart)) == 0, return -1);
+    if (memset_s(&blkPart, sizeof(blkPart), 0, sizeof(blkPart)) != EOK) {
+        return -1;
+    }
     blkPart.pno = part.partNum;
     return BlkpgPartCommand(part, blkPart, BLKPG_DEL_PARTITION);
 }
@@ -92,7 +99,9 @@ static int BlkpgRemovePartition(const Partition &part)
 static int BlockDiskOpen(Disk &disk)
 {
     disk.dev->fd = open(disk.dev->devPath.c_str(), RW_MODE);
-    UPDATER_WARNING_CHECK_NOT_RETURN(disk.dev->fd >= 0, "open fail: " << disk.dev->devPath << errno);
+    if (disk.dev->fd < 0) {
+        LOG(WARNING) << "open fail: " << disk.dev->devPath << errno;
+    }
     return disk.dev->fd;
 }
 
@@ -110,44 +119,63 @@ static bool DoRmPartition(const Disk &disk, int partn)
 {
     Partition *part = nullptr;
     part = GetPartition(disk, partn);
-    UPDATER_ERROR_CHECK(part, "Cannot get partition info for partition number: " << partn, return false);
+    if (part == nullptr) {
+        LOG(ERROR) << "Cannot get partition info for partition number: " << partn;
+        return false;
+    }
 
-    UPDATER_CHECK_ONLY_RETURN(disk.dev->fd >= 0, return false);
+    if (disk.dev->fd < 0) {
+        return false;
+    }
     part->partfd = disk.dev->fd;
     int ret = BlkpgRemovePartition(*part);
     part->partfd = -1;
-    UPDATER_ERROR_CHECK(ret >= 0, "Delete part failed", return false);
+    if (ret < 0) {
+        LOG(ERROR) << "Delete part failed";
+        return false;
+    }
     return true;
 }
 
 static int BlkpgAddPartition(Partition &part)
 {
     struct blkpg_partition blkPart {};
-    UPDATER_CHECK_ONLY_RETURN(!memset_s(&blkPart, sizeof(blkPart), 0, sizeof(blkPart)), return 0);
+    if (memset_s(&blkPart, sizeof(blkPart), 0, sizeof(blkPart)) != EOK) {
+        return 0;
+    }
     blkPart.start = static_cast<long long>(part.start * SECTOR_SIZE_DEFAULT);
     LOG(INFO) << "blkPart.start " << blkPart.start;
     blkPart.length = static_cast<long long>(part.length * SECTOR_SIZE_DEFAULT);
     LOG(INFO) << "blkPart.length " << blkPart.length;
     blkPart.pno = part.partNum;
     LOG(INFO) << "blkPart.pno " << blkPart.pno;
-    UPDATER_CHECK_ONLY_RETURN(strncpy_s(blkPart.devname, BLKPG_DEVNAMELTH, part.devName.c_str(),
-        part.devName.size()) == 0, return 0);
+    if (strncpy_s(blkPart.devname, BLKPG_DEVNAMELTH, part.devName.c_str(), part.devName.size()) != EOK) {
+        return 0;
+    }
     LOG(INFO) << "blkPart.devname " << blkPart.devname;
-    UPDATER_CHECK_ONLY_RETURN(strncpy_s(blkPart.volname, BLKPG_VOLNAMELTH, part.partName.c_str(),
-        part.partName.size()) == 0, return 0);
+    if (strncpy_s(blkPart.volname, BLKPG_VOLNAMELTH, part.partName.c_str(), part.partName.size()) != EOK) {
+        return 0;
+    }
     LOG(INFO) << "blkPart.volname " << blkPart.volname;
-    UPDATER_CHECK_ONLY_RETURN(BlkpgPartCommand(part, blkPart, BLKPG_ADD_PARTITION)>=0, return 0);
+    if (BlkpgPartCommand(part, blkPart, BLKPG_ADD_PARTITION) < 0) {
+        return 0;
+    }
     return 1;
 }
 
 static bool DoAddPartition(const Disk &disk, Partition &part)
 {
-    UPDATER_CHECK_ONLY_RETURN(disk.dev->fd >= 0, return false);
+    if (disk.dev->fd < 0) {
+        return false;
+    }
 
     part.partfd = disk.dev->fd;
     int ret = BlkpgAddPartition(part);
     part.partfd = -1;
-    UPDATER_ERROR_CHECK(ret != 0, "Add partition failed", return false);
+    if (ret == 0) {
+        LOG(ERROR) << "Add partition failed";
+        return false;
+    }
     return true;
 }
 
@@ -231,14 +259,21 @@ static bool AddPartitions(const Disk &disk, const PartitonList &ulist, int &part
                 LOG(INFO) << "Change userdata image is not support.";
                 continue;
             }
-            UPDATER_ERROR_CHECK(p2->partName != UPDATER_PARTNAME, "Change updater image is not supported.", continue);
+            if (p2->partName == UPDATER_PARTNAME) {
+                LOG(ERROR) << "Change updater image is not supported.";
+                continue;
+            }
             p2->partNum = userNum + step;
-            UPDATER_CHECK_ONLY_RETURN(snprintf_s(pdevname, sizeof(pdevname), sizeof(pdevname) - 1,
-                "%sp%d", MMC_DEV, p2->partNum) != -1, return false);
+            if (snprintf_s(pdevname, sizeof(pdevname), sizeof(pdevname) - 1, "%sp%d", MMC_DEV, p2->partNum) == -1) {
+                return false;
+            }
             p2->devName.clear();
             p2->devName = pdevname;
             LOG(INFO) << "Adding partition " << p2->partName;
-            UPDATER_ERROR_CHECK(DoAddPartition (disk, *p2), "Add partition fail for " << p2->partName, return false);
+            if (!DoAddPartition (disk, *p2)) {
+                LOG(ERROR) << "Add partition fail for " << p2->partName;
+                return false;
+            }
             step++;
             partitionAddedCounter++;
         }
@@ -253,15 +288,23 @@ static bool RemovePartitions(const Disk &disk, int &partitionRemovedCounter)
         if (it->changeType == NOT_CHANGE) {
             continue;
         }
-        UPDATER_ERROR_CHECK(it->partName != UPDATER_PARTNAME, "Cannot delete updater partition.", continue);
+        if (it->partName == UPDATER_PARTNAME) {
+            LOG(ERROR) << "Cannot delete updater partition.";
+            continue;
+        }
 
         if (it->partName == USERDATA_PARTNAME) {
             LOG(INFO) << "Cannot delete userdata partition.";
             continue;
         }
-        UPDATER_CHECK_ONLY_RETURN(DoUmountDiskPartition(*it), continue);
+        if (DoUmountDiskPartition(*it) == 0) {
+            continue;
+        }
         LOG(INFO) << "Removing partition " << it->partName;
-        UPDATER_ERROR_CHECK(DoRmPartition (disk, it->partNum), "Remove partition failed.", return false);
+        if (!DoRmPartition (disk, it->partNum)) {
+            LOG(ERROR) << "Remove partition failed.";
+            return false;
+        }
         partitionRemovedCounter++;
     }
     return true;
@@ -282,17 +325,26 @@ int DoPartitions(PartitonList &nlist)
     int sum = ProbeAllPartitions();
     UPDATER_ERROR_CHECK(sum, "partition sum  is zero! ", return 0);
     Disk *disk = GetRegisterBlockDisk(MMC_PATH);
-    UPDATER_ERROR_CHECK(disk, "getRegisterdisk fail! ", return 0);
+    if (disk == nullptr) {
+        LOG(ERROR) << "getRegisterdisk fail! ";
+        return 0;
+    }
     int reg = RegisterUpdaterPartitionList(nlist, disk->partList);
     UPDATER_ERROR_CHECK(reg, "register updater list fail! ", free(disk); return 0);
     get = GetRegisterUpdaterPartitionList(ulist);
     UPDATER_ERROR_CHECK(get, "get updater list fail! ", goto error);
 
     fd = BlockDiskOpen(*disk);
-    UPDATER_CHECK_ONLY_RETURN(fd >= 0, goto error);
-    UPDATER_CHECK_ONLY_RETURN(RemovePartitions(*disk, partitionChangedCounter), goto error);
+    if (fd < 0) {
+        goto error;
+    }
+    if (!RemovePartitions(*disk, partitionChangedCounter)) {
+        goto error;
+    }
     BlockSync (*disk);
-    UPDATER_CHECK_ONLY_RETURN(AddPartitions(*disk, ulist, partitionChangedCounter), goto error);
+    if (!AddPartitions(*disk, ulist, partitionChangedCounter)) {
+        goto error;
+    }
     BlockSync (*disk);
     WriteDiskPartitionToMisc(nlist);
     BlockDiskClose(*disk);
