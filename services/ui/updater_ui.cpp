@@ -15,7 +15,6 @@
 #include "updater_ui.h"
 #include <mutex>
 #include <thread>
-#include "flashd/flashd.h"
 #include "language/language_ui.h"
 #include "log/log.h"
 #include "page/page_manager.h"
@@ -148,8 +147,6 @@ void OnLabelSDCardEvt()
 void OnLabelSDCardNoDelayEvt()
 {
     LOG(INFO) << "On Label SDCard";
-    auto sdParam = "updater.sdcard.configs";
-    Flashd::SetParameter(sdParam, "1");
     std::thread {
         [] () {
             CALLBACK_GUARD_RETURN;

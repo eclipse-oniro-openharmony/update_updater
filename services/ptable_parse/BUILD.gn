@@ -12,7 +12,6 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import("//base/update/updater/updater_common.gni")
 SUBSYSTEM_DIR = "//base/update/updater/services/ptable_parse"
 
 config("updater_config") {

@@ -12,7 +12,6 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import("//base/update/updater/updater_common.gni")
 
 ohos_static_library("libpackageExt") {
   sources = [ "package.cpp" ]
