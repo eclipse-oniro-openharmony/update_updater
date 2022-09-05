@@ -42,7 +42,7 @@ bool FlashdWriterRaw::GetDataWriter(const std::string &partition)
         return false;
     }
     char lunIndexName = 'a' + ptnInfo.lun;
-    const std::string writePath = PREFIX_UFS_NODE + lunIndexName;
+    const std::string writePath = std::string(PREFIX_UFS_NODE) + lunIndexName;
     writer_ = DataWriter::CreateDataWriter(WRITE_RAW, writePath, ptnInfo.startAddr);
 #else
     writer_ = DataWriter::CreateDataWriter(WRITE_RAW, GetBlockDeviceByMountPoint(partition));
