@@ -11,7 +11,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//base/update/updater/updater_default_cfg.gni")
 import("//build/ohos.gni")
+
+config("updater_ui_support_cfg") {
+  if (updater_ui_support) {
+    defines = [ "UPDATER_UI_SUPPORT" ]
+  }
+}
+
 ohos_static_library("libui") {
   defines = [
     "ENABLE_BITMAP_FONT = 0",
@@ -21,6 +29,8 @@ ohos_static_library("libui") {
     "ENABLE_STATIC_FONT = 0",
     "ENABLE_VECTOR_FONT = 1",
   ]
+
+  public_configs = [ ":updater_ui_support_cfg" ]
 
   sources = [
     "control/callback_manager.cpp",

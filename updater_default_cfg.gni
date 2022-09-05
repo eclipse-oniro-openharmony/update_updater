@@ -13,6 +13,7 @@
 
 declare_args() {
   updater_cfg_file = ""
+  updater_ui_support = true
 }
 
 if (updater_cfg_file != "") {
