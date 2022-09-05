@@ -19,15 +19,22 @@
 #include "macros.h"
 #include "strategy/ui_strategy.h"
 #include "updater_ui.h"
+#include "updater_ui_empty.h"
 
 namespace Updater {
 class UpdaterUiFacade {
-    DISALLOW_COPY_MOVE_ASSIGN(UpdaterUiFacade);
+    DISALLOW_COPY_MOVE(UpdaterUiFacade);
     using StrategyMap = std::unordered_map<UpdaterMode, UiStrategyCfg>;
 public:
     UpdaterUiFacade();
     ~UpdaterUiFacade() = default;
+#ifdef UPDATER_UI_SUPPORT
     static UpdaterUiFacade &GetInstance();
+#else
+    static UpdaterUiEmpty &GetInstance();
+#endif
+
+    void InitEnv() const;
 
     [[nodiscard]] bool SetMode(UpdaterMode mode);
     UpdaterMode GetMode() const;
@@ -46,6 +53,9 @@ public:
     void ShowMainpage() const;
     void ShowProgressWarning(bool isShow) const;
     bool IsInProgress() const;
+
+    void Sleep(int ms) const;
+    void SaveScreen() const;
 private:
     std::pair<bool, StrategyMap::const_iterator> CheckMode() const;
     void SetLogoVisible(bool isVisible) const;
