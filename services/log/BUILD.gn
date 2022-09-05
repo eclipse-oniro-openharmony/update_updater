@@ -12,12 +12,9 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-if (!is_linux && !is_mingw && !is_mac) {
-  import("//base/update/updater/updater_common.gni")
-}
 
 config("log_config") {
-  cflags_cc = ["-std=c++17"]
+  cflags_cc = [ "-std=c++17" ]
 }
 
 ohos_static_library("libupdaterlog") {

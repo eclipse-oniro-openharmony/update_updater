@@ -12,14 +12,12 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-if (!is_linux && !is_mingw && !is_mac) {
-  import("//base/update/updater/updater_common.gni")
-}
+
 SUBSYSTEM_DIR = "//base/update/updater/services/package"
 
 config("package_config") {
   visibility = [ ":*" ]
-  cflags_cc = ["-std=c++17"]
+  cflags_cc = [ "-std=c++17" ]
   include_dirs = [
     "//base/update/updater/interfaces/kits/include",
     "//base/update/updater/utils/include",
@@ -76,7 +74,7 @@ ohos_static_library("libupdaterpackage") {
       "iphlpapi",
       "userenv",
       "ws2_32",
-      ]
+    ]
 
     ldflags = [
       "-Wl,--whole-archive",
