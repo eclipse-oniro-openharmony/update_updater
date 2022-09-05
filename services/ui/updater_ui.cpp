@@ -49,7 +49,7 @@ void ExitCallback()
     g_isInCallback = false;
 }
 
-inline UpdaterUiFacade &GetFacade()
+inline auto &GetFacade()
 {
     return UpdaterUiFacade::GetInstance();
 }

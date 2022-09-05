@@ -11,7 +11,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-external_deps = [ "hiviewdfx_hilog_native:libhilog"]
 declare_args() {
-  updater_ui_support = true
+  updater_cfg_file = ""
+}
+
+if (updater_cfg_file != "") {
+  import("${updater_cfg_file}")
 }

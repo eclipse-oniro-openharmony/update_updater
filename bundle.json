@@ -38,7 +38,7 @@
         "name": "updater",
         "subsystem": "updater",
         "syscap": [],
-        "features": [],
+        "features": [ "updater_ui_support" ],
         "adapted_system_type": [ "standard" ],
         "rom": "",
         "ram": "",

@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//base/update/updater/updater_common.gni")
 import("//build/ohos.gni")
 
 updater_resources_list = [
@@ -144,6 +145,10 @@ if (product_name == "rk3568") {
 }
 
 updater_resources_target = []
+
+if (!updater_ui_support) {
+  updater_resources_list = []
+}
 
 foreach(file, updater_resources_list) {
   _name = "$file"

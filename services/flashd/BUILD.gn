@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//base/update/updater/updater_default_cfg.gni")
 import("//build/ohos.gni")
 import("//base/update/updater/updater_common.gni")
 import(
@@ -178,6 +179,12 @@ ohos_static_library("libflashd") {
     deps += [ "//third_party/selinux:libselinux" ]
     include_dirs += [ "//third_party/selinux/libselinux/include" ]
     defines += [ "SURPPORT_SELINUX" ]
+  }
+
+  if (defined(use_ptable)) {
+    include_dirs = [ "//base/update/updater/services/ptable_parse" ]
+    deps += [ "//base/update/updater/services/ptable_parse:libptableparse" ]
+    defines = [ "UPDATER_USE_PTABLE" ]
   }
 
   external_deps += [ "init:libbegetutil" ]

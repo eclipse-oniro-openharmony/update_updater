@@ -11,6 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//base/update/updater/updater_common.gni")
+import("//base/update/updater/updater_default_cfg.gni")
 import("//build/ohos.gni")
 import("//base/update/updater/updater_common.gni")
 import(
@@ -76,6 +78,10 @@ ohos_executable("updater") {
     include_dirs += [ "//base/update/updater/services/ptable_parse" ]
     deps += [ "//base/update/updater/services/ptable_parse:libptableparse" ]
     defines += [ "UPDATER_USE_PTABLE" ]
+  }
+
+  if (updater_ui_support) {
+    defines += [ "UPDATER_UI_SUPPORT" ]
   }
 
   # add updater custom library
