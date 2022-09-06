@@ -1584,7 +1584,7 @@ void yyFlexLexer::yyensure_buffer_stack(void)
         if (!(yy_buffer_stack)) {
             YY_FATAL_ERROR("out of dynamic memory in yyensure_buffer_stack()");
         }
-        (void)memset((yy_buffer_stack), 0, num_to_alloc * sizeof(struct yy_buffer_state*));
+        memset((yy_buffer_stack), 0, num_to_alloc * sizeof(struct yy_buffer_state*));
         (yy_buffer_stack_max) = num_to_alloc;
         (yy_buffer_stack_top) = 0;
         return;
@@ -1600,7 +1600,7 @@ void yyFlexLexer::yyensure_buffer_stack(void)
             YY_FATAL_ERROR("out of dynamic memory in yyensure_buffer_stack()");
         }
         /* zero only the new slots.*/
-        (void)memset((yy_buffer_stack) + (yy_buffer_stack_max), 0, grow_size * sizeof(struct yy_buffer_state*));
+        memset((yy_buffer_stack) + (yy_buffer_stack_max), 0, grow_size * sizeof(struct yy_buffer_state*));
         (yy_buffer_stack_max) = num_to_alloc;
     }
 }
