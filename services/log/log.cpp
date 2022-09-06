@@ -41,31 +41,31 @@ void InitUpdaterLogger(const std::string &tag, const std::string &logFile, const
 UpdaterLogger::~UpdaterLogger()
 {
     std::string str = oss_.str();
-    if (g_logLevel <= level_) {
-        switch (level_) {
-            case static_cast<int>(INFO):
-                OHOS::HiviewDFX::HiLog::Info(g_logLabel, "%{public}s", str.c_str());
-                break;
-            case static_cast<int>(ERROR):
-                OHOS::HiviewDFX::HiLog::Error(g_logLabel, "%{public}s", str.c_str());
-                break;
-            case static_cast<int>(DEBUG):
-                OHOS::HiviewDFX::HiLog::Debug(g_logLabel, "%{public}s", str.c_str());
-                break;
-            case static_cast<int>(WARNING):
-                OHOS::HiviewDFX::HiLog::Warn(g_logLabel, "%{public}s", str.c_str());
-                break;
-            default:
-                break;            
-        }
-        if (g_updaterLog.is_open()) {
-            g_updaterLog << realTime_ <<  "  " << "[" << logLevelMap_[level_] << "]" <<
-                g_logTag << " " << str << std::endl << std::flush; 
-        }
-        oss_.str("");
-        oss_ << std::endl << std::flush;
-    } else {
+    if (g_logLevel > level_) {
         std::cout << std::endl << std::flush;
+        return;
+    }
+    switch (level_) {
+        case static_cast<int>(INFO):
+            OHOS::HiviewDFX::HiLog::Info(g_logLabel, "%{public}s", str.c_str());
+            break;
+        case static_cast<int>(ERROR):
+            OHOS::HiviewDFX::HiLog::Error(g_logLabel, "%{public}s", str.c_str());
+            break;
+        case static_cast<int>(DEBUG):
+            OHOS::HiviewDFX::HiLog::Debug(g_logLabel, "%{public}s", str.c_str());
+            break;
+        case static_cast<int>(WARNING):
+            OHOS::HiviewDFX::HiLog::Warn(g_logLabel, "%{public}s", str.c_str());
+            break;
+        default:
+            break;            
+    }
+    oss_.str("");
+    oss_ << std::endl << std::flush;
+    if (g_updaterLog.is_open()) {
+        g_updaterLog << realTime_ <<  "  " << "[" << logLevelMap_[level_] << "]" <<
+            g_logTag << " " << str << std::endl << std::flush; 
     }
 }
 
