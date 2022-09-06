@@ -13,6 +13,10 @@
 
 import("//build/ohos.gni")
 
+config("log_config") {
+  cflags_cc = [ "-std=c++17" ]
+}
+
 ohos_static_library("libupdaterlog") {
   sources = [
     "dump.cpp",
@@ -24,6 +28,8 @@ ohos_static_library("libupdaterlog") {
     "//third_party/bounds_checking_function/include",
     "//base/update/updater/utils/include",
   ]
+
+  configs = [ ":log_config" ]
 
   deps = [ "//third_party/bounds_checking_function:libsec_static" ]
   subsystem_name = "updater"

@@ -1,0 +1,101 @@
+# Copyright (C) 2022 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/ohos.gni")
+UPDATER_DIR = "//base/update/updater"
+DIFFPATCH_DIR = "//base/update/updater/services/diffpatch"
+
+config("diff_config") {
+  cflags_cc = [
+    "-frtti",
+    "-std=c++17",
+  ]
+  if (is_mingw) {
+    cflags_cc += [ "-Wno-inconsistent-dllimport" ]
+  }
+}
+
+ohos_executable("diff") {
+  use_exceptions = true
+  configs = [ ":diff_config" ]
+
+  sources = [
+    "${DIFFPATCH_DIR}/bzip2/bzip2_adapter.cpp",
+    "${DIFFPATCH_DIR}/bzip2/lz4_adapter.cpp",
+    "${DIFFPATCH_DIR}/bzip2/zip_adapter.cpp",
+    "${DIFFPATCH_DIR}/diff/blocks_diff.cpp",
+    "${DIFFPATCH_DIR}/diff/image_diff.cpp",
+    "${DIFFPATCH_DIR}/diff/update_diff.cpp",
+    "${DIFFPATCH_DIR}/diff_main.cpp",
+    "${DIFFPATCH_DIR}/diffpatch.cpp",
+    "${DIFFPATCH_DIR}/patch/blocks_patch.cpp",
+    "${DIFFPATCH_DIR}/patch/image_patch.cpp",
+    "${DIFFPATCH_DIR}/patch/update_patch.cpp",
+    "${UPDATER_DIR}/services/package/pkg_manager/pkg_utils.cpp",
+  ]
+
+  include_dirs = [
+    "${DIFFPATCH_DIR}",
+    "${UPDATER_DIR}/interfaces/kits/include",
+    "${UPDATER_DIR}/services/include/package",
+    "${UPDATER_DIR}/services/include/patch",
+    "${UPDATER_DIR}/services/include",
+    "${UPDATER_DIR}/utils/include",
+    "${UPDATER_DIR}/services/diffpatch/bzip2",
+    "${UPDATER_DIR}/services/diffpatch/diff",
+    "${UPDATER_DIR}/services/diffpatch/patch",
+    "${UPDATER_DIR}/services/diffpatch",
+    "${UPDATER_DIR}/services/package/pkg_manager",
+    "${UPDATER_DIR}/services/include/log",
+    "//third_party/bounds_checking_function/include",
+    "//third_party/openssl/include",
+    "//third_party/bzip2",
+    "//third_party/zlib",
+    "//third_party/lz4/lib",
+  ]
+
+  deps = [
+    "//base/update/updater/services/log:libupdaterlog",
+    "//base/update/updater/services/package:libupdaterpackage",
+    "//third_party/bzip2:libbz2",
+    "//third_party/lz4:liblz4_static",
+    "//third_party/openssl:libcrypto_static",
+    "//third_party/zlib:libz",
+  ]
+
+  if (is_mingw) {
+    static_link = false
+    libs = [ "setupapi" ]
+    ldflags = [
+      "-Wl,--whole-archive",
+      "-lpthread",
+      "-Wl,--no-whole-archive",
+    ]
+  }
+
+  if (is_linux) {
+    static_link = false
+
+    ldflags = [
+      "-Wl,--whole-archive",
+      "-lpthread",
+      "-latomic",
+      "-ldl",
+      "-lrt",
+      "-Wl,--no-whole-archive",
+    ]
+  }
+
+  subsystem_name = "developtools"
+  part_name = "updater"
+}
