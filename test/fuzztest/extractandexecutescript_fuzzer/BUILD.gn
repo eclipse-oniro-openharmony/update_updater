@@ -11,11 +11,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-module_output_path = "updater/extract_and_execute_script"
+module_output_path = "updater/do_partitions"
+
+import("//base/update/updater/updater_default_cfg.gni")
 
 #####################hydra-fuzz###################
 import("//build/config/features.gni")
-import("//base/update/updater/updater_default_cfg.gni")
 import("//build/test.gni")
 
 ##############################fuzztest##########################################
