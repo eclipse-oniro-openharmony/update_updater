@@ -164,6 +164,7 @@ int32_t ExtraPackageDir(const char *packagePath, const char *keyPath, const char
  *
  * @param packagePath   path of the update package
  * @param keyPath       path of the key used for verification
+ * @param file          file in package
  * @param outPath       package file output path
  * @return              Extra package creation result
  */
