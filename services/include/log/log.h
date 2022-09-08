@@ -22,7 +22,9 @@
 #include <string>
 #include <unordered_map>
 #include "error_code.h"
+#ifdef DIFF_PATCH_SDK
 #include "hilog/log.h"
+#endif
 
 namespace Updater {
 constexpr size_t MAX_LOG_SPACE = 4 * 5 * 1024 * 1024;
