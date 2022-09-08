@@ -14,6 +14,7 @@ external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
 
 declare_args() {
   updater_cfg_file = ""
+  updater_ui_support = true
 }
 
 if (updater_cfg_file != "") {

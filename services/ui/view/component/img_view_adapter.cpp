@@ -85,16 +85,16 @@ ImgViewAdapter::ImgViewAdapter(const UxViewInfo &info)
     currId_ = 0;
     valid_ = true;
     viewId_ = commonPtr->id;
-    this->SetAutoEnable(true);
+    this->SetAutoEnable(false);
     this->SetPosition(commonPtr->x, commonPtr->y);
     this->SetWidth(commonPtr->w);
     this->SetHeight(commonPtr->h);
-    this->SetResizeMode(OHOS::UIImageView::ImageResizeMode::CENTER);
     this->SetVisible(commonPtr->visible);
     this->SetViewId(viewId_.c_str());
     LOG(INFO) << "dir:" << dir_ << ", imgCnt:" << imgCnt_ << ", interval:" << interval_;
     if (interval_ == 0) {
         this->SetSrc(dir_.c_str());
+        this->SetResizeMode(OHOS::UIImageView::ImageResizeMode::FILL);
     } else {
         cb_ = std::make_unique<ImgAnimatorCallback>(this);
         cb_->Init();
@@ -164,6 +164,7 @@ void ImgViewAdapter::ShowNextImage()
     }
 
     this->SetSrc(currPath_.c_str());
+    this->SetResizeMode(OHOS::UIImageView::ImageResizeMode::FILL);
     currId_ = (currId_ + 1) % imgCnt_;
     Utils::UsSleep(interval_ * USECOND_TO_MSECOND);
 }

@@ -14,9 +14,10 @@
  */
 #ifndef PKG_STREAM_H
 #define PKG_STREAM_H
-
-#include <atomic>
+#ifndef __WIN32
 #include <sys/mman.h>
+#endif
+#include <atomic>
 #include "pkg_manager.h"
 #include "pkg_utils.h"
 

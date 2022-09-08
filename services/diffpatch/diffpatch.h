@@ -15,14 +15,23 @@
 
 #ifndef DIFF_PATCH_H
 #define DIFF_PATCH_H
-#include <cstdlib>
+
+#ifdef __WIN32
+#include "pkg_utils.h"
+#else
 #include <sys/mman.h>
+#endif
+#include <cstdlib>
 #include <unistd.h>
 #include <vector>
 #include "log/log.h"
 #include "patch/update_patch.h"
 
 namespace UpdatePatch {
+#ifdef __WIN32
+#undef ERROR
+#endif
+
 #define PATCH_LOGE(format, ...) Logger(Updater::ERROR, (__FILE_NAME__), (__LINE__), format, ##__VA_ARGS__)
 #define PATCH_DEBUG(format, ...) Logger(Updater::DEBUG, (__FILE_NAME__), (__LINE__), format, ##__VA_ARGS__)
 #define PATCH_LOGI(format, ...) Logger(Updater::INFO, (__FILE_NAME__), (__LINE__), format, ##__VA_ARGS__)

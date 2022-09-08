@@ -13,10 +13,12 @@
 
 import("//base/update/updater/updater_default_cfg.gni")
 import("//build/ohos.gni")
+
 SUBSYSTEM_DIR = "//base/update/updater/services/package"
 
 config("package_config") {
   visibility = [ ":*" ]
+  cflags_cc = [ "-std=c++17" ]
   include_dirs = [
     "//base/update/updater/interfaces/kits/include",
     "//base/update/updater/utils/include",
@@ -59,10 +61,26 @@ ohos_static_library("libupdaterpackage") {
 
   deps = [
     "//third_party/bounds_checking_function:libsec_static",
-    "//third_party/openssl:libcrypto_shared",
+    "//third_party/openssl:libcrypto_static",
   ]
 
   configs = [ ":package_config" ]
-  subsystem_name = "updater"
-  part_name = "updater"
+
+  if (is_mingw) {
+    libs = [
+      "setupapi",
+      "psapi",
+      "user32",
+      "advapi32",
+      "iphlpapi",
+      "userenv",
+      "ws2_32",
+    ]
+
+    ldflags = [
+      "-Wl,--whole-archive",
+      "-lpthread",
+      "-Wl,--no-whole-archive",
+    ]
+  }
 }

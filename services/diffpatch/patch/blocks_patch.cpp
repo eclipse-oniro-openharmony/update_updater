@@ -15,7 +15,6 @@
 
 #include "blocks_patch.h"
 #include <cstdio>
-#include <endian.h>
 #include <iostream>
 #include <vector>
 #include "diffpatch.h"
@@ -25,17 +24,37 @@ using namespace std;
 
 namespace UpdatePatch {
 #define PATCH_MIN std::char_traits<char>::length(BSDIFF_MAGIC) + sizeof(int64_t) * 3
+#define GET_BYTE_FROM_BUFFER(v, index, buffer)  (y) = (y) * 256; (y) += buffer[index]
+constexpr uint8_t BUFFER_MASK = 0x80;
 
 static int64_t ReadLE64(const uint8_t *buffer)
 {
     if (buffer == nullptr) {
-        PATCH_LOGE("buffer is null");
         return 0;
     }
+    int64_t y = 0;
+    int32_t index = static_cast<int32_t>(sizeof(int64_t)) - 1;
+    y = buffer[index] & static_cast<uint8_t>(~BUFFER_MASK);
+    index--;
+    GET_BYTE_FROM_BUFFER(y, index, buffer);
+    index--;
+    GET_BYTE_FROM_BUFFER(y, index, buffer);
+    index--;
+    GET_BYTE_FROM_BUFFER(y, index, buffer);
+    index--;
+    GET_BYTE_FROM_BUFFER(y, index, buffer);
+    index--;
+    GET_BYTE_FROM_BUFFER(y, index, buffer);
+    index--;
+    GET_BYTE_FROM_BUFFER(y, index, buffer);
+    index--;
+    GET_BYTE_FROM_BUFFER(y, index, buffer);
 
-    uint64_t result = 0;
-    (void)memcpy_s(&result, sizeof(uint64_t), buffer, sizeof(uint64_t));
-    return static_cast<int64_t>(le64toh(result));
+    index = static_cast<int32_t>(sizeof(int64_t));
+    if (buffer[index - 1] & BUFFER_MASK) {
+        y = -y;
+    }
+    return y;
 }
 
 int32_t BlocksPatch::ApplyPatch()

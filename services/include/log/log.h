@@ -27,6 +27,10 @@
 #endif
 
 namespace Updater {
+#ifdef __WIN32
+#undef ERROR
+#endif
+
 constexpr size_t MAX_LOG_SPACE = 4 * 5 * 1024 * 1024;
 constexpr int MAX_TIME_SIZE = 20;
 #define __FILE_NAME__   (strrchr((__FILE__), '/') ? strrchr((__FILE__), '/') + 1 : (__FILE__))

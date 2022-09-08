@@ -188,7 +188,7 @@ int32_t BZip2BufferReadAdapter::Open()
     }
 
     PATCH_DEBUG("BZip2BufferReadAdapter::Open %zu dataLength_ %zu", offset_, dataLength_);
-    memset_s(&stream_, sizeof(bz_stream), 0, sizeof(bz_stream));
+    (void)memset_s(&stream_, sizeof(bz_stream), 0, sizeof(bz_stream));
     int32_t ret = BZ2_bzDecompressInit(&stream_, 0, 0);
     if (ret != BZ_OK) {
         PATCH_LOGE("Failed to open read mem ret %d", ret);

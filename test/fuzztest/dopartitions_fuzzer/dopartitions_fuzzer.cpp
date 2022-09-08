@@ -44,7 +44,7 @@ namespace OHOS {
     {
         PartitonList nList;
         struct Partition myPaty;
-        memset_s(&myPaty, sizeof(struct Partition), 0, sizeof(struct Partition));
+        (void)memset_s(&myPaty, sizeof(struct Partition), 0, sizeof(struct Partition));
 
         if (size < FSTAB_NAME_LENGTH) {  /* fstable name length */
             InitEmmcPartition(myPaty, reinterpret_cast<const char*>(data), 0, size);

@@ -76,10 +76,6 @@ ohos_executable("updater") {
     defines += [ "UPDATER_USE_PTABLE" ]
   }
 
-  if (updater_ui_support) {
-    defines += [ "UPDATER_UI_SUPPORT" ]
-  }
-
   # add updater custom library
   if (defined(updater_custom_lib)) {
     deps += updater_custom_lib

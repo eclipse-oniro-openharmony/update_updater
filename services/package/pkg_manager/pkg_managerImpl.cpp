@@ -525,7 +525,11 @@ int32_t PkgManagerImpl::CreatePkgStream(PkgStreamPtr &stream, const std::string 
     if (type == PkgStream::PkgStreamType_Write || type == PkgStream::PkgStreamType_Read) {
         static char const *modeFlags[] = { "rb", "wb+" };
         char realPath[PATH_MAX + 1] = {};
+#ifdef _WIN32
+        if (type == PkgStream::PkgStreamType_Read && _fullpath(realPath, fileName.c_str(), PATH_MAX) == nullptr) {
+#else
         if (type == PkgStream::PkgStreamType_Read && realpath(fileName.c_str(), realPath) == nullptr) {
+#endif
             UPDATER_LAST_WORD(PKG_INVALID_FILE);
             return PKG_INVALID_FILE;
         }
@@ -550,14 +554,11 @@ int32_t PkgManagerImpl::CreatePkgStream(PkgStreamPtr &stream, const std::string 
             return PKG_INVALID_FILE, "Fail to open file %s ", fileName.c_str());
         stream = new FileStream(this, fileName, file, type);
     } else if (type == PkgStream::PkgStreamType_MemoryMap) {
-        size_t fileSize = size;
-        if (fileSize == 0) {
-            if (access(fileName.c_str(), 0) != 0) {
-                UPDATER_LAST_WORD(PKG_INVALID_FILE);
-                return PKG_INVALID_FILE;
-            }
-            fileSize = GetFileSize(fileName);
+        if ((size == 0) && (access(fileName.c_str(), 0) != 0)) {
+            UPDATER_LAST_WORD(PKG_INVALID_FILE);
+            return PKG_INVALID_FILE;
         }
+        size_t fileSize = (size == 0) ? GetFileSize(fileName) : size;
         PKG_CHECK(fileSize > 0, UPDATER_LAST_WORD(PKG_INVALID_FILE);
             return PKG_INVALID_FILE, "Fail to check file size %s ", fileName.c_str());
         uint8_t *memoryMap = MapMemory(fileName, fileSize);
