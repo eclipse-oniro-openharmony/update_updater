@@ -10,7 +10,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+if (!is_linux && !is_mingw && !is_mac) {
+  import("//base/update/updater/updater_default_cfg.gni")
+}
 import("//build/ohos.gni")
 UPDATER_DIR = "//base/update/updater"
 DIFFPATCH_DIR = "//base/update/updater/services/diffpatch"
