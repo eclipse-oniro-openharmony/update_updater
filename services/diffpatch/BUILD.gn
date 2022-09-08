@@ -57,7 +57,6 @@ ohos_executable("diff") {
     "${UPDATER_DIR}/services/diffpatch",
     "${UPDATER_DIR}/services/package/pkg_manager",
     "${UPDATER_DIR}/services/include/log",
-    "//base/startup/init_lite/interfaces/innerkits",
     "//third_party/bounds_checking_function/include",
     "//third_party/openssl/include",
     "//third_party/bzip2",
@@ -98,6 +97,8 @@ ohos_executable("diff") {
       "-Wl,--no-whole-archive",
     ]
   }
+
+  external_deps = [ "init:libbegetutil" ]
 
   subsystem_name = "developtools"
   part_name = "updater"
