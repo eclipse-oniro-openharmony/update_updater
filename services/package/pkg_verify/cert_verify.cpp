@@ -14,18 +14,15 @@
  */
 
 #include "cert_verify.h"
-
 #include "dump.h"
 #include "openssl_util.h"
 #include "pkg_utils.h"
-#include "utils.h"
 
 using namespace std;
-using namespace Updater;
+
 namespace Hpackage {
 namespace {
 constexpr const char *ROOT_CERT_PATH = "/certificate/signing_cert.crt";
-constexpr const char *ROOT_CERT_PATH_NORMAL = "/updater/certificate/signing_cert.crt";
 }
 
 void CertVerify::RegisterCertHelper(std::unique_ptr<CertHelper> ptr)
@@ -41,10 +38,6 @@ CertVerify &CertVerify::GetInstance()
 
 int32_t CertVerify::CheckCertChain(STACK_OF(X509) *certStack, X509 *cert)
 {
-    if (helper_ == nullptr) {
-        PKG_LOGE("helper_ null error");
-        return -1;
-    }
     return helper_->CertChainCheck(certStack, cert);
 }
 
@@ -71,16 +64,11 @@ int32_t SingleCertHelper::CertChainCheck(STACK_OF(X509) *certStack, X509 *cert)
     return VerifySingleCert(cert);
 }
 
-std::string SingleCertHelper::GetCertName()
-{
-    return Utils::IsUpdaterMode() ? ROOT_CERT_PATH : ROOT_CERT_PATH_NORMAL;
-}
-
 int32_t SingleCertHelper::InitRootCert()
 {
-    X509 *rootCert = GetX509CertFromPemFile(GetCertName());
+    X509 *rootCert = GetX509CertFromPemFile(ROOT_CERT_PATH);
     if (rootCert == nullptr) {
-        PKG_LOGE("Get root cert fail, file: %s", GetCertName().c_str());
+        PKG_LOGE("Get root cert fail, file: %s", ROOT_CERT_PATH);
         UPDATER_LAST_WORD(-1);
         return -1;
     }
