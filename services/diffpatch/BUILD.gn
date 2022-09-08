@@ -67,6 +67,7 @@ ohos_executable("diff") {
   deps = [
     "//base/update/updater/services/log:libupdaterlog",
     "//base/update/updater/services/package:libupdaterpackage",
+    "//base/update/updater/utils:libutils",
     "//third_party/bzip2:libbz2",
     "//third_party/lz4:liblz4_static",
     "//third_party/openssl:libcrypto_static",
