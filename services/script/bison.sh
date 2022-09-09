@@ -20,4 +20,16 @@ fi
 
 export PATH=/usr/share/bison:$PATH
 
-cp /usr/include/FlexLexer.h ./yacc
+if [ -f "/usr/include/FlexLexer.h" ] && [ -f "./yacc/FlexLexer.h" ];then
+  src_file_md5=$(md5sum "/usr/include/FlexLexer.h" | awk '{print $1}')
+  dest_file_md5=$(md5sum "./yacc/FlexLexer.h" | awk '{print $1}')
+  if [ "${src_file_md5}"x == "${dest_file_md5}"x ];then
+    echo "md5 check successful."
+  else
+    echo "md5 check failed."
+    cp /usr/include/FlexLexer.h ./yacc
+  fi
+else
+  echo "/usr/include/FlexLexer.h or ./yacc/FlexLexer.h doesn't exist."
+  cp /usr/include/FlexLexer.h ./yacc
+fi
