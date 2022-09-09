@@ -15,6 +15,7 @@
 
 #include "cert_verify.h"
 
+#include <sys/stat.h>
 #include "dump.h"
 #include "openssl_util.h"
 #include "pkg_utils.h"
@@ -74,7 +75,7 @@ std::string SingleCertHelper::GetCertName()
 {
     struct stat st {};
     if (stat("/bin/updater", &st) == 0 && S_ISREG(st.st_mode)) {
-        LOG(INFO) << "updater mode";
+        PKG_LOGE("updater mode");
         return ROOT_CERT_PATH;
     }
     return ROOT_CERT_PATH_NORMAL;
