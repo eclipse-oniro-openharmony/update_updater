@@ -16,11 +16,7 @@
 #ifndef JSON_NODE_H
 #define JSON_NODE_H
 
-#ifdef __gun_linux__
-#include <experimental/filesystem>
-#else
 #include <filesystem>
-#endif
 #include <list>
 #include <memory>
 #include <optional>

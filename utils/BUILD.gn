@@ -21,7 +21,6 @@ ohos_static_library("libutils") {
 
   include_dirs = [
     "include",
-    "//base/startup/init_lite/interfaces/innerkits",
     "//base/update/updater/interfaces/kits/include/",
     "//base/update/updater/services/include/",
     "//third_party/bounds_checking_function/include",
