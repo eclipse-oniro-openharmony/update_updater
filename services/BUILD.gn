@@ -95,4 +95,5 @@ ohos_executable("updater") {
   install_images = [ "updater" ]
   install_enable = true
   part_name = "updater"
+  subsystem_name = "updater"
 }

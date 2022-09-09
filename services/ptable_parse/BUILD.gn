@@ -49,4 +49,5 @@ ohos_static_library("libptableparse") {
   ]
 
   part_name = "updater"
+  subsystem_name = "updater"
 }
