@@ -98,8 +98,6 @@ ohos_executable("diff") {
     ]
   }
 
-  external_deps = [ "init:libbegetutil" ]
-
   subsystem_name = "developtools"
   part_name = "updater"
 }
