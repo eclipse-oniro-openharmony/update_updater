@@ -838,7 +838,7 @@ do_action:    /* This label is used only to access EOF actions. */
                 case 34:
                     YY_RULE_SETUP {
                         const int decimal = 10;
-                        return Parser::make_NUMBER(std::strtol(yytext, (&yytext + yyleng), decimal), loc);
+                        return Parser::make_NUMBER(std::strtol(yytext, nullptr, decimal), loc);
                     }
                     YY_BREAK
                 case 35:
