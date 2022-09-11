@@ -17,6 +17,7 @@ ohos_static_library("libmiscinfo") {
   sources = [ "misc_info.cpp" ]
 
   include_dirs = [
+    "//base/startup/init/interfaces/innerkits/include",
     "//base/update/updater/interfaces/kits/include",
     "//base/update/updater/services/include",
     "//base/update/updater/utils/include",
@@ -28,8 +29,6 @@ ohos_static_library("libmiscinfo") {
     "//base/update/updater/services/log:libupdaterlog",
     "//third_party/bounds_checking_function:libsec_static",
   ]
-
-  external_deps = [ "init:libbegetutil" ]
 
   subsystem_name = "updater"
   part_name = "updater"

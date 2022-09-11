@@ -22,6 +22,7 @@ ohos_static_library("libfsmanager") {
   ]
 
   include_dirs = [
+    "//base/startup/init/interfaces/innerkits/include",
     "//base/update/updater/services/include",
     "//base/update/updater/interfaces/kits/include",
     "//base/update/updater/utils/include",
@@ -33,7 +34,6 @@ ohos_static_library("libfsmanager") {
     "//third_party/bounds_checking_function:libsec_static",
   ]
 
-  external_deps = [ "init:libbegetutil" ]
   subsystem_name = "updater"
   part_name = "updater"
 }
