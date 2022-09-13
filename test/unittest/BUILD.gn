@@ -131,6 +131,7 @@ ohos_unittest("updater_unittest") {
     "//base/update/updater/services/include/script",
     "//base/update/updater/services/include/log",
     "//base/update/updater/services/include/patch",
+    "//base/update/updater/services/include/updater",
     "//base/update/updater/services/script/script_instruction",
     "//base/update/updater/services/script/script_interpreter",
     "//base/update/updater/services/script/script_manager",
