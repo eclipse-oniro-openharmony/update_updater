@@ -173,6 +173,7 @@ ohos_unittest("updater_unittest") {
     "//drivers/framework/include",
     "//drivers/peripheral/input/hal/include",
     "//drivers/peripheral/input/interfaces/include",
+    "//drivers/peripheral/partitionslot/hal/include",
     "//third_party/bounds_checking_function/include",
   ]
   deps = [
@@ -185,6 +186,7 @@ ohos_unittest("updater_unittest") {
     "//base/update/updater/services/package:libupdaterpackage",
     "//base/update/updater/services/ui:libui",
     "//base/update/updater/utils:libutils",
+    "//drivers/peripheral/partitionslot/hal:libpartition_slot_manager",
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/bzip2:libbz2",
     "//third_party/cJSON:cjson_static",
