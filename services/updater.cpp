@@ -54,7 +54,8 @@ namespace {
 int32_t ExtractUpdaterBinary(PkgManager::PkgManagerPtr manager, const std::string &updaterBinary)
 {
     PkgManager::StreamPtr outStream = nullptr;
-    int32_t ret = manager->CreatePkgStream(outStream,  GetWorkPath() + updaterBinary, 0, PkgStream::PkgStreamType_Write);
+    int32_t ret = manager->CreatePkgStream(outStream,  GetWorkPath() + updaterBinary,
+        0, PkgStream::PkgStreamType_Write);
     UPDATER_ERROR_CHECK(ret == PKG_SUCCESS, "ExtractUpdaterBinary create stream fail",
         UPDATER_LAST_WORD(UPDATE_CORRUPT); return UPDATE_CORRUPT);
     ret = manager->ExtractFile(updaterBinary, outStream);
@@ -480,7 +481,7 @@ std::string GetWorkPath()
 {
     if (Utils::IsUpdaterMode()) {
         return G_WORK_PATH;
-    } 
+    }
 
     return std::string(UPDATER_PATH) + "/";
 }
