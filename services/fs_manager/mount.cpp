@@ -199,6 +199,11 @@ int FormatPartition(const std::string &path, bool isZeroErase)
 
 int SetupPartitions(PackageUpdateMode mode)
 {
+    if (!Utils::IsUpdaterMode()) {
+        LOG(ERROR) << "live update mode";
+        return 0;
+    }
+
     if (g_fstab == NULL || g_fstab->head == NULL) {
         LOG(ERROR) << "Fstab is invalid";
         return -1;

@@ -22,10 +22,11 @@
 #include "utils.h"
 
 using namespace std;
+using namespace Updater;
 namespace Hpackage {
 namespace {
 constexpr const char *ROOT_CERT_PATH = "/certificate/signing_cert.crt";
-constexpr const char *ROOT_CERT_PATH_NORMAL = "/updater/certificate/signing_cert.crt";
+constexpr const char *ROOT_CERT_PATH_NORMAL = "/data/updater/signing_cert.crt";
 }
 
 void CertVerify::RegisterCertHelper(std::unique_ptr<CertHelper> ptr)
@@ -73,12 +74,7 @@ int32_t SingleCertHelper::CertChainCheck(STACK_OF(X509) *certStack, X509 *cert)
 
 std::string SingleCertHelper::GetCertName()
 {
-    struct stat st {};
-    if (stat("/bin/updater", &st) == 0 && S_ISREG(st.st_mode)) {
-        PKG_LOGE("updater mode");
-        return ROOT_CERT_PATH;
-    }
-    return ROOT_CERT_PATH_NORMAL;
+    return Utils::IsUpdaterMode() ? ROOT_CERT_PATH : ROOT_CERT_PATH_NORMAL;
 }
 
 int32_t SingleCertHelper::InitRootCert()

@@ -108,3 +108,49 @@ ohos_static_library("libui") {
     "//third_party/libpng:libpng",
   ]
 }
+
+ohos_static_library("libui_empty") {
+  sources = [
+    "language/language_ui.cpp",
+    "updater_ui_facade.cpp",
+  ]
+
+  include_dirs = [
+    "//third_party/libpng",
+    "//third_party/libdrm/include/drm",
+    "//third_party/libdrm",
+    "//base/update/updater/services/include/log",
+    "//base/update/updater/services/include",
+    "//drivers/hdf_core/framework/ability/sbuf/include",
+    "//drivers/hdf_core/framework/include/platform",
+    "//drivers/hdf_core/framework/include/core",
+    "//drivers/hdf_core/framework/include/osal",
+    "//drivers/hdf_core/framework/include/utils",
+    "//drivers/hdf_core/framework/include/config",
+    "//drivers/hdf_core/framework/include",
+    "//drivers/hdf_core/adapter/uhdf2/hdi",
+    "//drivers/peripheral/input/hal/include",
+    "//drivers/peripheral/input/interfaces/include",
+    "//base/update/updater/utils/include",
+    "//base/update/updater/utils/json",
+    "//base/update/updater/services",
+    "//base/update/updater/interfaces/kits/include",
+    "//base/update/updater/services/ui",
+    "//base/update/updater/services/ui/include",
+    "//base/update/updater/services/ui/control",
+    "//base/update/updater/services/ui/driver",
+    "//base/update/updater/services/ui/view",
+    "//base/update/updater/services/ui/language",
+    "//foundation/graphic/ui/frameworks",
+    "//foundation/graphic/ui/interfaces/kits",
+    "//foundation/graphic/ui/interfaces/innerkits",
+    "//foundation/graphic/utils/interfaces/kits",
+    "//foundation/graphic/utils/interfaces/innerkits",
+  ]
+
+  deps = [
+    "//base/update/updater/services/log:libupdaterlog",
+    "//base/update/updater/utils:libutils",
+    "//third_party/cJSON:cjson_static",
+  ]
+}

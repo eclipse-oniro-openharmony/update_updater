@@ -27,7 +27,11 @@ using namespace Updater;
 #ifndef UPDATER_UT
 int main(int argc, char **argv)
 {
-    InitUpdaterLogger("UPDATER_BINARY", TMP_LOG, TMP_STAGE_LOG, TMP_ERROR_CODE_PATH);
+    if (Utils::IsUpdaterMode()) {
+        InitUpdaterLogger("UPDATER_BINARY", TMP_LOG, TMP_STAGE_LOG, TMP_ERROR_CODE_PATH);
+    } else {
+        InitUpdaterLogger("UPDATER_BINARY", UPDATER_LOG, UPDATER_STAGE_LOG, ERROR_CODE_PATH);
+    }
     if (argc < MINIMAL_ARGC_LIMIT) {
         LOG(ERROR) << "Invalid arguments.";
         return EXIT_INVALID_ARGS;

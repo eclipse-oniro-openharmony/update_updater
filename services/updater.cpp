@@ -54,7 +54,7 @@ namespace {
 int32_t ExtractUpdaterBinary(PkgManager::PkgManagerPtr manager, const std::string &updaterBinary)
 {
     PkgManager::StreamPtr outStream = nullptr;
-    int32_t ret = manager->CreatePkgStream(outStream, G_WORK_PATH + updaterBinary, 0, PkgStream::PkgStreamType_Write);
+    int32_t ret = manager->CreatePkgStream(outStream,  GetWorkPath() + updaterBinary, 0, PkgStream::PkgStreamType_Write);
     UPDATER_ERROR_CHECK(ret == PKG_SUCCESS, "ExtractUpdaterBinary create stream fail",
         UPDATER_LAST_WORD(UPDATE_CORRUPT); return UPDATE_CORRUPT);
     ret = manager->ExtractFile(updaterBinary, outStream);
@@ -121,7 +121,7 @@ int UpdatePreProcess(PkgManager::PkgManagerPtr pkgManager, const std::string &pa
     }
     std::string verStr(verPtr);
     LOG(INFO) << "current version:" << verStr;
-    std::vector<std::string> targetVersions = pkginfomanager->GetOTAVersion(pkgManager, "/version_list", G_WORK_PATH);
+    std::vector<std::string> targetVersions = pkginfomanager->GetOTAVersion(pkgManager, "/version_list", GetWorkPath());
     for (size_t i = 0; i < targetVersions.size(); i++) {
         ret = verStr.compare(targetVersions[i]);
         if (ret == 0) {
@@ -418,7 +418,7 @@ UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, const std::
         return UPDATE_ERROR);
     if (pid == 0) { // child
         close(pipeRead);   // close read endpoint
-        std::string fullPath = std::string(G_WORK_PATH) + std::string(UPDATER_BINARY);
+        std::string fullPath = GetWorkPath() + std::string(UPDATER_BINARY);
 #ifdef UPDATER_UT
         if (packagePath.find("updater_binary_abnormal") != std::string::npos) {
             fullPath = "/system/bin/updater_binary_abnormal";
@@ -474,5 +474,14 @@ UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, const std::
         "Updater process exit with status: " << WEXITSTATUS(status), return UPDATE_ERROR);
     LOG(DEBUG) << "Updater process finished.";
     return UPDATE_SUCCESS;
+}
+
+std::string GetWorkPath()
+{
+    if (Utils::IsUpdaterMode()) {
+        return G_WORK_PATH;
+    } 
+
+    return UPDATER_PATH;
 }
 } // namespace Updater

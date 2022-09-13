@@ -39,9 +39,6 @@ using namespace Hpackage;
 
 namespace Utils {
 constexpr uint8_t SHIFT_RIGHT_FOUR_BITS = 4;
-constexpr int USER_ROOT_AUTHORITY = 0;
-constexpr int GROUP_SYS_AUTHORITY = 1000;
-constexpr int GROUP_UPDATE_AUTHORITY = 6666;
 constexpr int USECONDS_PER_SECONDS = 1000000; // 1s = 1000000us
 constexpr int NANOSECS_PER_USECONDS = 1000; // 1us = 1000ns
 int32_t DeleteFile(const std::string& filename)
@@ -243,7 +240,7 @@ std::string GetCertName()
 {
 #ifndef UPDATER_UT
     static std::string signingCertName = IsUpdaterMode() ?
-        "/certificate/signing_cert.crt" : "/updater/certificate/signing_cert.crt";
+        "/certificate/signing_cert.crt" : "/data/updater/signing_cert.crt";
 #else
     static std::string signingCertName = "/data/updater/src/signing_cert.crt";
 #endif
