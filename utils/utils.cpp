@@ -243,7 +243,8 @@ void DoShutdown()
 std::string GetCertName()
 {
 #ifndef UPDATER_UT
-    static std::string signingCertName = "/certificate/signing_cert.crt";
+    static std::string signingCertName = IsUpdaterMode() ?
+        "/certificate/signing_cert.crt" : "/updater/certificate/signing_cert.crt";
 #else
     static std::string signingCertName = "/data/updater/src/signing_cert.crt";
 #endif
@@ -516,6 +517,49 @@ bool PathToRealPath(const std::string &path, std::string &realPath)
 
     realPath = tmpPath;
     return true;
+}
+
+bool IsUpdaterMode()
+{
+    struct stat st {};
+    if (stat("/bin/updater", &st) == 0 && S_ISREG(st.st_mode)) {
+        LOG(INFO) << "updater mode";
+        return true;
+    }
+    LOG(INFO) << "normal mode";
+    return false;
+}
+
+bool RemoveDir(const std::string &path)
+{
+    if (path.empty()) {
+        LOG(ERROR) << "input path is empty.";
+        return false;
+    }
+    std::string strPath = path;
+    if (strPath.at(strPath.length() - 1) != '/') {
+        strPath.append("/");
+    }
+    DIR *d = opendir(strPath.c_str());
+    if (d != nullptr) {
+        struct dirent *dt = nullptr;
+        dt = readdir(d);
+        while (dt != nullptr) {
+            if (strcmp(dt->d_name, "..") != 0 && strcmp(dt->d_name, ".") != 0) {
+                struct stat st {};
+                auto file_name = strPath + std::string(dt->d_name);
+                stat(file_name.c_str(), &st);
+                if (S_ISDIR(st.st_mode)) {
+                    RemoveDir(file_name);
+                } else {
+                    remove(file_name.c_str());
+                }
+            }
+            dt = readdir(d);
+        }
+        closedir(d);
+    }
+    return rmdir(strPath.c_str()) == 0 ? true : false;
 }
 } // Utils
 } // namespace Updater

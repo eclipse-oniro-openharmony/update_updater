@@ -29,7 +29,6 @@ ohos_executable("updater") {
     "include",
     "${SUBSYSTEM_DIR}/utils/include",
     "${SUBSYSTEM_DIR}/interfaces/kits/include/",
-    "//third_party/bounds_checking_function/include",
     "//base/update/updater/services/include/package",
     "//base/update/updater/services/package/pkg_manager",
     "//base/update/updater/services/package/pkg_verify",
@@ -41,6 +40,7 @@ ohos_executable("updater") {
     "//foundation/graphic/utils/interfaces/kits",
     "//foundation/graphic/utils/interfaces/innerkits",
     "//third_party/bounds_checking_function/include",
+    "//third_party/openssl/include",
     "//base/update/updater/services",
     "//base/update/updater/services/ui",
     "//base/update/updater/services/ui/view",
@@ -49,7 +49,6 @@ ohos_executable("updater") {
   ]
 
   deps = [
-    "//base/startup/syspara_lite/hals/parameter:sysparam_hal",
     "//base/update/updater/interfaces/kits/misc_info:libmiscinfo",
     "//base/update/updater/interfaces/kits/packages:libpackageExt",
     "//base/update/updater/services/applypatch:libapplypatch",

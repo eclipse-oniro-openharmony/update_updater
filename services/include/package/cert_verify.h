@@ -58,6 +58,7 @@ private:
     int32_t InitRootCert();
     int32_t VerifySingleCert(X509 *cert);
     int32_t CompareCertSubjectAndIssuer(X509 *cert);
+    std::string GetCertName();
 
     CertInfo rootInfo_ {};
 };

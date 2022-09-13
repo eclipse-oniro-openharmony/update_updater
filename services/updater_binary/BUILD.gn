@@ -26,6 +26,7 @@ config("updater_config") {
     "//base/update/updater/utils/include",
     "//base/update/updater/utils/json",
     "//base/update/updater/services/include/applypatch",
+    "//base/startup/init/interfaces/innerkits/include",
     "//third_party/openssl/include",
     "//third_party/bounds_checking_function/include",
     "//drivers/hdf/frameworks/include/utils",

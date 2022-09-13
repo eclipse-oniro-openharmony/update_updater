@@ -58,7 +58,7 @@ ohos_source_set("flashd_deamon") {
   configs = [ ":flashd_hdc_config" ]
 
   deps = [
-    "//third_party/libuv:uv_static",
+    "//third_party/libuv:uv",
     "//third_party/lz4:liblz4_static",
     "//third_party/openssl:libcrypto_static",
     "//utils/native/base:utils",
@@ -129,7 +129,6 @@ ohos_static_library("libflashd") {
     "//base/update/updater/services/applypatch:libapplypatch",
     "//base/update/updater/services/diffpatch/patch:libpatch",
     "//base/update/updater/services/fs_manager:libfsmanager",
-    "//base/update/updater/services/hdi/server:libupdate_hdi_impl",
     "//base/update/updater/services/log:libupdaterlog",
     "//base/update/updater/services/package:libupdaterpackage",
     "//base/update/updater/services/script:libupdaterscript",
@@ -137,7 +136,7 @@ ohos_static_library("libflashd") {
     "//developtools/hdc:hdc_hash_gen",
     "//third_party/bzip2:libbz2",
     "//third_party/cJSON:cjson_static",
-    "//third_party/libuv:uv_static",
+    "//third_party/libuv:uv",
     "//third_party/lz4:liblz4_static",
     "//third_party/openssl:libcrypto_static",
     "//third_party/zlib:libz",
