@@ -482,6 +482,6 @@ std::string GetWorkPath()
         return G_WORK_PATH;
     } 
 
-    return UPDATER_PATH;
+    return std::string(UPDATER_PATH) + "/";
 }
 } // namespace Updater
