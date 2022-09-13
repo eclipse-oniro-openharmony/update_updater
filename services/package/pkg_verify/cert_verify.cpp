@@ -74,7 +74,12 @@ int32_t SingleCertHelper::CertChainCheck(STACK_OF(X509) *certStack, X509 *cert)
 
 std::string SingleCertHelper::GetCertName()
 {
-    return Utils::IsUpdaterMode() ? ROOT_CERT_PATH : ROOT_CERT_PATH_NORMAL;
+    struct stat st {};
+    if (stat("/bin/updater", &st) == 0 && S_ISREG(st.st_mode)) {
+        PKG_LOGE("updater mode");
+        return ROOT_CERT_PATH;
+    }
+    return ROOT_CERT_PATH_NORMAL;
 }
 
 int32_t SingleCertHelper::InitRootCert()
