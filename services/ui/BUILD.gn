@@ -111,8 +111,34 @@ ohos_static_library("libui") {
 
 ohos_static_library("libui_empty") {
   sources = [
+    "control/callback_manager.cpp",
+    "control/event_listener.cpp",
+    "control/event_manager.cpp",
+    "driver/drm_driver.cpp",
+    "driver/fbdev_driver.cpp",
+    "driver/graphic_engine.cpp",
+    "driver/input_event.cpp",
+    "driver/surface_dev.cpp",
     "language/language_ui.cpp",
+    "strategy/logo_strategy.cpp",
+    "strategy/progress_strategy.cpp",
+    "strategy/ui_strategy.cpp",
+    "updater_ui.cpp",
+    "updater_ui_config.cpp",
+    "updater_ui_env.cpp",
     "updater_ui_facade.cpp",
+    "updater_ui_tools.cpp",
+    "view/component/box_progress_adapter.cpp",
+    "view/component/component_factory.cpp",
+    "view/component/img_view_adapter.cpp",
+    "view/component/label_btn_adapter.cpp",
+    "view/component/text_label_adapter.cpp",
+    "view/layout/layout_parser.cpp",
+    "view/page/base_page.cpp",
+    "view/page/page.cpp",
+    "view/page/page_manager.cpp",
+    "view/page/sub_page.cpp",
+    "view/view_api.cpp",
   ]
 
   include_dirs = [
@@ -151,6 +177,11 @@ ohos_static_library("libui_empty") {
   deps = [
     "//base/update/updater/services/log:libupdaterlog",
     "//base/update/updater/utils:libutils",
+    "//drivers/peripheral/input/hal:hdi_input",
+    "//foundation/graphic/ui/ext/updater:libupdater_layout",
+    "//third_party/bounds_checking_function:libsec_static",
     "//third_party/cJSON:cjson_static",
+    "//third_party/libdrm:libdrm",
+    "//third_party/libpng:libpng",
   ]
 }
