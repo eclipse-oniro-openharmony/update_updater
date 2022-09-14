@@ -118,7 +118,7 @@ OHOS::BufferInfo *GraphicEngine::GetFBBufferInfo()
     return buffInfo_.get();
 }
 
-void GraphicEngine::Flush()
+void GraphicEngine::Flush(const OHOS::Rect& flushRect)
 {
     if ((sfDev_ == nullptr) || (buffInfo_ == nullptr)) {
         LOG(ERROR) << "null error";

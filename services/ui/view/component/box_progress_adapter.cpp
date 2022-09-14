@@ -60,7 +60,7 @@ bool BoxProgressAdapter::IsValid(const UxBoxProgressInfo &info)
 void BoxProgressAdapter::SetValue(float value)
 {
     ON_SCOPE_EXIT(flush) {
-        GraphicEngine::GetInstance().Flush();
+        GraphicEngine::GetInstance().Flush(GetRect());
     };
     OHOS::UIBoxProgress::SetValue(static_cast<int>((value / FULL_PERCENT_PROGRESS) * (progressWidth_ - 1)));
     if (!hasEp_ || ep_ == nullptr) {
