@@ -71,7 +71,7 @@ int32_t FileStream::Read(const PkgBuffer &data, size_t offset, size_t needRead, 
         return PKG_INVALID_STREAM;
     }
     readLen = 0;
-    if (fseek(stream_, offset, SEEK_SET) != 0) {
+    if (fseeko64(stream_, offset, SEEK_SET) != 0) {
         PKG_LOGE("read data fail");
         return PKG_INVALID_STREAM;
     }
@@ -97,7 +97,7 @@ int32_t FileStream::Write(const PkgBuffer &data, size_t size, size_t offset)
         PKG_LOGE("Invalid stream");
         return PKG_INVALID_STREAM;
     }
-    if (fseek(stream_, offset, SEEK_SET) != 0) {
+    if (fseeko64(stream_, offset, SEEK_SET) != 0) {
         PKG_LOGE("write data fail");
         return PKG_INVALID_STREAM;
     }
