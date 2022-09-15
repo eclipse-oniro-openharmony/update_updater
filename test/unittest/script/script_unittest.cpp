@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <climits>
 #include <cstring>
 #include <fcntl.h>
 #include <gtest/gtest.h>
@@ -21,12 +22,13 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include "log.h"
-#include "pkg_algorithm.h"
+#include "pkg_stream.h"
+#include "pkg_utils.h"
 #include "script_instruction.h"
 #include "script_manager.h"
+#include "script/script_unittest.h"
 #include "script_utils.h"
 #include "unittest_comm.h"
-#include "utils.h"
 
 using namespace std;
 using namespace Hpackage;
@@ -37,6 +39,47 @@ using namespace testing::ext;
 namespace {
 constexpr int32_t SCRIPT_TEST_PRIORITY_NUM = 3;
 constexpr int32_t SCRIPT_TEST_LAST_PRIORITY = 2;
+
+class TestPkgManager : public TestScriptPkgManager {
+public:
+    int32_t ExtractFile(const std::string &fileId, StreamPtr output) override { return 0; }
+    const FileInfo *GetFileInfo(const std::string &fileId) override {
+        static FileInfo fileInfo {};
+        static std::vector<std::string> testFileNames = {
+            "loadScript.us",
+            "registerCmd.us",
+            "test_function.us",
+            "test_if.us",
+            "test_logic.us",
+            "test_math.us",
+            "test_native.us",
+            "testscript.us",
+            "Verse-script.us",
+            "test_script.us"
+        };
+        if (std::find(testFileNames.begin(), testFileNames.end(), fileId) != testFileNames.end()) {
+            return &fileInfo;
+        }
+        return nullptr;
+    }
+    int32_t CreatePkgStream(StreamPtr &stream, const std::string &fileName,
+         size_t size, int32_t type) override
+    {
+        FILE *file = nullptr;
+        char realPath[PATH_MAX + 1] = {};
+        if (realpath((TEST_PATH_FROM + fileName).c_str(), realPath) == nullptr) {
+            return PKG_INVALID_FILE;
+        }
+        file = fopen(realPath, "rb");
+        PKG_CHECK(file != nullptr, return PKG_INVALID_FILE, "Fail to open file %s ", fileName.c_str());
+        stream = new FileStream(this, fileName, file, PkgStream::PkgStreamType_Read);
+        return USCRIPT_SUCCESS;
+    }
+    void ClosePkgStream(StreamPtr &stream) override {
+        delete stream;
+    }
+};
+
 
 class TestScriptInstructionSparseImageWrite : public Uscript::UScriptInstruction {
 public:
@@ -116,33 +159,18 @@ private:
 
 class UScriptTest : public ::testing::Test {
 public:
-    UScriptTest()
-    {
-        packageManager = PkgManager::GetPackageInstance();
-    }
+    UScriptTest() {}
 
     ~UScriptTest()
     {
-        packageManager = PkgManager::GetPackageInstance();
-        PkgManager::ReleasePackageInstance(packageManager);
         ScriptManager::ReleaseScriptManager();
     }
 
     int TestUscriptExecute()
     {
-        CreatePackageBin();
-        packageManager = PkgManager::GetPackageInstance();
-        if (packageManager == nullptr) {
-            return PKG_SUCCESS;
-        }
-        std::vector<std::string> components;
-        int32_t ret = packageManager->LoadPackage(TEST_PATH_TO + testPackageName, GetTestCertName(), components);
-        if (ret != USCRIPT_SUCCESS) {
-            USCRIPT_LOGI("LoadPackage fail ret:%d", ret);
-            return USCRIPT_INVALID_SCRIPT;
-        }
-
-        UTestScriptEnv* env = new UTestScriptEnv(packageManager);
+        int32_t ret {};
+        TestPkgManager packageManager;
+        UTestScriptEnv* env = new UTestScriptEnv(&packageManager);
         ScriptManager* manager = ScriptManager::GetScriptManager(env);
         if (manager == nullptr) {
             USCRIPT_LOGI("create manager fail ret:%d", ret);
@@ -165,105 +193,9 @@ public:
     }
 
 protected:
-    void SetUp()
-    {
-        // 先创建目标目录
-        if (access(TEST_PATH_TO.c_str(), R_OK | W_OK) == -1) {
-            mkdir(TEST_PATH_TO.c_str(), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
-        }
-    }
+    void SetUp() {}
     void TearDown() {}
     void TestBody() {}
-
-    int32_t BuildFileDigest(uint8_t &digest, size_t size, const std::string &packagePath)
-    {
-        PkgManager::StreamPtr stream = nullptr;
-        int32_t ret = packageManager->CreatePkgStream(stream, packagePath, 0, PkgStream::PkgStreamType_Read);
-        PKG_CHECK(ret == PKG_SUCCESS, packageManager->ClosePkgStream(stream);
-            return ret, "Create input stream fail %s", packagePath.c_str());
-        size_t fileLen = stream->GetFileLength();
-        PKG_CHECK(fileLen > 0, packageManager->ClosePkgStream(stream); return PKG_INVALID_FILE, "invalid file to load");
-        PKG_CHECK(fileLen <= SIZE_MAX, packageManager->ClosePkgStream(stream); return PKG_INVALID_FILE,
-            "Invalid file len %zu to load %s", fileLen, stream->GetFileName().c_str());
-
-        size_t buffSize = 4096;
-        PkgBuffer buff(buffSize);
-        // 整包检查
-        DigestAlgorithm::DigestAlgorithmPtr algorithm = PkgAlgorithmFactory::GetDigestAlgorithm(PKG_DIGEST_TYPE_SHA256);
-        PKG_CHECK(algorithm != nullptr, packageManager->ClosePkgStream(stream); return PKG_NOT_EXIST_ALGORITHM,
-            "Invalid file %s", stream->GetFileName().c_str());
-        algorithm->Init();
-
-        size_t offset = 0;
-        size_t readLen = 0;
-        while (offset < fileLen) {
-            ret = stream->Read(buff, offset, buffSize, readLen);
-            PKG_CHECK(ret == PKG_SUCCESS,
-                packageManager->ClosePkgStream(stream); return ret,
-                "read buffer fail %s", stream->GetFileName().c_str());
-            algorithm->Update(buff, readLen);
-
-            offset += readLen;
-            readLen = 0;
-        }
-        PkgBuffer signBuffer(&digest, size);
-        algorithm->Final(signBuffer);
-        packageManager->ClosePkgStream(stream);
-        return PKG_SUCCESS;
-    }
-
-    int CreatePackageBin()
-    {
-        int32_t ret = PKG_SUCCESS;
-        uint32_t updateFileVersion = 1000;
-        uint32_t componentInfoIdBase = 100;
-        uint8_t componentInfoFlags = 22;
-        PKG_LOGI("\n\n ************* CreatePackageBin %s \r\n", testPackageName.c_str());
-        UpgradePkgInfoExt pkgInfo;
-        pkgInfo.softwareVersion = strdup("100.100.100.100");
-        pkgInfo.date = strdup("2021-02-02");
-        pkgInfo.time = strdup("21:23:49");
-        pkgInfo.productUpdateId = strdup("555.555.100.555");
-        pkgInfo.entryCount = testFileNames_.size();
-        pkgInfo.updateFileVersion = updateFileVersion;
-        pkgInfo.digestMethod = PKG_DIGEST_TYPE_SHA256;
-        pkgInfo.signMethod = PKG_SIGN_METHOD_RSA;
-        pkgInfo.pkgType = PKG_PACK_TYPE_UPGRADE;
-        std::string filePath;
-        ComponentInfoExt comp[testFileNames_.size()];
-        for (size_t i = 0; i < testFileNames_.size(); i++) {
-            comp[i].componentAddr = strdup(testFileNames_[i].c_str());
-            filePath = TEST_PATH_FROM;
-            filePath += testFileNames_[i].c_str();
-            comp[i].filePath = strdup(filePath.c_str());
-            comp[i].version = strdup("55555555");
-            ret = BuildFileDigest(*comp[i].digest, sizeof(comp[i].digest), filePath);
-            EXPECT_EQ(ret, PKG_SUCCESS);
-            comp[i].size = GetFileSize(filePath);
-            comp[i].originalSize = comp[i].size;
-            comp[i].id = componentInfoIdBase;
-            comp[i].resType = 1;
-            comp[i].type = 1;
-            comp[i].flags = componentInfoFlags;
-            filePath.clear();
-        }
-        std::string packagePath = TEST_PATH_TO;
-        packagePath += testPackageName;
-        ret = CreatePackage(&pkgInfo, comp, packagePath.c_str(), GetTestPrivateKeyName().c_str());
-        if (ret == 0) {
-            PKG_LOGI("CreatePackage success offset");
-        }
-        for (size_t i = 0; i < testFileNames_.size(); i++) {
-            free(comp[i].componentAddr);
-            free(comp[i].filePath);
-            free(comp[i].version);
-        }
-        free(pkgInfo.productUpdateId);
-        free(pkgInfo.softwareVersion);
-        free(pkgInfo.date);
-        free(pkgInfo.time);
-        return ret;
-    }
 
 private:
     std::vector<std::string> testFileNames_ = {
@@ -278,8 +210,6 @@ private:
         "Verse-script.us",
         "test_script.us"
     };
-    PkgManager::PkgManagerPtr packageManager = nullptr;
-    std::string testPackageName = "test_package.bin";
 };
 
 HWTEST_F(UScriptTest, TestUscriptExecute, TestSize.Level1)
