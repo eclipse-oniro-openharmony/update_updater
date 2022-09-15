@@ -25,13 +25,18 @@ static std::ofstream g_updaterLog;
 static std::ofstream g_updaterStage;
 static std::ofstream g_errorCode;
 static std::string g_logTag;
-constexpr int MAX_TIME_SIZE = 20;
 static int g_logLevel = INFO;
+#ifdef DIFF_PATCH_SDK
+static OHOS::HiviewDFX::HiLogLabel g_logLabel = {LOG_CORE, 0XD002E01, "UPDATER"};
+#endif
 
 void InitUpdaterLogger(const std::string &tag, const std::string &logFile, const std::string &stageFile,
     const std::string &errorCodeFile)
 {
     g_logTag = tag;
+#ifdef DIFF_PATCH_SDK
+    g_logLabel.tag = tag.c_str();
+#endif
     g_updaterLog.open(logFile.c_str(), std::ios::app | std::ios::out);
     g_updaterStage.open(stageFile.c_str(), std::ios::app | std::ios::out);
     g_errorCode.open(errorCodeFile.c_str(), std::ios::app | std::ios::out);
@@ -39,10 +44,34 @@ void InitUpdaterLogger(const std::string &tag, const std::string &logFile, const
 
 UpdaterLogger::~UpdaterLogger()
 {
-    if (g_updaterLog.is_open() && g_logLevel <= level_) {
-        g_updaterLog << std::endl << std::flush;
-    } else {
+    std::string str = oss_.str();
+    if (g_logLevel > level_) {
         std::cout << std::endl << std::flush;
+        return;
+    }
+#ifdef DIFF_PATCH_SDK
+    switch (level_) {
+        case static_cast<int>(INFO):
+            OHOS::HiviewDFX::HiLog::Info(g_logLabel, "%{public}s", str.c_str());
+            break;
+        case static_cast<int>(ERROR):
+            OHOS::HiviewDFX::HiLog::Error(g_logLabel, "%{public}s", str.c_str());
+            break;
+        case static_cast<int>(DEBUG):
+            OHOS::HiviewDFX::HiLog::Debug(g_logLabel, "%{public}s", str.c_str());
+            break;
+        case static_cast<int>(WARNING):
+            OHOS::HiviewDFX::HiLog::Warn(g_logLabel, "%{public}s", str.c_str());
+            break;
+        default:
+            break;            
+    }
+#endif
+    oss_.str("");
+    oss_ << std::endl << std::flush;
+    if (g_updaterLog.is_open()) {
+        g_updaterLog << realTime_ <<  "  " << "[" << logLevelMap_[level_] << "]" <<
+            g_logTag << " " << str << std::endl << std::flush; 
     }
 }
 
@@ -62,7 +91,7 @@ void SetLogLevel(int level)
 
 std::ostream& UpdaterLogger::OutputUpdaterLog(const std::string &path, int line)
 {
-    std::unordered_map<int, std::string> logLevelMap = {
+    logLevelMap_ = {
         { VERBOSE, "VERBOSE" },
         { DEBUG, "DEBUG" },
         { INFO, "INFO" },
@@ -71,16 +100,14 @@ std::ostream& UpdaterLogger::OutputUpdaterLog(const std::string &path, int line)
         { FATAL, "FATAL" }
     };
 
-    char realTime[MAX_TIME_SIZE] = {0};
     auto sysTime = std::chrono::system_clock::now();
     auto currentTime = std::chrono::system_clock::to_time_t(sysTime);
     struct tm *localTime = std::localtime(&currentTime);
     if (localTime != nullptr) {
-        std::strftime(realTime, sizeof(realTime), "%Y-%m-%d %H:%M:%S", localTime);
+        std::strftime(realTime_, sizeof(realTime_), "%Y-%m-%d %H:%M:%S", localTime);
     }
-    if (g_updaterLog.is_open() && g_logLevel <= level_) {
-        return g_updaterLog << realTime <<  "  " << "[" << logLevelMap[level_] << "]" <<
-            g_logTag << " " << path << " " << line << " : ";
+    if (g_logLevel <= level_) {
+        return oss_ << path << " " << line << " : ";
     }
     return std::cout;
 }

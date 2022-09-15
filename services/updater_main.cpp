@@ -29,6 +29,7 @@
 #include <vector>
 #include "applypatch/partition_record.h"
 #include "cert_verify.h"
+#include "flashd/flashd.h"
 #include "fs_manager/mount.h"
 #include "include/updater/updater.h"
 #include "language/language_ui.h"
@@ -117,6 +118,8 @@ UpdaterStatus UpdaterFromSdcard()
 {
 #ifndef UPDATER_UT
     // sdcard fsType only support ext4/vfat
+    auto sdParam = "updater.data.configs";
+    Flashd::SetParameter(sdParam, "1");
     std::string sdcardStr = GetBlockDeviceByMountPoint(SDCARD_PATH);
     if (!IsSDCardExist(sdcardStr)) {
         UpdaterUiFacade::GetInstance().ShowLog(

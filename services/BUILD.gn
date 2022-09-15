@@ -90,7 +90,7 @@ ohos_executable("updater") {
     ldflags += [ "-Wl,--no-whole-archive" ]
   }
 
-  external_deps = [ "init:libbegetutil" ]
+  external_deps += [ "init:libbegetutil" ]
   install_images = [ "updater" ]
   install_enable = true
   part_name = "updater"

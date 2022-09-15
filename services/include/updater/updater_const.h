@@ -51,7 +51,6 @@ constexpr int MINIMAL_ARGC_LIMIT = 2;
 constexpr int MAX_LOG_BUF_SIZE = 4096;
 constexpr int MAX_LOG_NAME_SIZE = 100;
 constexpr long MAX_LOG_SIZE = 5 * 1024 * 1024;
-constexpr int MAX_TIME_SIZE = 20;
 constexpr int MAX_RESULT_SIZE = 20;
 constexpr int MAX_RESULT_BUFF_SIZE = 1000;
 constexpr int VERIFICATION_PROGRESS_TIME = 60;
