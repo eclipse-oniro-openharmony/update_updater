@@ -343,15 +343,4 @@ HWTEST_F(ScriptInstructionHelperUnitTest, TestRegisterUserInstruction02, TestSiz
     ScriptInstructionHelperUnitTest test;
     test.TestRegisterUserInstruction02();
 }
-
-HWTEST_F(ScriptInstructionHelperUnitTest, TestRegisterUserInstruction03, TestSize.Level1)
-{
-    std::cout << "/lib/libuser_instruction_invalid.so" << std::endl;
-    void *instrLib_ = dlopen("/lib/libuser_instruction_invalid.so",  RTLD_NOW);
-    dlclose(instrLib_);
-
-    std::cout << "/lib/libuser_instruction.so" << std::endl;
-    instrLib_ = dlopen("/lib/libuser_instruction.so",  RTLD_NOW);
-    dlclose(instrLib_);
-}
 }

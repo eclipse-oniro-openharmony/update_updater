@@ -171,7 +171,7 @@ int32_t ScriptInstructionHelper::RegisterUserInstruction(const std::string &inst
         USCRIPT_LOGE("Fail to add instruction for %s", instrName.c_str());
         delete instr;
         instr = nullptr;
-		return ret;
+        return ret;
     }
 
     USCRIPT_LOGI("RegisterUserInstruction %s successfull", instrName.c_str());
