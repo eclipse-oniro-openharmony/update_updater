@@ -164,6 +164,7 @@ foreach(file, updater_resources_list) {
     }
     install_images = [ "updater" ]
     part_name = "updater"
+    subsystem_name = "updater"
   }
   updater_resources_target += [ ":$_name" ]
 }

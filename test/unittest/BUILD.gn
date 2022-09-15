@@ -223,10 +223,12 @@ ohos_executable("test_update_binary") {
   sources = [ "updater_test/test_update_binary.cpp" ]
   install_enable = true
   part_name = "updater"
+  subsystem_name = "updater"
 }
 
 ohos_executable("test_update_binary_abnormal") {
   sources = [ "updater_test/test_update_binary_abnormal.cpp" ]
   install_enable = true
   part_name = "updater"
+  subsystem_name = "updater"
 }

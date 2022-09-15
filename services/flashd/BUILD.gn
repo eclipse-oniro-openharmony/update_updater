@@ -186,6 +186,7 @@ ohos_static_library("libflashd") {
   external_deps = [ "init:libbegetutil" ]
 
   part_name = "updater"
+  subsystem_name = "updater"
 }
 
 group("updater_flashd") {

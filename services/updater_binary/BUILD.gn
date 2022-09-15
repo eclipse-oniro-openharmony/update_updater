@@ -83,4 +83,5 @@ ohos_executable("updater_binary") {
     "updater",
   ]
   part_name = "updater"
+  subsystem_name = "updater"
 }
