@@ -23,14 +23,14 @@ ohos_unittest("script_unittest") {
       "//base/update/updater/test/unittest/test_data/ohos_test.xml"
   module_out_path = MODULE_OUTPUT_PATH
   sources = [
-    "script_interpreter_unittest.cpp",
-    "script_unittest.cpp",
-    "threadpool_unittest.cpp",
     "script_instruction/basic_instruction_unittest.cpp",
     "script_instruction/script_instructionhelper_unittest.cpp",
     "script_instruction/script_loadscript_unittest.cpp",
     "script_instruction/script_registercmd_unittest.cpp",
     "script_instruction/script_updateprocesser_unittest.cpp",
+    "script_interpreter_unittest.cpp",
+    "script_unittest.cpp",
+    "threadpool_unittest.cpp",
   ]
   include_dirs = [
     "//base/update/updater/interfaces/kits/include",
@@ -51,21 +51,21 @@ ohos_unittest("script_unittest") {
   ]
 
   deps = [
+    ":user_instruction",
+    ":user_instruction_invalid",
     "//base/update/updater/interfaces/kits/packages:libpackageExt",
-    "//base/update/updater/services/script:libupdaterscript",
     "//base/update/updater/services/log:libupdaterlog",
     "//base/update/updater/services/package:libupdaterpackage",
+    "//base/update/updater/services/script:libupdaterscript",
     "//third_party/bounds_checking_function:libsec_static",
+    "//third_party/bzip2:libbz2",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
-    "//third_party/bzip2:libbz2",
     "//third_party/lz4:liblz4_static",
     "//third_party/openssl:libcrypto_shared",
     "//third_party/openssl:ssl_source",
     "//third_party/zlib:libz",
     "//utils/native/base:utils",
-    ":user_instruction",
-    ":user_instruction_invalid",
   ]
   configs = [ "$UPDATER_TEST_ROOT:utest_config" ]
   install_enable = true
@@ -88,14 +88,15 @@ ohos_shared_library("user_instruction") {
 }
 
 ohos_shared_library("user_instruction_invalid") {
-  sources = [ "script_instruction/user_instruction/user_instruction_invalid.cpp" ]
+  sources =
+      [ "script_instruction/user_instruction/user_instruction_invalid.cpp" ]
   output_extension = "so"
   ldflags = [ "-rdynamic" ]
   include_dirs = [
     "//base/update/updater/interfaces/kits/include/",
     "//base/update/updater/services/include",
     "//base/update/updater/services/include/package",
-    "//base/update/updater/services/include/script", 
+    "//base/update/updater/services/include/script",
     "//base/update/updater/services/script/script_instruction",
   ]
   install_enable = true
