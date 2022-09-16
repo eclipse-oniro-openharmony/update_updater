@@ -17,40 +17,40 @@ import("//build/ohos.gni")
 SUBSYSTEM_DIR = "//base/update/updater"
 
 updater_common_include = [
-    "include",
-    "${SUBSYSTEM_DIR}/utils/include",
-    "${SUBSYSTEM_DIR}/interfaces/kits/include/",
-    "//base/update/updater/services/include/package",
-    "//base/update/updater/services/package/pkg_manager",
-    "//base/update/updater/services/package/pkg_verify",
-    "//base/update/updater/services/include/log",
-    "//base/update/updater/utils/json",
-    "//foundation/graphic/ui/frameworks",
-    "//foundation/graphic/ui/interfaces/kits",
-    "//foundation/graphic/ui/interfaces/innerkits",
-    "//foundation/graphic/utils/interfaces/kits",
-    "//foundation/graphic/utils/interfaces/innerkits",
-    "//third_party/bounds_checking_function/include",
-    "//base/update/updater/services",
-    "//base/update/updater/services/ui",
-    "//base/update/updater/services/include",
-    "//base/startup/syspara_lite/interfaces/innerkits/native/syspara/include",
+  "include",
+  "${SUBSYSTEM_DIR}/utils/include",
+  "${SUBSYSTEM_DIR}/interfaces/kits/include/",
+  "//base/update/updater/services/include/package",
+  "//base/update/updater/services/package/pkg_manager",
+  "//base/update/updater/services/package/pkg_verify",
+  "//base/update/updater/services/include/log",
+  "//base/update/updater/utils/json",
+  "//foundation/graphic/ui/frameworks",
+  "//foundation/graphic/ui/interfaces/kits",
+  "//foundation/graphic/ui/interfaces/innerkits",
+  "//foundation/graphic/utils/interfaces/kits",
+  "//foundation/graphic/utils/interfaces/innerkits",
+  "//third_party/bounds_checking_function/include",
+  "//base/update/updater/services",
+  "//base/update/updater/services/ui",
+  "//base/update/updater/services/include",
+  "//base/startup/syspara_lite/interfaces/innerkits/native/syspara/include",
 ]
 
 updater_common_deps = [
-    "//base/update/updater/interfaces/kits/packages:libpackageExt",
-    "//base/update/updater/services/applypatch:libapplypatch",
-    "//base/update/updater/services/diffpatch/patch:libpatch",
-    "//base/update/updater/services/fs_manager:libfsmanager",
-    "//base/update/updater/services/log:libupdaterlog",
-    "//base/update/updater/services/package:libupdaterpackage",
-    "//third_party/bounds_checking_function:libsec_shared",
-    "//third_party/bounds_checking_function:libsec_static",
-    "//third_party/bzip2:libbz2",
-    "//third_party/cJSON:cjson_static",
-    "//third_party/openssl:libcrypto_static",
-    "//third_party/openssl:ssl_source",
-    "//third_party/zlib:libz",
+  "//base/update/updater/interfaces/kits/packages:libpackageExt",
+  "//base/update/updater/services/applypatch:libapplypatch",
+  "//base/update/updater/services/diffpatch/patch:libpatch",
+  "//base/update/updater/services/fs_manager:libfsmanager",
+  "//base/update/updater/services/log:libupdaterlog",
+  "//base/update/updater/services/package:libupdaterpackage",
+  "//third_party/bounds_checking_function:libsec_shared",
+  "//third_party/bounds_checking_function:libsec_static",
+  "//third_party/bzip2:libbz2",
+  "//third_party/cJSON:cjson_static",
+  "//third_party/openssl:libcrypto_static",
+  "//third_party/openssl:ssl_source",
+  "//third_party/zlib:libz",
 ]
 
 config("common_configs") {
@@ -99,7 +99,7 @@ ohos_executable("updater") {
     "//third_party/libdrm:libdrm",
   ]
 
-  configs = [":common_configs"]
+  configs = [ ":common_configs" ]
   external_deps += [ "init:libbegetutil" ]
 
   install_images = [ "updater" ]
@@ -118,11 +118,9 @@ ohos_static_library("libupdater") {
   include_dirs = updater_common_include
 
   deps = updater_common_deps
-  deps = [
-    "//base/update/updater/services/ui:libui_empty",
-  ]
+  deps += [ "//base/update/updater/services/ui:libui_empty" ]
 
-  configs = [":common_configs"]
+  configs = [ ":common_configs" ]
   external_deps = [ "init:libbegetutil" ]
 
   subsystem_name = "updater"
