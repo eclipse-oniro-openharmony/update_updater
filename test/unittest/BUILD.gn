@@ -20,7 +20,6 @@ config("utest_config") {
 
   cflags = [
     "-fprofile-arcs",
-    "-ftest-coverage",
     "-Wno-implicit-fallthrough",
     "-Wno-unused-function",
   ]
