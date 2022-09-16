@@ -101,7 +101,7 @@ using namespace Uscript;
     return Parser::make_IDENTIFIER(yytext, loc);
 }
 ([1-9][0-9]*)|"0" {
-    return Parser::make_NUMBER(std::strtol(yytext,(&yytext+yyleng), 10),loc);
+    return Parser::make_NUMBER(std::strtol(yytext, nullptr, 10),loc);
 }
 [0-9]+\.[0-9]+ {
     char* end = nullptr;

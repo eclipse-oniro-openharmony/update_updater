@@ -31,7 +31,7 @@ public:
     virtual ~GraphicEngine() = default;
     static GraphicEngine &GetInstance();
     void Init(uint32_t bkgColor, uint8_t mode);
-    void Flush() override;
+    void Flush(const OHOS::Rect& flushRect) override;
     OHOS::BufferInfo *GetFBBufferInfo() override;
     uint16_t GetScreenWidth() override;
     uint16_t GetScreenHeight() override;

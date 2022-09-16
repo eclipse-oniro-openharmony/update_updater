@@ -13,6 +13,8 @@
 
 module_output_path = "updater/updater_format_artition"
 
+import("//base/update/updater/updater_default_cfg.gni")
+
 #####################hydra-fuzz###################
 import("//build/config/features.gni")
 import("//build/test.gni")

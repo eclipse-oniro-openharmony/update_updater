@@ -13,6 +13,8 @@
 
 module_output_path = "updater/updater_start_updater_proc"
 
+import("//base/update/updater/updater_default_cfg.gni")
+
 #####################hydra-fuzz###################
 import("//build/config/features.gni")
 import("//build/test.gni")
@@ -55,7 +57,7 @@ ohos_fuzztest("UpdaterStartUpdaterProcFuzzTest") {
     "//third_party/zlib:libz",
   ]
 
-  external_deps = [ "drivers_interface_input:hdi_input" ]
+  external_deps += [ "drivers_interface_input:hdi_input" ]
 
   cflags = [
     "-g",
