@@ -21,6 +21,7 @@
 #include "script_utils.h"
 
 using namespace std;
+using namespace Updater;
 
 namespace Uscript {
 static uint32_t g_contextId = 0;
