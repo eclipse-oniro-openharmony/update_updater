@@ -32,6 +32,25 @@ ohos_unittest("script_unittest") {
     "script_unittest.cpp",
     "threadpool_unittest.cpp",
   ]
+  sources += [
+    "//base/update/updater/services/script/script_instruction/script_basicinstruction.cpp",
+    "//base/update/updater/services/script/script_instruction/script_instructionhelper.cpp",
+    "//base/update/updater/services/script/script_instruction/script_loadscript.cpp",
+    "//base/update/updater/services/script/script_instruction/script_registercmd.cpp",
+    "//base/update/updater/services/script/script_instruction/script_updateprocesser.cpp",
+    "//base/update/updater/services/script/script_interpreter/script_context.cpp",
+    "//base/update/updater/services/script/script_interpreter/script_expression.cpp",
+    "//base/update/updater/services/script/script_interpreter/script_function.cpp",
+    "//base/update/updater/services/script/script_interpreter/script_interpreter.cpp",
+    "//base/update/updater/services/script/script_interpreter/script_param.cpp",
+    "//base/update/updater/services/script/script_interpreter/script_scanner.cpp",
+    "//base/update/updater/services/script/script_interpreter/script_statement.cpp",
+    "//base/update/updater/services/script/script_manager/script_managerImpl.cpp",
+    "//base/update/updater/services/script/script_manager/script_utils.cpp",
+    "//base/update/updater/services/script/threadpool/threadpool.cpp",
+    "//base/update/updater/services/script/yacc/lexer.cpp",
+    "//base/update/updater/services/script/yacc/parser.cpp",
+  ]
   include_dirs = [
     "//base/update/updater/interfaces/kits/include",
     "//base/update/updater/services/include/package",
@@ -54,7 +73,6 @@ ohos_unittest("script_unittest") {
     "//base/update/updater/interfaces/kits/packages:libpackageExt",
     "//base/update/updater/services/log:libupdaterlog",
     "//base/update/updater/services/package:libupdaterpackage",
-    "//base/update/updater/services/script:libupdaterscript",
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/bzip2:libbz2",
     "//third_party/googletest:gmock_main",
