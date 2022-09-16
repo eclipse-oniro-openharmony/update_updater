@@ -17,6 +17,7 @@
 #include <vector>
 #include "script_context.h"
 #include "script_instruction.h"
+#include "script_instruction_unittest.h"
 #include "script_instructionhelper.h"
 #include "script_loadscript.h"
 #include "script_manager_impl.h"
@@ -27,37 +28,14 @@ using namespace BasicInstruction;
 using namespace Hpackage;
 using namespace testing::ext;
 
-class UTestScriptEnv : public UScriptEnv {
-public:
-    explicit UTestScriptEnv(Hpackage::PkgManager::PkgManagerPtr pkgManager) : UScriptEnv(pkgManager)
-    {}
-    ~UTestScriptEnv() = default;
-
-    virtual void PostMessage(const std::string &cmd, std::string content) {}
-
-    virtual UScriptInstructionFactoryPtr GetInstructionFactory()
-    {
-        return nullptr;
-    }
-
-    virtual const std::vector<std::string> GetInstructionNames() const
-    {
-        return {};
-    }
-
-    virtual bool IsRetry() const
-    {
-        return isRetry;
-    }
-    UScriptInstructionFactory *factory_ = nullptr;
-private:
-    bool isRetry = false;
-};
-
 class TestPkgManager : public TestScriptPkgManager {
 public:
-    int32_t ExtractFile(const std::string &fileId, StreamPtr output) override { return 0; }
-    const FileInfo *GetFileInfo(const std::string &fileId) override {
+    int32_t ExtractFile(const std::string &fileId, StreamPtr output) override
+    {
+        return 0;
+    }
+    const FileInfo *GetFileInfo(const std::string &fileId) override
+    {
         static FileInfo fileInfo {};
         if (fileId == "script") {
             return &fileInfo;

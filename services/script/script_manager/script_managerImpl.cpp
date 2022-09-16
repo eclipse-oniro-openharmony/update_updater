@@ -179,7 +179,8 @@ int32_t ScriptManagerImpl::AddInstruction(const std::string &instrName, const US
 
 int32_t ScriptManagerImpl::AddScript(const std::string &scriptName, int32_t priority)
 {
-    USCRIPT_CHECK(priority >= 0 && priority < MAX_PRIORITY, return USCRIPT_INVALID_PRIORITY, "Invalid priority %d", priority);
+    USCRIPT_CHECK(priority >= 0 && priority < MAX_PRIORITY,
+        return USCRIPT_INVALID_PRIORITY, "Invalid priority %d", priority);
 
     PkgManager::PkgManagerPtr manager = scriptEnv_->GetPkgManager();
     USCRIPT_CHECK(manager != nullptr, return USCRIPT_INVALID_PARAM, "Failed to get pkg manager");

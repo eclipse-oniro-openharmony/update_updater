@@ -129,7 +129,9 @@ int32_t ScriptInstructionHelper::RegisterUserInstruction(const std::string& libN
     factory = pGetInstructionFactory();
     USCRIPT_CHECK(factory != nullptr, return USCRIPT_INVALID_PARAM,
         "Fail to create instruction factory for %s", instrName.c_str());
-    ON_SCOPE_EXIT(freeFactory) { pReleaseInstructionFactory(factory); };
+    ON_SCOPE_EXIT(freeFactory) {
+        pReleaseInstructionFactory(factory);
+    };
     // Create instruction and register it
     UScriptInstructionPtr instr = nullptr;
     int32_t ret = factory->CreateInstructionInstance(instr, instrName);

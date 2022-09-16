@@ -24,6 +24,7 @@
 #include <unistd.h>
 #include "log.h"
 #include "script_basicinstruction.h"
+#include "script_instruction_unittest.h"
 #include "script_instructionhelper.h"
 #include "script_manager.h"
 #include "script/script_unittest.h"
@@ -38,40 +39,10 @@ using namespace Updater;
 using namespace testing::ext;
 
 namespace {
-constexpr auto TEST_VALID_LIB_PATH = "/lib/libuser_instruction.so";
-constexpr auto TEST_INVALID_LIB_PATH = "/lib/libuser_instruction_invalid.so";
-constexpr auto TEST_NONEXIST_LIB_PATH = "/lib/other.so";
-
-class UTestScriptEnv : public UScriptEnv {
-public:
-    explicit UTestScriptEnv(Hpackage::PkgManager::PkgManagerPtr pkgManager) : UScriptEnv(pkgManager)
-    {}
-    ~UTestScriptEnv() = default;
-
-    virtual void PostMessage(const std::string &cmd, std::string content) {}
-
-    virtual UScriptInstructionFactoryPtr GetInstructionFactory()
-    {
-        return nullptr;
-    }
-
-    virtual const std::vector<std::string> GetInstructionNames() const
-    {
-        return {};
-    }
-
-    virtual bool IsRetry() const
-    {
-        return isRetry;
-    }
-    UScriptInstructionFactory *factory_ = nullptr;
-private:
-    bool isRetry = false;
-};
 
 class TestInstruction1 : public UScriptInstruction {
 public:
-    virtual int32_t Execute(UScriptEnv &env, UScriptContext &context) override
+    int32_t Execute(UScriptEnv &env, UScriptContext &context) override
     {
         return USCRIPT_SUCCESS;
     }
@@ -79,7 +50,7 @@ public:
 
 class TestInstruction2 : public UScriptInstruction {
 public:
-    virtual int32_t Execute(UScriptEnv &env, UScriptContext &context) override
+    int32_t Execute(UScriptEnv &env, UScriptContext &context) override
     {
         return USCRIPT_SUCCESS;
     }
@@ -87,7 +58,7 @@ public:
 
 class TestInstruction3 : public UScriptInstruction {
 public:
-    virtual int32_t Execute(UScriptEnv &env, UScriptContext &context) override
+    int32_t Execute(UScriptEnv &env, UScriptContext &context) override
     {
         return USCRIPT_SUCCESS;
     }
@@ -95,7 +66,7 @@ public:
 
 class TestInstructionFactory : public UScriptInstructionFactory {
 public:
-    virtual int32_t CreateInstructionInstance(UScriptInstructionPtr& instr, const std::string& name) override
+    int32_t CreateInstructionInstance(UScriptInstructionPtr& instr, const std::string& name) override
     {
         if (name == "test1") {
             instr = new (std::nothrow) TestInstruction1();
@@ -116,8 +87,12 @@ public:
 
 class TestPkgManager : public TestScriptPkgManager {
 public:
-    int32_t ExtractFile(const std::string &fileId, StreamPtr output) override { return 0; }
-    const FileInfo *GetFileInfo(const std::string &fileId) override {
+    int32_t ExtractFile(const std::string &fileId, StreamPtr output) override
+    {
+        return 0;
+    }
+    const FileInfo *GetFileInfo(const std::string &fileId) override
+    {
         const static std::unordered_map<std::string, FileInfo> fileMap {
             {"script1", FileInfo {}},
             {"script2", FileInfo {}},
@@ -131,7 +106,8 @@ public:
 
 class ScriptInstructionHelperUnitTest : public ::testing::Test {
 public:
-    ScriptInstructionHelperUnitTest() {
+    ScriptInstructionHelperUnitTest()
+    {
         factory_ = std::make_unique<TestInstructionFactory>();
     }
     ~ScriptInstructionHelperUnitTest() {}
@@ -169,7 +145,6 @@ public:
             EXPECT_TRUE(helper->IsReservedInstruction(instruction));
         }
         EXPECT_FALSE(helper->IsReservedInstruction("non reserved"));
-        ScriptInstructionHelper::ReleaseBasicInstructionHelper();
     }
     void TestAddInstruction() const
     {
@@ -188,7 +163,6 @@ public:
         UScriptInstructionPtr instr2 = nullptr;
         EXPECT_EQ(factory_->CreateInstructionInstance(instr2, "test2"), USCRIPT_SUCCESS);
         EXPECT_EQ(helper->AddInstruction("instruction1", instr2), USCRIPT_SUCCESS);
-        ScriptInstructionHelper::ReleaseBasicInstructionHelper();
     }
     void TestAddScript() const
     {
@@ -198,7 +172,6 @@ public:
             ScriptManagerImpl scriptManager(&env);
             auto *helper = ScriptInstructionHelper::GetBasicInstructionHelper(&scriptManager);
             EXPECT_EQ(helper->AddScript("", 0), USCRIPT_INVALID_PARAM);
-            ScriptInstructionHelper::ReleaseBasicInstructionHelper();
         }
         // priority invalid
         TestPkgManager pkgManager;
@@ -208,7 +181,6 @@ public:
             auto *helper = ScriptInstructionHelper::GetBasicInstructionHelper(&scriptManager);
             EXPECT_EQ(helper->AddScript("", -1), USCRIPT_INVALID_PRIORITY);
             EXPECT_EQ(helper->AddScript("", 4), USCRIPT_INVALID_PRIORITY);
-            ScriptInstructionHelper::ReleaseBasicInstructionHelper();
         }
         // successfully add script
         {
@@ -218,7 +190,6 @@ public:
             EXPECT_EQ(helper->AddScript("script0", 0), USCRIPT_INVALID_SCRIPT);
             EXPECT_EQ(helper->AddScript("script1", 1), USCRIPT_SUCCESS);
             EXPECT_EQ(helper->AddScript("", 1), USCRIPT_INVALID_SCRIPT);
-            ScriptInstructionHelper::ReleaseBasicInstructionHelper();
         }
     }
     void TestRegisterUserInstruction01() const
@@ -229,7 +200,6 @@ public:
             ScriptManagerImpl scriptManager(&env);
             auto *helper = ScriptInstructionHelper::GetBasicInstructionHelper(&scriptManager);
             EXPECT_EQ(helper->RegisterUserInstruction("", nullptr), USCRIPT_INVALID_PARAM);
-            ScriptInstructionHelper::ReleaseBasicInstructionHelper();
         }
         // invalid instruction ""
         {
@@ -237,7 +207,6 @@ public:
             ScriptManagerImpl scriptManager(&env);
             auto *helper = ScriptInstructionHelper::GetBasicInstructionHelper(&scriptManager);
             EXPECT_EQ(helper->RegisterUserInstruction("", factory_.get()), USCRIPT_NOTEXIST_INSTRUCTION);
-            ScriptInstructionHelper::ReleaseBasicInstructionHelper();
         }
         // test new failed, register reserved instr, register non-exist instr scene
         {
@@ -258,21 +227,18 @@ public:
             ScriptManagerImpl scriptManager(&env);
             auto *helper = ScriptInstructionHelper::GetBasicInstructionHelper(&scriptManager);
             EXPECT_EQ(helper->RegisterUserInstruction("", ""), USCRIPT_INVALID_PARAM);
-            ScriptInstructionHelper::ReleaseBasicInstructionHelper();
         }
         {
             UTestScriptEnv env {nullptr};
             ScriptManagerImpl scriptManager(&env);
             auto *helper = ScriptInstructionHelper::GetBasicInstructionHelper(&scriptManager);
             EXPECT_EQ(helper->RegisterUserInstruction("noexist", ""), USCRIPT_INVALID_PARAM);
-            ScriptInstructionHelper::ReleaseBasicInstructionHelper();
         }
         {
             UTestScriptEnv env {nullptr};{
             ScriptManagerImpl scriptManager(&env);
             auto *helper = ScriptInstructionHelper::GetBasicInstructionHelper(&scriptManager);
             EXPECT_EQ(helper->RegisterUserInstruction(TEST_INVALID_LIB_PATH, ""), USCRIPT_ERROR_CREATE_OBJ);}
-            ScriptInstructionHelper::ReleaseBasicInstructionHelper();
         }
         {
             UTestScriptEnv env {nullptr};{
@@ -282,7 +248,6 @@ public:
             EXPECT_EQ(helper->RegisterUserInstruction(TEST_NONEXIST_LIB_PATH, ""), USCRIPT_INVALID_PARAM);
             EXPECT_EQ(helper->RegisterUserInstruction(TEST_INVALID_LIB_PATH, ""), USCRIPT_INVALID_PARAM);
             EXPECT_EQ(helper->RegisterUserInstruction(TEST_VALID_LIB_PATH, "uInstruction1"), USCRIPT_SUCCESS);}
-            ScriptInstructionHelper::ReleaseBasicInstructionHelper();
         }
         {
             UTestScriptEnv env {nullptr};{
@@ -292,7 +257,6 @@ public:
             EXPECT_EQ(helper->RegisterUserInstruction(TEST_NONEXIST_LIB_PATH, ""), USCRIPT_INVALID_PARAM);
             EXPECT_EQ(helper->RegisterUserInstruction(TEST_VALID_LIB_PATH, "uInstruction1"), USCRIPT_SUCCESS);
             EXPECT_EQ(helper->RegisterUserInstruction(TEST_VALID_LIB_PATH, "abort"), USCRIPT_ERROR_REVERED);}
-            ScriptInstructionHelper::ReleaseBasicInstructionHelper();
         }
     }
 protected:

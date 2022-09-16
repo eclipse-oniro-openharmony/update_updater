@@ -42,7 +42,7 @@ using namespace testing::ext;
 namespace {
 class MockUScriptEnv : public UScriptEnv {
 public:
-    MockUScriptEnv(Hpackage::PkgManager::PkgManagerPtr pkgManager) : UScriptEnv(pkgManager) {}
+    explicit MockUScriptEnv(Hpackage::PkgManager::PkgManagerPtr pkgManager) : UScriptEnv(pkgManager) {}
     MOCK_CONST_METHOD0(IsRetry, bool());
     MOCK_METHOD2(PostMessage, void(const std::string &cmd, std::string content));
     MOCK_METHOD0(GetInstructionFactory, UScriptInstructionFactoryPtr());
@@ -128,8 +128,7 @@ public:
         std::stringstream tgt;
         std::apply([&tgt] (auto && ... args) {
             ((tgt << args << "  "), ...);
-            tgt << std::endl;
-        }, input);
+            tgt << std::endl; }, input);
         std::apply([&context] (auto && ... args) {
             AddInputParam(context, args...);
         }, input);
@@ -149,7 +148,7 @@ public:
             std::stringstream tgt;
             auto toString = [] (auto &&arg) -> std::string {
                 using T = std::remove_cv_t<std::remove_reference_t<decltype(arg)>>;
-                if constexpr (std::is_same_v<std::string, T> || 
+                if constexpr (std::is_same_v<std::string, T> ||
                     std::is_same_v<const char *, T> ||
                     std::is_same_v<char *, T>) {
                     return arg;
@@ -158,11 +157,9 @@ public:
                 }
             };
             std::apply([&toString, &tgt] (auto && ... args) {
-                ((tgt << toString(args)), ...);
-            }, input);
+                ((tgt << toString(args)), ...); }, input);
             std::apply([&context] (auto && ... args) {
-                AddInputParam(context, args...);
-            }, input);
+                AddInputParam(context, args...); }, input);
             EXPECT_EQ(instruction->Execute(env, context), USCRIPT_SUCCESS);
             std::vector<UScriptValuePtr> output = context.GetOutVar();
             ASSERT_EQ(output.size(), 1);

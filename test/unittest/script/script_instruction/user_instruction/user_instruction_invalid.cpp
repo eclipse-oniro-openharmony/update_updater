@@ -44,20 +44,20 @@ public:
     }
     UserInstructionFactory()
     {
-        std::cout << "UserInstructionFactory" << std::endl << std::flush;
     }
     ~UserInstructionFactory()
     {
-        std::cout << "~UserInstructionFactory" << std::endl << std::flush;
     }
 };
 
-extern "C" __attribute__((visibility("default"))) Uscript::UScriptInstructionFactoryPtr GetInstructionFactory()
+extern "C" {
+__attribute__((visibility("default"))) Uscript::UScriptInstructionFactoryPtr GetInstructionFactory()
 {
     return new (std::nothrow) UserInstructionFactory;
 }
 
-extern "C" __attribute__((visibility("default"))) void ReleaseInstructionFactory(Uscript::UScriptInstructionFactoryPtr p)
+__attribute__((visibility("default"))) void ReleaseInstructionFactory(Uscript::UScriptInstructionFactoryPtr p)
 {
     delete p;
+}
 }
