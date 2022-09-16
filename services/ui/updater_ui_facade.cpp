@@ -26,19 +26,11 @@ UpdaterUiFacade::UpdaterUiFacade()
 {
 }
 
-#ifdef UPDATER_UI_SUPPORT
 UpdaterUiFacade &UpdaterUiFacade::GetInstance()
 {
     static UpdaterUiFacade instance;
     return instance;
 }
-#else
-UpdaterUiEmpty &UpdaterUiFacade::GetInstance(bool extra)
-{
-    static UpdaterUiEmpty instance;
-    return instance;
-}
-#endif
 
 void UpdaterUiFacade::InitEnv() const
 {

@@ -19,7 +19,6 @@
 #include "macros.h"
 #include "strategy/ui_strategy.h"
 #include "updater_ui.h"
-#include "updater_ui_empty.h"
 
 namespace Updater {
 class UpdaterUiFacade {
@@ -28,19 +27,7 @@ class UpdaterUiFacade {
 public:
     UpdaterUiFacade();
     ~UpdaterUiFacade() = default;
-#ifdef UPDATER_UI_SUPPORT
     static UpdaterUiFacade &GetInstance();
-#else
-    /* add extra parameter with default value. Because c++ function mangling name
-     * don't consider return type, so UpdaterUiFacade &GetInstance() and
-     * UpdaterUiEmpty &GetInstance() is regarded as same function when linking
-     * which may cause undefined behavior. This will happen when you define UPDATER_UI_SUPPORT
-     * in one translation unit but don't define UPDATER_UI_SUPPORT in another. So when adding
-     * an extra parameter in UpdaterUiEmpty &GetInstance(), linker will regard these two function
-     * as different and report an undefined symbol error which would be safer.
-     */
-    static UpdaterUiEmpty &GetInstance([[maybe_unused]] bool extra = false);
-#endif
 
     void InitEnv() const;
 

@@ -40,8 +40,6 @@ enum EXIT_CODES {
 
 int ProcessUpdater(bool retry, int pipeFd, const std::string &packagePath, const std::string &keyPath);
 void GetPartitionPathFromName(const std::string &partitionName, std::string &partitionPath);
-void GetPartitionSuffix(std::string &suffix);
-void SetActiveSlot();
 
 class UpdaterInstructionFactory : public UScriptInstructionFactory {
 public:

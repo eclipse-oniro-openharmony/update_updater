@@ -41,7 +41,7 @@
 #include "pkg_utils.h"
 #include "securec.h"
 #include "updater/updater_const.h"
-#include "updater_ui_facade.h"
+#include "updater_ui_stub.h"
 #include "utils.h"
 
 namespace Updater {
@@ -122,7 +122,7 @@ UpdaterStatus UpdaterFromSdcard()
     Flashd::SetParameter(sdParam, "1");
     std::string sdcardStr = GetBlockDeviceByMountPoint(SDCARD_PATH);
     if (!IsSDCardExist(sdcardStr)) {
-        UpdaterUiFacade::GetInstance().ShowLog(
+        UpdaterUiStub::GetInstance().ShowLog(
             (errno == ENOENT) ? TR(LOG_SDCARD_NOTFIND) : TR(LOG_SDCARD_ABNORMAL), true);
         return UPDATE_ERROR;
     }
@@ -136,7 +136,7 @@ UpdaterStatus UpdaterFromSdcard()
 #endif
     if (access(SDCARD_CARD_PKG_PATH, 0) != 0) {
         LOG(ERROR) << "package is not exist";
-        UpdaterUiFacade::GetInstance().ShowLog(TR(LOG_NOPKG), true);
+        UpdaterUiStub::GetInstance().ShowLog(TR(LOG_NOPKG), true);
         return UPDATE_ERROR;
     }
     PkgManager::PkgManagerPtr pkgManager = PkgManager::GetPackageInstance();
@@ -148,11 +148,11 @@ UpdaterStatus UpdaterFromSdcard()
     STAGE(UPDATE_STAGE_BEGIN) << "UpdaterFromSdcard";
     LOG(INFO) << "UpdaterFromSdcard start, sdcard updaterPath : " << SDCARD_CARD_PKG_PATH;
 
-    UpdaterUiFacade::GetInstance().ShowLog(TR(LOG_SDCARD_NOTMOVE));
+    UpdaterUiStub::GetInstance().ShowLog(TR(LOG_SDCARD_NOTMOVE));
     UpdaterStatus updateRet = DoInstallUpdaterPackage(pkgManager, SDCARD_CARD_PKG_PATH, 0, SDCARD_UPDATE);
     if (updateRet != UPDATE_SUCCESS) {
-        UpdaterUiFacade::GetInstance().Sleep(UI_SHOW_DURATION);
-        UpdaterUiFacade::GetInstance().ShowLog(TR(LOG_SDCARD_FAIL));
+        UpdaterUiStub::GetInstance().Sleep(UI_SHOW_DURATION);
+        UpdaterUiStub::GetInstance().ShowLog(TR(LOG_SDCARD_FAIL));
         STAGE(UPDATE_STAGE_FAIL) << "UpdaterFromSdcard failed";
     } else {
         LOG(INFO) << "Update from SD Card successfully!";
@@ -221,8 +221,8 @@ static UpdaterStatus InstallUpdaterPackage(UpdaterParams &upParams, const std::v
     UPDATER_INIT_RECORD;
     UpdaterStatus status = UPDATE_UNKNOWN;
     if (IsBatteryCapacitySufficient() == false) {
-        UpdaterUiFacade::GetInstance().ShowUpdInfo(TR(LOG_LOWPOWER));
-        UpdaterUiFacade::GetInstance().Sleep(UI_SHOW_DURATION);
+        UpdaterUiStub::GetInstance().ShowUpdInfo(TR(LOG_LOWPOWER));
+        UpdaterUiStub::GetInstance().Sleep(UI_SHOW_DURATION);
         UPDATER_LAST_WORD(UPDATE_ERROR);
         LOG(ERROR) << "Battery is not sufficient for install package.";
         status = UPDATE_SKIP;
@@ -237,24 +237,24 @@ static UpdaterStatus InstallUpdaterPackage(UpdaterParams &upParams, const std::v
             SetRetryCountToMisc(upParams.retryCount + 1, args);
         }
         if (SetupPartitions() != 0) {
-            UpdaterUiFacade::GetInstance().ShowUpdInfo(TR(UPD_SETPART_FAIL), true);
+            UpdaterUiStub::GetInstance().ShowUpdInfo(TR(UPD_SETPART_FAIL), true);
             return UPDATE_ERROR;
         }
         status = DoInstallUpdaterPackage(manager, upParams.updatePackage, upParams.retryCount, HOTA_UPDATE);
         if (status != UPDATE_SUCCESS) {
-            UpdaterUiFacade::GetInstance().Sleep(UI_SHOW_DURATION);
-            UpdaterUiFacade::GetInstance().ShowLog(TR(LOG_UPDFAIL));
+            UpdaterUiStub::GetInstance().Sleep(UI_SHOW_DURATION);
+            UpdaterUiStub::GetInstance().ShowLog(TR(LOG_UPDFAIL));
             STAGE(UPDATE_STAGE_FAIL) << "Install failed";
             if (status == UPDATE_RETRY && upParams.retryCount < MAX_RETRY_COUNT) {
                 upParams.retryCount += 1;
-                UpdaterUiFacade::GetInstance().ShowFailedPage();
+                UpdaterUiStub::GetInstance().ShowFailedPage();
                 SetRetryCountToMisc(upParams.retryCount, args);
                 Utils::DoReboot("updater");
             }
         } else {
             LOG(INFO) << "Install package success.";
             STAGE(UPDATE_STAGE_SUCCESS) << "Install package";
-            UpdaterUiFacade::GetInstance().ShowSuccessPage();
+            UpdaterUiStub::GetInstance().ShowSuccessPage();
         }
     }
     return status;
@@ -265,7 +265,7 @@ static UpdaterStatus StartUpdaterEntry(PkgManager::PkgManagerPtr manager,
 {
     UpdaterStatus status = UPDATE_UNKNOWN;
     if (upParams.updatePackage != "") {
-        UpdaterUiFacade::GetInstance().ShowProgressPage();
+        UpdaterUiStub::GetInstance().ShowProgressPage();
         status = InstallUpdaterPackage(upParams, args, manager);
         if (status != UPDATE_SUCCESS) {
             if (!CheckDumpResult()) {
@@ -275,7 +275,7 @@ static UpdaterStatus StartUpdaterEntry(PkgManager::PkgManagerPtr manager,
         }
         WriteDumpResult("pass");
     } else if (upParams.factoryWipeData) {
-        UpdaterUiFacade::GetInstance().ShowProgressPage();
+        UpdaterUiStub::GetInstance().ShowProgressPage();
         LOG(INFO) << "Factory level FactoryReset begin";
         status = UPDATE_SUCCESS;
         DoProgress();
@@ -283,10 +283,10 @@ static UpdaterStatus StartUpdaterEntry(PkgManager::PkgManagerPtr manager,
             LOG(ERROR) << "FactoryReset factory level failed";
             status = UPDATE_ERROR;
         }
-        UpdaterUiFacade::GetInstance().ShowLogRes(
+        UpdaterUiStub::GetInstance().ShowLogRes(
             (status != UPDATE_SUCCESS) ? TR(LOGRES_FACTORY_FAIL) : TR(LOGRES_FACTORY_DONE));
     } else if (upParams.userWipeData) {
-        UpdaterUiFacade::GetInstance().ShowProgressPage();
+        UpdaterUiStub::GetInstance().ShowProgressPage();
         LOG(INFO) << "User level FactoryReset begin";
         status = UPDATE_SUCCESS;
         DoProgress();
@@ -295,10 +295,10 @@ static UpdaterStatus StartUpdaterEntry(PkgManager::PkgManagerPtr manager,
             status = UPDATE_ERROR;
         }
         if (status != UPDATE_SUCCESS) {
-            UpdaterUiFacade::GetInstance().ShowLogRes(TR(LOGRES_WIPE_FAIL));
+            UpdaterUiStub::GetInstance().ShowLogRes(TR(LOGRES_WIPE_FAIL));
         } else {
-            UpdaterUiFacade::GetInstance().ShowSuccessPage();
-            UpdaterUiFacade::GetInstance().ShowLogRes(TR(LOGRES_WIPE_FINISH));
+            UpdaterUiStub::GetInstance().ShowSuccessPage();
+            UpdaterUiStub::GetInstance().ShowLogRes(TR(LOGRES_WIPE_FINISH));
             PostUpdater(true);
             std::this_thread::sleep_for(std::chrono::milliseconds(UI_SHOW_DURATION));
         }
@@ -327,17 +327,17 @@ static UpdaterStatus StartUpdater(PkgManager::PkgManagerPtr manager, const std::
                 std::string option = OPTIONS[optionIndex].name;
                 if (option == "update_package") {
                     upParams.updatePackage = optarg;
-                    (void)UpdaterUiFacade::GetInstance().SetMode(UpdaterMode::OTA);
+                    (void)UpdaterUiStub::GetInstance().SetMode(UpdaterMode::OTA);
                     mode = HOTA_UPDATE;
                 } else if (option == "retry_count") {
                     upParams.retryCount = atoi(optarg);
-                    (void)UpdaterUiFacade::GetInstance().SetMode(UpdaterMode::OTA);
+                    (void)UpdaterUiStub::GetInstance().SetMode(UpdaterMode::OTA);
                     mode = HOTA_UPDATE;
                 } else if (option == "factory_wipe_data") {
-                    (void)UpdaterUiFacade::GetInstance().SetMode(UpdaterMode::REBOOTFACTORYRST);
+                    (void)UpdaterUiStub::GetInstance().SetMode(UpdaterMode::REBOOTFACTORYRST);
                     upParams.factoryWipeData = true;
                 } else if (option == "user_wipe_data") {
-                    (void)UpdaterUiFacade::GetInstance().SetMode(UpdaterMode::REBOOTFACTORYRST);
+                    (void)UpdaterUiStub::GetInstance().SetMode(UpdaterMode::REBOOTFACTORYRST);
                     upParams.userWipeData = true;
                 }
                 break;
@@ -370,20 +370,20 @@ int UpdaterMain(int argc, char **argv)
 
     LOG(INFO) << "Ready to start";
 #if !defined(UPDATER_UT) && defined(UPDATER_UI_SUPPORT)
-    UpdaterUiFacade::GetInstance().InitEnv();
+    UpdaterUiStub::GetInstance().InitEnv();
 #endif
     UpdaterInit::GetInstance().InvokeEvent(UPDATER_INIT_EVENT);
     PackageUpdateMode mode = UNKNOWN_UPDATE;
     status = StartUpdater(manager, args, argv, mode);
 #if !defined(UPDATER_UT) && defined(UPDATER_UI_SUPPORT)
-    UpdaterUiFacade::GetInstance().Sleep(UI_SHOW_DURATION);
+    UpdaterUiStub::GetInstance().Sleep(UI_SHOW_DURATION);
     if (status != UPDATE_SUCCESS && status != UPDATE_SKIP) {
         if (mode == HOTA_UPDATE) {
-            UpdaterUiFacade::GetInstance().ShowFailedPage();
+            UpdaterUiStub::GetInstance().ShowFailedPage();
         } else {
-            UpdaterUiFacade::GetInstance().ShowMainpage();
-            UpdaterUiFacade::GetInstance().Sleep(50); /* wait for page flush 50ms */
-            UpdaterUiFacade::GetInstance().SaveScreen();
+            UpdaterUiStub::GetInstance().ShowMainpage();
+            UpdaterUiStub::GetInstance().Sleep(50); /* wait for page flush 50ms */
+            UpdaterUiStub::GetInstance().SaveScreen();
         }
         // Wait for user input
         while (true) {

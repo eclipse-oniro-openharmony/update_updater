@@ -21,13 +21,13 @@
 #include "applypatch/partition_record.h"
 #include "dump.h"
 #include "log.h"
-#include "partitionslot_manager.h"
 #include "pkg_manager.h"
 #ifdef UPDATER_USE_PTABLE
 #include "ptable_manager.h"
 #endif
 #include "script_instruction.h"
 #include "script_manager.h"
+#include "slot_info/slot_info.h"
 #include "update_image_block.h"
 #include "update_image_patch.h"
 #include "update_partitions.h"
@@ -243,50 +243,14 @@ int UScriptInstructionRawImageWrite::GetWritePathAndOffset(const std::string &pa
         return USCRIPT_ERROR_EXECUTE;
     }
 
-    std::string suffix = "";
-    GetPartitionSuffix(suffix);
-    writePath += suffix;
+    if (partitionName != "/userdata") {
+        std::string suffix = "";
+        GetPartitionSuffix(suffix);
+        writePath += suffix;
+    }
     LOG(INFO) << "write partition path: " << writePath;
 #endif
     return USCRIPT_SUCCESS;
-}
-
-void GetPartitionSuffix(std::string &suffix)
-{
-    OHOS::HDI::Partitionslot::V1_0::PartitionSlotManager psMgr;
-    int32_t curSlot = -1;
-    int32_t numOfSlots = 0;
-    int32_t ret = psMgr.GetCurrentSlot(curSlot, numOfSlots);
-    LOG(INFO) << "Get slot info, curSlot: " << curSlot << "numOfSlots :" << numOfSlots;
-    if (ret != 0 || curSlot <= 0 || curSlot > 2 || numOfSlots != 2) { // 2: max slot num
-        suffix = "";
-        return;
-    }
-
-    int32_t updateSlot = curSlot == 1 ? 2 : 1;
-    ret = psMgr.GetSlotSuffix(updateSlot, suffix);
-    if (ret != 0) {
-        LOG(ERROR) << "Get slot suffix error, partitionPath: " << suffix;
-        suffix = "";
-    }
-}
-
-void SetActiveSlot()
-{
-    OHOS::HDI::Partitionslot::V1_0::PartitionSlotManager psMgr;
-    int32_t curSlot = -1;
-    int32_t numOfSlots = 0;
-    int32_t ret = psMgr.GetCurrentSlot(curSlot, numOfSlots);
-    LOG(INFO) << "Get slot info, curSlot: " << curSlot << "numOfSlots :" << numOfSlots;
-    if (ret != 0 || curSlot <= 0 || curSlot > 2 || numOfSlots != 2) { // 2: max slot num
-        return;
-    }
-
-    int32_t activeSlot = curSlot == 1 ? 2 : 1;
-    ret = psMgr.SetActiveSlot(activeSlot);
-    if (ret != 0) {
-        LOG(ERROR) << "Set active slot error, slot: " << activeSlot;
-    }
 }
 
 int ProcessUpdater(bool retry, int pipeFd, const std::string &packagePath, const std::string &keyPath)

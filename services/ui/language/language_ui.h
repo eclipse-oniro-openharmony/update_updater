@@ -57,6 +57,10 @@ private:
 };
 }
 
+#ifdef UPDATER_UI_SUPPORT
 #define TR(tag) Lang::LanguageUI::GetInstance().Translate(STRINGFY(tag), UpdaterUiMsgID::tag)
+#else
+#define TR(tag) ""
+#endif
 } // namespace Updater
 #endif /* UPDATE_UI_HOS_UPDATER_H */
