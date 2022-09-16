@@ -111,9 +111,7 @@ ohos_static_library("libui") {
 }
 
 ohos_static_library("libui_empty") {
-  sources = [
-      "updater_ui_stub.cpp",
-  ]
+  sources = [ "updater_ui_stub.cpp" ]
 
   include_dirs = [
     "//base/update/updater/services/include",
