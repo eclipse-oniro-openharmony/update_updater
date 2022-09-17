@@ -12,7 +12,6 @@
 # limitations under the License.
 if (!is_linux && !is_mingw && !is_mac) {
   import("//base/update/updater/updater_default_cfg.gni")
-  defines = [ "DIFF_PATCH_SDK" ]
 }
 import("//build/ohos.gni")
 

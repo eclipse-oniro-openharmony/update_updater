@@ -74,6 +74,7 @@ int32_t SingleCertHelper::CertChainCheck(STACK_OF(X509) *certStack, X509 *cert)
 
 int32_t SingleCertHelper::InitRootCert()
 {
+#ifndef DIFF_PATCH_SDK
     X509 *rootCert = GetX509CertFromPemFile(Utils::GetCertName());
     if (rootCert == nullptr) {
         PKG_LOGE("Get root cert fail, file: %s", Utils::GetCertName().c_str());
@@ -83,6 +84,7 @@ int32_t SingleCertHelper::InitRootCert()
     rootInfo_.rootCert = rootCert;
     rootInfo_.subject = GetX509CertSubjectName(rootCert);
     rootInfo_.issuer = GetX509CertIssuerName(rootCert);
+#endif
 
     return 0;
 }
