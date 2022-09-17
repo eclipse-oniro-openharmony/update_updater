@@ -30,7 +30,6 @@ config("diff_config") {
 ohos_executable("diff") {
   use_exceptions = true
   configs = [ ":diff_config" ]
-  defines = [ "DIFF_PATCH_SDK" ]
 
   sources = [
     "${DIFFPATCH_DIR}/bzip2/bzip2_adapter.cpp",

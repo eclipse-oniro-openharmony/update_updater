@@ -16,7 +16,10 @@ if (!is_linux && !is_mingw && !is_mac) {
 import("//build/ohos.gni")
 
 config("log_config") {
-  cflags_cc = [ "-std=c++17" ]
+  if (is_linux || is_mingw || is_mac) {
+    cflags_cc = [ "-std=c++17" ]
+    defines = [ "DIFF_PATCH_SDK" ]
+  }
 }
 
 ohos_static_library("libupdaterlog") {
@@ -31,7 +34,7 @@ ohos_static_library("libupdaterlog") {
     "//base/update/updater/utils/include",
   ]
 
-  configs = [ ":log_config" ]
+  public_configs = [ ":log_config" ]
 
   deps = [ "//third_party/bounds_checking_function:libsec_static" ]
   subsystem_name = "updater"
