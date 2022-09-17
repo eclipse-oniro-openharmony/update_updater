@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef MISC_INFO_H
-#define MISC_INFO_H
+#ifndef SLOT_INFO_H
+#define SLOT_INFO_H
 
 #include <iostream>
 #include <cstdlib>
@@ -24,4 +24,4 @@ namespace Updater {
 void GetPartitionSuffix(std::string &suffix);
 void SetActiveSlot();
 } // Updater
-#endif /* MISC_INFO_H */
+#endif /* SLOT_INFO_H */
