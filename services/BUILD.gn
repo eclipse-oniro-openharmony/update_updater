@@ -121,7 +121,7 @@ ohos_static_library("libupdater") {
   deps += [ "//base/update/updater/services/ui:libui_empty" ]
 
   configs = [ ":common_configs" ]
-  external_deps = [ "init:libbegetutil" ]
+  external_deps += [ "init:libbegetutil" ]
 
   subsystem_name = "updater"
   part_name = "updater"
