@@ -26,7 +26,7 @@ static std::ofstream g_updaterStage;
 static std::ofstream g_errorCode;
 static std::string g_logTag;
 static int g_logLevel = INFO;
-#ifdef DIFF_PATCH_SDK
+#ifndef DIFF_PATCH_SDK
 static OHOS::HiviewDFX::HiLogLabel g_logLabel = {LOG_CORE, 0XD002E01, "UPDATER"};
 #endif
 
@@ -34,7 +34,7 @@ void InitUpdaterLogger(const std::string &tag, const std::string &logFile, const
     const std::string &errorCodeFile)
 {
     g_logTag = tag;
-#ifdef DIFF_PATCH_SDK
+#ifndef DIFF_PATCH_SDK
     g_logLabel.tag = tag.c_str();
 #endif
     g_updaterLog.open(logFile.c_str(), std::ios::app | std::ios::out);
@@ -49,7 +49,7 @@ UpdaterLogger::~UpdaterLogger()
         std::cout << std::endl << std::flush;
         return;
     }
-#ifdef DIFF_PATCH_SDK
+#ifndef DIFF_PATCH_SDK
     switch (level_) {
         case static_cast<int>(INFO):
             OHOS::HiviewDFX::HiLog::Info(g_logLabel, "%{public}s", str.c_str());
