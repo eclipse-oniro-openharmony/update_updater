@@ -364,8 +364,6 @@ int UpdaterMain(int argc, char **argv)
     [[maybe_unused]] UpdaterStatus status = UPDATE_UNKNOWN;
     PkgManager::PkgManagerPtr manager = PkgManager::GetPackageInstance();
     UpdaterInit::GetInstance().InvokeEvent(UPDATER_PRE_INIT_EVENT);
-    Dump::GetInstance().RegisterDump("DumpHelperLog", std::make_unique<DumpHelperLog>());
-    CertVerify::GetInstance().RegisterCertHelper(std::make_unique<SingleCertHelper>());
     std::vector<std::string> args = ParseParams(argc, argv);
 
     LOG(INFO) << "Ready to start";

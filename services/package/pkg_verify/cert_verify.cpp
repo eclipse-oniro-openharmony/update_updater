@@ -24,9 +24,9 @@
 using namespace std;
 using namespace Updater;
 namespace Hpackage {
-namespace {
-constexpr const char *ROOT_CERT_PATH = "/certificate/signing_cert.crt";
-constexpr const char *ROOT_CERT_PATH_NORMAL = "/data/updater/signing_cert.crt";
+extern "C" __attribute_((constructor)) void RegisterCertHelper(void)
+{
+    CertVerify::GetInstance().RegisterCertHelper(std::make_unique<SingleCertHelper>());
 }
 
 void CertVerify::RegisterCertHelper(std::unique_ptr<CertHelper> ptr)
@@ -72,21 +72,11 @@ int32_t SingleCertHelper::CertChainCheck(STACK_OF(X509) *certStack, X509 *cert)
     return VerifySingleCert(cert);
 }
 
-std::string SingleCertHelper::GetCertName()
-{
-    struct stat st {};
-    if (stat("/bin/updater", &st) == 0 && S_ISREG(st.st_mode)) {
-        PKG_LOGE("updater mode");
-        return ROOT_CERT_PATH;
-    }
-    return ROOT_CERT_PATH_NORMAL;
-}
-
 int32_t SingleCertHelper::InitRootCert()
 {
-    X509 *rootCert = GetX509CertFromPemFile(GetCertName());
+    X509 *rootCert = GetX509CertFromPemFile(Utils::GetCertName());
     if (rootCert == nullptr) {
-        PKG_LOGE("Get root cert fail, file: %s", GetCertName().c_str());
+        PKG_LOGE("Get root cert fail, file: %s", Utils::GetCertName().c_str());
         UPDATER_LAST_WORD(-1);
         return -1;
     }
