@@ -24,7 +24,7 @@
 using namespace std;
 using namespace Updater;
 namespace Hpackage {
-extern "C" __attribute_((constructor)) void RegisterCertHelper(void)
+extern "C" __attribute__((constructor)) void RegisterCertHelper(void)
 {
     CertVerify::GetInstance().RegisterCertHelper(std::make_unique<SingleCertHelper>());
 }

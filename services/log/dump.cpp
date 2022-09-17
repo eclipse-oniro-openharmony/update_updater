@@ -24,7 +24,7 @@
 namespace Updater {
 thread_local std::stack<std::string> g_stageStack;
 
-extern "C" __attribute_((constructor)) void RegisterDump(void)
+extern "C" __attribute__((constructor)) void RegisterDump(void)
 {
     Dump::GetInstance().RegisterDump("DumpHelperLog", std::make_unique<DumpHelperLog>());
 }
