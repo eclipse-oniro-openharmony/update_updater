@@ -241,7 +241,7 @@ std::string GetCertName()
 {
 #ifndef UPDATER_UT
     static std::string signingCertName = IsUpdaterMode() ?
-        "/certificate/signing_cert.crt" : "/data/updater/signing_cert.crt";
+        "/certificate/signing_cert.crt" : "/etc/certificate/signing_cert.crt";
 #else
     static std::string signingCertName = "/data/updater/src/signing_cert.crt";
 #endif
