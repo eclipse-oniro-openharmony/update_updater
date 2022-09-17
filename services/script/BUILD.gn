@@ -63,8 +63,6 @@ ohos_static_library("libupdaterscript") {
   ]
   configs = [ ":script_config" ]
 
-  deps = [
-    "//third_party/bounds_checking_function:libsec_static",
-    "//utils/native/base:utils",
-  ]
+  external_deps += [ "c_utils:utils" ]
+  deps = [ "//third_party/bounds_checking_function:libsec_static" ]
 }
