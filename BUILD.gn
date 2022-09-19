@@ -29,5 +29,10 @@ group("fuzztest") {
 
 group("unittest") {
   testonly = true
-  deps = [ "test/unittest:updater_unittest" ]
+  deps = [
+    "test/unittest:updater_unittest",
+    "test/unittest/script:script_unittest",
+    "test/unittest/script:user_instruction",
+    "test/unittest/script:user_instruction_invalid",
+  ]
 }

@@ -15,6 +15,7 @@
 #include "script_instructionhelper.h"
 #include <dlfcn.h>
 #include <set>
+#include "scope_guard.h"
 #include "script_basicinstruction.h"
 #include "script_loadscript.h"
 #include "script_manager_impl.h"
@@ -23,6 +24,7 @@
 #include "script_utils.h"
 
 using namespace BasicInstruction;
+using namespace Updater;
 
 namespace Uscript {
 static std::set<std::string> g_reservedInstructions = {
@@ -101,46 +103,51 @@ int32_t ScriptInstructionHelper::AddInstruction(const std::string &instrName, co
 int32_t ScriptInstructionHelper::RegisterUserInstruction(const std::string& libName,
     const std::string &instrName)
 {
-    if (!userInstrLibName_.empty() && userInstrLibName_.compare(libName) != 0) {
-        USCRIPT_LOGE("Lib name must be equal %s ", libName.c_str());
+    // first get realpath of libName, then compare with realLibName
+    char *realPath = realpath(libName.c_str(), nullptr);
+    USCRIPT_CHECK(realPath != nullptr, return USCRIPT_INVALID_PARAM, "realPath is NULL %s", libName.c_str());
+    std::string realLibName = realPath;
+    free(realPath);
+    if (!userInstrLibName_.empty() && userInstrLibName_.compare(realLibName) != 0) {
+        USCRIPT_LOGE("Lib name must be equal %s ", realLibName.c_str());
         return USCRIPT_INVALID_PARAM;
     }
 
-    userInstrLibName_.assign(libName);
+    userInstrLibName_.assign(realLibName);
     Uscript::UScriptInstructionFactoryPtr factory = nullptr;
     if (instrLib_ == nullptr) {
-        char *realPath = realpath(libName.c_str(), nullptr);
-        USCRIPT_CHECK(realPath != nullptr, return USCRIPT_INVALID_PARAM, "realPath is NULL");
-        instrLib_ = dlopen(realPath, RTLD_LAZY);
-        free(realPath);
+        instrLib_ = dlopen(realLibName.c_str(),  RTLD_LAZY);
     }
     USCRIPT_CHECK(instrLib_ != nullptr, return USCRIPT_INVALID_PARAM,
         "Fail to dlopen %s ", libName.c_str());
-
-    Uscript::UScriptInstructionFactoryPtr (*pGetInstructionFactory)();
-    pGetInstructionFactory = (Uscript::UScriptInstructionFactoryPtr(*)())dlsym(instrLib_, "GetInstructionFactory");
-    if (pGetInstructionFactory == nullptr) {
-        USCRIPT_LOGE("Fail to get sym %s ", libName.c_str());
+    auto pGetInstructionFactory = (Uscript::UScriptInstructionFactoryPtr(*)())dlsym(instrLib_, "GetInstructionFactory");
+    auto pReleaseInstructionFactory = (void(*)(Uscript::UScriptInstructionFactoryPtr))dlsym(instrLib_, "ReleaseInstructionFactory");
+    if (pReleaseInstructionFactory == nullptr || pGetInstructionFactory == nullptr) {
+        USCRIPT_LOGE("Fail to get sym %s", libName.c_str());
         return USCRIPT_INVALID_PARAM;
     }
     factory = pGetInstructionFactory();
     USCRIPT_CHECK(factory != nullptr, return USCRIPT_INVALID_PARAM,
         "Fail to create instruction factory for %s", instrName.c_str());
-
+    ON_SCOPE_EXIT(freeFactory) {
+        pReleaseInstructionFactory(factory);
+    };
     // Create instruction and register it
     UScriptInstructionPtr instr = nullptr;
     int32_t ret = factory->CreateInstructionInstance(instr, instrName);
     if (ret != USCRIPT_SUCCESS || instr == nullptr) {
         USCRIPT_LOGE("Fail to create instruction for %s", instrName.c_str());
-        return ret;
+        return ret == USCRIPT_SUCCESS ? USCRIPT_ERROR_CREATE_OBJ : USCRIPT_NOTEXIST_INSTRUCTION;
     }
 
-    AddInstruction(instrName, instr);
+    ret = AddInstruction(instrName, instr);
     if (ret != USCRIPT_SUCCESS) {
         USCRIPT_LOGE("Fail to add instruction for %s", instrName.c_str());
+        // ret is USCRIPT_ERROR_REVERED, instr register failed, can be deleted
+        delete instr;
+        instr = nullptr;
     }
-    delete instr;
-    instr = nullptr;
+    // ScriptManagerImpl::AddInstruction has saved instr, don't delete it here!!!
     return ret;
 }
 
@@ -157,16 +164,19 @@ int32_t ScriptInstructionHelper::RegisterUserInstruction(const std::string &inst
     int32_t ret = factory->CreateInstructionInstance(instr, instrName);
     if (ret != USCRIPT_SUCCESS || instr == nullptr) {
         USCRIPT_LOGE("Fail to create instruction for %s", instrName.c_str());
-        return ret;
+        // when instr == nullptr && ret == USCRIPT_SUCCESS, shouldn't return USCRIPT_SUCCESS
+        return ret == USCRIPT_SUCCESS ? USCRIPT_ERROR_CREATE_OBJ : USCRIPT_NOTEXIST_INSTRUCTION;
     }
 
     ret = AddInstruction(instrName, instr);
     if (ret != USCRIPT_SUCCESS) {
         USCRIPT_LOGE("Fail to add instruction for %s", instrName.c_str());
+        delete instr;
+        instr = nullptr;
         return ret;
     }
 
     USCRIPT_LOGI("RegisterUserInstruction %s successfull", instrName.c_str());
-    return USCRIPT_SUCCESS;
+    return ret;
 }
 } // namespace Uscript
