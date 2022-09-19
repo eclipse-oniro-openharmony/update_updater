@@ -21,7 +21,6 @@ config("utest_config") {
 
   cflags = [
     "-fprofile-arcs",
-    "-ftest-coverage",
     "-Wno-implicit-fallthrough",
     "-Wno-unused-function",
   ]
@@ -43,13 +42,8 @@ ohos_unittest("updater_unittest") {
     "applypatch_test/transfer_manager_unittest.cpp",
     "diffpatch/bzip2_unittest.cpp",
     "diffpatch/diffpatch_unittest.cpp",
-    "fs_manager/do_partition_unittest.cpp",
     "log_test/log_unittest.cpp",
     "misc_info_test/misc_info_unittest.cpp",
-    "script/basic_instruction_unittest.cpp",
-    "script/script_instruction_unittest.cpp",
-    "script/script_interpreter_unittest.cpp",
-    "script/threadpool_unittest.cpp",
     "updater_binary/update_image_block_test.cpp",
     "updater_binary/updater_binary_unittest.cpp",
     "updaterkits_test/updaterkits_unittest.cpp",

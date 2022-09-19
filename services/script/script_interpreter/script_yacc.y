@@ -19,7 +19,7 @@
 /* 指定bison的版本 */
 %require "3.0.4"
 
-%define api.namespace {uscript} //声明命名空间与下面声明的类名结合使用 Uscript::Parser::  在scanner.l中有体现
+%define api.namespace {Uscript} //声明命名空间与下面声明的类名结合使用 Uscript::Parser::  在scanner.l中有体现
 %define api.parser.class { Parser }
 %define api.token.constructor
 %define api.value.type variant //使得类型与token定义可以使用各种复杂的结构与类型
@@ -70,7 +70,7 @@
 %{
 void Parser::error (const location_type& loc, const std::string& msg)
 {
-    LOG(updater::ERROR) << "error " << msg << "  loc "  << loc << std::endl;
+    LOG(Updater::ERROR) << "error " << msg << "  loc "  << loc << std::endl;
 }
 %}
 
