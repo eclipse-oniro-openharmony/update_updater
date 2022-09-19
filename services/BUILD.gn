@@ -118,7 +118,6 @@ ohos_static_library("libupdater") {
   include_dirs = updater_common_include
 
   deps = updater_common_deps
-  deps += [ "//base/update/updater/services/ui:libui_empty" ]
 
   configs = [ ":common_configs" ]
   external_deps += [ "init:libbegetutil" ]

@@ -49,7 +49,6 @@ ohos_static_library("libui") {
     "updater_ui_config.cpp",
     "updater_ui_env.cpp",
     "updater_ui_facade.cpp",
-    "updater_ui_stub.cpp",
     "updater_ui_tools.cpp",
     "view/component/box_progress_adapter.cpp",
     "view/component/component_factory.cpp",
@@ -107,21 +106,5 @@ ohos_static_library("libui") {
     "//third_party/cJSON:cjson_static",
     "//third_party/libdrm:libdrm",
     "//third_party/libpng:libpng",
-  ]
-}
-
-ohos_static_library("libui_empty") {
-  sources = [ "updater_ui_stub.cpp" ]
-
-  include_dirs = [
-    "//base/update/updater/services/include",
-    "//base/update/updater/services/ui",
-    "//base/update/updater/utils/include",
-    "//base/update/updater/utils/json",
-  ]
-
-  deps = [
-    "//base/update/updater/services/log:libupdaterlog",
-    "//third_party/cJSON:cjson_static",
   ]
 }
