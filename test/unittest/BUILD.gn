@@ -20,8 +20,8 @@ config("utest_config") {
   visibility = [ ":*" ]
 
   cflags = [
+    "--coverage",
     "-fprofile-arcs",
-    "-ftest-coverage",
     "-Wno-implicit-fallthrough",
     "-Wno-unused-function",
   ]

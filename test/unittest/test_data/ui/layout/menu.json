@@ -1,0 +1,97 @@
+{
+    "id" : "menu",
+    "bgColor" : "#000000ff",
+    "default" : {
+        "Common" : {
+            "visible" : true
+        },
+        "UILabel" : {
+            "bgColor" : "#000000ff",
+            "fontColor" : "#ffffffff",
+            "align" : "center"
+        }
+    },
+    "coms" : [
+        {
+            "type" : "UILabel",
+            "id" : "Label_RebootToNormalSystem",
+            "text" : "Reboot to normal system",
+            "x" : 1280,
+            "y" : 0,
+            "w" : 800,
+            "h" : 200,
+            "fontSize" : 60,
+            "visible" : false
+        },
+        {
+            "type" : "UILabel",
+            "id" : "Label_UserdataReset",
+            "text" : "Userdata reset",
+            "x" : 1280,
+            "y" : 200,
+            "w" : 800,
+            "h" : 200,
+            "fontSize" : 60
+        },
+        {
+            "type" : "UILabel",
+            "id" : "Label_UpdateFromSDCard",
+            "text" : "Update from SD Card",
+            "x" : 1280,
+            "y" : 400,
+            "w" : 800,
+            "h" : 200,
+            "fontSize" : 60
+        },
+        {
+            "type" : "UILabel",
+            "id" : "Label_MenuDialogTitle",
+            "text" : "Tip",
+            "x" : 1280,
+            "y" : 600,
+            "w" : 800,
+            "h" : 200,
+            "fontSize" : 40
+        },
+        {
+            "type" : "UILabel",
+            "id" : "Label_MenuDialogNote",
+            "text" : "Delete user date now...",
+            "x" : 1280,
+            "y" : 800,
+            "w" : 800,
+            "h" : 200,
+            "fontSize" : 40
+        },
+        {
+            "type" : "UILabel",
+            "id" : "Label_MenuDialogNext",
+            "text" : "Do you want to continue?",
+            "x" : 1280,
+            "y" : 1000,
+            "w" : 800,
+            "h" : 200,
+            "fontSize" : 40
+        },
+        {
+            "type" : "UILabel",
+            "id" : "Label_MenuDialogOK",
+            "text" : "Continue",
+            "x" : 1280,
+            "y" : 1200,
+            "w" : 800,
+            "h" : 200,
+            "fontSize" : 40
+        },
+        {
+            "type" : "UILabel",
+            "id" : "Label_MenuDialogCancel",
+            "text" : "Cancel",
+            "x" : 1680,
+            "y" : 1200,
+            "w" : 800,
+            "h" : 200,
+            "fontSize" : 40
+        }
+    ]
+}

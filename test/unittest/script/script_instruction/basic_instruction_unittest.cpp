@@ -121,7 +121,7 @@ public:
     {
         MockUScriptEnv env {nullptr};
         UScriptInstructionContext context {};
-        std::tuple input = {"string1", 1, 1.0, 1.0001, 1.00000001};
+        auto input = std::make_tuple("string1", 1, 1.0, 1.0001, 1.00000001);
         auto instruction = std::make_unique<UScriptInstructionStdout>();
         std::stringstream buffer;
         std::streambuf* old = std::cout.rdbuf(buffer.rdbuf());
@@ -143,7 +143,7 @@ public:
         MockUScriptEnv env {nullptr};
         {
             UScriptInstructionContext context {};
-            std::tuple input = {"this is a test",  "test2", 1, 1.0, 1.0001, 1.00000001};
+            auto input = std::make_tuple("this is a test",  "test2", 1, 1.0, 1.0001, 1.00000001);
             auto instruction = std::make_unique<UScriptInstructionConcat>();
             std::stringstream tgt;
             auto toString = [] (auto &&arg) -> std::string {

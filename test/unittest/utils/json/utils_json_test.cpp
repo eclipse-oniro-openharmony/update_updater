@@ -14,14 +14,16 @@
  */
 
 #include "utils_json_test.h"
-
+#include <fstream>
 #include "cJSON.h"
 #include "json_node.h"
+#include "utils.h"
 
 using namespace std::literals;
-using namespace Updater;
 using namespace std;
 using namespace testing::ext;
+using namespace Updater;
+using namespace Utils;
 
 namespace UpdaterUt {
 // do something at the each function begining
@@ -46,6 +48,28 @@ void UtilsJsonNodeUnitTest::SetUpTestCase(void)
 void UtilsJsonNodeUnitTest::TearDownTestCase(void)
 {
     cout << "TearDownTestCase" << endl;
+}
+
+HWTEST_F(UtilsJsonNodeUnitTest, TestGetKey, TestSize.Level0)
+{
+    {
+        std::string str = R"({"key": "value1"})";
+        JsonNode node(str);
+        EXPECT_EQ(node.Key(), std::nullopt);
+        EXPECT_EQ(node["key"].Key(), "key");
+    }
+    {
+        std::string str = R"({"key"})";
+        JsonNode node(str);
+        EXPECT_EQ(node.Key(), std::nullopt);
+    }
+}
+
+HWTEST_F(UtilsJsonNodeUnitTest, TestEqualTypeNotMatched, TestSize.Level0)
+{
+    std::string str = R"({"key": "value1"})";
+    JsonNode node(str);
+    EXPECT_EQ((node["key"] == 1), false);
 }
 
 HWTEST_F(UtilsJsonNodeUnitTest, TestStrNode, TestSize.Level0)
@@ -137,5 +161,56 @@ HWTEST_F(UtilsJsonNodeUnitTest, TestAll, TestSize.Level0)
     EXPECT_EQ(nodeG["K"]["N"][0], "O");
     EXPECT_EQ(nodeG["K"]["N"][1], "P");
     EXPECT_EQ(nodeG["L"], true);
+}
+
+HWTEST_F(UtilsJsonNodeUnitTest, TestInvalidKey, TestSize.Level0)
+{
+    std::string str = R"({"key": "value1"})";
+    JsonNode node(str);
+    EXPECT_EQ(node["key1"].Type(), NodeType::UNKNOWN);
+}
+
+HWTEST_F(UtilsJsonNodeUnitTest, TestInvalidIndex, TestSize.Level0)
+{
+    {
+        std::string str = R"({"key": "value1"})";
+        JsonNode node(str);
+        EXPECT_EQ(node["key"].Type(), NodeType::STRING);
+        EXPECT_EQ(node["key1"].Type(), NodeType::UNKNOWN);
+        EXPECT_EQ(node["key"].Type(), NodeType::STRING);
+    }
+    {
+        std::string str = R"({"key": [1]})";
+        JsonNode node(str);
+        EXPECT_EQ(node["key"].Type(), NodeType::ARRAY);
+        EXPECT_EQ(node["key"][0].Type(), NodeType::INT);
+        EXPECT_EQ(node["key"][1].Type(), NodeType::UNKNOWN);
+    }
+}
+
+HWTEST_F(UtilsJsonNodeUnitTest, TestInvalidPath0, TestSize.Level0)
+{
+    JsonNode node(Fs::path {R"(\invalid)"});
+    EXPECT_EQ(node.Type(), NodeType::UNKNOWN);
+}
+
+HWTEST_F(UtilsJsonNodeUnitTest, TestInvalidPath1, TestSize.Level0)
+{
+    JsonNode node(Fs::path {"/data/noexist"});
+    EXPECT_EQ(node.Type(), NodeType::UNKNOWN);
+}
+
+HWTEST_F(UtilsJsonNodeUnitTest, TestInvalidPath2, TestSize.Level0)
+{
+    constexpr auto invalidContent = R"({ "key" : "value")";
+    constexpr auto invalidJsonPath = "/tmp/tmp.json";
+    {
+        std::ofstream ofs(Fs::path {invalidJsonPath});
+        ofs << invalidContent;
+        ofs.flush();
+    }
+    JsonNode node(Fs::path {invalidJsonPath});
+    EXPECT_EQ(node.Type(), NodeType::UNKNOWN);
+    DeleteFile(invalidJsonPath);
 }
 } // namespace UpdaterUt

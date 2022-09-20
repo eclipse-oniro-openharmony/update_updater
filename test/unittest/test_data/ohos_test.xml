@@ -127,4 +127,14 @@
             <option name="push" value="updater/updater/libuser_instruction.so -> /lib" src="out"/>
         </preparer>
     </target>
+    <target name="ui_unittest">
+        <preparer>
+            <option name="push" value="ui/layout/all.json -> /data/updater/ui" src="res"/>
+            <option name="push" value="ui/layout/boxprogress.json -> /data/updater/ui" src="res"/>
+            <option name="push" value="ui/layout/imageview.json -> /data/updater/ui" src="res"/>
+            <option name="push" value="ui/layout/label.json -> /data/updater/ui" src="res"/>
+            <option name="push" value="ui/layout/menu.json -> /data/updater/ui" src="res"/>
+            <option name="push" value="ui/layout/subpage.json -> /data/updater/ui" src="res"/>
+        </preparer>
+    </target>
 </configuration>

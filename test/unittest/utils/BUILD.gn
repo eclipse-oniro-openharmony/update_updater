@@ -25,6 +25,10 @@ ohos_unittest("utils_test") {
     "json/utils_json_test.cpp",
     "json/utils_json_visitor_test.cpp",
   ]
+  sources += [
+    "//base/update/updater/utils/utils.cpp",
+    "//base/update/updater/utils/json/json_node.cpp",
+  ]
   include_dirs = [
     "include",
     "//base/update/updater/interfaces/kits/include/",
@@ -35,10 +39,9 @@ ohos_unittest("utils_test") {
     "//third_party/bounds_checking_function/include",
     "//third_party/cJSON",
   ]
-
+  external_deps = [ "init:libbegetutil" ]
   deps = [
     "//base/update/updater/services/log:libupdaterlog",
-    "//base/update/updater/utils:libutils",
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/cJSON:cjson_static",
     "//third_party/googletest:gmock_main",

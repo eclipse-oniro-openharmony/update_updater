@@ -60,6 +60,15 @@ DEFINE_STRUCT_TRAIT(I, "I",
 DEFINE_STRUCT_TRAIT(J, "J",
     (std::vector<std::vector<std::string>>, d1)
 );
+
+DEFINE_STRUCT_TRAIT(K, "K",
+    (int, d1),
+    (std::string, d2)
+);
+
+DEFINE_STRUCT_TRAIT(L, "L",
+    (std::vector<int>, d1)
+);
 }
 
 using namespace Updater;
@@ -137,6 +146,28 @@ std::string g_jsonStr = R"({
                 "baz1"
             ]
         ]
+    },
+    "K" : {
+        "d1" : 1
+    },
+    "KNonDefault0" : {
+        "d1" : 2
+    },
+    "KNonDefault1" : {
+        "d1" : 2,
+        "d2" : "v2"
+    },
+    "L" : {
+        "d1" : [1]
+    },
+    "LNonDefault0" : {
+        "d1" : [2]
+    },
+    "LNonDefault1" : {
+        "d1" : "2"
+    },
+    "LNonDefault2" : {
+        "d1" : ["2"]
     }
 })";
 
@@ -192,5 +223,53 @@ HWTEST_F(UtilsJsonVisitorUnitTest, testJ, TestSize.Level0)
     ASSERT_EQ(j.d1.size(), 2);
     EXPECT_EQ(j.d1[0], std::vector<std::string>({"foo", "bar", "baz"}));
     EXPECT_EQ(j.d1[1], std::vector<std::string>({"foo1", "bar1", "baz1"}));
+}
+
+HWTEST_F(UtilsJsonVisitorUnitTest, testInvalidK, TestSize.Level0)
+{
+    K k {};
+    bool res = Visit<SETVAL>(g_node["K"], k);
+    EXPECT_EQ(res, false);
+}
+
+HWTEST_F(UtilsJsonVisitorUnitTest, testNoDefaultAndNonDefaultK, TestSize.Level0)
+{
+    K k {};
+    bool res = Visit<SETVAL>(g_node["KNonDefault0"], g_node["K"], k);
+    EXPECT_EQ(res, false);
+
+    res = Visit<SETVAL>(g_node["KNonDefault1"], g_node["K"], k);
+    EXPECT_EQ(res, true);
+    EXPECT_EQ(k.d1, 2);
+    EXPECT_EQ(k.d2, "v2");
+}
+
+HWTEST_F(UtilsJsonVisitorUnitTest, testArrayL, TestSize.Level0)
+{
+    L l {};
+    bool res = Visit<SETVAL>(g_node["LNonDefault0"], g_node["L"], l);
+    EXPECT_EQ(res, true);
+    EXPECT_EQ(l.d1, std::vector<int>({2, 1}));
+
+    l = {};
+    res = Visit<SETVAL>(g_node["L"], g_node["LNonDefault0"], l);
+    EXPECT_EQ(res, true);
+    EXPECT_EQ(l.d1, std::vector<int>({1, 2}));
+
+    l = {};
+    res = Visit<SETVAL>(g_node["LNonDefault1"], g_node["L"], l);
+    EXPECT_EQ(res, false);
+
+    l = {};
+    res = Visit<SETVAL>(g_node["L"], g_node["LNonDefault1"], l);
+    EXPECT_EQ(res, false);
+
+    l = {};
+    res = Visit<SETVAL>(g_node["L"], g_node["LNonDefault2"], l);
+    EXPECT_EQ(res, false);
+
+    l = {};
+    res = Visit<SETVAL>(g_node["LNonDefault2"], g_node["L"], l);
+    EXPECT_EQ(res, false);
 }
 } // namespace UpdaterUt
