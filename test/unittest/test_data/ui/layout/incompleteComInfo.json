@@ -1,0 +1,19 @@
+{
+    "id" : "menu",
+    "bgColor" : "#000000ff",
+    "coms" : [
+        {
+            "id" : "label_button_0",
+            "type" : "UILabelButton",
+            "x" : 0,
+            "y" : 0,
+            "w" : 100,
+            "h" : 100,
+            "bgColor": "#e5e7e9ff",
+            "txtColor": "#007dffff",
+            "focusedBgColor": "#007dffff",
+            "focusedTxtColor": "#ffffffff",
+            "focusable" : true
+        }
+    ]
+}

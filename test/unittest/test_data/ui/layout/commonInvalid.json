@@ -1,0 +1,25 @@
+{
+    "id" : "menu",
+    "bgColor" : "#000000ff",
+    "default" : {
+        "Common" : {
+            "visible" : true
+        },
+        "UILabel" : {
+            "bgColor" : "#000000ff",
+            "fontColor" : "#ffffffff",
+            "align" : "center"
+        }
+    },
+    "coms" : [
+        {
+            "type" : "UILabel",
+            "id" : "Label_RebootToNormalSystem",
+            "text" : "Reboot to normal system",
+            "x" : 1280,
+            "y" : 0,
+            "fontSize" : 60,
+            "visible" : false
+        }
+    ]
+}

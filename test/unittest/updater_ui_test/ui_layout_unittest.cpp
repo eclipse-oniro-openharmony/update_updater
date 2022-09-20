@@ -22,7 +22,7 @@
 using namespace Updater;
 using namespace std;
 using namespace testing::ext;
-
+namespace Fs = std::filesystem;
 namespace Updater {
 bool operator == (const UxViewCommonInfo &lhs, const UxViewCommonInfo &rhs)
 {
@@ -248,5 +248,18 @@ HWTEST_F(UpdaterUiLayoutParserUnitTest, test_load_sub_page_info, TestSize.Level0
     EXPECT_EQ(subPages[0].coms[1], "b");
     EXPECT_EQ(subPages[0].coms[2], "c");
 
+}
+
+HWTEST_F(UpdaterUiLayoutParserUnitTest, test_invalid_cases, TestSize.Level0)
+{
+    constexpr std::array files { "/data/updater/ui/noPageInfo.json", "/data/updater/ui/noComs.json",
+        "/data/updater/ui/comsNoType.json", "/data/updater/ui/commonInvalid.json",
+        "/data/updater/ui/typeInvalid.json", "/data/updater/ui/incompleteComInfo.json"};
+    for (auto file : files) {
+        std::vector<std::string> layoutFiles { file };
+        std::vector<UxPageInfo> pageInfos {};
+        EXPECT_EQ(true, Fs::exists(Fs::path {file})) << file;
+        EXPECT_EQ(false, LayoutParser::GetInstance().LoadLayout(layoutFiles, pageInfos));
+    }
 }
 } // namespace

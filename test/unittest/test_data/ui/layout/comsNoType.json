@@ -1,0 +1,19 @@
+{
+    "id" : "menu",
+    "bgColor" : "#000000ff",
+    "coms" : [
+        {
+            "id" : "image_view",
+            "x" : 0,
+            "y" : 0,
+            "w" : 100,
+            "h" : 100,
+            "parent" : "menu",
+            "visible" : true,
+            "resPath" : "/res/images",
+            "imgCnt" : 100,
+            "filePrefix" : "",
+            "updInterval" : 1
+        }
+    ]
+}
