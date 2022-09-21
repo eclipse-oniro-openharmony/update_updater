@@ -11,7 +11,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 import("//build/test.gni")
 
 UPDATER_TEST_ROOT = "//base/update/updater/test/unittest"
@@ -21,7 +20,7 @@ MODULE_OUTPUT_PATH = "updater/updater_test"
 ohos_unittest("ui_unittest") {
   testonly = true
   resource_config_file =
-    "//base/update/updater/test/unittest/test_data/ohos_test.xml"
+      "//base/update/updater/test/unittest/test_data/ohos_test.xml"
   module_out_path = MODULE_OUTPUT_PATH
   defines = [
     "ENABLE_BITMAP_FONT = 0",
@@ -31,9 +30,7 @@ ohos_unittest("ui_unittest") {
     "ENABLE_STATIC_FONT = 0",
     "ENABLE_VECTOR_FONT = 1",
   ]
-  sources = [
-    "ui_layout_unittest.cpp",
-  ]
+  sources = [ "ui_layout_unittest.cpp" ]
   sources += [
     "//base/update/updater/services/ui/language/language_ui.cpp",
     "//base/update/updater/services/ui/strategy/logo_strategy.cpp",
@@ -92,10 +89,10 @@ ohos_unittest("ui_unittest") {
     "//foundation/graphic/ui/ext/updater:libupdater_layout",
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/cJSON:cjson_static",
-    "//third_party/libdrm:libdrm",
-    "//third_party/libpng:libpng",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
+    "//third_party/libdrm:libdrm",
+    "//third_party/libpng:libpng",
   ]
   configs = [ "$UPDATER_TEST_ROOT:utest_config" ]
   install_enable = true

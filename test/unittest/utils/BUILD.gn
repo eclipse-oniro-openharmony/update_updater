@@ -21,13 +21,13 @@ ohos_unittest("utils_test") {
   testonly = true
   module_out_path = MODULE_OUTPUT_PATH
   sources = [
-    "utils_unittest.cpp",
     "json/utils_json_test.cpp",
     "json/utils_json_visitor_test.cpp",
+    "utils_unittest.cpp",
   ]
   sources += [
-    "//base/update/updater/utils/utils.cpp",
     "//base/update/updater/utils/json/json_node.cpp",
+    "//base/update/updater/utils/utils.cpp",
   ]
   include_dirs = [
     "include",
