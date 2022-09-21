@@ -53,29 +53,6 @@ updater_common_deps = [
   "//third_party/zlib:libz",
 ]
 
-config("common_configs") {
-  if (defined(use_ptable)) {
-    include_dirs += [ "//base/update/updater/services/ptable_parse" ]
-    deps += [ "//base/update/updater/services/ptable_parse:libptableparse" ]
-    defines += [ "UPDATER_USE_PTABLE" ]
-  }
-
-  # add updater custom library
-  if (defined(updater_custom_lib)) {
-    deps += updater_custom_lib
-    deps += [ "//drivers/peripheral/adapter/input/hal:hdi_input_adapter" ]
-  }
-
-  # force link invisible function
-  if (defined(updater_force_link_libs)) {
-    ldflags = [ "-Wl,--whole-archive" ]
-    foreach(lib, updater_force_link_libs) {
-      ldflags += [ "${lib}" ]
-    }
-    ldflags += [ "-Wl,--no-whole-archive" ]
-  }
-}
-
 ohos_executable("updater") {
   defines = [ "BUILD_OHOS" ]
   sources = [
@@ -99,7 +76,27 @@ ohos_executable("updater") {
     "//third_party/libdrm:libdrm",
   ]
 
-  configs = [ ":common_configs" ]
+  if (defined(use_ptable)) {
+    include_dirs += [ "//base/update/updater/services/ptable_parse" ]
+    deps += [ "//base/update/updater/services/ptable_parse:libptableparse" ]
+    defines += [ "UPDATER_USE_PTABLE" ]
+  }
+
+  # add updater custom library
+  if (defined(updater_custom_lib)) {
+    deps += updater_custom_lib
+    deps += [ "//drivers/peripheral/adapter/input/hal:hdi_input_adapter" ]
+  }
+
+  # force link invisible function
+  if (defined(updater_force_link_libs)) {
+    ldflags = [ "-Wl,--whole-archive" ]
+    foreach(lib, updater_force_link_libs) {
+      ldflags += [ "${lib}" ]
+    }
+    ldflags += [ "-Wl,--no-whole-archive" ]
+  }
+
   external_deps += [ "init:libbegetutil" ]
 
   install_images = [ "updater" ]
@@ -119,7 +116,27 @@ ohos_static_library("libupdater") {
 
   deps = updater_common_deps
 
-  configs = [ ":common_configs" ]
+  if (defined(use_ptable)) {
+    include_dirs += [ "//base/update/updater/services/ptable_parse" ]
+    deps += [ "//base/update/updater/services/ptable_parse:libptableparse" ]
+    defines += [ "UPDATER_USE_PTABLE" ]
+  }
+
+  # add updater custom library
+  if (defined(updater_custom_lib)) {
+    deps += updater_custom_lib
+    deps += [ "//drivers/peripheral/adapter/input/hal:hdi_input_adapter" ]
+  }
+
+  # force link invisible function
+  if (defined(updater_force_link_libs)) {
+    ldflags = [ "-Wl,--whole-archive" ]
+    foreach(lib, updater_force_link_libs) {
+      ldflags += [ "${lib}" ]
+    }
+    ldflags += [ "-Wl,--no-whole-archive" ]
+  }
+
   external_deps += [ "init:libbegetutil" ]
 
   subsystem_name = "updater"
