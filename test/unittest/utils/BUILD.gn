@@ -40,8 +40,8 @@ ohos_unittest("utils_test") {
     "//third_party/cJSON",
   ]
   external_deps = [
-    "init:libbegetutil",
     "hiviewdfx_hilog_native:libhilog",
+    "init:libbegetutil",
   ]
   deps = [
     "//base/update/updater/services/log:libupdaterlog",
