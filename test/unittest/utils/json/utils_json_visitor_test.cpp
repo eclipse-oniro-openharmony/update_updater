@@ -78,15 +78,27 @@ using namespace testing::ext;
 namespace {
 using PairType = std::pair<std::string_view, std::string_view>;
 template<typename T, std::size_t N>
-void TestInvalidCases(T &obj, const std::array<PairType, N> &replaceData, std::string &jsonStr)
+void TestInvalidCases(T &obj, const std::array<PairType, N> &replaceData, const std::string &jsonStr)
 {
     for (auto data : replaceData) {
         auto pos = jsonStr.find(data.first);
         ASSERT_NE(pos, std::string::npos) << data.first;
-        jsonStr.replace(pos, data.first.size(), data.second.data(), data.second.size());
-        JsonNode node {jsonStr};
-        EXPECT_EQ(false, Visit<SETVAL>(node[Traits<T>::STRUCT_KEY], obj)) << data.first;
-        jsonStr.replace(jsonStr.find(data.second), data.second.size(), data.first.data(), data.first.size());
+        {
+            // make type not matched
+            std::string newJsonStr = jsonStr;
+            newJsonStr.replace(pos, data.first.size(), data.second.data(), data.second.size());
+            JsonNode node {newJsonStr};
+            EXPECT_EQ(false, Visit<SETVAL>(node[Traits<T>::STRUCT_KEY], obj)) << data.first;
+            EXPECT_EQ(false, Visit<SETVAL>({}, node[Traits<T>::STRUCT_KEY], obj)) << data.first;
+        }
+        {
+            // make field not existed
+            std::string newJsonStr = jsonStr;
+            newJsonStr.replace(pos, data.first.size(), "");
+            JsonNode node {newJsonStr};
+            EXPECT_EQ(false, Visit<SETVAL>(node[Traits<T>::STRUCT_KEY], obj)) << data.first;
+            EXPECT_EQ(false, Visit<SETVAL>({}, node[Traits<T>::STRUCT_KEY], obj)) << data.first;
+        }
     }
 }
 }
@@ -161,7 +173,12 @@ HWTEST_F(UtilsJsonVisitorUnitTest, testE, TestSize.Level0)
 
     constexpr std::array replaceData {
         PairType { R"("d1":1)", R"("d1":"1")" }, PairType { R"("r":1)", R"("r":"1")" },
-        PairType { R"("g":"foo")", R"("g":1)" }, PairType { R"("b":true)", R"("b":"true")" }
+        PairType { R"("g":"foo")", R"("g":1)" }, PairType { R"("b":true)", R"("b":"true")" },
+        PairType { R"("d2": {
+                "r":1,
+                "g":"foo",
+                "b":true
+            })", R"("d2":2)"},
     };
     TestInvalidCases(e, replaceData, eJson);
 }
@@ -214,76 +231,57 @@ HWTEST_F(UtilsJsonVisitorUnitTest, testH, TestSize.Level0)
 
 HWTEST_F(UtilsJsonVisitorUnitTest, testI, TestSize.Level0)
 {
-    std::string iJson = R"({
-        "I" : {
-            "d1": [
-                "foo",
-                "bar",
-                "baz"
-            ]
-        }
-    })";
+    std::string iJson = R"({ "I" : { "d1": [ "foo", "bar", "baz" ] } })";
     I i {};
     JsonNode node {iJson};
     EXPECT_EQ(Visit<SETVAL>(node["I"], i), true);
     EXPECT_EQ(i.d1, std::vector<std::string>({"foo", "bar", "baz"}));
+    i = {};
+    EXPECT_EQ(Visit<SETVAL>({}, node["I"], i), true);
+    EXPECT_EQ(i.d1, std::vector<std::string>({"foo", "bar", "baz"}));
     EXPECT_EQ(Visit<SETVAL>(JsonNode {R"({"I" : { "d1" : 1 }})"s} ["I"], i), false);
+    EXPECT_EQ(Visit<SETVAL>({}, JsonNode {R"({"I" : { "d1" : 1 }})"s} ["I"], i), false);
+    EXPECT_EQ(Visit<SETVAL>(JsonNode {R"({ "I" : { "d1": "foo" } })"s} ["I"], i), false);
+    EXPECT_EQ(Visit<SETVAL>(JsonNode {R"({ "I" : { "d1": [ 1 ] } })"s} ["I"], i), false);
 }
 
 HWTEST_F(UtilsJsonVisitorUnitTest, testJ, TestSize.Level0)
 {
-    std::string jJson = R"({
-        "J" : {
-            "d1" : [
-                [
-                    "foo",
-                    "bar",
-                    "baz"
-                ],
-                [
-                    "foo1",
-                    "bar1",
-                    "baz1"
-                ]
-            ]
-        }
-    })";
     J j {};
-    JsonNode node {jJson};
+    JsonNode node {R"({"J" : {"d1" : [["foo","bar","baz"],["foo1","bar1","baz1"]]}})"s};
     EXPECT_EQ(Visit<SETVAL>(node["J"], j), true);
     ASSERT_EQ(j.d1.size(), 2);
     EXPECT_EQ(j.d1[0], std::vector<std::string>({"foo", "bar", "baz"}));
     EXPECT_EQ(j.d1[1], std::vector<std::string>({"foo1", "bar1", "baz1"}));
+
+    j = {};
+    EXPECT_EQ(Visit<SETVAL>({}, node["J"], j), true);
+    ASSERT_EQ(j.d1.size(), 2);
+    EXPECT_EQ(j.d1[0], std::vector<std::string>({"foo", "bar", "baz"}));
+    EXPECT_EQ(j.d1[1], std::vector<std::string>({"foo1", "bar1", "baz1"}));
+
+    j = {};
     EXPECT_EQ(Visit<SETVAL>(JsonNode {R"({"J" : { "d1" : 1 }})"s} ["J"], j), false);
     EXPECT_EQ(Visit<SETVAL>(JsonNode {R"({"J" : { "d1" : [1] }})"s} ["J"], j), false);
     EXPECT_EQ(Visit<SETVAL>(JsonNode {R"({"J" : { "d1" : [[1]] }})"s} ["J"], j), false);
+    EXPECT_EQ(Visit<SETVAL>({}, JsonNode {R"({"J" : { "d1" : 1 }})"s} ["J"], j), false);
+    EXPECT_EQ(Visit<SETVAL>({}, JsonNode {R"({"J" : { "d1" : [1] }})"s} ["J"], j), false);
+    EXPECT_EQ(Visit<SETVAL>({}, JsonNode {R"({"J" : { "d1" : [[1]] }})"s} ["J"], j), false);
 }
 
 HWTEST_F(UtilsJsonVisitorUnitTest, testInvalidK, TestSize.Level0)
 {
-    std::string kJson = R"({
-        "K" : {
-            "d1" : 1
-        }
-    })";
     K k {};
-    JsonNode node {kJson};
-    EXPECT_EQ(Visit<SETVAL>(node["K"], k), false);
+    EXPECT_EQ(Visit<SETVAL>(JsonNode {R"({ "K" : { "d1" : 1 } })"s} ["K"], k), false);
+    EXPECT_EQ(Visit<SETVAL>(JsonNode {R"({ "K" : { "d1" : "1" } })"s} ["K"], k), false);
 }
 
 HWTEST_F(UtilsJsonVisitorUnitTest, testNoDefaultAndNonDefaultK, TestSize.Level0)
 {
     std::string kJson = R"({
-        "K" : {
-            "d1" : 1
-        },
-        "KNonDefault0" : {
-            "d1" : 2
-        },
-        "KNonDefault1" : {
-            "d1" : 2,
-            "d2" : "v2"
-        }
+        "K" : { "d1" : 1 },
+        "KNonDefault0" : { "d1" : 2 },
+        "KNonDefault1" : { "d1" : 2, "d2" : "v2" }
     })";
     K k {};
     JsonNode node {kJson};
@@ -298,18 +296,10 @@ HWTEST_F(UtilsJsonVisitorUnitTest, testNoDefaultAndNonDefaultK, TestSize.Level0)
 HWTEST_F(UtilsJsonVisitorUnitTest, testArrayL, TestSize.Level0)
 {
     std::string lJson = R"({
-        "L" : {
-            "d1" : [1]
-        },
-        "LNonDefault0" : {
-            "d1" : [2]
-        },
-        "LNonDefault1" : {
-            "d1" : "2"
-        },
-        "LNonDefault2" : {
-            "d1" : ["2"]
-        }
+        "L" : { "d1" : [1] },
+        "LNonDefault0" : { "d1" : [2] },
+        "LNonDefault1" : { "d1" : "2" },
+        "LNonDefault2" : { "d1" : ["2"] }
     })";
     L l {};
     JsonNode node {lJson};
