@@ -95,6 +95,7 @@ ohos_unittest("ui_unittest") {
     "//third_party/libpng:libpng",
   ]
   configs = [ "$UPDATER_TEST_ROOT:utest_config" ]
+  external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
   install_enable = true
   part_name = "updater"
 }
