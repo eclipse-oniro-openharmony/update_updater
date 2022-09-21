@@ -23,6 +23,11 @@
 namespace Updater {
 class UpdaterUiEmpty {
 public:
+    static UpdaterUiEmpty &GetInstance()
+    {
+        static UpdaterUiEmpty instance;
+        return instance;
+    }
     void InitEnv() const {}
     [[nodiscard]] bool SetMode(UpdaterMode mode)
     {

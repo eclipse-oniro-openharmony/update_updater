@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Copyright (c) 2022 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -10,33 +10,25 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-if (!is_linux && !is_mingw && !is_mac) {
-  import("//base/update/updater/updater_default_cfg.gni")
-}
+
+import("//base/update/updater/updater_default_cfg.gni")
 import("//build/ohos.gni")
 
-config("log_config") {
-  if (is_linux || is_mingw || is_mac) {
-    cflags_cc = [ "-std=c++17" ]
-    defines = [ "DIFF_PATCH_SDK" ]
-  }
-}
-
-ohos_static_library("libupdaterlog") {
-  sources = [
-    "dump.cpp",
-    "log.cpp",
-  ]
+ohos_static_library("libslotinfo") {
+  sources = [ "slot_info.cpp" ]
 
   include_dirs = [
+    "//base/update/updater/interfaces/kits/include",
     "//base/update/updater/services/include",
-    "//third_party/bounds_checking_function/include",
     "//base/update/updater/utils/include",
+    "//drivers/peripheral/partitionslot/hal/include",
   ]
 
-  public_configs = [ ":log_config" ]
+  deps = [
+    "//base/update/updater/services/log:libupdaterlog",
+    "//drivers/peripheral/partitionslot/hal:libpartition_slot_manager",
+  ]
 
-  deps = [ "//third_party/bounds_checking_function:libsec_static" ]
   subsystem_name = "updater"
   part_name = "updater"
 }

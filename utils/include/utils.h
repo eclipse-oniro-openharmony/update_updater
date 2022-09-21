@@ -28,6 +28,9 @@ constexpr int N_DEC = 10;
 constexpr int N_HEX = 16;
 constexpr int O_USER_GROUP_ID = 1000;
 constexpr int ARGC_TWO_NUMS = 2;
+constexpr int USER_ROOT_AUTHORITY = 0;
+constexpr int GROUP_SYS_AUTHORITY = 1000;
+constexpr int GROUP_UPDATE_AUTHORITY = 6666;
 template<class T>
 T String2Int(const std::string &str, int base = N_HEX)
 {

@@ -21,6 +21,8 @@
 #include "script_interpreter.h"
 #include "script_utils.h"
 #include "thread_pool.h"
+#include "updater_const.h"
+#include "utils.h"
 
 using namespace Hpackage;
 
@@ -120,7 +122,8 @@ int32_t ScriptManagerImpl::ExtractAndExecuteScript(PkgManager::PkgManagerPtr man
     const std::string &scriptName)
 {
     PkgManager::StreamPtr outStream = nullptr;
-    int32_t ret = manager->CreatePkgStream(outStream, scriptName, 0, PkgStream::PkgStreamType_Write);
+    const std::string path = Updater::Utils::IsUpdaterMode() ? "" : Updater::UPDATER_PATH;
+    int32_t ret = manager->CreatePkgStream(outStream, path + scriptName, 0, PkgStream::PkgStreamType_Write);
     USCRIPT_CHECK(ret == USCRIPT_SUCCESS, return ret, "Failed to create script stream %s", scriptName.c_str());
     ret = manager->ExtractFile(scriptName, outStream);
     USCRIPT_CHECK(ret == USCRIPT_SUCCESS, return ret, "Failed to extract script stream %s", scriptName.c_str());

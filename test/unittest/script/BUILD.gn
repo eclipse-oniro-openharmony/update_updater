@@ -56,6 +56,7 @@ ohos_unittest("script_unittest") {
     "//base/update/updater/services/include/package",
     "//base/update/updater/services/include/script",
     "//base/update/updater/services/include/log",
+    "//base/update/updater/services/include/updater",
     "//base/update/updater/services/package/pkg_algorithm",
     "//base/update/updater/services/package/pkg_manager",
     "//base/update/updater/services/script/script_instruction",
@@ -73,6 +74,7 @@ ohos_unittest("script_unittest") {
     "//base/update/updater/interfaces/kits/packages:libpackageExt",
     "//base/update/updater/services/log:libupdaterlog",
     "//base/update/updater/services/package:libupdaterpackage",
+    "//base/update/updater/utils:libutils",
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/bzip2:libbz2",
     "//third_party/googletest:gmock_main",
@@ -84,6 +86,7 @@ ohos_unittest("script_unittest") {
     "//utils/native/base:utils",
   ]
   configs = [ "$UPDATER_TEST_ROOT:utest_config" ]
+  external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
   install_enable = true
   part_name = "updater"
 }
