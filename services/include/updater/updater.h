@@ -68,5 +68,7 @@ bool ClearMisc();
 int GetBootMode(int &mode);
 
 int OtaUpdatePreCheck(Hpackage::PkgManager::PkgManagerPtr pkgManager, const std::string &packagePath);
+
+std::string GetWorkPath();
 } // Updater
 #endif /* UPDATER_UPDATER_H */

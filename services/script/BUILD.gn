@@ -28,9 +28,10 @@ config("script_config") {
 
   include_dirs = [
     "//base/update/updater/interfaces/kits/include",
+    "//base/update/updater/services/include/log",
     "//base/update/updater/services/include/package",
     "//base/update/updater/services/include/script",
-    "//base/update/updater/services/include/log",
+    "//base/update/updater/services/include/updater",
     "//base/update/updater/utils/include",
     "//third_party/bounds_checking_function/include",
     "script_instruction",

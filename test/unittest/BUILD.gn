@@ -126,6 +126,7 @@ ohos_unittest("updater_unittest") {
     "//base/update/updater/services/include/script",
     "//base/update/updater/services/include/log",
     "//base/update/updater/services/include/patch",
+    "//base/update/updater/services/include/updater",
     "//base/update/updater/services/script/script_instruction",
     "//base/update/updater/services/script/script_interpreter",
     "//base/update/updater/services/script/script_manager",
@@ -168,10 +169,12 @@ ohos_unittest("updater_unittest") {
     "//drivers/framework/include",
     "//drivers/peripheral/input/hal/include",
     "//drivers/peripheral/input/interfaces/include",
+    "//drivers/peripheral/partitionslot/hal/include",
     "//third_party/bounds_checking_function/include",
   ]
   deps = [
     "//base/update/updater/interfaces/kits/misc_info:libmiscinfo",
+    "//base/update/updater/interfaces/kits/slot_info:libslotinfo",
     "//base/update/updater/services/applypatch:libapplypatch",
     "//base/update/updater/services/diffpatch/diff:libdiff",
     "//base/update/updater/services/diffpatch/patch:libpatch",
@@ -180,6 +183,7 @@ ohos_unittest("updater_unittest") {
     "//base/update/updater/services/package:libupdaterpackage",
     "//base/update/updater/services/ui:libui",
     "//base/update/updater/utils:libutils",
+    "//drivers/peripheral/partitionslot/hal:libpartition_slot_manager",
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/bzip2:libbz2",
     "//third_party/cJSON:cjson_static",

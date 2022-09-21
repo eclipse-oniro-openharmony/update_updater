@@ -22,7 +22,7 @@
 #include <string>
 #include <unordered_map>
 #include "error_code.h"
-#ifdef DIFF_PATCH_SDK
+#ifndef DIFF_PATCH_SDK
 #include "hilog/log.h"
 #endif
 

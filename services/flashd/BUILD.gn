@@ -163,6 +163,7 @@ ohos_static_library("libflashd") {
     "//base/update/updater/utils/include",
     "//base/update/updater/utils/json",
     "//base/startup/init/services/include/param",
+    "//drivers/peripheral/partitionslot/hal/include",
     "//third_party/bounds_checking_function/include",
     "//third_party/cJSON",
     "//third_party/openssl/include",

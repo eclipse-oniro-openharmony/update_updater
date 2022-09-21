@@ -27,6 +27,7 @@
 #endif
 #include "script_instruction.h"
 #include "script_manager.h"
+#include "slot_info/slot_info.h"
 #include "update_image_block.h"
 #include "update_image_patch.h"
 #include "update_partitions.h"
@@ -241,6 +242,13 @@ int UScriptInstructionRawImageWrite::GetWritePathAndOffset(const std::string &pa
             partitionName.substr(1, partitionName.size()) << "\'.";
         return USCRIPT_ERROR_EXECUTE;
     }
+
+    if (partitionName != "/userdata") {
+        std::string suffix = "";
+        GetPartitionSuffix(suffix);
+        writePath += suffix;
+    }
+    LOG(INFO) << "write partition path: " << writePath;
 #endif
     return USCRIPT_SUCCESS;
 }
@@ -293,6 +301,9 @@ int ProcessUpdater(bool retry, int pipeFd, const std::string &packagePath, const
     fclose(pipeWrite);
     pipeWrite = nullptr;
 #endif
+    if (ret == 0) {
+        SetActiveSlot();
+    }
     return ret;
 }
 } // Updater

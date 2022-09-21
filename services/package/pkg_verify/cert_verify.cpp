@@ -22,10 +22,11 @@
 #include "utils.h"
 
 using namespace std;
+using namespace Updater;
 namespace Hpackage {
-namespace {
-constexpr const char *ROOT_CERT_PATH = "/certificate/signing_cert.crt";
-constexpr const char *ROOT_CERT_PATH_NORMAL = "/updater/certificate/signing_cert.crt";
+extern "C" __attribute__((constructor)) void RegisterCertHelper(void)
+{
+    CertVerify::GetInstance().RegisterCertHelper(std::make_unique<SingleCertHelper>());
 }
 
 void CertVerify::RegisterCertHelper(std::unique_ptr<CertHelper> ptr)
@@ -71,27 +72,19 @@ int32_t SingleCertHelper::CertChainCheck(STACK_OF(X509) *certStack, X509 *cert)
     return VerifySingleCert(cert);
 }
 
-std::string SingleCertHelper::GetCertName()
-{
-    struct stat st {};
-    if (stat("/bin/updater", &st) == 0 && S_ISREG(st.st_mode)) {
-        PKG_LOGE("updater mode");
-        return ROOT_CERT_PATH;
-    }
-    return ROOT_CERT_PATH_NORMAL;
-}
-
 int32_t SingleCertHelper::InitRootCert()
 {
-    X509 *rootCert = GetX509CertFromPemFile(GetCertName());
+#ifndef DIFF_PATCH_SDK
+    X509 *rootCert = GetX509CertFromPemFile(Utils::GetCertName());
     if (rootCert == nullptr) {
-        PKG_LOGE("Get root cert fail, file: %s", GetCertName().c_str());
+        PKG_LOGE("Get root cert fail, file: %s", Utils::GetCertName().c_str());
         UPDATER_LAST_WORD(-1);
         return -1;
     }
     rootInfo_.rootCert = rootCert;
     rootInfo_.subject = GetX509CertSubjectName(rootCert);
     rootInfo_.issuer = GetX509CertIssuerName(rootCert);
+#endif
 
     return 0;
 }
