@@ -34,16 +34,12 @@ const static std::string TEST_PATH_TO = "/data/fuzz/test/";
 
 static inline std::string GetTestCertName()
 {
-    std::string name = TEST_PATH_TO;
-    name += "signing_cert.crt";
-    return name;
+    return TEST_PATH_TO + "signing_cert.crt";
 }
 
 static inline std::string GetTestPrivateKeyName()
 {
-    std::string name = TEST_PATH_TO;
-    name += "rsa_private_key2048.pem";
-    return name;
+    return TEST_PATH_TO + "rsa_private_key2048.pem";
 }
 
 static int32_t BuildFileDigest(uint8_t &digest, size_t size, const std::string &packagePath)

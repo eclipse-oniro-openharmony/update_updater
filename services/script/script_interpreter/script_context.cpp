@@ -54,7 +54,7 @@ int32_t UScriptInstructionContext::GetParamCount()
     return innerParam_.size();
 }
 
-int32_t UScriptInstructionContext::GetParam(int32_t index, int &value)
+int32_t UScriptInstructionContext::GetParam(int32_t index, int32_t &value)
 {
     return GetParam<int32_t, IntegerValue>(index, value);
 }

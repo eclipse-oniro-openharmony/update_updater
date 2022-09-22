@@ -23,7 +23,9 @@ namespace Updater {
 void DrmDriver::Flip(const uint8_t *buf)
 {
     if (buff_.vaddr != MAP_FAILED) {
-        static_cast<void>(memcpy_s(buff_.vaddr, buff_.size, buf, buff_.size));
+        if (memcpy_s(buff_.vaddr, buff_.size, buf, buff_.size) != EOK) {
+            LOG(ERROR) << "memcpy_s faild";
+        }
     }
 }
 
@@ -186,7 +188,7 @@ drmModeConnector *DrmDriver::GetConnector(const drmModeRes &res, const int fd, u
     modeId = 0;
     for (int i = 0; i < conn->count_modes; i++) {
         if ((conn->modes[i].type & DRM_MODE_TYPE_PREFERRED) != 0) {
-            modeId = i;
+            modeId = static_cast<uint32_t>(i);
             break;
         }
     }
