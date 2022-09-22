@@ -83,10 +83,12 @@ ohos_unittest("script_unittest") {
     "//third_party/openssl:libcrypto_shared",
     "//third_party/openssl:ssl_source",
     "//third_party/zlib:libz",
-    "//utils/native/base:utils",
   ]
   configs = [ "$UPDATER_TEST_ROOT:utest_config" ]
-  external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+  external_deps = [
+    "c_utils:utils",
+    "hiviewdfx_hilog_native:libhilog",
+  ]
   install_enable = true
   part_name = "updater"
 }

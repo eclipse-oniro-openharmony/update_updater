@@ -1,0 +1,49 @@
+{
+    "id" : "menu",
+    "bgColor" : "#000000ff",
+    "coms" : [
+        {
+            "id" : "label_id_0",
+            "type" : "UILabel",
+            "text" : "Reboot to normal system",
+            "x" : 0,
+            "y" : 0,
+            "w" : 100,
+            "h" : 100,
+            "align" : "center",
+            "visible" : true,
+            "fontSize" : 10,
+            "bgColor" : "#ffffffff",
+            "fontColor" : "#ffffffff"
+        },
+        {
+            "id" : "image_view",
+            "type" : "UIImageView",
+            "x" : 0,
+            "y" : 0,
+            "w" : 100,
+            "h" : 100,
+            "parent" : "rootview",
+            "visible" : true,
+            "filePrefix" : "",
+            "resPath" : "/res/images",
+            "imgCnt" : 100,
+            "updInterval" : 1
+        },
+        {
+            "id" : "box_progress_0",
+            "type" : "UIBoxProgress",
+            "x" : 0,
+            "y" : 0,
+            "w" : 100,
+            "h" : 100,
+            "parent" : "rootview",
+            "visible" : true,
+            "defaultValue" : 10,
+            "bgColor" : "#ffffffff",
+            "fgColor" : "#ffffffff",
+            "endPoint" : "",
+            "hasEp" : false
+        }
+    ]
+}

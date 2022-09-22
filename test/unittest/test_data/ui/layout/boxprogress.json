@@ -1,0 +1,21 @@
+{
+    "id" : "menu",
+    "bgColor" : "#000000ff",
+    "coms" : [
+        {
+            "id" : "box_progress_0",
+            "type" : "UIBoxProgress",
+            "x" : 0,
+            "y" : 0,
+            "w" : 100,
+            "h" : 100,
+            "parent" : "menu",
+            "visible" : true,
+            "defaultValue" : 10,
+            "bgColor" : "#ffffffff",
+            "fgColor" : "#ffffffff",
+            "endPoint" : "",
+            "hasEp" : false
+        }
+    ]
+}

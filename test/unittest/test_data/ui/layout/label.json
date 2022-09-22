@@ -1,0 +1,21 @@
+{
+    "id" : "menu",
+    "bgColor" : "#000000ff",
+    "coms" : [
+        {
+            "id" : "label_id_0",
+            "type" : "UILabel",
+            "text" : "Reboot to normal system",
+            "x" : 0,
+            "y" : 0,
+            "w" : 100,
+            "h" : 100,
+            "parent" : "rootview",
+            "align" : "center",
+            "visible" : true,
+            "fontSize" : 10,
+            "bgColor" : "#ffffffff",
+            "fontColor" : "#ffffffff"
+        }
+    ]
+}

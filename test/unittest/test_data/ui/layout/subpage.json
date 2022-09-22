@@ -1,0 +1,16 @@
+{
+    "id" : "menu",
+    "bgColor" : "#000000ff",
+    "subpages" : [
+        {
+            "id" : "subpage1",
+            "coms" : [
+                "a",
+                "b",
+                "c"
+            ],
+            "bgColor" : "#000000ff"
+        }
+    ],
+    "coms" : []
+}
