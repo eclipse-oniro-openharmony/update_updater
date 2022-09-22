@@ -15,6 +15,7 @@
 
 #include <fstream>
 #include <vector>
+#include "file_ex.h"
 #include "gtest/gtest.h"
 #include "layout/layout_parser.h"
 #include "view_api.h"
@@ -257,7 +258,7 @@ HWTEST_F(UpdaterUiLayoutParserUnitTest, test_invalid_cases, TestSize.Level0)
     for (auto file : files) {
         std::vector<std::string> layoutFiles { file };
         std::vector<UxPageInfo> pageInfos {};
-        EXPECT_EQ(true, Fs::exists(Fs::path {file})) << file;
+        EXPECT_EQ(true, OHOS::FileExists(file)) << file;
         EXPECT_EQ(false, LayoutParser::GetInstance().LoadLayout(layoutFiles, pageInfos));
     }
 }
