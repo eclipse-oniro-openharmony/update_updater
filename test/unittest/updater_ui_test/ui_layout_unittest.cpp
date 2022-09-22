@@ -247,7 +247,6 @@ HWTEST_F(UpdaterUiLayoutParserUnitTest, test_load_sub_page_info, TestSize.Level0
     EXPECT_EQ(subPages[0].coms[0], "a");
     EXPECT_EQ(subPages[0].coms[1], "b");
     EXPECT_EQ(subPages[0].coms[2], "c");
-
 }
 
 HWTEST_F(UpdaterUiLayoutParserUnitTest, test_invalid_cases, TestSize.Level0)
