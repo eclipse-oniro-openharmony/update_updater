@@ -95,24 +95,24 @@ protected:
     // LWORD = 4 bytes (32 bits)
     inline uint32_t GET_LWORD_FROM_BYTE(const uint8_t *x)
     {
-        uint32_t res = (unsigned int)*(x) |
-            ((unsigned int)*(x + 1) << 8) |
-            ((unsigned int)*(x + 2) << 16) |
-            ((unsigned int)*(x + 3) << 24);
+        uint32_t res = static_cast<unsigned int>(*x) |
+            (static_cast<unsigned int>(*(x + 1)) << 8) |
+            (static_cast<unsigned int>(*(x + 2)) << 16) |
+            (static_cast<unsigned int>(*(x + 3)) << 24);
         return res;
     }
 
     // LLWORD = 8 bytes (64 bits)
     inline uint64_t GET_LLWORD_FROM_BYTE(const uint8_t *x)
     {
-        uint64_t res = (unsigned long long)*(x) |
-            ((unsigned long long)*(x + 1) << 8) |
-            ((unsigned long long)*(x + 2) << 16) |
-            ((unsigned long long)*(x + 3) << 24) |
-            ((unsigned long long)*(x + 4) << 32) |
-            ((unsigned long long)*(x + 5) << 40) |
-            ((unsigned long long)*(x + 6) << 48) |
-            ((unsigned long long)*(x + 7) << 56);
+        uint64_t res = static_cast<unsigned long long>(*x) |
+            (static_cast<unsigned long long>(*(x + 1)) << 8) |
+            (static_cast<unsigned long long>(*(x + 2)) << 16) |
+            (static_cast<unsigned long long>(*(x + 3)) << 24) |
+            (static_cast<unsigned long long>(*(x + 4)) << 32) |
+            (static_cast<unsigned long long>(*(x + 5)) << 40) |
+            (static_cast<unsigned long long>(*(x + 6)) << 48) |
+            (static_cast<unsigned long long>(*(x + 7)) << 56);
         return res;
     }
 

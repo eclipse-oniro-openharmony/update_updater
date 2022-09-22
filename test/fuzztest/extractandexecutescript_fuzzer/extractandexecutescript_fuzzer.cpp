@@ -43,16 +43,12 @@ const static int32_t SCRIPT_TEST_LAST_PRIORITY = 2;
 
 static inline std::string GetTestCertName()
 {
-    std::string name = TEST_PATH_TO;
-    name += "signing_cert.crt";
-    return name;
+    return TEST_PATH_TO + "signing_cert.crt";
 }
 
 static inline std::string GetTestPrivateKeyName()
 {
-    std::string name = TEST_PATH_TO;
-    name += "rsa_private_key2048.pem";
-    return name;
+    return TEST_PATH_TO + "rsa_private_key2048.pem";
 }
 
 class TestScriptInstructionSparseImageWrite : public uscript::UScriptInstruction {
@@ -239,8 +235,7 @@ protected:
             filePath = TEST_PATH_TO;
             filePath += inputFile[i].c_str();
             comp[i].filePath = strdup(filePath.c_str());
-            comp[i].version = strdup("55555555");
-
+            comp[i].version = strdup("555555555");
             ret = BuildFileDigest(*comp[i].digest, sizeof(comp[i].digest), filePath);
             comp[i].size = GetFileSize(filePath);
             comp[i].originalSize = comp[i].size;

@@ -38,7 +38,7 @@ public:
 private:
     int32_t ExtractAndExecuteScript(Hpackage::PkgManager::PkgManagerPtr manager,
         const std::string &scriptName);
-    int32_t AddScript(const std::string &instrName, int32_t priority);
+    int32_t AddScript(const std::string &scriptName, int32_t priority);
     int32_t AddInstruction(const std::string &instrName, const UScriptInstructionPtr instruction);
     UScriptInstruction* FindInstruction(const std::string &instrName);
     UScriptEnv* GetScriptEnv(const std::string &instrName) const;

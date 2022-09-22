@@ -497,6 +497,6 @@ HWTEST_F(FLashServiceUnitTest, TestFlashdMain, TestSize.Level1)
     const char* argv1[] = {"TestFlashdMain", "-t"};
     flashd_main(sizeof(argv1) / sizeof(char*), const_cast<char**>(argv1));
     const char *argv2[] = {"TestFlashdMain", "-u", " -l5"};
-    flashd_main(sizeof(argv2)/sizeof(char*), const_cast<char**>(argv2));
+    flashd_main(sizeof(argv2) / sizeof(char*), const_cast<char**>(argv2));
 }
 } // namespace
