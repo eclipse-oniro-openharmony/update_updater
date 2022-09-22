@@ -18,6 +18,13 @@
 #include "pkg_utils.h"
 #include "securec.h"
 
+#ifdef __APPLE__
+#define off64_t off_t
+#define fopen64 fopen
+#define ftello64 ftello
+#define fseeko64 fseek
+#endif
+
 namespace Hpackage {
 const std::string PkgStreamImpl::GetFileName() const
 {

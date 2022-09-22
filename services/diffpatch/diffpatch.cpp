@@ -15,7 +15,7 @@
 
 #include "diffpatch.h"
 #ifndef __WIN32
-#include <linux/limits.h>
+#include <climits>
 #include <sys/mman.h>
 #endif
 #include <cstdlib>
