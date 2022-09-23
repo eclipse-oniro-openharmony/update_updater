@@ -109,7 +109,7 @@ bool PkgFile::CheckState(std::vector<uint32_t> states, uint32_t state)
 int32_t PkgFile::ConvertBufferToString(std::string &fileName, const PkgBuffer &buffer)
 {
     for (uint32_t i = 0; i < buffer.length; ++i) {
-        if (buffer.buffer[i] < 32 || buffer.buffer[i] >= 127) { // should be printable character
+        if (buffer.buffer[i] < 32 || buffer.buffer[i] >= 127) { // 32, 127 : The boundary of printable character
             break;
         }
         fileName.push_back(buffer.buffer[i]);

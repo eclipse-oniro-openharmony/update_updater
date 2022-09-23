@@ -40,7 +40,7 @@ public:
     {
         loc = location();
     }
-    virtual ~Scanner() {}
+    ~Scanner() {} override
     // 不需要手动实现这个函数，Flex会生成YY_DECL宏定义的代码来实现这个函数
     virtual Uscript::Parser::symbol_type nextToken();
     virtual int yywrap()
@@ -48,7 +48,7 @@ public:
         return 1;
     }
 
-    virtual int LexerInput(char* buf, int maxSize);
+    virtual int LexerInput(char* buf, int maxSize) override;
 
     void SetPkgStream(Hpackage::PkgManager::StreamPtr pkgStream)
     {

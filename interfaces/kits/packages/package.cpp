@@ -117,7 +117,6 @@ int32_t GetLz4PkgInfo(PkgManager::PkgInfoPtr pkgInfo,
     }
     return PKG_SUCCESS;
 }
-}
 
 int32_t CreatePackage(const UpgradePkgInfoExt *pkgInfoExt,
     ComponentInfoExt compInfo[],
@@ -295,4 +294,5 @@ int32_t ExtraPackageFile(const char *packagePath, const char *keyPath, const cha
     manager->ClosePkgStream(outStream);
     PkgManager::ReleasePackageInstance(manager);
     return PKG_SUCCESS;
+}
 }
