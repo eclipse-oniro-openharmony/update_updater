@@ -125,6 +125,7 @@ ohos_static_library("libflashd") {
   deps = [
     ":flashd_deamon",
     "//base/update/updater/interfaces/kits/misc_info:libmiscinfo",
+    "//base/update/updater/interfaces/kits/slot_info:libslotinfo",
     "//base/update/updater/interfaces/kits/updaterkits:libupdaterkits",
     "//base/update/updater/services/applypatch:libapplypatch",
     "//base/update/updater/services/diffpatch/patch:libpatch",
