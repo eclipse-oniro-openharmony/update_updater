@@ -130,6 +130,7 @@ ohos_static_library("libflashd") {
     "//base/update/updater/services/applypatch:libapplypatch",
     "//base/update/updater/services/diffpatch/patch:libpatch",
     "//base/update/updater/services/fs_manager:libfsmanager",
+    "//base/update/updater/services/hdi/server:libupdate_hdi_impl",
     "//base/update/updater/services/log:libupdaterlog",
     "//base/update/updater/services/package:libupdaterpackage",
     "//base/update/updater/services/script:libupdaterscript",
