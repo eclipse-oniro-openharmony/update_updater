@@ -550,7 +550,7 @@ public:
         });
         PKG_CHECK(outStream != nullptr, close(fd); return -1, "Can not create stream ");
 
-        void* mappedData = mmap(nullptr, (size_t)fileSize, PROT_READ, MAP_SHARED, fd, 0);
+        void* mappedData = mmap(nullptr, fileSize, PROT_READ, MAP_SHARED, fd, 0);
         PKG_CHECK(mappedData != MAP_FAILED, close(fd); return -2, "Can not mmap ");
 
         size_t addrOffset = 4;
