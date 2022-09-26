@@ -47,7 +47,7 @@ public:
         std::string path = TEST_PATH_TO + testPackageName;
         int fd = open(GetTestCertName().c_str(), O_RDONLY);
         if (fd < 0) {
-            cout << GetTestCertName() << " open failed, fd = " << fd << endl;
+            LOG(ERROR) << GetTestCertName() << " open failed, fd = " << fd;
             return -1;
         } else {
             close(fd);
@@ -65,7 +65,7 @@ protected:
             mode_t mode = (S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
             mkdir(TEST_PATH_TO.c_str(), mode);
         }
-        InitUpdaterLogger("UPDATER ", "updater_log.log", "updater_status.log", "error_code.log");
+        InitUpdaterLogger("UPDATER", "updater_log.log", "updater_status.log", "error_code.log");
     }
     void TearDown() {}
     void TestBody() {}

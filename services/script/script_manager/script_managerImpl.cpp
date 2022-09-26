@@ -123,7 +123,7 @@ int32_t ScriptManagerImpl::ExtractAndExecuteScript(PkgManager::PkgManagerPtr man
 {
     PkgManager::StreamPtr outStream = nullptr;
     const std::string path = Updater::Utils::IsUpdaterMode() ? "" : Updater::UPDATER_PATH;
-    int32_t ret = manager->CreatePkgStream(outStream, path + scriptName, 0, PkgStream::PkgStreamType_Write);
+    int32_t ret = manager->CreatePkgStream(outStream, path + "/" + scriptName, 0, PkgStream::PkgStreamType_Write);
     USCRIPT_CHECK(ret == USCRIPT_SUCCESS, return ret, "Failed to create script stream %s", scriptName.c_str());
     ret = manager->ExtractFile(scriptName, outStream);
     USCRIPT_CHECK(ret == USCRIPT_SUCCESS, return ret, "Failed to extract script stream %s", scriptName.c_str());

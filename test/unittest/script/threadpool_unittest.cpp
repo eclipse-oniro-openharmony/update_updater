@@ -56,7 +56,7 @@ public:
         task.workSize = taskNumber;
         task.processor = [&](int iter) {
             for (size_t i = iter; i < taskNumberRound; i += taskNumber) {
-                printf("Run thread %zu %d \n", i, gettid());
+                LOG(INFO) << "Run thread " << i << " " << gettid();
             }
         };
         ThreadPool::AddTask(std::move(task));
