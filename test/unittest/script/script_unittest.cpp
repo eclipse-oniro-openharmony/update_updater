@@ -73,8 +73,7 @@ public:
         FILE *file = nullptr;
         std::string fileNameReal = fileName;
         char realPath[PATH_MAX + 1] = {};
-        if (!Updater::Utils::IsUpdaterMode())
-        {
+        if (!Updater::Utils::IsUpdaterMode()) {
             fileNameReal = fileName.substr(fileName.rfind("/"));
         }
         if (realpath((TEST_PATH_FROM + fileNameReal).c_str(), realPath) == nullptr) {
