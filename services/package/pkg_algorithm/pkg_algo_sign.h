@@ -44,7 +44,7 @@ class SignAlgorithm {
 public:
     using SignAlgorithmPtr = std::shared_ptr<SignAlgorithm>;
 
-    SignAlgorithm(std::string keyPath, uint8_t digestMethod) : keyName_(keyPath), digestMethod_(digestMethod) {}
+    SignAlgorithm(const std::string keyPath, uint8_t digestMethod) : keyName_(keyPath), digestMethod_(digestMethod) {}
 
     virtual ~SignAlgorithm() {}
 
@@ -60,7 +60,7 @@ protected:
 
 class VerifyAlgorithm : public SignAlgorithm {
 public:
-    VerifyAlgorithm(std::string keyPath, uint8_t digestMethod) : SignAlgorithm(keyPath, digestMethod) {}
+    VerifyAlgorithm(const std::string keyPath, uint8_t digestMethod) : SignAlgorithm(keyPath, digestMethod) {}
 
     ~VerifyAlgorithm() override {}
 

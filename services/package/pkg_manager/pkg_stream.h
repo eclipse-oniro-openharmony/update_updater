@@ -26,7 +26,7 @@ class PkgStreamImpl;
 using PkgStreamPtr = PkgStreamImpl *;
 class PkgStreamImpl : public PkgStream {
 public:
-    explicit PkgStreamImpl(PkgManager::PkgManagerPtr pkgManager, std::string fileName)
+    explicit PkgStreamImpl(PkgManager::PkgManagerPtr pkgManager, const std::string fileName)
         : fileName_(fileName), refCount_(0), pkgManager_(pkgManager) {}
 
     virtual ~PkgStreamImpl() {}
@@ -79,7 +79,7 @@ private:
 
 class FileStream : public PkgStreamImpl {
 public:
-    FileStream(PkgManager::PkgManagerPtr pkgManager, std::string fileName, FILE *stream, int32_t streamType)
+    FileStream(PkgManager::PkgManagerPtr pkgManager, const std::string fileName, FILE *stream, int32_t streamType)
         : PkgStreamImpl(pkgManager, fileName), stream_(stream), fileLength_(0), streamType_(streamType) {}
 
     ~FileStream() override;
@@ -107,7 +107,7 @@ private:
 
 class MemoryMapStream : public PkgStreamImpl {
 public:
-    MemoryMapStream(PkgManager::PkgManagerPtr pkgManager, std::string fileName, const PkgBuffer &buffer,
+    MemoryMapStream(PkgManager::PkgManagerPtr pkgManager, const std::string fileName, const PkgBuffer &buffer,
         int32_t streamType = PkgStreamType_MemoryMap) : PkgStreamImpl(pkgManager, fileName), memMap_(buffer.buffer),
         memSize_(buffer.length), currOffset_(0), streamType_(streamType) {}
     ~MemoryMapStream() override;
@@ -156,7 +156,7 @@ private:
 
 class ProcessorStream : public PkgStreamImpl {
 public:
-    ProcessorStream(PkgManager::PkgManagerPtr pkgManager, std::string fileName,
+    ProcessorStream(PkgManager::PkgManagerPtr pkgManager, const std::string fileName,
         ExtractFileProcessor processor, const void *context)
         : PkgStreamImpl(pkgManager, fileName), processor_(processor), context_(context) {}
 

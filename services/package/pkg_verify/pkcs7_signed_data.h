@@ -49,7 +49,7 @@ private:
     int32_t ParseContentInfo(std::vector<uint8_t> &digestBlock) const;
     int32_t GetDigestFromContentInfo(std::vector<uint8_t> &digestBlock);
     int32_t SignerInfosParse();
-    int32_t SignerInfoParse(PKCS7_SIGNER_INFO *p7SignerInfo, Pkcs7SignerInfo &signerInfo);
+    static int32_t SignerInfoParse(PKCS7_SIGNER_INFO *p7SignerInfo, Pkcs7SignerInfo &signerInfo);
     int32_t Pkcs7SignleSignerVerify(const Pkcs7SignerInfo &signerInfo) const;
     int32_t VerifyDigest(X509 *cert, const Pkcs7SignerInfo &signer) const;
 

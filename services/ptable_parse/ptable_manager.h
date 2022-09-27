@@ -46,12 +46,12 @@ protected:
     void InitPtablePtr();
     bool InitPtableManager();
     void SetDeviceStorageType();
-    bool IsUfsDevice();
+    static bool IsUfsDevice();
     bool IsPartitionChanged(const std::vector<Ptable::PtnInfo> &devicePtnInfo,
         const std::vector<Ptable::PtnInfo> &pkgPtnInfo, const std::string &partitionName);
-    bool IsPtableChanged(const std::vector<Ptable::PtnInfo> &devicePtnInfo,
+    static bool IsPtableChanged(const std::vector<Ptable::PtnInfo> &devicePtnInfo,
         const std::vector<Ptable::PtnInfo> &pkgPtnInfo);
-    int32_t GetPartitionInfoIndexByName(const std::vector<Ptable::PtnInfo> &ptnInfo, const std::string &name);
+    static int32_t GetPartitionInfoIndexByName(const std::vector<Ptable::PtnInfo> &ptnInfo, const std::string &name);
 
     StorageType GetDeviceStorageType();
 };
@@ -71,7 +71,7 @@ public:
 
 private:
     PackagePtable();
-    bool GetPtableBufferFromPkg(Hpackage::PkgManager *pkgManager, uint8_t *&imageBuf, uint32_t size);
+    static bool GetPtableBufferFromPkg(Hpackage::PkgManager *pkgManager, uint8_t *&imageBuf, uint32_t size);
 };
 
 

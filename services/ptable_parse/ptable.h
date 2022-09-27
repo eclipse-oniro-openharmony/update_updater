@@ -71,7 +71,7 @@ protected:
     static constexpr uint32_t GPT_ENTRYS_SIZE = 128 * 128;
 
     // set 32 bits data
-    inline void PUT_LONG(uint8_t *x, const uint32_t y)
+    static inline void PUT_LONG(uint8_t *x, const uint32_t y)
     {
         *(x) = (y) & 0xff;
         *((x) + 1) = ((y) >> 8) & 0xff;
@@ -80,7 +80,7 @@ protected:
     }
 
     // set 64 bits data
-    inline void PUT_LONG_LONG(uint8_t *x, const uint64_t y)
+    static inline void PUT_LONG_LONG(uint8_t *x, const uint64_t y)
     {
         *(x) = (y) & 0xff;
         *((x) + 1) = (((y) >> 8) & 0xff);
@@ -93,7 +93,7 @@ protected:
     }
 
     // LWORD = 4 bytes (32 bits)
-    inline uint32_t GET_LWORD_FROM_BYTE(const uint8_t *x)
+    static inline uint32_t GET_LWORD_FROM_BYTE(const uint8_t *x)
     {
         uint32_t res = (unsigned int)*(x) |
             ((unsigned int)*(x + 1) << 8) |
@@ -103,7 +103,7 @@ protected:
     }
 
     // LLWORD = 8 bytes (64 bits)
-    inline uint64_t GET_LLWORD_FROM_BYTE(const uint8_t *x)
+    static inline uint64_t GET_LLWORD_FROM_BYTE(const uint8_t *x)
     {
         uint64_t res = (unsigned long long)*(x) |
             ((unsigned long long)*(x + 1) << 8) |
@@ -139,20 +139,20 @@ protected:
     PtableData ptableData_;
 
     PtableData GetPtableData() const;
-    bool MemReadWithOffset(const std::string &filePath, const uint64_t offset,
+    static bool MemReadWithOffset(const std::string &filePath, const uint64_t offset,
         uint8_t *outData, const uint32_t dataSize);
     bool CheckProtectiveMbr(const uint8_t *gptImage, const uint32_t imgLen);
     bool CheckIfValidGpt(const uint8_t *gptImage, const uint32_t gptImageLen);
-    bool GetCapacity(const std::string &filePath, uint64_t &lunCapacity);
+    static bool GetCapacity(const std::string &filePath, uint64_t &lunCapacity);
     bool GetPartitionGptHeaderInfo(const uint8_t *buffer, const uint32_t bufferLen, GPTHeaderInfo& gptHeaderInfo);
     bool PartitionCheckGptHeader(const uint8_t *gptImage, const uint32_t len, const uint64_t lbaNum,
         const uint32_t blockSize, GPTHeaderInfo& gptHeaderInfo);
-    void ParsePartitionName(const uint8_t *data, const uint32_t dataLen,
+    static void ParsePartitionName(const uint8_t *data, const uint32_t dataLen,
         std::string &name, const uint32_t nameLen);
     uint32_t CalculateCrc32(const uint8_t *buffer, const uint32_t len);
     bool WritePtablePartition(const std::string &path, uint64_t offset, const uint8_t *buffer, uint32_t size);
-    bool CheckFileExist(const std::string &fileName);
-    bool WriteBufferToPath(const std::string &path, const uint64_t offset, const uint8_t *buffer, const uint32_t size);
+    static bool CheckFileExist(const std::string &fileName);
+    static bool WriteBufferToPath(const std::string &path, const uint64_t offset, const uint8_t *buffer, const uint32_t size);
 
 private:
     static constexpr uint64_t MBR_MAGIC_NUM_POS = 0x1FE;
@@ -172,12 +172,12 @@ private:
     static constexpr uint32_t PRIMARY_HEADER_OFFSET = 24;
     static constexpr uint32_t MIN_PARTITION_ARRAY_SIZE = 0x4000;
 
-    bool VerifyMbrMagicNum(const uint8_t *buffer, const uint32_t size);
-    uint32_t Reflect(uint32_t data, const uint32_t len);
+    static bool VerifyMbrMagicNum(const uint8_t *buffer, const uint32_t size);
+    static uint32_t Reflect(uint32_t data, const uint32_t len);
 
     bool CheckGptHeader(uint8_t *buffer, const uint32_t bufferLen, const uint64_t lbaNum,
         GPTHeaderInfo& gptHeaderInfo);
-    void SetPartitionName(const std::string &name, uint8_t *data, const uint32_t size);
+    static void SetPartitionName(const std::string &name, uint8_t *data, const uint32_t size);
     bool ParsePtableDataNode(const JsonNode &ptableDataNode);
     bool ParsePtableData();
 };
