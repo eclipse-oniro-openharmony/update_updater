@@ -109,6 +109,7 @@
             <option name="push" value="src/signing_cert.crt -> /data/updater/src" src="res"/>
             <option name="push" value="src/ecc/prime256v1-key.pem -> /data/updater/src/ecc" src="res"/>
             <option name="push" value="src/ecc/signing_cert.crt -> /data/updater/src/ecc" src="res"/>
+            <option name="push" value="package/test_package.zip -> /data/updater/package" src="res"/>
         </preparer>
     </target>
     <target name="script_unittest">

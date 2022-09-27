@@ -48,6 +48,7 @@ ohos_unittest("updater_unittest") {
     "updater_binary/update_image_block_test.cpp",
     "updater_binary/updater_binary_unittest.cpp",
     "updaterkits_test/updaterkits_unittest.cpp",
+    "package/pkg_verify_unittest.cpp",
   ]
 
   sources += [
