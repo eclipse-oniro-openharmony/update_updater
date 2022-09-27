@@ -45,6 +45,7 @@ ohos_unittest("updater_unittest") {
     "diffpatch/diffpatch_unittest.cpp",
     "log_test/log_unittest.cpp",
     "misc_info_test/misc_info_unittest.cpp",
+    "package/pkg_verify_unittest.cpp",
     "updater_binary/update_image_block_test.cpp",
     "updater_binary/updater_binary_unittest.cpp",
     "updaterkits_test/updaterkits_unittest.cpp",
