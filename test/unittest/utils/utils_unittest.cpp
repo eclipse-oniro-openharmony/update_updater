@@ -94,7 +94,7 @@ HWTEST_F(UtilsUnitTest, RemoveDirTest, TestSize.Level0)
         ofstream tmpFile;
         string filePath = path + "/tmpFile";
         tmpFile.open(filePath.c_str());
-        if (tmpFile) {
+        if (tmpFile.is_open()) {
             tmpFile.close();
             EXPECT_EQ(Utils::RemoveDir(path), true);
         }
