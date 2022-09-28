@@ -36,6 +36,7 @@ ohos_unittest("utils_test") {
     "//base/update/updater/utils/include",
     "//base/update/updater/utils/json",
     "//base/update/updater/services/ui",
+    "//base/update/updater/test/unittest",
     "//third_party/bounds_checking_function/include",
     "//third_party/cJSON",
   ]

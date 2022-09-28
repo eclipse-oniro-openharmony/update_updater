@@ -391,4 +391,11 @@ HWTEST_F(DiffPatchUnitTest, BlockDiffPatchTest_2, TestSize.Level1)
     testDate.push_back('a');
     EXPECT_EQ(0, UpdatePatch::WriteDataToFile("BlockDiffPatchTest_2.txt", testDate, testDate.size()));
 }
+
+HWTEST_F(DiffPatchUnitTest, PatchMapFileTest, TestSize.Level1)
+{
+    UpdatePatch::MemMapInfo data{};
+    string filePath = TEST_PATH_FROM + "diffpatch/non_exist.file";
+    EXPECT_EQ(-1, UpdatePatch::PatchMapFile(filePath, data));
+}
 }

@@ -16,7 +16,9 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <iostream>
+#include <fstream>
 #include <vector>
+#include <unittest_comm.h>
 #include "utils.h"
 
 using namespace Updater;
@@ -78,5 +80,29 @@ HWTEST_F(UtilsUnitTest, updater_utils_test_006, TestSize.Level0)
     std::vector<std::string> files;
     string path = "/data";
     Utils::GetFilesFromDirectory(path, files, true);
+}
+
+HWTEST_F(UtilsUnitTest, RemoveDirTest, TestSize.Level0)
+{
+    string path = "";
+    EXPECT_EQ(Utils::RemoveDir(path), false);
+    path = TEST_PATH_FROM + "../utils/nonExistDir";
+    EXPECT_EQ(Utils::RemoveDir(path), false);
+    path = "/data/updater/rmDir";
+    int ret = mkdir(path.c_str(), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
+    if (ret == 0) {
+        ofstream tmpFile;
+        string filePath = path + "/tmpFile";
+        tmpFile.open(filePath.c_str());
+        if (tmpFile.is_open()) {
+            tmpFile.close();
+            EXPECT_EQ(Utils::RemoveDir(path), true);
+        }
+    }
+}
+
+HWTEST_F(UtilsUnitTest, IsUpdaterMode, TestSize.Level0)
+{
+    EXPECT_EQ(Utils::IsUpdaterMode(), false);
 }
 } // updater_ut
