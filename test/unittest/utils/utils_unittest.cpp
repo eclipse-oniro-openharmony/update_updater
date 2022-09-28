@@ -90,7 +90,7 @@ HWTEST_F(UtilsUnitTest, RemoveDirTest, TestSize.Level0)
     EXPECT_EQ(Utils::RemoveDir(path), false);
     path = "/data/updater/rmDir";
     int ret = mkdir(path.c_str(), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
-    if (!ret) {
+    if (ret == 0) {
         ofstream tmpFile;
         string filePath = path + "/tmpFile";
         tmpFile.open(filePath.c_str());
