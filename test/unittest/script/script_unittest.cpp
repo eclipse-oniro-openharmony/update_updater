@@ -29,6 +29,7 @@
 #include "script/script_unittest.h"
 #include "script_utils.h"
 #include "unittest_comm.h"
+#include "utils.h"
 
 using namespace std;
 using namespace Hpackage;
@@ -70,13 +71,18 @@ public:
          size_t size, int32_t type) override
     {
         FILE *file = nullptr;
+        std::string fileNameReal = fileName;
         char realPath[PATH_MAX + 1] = {};
-        if (realpath((TEST_PATH_FROM + fileName).c_str(), realPath) == nullptr) {
+        if (!Updater::Utils::IsUpdaterMode()) {
+            fileNameReal = fileName.substr(fileName.rfind("/"));
+        }
+        if (realpath((TEST_PATH_FROM + fileNameReal).c_str(), realPath) == nullptr) {
+            LOG(ERROR) << fileNameReal << " realpath failed";
             return PKG_INVALID_FILE;
         }
         file = fopen(realPath, "rb");
-        PKG_CHECK(file != nullptr, return PKG_INVALID_FILE, "Fail to open file %s ", fileName.c_str());
-        stream = new FileStream(this, fileName, file, PkgStream::PkgStreamType_Read);
+        PKG_CHECK(file != nullptr, return PKG_INVALID_FILE, "Fail to open file %s ", fileNameReal.c_str());
+        stream = new FileStream(this, fileNameReal, file, PkgStream::PkgStreamType_Read);
         return USCRIPT_SUCCESS;
     }
     void ClosePkgStream(StreamPtr &stream) override

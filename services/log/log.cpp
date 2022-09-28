@@ -35,7 +35,7 @@ void InitUpdaterLogger(const std::string &tag, const std::string &logFile, const
 {
     g_logTag = tag;
 #ifndef DIFF_PATCH_SDK
-    g_logLabel.tag = tag.c_str();
+    g_logLabel.tag = g_logTag.c_str();
 #endif
     g_updaterLog.open(logFile.c_str(), std::ios::app | std::ios::out);
     g_updaterStage.open(stageFile.c_str(), std::ios::app | std::ios::out);

@@ -43,8 +43,8 @@ private:
     bool isRetry = false;
 };
 
-constexpr auto TEST_VALID_LIB_PATH = "/lib/libuser_instruction.so";
-constexpr auto TEST_INVALID_LIB_PATH = "/lib/libuser_instruction_invalid.so";
-constexpr auto TEST_NONEXIST_LIB_PATH = "/lib/other.so";
+constexpr auto TEST_VALID_LIB_PATH = "/system/lib/libuser_instruction.so";
+constexpr auto TEST_INVALID_LIB_PATH = "/system/lib/libuser_instruction_invalid.so";
+constexpr auto TEST_NONEXIST_LIB_PATH = "/system/lib/other.so"; // this lib doesn't exist
 }
 #endif // SCRIPT_INSTRUCTION_UNITTEST_H

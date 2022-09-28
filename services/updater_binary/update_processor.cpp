@@ -243,12 +243,14 @@ int UScriptInstructionRawImageWrite::GetWritePathAndOffset(const std::string &pa
         return USCRIPT_ERROR_EXECUTE;
     }
 
+#ifndef UPDATER_UT
     if (partitionName != "/userdata") {
         std::string suffix = "";
         GetPartitionSuffix(suffix);
         writePath += suffix;
     }
     LOG(INFO) << "write partition path: " << writePath;
+#endif
 #endif
     return USCRIPT_SUCCESS;
 }
@@ -300,10 +302,10 @@ int ProcessUpdater(bool retry, int pipeFd, const std::string &packagePath, const
 #ifndef UPDATER_UT
     fclose(pipeWrite);
     pipeWrite = nullptr;
-#endif
     if (ret == 0) {
         SetActiveSlot();
     }
+#endif
     return ret;
 }
 } // Updater
