@@ -33,6 +33,9 @@
 #include "package/pkg_manager.h"
 #include "package/packages_info.h"
 #include "parameter.h"
+#ifdef WITH_SELINUX
+#include <policycoreutils.h>
+#endif // WITH_SELINUX
 #ifdef UPDATER_USE_PTABLE
 #include "ptable_parse/ptable_manager.h"
 #endif
@@ -429,6 +432,10 @@ UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, const std::
 #endif
         UPDATER_ERROR_CHECK_NOT_RETURN(chmod(fullPath.c_str(), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) == 0,
             "Failed to change mode");
+
+#ifdef WITH_SELINUX
+        Restorecon(fullPath.c_str());
+#endif // WITH_SELINUX
 
         // Set process scheduler to normal if current scheduler is
         // SCHED_FIFO, which may cause bad performance.

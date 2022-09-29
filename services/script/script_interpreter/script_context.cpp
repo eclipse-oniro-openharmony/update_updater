@@ -77,14 +77,13 @@ int32_t UScriptInstructionContext::GetParam(int32_t index, T &value)
         LOG(ERROR) << "Invalid index " << index;
         return UScriptContext::PARAM_TYPE_INVALID;
     }
-    // check whether TWapper's type is same with inner param's type
-    TWapper v {T {}};
-    if (innerParam_[index].get()->GetValueType() != v.GetValueType()) {
+
+    // then perform cast between innerparam and TWapper
+    TWapper* inter = static_cast<TWapper*>(innerParam_[index].get());
+    if (inter == nullptr) {
         LOG(ERROR) << "Invalid index " << index;
         return USCRIPT_INVALID_PARAM;
     }
-    // then perform cast between innerparam and TWapper
-    TWapper* inter = static_cast<TWapper*>(innerParam_[index].get());
     value = inter->GetValue();
     return USCRIPT_SUCCESS;
 }
