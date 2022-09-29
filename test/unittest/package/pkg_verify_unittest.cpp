@@ -81,7 +81,7 @@ public:
         packagePath = "/data/updater/package/test_package.zip";
         keyPath = "/data/updater/src/signing_cert.crt";
         outPath = "/data/updater/package/";
-        ret = ExtraPackageFile(packagePath.c_str(), keyPath.c_str(), nullptr, outPath.c_str());
+        ret = ExtraPackageDir(packagePath.c_str(), keyPath.c_str(), nullptr, outPath.c_str());
         EXPECT_EQ(ret, PKG_SUCCESS);
         return 0;
     }
