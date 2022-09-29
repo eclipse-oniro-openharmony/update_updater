@@ -91,7 +91,7 @@ public:
 
     ~UpgradePkgFile() override {}
 
-    int32_t AddEntry(const PkgManager::FileInfoPtr file, const PkgStreamPtr input) override;
+    int32_t AddEntry(const PkgManager::FileInfoPtr file, const PkgStreamPtr inStream) override;
 
     int32_t SavePackage(size_t &signOffset) override;
 

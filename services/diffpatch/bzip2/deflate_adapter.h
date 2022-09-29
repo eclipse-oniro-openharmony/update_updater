@@ -23,10 +23,7 @@ class DeflateAdapter {
 public:
     static constexpr uint32_t BUFFER_SIZE = 1024 * 32;
     DeflateAdapter() = default;
-    virtual ~DeflateAdapter()
-    {
-        Close();
-    }
+    virtual ~DeflateAdapter() {}
 
     virtual int32_t Open()
     {
