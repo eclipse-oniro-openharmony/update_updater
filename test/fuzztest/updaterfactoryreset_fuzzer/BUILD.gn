@@ -55,7 +55,7 @@ ohos_fuzztest("UpdaterFactoryResetFuzzTest") {
     "//third_party/zlib:libz",
   ]
 
-  external_deps += [ "init:libbegetutil" ]
+  external_deps = [ "init:libbegetutil" ]
 
   cflags = [
     "-g",

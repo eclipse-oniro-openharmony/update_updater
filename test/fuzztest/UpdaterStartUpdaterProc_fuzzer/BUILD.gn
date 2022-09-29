@@ -57,7 +57,7 @@ ohos_fuzztest("UpdaterStartUpdaterProcFuzzTest") {
     "//third_party/zlib:libz",
   ]
 
-  external_deps += [ "drivers_interface_input:hdi_input" ]
+  external_deps = [ "drivers_interface_input:hdi_input" ]
 
   cflags = [
     "-g",
