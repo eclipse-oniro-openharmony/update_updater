@@ -46,7 +46,7 @@ private:
     ~LanguageUI() = default;
     LanguageUI();
     bool Parse();
-    static bool CheckLevel(int level);
+    bool CheckLevel(int level);
     bool ParseJson(const std::string &file);
     std::unordered_map<std::string, std::string> strMap_;
     std::vector<std::string> res_;
