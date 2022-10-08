@@ -20,13 +20,16 @@ base/update/updater/
 ├── resources           # 升级子系统用户界面图片资源目录
 ├── services            # 组件服务层代码目录
 │   ├── applypatch      # 升级包数据更新代码目录
+│   ├── diffpatch       # 差分还原代码目录
+│   ├── etc             # 启动相关配置文件目录
+│   ├── flashd          # flashd模式镜像写入和升级功代码目录
 │   ├── fs_manager      # 文件系统和分区管理代码目录
+│   ├── hdi             # 硬件相关接口定义
 │   ├── include         # 升级子系统头文件目录
 │   ├── log             # 升级子系统日志模块目录
 │   ├── package         # 升级包管理模块目录
+│   ├── ptable_parse    # 分区表解析代码目录
 │   ├── script          # 升级脚本管理目录
-│   ├── diffpatch       # 差分还原代码目录
-│   ├── sparse_image    # 稀疏镜像解析代码目录
 │   ├── ui              # 升级ui界面代码目录
 │   └── updater_binary  # 升级可执行程序目录
 ├── interfaces
