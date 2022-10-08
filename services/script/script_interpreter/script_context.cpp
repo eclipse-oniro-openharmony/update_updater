@@ -79,7 +79,7 @@ int32_t UScriptInstructionContext::GetParam(int32_t index, T &value)
     }
 
     // then perform cast between innerparam and TWapper
-    TWapper* inter = static_cast<TWapper*>(innerParam_[index].get());
+    TWapper *inter = static_cast<TWapper*>(innerParam_[index].get());
     if (inter == nullptr) {
         LOG(ERROR) << "Invalid index " << index;
         return USCRIPT_INVALID_PARAM;
