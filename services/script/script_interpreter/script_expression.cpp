@@ -23,7 +23,7 @@ namespace Uscript {
 UScriptExpression::UScriptExpression(ExpressionType expressType) : expressType_(expressType) {}
 UScriptExpression::~UScriptExpression() {}
 
-UScriptExpression* AssignExpression::CreateExpression(std::string identifier, UScriptExpression *expression)
+UScriptExpression* AssignExpression::CreateExpression(const std::string identifier, UScriptExpression *expression)
 {
     return new AssignExpression(identifier, expression);
 }
@@ -48,7 +48,7 @@ UScriptExpression* BinaryExpression::CreateExpression(ExpressionAction action,
 {
     return new BinaryExpression(action, left, right);
 }
-UScriptExpression* FunctionCallExpression::CreateExpression(std::string identifier, ScriptParams *params)
+UScriptExpression* FunctionCallExpression::CreateExpression(const std::string identifier, ScriptParams *params)
 {
     return new FunctionCallExpression(identifier, params);
 }

@@ -321,7 +321,7 @@ void DevicePtable::LoadPartitionInfo([[maybe_unused]] Hpackage::PkgManager *pkgM
     return;
 }
 
-bool DevicePtable::ComparePartition(PtableManager &newPtbManager, std::string partitionName)
+bool DevicePtable::ComparePartition(PtableManager &newPtbManager, const std::string partitionName)
 {
     if (pPtable_ == nullptr || newPtbManager.pPtable_ == nullptr) {
         LOG(ERROR) << "input pPtable point is nullptr, compare failed!";
