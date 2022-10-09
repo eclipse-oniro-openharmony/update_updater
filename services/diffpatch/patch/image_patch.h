@@ -117,10 +117,7 @@ class CompressedFileRestore : public UpdatePatchWriter {
 public:
     CompressedFileRestore(Hpackage::PkgManager::FileInfoPtr fileInfo, UpdatePatchWriterPtr writer)
         : UpdatePatchWriter(), fileInfo_(fileInfo), writer_(writer) {}
-    ~CompressedFileRestore() override
-    {
-        Finish();
-    }
+    ~CompressedFileRestore() override {}
 
     int32_t Init() override;
     int32_t Write(size_t start, const BlockBuffer &buffer, size_t len) override;

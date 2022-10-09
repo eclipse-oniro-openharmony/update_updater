@@ -37,7 +37,7 @@ size_t DigestAlgorithm::GetSignatureLen(int8_t digestMethod)
     return SIGN_SHA256_LEN;
 }
 
-uint8_t DigestAlgorithm::GetDigestMethod(std::string version)
+uint8_t DigestAlgorithm::GetDigestMethod(const std::string version)
 {
     return PKG_DIGEST_TYPE_SHA256;
 }

@@ -43,7 +43,7 @@ struct BufferObject {
 class DrmDriver : public GraphicDrv {
     DISALLOW_COPY_MOVE(DrmDriver);
 public:
-    DrmDriver() : fd_(-1), conn_(nullptr), res_(nullptr), crtc_(nullptr) {}
+    DrmDriver() : conn_(nullptr), res_(nullptr), crtc_(nullptr) {}
     ~DrmDriver() override;
     bool Init() override;
     void Flip(const uint8_t *buf) override;
@@ -58,7 +58,6 @@ private:
     drmModeConnector *GetConnector(const drmModeRes &res, const int fd, uint32_t &modeId) const;
     drmModeRes *GetResources(int &fd) const;
     drmModeRes *GetOneResources(const int devIndex, int &fd) const;
-    int fd_;
     drmModeConnector *conn_;
     drmModeRes *res_;
     drmModeCrtc *crtc_;

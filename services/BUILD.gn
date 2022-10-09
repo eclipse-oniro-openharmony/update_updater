@@ -138,6 +138,10 @@ ohos_static_library("libupdater") {
   }
 
   external_deps = [ "init:libbegetutil" ]
+  if (build_selinux) {
+    external_deps += [ "selinux:librestorecon" ]
+    cflags = [ "-DWITH_SELINUX" ]
+  }
 
   subsystem_name = "updater"
   part_name = "updater"

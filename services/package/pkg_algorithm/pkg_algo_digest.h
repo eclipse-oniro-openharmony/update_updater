@@ -60,7 +60,7 @@ public:
 
     static size_t GetDigestLen(int8_t digestMethod);
     static size_t GetSignatureLen(int8_t digestMethod);
-    static uint8_t GetDigestMethod(std::string version);
+    static uint8_t GetDigestMethod(const std::string version);
 };
 
 class Crc32Algorithm : public DigestAlgorithm {

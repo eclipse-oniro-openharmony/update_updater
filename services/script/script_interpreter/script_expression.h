@@ -112,14 +112,14 @@ private:
 
 class StringExpression : public UScriptExpression {
 public:
-    explicit StringExpression(std::string str) : UScriptExpression(UScriptExpression::EXPRESSION_TYPE_STRING),
+    explicit StringExpression(const std::string str) : UScriptExpression(UScriptExpression::EXPRESSION_TYPE_STRING),
         value_(str) {}
 
     ~StringExpression() override {}
 
     UScriptValuePtr Execute(ScriptInterpreter &inter, UScriptContextPtr local) override;
 
-    static UScriptExpression* CreateExpression(std::string value)
+    static UScriptExpression* CreateExpression(const std::string value)
     {
         return new StringExpression(value);
     }
@@ -129,14 +129,14 @@ private:
 
 class IdentifierExpression : public UScriptExpression {
 public:
-    explicit IdentifierExpression(std::string str)
+    explicit IdentifierExpression(const std::string str)
         : UScriptExpression(UScriptExpression::EXPRESSION_TYPE_IDENTIFIER), identifier_(str) {}
 
     ~IdentifierExpression() override {}
 
     UScriptValuePtr Execute(ScriptInterpreter &inter, UScriptContextPtr local) override;
 
-    static UScriptExpression* CreateExpression(std::string value)
+    static UScriptExpression* CreateExpression(const std::string value)
     {
         return new IdentifierExpression(value);
     }
@@ -170,7 +170,7 @@ private:
 
 class AssignExpression : public UScriptExpression {
 public:
-    AssignExpression(std::string identifier, UScriptExpression *expression)
+    AssignExpression(const std::string identifier, UScriptExpression *expression)
         : UScriptExpression(UScriptExpression::EXPRESSION_TYPE_ASSIGN), identifier_(identifier),
         expression_(expression) {}
 
@@ -178,9 +178,9 @@ public:
 
     UScriptValuePtr Execute(ScriptInterpreter &inter, UScriptContextPtr local) override;
 
-    void AddIdentifier(const std::string &identifiers);
+    void AddIdentifier(const std::string &identifier);
 
-    static UScriptExpression* CreateExpression(std::string identifier, UScriptExpression *expression);
+    static UScriptExpression* CreateExpression(const std::string identifier, UScriptExpression *expression);
     static UScriptExpression* AddIdentifier(UScriptExpression *expression, std::string identifier);
 private:
     std::string identifier_;
@@ -190,14 +190,14 @@ private:
 
 class FunctionCallExpression : public UScriptExpression {
 public:
-    FunctionCallExpression(std::string identifier, ScriptParams *params)
+    FunctionCallExpression(const std::string identifier, ScriptParams *params)
         : UScriptExpression(UScriptExpression::EXPRESSION_TYPE_FUNC), functionName_(identifier), params_(params) {}
 
     ~FunctionCallExpression() override;
 
     UScriptValuePtr Execute(ScriptInterpreter &inter, UScriptContextPtr local) override;
 
-    static UScriptExpression* CreateExpression(std::string identifier, ScriptParams *params);
+    static UScriptExpression* CreateExpression(const std::string identifier, ScriptParams *params);
 private:
     std::string functionName_;
     ScriptParams* params_ = nullptr;

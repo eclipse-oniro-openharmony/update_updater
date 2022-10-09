@@ -30,10 +30,10 @@ public:
         size_t &signatureSize) const;
 
 private:
-    int32_t ParsePkgFooter(const uint8_t *footer, size_t length, uint16_t &commentAppendLen,
-        uint16_t &commentTotalLen) const;
+    int32_t ParsePkgFooter(const uint8_t *footer, size_t length, uint16_t &signCommentAppendLen,
+        uint16_t &signCommentTotalLen) const;
 
-    int32_t CheckZipEocd(const uint8_t *eocd, size_t length, uint16_t commentTotalLen) const;
+    int32_t CheckZipEocd(const uint8_t *eocd, size_t length, uint16_t signCommentTotalLen) const;
 };
 } // namespace Hpackage
 #endif

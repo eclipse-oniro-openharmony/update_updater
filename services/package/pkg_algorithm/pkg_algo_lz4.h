@@ -54,9 +54,9 @@ protected:
     int32_t GetUnpackParam(LZ4F_decompressionContext_t &ctx,
         const PkgStreamPtr inStream, size_t &nextToRead, size_t &srcOffset);
 
-    int32_t AdpLz4Compress(const uint8_t *src, uint8_t *dst, uint32_t srcSize, uint32_t dstCapacity) const;
+    int32_t AdpLz4Compress(const uint8_t *src, uint8_t *dest, uint32_t srcSize, uint32_t dstCapacity) const;
 
-    int32_t AdpLz4Decompress(const uint8_t *src, uint8_t *dst, uint32_t srcSize, uint32_t dstCapacity) const;
+    int32_t AdpLz4Decompress(const uint8_t *src, uint8_t *dest, uint32_t srcSize, uint32_t dstCapacity) const;
 
 protected:
     int8_t compressionLevel_ {0};
