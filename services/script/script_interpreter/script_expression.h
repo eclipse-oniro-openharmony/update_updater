@@ -178,7 +178,7 @@ public:
 
     UScriptValuePtr Execute(ScriptInterpreter &inter, UScriptContextPtr local) override;
 
-    void AddIdentifier(const std::string &identifiers);
+    void AddIdentifier(const std::string &identifier);
 
     static UScriptExpression* CreateExpression(const std::string identifier, UScriptExpression *expression);
     static UScriptExpression* AddIdentifier(UScriptExpression *expression, std::string identifier);

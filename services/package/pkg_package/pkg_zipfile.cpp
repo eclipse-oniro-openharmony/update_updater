@@ -261,9 +261,6 @@ int32_t ZipFileEntry::Pack(PkgStreamPtr inStream, size_t startOffset, size_t &en
     }, nameLen);
 
     size_t headerLen = nameLen + sizeof(LocalFileHeader);
-    if (ZIP_PKG_ALIGNMENT_DEF != 0 && ((startOffset + headerLen) & (ZIP_PKG_ALIGNMENT_DEF - 1))) {
-        headerLen += ZIP_PKG_ALIGNMENT_DEF - ((startOffset + headerLen) % ZIP_PKG_ALIGNMENT_DEF);
-    }
     bool hasDataDesc = true;
     if (fileInfo_.method == Z_DEFLATED) {
 #ifndef UPDATER_UT

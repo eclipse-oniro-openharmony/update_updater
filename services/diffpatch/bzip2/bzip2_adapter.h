@@ -66,10 +66,7 @@ private:
 class BZip2ReadAdapter {
 public:
     BZip2ReadAdapter(size_t offset, size_t length) : offset_(offset), dataLength_(length) {}
-    virtual ~BZip2ReadAdapter()
-    {
-        Close();
-    }
+    virtual ~BZip2ReadAdapter() {}
 
     virtual int32_t Open() = 0;
     virtual int32_t Close()

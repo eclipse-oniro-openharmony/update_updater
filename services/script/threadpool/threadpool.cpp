@@ -27,10 +27,8 @@ ThreadPool* ThreadPool::CreateThreadPool(int number)
     if (g_threadPool != nullptr) {
         return g_threadPool;
     }
-    if (g_threadPool == nullptr) {
-        g_threadPool = new ThreadPool();
-        g_threadPool->Init(number);
-    }
+    g_threadPool = new ThreadPool();
+    g_threadPool->Init(number);
     return g_threadPool;
 }
 
