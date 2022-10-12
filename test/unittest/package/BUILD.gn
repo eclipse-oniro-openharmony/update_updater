@@ -1,0 +1,87 @@
+# Copyright (c) 2022 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/test.gni")
+
+UPDATER_TEST_ROOT = "//base/update/updater/test/unittest"
+
+MODULE_OUTPUT_PATH = "updater/updater_test"
+
+ohos_unittest("package_unittest") {
+  testonly = true
+  module_out_path = MODULE_OUTPUT_PATH
+  sources = [ "pkg_verify_unittest.cpp" ]
+
+  sources += [
+    "//base/update/updater/interfaces/kits/packages/package.cpp",
+    "//base/update/updater/services/package/pkg_algorithm/pkg_algo_deflate.cpp",
+    "//base/update/updater/services/package/pkg_algorithm/pkg_algo_digest.cpp",
+    "//base/update/updater/services/package/pkg_algorithm/pkg_algo_lz4.cpp",
+    "//base/update/updater/services/package/pkg_algorithm/pkg_algo_sign.cpp",
+    "//base/update/updater/services/package/pkg_algorithm/pkg_algorithm.cpp",
+    "//base/update/updater/services/package/pkg_manager/pkg_managerImpl.cpp",
+    "//base/update/updater/services/package/pkg_manager/pkg_stream.cpp",
+    "//base/update/updater/services/package/pkg_manager/pkg_utils.cpp",
+    "//base/update/updater/services/package/pkg_package/packages_info.cpp",
+    "//base/update/updater/services/package/pkg_package/pkg_gzipfile.cpp",
+    "//base/update/updater/services/package/pkg_package/pkg_lz4file.cpp",
+    "//base/update/updater/services/package/pkg_package/pkg_pkgfile.cpp",
+    "//base/update/updater/services/package/pkg_package/pkg_upgradefile.cpp",
+    "//base/update/updater/services/package/pkg_package/pkg_zipfile.cpp",
+    "//base/update/updater/services/package/pkg_verify/cert_verify.cpp",
+    "//base/update/updater/services/package/pkg_verify/openssl_util.cpp",
+    "//base/update/updater/services/package/pkg_verify/pkcs7_signed_data.cpp",
+    "//base/update/updater/services/package/pkg_verify/pkg_verify_util.cpp",
+    "//base/update/updater/services/package/pkg_verify/zip_pkg_parse.cpp",
+  ]
+
+  include_dirs = [
+    "//base/update/updater/interfaces/kits/include",
+    "//base/update/updater/interfaces/kits/include/package",
+    "//base/update/updater/services/include",
+    "//base/update/updater/services/include/package",
+    "//base/update/updater/services/include/script",
+    "//base/update/updater/services/include/log",
+    "//base/update/updater/services/package/pkg_algorithm",
+    "//base/update/updater/services/package/pkg_manager",
+    "//base/update/updater/services/package/pkg_package",
+    "//base/update/updater/services/package/pkg_verify",
+    "//base/update/updater/test/unittest",
+    "//base/update/updater/utils/include",
+    "//third_party/bounds_checking_function/include",
+    "//third_party/lz4/lib",
+    "//third_party/openssl/include",
+    "//third_party/zlib",
+  ]
+
+  deps = [
+    "//base/update/updater/interfaces/kits/packages:libpackageExt",
+    "//base/update/updater/services/log:libupdaterlog",
+    "//base/update/updater/services/package:libupdaterpackage",
+    "//base/update/updater/utils:libutils",
+    "//third_party/bounds_checking_function:libsec_static",
+    "//third_party/bzip2:libbz2",
+    "//third_party/googletest:gmock_main",
+    "//third_party/googletest:gtest_main",
+    "//third_party/lz4:liblz4_static",
+    "//third_party/openssl:libcrypto_shared",
+    "//third_party/zlib:libz",
+  ]
+  configs = [ "$UPDATER_TEST_ROOT:utest_config" ]
+  external_deps = [
+    "c_utils:utils",
+    "hiviewdfx_hilog_native:libhilog",
+  ]
+  install_enable = true
+  part_name = "updater"
+}

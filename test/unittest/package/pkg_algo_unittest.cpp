@@ -148,7 +148,7 @@ public:
         ret = algorithm->SignBuffer(digest, signature, signLen);
         EXPECT_EQ(ret, PKG_SUCCESS);
 
-        ret = algorithm->VerifyBuffer(digest.data, signature);
+        ret = algorithm->VerifyDigest(digest.data, signature);
         EXPECT_EQ(ret, PKG_INVALID_SIGNATURE);
 
         filePath = TEST_PATH_FROM + certName;
@@ -157,7 +157,7 @@ public:
         ret = algorithm->SignBuffer(digest, signature, signLen);
         EXPECT_EQ(ret, PKG_INVALID_SIGNATURE);
 
-        ret = algorithm->VerifyBuffer(digest.data, signature);
+        ret = algorithm->VerifyDigest(digest.data, signature);
         EXPECT_EQ(ret, PKG_SUCCESS);
         return 0;
     }
@@ -283,7 +283,7 @@ HWTEST_F(PkgAlgoUnitTest, TestPkgAlgoDeflate, TestSize.Level1)
     SignAlgorithmEcc *a12 = new SignAlgorithmEcc("cc", 0);
     std::vector<uint8_t> b1;
     std::vector<uint8_t> b2;
-    int32_t ret = a12->VerifyBuffer(b1, b2);
+    int32_t ret = a12->VerifyDigest(b1, b2);
     delete a12;
     EXPECT_EQ(ret, PKG_INVALID_SIGNATURE);
 }
