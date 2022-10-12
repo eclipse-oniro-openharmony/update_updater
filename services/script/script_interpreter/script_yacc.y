@@ -20,7 +20,7 @@
 %require "3.0.4"
 
 %define api.namespace {Uscript} //声明命名空间与下面声明的类名结合使用 Uscript::Parser::  在scanner.l中有体现
-%define api.parser.class { Parser }
+%define parser_class_name { Parser }
 %define api.token.constructor
 %define api.value.type variant //使得类型与token定义可以使用各种复杂的结构与类型
 %defines  //生成各种头文件  location.hh position.hh  parser.hpp
