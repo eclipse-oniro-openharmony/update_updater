@@ -28,6 +28,8 @@ config("utest_config") {
   cflags_cc = [ "-Wno-implicit-fallthrough" ]
 
   ldflags = [ "--coverage" ]
+
+  configs = [ "//build/config/compiler:exceptions" ]
 }
 
 ohos_unittest("updater_unittest") {
@@ -51,6 +53,8 @@ ohos_unittest("updater_unittest") {
   ]
 
   sources += [
+    "$root_out_dir/updater/updater/yacc/lexer.cpp",
+    "$root_out_dir/updater/updater/yacc/parser.cpp",
     "//base/update/updater/interfaces/kits/misc_info/misc_info.cpp",
     "//base/update/updater/interfaces/kits/packages/package.cpp",
     "//base/update/updater/interfaces/kits/updaterkits/updaterkits.cpp",
@@ -105,8 +109,6 @@ ohos_unittest("updater_unittest") {
     "//base/update/updater/services/script/script_manager/script_managerImpl.cpp",
     "//base/update/updater/services/script/script_manager/script_utils.cpp",
     "//base/update/updater/services/script/threadpool/threadpool.cpp",
-    "//base/update/updater/services/script/yacc/lexer.cpp",
-    "//base/update/updater/services/script/yacc/parser.cpp",
     "//base/update/updater/services/updater_binary/update_image_block.cpp",
     "//base/update/updater/services/updater_binary/update_image_patch.cpp",
     "//base/update/updater/services/updater_binary/update_partitions.cpp",
@@ -131,7 +133,7 @@ ohos_unittest("updater_unittest") {
     "//base/update/updater/services/script/script_interpreter",
     "//base/update/updater/services/script/script_manager",
     "//base/update/updater/services/script/threadpool",
-    "//base/update/updater/services/script/yacc",
+    "$root_out_dir/updater/updater/yacc",
     "//base/update/updater/services/package/pkg_algorithm",
     "//base/update/updater/services/package/pkg_manager",
     "//base/update/updater/services/package/pkg_package",
@@ -195,6 +197,7 @@ ohos_unittest("updater_unittest") {
   ]
 
   deps += [
+    "//base/update/updater/services/script:gen_yacc",
     "//base/update/updater/test/unittest:test_update_binary",
     "//base/update/updater/test/unittest:test_update_binary_abnormal",
   ]

@@ -33,6 +33,8 @@ ohos_unittest("script_unittest") {
     "threadpool_unittest.cpp",
   ]
   sources += [
+    "$root_out_dir/updater/updater/yacc/lexer.cpp",
+    "$root_out_dir/updater/updater/yacc/parser.cpp",
     "//base/update/updater/services/script/script_instruction/script_basicinstruction.cpp",
     "//base/update/updater/services/script/script_instruction/script_instructionhelper.cpp",
     "//base/update/updater/services/script/script_instruction/script_loadscript.cpp",
@@ -48,8 +50,6 @@ ohos_unittest("script_unittest") {
     "//base/update/updater/services/script/script_manager/script_managerImpl.cpp",
     "//base/update/updater/services/script/script_manager/script_utils.cpp",
     "//base/update/updater/services/script/threadpool/threadpool.cpp",
-    "//base/update/updater/services/script/yacc/lexer.cpp",
-    "//base/update/updater/services/script/yacc/parser.cpp",
   ]
   include_dirs = [
     "//base/update/updater/interfaces/kits/include",
@@ -63,7 +63,7 @@ ohos_unittest("script_unittest") {
     "//base/update/updater/services/script/script_interpreter",
     "//base/update/updater/services/script/script_manager",
     "//base/update/updater/services/script/threadpool",
-    "//base/update/updater/services/script/yacc",
+    "$root_out_dir/updater/updater/yacc",
     "//base/update/updater/test/unittest",
     "//base/update/updater/utils/include",
     "//third_party/bounds_checking_function/include",
@@ -74,6 +74,7 @@ ohos_unittest("script_unittest") {
     "//base/update/updater/interfaces/kits/packages:libpackageExt",
     "//base/update/updater/services/log:libupdaterlog",
     "//base/update/updater/services/package:libupdaterpackage",
+    "//base/update/updater/services/script:gen_yacc",
     "//base/update/updater/utils:libutils",
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/bzip2:libbz2",
