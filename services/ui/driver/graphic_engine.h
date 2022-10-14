@@ -30,7 +30,7 @@ public:
     GraphicEngine() = default;
     virtual ~GraphicEngine() = default;
     static GraphicEngine &GetInstance();
-    void Init(uint32_t bkgColor, uint8_t mode);
+    void Init(uint32_t bkgColor, uint8_t mode, const char *fontPath);
     void Flush(const OHOS::Rect& flushRect) override;
     OHOS::BufferInfo *GetFBBufferInfo() override;
     uint16_t GetScreenWidth() override;
@@ -38,7 +38,7 @@ public:
 
 private:
     void FlushThreadLoop() const;
-    void InitFontEngine() const;
+    void InitFontEngine(const char *fontPath) const;
     void InitImageDecodeAbility() const;
     void InitFlushThread();
     std::thread flushLoop_;
