@@ -107,6 +107,15 @@ public:
             std::vector<UScriptValuePtr> output = context.GetOutVar();
             EXPECT_EQ(output.size(), 0);
         }
+        {
+            MockUScriptEnv env {nullptr};
+            UScriptInstructionContext context {};
+            AddInputParam(context, "this is a test", 1);
+            auto instruction = std::make_unique<UScriptInstructionIsSubString>();
+            EXPECT_EQ(instruction->Execute(env, context), USCRIPT_INVALID_PARAM);
+            std::vector<UScriptValuePtr> output = context.GetOutVar();
+            EXPECT_EQ(output.size(), 0);
+        }
     }
     void TestBasicInstructionStdout() const
     {
@@ -163,6 +172,10 @@ public:
             EXPECT_EQ(instruction->Execute(env, context), UScriptContext::PARAM_TYPE_INVALID);
         }
         {
+            UScriptInstructionContext context1 {};
+            AddInputParam(context1, 1);
+            auto instruction1 = std::make_unique<UScriptInstructionConcat>();
+            EXPECT_EQ(instruction1->Execute(env, context1), USCRIPT_INVALID_PARAM);
             UScriptInstructionContext context2 {};
             AddInputParam(context2, "test");
             auto instruction2 = std::make_unique<UScriptInstructionConcat>();
@@ -180,6 +193,12 @@ public:
             UScriptInstructionContext context {};
             auto instruction = std::make_unique<UScriptInstructionAbort>();
             EXPECT_EQ(instruction->Execute(env, context), UScriptContext::PARAM_TYPE_INVALID);
+        }
+        {
+            UScriptInstructionContext context {};
+            AddInputParam(context, 1.0);
+            auto instruction = std::make_unique<UScriptInstructionSleep>();
+            EXPECT_EQ(instruction->Execute(env, context), USCRIPT_INVALID_PARAM);
         }
         {
             UScriptInstructionContext context {};
