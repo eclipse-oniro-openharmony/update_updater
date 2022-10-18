@@ -35,11 +35,11 @@ GraphicEngine &GraphicEngine::GetInstance()
     return instance;
 }
 
-void GraphicEngine::Init(uint32_t bkgColor, uint8_t mode)
+void GraphicEngine::Init(uint32_t bkgColor, uint8_t mode, const char *fontPath)
 {
     bkgColor_ = bkgColor;
     colorMode_ = mode;
-    [[maybe_unused]] static bool initOnce = [this] () {
+    [[maybe_unused]] static bool initOnce = [this, fontPath] () {
         sfDev_ = std::make_unique<SurfaceDev>();
         if (!sfDev_->Init()) {
             LOG(INFO) << "GraphicEngine Init failed!";
@@ -48,7 +48,7 @@ void GraphicEngine::Init(uint32_t bkgColor, uint8_t mode)
         sfDev_->GetScreenSize(width_, height_);
         buffInfo_ = nullptr;
         virAddr_ = nullptr;
-        InitFontEngine();
+        InitFontEngine(fontPath);
         InitImageDecodeAbility();
         InitFlushThread();
         LOG(INFO) << "GraphicEngine Init width: " << width_ << ", height: " << height_ << ", bkgColor: " << bkgColor_;
@@ -56,13 +56,13 @@ void GraphicEngine::Init(uint32_t bkgColor, uint8_t mode)
     } ();
 }
 
-void GraphicEngine::InitFontEngine() const
+void GraphicEngine::InitFontEngine(const char *fontPath) const
 {
     constexpr uint32_t uiFontMemAlignment = 4;
     static uint32_t fontMemBaseAddr[OHOS::MIN_FONT_PSRAM_LENGTH / uiFontMemAlignment];
     OHOS::GraphicStartUp::InitFontEngine(reinterpret_cast<uintptr_t>(fontMemBaseAddr), OHOS::MIN_FONT_PSRAM_LENGTH,
-        VECTOR_FONT_DIR, DEFAULT_FONT_FILENAME);
-    LOG(INFO) << "InitFontEngine VECTOR_FONT_DIR: " << VECTOR_FONT_DIR << DEFAULT_FONT_FILENAME;
+        fontPath, DEFAULT_FONT_FILENAME);
+    LOG(INFO) << "InitFontEngine VECTOR_FONT_DIR: " << fontPath << DEFAULT_FONT_FILENAME;
 }
 
 void GraphicEngine::InitImageDecodeAbility() const
