@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 #include "pkg_utils.h"
-#ifdef __WIN32
+#ifdef _WIN32
 #include <windows.h>
 #else
-#include <linux/limits.h>
+#include <climits>
 #include <sys/mman.h>
 #endif
 #include <cstring>
@@ -26,8 +26,12 @@
 #include "utils.h"
 
 namespace Hpackage {
-#ifdef __WIN32
+#ifdef _WIN32
 #undef ERROR
+#endif
+
+#ifdef __APPLE__
+#define MAP_POPULATE 0x08000
 #endif
 
 constexpr int32_t MIN_YEAR = 80;
