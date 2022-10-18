@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//base/startup/init/begetd.gni")
 import("//base/update/updater/updater_default_cfg.gni")
 import("//build/ohos.gni")
 
@@ -24,10 +25,12 @@ ohos_static_library("libslotinfo") {
     "//drivers/peripheral/partitionslot/hal/include",
   ]
 
-  deps = [
-    "//base/update/updater/services/log:libupdaterlog",
-    "//drivers/peripheral/partitionslot/hal:libpartition_slot_manager",
-  ]
+  deps = [ "//base/update/updater/services/log:libupdaterlog" ]
+  if (enable_ohos_startup_init_feature_ab_partition) {
+    defines = [ "UPDATER_AB_SUPPORT" ]
+    deps +=
+        [ "//drivers/peripheral/partitionslot/hal:libpartition_slot_manager" ]
+  }
 
   subsystem_name = "updater"
   part_name = "updater"
