@@ -11,6 +11,12 @@
 
 升级包安装组件运行在updater分区，其功能主要包括读取misc分区信息获取升级包状态，对升级包进行校验，确保升级包合法有效；然后从升级包中解析出升级的可执行程序，创建子进程并启动升级程序。具体升级的动作由升级脚本控制。
 
+更多升级子系统相关概念，请参考：[升级子系统](https://gitee.com/openharmony/docs/blob/master/zh-cn/readme/%E5%8D%87%E7%BA%A7%E5%AD%90%E7%B3%BB%E7%BB%9F.md)
+
+**图 1**  升级子系统架构图
+
+![](figures/Openharmony-updater-升级子系统架构图.png)
+
 ## 目录<a name="section198mcpsimp"></a>
 
 ```
@@ -18,13 +24,16 @@ base/update/updater/
 ├── resources           # 升级子系统用户界面图片资源目录
 ├── services            # 组件服务层代码目录
 │   ├── applypatch      # 升级包数据更新代码目录
+│   ├── diffpatch       # 差分还原代码目录
+│   ├── etc             # 启动相关配置文件目录
+│   ├── flashd          # flashd模式镜像写入和升级功代码目录
 │   ├── fs_manager      # 文件系统和分区管理代码目录
+│   ├── hdi             # 硬件相关接口定义
 │   ├── include         # 升级子系统头文件目录
 │   ├── log             # 升级子系统日志模块目录
 │   ├── package         # 升级包管理模块目录
+│   ├── ptable_parse    # 分区表解析代码目录
 │   ├── script          # 升级脚本管理目录
-│   ├── diffpatch       # 差分还原代码目录
-│   ├── sparse_image    # 稀疏镜像解析代码目录
 │   ├── ui              # 升级ui界面代码目录
 │   └── updater_binary  # 升级可执行程序目录
 ├── interfaces
@@ -84,7 +93,7 @@ b、 产品中添加需要编译的组件
 
 ## 相关仓<a name="section247mcpsimp"></a>
 
-升级子系统
+[升级子系统](https://gitee.com/openharmony/docs/blob/master/zh-cn/readme/%E5%8D%87%E7%BA%A7%E5%AD%90%E7%B3%BB%E7%BB%9F.md)
 
 [**update\_updater**](https://gitee.com/openharmony/update_updater)
 
