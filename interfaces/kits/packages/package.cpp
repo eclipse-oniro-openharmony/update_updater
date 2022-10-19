@@ -241,9 +241,9 @@ int32_t ExtraPackageDir(const char *packagePath, const char *keyPath, const char
     }
 
     std::vector<std::string> components;
-    int32_t ret = manager->LoadPackage(std::string(packagePath), std::string(keyPath), components);
+    int32_t ret = manager->LoadPackageWithoutUnPack(std::string(packagePath), std::string(keyPath), components);
     if (ret != PKG_SUCCESS) {
-        LOG(ERROR) << "LoadPackage fail";
+        LOG(ERROR) << "LoadPackageWithoutUnPack fail";
         PkgManager::ReleasePackageInstance(manager);
         return ret;
     }
