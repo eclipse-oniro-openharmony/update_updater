@@ -22,7 +22,10 @@ ohos_unittest("package_unittest") {
   resource_config_file =
       "//base/update/updater/test/unittest/test_data/ohos_test.xml"
   module_out_path = MODULE_OUTPUT_PATH
-  sources = [ "pkg_verify_unittest.cpp" ]
+  sources = [
+    "pkg_manager_unittest.cpp",
+    "pkg_verify_unittest.cpp"
+  ]
 
   sources += [
     "//base/update/updater/interfaces/kits/packages/package.cpp",
