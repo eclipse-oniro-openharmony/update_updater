@@ -22,6 +22,8 @@ import("//build/test.gni")
 ##############################fuzztest##########################################
 ohos_fuzztest("ExtractAndExecuteScriptFuzzTest") {
   module_out_path = module_output_path
+  resource_config_file =
+      "//base/update/updater/test/fuzztest/fuzz_src_data/ohos_test.xml"
   fuzz_config_file =
       "//base/update/updater/test/fuzztest/extractandexecutescript_fuzzer"
   include_dirs = [

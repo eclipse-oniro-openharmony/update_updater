@@ -55,11 +55,11 @@ static inline std::string GetTestPrivateKeyName()
     return name;
 }
 
-class TestScriptInstructionSparseImageWrite : public uscript::UScriptInstruction {
+class TestScriptInstructionSparseImageWrite : public Uscript::UScriptInstruction {
 public:
     TestScriptInstructionSparseImageWrite() {}
     virtual ~TestScriptInstructionSparseImageWrite() {}
-    int32_t Execute(uscript::UScriptEnv &env, uscript::UScriptContext &context) override
+    int32_t Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context) override
     {
         /* 从参数中获取分区信息 */
         std::string partitionName;
@@ -94,7 +94,7 @@ public:
 class UTestScriptEnv : public UScriptEnv {
 public:
     UScriptInstructionFactory *factory_ = nullptr;
-    explicit UTestScriptEnv(hpackage::PkgManager::PkgManagerPtr pkgManager) : UScriptEnv(pkgManager) {}
+    explicit UTestScriptEnv(Hpackage::PkgManager::PkgManagerPtr pkgManager) : UScriptEnv(pkgManager) {}
     ~UTestScriptEnv()
     {
         if (factory_ != nullptr) {

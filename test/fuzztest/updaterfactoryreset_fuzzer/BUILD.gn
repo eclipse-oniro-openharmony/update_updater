@@ -22,23 +22,37 @@ import("//build/test.gni")
 ##############################fuzztest##########################################
 ohos_fuzztest("UpdaterFactoryResetFuzzTest") {
   module_out_path = module_output_path
+  resource_config_file =
+      "//base/update/updater/test/fuzztest/fuzz_src_data/ohos_test.xml"
   fuzz_config_file =
       "//base/update/updater/test/fuzztest/updaterfactoryreset_fuzzer"
   include_dirs = [
     "//base/update/updater/utils/include",
+    "//base/update/updater/utils/json",
     "//base/update/updater/interfaces/kits/include/",
     "//base/update/updater/services/include/log",
     "//base/update/updater/services",
-    "//base/update/updater/services/ui",
     "//base/update/updater/services/include",
     "//base/update/updater/services/include/package",
     "//base/update/updater/services/package/pkg_manager",
     "//base/update/updater/services/include/fs_manager",
+    "//base/update/updater/services/ui",
+    "//base/update/updater/services/ui/include",
+    "//base/update/updater/services/ui/control",
+    "//base/update/updater/services/ui/driver",
+    "//base/update/updater/services/ui/view",
+    "//base/update/updater/services/ui/language",
+    "//foundation/graphic/ui/frameworks",
+    "//foundation/graphic/ui/interfaces/kits",
+    "//foundation/graphic/ui/interfaces/innerkits",
+    "//foundation/graphic/utils/interfaces/kits",
+    "//foundation/graphic/utils/interfaces/innerkits",
   ]
 
   deps = [
     "//base/update/updater/interfaces/kits/misc_info:libmiscinfo",
     "//base/update/updater/interfaces/kits/packages:libpackageExt",
+    "//base/update/updater/services:libupdater",
     "//base/update/updater/services/applypatch:libapplypatch",
     "//base/update/updater/services/diffpatch/patch:libpatch",
     "//base/update/updater/services/fs_manager:libfsmanager",
@@ -48,6 +62,7 @@ ohos_fuzztest("UpdaterFactoryResetFuzzTest") {
     "//base/update/updater/utils:libutils",
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/bzip2:libbz2",
+    "//third_party/cJSON:cjson_static",
     "//third_party/libdrm:libdrm",
     "//third_party/lz4:liblz4_static",
     "//third_party/openssl:libcrypto_static",
