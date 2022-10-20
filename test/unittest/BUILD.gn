@@ -47,6 +47,8 @@ ohos_unittest("updater_unittest") {
     "diffpatch/diffpatch_unittest.cpp",
     "log_test/log_unittest.cpp",
     "misc_info_test/misc_info_unittest.cpp",
+    "ptable_parse_test/ptable_manager_unittest.cpp",
+    "ptable_parse_test/ptable_unitttest.cpp",
     "updater_binary/update_image_block_test.cpp",
     "updaterkits_test/updaterkits_unittest.cpp",
   ]
@@ -93,6 +95,9 @@ ohos_unittest("updater_unittest") {
     "//base/update/updater/services/package/pkg_package/pkg_pkgfile.cpp",
     "//base/update/updater/services/package/pkg_package/pkg_upgradefile.cpp",
     "//base/update/updater/services/package/pkg_package/pkg_zipfile.cpp",
+    "//base/update/updater/services/ptable_parse/ptable.cpp",
+    "//base/update/updater/services/ptable_parse/ptable_manager.cpp",
+    "//base/update/updater/services/ptable_parse/ufs_ptable.cpp",
     "//base/update/updater/services/script/script_instruction/script_basicinstruction.cpp",
     "//base/update/updater/services/script/script_instruction/script_instructionhelper.cpp",
     "//base/update/updater/services/script/script_instruction/script_loadscript.cpp",
@@ -172,6 +177,7 @@ ohos_unittest("updater_unittest") {
     "//drivers/peripheral/input/interfaces/include",
     "//drivers/peripheral/partitionslot/hal/include",
     "//third_party/bounds_checking_function/include",
+    "//base/update/updater/services/ptable_parse",
   ]
   deps = [
     "//base/update/updater/interfaces/kits/misc_info:libmiscinfo",
