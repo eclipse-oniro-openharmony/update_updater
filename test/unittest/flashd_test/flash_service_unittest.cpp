@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,9 +32,6 @@ using namespace Flashd;
 using namespace testing::ext;
 
 namespace {
-static std::string TEST_PARTITION_NAME = "data";
-static std::string TEST_UPDATER_PACKAGE_PATH = "/data/updater/updater/updater.zip";
-static std::string TEST_FLASH_IMAGE_NAME = "/data/updater/updater/updater.zip";
 
 class FLashServiceUnitTest : public testing::Test {
 public:
@@ -50,29 +47,6 @@ public:
     void TearDown() {}
     void TestBody() {}
     std::unique_ptr<Flashd::Commander> commander_ = nullptr;
-public:
-    int TestPartitionDoFormat(std::string partitionName)
-    {
-        // std::string partitionName = "data";
-        Partition part(partitionName);
-        return part.DoFormat();
-    }
-
-    int TestPartitionDoErase(std::string partitionName)
-    {
-        // std::string partitionName = "data";
-        Partition part(partitionName);
-        return part.DoErase();
-    }
-    // void TestDoFormat()
-    // {
-    //     commander_ = CreateCommander(CMDSTR_FORMAT_PARTITION);
-    //     EXPECT_NE(nullptr, commander_);
-    //     uint8_t *payload = "format data";
-    //     int payloadSize = 12;
-    //     commander_->DoCommand(payload, payloadSize);
-    // }
-
 };
 
 HWTEST_F(FLashServiceUnitTest, FormatCommanderDoCommand, TestSize.Level1)
@@ -107,7 +81,6 @@ HWTEST_F(FLashServiceUnitTest, FormatCommanderDoCommand, TestSize.Level1)
     payloadSize = 16;
     commander->DoCommand(payload, payloadSize);
     EXPECT_EQ(UpdaterState::FAIL, ret);
-
 }
 
 HWTEST_F(FLashServiceUnitTest, UpdateCommanderDoCommand, TestSize.Level1)
@@ -197,8 +170,5 @@ HWTEST_F(FLashServiceUnitTest, FlashCommanderDoCommand, TestSize.Level1)
     payloadSize = 30;
     commander->DoCommand(payload, payloadSize);
     EXPECT_EQ(UpdaterState::SUCCESS, ret);
-
 }
-
-
 } // namespace

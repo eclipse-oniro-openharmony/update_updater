@@ -31,12 +31,12 @@ group("unittest") {
   testonly = true
   deps = [
     "test/unittest:updater_unittest",
+    "test/unittest/flashd_test:flashd_test",
     "test/unittest/package:package_unittest",
     "test/unittest/script:script_unittest",
     "test/unittest/script:user_instruction",
     "test/unittest/script:user_instruction_invalid",
     "test/unittest/updater_ui_test:ui_unittest",
     "test/unittest/utils:utils_test",
-    "test/unittest/flashd_test:flashd_test",
   ]
 }
