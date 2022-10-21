@@ -18,7 +18,7 @@ UPDATER_TEST_ROOT = "//base/update/updater/test/unittest"
 MODULE_OUTPUT_PATH = "updater/updater_test"
 HDC_PATH = "//developtools/hdc/src"
 
-ohos_unittest("flashd_test") {
+ohos_unittest("flashd_unittest") {
   testonly = true
   module_out_path = MODULE_OUTPUT_PATH
   sources = [
