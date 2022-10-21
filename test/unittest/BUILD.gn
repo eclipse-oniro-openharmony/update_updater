@@ -51,6 +51,8 @@ ohos_unittest("updater_unittest") {
     "ptable_parse_test/ptable_unitttest.cpp",
     "updater_binary/update_image_block_test.cpp",
     "updaterkits_test/updaterkits_unittest.cpp",
+    "ptable_parse_test/ptable_manager_unittest.cpp",
+    "ptable_parse_test/ptable_unitttest.cpp",
   ]
 
   sources += [
@@ -119,6 +121,9 @@ ohos_unittest("updater_unittest") {
     "//base/update/updater/services/updater_binary/update_processor.cpp",
     "//base/update/updater/services/updater_utils.cpp",
     "//base/update/updater/utils/utils.cpp",
+    "//base/update/updater/services/ptable_parse/ptable_manager.cpp",
+    "//base/update/updater/services/ptable_parse/ufs_ptable.cpp",
+    "//base/update/updater/services/ptable_parse/ptable.cpp",
   ]
 
   include_dirs = [
