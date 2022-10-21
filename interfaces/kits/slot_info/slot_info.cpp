@@ -19,6 +19,15 @@
 #include "partitionslot_manager.h"
 
 namespace Updater {
+#ifndef UPDATER_AB_SUPPORT
+void GetPartitionSuffix(std::string &suffix)
+{
+    suffix = "";
+}
+void SetActiveSlot()
+{
+}
+#else
 void GetPartitionSuffix(std::string &suffix)
 {
     OHOS::HDI::Partitionslot::V1_0::PartitionSlotManager psMgr;
@@ -56,4 +65,5 @@ void SetActiveSlot()
         LOG(ERROR) << "Set active slot error, slot: " << activeSlot;
     }
 }
+#endif
 } // Updater
