@@ -268,7 +268,7 @@ int32_t ExtraPackageDir(const char *packagePath, const char *dir, const char *ou
 int32_t ExtraPackageFile(const char *packagePath, const char *file, const char *outPath)
 {
     PkgManager::PkgManagerPtr manager = PkgManager::GetPackageInstance();
-    if (packagePath == nullptr || outPath == nullptr || manager == nullptr) {
+    if (packagePath == nullptr || outPath == nullptr || file == nullptr || manager == nullptr) {
         LOG(ERROR) << "Check param fail ";
         return PKG_INVALID_PARAM;
     }
