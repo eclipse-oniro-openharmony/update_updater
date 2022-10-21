@@ -48,7 +48,7 @@ ohos_unittest("updater_unittest") {
     "log_test/log_unittest.cpp",
     "misc_info_test/misc_info_unittest.cpp",
     "ptable_parse_test/ptable_manager_unittest.cpp",
-    "ptable_parse_test/ptable_unitttest.cpp",
+    "ptable_parse_test/ptable_unittest.cpp",
     "updater_binary/update_image_block_test.cpp",
     "updaterkits_test/updaterkits_unittest.cpp",
   ]
