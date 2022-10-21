@@ -26,7 +26,7 @@ class PtableTest : public Ptable {
 public:
     PtableTest() {}
     ~PtableTest() {}
-    ParsePartitionFromBuffer(uint8_t *ptbImgBuffer, const uint32_t imgBufSize) override
+    bool ParsePartitionFromBuffer(uint8_t *ptbImgBuffer, const uint32_t imgBufSize) override
     {
         return true;
     }
