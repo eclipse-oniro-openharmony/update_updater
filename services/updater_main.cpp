@@ -236,10 +236,10 @@ static UpdaterStatus InstallUpdaterPackage(UpdaterParams &upParams, const std::v
             }
             SetRetryCountToMisc(upParams.retryCount + 1, args);
         }
-        if (SetupPartitions() != 0) {
-            UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_SETPART_FAIL), true);
-            return UPDATE_ERROR;
-        }
+        // if (SetupPartitions() != 0) {
+        //     UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_SETPART_FAIL), true);
+        //     return UPDATE_ERROR;
+        // }
         status = DoInstallUpdaterPackage(manager, upParams.updatePackage, upParams.retryCount, HOTA_UPDATE);
         if (status != UPDATE_SUCCESS) {
             UPDATER_UI_INSTANCE.Sleep(UI_SHOW_DURATION);
@@ -260,13 +260,45 @@ static UpdaterStatus InstallUpdaterPackage(UpdaterParams &upParams, const std::v
     return status;
 }
 
+
+static UpdaterStatus InstallUpdaterPackageSupport(UpdaterParams &upParams, const std::vector<std::string> &args,
+    PkgManager::PkgManagerPtr manager)
+{
+    size_t i = 0;
+    UpdaterStatus status = UPDATE_UNKNOWN;
+    UpdaterParams upParam {
+        false, false, 0, ""
+    };
+    if (SetupPartitions() != 0) {
+        UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_SETPART_FAIL), true);
+        return UPDATE_ERROR;
+    }
+    upParam.factoryWipeData = upParams.factoryWipeData;
+    upParam.retryCount = upParams.retryCount;
+    upParam.userWipeData = upParams.userWipeData;
+    std::vector<std::string> updatePackageAllPath = SplitString(upParams.updatePackage, ", ");
+
+    UPDATER_UI_INSTANCE.ShowProgress(0);
+    for(i = 0; i < updatePackageAllPath.size(); i++) {
+        upParam.updatePackage = updatePackageAllPath[i];
+        status = InstallUpdaterPackage(upParam, args, manager);
+        if (status != UPDATE_SUCCESS) {
+            LOG(ERROR) << "InstallUpdaterPackage failed! The package is " << updatePackageAllPath[i];
+            return status;
+        }
+    }
+    ProgressSmoothHandler();
+    UPDATER_UI_INSTANCE.ShowProgress(FULL_PERCENT_PROGRESS);
+    return status;
+}
+
 static UpdaterStatus StartUpdaterEntry(PkgManager::PkgManagerPtr manager,
     const std::vector<std::string> &args, UpdaterParams &upParams)
 {
     UpdaterStatus status = UPDATE_UNKNOWN;
     if (upParams.updatePackage != "") {
         UPDATER_UI_INSTANCE.ShowProgressPage();
-        status = InstallUpdaterPackage(upParams, args, manager);
+        status = InstallUpdaterPackageSupport(upParams, args, manager);
         if (status != UPDATE_SUCCESS) {
             if (!CheckDumpResult()) {
                 UPDATER_LAST_WORD(status);
