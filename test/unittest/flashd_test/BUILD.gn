@@ -23,7 +23,7 @@ ohos_unittest("flashd_unittest") {
   module_out_path = MODULE_OUTPUT_PATH
   sources = [
     "//base/update/updater/services/updater_utils.cpp",
-    "flash_service_unittest.cpp",
+    "flashd_unittest.cpp",
   ]
   include_dirs = [
     "${HDC_PATH}/daemon",
