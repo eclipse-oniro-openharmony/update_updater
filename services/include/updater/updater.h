@@ -38,6 +38,8 @@ enum PackageUpdateMode {
     UNKNOWN_UPDATE,
 };
 
+void ProgressSmoothHandler();
+
 UpdaterStatus DoInstallUpdaterPackage(Hpackage::PkgManager::PkgManagerPtr pkgManager,
     const std::string &packagePath, int retryCount, PackageUpdateMode updateMode);
 
