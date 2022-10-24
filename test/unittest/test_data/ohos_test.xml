@@ -171,4 +171,9 @@
             <option name="push" value="ui/layout/typeInvalid.json -> /data/updater/ui" src="res"/>
         </preparer>
     </target>
+    <target name="flashd_unittest">
+        <preparer>
+            <option name="push" value="updater/updater/libupdate_hdi_impl.z.so -> /system/lib" src="out"/>
+        </preparer>
+    </target>
 </configuration>
