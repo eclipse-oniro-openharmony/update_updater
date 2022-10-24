@@ -201,7 +201,10 @@ ohos_unittest("updater_unittest") {
     "//base/update/updater/test/unittest:test_update_binary_abnormal",
   ]
 
-  external_deps = [ "init:libbegetutil" ]
+  external_deps = [
+    "init:libbegetutil",
+    "hiviewdfx_hilog_native:libhilog",
+  ]
 
   cflags_cc = [ "-fexceptions" ]
 
