@@ -204,13 +204,16 @@ UpdaterStatus IsSpaceCapacitySufficient(const std::string &packagePath)
     return UPDATE_SUCCESS;
 }
 
-void ProgressSmoothHandler()
+void ProgressSmoothHandler(int progress)
 {
 #ifdef UPDATER_UI_SUPPORT
-    while (g_tmpProgressValue < FULL_PERCENT_PROGRESS) {
-        int increase = (FULL_PERCENT_PROGRESS - g_tmpProgressValue) / PROGRESS_VALUE_CONST;
+    if (progress < 0) {
+        return;
+    }
+    while (g_tmpProgressValue < progress) {
+        int increase = (progress - g_tmpProgressValue) / PROGRESS_VALUE_CONST;
         g_tmpProgressValue += increase;
-        if (g_tmpProgressValue >= FULL_PERCENT_PROGRESS || increase == 0) {
+        if (g_tmpProgressValue >= progress || increase == 0) {
             break;
         } else {
             UPDATER_UI_INSTANCE.ShowProgress(g_tmpProgressValue);
@@ -245,76 +248,35 @@ bool PtableProcess(PkgManager::PkgManagerPtr pkgManager, PackageUpdateMode updat
 }
 #endif
 
-bool GetUpdaterPackagePath(std::vector<std::string> &args)
+void GetUpdaterPackagePath(std::vector<std::string> &args)
 {
     UpdateMessage boot {};
     bool readMiscResult = ReadUpdaterMiscMsg(boot);
     if (!readMiscResult) {
         LOG(ERROR) << "read misc failed";
-        return readMiscResult;
+        return;
     }
     std::vector<std::string> miscInfo = SplitString(boot.update, "\n");
     if (miscInfo.size() < 2) { // 2 : the message before path
         LOG(ERROR) << "SplitString update failed";
-        return false;
+        return;
     }
     std::vector<std::string> allPkgPath = SplitString(miscInfo[1], ", =");
     if (allPkgPath.size() < 1) {
         LOG(ERROR) << "SplitString miscInfo failed";
-        return false;
+        return;
     }
-    for(int32_t i = 1; i < allPkgPath.size(); i++) {
+    for (int32_t i = 1; i < allPkgPath.size(); i++) {
         args.push_back(allPkgPath[i]);
     }
-    return true;
 }
 
-UpdaterStatus ShowHistoricalProgress(const std::string &packagePath)
-{
-    int32_t i = 0;
-    size_t allPkgSize = 0;
-    size_t nowSize = 0;
-    bool tmp = false;
-    std::vector<std::string> args;
-    bool getPathRet = GetUpdaterPackagePath(args);
-    if (!getPathRet) {
-        LOG(ERROR) << "GetUpdaterPackagePath failed";
-        return UPDATE_ERROR;
-    }
-    for(i = 0; i < args.size(); i++) {
-        char realPath[PATH_MAX + 1] = {0};
-        if(realpath(args[i].c_str(),realPath) == nullptr) {
-            continue;
-        }
-        if (packagePath == args[i]) {
-            tmp = true;
-        }
-        std::ifstream fin(realPath);
-        if(fin.is_open()) {
-            fin.seekg(0, std::ios::end);
-            allPkgSize += fin.tellg();
-            if (!tmp) {
-                nowSize += fin.tellg();
-            }
-            fin.close();
-        }
-    }
-    UPDATER_UI_INSTANCE.ShowProgress(static_cast<float>(nowSize) / static_cast<float>(allPkgSize) * 100);
-    return UPDATE_SUCCESS;
-}
-
-UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, const std::string &packagePath,
-    int retryCount, PackageUpdateMode updateMode)
+UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, UpdaterParams &upParams,
+    PackageUpdateMode updateMode)
 {
     UPDATER_INIT_RECORD;
     UPDATER_UI_INSTANCE.ShowProgressPage();
-    if (updateMode == HOTA_UPDATE) {
-        UpdaterStatus ret = ShowHistoricalProgress(packagePath);
-        if (ret != UPDATE_SUCCESS) {
-            LOG(ERROR) << "ShowHistoricalProgress failed";
-            return ret;
-        }
-    }
+    UPDATER_UI_INSTANCE.ShowProgressPage(upParams.initialProgress * FULL_PERCENT_PROGRESS);
     UPDATER_ERROR_CHECK(pkgManager != nullptr, "Fail to GetPackageInstance", UPDATER_LAST_WORD(UPDATE_CORRUPT);
         return UPDATE_CORRUPT);
     UPDATER_CHECK_ONLY_RETURN(SetupPartitions(updateMode) == 0,
@@ -351,6 +313,7 @@ UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, cons
     }
 
     verifyret = GetUpdatePackageInfo(pkgManager, packagePath);
+    ProgressSmoothHandler(static_cast<int>(upParams.initialProgress * FULL_PERCENT_PROGRESS + 5)); // 5 : verify
     UPDATER_ERROR_CHECK(verifyret == PKG_SUCCESS, "Verify package Fail...",
         UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_VERIFYFAIL), true);
         return UPDATE_CORRUPT);
@@ -376,41 +339,10 @@ UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, cons
 
 namespace {
 #ifdef UPDATER_UI_SUPPORT
-void SetProgress(const std::vector<std::string> &output, const std::string &packagePath)
+float 
+
+void SetProgress(const std::vector<std::string> &output, UpdaterParams &upParams)
 {
-    int i = 0;
-    size_t allPkgSize = 0;
-    std::vector<std::string> args;
-    bool getPathRet = GetUpdaterPackagePath(args);
-    if (!getPathRet) {
-        LOG(ERROR) << "GetUpdaterPackagePath faile";
-        return;
-    }
-    std::vector<size_t> nowSize;
-    float nowPersent = 0.0;
-    int pkgLocation = -1;
-    for(i = 0; i < args.size(); i++) {
-        char realPath[PATH_MAX + 1] = {0};
-        if(realpath(args[i].c_str(),realPath) == nullptr) {
-            continue;
-        }
-        if (packagePath == args[i]) {
-            pkgLocation = 1;
-        }
-        std::ifstream fin(realPath);
-        if(fin.is_open()) {
-            fin.seekg(0, std::ios::end);
-            nowSize.push_back(fin.tellg());
-            allPkgSize += nowSize[i];
-            fin.close();
-        }
-    }
-    for(i = 0; i < nowSize.size(); i++) {
-        if (i == pkgLocation) {
-            break;
-        }
-        nowPersent += static_cast<float>(nowSize[i]) / static_cast<float>(allPkgSize);
-    }
     if (output.size() < DEFAULT_PROCESS_NUM) {
         LOG(ERROR) << "check output fail";
         return;
@@ -427,7 +359,7 @@ void SetProgress(const std::vector<std::string> &output, const std::string &pack
         g_tmpValue += g_percentage;
         g_tmpProgressValue = g_tmpValue;
         UPDATER_UI_INSTANCE.ShowProgress(g_tmpProgressValue *
-            (static_cast<float>(nowSize[pkgLocation]) / static_cast<float>(allPkgSize)) + nowPersent * 100);
+            upParams.currentPercentage + upParams.initialProgress * FULL_PERCENT_PROGRESS);
         return;
     }
     g_tmpProgressValue = tmpProgressValue + g_tmpValue;
@@ -435,12 +367,12 @@ void SetProgress(const std::vector<std::string> &output, const std::string &pack
         return;
     }
     UPDATER_UI_INSTANCE.ShowProgress(g_tmpProgressValue *
-        (static_cast<float>(nowSize[pkgLocation]) / static_cast<float>(allPkgSize)) + nowPersent * 100);
+        upParams.currentPercentage + upParams.initialProgress * FULL_PERCENT_PROGRESS);
 }
 #endif
 
 void HandleChildOutput(const std::string &buffer, int32_t bufferLen, bool &retryUpdate,
-    const std::string &packagePath)
+    UpdaterParams &upParams)
 {
     if (bufferLen == 0) {
         return;
@@ -485,7 +417,7 @@ void HandleChildOutput(const std::string &buffer, int32_t bufferLen, bool &retry
             g_percentage = static_cast<int>(frac * FULL_PERCENT_PROGRESS);
         }
     } else if (outputHeader == "set_progress") {
-        SetProgress(output, packagePath);
+        SetProgress(output, upParams);
     } else {
         LOG(WARNING) << "Child process returns unexpected message.";
 #endif
@@ -493,8 +425,7 @@ void HandleChildOutput(const std::string &buffer, int32_t bufferLen, bool &retry
 }
 }
 
-UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, const std::string &packagePath,
-    int retryCount, int &maxTemperature)
+UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, UpdaterParams &upParams, int &maxTemperature)
 {
     UPDATER_INIT_RECORD;
     int pfd[DEFAULT_PIPE_NUM]; /* communication between parent and child */
@@ -517,7 +448,7 @@ UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, const std::
         close(pipeRead);   // close read endpoint
         std::string fullPath = GetWorkPath() + std::string(UPDATER_BINARY);
 #ifdef UPDATER_UT
-        if (packagePath.find("updater_binary_abnormal") != std::string::npos) {
+        if (upParams.updatePackage.find("updater_binary_abnormal") != std::string::npos) {
             fullPath = "/system/bin/updater_binary_abnormal";
         } else {
             fullPath = "/system/bin/test_update_binary";
@@ -544,10 +475,10 @@ UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, const std::
                 LOG(WARNING) << "Cannot set current process schedule with SCHED_OTHER";
             }
         }
-        if (retryCount > 0) {
-            execl(fullPath.c_str(), packagePath.c_str(), std::to_string(pipeWrite).c_str(), "retry", nullptr);
+        if (upParams.retryCount > 0) {
+            execl(fullPath.c_str(), upParams.updatePackage.c_str(), std::to_string(pipeWrite).c_str(), "retry", nullptr);
         } else {
-            execl(fullPath.c_str(), packagePath.c_str(), std::to_string(pipeWrite).c_str(), nullptr);
+            execl(fullPath.c_str(), upParams.updatePackage.c_str(), std::to_string(pipeWrite).c_str(), nullptr);
         }
         LOG(INFO) << "Execute updater binary failed";
         UPDATER_LAST_WORD(UPDATE_ERROR);
@@ -564,7 +495,7 @@ UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, const std::
         if (pch != nullptr) {
             *pch = '\0';
         }
-        HandleChildOutput(buffer, MAX_BUFFER_SIZE, retryUpdate, packagePath);
+        HandleChildOutput(buffer, MAX_BUFFER_SIZE, retryUpdate, upParams);
     }
     fclose(fromChild);
 

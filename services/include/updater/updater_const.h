@@ -38,7 +38,7 @@ constexpr const char *PREFIX_UFS_NODE = "/dev/block/sd";
 
 #ifndef UPDATER_UT
 constexpr const char *SDCARD_CARD_PATH = "/sdcard/updater";
-constexpr const char *SDCARD_CARD_PKG_PATH = "/sdcard/updater/updater.zip";
+constexpr const char *SDCARD_CARD_PKG_PATH = "/sdcard/updater/updater_full.zip,/sdcard/updater/updater_cust.zip,/sdcard/updater_preload.zip";
 constexpr const char *DEFAULT_LOCALE = "en-US";
 constexpr const char *G_WORK_PATH = "/tmp/";
 #else

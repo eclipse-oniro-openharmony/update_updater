@@ -38,13 +38,22 @@ enum PackageUpdateMode {
     UNKNOWN_UPDATE,
 };
 
-void ProgressSmoothHandler();
+struct UpdaterParams {
+    bool factoryWipeData;
+    bool userWipeData;
+    int retryCount;
+    float initialProgress;
+    float currentPercentage;
+    std::string updatePackage;
+};
+
+void ProgressSmoothHandler(int progress);
 
 UpdaterStatus DoInstallUpdaterPackage(Hpackage::PkgManager::PkgManagerPtr pkgManager,
-    const std::string &packagePath, int retryCount, PackageUpdateMode updateMode);
+    UpdaterParams &upParams, PackageUpdateMode updateMode);
 
-UpdaterStatus StartUpdaterProc(Hpackage::PkgManager::PkgManagerPtr pkgManager, const std::string &packagePath,
-    int retryCount, int &maxTemperature);
+UpdaterStatus StartUpdaterProc(Hpackage::PkgManager::PkgManagerPtr pkgManager,
+    UpdaterParams &upParams, int &maxTemperature);
 
 int GetUpdatePackageInfo(Hpackage::PkgManager::PkgManagerPtr pkgManager, const std::string& path);
 
