@@ -24,6 +24,7 @@ ohos_fuzztest("DoPartitionsFuzzTest") {
   module_out_path = module_output_path
   fuzz_config_file = "//base/update/updater/test/fuzztest/dopartitions_fuzzer"
   include_dirs = [
+    "//base/startup/init/interfaces/innerkits/include",
     "//base/update/updater/utils/include",
     "//base/update/updater/interfaces/kits/include/",
     "//base/update/updater/services/include/fs_manager",
@@ -51,7 +52,11 @@ ohos_fuzztest("DoPartitionsFuzzTest") {
     "//third_party/openssl:ssl_source",
     "//third_party/zlib:libz",
   ]
-  external_deps = [ "c_utils:utils" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "init:libbegetutil",
+  ]
 
   cflags = [
     "-g",

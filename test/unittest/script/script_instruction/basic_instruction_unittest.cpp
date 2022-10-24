@@ -196,6 +196,12 @@ public:
         }
         {
             UScriptInstructionContext context {};
+            AddInputParam(context, 1.0);
+            auto instruction = std::make_unique<UScriptInstructionSleep>();
+            EXPECT_EQ(instruction->Execute(env, context), USCRIPT_INVALID_PARAM);
+        }
+        {
+            UScriptInstructionContext context {};
             AddInputParam(context, 1);
             auto instruction = std::make_unique<UScriptInstructionAbort>();
             EXPECT_EQ(instruction->Execute(env, context), USCRIPT_SUCCESS);
@@ -235,12 +241,6 @@ public:
             UScriptInstructionContext context {};
             auto instruction = std::make_unique<UScriptInstructionSleep>();
             EXPECT_EQ(instruction->Execute(env, context), UScriptContext::PARAM_TYPE_INVALID);
-        }
-        {
-            UScriptInstructionContext context {};
-            AddInputParam(context, 1.0);
-            auto instruction = std::make_unique<UScriptInstructionSleep>();
-            EXPECT_EQ(instruction->Execute(env, context), USCRIPT_INVALID_PARAM);
         }
         {
             UScriptInstructionContext context {};

@@ -240,8 +240,7 @@ void DoShutdown()
 std::string GetCertName()
 {
 #ifndef UPDATER_UT
-    static std::string signingCertName = IsUpdaterMode() ?
-        "/certificate/signing_cert.crt" : "/etc/certificate/signing_cert.crt";
+    static std::string signingCertName = "/etc/certificate/signing_cert.crt";
 #else
     static std::string signingCertName = "/data/updater/src/signing_cert.crt";
 #endif

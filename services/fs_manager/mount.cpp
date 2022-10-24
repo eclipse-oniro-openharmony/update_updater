@@ -86,6 +86,11 @@ void LoadSpecificFstab(const std::string &fstabName)
 
 int UmountForPath(const std::string& path)
 {
+    if (g_fstab == nullptr) {
+        LOG(ERROR) << "fstab is not loaded, g_fstab is null.";
+        return -1;
+    }
+
     FstabItem *item = FindFstabItemForPath(*g_fstab, path.c_str());
     if (item == nullptr) {
         LOG(ERROR) << "Cannot find fstab item for " << path << " to umount.";
@@ -110,6 +115,11 @@ int UmountForPath(const std::string& path)
 
 int MountForPath(const std::string &path)
 {
+    if (g_fstab == nullptr) {
+        LOG(ERROR) << "fstab is not loaded, g_fstab is null.";
+        return -1;
+    }
+
     FstabItem *item = FindFstabItemForPath(*g_fstab, path.c_str());
     int ret = -1;
     if (item == nullptr) {
@@ -165,6 +175,11 @@ void ErasePartition(const std::string &devPath)
 
 int FormatPartition(const std::string &path, bool isZeroErase)
 {
+    if (g_fstab == nullptr) {
+        LOG(ERROR) << "fstab is not loaded, g_fstab is null.";
+        return -1;
+    }
+
     FstabItem *item = FindFstabItemForPath(*g_fstab, path.c_str());
     if (item == nullptr) {
         LOG(ERROR) << "Cannot find fstab item for " << path << " to format.";

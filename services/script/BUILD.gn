@@ -15,13 +15,25 @@ import("//base/update/updater/updater_default_cfg.gni")
 import("//build/ohos.gni")
 SUBSYSTEM_DIR = "//base/update/updater/services/script"
 
-args = [
-  "--scriptname",
-  "./bison.sh",
-  "--output",
-  rebase_path("${SUBSYSTEM_DIR}"),
-]
-exec_script("//base/update/packaging_tools/code_yacc.py", args)
+yacc_path = "$root_out_dir/updater/updater/yacc"
+script_yacc_path = "$SUBSYSTEM_DIR/script_interpreter/script_yacc.y"
+script_lex_path = "$SUBSYSTEM_DIR/script_interpreter/script_lex.l"
+action("gen_yacc") {
+  script = "//base/update/updater/services/script/generate_yacc.py"
+  inputs = [ script ]
+  outputs = [
+    "$root_out_dir/updater/updater/yacc/lexer.cpp",
+    "$root_out_dir/updater/updater/yacc/parser.cpp",
+  ]
+  args = [
+    "--output",
+    rebase_path(yacc_path, root_build_dir),
+    "--bisoninput",
+    rebase_path(script_yacc_path, root_build_dir),
+    "--flexinput",
+    rebase_path(script_lex_path, root_build_dir),
+  ]
+}
 
 config("script_config") {
   visibility = [ ":*" ]
@@ -38,8 +50,10 @@ config("script_config") {
     "script_interpreter",
     "script_manager",
     "threadpool",
-    "yacc",
+    "$yacc_path",
   ]
+
+  configs = [ "//build/config/compiler:exceptions" ]
 }
 
 ohos_static_library("libupdaterscript") {
@@ -59,11 +73,14 @@ ohos_static_library("libupdaterscript") {
     "$SUBSYSTEM_DIR/script_manager/script_managerImpl.cpp",
     "$SUBSYSTEM_DIR/script_manager/script_utils.cpp",
     "$SUBSYSTEM_DIR/threadpool/threadpool.cpp",
-    "$SUBSYSTEM_DIR/yacc/lexer.cpp",
-    "$SUBSYSTEM_DIR/yacc/parser.cpp",
+    "$root_out_dir/updater/updater/yacc/lexer.cpp",
+    "$root_out_dir/updater/updater/yacc/parser.cpp",
   ]
   configs = [ ":script_config" ]
 
   external_deps = [ "c_utils:utils" ]
-  deps = [ "//third_party/bounds_checking_function:libsec_static" ]
+  deps = [
+    "//base/update/updater/services/script:gen_yacc",
+    "//third_party/bounds_checking_function:libsec_static",
+  ]
 }

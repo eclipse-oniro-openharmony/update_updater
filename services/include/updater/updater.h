@@ -59,7 +59,7 @@ bool IsSDCardExist(const std::string &sdcard_path);
 
 void PostUpdater(bool clearMisc);
 
-bool ClearMisc();
+bool DeleteUpdaterPath(const std::string &path);
 
 std::vector<std::string> ParseParams(int argc, char **argv);
 
