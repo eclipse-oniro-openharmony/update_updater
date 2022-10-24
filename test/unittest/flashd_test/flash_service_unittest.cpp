@@ -35,7 +35,8 @@ namespace {
 
 class FLashServiceUnitTest : public testing::Test {
 public:
-    FLashServiceUnitTest() {
+    FLashServiceUnitTest()
+    {
         std::cout<<"FLashServiceUnitTest()";
         InitUpdaterLogger("FLASHD", TMP_LOG, TMP_STAGE_LOG, TMP_ERROR_CODE_PATH);
     }
@@ -142,7 +143,6 @@ HWTEST_F(FLashServiceUnitTest, EraseCommanderDoCommand, TestSize.Level1)
     payloadSize = 15;
     commander->DoCommand(payload, payloadSize);
     EXPECT_EQ(UpdaterState::FAIL, ret);
-
 }
 HWTEST_F(FLashServiceUnitTest, FlashCommanderDoCommand, TestSize.Level1)
 {
