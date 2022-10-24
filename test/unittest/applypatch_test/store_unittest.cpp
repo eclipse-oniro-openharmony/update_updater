@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2021 Huawei Device Co., Ltd.
+* Copyright (c) 2022 Huawei Device Co., Ltd.
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
 * You may obtain a copy of the License at
@@ -61,6 +61,7 @@ HWTEST_F(StoreUnitTest, store_test_002, TestSize.Level1)
     std::vector<uint8_t> buffer(4096, 0);
     EXPECT_EQ(Store::WriteDataToStore("", "test_file1", buffer, buffer.size()), -1);
 }
+
 HWTEST_F(StoreUnitTest, store_test_003, TestSize.Level1)
 {
     std::string storePath = "data/updater/ut_test";
