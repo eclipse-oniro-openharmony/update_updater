@@ -54,7 +54,7 @@ public:
         return false;
     }
 
-    virtual UScriptValuePtr Computer(int32_t action, UScriptValuePtr rightValue);
+    virtual UScriptValuePtr Computer(int32_t action, UScriptValuePtr value);
 
     virtual std::string ToString();
 
@@ -81,7 +81,7 @@ public:
         return value_;
     }
 
-    UScriptValuePtr Computer(int32_t action, UScriptValuePtr rightValue) override;
+    UScriptValuePtr Computer(int32_t action, UScriptValuePtr value) override;
     std::string ToString() override;
 
 private:
@@ -103,7 +103,7 @@ public:
         return value_;
     }
 
-    UScriptValuePtr Computer(int32_t action, UScriptValuePtr rightValue) override;
+    UScriptValuePtr Computer(int32_t action, UScriptValuePtr value) override;
     std::string ToString() override;
 
 private:
@@ -127,7 +127,7 @@ public:
         return value_;
     }
 
-    UScriptValuePtr Computer(int32_t action, UScriptValuePtr rightValue) override;
+    UScriptValuePtr Computer(int32_t action, UScriptValuePtr value) override;
 
     UScriptValuePtr ComputerReturn(int32_t action, UScriptValuePtr rightValue, UScriptValuePtr defReturn) const;
 
@@ -151,7 +151,7 @@ public:
         return false;
     }
 
-    UScriptValuePtr Computer(int32_t action, UScriptValuePtr rightValue) override;
+    UScriptValuePtr Computer(int32_t action, UScriptValuePtr value) override;
     std::string ToString() override;
 
     void AddValue(const UScriptValuePtr value);
@@ -182,7 +182,7 @@ public:
     {
         return retCode_ = code;
     }
-    UScriptValuePtr Computer(int32_t action, UScriptValuePtr rightValue) override
+    UScriptValuePtr Computer(int32_t action, UScriptValuePtr value) override
     {
         return nullptr;
     }

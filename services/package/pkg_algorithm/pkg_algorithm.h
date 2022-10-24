@@ -81,7 +81,7 @@ protected:
     int32_t FinalDigest(DigestAlgorithm::DigestAlgorithmPtr algorithm,
         PkgAlgorithmContext &context, bool check) const;
     int32_t ReadData(const PkgStreamPtr inStream,
-        size_t offset, PkgBuffer &buffer, size_t &size, size_t &readLen) const;
+        size_t offset, PkgBuffer &buffer, size_t &remainSize, size_t &readLen) const;
 };
 
 class PkgAlgorithmFactory {

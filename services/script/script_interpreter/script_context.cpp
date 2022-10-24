@@ -145,7 +145,7 @@ void UScriptInterpretContext::UpdateVariables(const ScriptInterpreter &inter,
     }
 }
 
-UScriptValuePtr UScriptValue::Computer(int32_t action, UScriptValuePtr rightValue)
+UScriptValuePtr UScriptValue::Computer(int32_t action, UScriptValuePtr value)
 {
     return std::make_shared<ErrorValue>(USCRIPT_ERROR_INTERPRET);
 }
