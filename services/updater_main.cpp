@@ -236,10 +236,6 @@ static UpdaterStatus InstallUpdaterPackage(UpdaterParams &upParams, const std::v
             }
             SetRetryCountToMisc(upParams.retryCount + 1, args);
         }
-        // if (SetupPartitions() != 0) {
-        //     UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_SETPART_FAIL), true);
-        //     return UPDATE_ERROR;
-        // }
         status = DoInstallUpdaterPackage(manager, upParams.updatePackage, upParams.retryCount, HOTA_UPDATE);
         if (status != UPDATE_SUCCESS) {
             UPDATER_UI_INSTANCE.Sleep(UI_SHOW_DURATION);
