@@ -259,7 +259,11 @@ bool GetUpdaterPackagePath(std::vector<std::string> &args)
         return false;
     }
     std::vector<std::string> allPkgPath = SplitString(miscInfo[1], ", =");
+<<<<<<< HEAD
     if (allPkgPath.size() < 1) {
+=======
+    if (allPkgPath.size < 1) {
+>>>>>>> d785516d05dd441f496a487db0863d232b029aaa
         LOG(ERROR) << "SplitString miscInfo failed";
         return false;
     }
@@ -269,7 +273,11 @@ bool GetUpdaterPackagePath(std::vector<std::string> &args)
     return true;
 }
 
+<<<<<<< HEAD
 UpdaterStatus ShowHistoricalProgress(const std::string &packagePath)
+=======
+void ShowHistoricalProgress()
+>>>>>>> d785516d05dd441f496a487db0863d232b029aaa
 {
     int32_t i = 0;
     size_t allPkgSize = 0;
@@ -300,7 +308,10 @@ UpdaterStatus ShowHistoricalProgress(const std::string &packagePath)
         }
     }
     UPDATER_UI_INSTANCE.ShowProgress(static_cast<float>(nowSize) / static_cast<float>(allPkgSize) * 100);
+<<<<<<< HEAD
     return UPDATE_SUCCESS;
+=======
+>>>>>>> d785516d05dd441f496a487db0863d232b029aaa
 }
 
 UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, const std::string &packagePath,
@@ -308,12 +319,17 @@ UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, cons
 {
     UPDATER_INIT_RECORD;
     UPDATER_UI_INSTANCE.ShowProgressPage();
+<<<<<<< HEAD
     if (updateMode == HOTA_UPDATE) {
         UpdaterStatus ret = ShowHistoricalProgress(packagePath);
         if (ret != UPDATE_SUCCESS) {
             LOG(ERROR) << "ShowHistoricalProgress failed";
             return ret;
         }
+=======
+    if (updateMode = HOTA_UPDATE) {
+        ShowHistoricalProgress();
+>>>>>>> d785516d05dd441f496a487db0863d232b029aaa
     }
     UPDATER_ERROR_CHECK(pkgManager != nullptr, "Fail to GetPackageInstance", UPDATER_LAST_WORD(UPDATE_CORRUPT);
         return UPDATE_CORRUPT);
@@ -389,7 +405,11 @@ void SetProgress(const std::vector<std::string> &output, const std::string &pack
     std::vector<size_t> nowSize;
     float nowPersent = 0.0;
     int pkgLocation = -1;
+<<<<<<< HEAD
     for(i = 0; i < args.size(); i++) {
+=======
+    for(i = 0; i < args.size; i++) {
+>>>>>>> d785516d05dd441f496a487db0863d232b029aaa
         char realPath[PATH_MAX + 1] = {0};
         if(realpath(args[i].c_str(),realPath) == nullptr) {
             continue;
@@ -427,7 +447,11 @@ void SetProgress(const std::vector<std::string> &output, const std::string &pack
         g_tmpValue += g_percentage;
         g_tmpProgressValue = g_tmpValue;
         UPDATER_UI_INSTANCE.ShowProgress(g_tmpProgressValue *
+<<<<<<< HEAD
             (static_cast<float>(nowSize[pkgLocation]) / static_cast<float>(allPkgSize)) + nowPersent * 100);
+=======
+            (static_cast<float>(nowSize[pkgLocation]) / static_cast<float>(allPkgSize) + nowPersent * 100);
+>>>>>>> d785516d05dd441f496a487db0863d232b029aaa
         return;
     }
     g_tmpProgressValue = tmpProgressValue + g_tmpValue;
@@ -435,7 +459,11 @@ void SetProgress(const std::vector<std::string> &output, const std::string &pack
         return;
     }
     UPDATER_UI_INSTANCE.ShowProgress(g_tmpProgressValue *
+<<<<<<< HEAD
         (static_cast<float>(nowSize[pkgLocation]) / static_cast<float>(allPkgSize)) + nowPersent * 100);
+=======
+        (static_cast<float>(nowSize[pkgLocation]) / static_cast<float>(allPkgSize) + nowPersent * 100);
+>>>>>>> d785516d05dd441f496a487db0863d232b029aaa
 }
 #endif
 
