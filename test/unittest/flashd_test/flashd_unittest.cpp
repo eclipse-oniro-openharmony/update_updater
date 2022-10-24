@@ -20,6 +20,7 @@
 #include "common/flashd_define.h"
 #include "daemon/format_commander.h"
 #include "daemon/commander_factory.h"
+#include "daemon/flashd_utils.h"
 #include "partition.h"
 #include "fs_manager/mount.h"
 #include "log/log.h"
@@ -170,5 +171,36 @@ HWTEST_F(FLashServiceUnitTest, FlashCommanderDoCommand, TestSize.Level1)
     payloadSize = 30;
     commander->DoCommand(payload, payloadSize);
     EXPECT_EQ(UpdaterState::SUCCESS, ret);
+}
+HWTEST_F(FLashServiceUnitTest, GetFileName, TestSize.Level1)
+{
+    std::string testStr = "data/test/test.zip";
+    std::string res = GetFileName(testStr);
+    EXPECT_EQ("test.zip", res);
+
+    testStr = "D:\\test\\test.zip";
+    res = GetFileName(testStr);
+    EXPECT_EQ("test.zip", res);
+
+    testStr = "test.zip";
+    res = GetFileName(testStr);
+    EXPECT_EQ("", res);
+}
+HWTEST_F(FLashServiceUnitTest, Split, TestSize.Level1)
+{
+    std::string input = "";
+    std::vector<std::string> output = Split(input, { "-f" });
+    std::string res = "";
+    for (auto s : output) {
+        res += s;
+    }
+    EXPECT_EQ("", res);
+    input = "flash updater updater.img";
+    output = Split(input, { "-f" });
+    res = "";
+    for (auto s : output) {
+        res += s;
+    }
+    EXPECT_EQ("flashupdaterupdater.img", res);
 }
 } // namespace
