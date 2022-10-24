@@ -309,7 +309,7 @@ bool Ptable::GetPartitionGptHeaderInfo(const uint8_t *buffer, const uint32_t buf
 }
 
 bool Ptable::CheckGptHeader(uint8_t *buffer, const uint32_t bufferLen, const uint64_t lbaNum,
-    GPTHeaderInfo& gptHeaderInfo)
+    const GPTHeaderInfo& gptHeaderInfo)
 {
     if (bufferLen < LBA_LENGTH || lbaNum == 0) {
         LOG(ERROR) << "bufferLen < LBA_LENGTH || lbaNum == 0";

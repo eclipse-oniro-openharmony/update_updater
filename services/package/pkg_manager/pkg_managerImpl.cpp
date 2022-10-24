@@ -739,6 +739,7 @@ int32_t PkgManagerImpl::Sign(PkgStreamPtr stream, size_t offset, const PkgInfoPt
     if (info->signMethod == PKG_SIGN_METHOD_NONE) {
         return PKG_SUCCESS;
     }
+
     size_t digestLen = DigestAlgorithm::GetDigestLen(info->digestMethod);
     std::vector<std::vector<uint8_t>> digestInfos(DIGEST_INFO_SIGNATURE + 1);
     digestInfos[DIGEST_INFO_HAS_SIGN].resize(digestLen);
@@ -755,12 +756,9 @@ int32_t PkgManagerImpl::Sign(PkgStreamPtr stream, size_t offset, const PkgInfoPt
     }
     size_t signLen = DigestAlgorithm::GetSignatureLen(info->digestMethod);
     std::vector<uint8_t> signedData(signLen, 0);
+    // Clear buffer
     PkgBuffer signBuffer(signedData);
     ret = stream->Write(signBuffer, signLen, offset);
-    if (ret != PKG_SUCCESS) {
-        PKG_LOGE("Write failed");
-        return ret;
-    }
     size_t signDataLen = 0;
     signedData.clear();
     PkgBuffer digest(digestInfos[DIGEST_INFO_HAS_SIGN].data(), digestLen);

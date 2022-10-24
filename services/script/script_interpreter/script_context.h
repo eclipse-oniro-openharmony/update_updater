@@ -107,7 +107,7 @@ public:
     std::string ToString() override;
 
 private:
-    bool ComputerEqual(UScriptValuePtr rightValue);
+    bool ComputerEqual(const UScriptValuePtr rightValue);
     float value_;
 };
 

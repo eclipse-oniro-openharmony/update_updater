@@ -207,7 +207,6 @@ int32_t Lz4PkgFile::LoadPackage(std::vector<std::string> &fileNames, VerifyFunct
             return PKG_LZ4_FINISH;
         }
         ret = entry->DecodeHeader(buffer, 0, srcOffset, readLen);
-        srcOffset += readLen;
 
         // 保存entry文件
         pkgEntryMapId_.insert(std::pair<uint32_t, PkgEntryPtr>(entry->GetNodeId(), entry));

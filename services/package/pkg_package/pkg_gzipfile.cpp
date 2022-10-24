@@ -238,7 +238,6 @@ int32_t GZipFileEntry::DecodeHeader(const PkgBuffer &buffer, size_t headerOffset
     }
     fileInfo_.fileInfo.digestMethod = PKG_DIGEST_TYPE_CRC;
     fileInfo_.fileInfo.packMethod = PKG_COMPRESS_METHOD_GZIP;
-    fileInfo_.method = static_cast<int32_t>(method);
     fileInfo_.level = Z_BEST_COMPRESSION;
     fileInfo_.method = Z_DEFLATED;
     fileInfo_.windowBits = -MAX_WBITS;
