@@ -202,8 +202,8 @@ ohos_unittest("updater_unittest") {
   ]
 
   external_deps = [
-    "init:libbegetutil",
     "hiviewdfx_hilog_native:libhilog",
+    "init:libbegetutil",
   ]
 
   cflags_cc = [ "-fexceptions" ]
