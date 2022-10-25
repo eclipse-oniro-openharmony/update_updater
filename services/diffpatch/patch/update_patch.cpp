@@ -114,7 +114,7 @@ int32_t UpdateApplyPatch::ApplyBlockPatch(const PatchBuffer &patchInfo,
 
     Hpackage::PkgManager::StreamPtr stream = nullptr;
     int32_t ret = pkgManager->CreatePkgStream(stream, "", {oldInfo.buffer, oldInfo.length});
-    if (stream == nullptr && ret != PKG_SUCCESS) {
+    if (stream == nullptr || ret != PKG_SUCCESS) {
         PATCH_LOGE("Failed to create stream");
         pkgManager->ClosePkgStream(stream);
         return -1;
