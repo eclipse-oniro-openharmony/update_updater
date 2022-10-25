@@ -226,7 +226,6 @@ int32_t GZipFileEntry::DecodeHeader(const PkgBuffer &buffer, size_t headerOffset
     size_t offset = sizeof(GZipHeader);
 
     uint8_t flags = *(buffer.buffer + offsetof(GZipHeader, flags));
-    uint8_t method = *(buffer.buffer + offsetof(GZipHeader, method));
 
     DecodeHeaderCalOffset(flags, buffer, offset, fileName_);
     if (fileName_.empty()) {
