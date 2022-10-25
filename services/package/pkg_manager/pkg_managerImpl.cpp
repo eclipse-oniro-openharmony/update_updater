@@ -430,18 +430,18 @@ int32_t PkgManagerImpl::LoadPackageWithStream(const std::string &packagePath,
     return PKG_SUCCESS;
 }
 
-int32_t PkgManagerImpl::ExtractFile(const std::string &name, PkgManager::StreamPtr output)
+int32_t PkgManagerImpl::ExtractFile(const std::string &path, PkgManager::StreamPtr output)
 {
     if (output == nullptr) {
         PKG_LOGE("Invalid stream");
         return PKG_INVALID_STREAM;
     }
     int32_t ret = PKG_INVALID_FILE;
-    PkgEntryPtr pkgEntry = GetPkgEntry(name);
+    PkgEntryPtr pkgEntry = GetPkgEntry(path);
     if (pkgEntry != nullptr && pkgEntry->GetPkgFile() != nullptr) {
         ret = pkgEntry->GetPkgFile()->ExtractFile(pkgEntry, PkgStreamImpl::ConvertPkgStream(output));
     } else {
-        PKG_LOGE("Can not find file %s", name.c_str());
+        PKG_LOGE("Can not find file %s", path.c_str());
     }
     return ret;
 }
@@ -466,12 +466,12 @@ const FileInfo *PkgManagerImpl::GetFileInfo(const std::string &path)
     return nullptr;
 }
 
-PkgEntryPtr PkgManagerImpl::GetPkgEntry(const std::string &fileId)
+PkgEntryPtr PkgManagerImpl::GetPkgEntry(const std::string &path)
 {
     // Find out pkgEntry by fileId.
     for (auto iter : pkgFiles_) {
         PkgFilePtr pkgFile = iter;
-        PkgEntryPtr pkgEntry = pkgFile->FindPkgEntry(fileId);
+        PkgEntryPtr pkgEntry = pkgFile->FindPkgEntry(path);
         if (pkgEntry == nullptr) {
             continue;
         }
@@ -626,7 +626,7 @@ PkgFile::PkgType PkgManagerImpl::GetPkgTypeByName(const std::string &path)
 }
 
 int32_t PkgManagerImpl::VerifyPackage(const std::string &packagePath, const std::string &keyPath,
-    const std::string &version, const PkgBuffer &digest, VerifyCallback verifyCallback)
+    const std::string &version, const PkgBuffer &digest, VerifyCallback cb)
 {
     int32_t ret = SetSignVerifyKeyName(keyPath);
     if (ret != PKG_SUCCESS) {
@@ -648,7 +648,7 @@ int32_t PkgManagerImpl::VerifyPackage(const std::string &packagePath, const std:
         std::vector<std::string> components;
         ret = pkgManager->LoadPackage(packagePath, keyPath, components);
     }
-    verifyCallback(ret, VERIFY_FINSH_PERCENT);
+    cb(ret, VERIFY_FINSH_PERCENT);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("Verify file %s fail", packagePath.c_str());
         return ret;
@@ -792,9 +792,9 @@ int32_t PkgManagerImpl::SetSignVerifyKeyName(const std::string &keyName)
     return PKG_SUCCESS;
 }
 
-int32_t PkgManagerImpl::DecompressBuffer(FileInfoPtr info, const PkgBuffer &data, StreamPtr output) const
+int32_t PkgManagerImpl::DecompressBuffer(FileInfoPtr info, const PkgBuffer &buffer, StreamPtr stream) const
 {
-    if (info == nullptr || data.buffer == nullptr || output == nullptr) {
+    if (info == nullptr || buffer.buffer == nullptr || stream == nullptr) {
         PKG_LOGE("DecompressBuffer Param is null");
         return PKG_INVALID_PARAM;
     }
@@ -805,28 +805,28 @@ int32_t PkgManagerImpl::DecompressBuffer(FileInfoPtr info, const PkgBuffer &data
     }
 
     std::shared_ptr<MemoryMapStream> inStream = std::make_shared<MemoryMapStream>(
-        (PkgManager::PkgManagerPtr)this, info->identity, data, PkgStream::PkgStreamType_Buffer);
+        (PkgManager::PkgManagerPtr)this, info->identity, buffer, PkgStream::PkgStreamType_Buffer);
     if (inStream == nullptr) {
         PKG_LOGE("DecompressBuffer Can not create stream for %s", info->identity.c_str());
         return PKG_INVALID_PARAM;
     }
-    PkgAlgorithmContext context = {{0, 0}, {data.length, 0}, 0, info->digestMethod};
-    int32_t ret = algorithm->Unpack(inStream.get(), PkgStreamImpl::ConvertPkgStream(output), context);
+    PkgAlgorithmContext context = {{0, 0}, {buffer.length, 0}, 0, info->digestMethod};
+    int32_t ret = algorithm->Unpack(inStream.get(), PkgStreamImpl::ConvertPkgStream(stream), context);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("Fail Decompress for %s", info->identity.c_str());
         return ret;
     }
-    PKG_LOGI("packedSize: %zu unpackedSize: %zu ", data.length, context.unpackedSize);
-    PkgStreamImpl::ConvertPkgStream(output)->Flush(context.unpackedSize);
+    PKG_LOGI("packedSize: %zu unpackedSize: %zu ", buffer.length, context.unpackedSize);
+    PkgStreamImpl::ConvertPkgStream(stream)->Flush(context.unpackedSize);
     info->packedSize = context.packedSize;
     info->unpackedSize = context.unpackedSize;
     algorithm->UpdateFileInfo(info);
     return PKG_SUCCESS;
 }
 
-int32_t PkgManagerImpl::CompressBuffer(FileInfoPtr info, const PkgBuffer &data, StreamPtr output) const
+int32_t PkgManagerImpl::CompressBuffer(FileInfoPtr info, const PkgBuffer &buffer, StreamPtr stream) const
 {
-    if (info == nullptr || data.buffer == nullptr || output == nullptr) {
+    if (info == nullptr || buffer.buffer == nullptr || stream == nullptr) {
         PKG_LOGE("CompressBuffer Param is null");
         return PKG_INVALID_PARAM;
     }
@@ -837,19 +837,19 @@ int32_t PkgManagerImpl::CompressBuffer(FileInfoPtr info, const PkgBuffer &data, 
     }
 
     std::shared_ptr<MemoryMapStream> inStream = std::make_shared<MemoryMapStream>(
-        (PkgManager::PkgManagerPtr)this, info->identity, data, PkgStream::PkgStreamType_Buffer);
+        (PkgManager::PkgManagerPtr)this, info->identity, buffer, PkgStream::PkgStreamType_Buffer);
     if (inStream == nullptr) {
         PKG_LOGE("CompressBuffer Can not create stream for %s", info->identity.c_str());
         return PKG_INVALID_PARAM;
     }
-    PkgAlgorithmContext context = {{0, 0}, {0, data.length}, 0, info->digestMethod};
-    int32_t ret = algorithm->Pack(inStream.get(), PkgStreamImpl::ConvertPkgStream(output), context);
+    PkgAlgorithmContext context = {{0, 0}, {0, buffer.length}, 0, info->digestMethod};
+    int32_t ret = algorithm->Pack(inStream.get(), PkgStreamImpl::ConvertPkgStream(stream), context);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("Fail Decompress for %s", info->identity.c_str());
         return ret;
     }
     PKG_LOGI("packedSize: %zu unpackedSize: %zu ", context.packedSize, context.unpackedSize);
-    PkgStreamImpl::ConvertPkgStream(output)->Flush(context.packedSize);
+    PkgStreamImpl::ConvertPkgStream(stream)->Flush(context.packedSize);
     info->packedSize = context.packedSize;
     info->unpackedSize = context.unpackedSize;
     return PKG_SUCCESS;
