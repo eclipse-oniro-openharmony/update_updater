@@ -37,7 +37,6 @@ using namespace testing::ext;
 namespace UpdaterUt {
 constexpr uint32_t MAX_FILE_NAME = 256;
 constexpr uint32_t CENTRAL_SIGNATURE = 0x02014b50;
-constexpr uint32_t END_CENTRAL_SIGNATURE = 0x06054b50;
 
 class TestFile : public PkgFile {
 public:
@@ -165,57 +164,6 @@ public:
     {
         *reinterpret_cast<size_t *>(buff) = size;
     }
-
-    int TestBigZipFile()
-    {
-        pkgManager_ = static_cast<PkgManagerImpl*>(PkgManager::GetPackageInstance());
-        EXPECT_NE(pkgManager_, nullptr);
-        string name = "TestBigZipFile";
-        PkgManager::StreamPtr stream = nullptr;
-        size_t buffLen = sizeof(Zip64EndCentralDirLocator) + sizeof(EndCentralDir) + sizeof(Zip64EndCentralDirRecord);
-        pkgManager_->CreatePkgStream(stream, name, buffLen, PkgStream::PkgStreamType_MemoryMap);
-        EXPECT_NE(stream, nullptr);
-        PkgBuffer data;
-        stream->GetBuffer(data);
-
-        uint32_t signNumber = 0x06064b50;
-        Zip64EndCentralDirRecord zip64Cdr;
-        zip64Cdr.signature = signNumber;
-        zip64Cdr.totalEntries = 0;
-        zip64Cdr.offset = 0;
-        EXPECT_EQ(memcpy_s(data.buffer, sizeof(zip64Cdr), &zip64Cdr, sizeof(zip64Cdr)), 0);
-
-        signNumber = 0x07064b50;
-        Zip64EndCentralDirLocator zip64Locator;
-        zip64Locator.signature = signNumber;
-        zip64Locator.numberOfDisk = 1;
-        zip64Locator.endOfCentralDirectoryRecord = 0;
-        zip64Locator.totalNumberOfDisks = 1;
-        EXPECT_EQ(memcpy_s(data.buffer + sizeof(Zip64EndCentralDirRecord), sizeof(zip64Locator), &zip64Locator,
-            sizeof(zip64Locator)),
-            0);
-
-        EndCentralDir endDir;
-        endDir.signature = END_CENTRAL_SIGNATURE;
-        endDir.numDisk = 0;
-        endDir.startDiskOfCentralDir = 0;
-        endDir.totalEntriesInThisDisk = 1;
-        endDir.totalEntries = 0;
-        endDir.sizeOfCentralDir = 0;
-        endDir.offset = UINT_MAX;
-        endDir.commentLen = 0;
-        EXPECT_EQ(memcpy_s(data.buffer + sizeof(Zip64EndCentralDirRecord) + sizeof(Zip64EndCentralDirLocator),
-            sizeof(endDir), &endDir, sizeof(endDir)),
-            0);
-
-        std::unique_ptr<ZipPkgFile> zipFile = std::make_unique<ZipPkgFile>(pkgManager_,
-            PkgStreamImpl::ConvertPkgStream(stream));
-        EXPECT_NE(zipFile, nullptr);
-        std::vector<std::string> components;
-        int ret = zipFile->LoadPackage(components);
-        EXPECT_EQ(ret, 0);
-        return 0;
-    }
 };
 
 HWTEST_F(PkgPackageTest, TestPkgFile, TestSize.Level1)
@@ -234,11 +182,5 @@ HWTEST_F(PkgPackageTest, TestBigZip, TestSize.Level1)
 {
     PkgPackageTest test;
     EXPECT_EQ(0, test.TestBigZipEntry());
-}
-
-HWTEST_F(PkgPackageTest, TestBigZipFile, TestSize.Level1)
-{
-    PkgPackageTest test;
-    EXPECT_EQ(0, test.TestBigZipFile());
 }
 }
