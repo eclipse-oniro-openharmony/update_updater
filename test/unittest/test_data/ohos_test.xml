@@ -173,7 +173,7 @@
     </target>
     <target name="flashd_unittest">
         <preparer>
-            <option name="push" value="updater/updater/libupdate_hdi_impl.z.so -> /system/lib" src="out"/>
+            <option name="push" value="updater/updater/libupdate_hdi_impl.z.so -> /system/lib" src="res"/>
         </preparer>
     </target>
 </configuration>
