@@ -78,7 +78,7 @@ public:
     void TestCalculateCrc32()
     {
         PtableTest ptableTest {};
-        uint8_t buffer[128]; // 128 : set buffer size
+        uint8_t buffer[128] = {1}; // 128 : set buffer size
         uint8_t *nullBuffer = nullptr;
         uint32_t len = 0;
         int ret = ptableTest.TestCalculateCrc32(buffer, len);

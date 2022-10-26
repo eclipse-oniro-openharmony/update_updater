@@ -64,7 +64,7 @@ public:
         ASSERT_EQ(ret, -1);
         name = "TestGetPartitionInfoIndexByName";
         ret = context.TestGetPartitionInfoIndexByName(ptnInfo, name);
-        ASSERT_EQ(ret, -1);
+        ASSERT_NE(ret, -1);
     }
     void TestIsPtableChanged()
     {
