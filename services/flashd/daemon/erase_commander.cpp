@@ -25,7 +25,7 @@ namespace {
 constexpr size_t CMD_PARAM_COUNT_MIN = 2;
 }
 
-void EraseCommander::DoCommand([[maybe_unused]] const std::string &cmdParam, [[maybe_unused]] size_t fileSize)
+void EraseCommander::DoCommand([[maybe_unused]] const std::string &cmmParam, [[maybe_unused]] size_t fileSize)
 {
     FLASHD_LOGI("unsupport");
 }

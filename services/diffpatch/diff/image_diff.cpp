@@ -542,7 +542,7 @@ int32_t Lz4ImageDiff::TestAndSetConfig(const BlockBuffer &buffer, const std::str
 }
 
 int32_t CompressedImageDiff::CompressData(Hpackage::PkgManager::FileInfoPtr info,
-    const BlockBuffer &buffer, std::vector<uint8_t> &outData, size_t &bufferSize) const
+    const BlockBuffer &buffer, std::vector<uint8_t> &outData, size_t &outSize) const
 {
     Hpackage::PkgManager *pkgManager = Hpackage::PkgManager::GetPackageInstance();
     if (pkgManager == nullptr) {
@@ -551,14 +551,14 @@ int32_t CompressedImageDiff::CompressData(Hpackage::PkgManager::FileInfoPtr info
     }
     Hpackage::PkgManager::StreamPtr stream1 = nullptr;
     pkgManager->CreatePkgStream(stream1, "gzip",
-        [&outData, &bufferSize](const PkgBuffer &data,
+        [&outData, &outSize](const PkgBuffer &data,
             size_t size, size_t start, bool isFinish, const void *context) ->int {
             if (isFinish) {
                 return 0;
             }
-            bufferSize += size;
-            if ((start + bufferSize) > outData.size()) {
-                outData.resize(IGMDIFF_LIMIT_UNIT * ((start + bufferSize) / IGMDIFF_LIMIT_UNIT + 1));
+            outSize += size;
+            if ((start + outSize) > outData.size()) {
+                outData.resize(IGMDIFF_LIMIT_UNIT * ((start + outSize) / IGMDIFF_LIMIT_UNIT + 1));
             }
             return memcpy_s(outData.data() + start, outData.size(), data.buffer, size);
         }, nullptr);
@@ -567,7 +567,7 @@ int32_t CompressedImageDiff::CompressData(Hpackage::PkgManager::FileInfoPtr info
         PATCH_LOGE("Can not Compress buff ");
         return -1;
     }
-    PATCH_DEBUG("UpdateDiff::MakePatch totalSize: %zu", bufferSize);
+    PATCH_DEBUG("UpdateDiff::MakePatch totalSize: %zu", outSize);
     return 0;
 }
 } // namespace UpdatePatch

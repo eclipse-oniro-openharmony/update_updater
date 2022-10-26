@@ -90,7 +90,7 @@ std::vector<std::string> PackagesInfo::GetOTAVersion(Hpackage::PkgManager::PkgMa
     }
     int32_t ret = manager->CreatePkgStream(outStream, versionList, info->unpackedSize,
         PkgStream::PkgStreamType_MemoryMap);
-    if (outStream == nullptr) {
+    if (outStream == nullptr || ret == -1) {
         PKG_LOGE("Create stream fail %s", versionList.c_str());
         return tmpVersionList;
     }
@@ -130,11 +130,15 @@ std::vector<std::string> PackagesInfo::GetBoardID(Hpackage::PkgManager::PkgManag
     }
     int32_t ret = manager->CreatePkgStream(outStream, boardIdName, info->unpackedSize,
         PkgStream::PkgStreamType_MemoryMap);
-    if (outStream == nullptr) {
+    if (outStream == nullptr || ret == -1) {
         PKG_LOGE("Create stream fail %s", boardIdName.c_str());
         return boardlist;
     }
     ret = manager->ExtractFile(boardIdName, outStream);
+    if (ret == PKG_INVALID_STATE || ret == PKG_INVALID_PARAM) {
+        PKG_LOGE("ExtractFile error, ret =  %d", ret);
+        return boardlist;
+    }
     PkgBuffer data = {};
     ret = outStream->GetBuffer(data);
     if (ret != PKG_SUCCESS) {

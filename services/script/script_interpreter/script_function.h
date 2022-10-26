@@ -44,7 +44,7 @@ public:
     UScriptValuePtr Execute(ScriptInterpreter &inter, UScriptContextPtr local, ScriptParams *params);
 
 private:
-    std::vector<std::string> GetParamNames(ScriptInterpreter &inter, UScriptContextPtr context) const;
+    std::vector<std::string> GetParamNames(const ScriptInterpreter &inter, UScriptContextPtr context) const;
     std::string functionName_;
     ScriptParams* params_ = nullptr;
     UScriptStatementList* statements_ = nullptr;

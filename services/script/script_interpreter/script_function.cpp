@@ -42,11 +42,6 @@ UScriptValuePtr ScriptFunction::Execute(ScriptInterpreter &inter,
             "[interpreter-%d] ScriptFunction::Execute param not match %s",
             inter.GetInstanceId(), functionName_.c_str());
     } else {
-        USCRIPT_CHECK(params_->GetParams().size() == params_->GetParams().size(),
-            return std::make_shared<ErrorValue>(USCRIPT_ERROR_INTERPRET),
-            "[interpreter-%d] ScriptFunction::Execute param not match %s",
-            inter.GetInstanceId(), functionName_.c_str());
-
         size_t index = 0;
         std::vector<std::string> paramNames = GetParamNames(inter, context);
         for (auto expression : inputParams->GetParams()) {
@@ -67,7 +62,7 @@ UScriptValuePtr ScriptFunction::Execute(ScriptInterpreter &inter,
     return result.GetResultValue();
 }
 
-std::vector<std::string> ScriptFunction::GetParamNames(ScriptInterpreter &inter,
+std::vector<std::string> ScriptFunction::GetParamNames(const ScriptInterpreter &inter,
     UScriptContextPtr context) const
 {
     int32_t ret;

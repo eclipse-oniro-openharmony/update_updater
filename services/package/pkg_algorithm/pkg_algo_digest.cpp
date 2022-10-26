@@ -21,7 +21,7 @@
 namespace Hpackage {
 size_t DigestAlgorithm::GetDigestLen(int8_t digestMethod)
 {
-    static size_t digestLens[PKG_DIGEST_TYPE_MAX] = {0, DIGEST_CRC_LEN, DIGEST_SHA256_LEN, DIGEST_SHA256_LEN};
+    static const size_t digestLens[PKG_DIGEST_TYPE_MAX] = {0, DIGEST_CRC_LEN, DIGEST_SHA256_LEN, DIGEST_SHA256_LEN};
     if (digestMethod < PKG_DIGEST_TYPE_MAX) {
         return digestLens[digestMethod];
     }
@@ -30,7 +30,7 @@ size_t DigestAlgorithm::GetDigestLen(int8_t digestMethod)
 
 size_t DigestAlgorithm::GetSignatureLen(int8_t digestMethod)
 {
-    static size_t signatureLens[PKG_DIGEST_TYPE_MAX] = {0, 0, SIGN_SHA256_LEN, SIGN_SHA384_LEN};
+    static const size_t signatureLens[PKG_DIGEST_TYPE_MAX] = {0, 0, SIGN_SHA256_LEN, SIGN_SHA384_LEN};
     if (digestMethod < PKG_DIGEST_TYPE_MAX) {
         return signatureLens[digestMethod];
     }

@@ -33,7 +33,7 @@ public:
 
     void Init(const BlockBuffer &oldInfo);
     int64_t Search(const BlockBuffer &newInfo,
-        const BlockBuffer &oldInfo, int64_t st, int64_t en, int64_t &pos) const;
+        const BlockBuffer &oldInfo, int64_t start, int64_t end, int64_t &pos) const;
 private:
     void InitBuckets(const BlockBuffer &oldInfo,
         std::vector<DataType> &buckets, std::vector<DataType> &suffixArrayTemp);

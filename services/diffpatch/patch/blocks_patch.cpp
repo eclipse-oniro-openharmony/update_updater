@@ -70,7 +70,7 @@ int32_t BlocksPatch::ApplyPatch()
 
     while (newOffset_ < newSize_) {
         ControlData ctrlData {};
-        int32_t ret = ReadControlData(ctrlData);
+        ret = ReadControlData(ctrlData);
         if (ret != 0) {
             PATCH_LOGE("Failed to read control data");
             return ret;
@@ -244,7 +244,6 @@ int32_t BlocksStreamPatch::RestoreDiffData(const ControlData &ctrlData)
         return ret;
     }
 
-    size_t oldOffset = static_cast<size_t>(oldOffset_);
     size_t oldLength = stream_->GetFileLength();
     PkgBuffer buffer {};
     if (stream_->GetStreamType() == PkgStream::PkgStreamType_MemoryMap ||
@@ -261,12 +260,6 @@ int32_t BlocksStreamPatch::RestoreDiffData(const ControlData &ctrlData)
         if (ret != 0 || readLen != static_cast<size_t>(ctrlData.diffLength)) {
             PATCH_LOGE("Failed to get old buffer");
             return ret;
-        }
-        oldOffset = 0;
-    }
-    for (int64_t i = 0; i < ctrlData.diffLength; i++) {
-        if ((oldOffset_ + i >= 0) && (static_cast<size_t>(oldOffset_ + i) < oldLength)) {
-            diffData[i] += buffer.buffer[static_cast<int64_t>(oldOffset) + i];
         }
     }
     // write

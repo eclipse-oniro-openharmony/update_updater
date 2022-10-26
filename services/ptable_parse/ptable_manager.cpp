@@ -25,7 +25,7 @@ PtableManager::PtableManager() : pPtable_(nullptr)
     InitPtablePtr();
 }
 
-PtableManager::StorageType PtableManager::GetDeviceStorageType()
+PtableManager::StorageType PtableManager::GetDeviceStorageType() const
 {
     return storage_;
 }

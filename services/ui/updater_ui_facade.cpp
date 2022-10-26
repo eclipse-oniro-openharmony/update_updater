@@ -138,7 +138,7 @@ void UpdaterUiFacade::SetProgressVisible(bool isVisible) const
 void UpdaterUiFacade::ShowProgressWarning(bool isShow) const
 {
     if (auto [res, it] = CheckMode(); res) {
-        auto &progressPg = it->second.progressPage;
+        const auto &progressPg = it->second.progressPage;
         pgMgr_[progressPg.progressPageId][progressPg.warningComId]->SetVisible(isShow);
     }
 }

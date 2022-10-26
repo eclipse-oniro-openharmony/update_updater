@@ -14,6 +14,7 @@
  */
 
 #include "blocks_diff.h"
+#include "scope_guard.h"
 #include <cstdio>
 #include <iostream>
 #include <vector>
@@ -21,6 +22,7 @@
 
 using namespace Hpackage;
 using namespace std;
+using namespace Updater;
 
 namespace UpdatePatch {
 #define SWAP(a, b) auto swapTmp = (a); (a) = (b); (b) = swapTmp
@@ -368,6 +370,9 @@ int32_t BlocksDiff::WriteControlData(const std::vector<ControlData> controlDatas
     BlockBuffer srcData = {buffer, sizeof(int64_t)};
     PATCH_DEBUG("WriteControlData patchSize %zu controlDatas %zu", patchSize, controlDatas.size());
     std::vector<int64_t> data;
+    ON_SCOPE_EXIT(closeBzip2Adapter) {
+        bzip2Adapter->Close();
+    };
     for (size_t i = 0; i < controlDatas.size(); i++) {
         WriteLE64(srcData, controlDatas[i].diffLength);
         ret = bzip2Adapter->WriteData(srcData);
@@ -390,7 +395,10 @@ int32_t BlocksDiff::WriteControlData(const std::vector<ControlData> controlDatas
     }
     size_t dataSize = 0;
     ret = bzip2Adapter->FlushData(dataSize);
-    bzip2Adapter->Close();
+    if (ret != 0) {
+        PATCH_LOGE("Failed to FlushData %d", ret);
+        return ret;
+    }
     patchSize += dataSize;
     PATCH_DEBUG("WriteControlData exit patchSize %zu", patchSize);
     return 0;
@@ -405,6 +413,9 @@ int32_t BlocksDiff::WriteDiffData(const std::vector<ControlData> controlDatas, s
         return -1;
     }
     bzip2Adapter->Open();
+    ON_SCOPE_EXIT(closeBzip2Adapter) {
+        bzip2Adapter->Close();
+    };
 
     std::vector<uint8_t> diffData(IGMDIFF_LIMIT_UNIT, 0);
     int32_t ret = 0;
@@ -432,7 +443,10 @@ int32_t BlocksDiff::WriteDiffData(const std::vector<ControlData> controlDatas, s
     }
     size_t dataSize = 0;
     ret = bzip2Adapter->FlushData(dataSize);
-    bzip2Adapter->Close();
+    if (ret != 0) {
+        PATCH_LOGE("Failed to FlushData %d", ret);
+        return ret;
+    }
     patchSize += dataSize;
     PATCH_DEBUG("WriteDiffData exit patchSize %zu dataSize %zu ", patchSize, dataSize);
     return 0;
@@ -447,6 +461,9 @@ int32_t BlocksDiff::WriteExtraData(const std::vector<ControlData> controlDatas, 
         return -1;
     }
     bzip2Adapter->Open();
+    ON_SCOPE_EXIT(closeBzip2Adapter) {
+        bzip2Adapter->Close();
+    };
     int32_t ret = 0;
     for (size_t i = 0; i < controlDatas.size(); i++) {
         if (controlDatas[i].extraLength <= 0) {
@@ -461,7 +478,10 @@ int32_t BlocksDiff::WriteExtraData(const std::vector<ControlData> controlDatas, 
     }
     size_t dataSize = 0;
     ret = bzip2Adapter->FlushData(dataSize);
-    bzip2Adapter->Close();
+    if (ret != 0) {
+        PATCH_LOGE("Failed to FlushData %d", ret);
+        return ret;
+    }
     patchSize += dataSize;
     PATCH_DEBUG("WriteExtraData exit patchSize %zu", patchSize);
     return 0;

@@ -25,11 +25,11 @@ public:
     explicit FlashCommander(callbackFun callback) : Commander(callback) {}
     ~FlashCommander() override {};
     void DoCommand(const uint8_t *payload, int payloadSize) override;
-    void DoCommand(const std::string &cmmParam, size_t fileSize) override;
+    void DoCommand([[maybe_unused]] const std::string &cmmParam, [[maybe_unused]] size_t fileSize) override;
     void PostCommand() override;
 
 private:
-    int DoFlash(const uint8_t *buffer, int bufferSize);
+    int DoFlash(const uint8_t *payload, int payloadSize);
     bool InitPartition(const std::string &partName, const uint8_t *buffer, int bufferSize);
 
     std::string partName_ = {};

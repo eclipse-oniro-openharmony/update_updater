@@ -37,11 +37,11 @@ UpdateCommander::~UpdateCommander()
     SafeCloseFile(fd_);
 }
 
-void UpdateCommander::DoCommand(const std::string &cmdParam, size_t fileSize)
+void UpdateCommander::DoCommand(const std::string &cmmParam, size_t fileSize)
 {
     FLASHD_LOGI("start to update");
     startTime_ = OHOS::GetMicroTickCount();
-    auto params = Split(cmdParam, { "-f" });
+    auto params = Split(cmmParam, { "-f" });
     if (params.size() < CMD_PARAM_COUNT_MIN) {
         FLASHD_LOGE("update param count is %u, not invaild", params.size());
         NotifyFail(CmdType::UPDATE);
@@ -59,7 +59,7 @@ void UpdateCommander::DoCommand(const std::string &cmdParam, size_t fileSize)
     }
 
     fileSize_ = fileSize;
-    filePath_ = FLASHD_FILE_PATH + GetFileName(cmdParam);
+    filePath_ = FLASHD_FILE_PATH + GetFileName(cmmParam);
     fd_ = open(filePath_.c_str(), O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
     if (fd_ < 0) {
         NotifyFail(CmdType::UPDATE);

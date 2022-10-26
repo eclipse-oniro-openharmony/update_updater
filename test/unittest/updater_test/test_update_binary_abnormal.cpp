@@ -38,11 +38,7 @@ int main(int argc, char **argv)
         return EXIT_INVALID_ARGS;
     }
 
-    bool retry = false;
     int pipeFd = static_cast<int>(std::strtol(argv[1], nullptr, decimal));
-    if (argc >= withRetry && strcmp(argv[withRetry - 1], "retry") == 0) {
-        retry = true;
-    }
     FILE *pipeWrite = fdopen(pipeFd, "w");
     if (pipeWrite == nullptr) {
         std::cout << "Failed to fdopen\n";

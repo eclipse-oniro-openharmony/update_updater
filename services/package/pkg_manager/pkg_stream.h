@@ -31,7 +31,7 @@ public:
 
     virtual ~PkgStreamImpl() {}
 
-    virtual int32_t Read(const PkgBuffer &data, size_t start, size_t needRead, size_t &readLen) override
+    int32_t Read(const PkgBuffer &data, size_t start, size_t needRead, size_t &readLen) override
     {
         UNUSED(data);
         UNUSED(start);
@@ -55,7 +55,7 @@ public:
 
     const std::string GetFileName() const override;
 
-    virtual int32_t GetStreamType() const override
+    int32_t GetStreamType() const override
     {
         return PkgStreamType_Read;
     };

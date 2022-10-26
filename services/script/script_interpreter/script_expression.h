@@ -62,7 +62,7 @@ public:
     {
         return new UScriptExpression(expressType);
     }
-    ExpressionType GetExpressType()
+    ExpressionType GetExpressType() const
     {
         return expressType_;
     }
@@ -141,7 +141,7 @@ public:
         return new IdentifierExpression(value);
     }
 
-    const std::string GetIdentifier()
+    const std::string GetIdentifier() const
     {
         return identifier_;
     }
@@ -181,7 +181,7 @@ public:
     void AddIdentifier(const std::string &identifier);
 
     static UScriptExpression* CreateExpression(const std::string identifier, UScriptExpression *expression);
-    static UScriptExpression* AddIdentifier(UScriptExpression *expression, std::string identifier);
+    static UScriptExpression* AddIdentifier(UScriptExpression *expression, const std::string identifier);
 private:
     std::string identifier_;
     std::vector<std::string> multipleIdentifiers_; // 最大支持4个参数a,b,v = 1
