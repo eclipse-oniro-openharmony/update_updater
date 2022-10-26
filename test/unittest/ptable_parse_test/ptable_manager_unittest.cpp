@@ -25,13 +25,16 @@ namespace {
 class PtableManagerTest : public PtableManager {
 public:
     PtableManagerTest() {}
+
     ~PtableManagerTest() {}
+
     void LoadPartitionInfo([[maybe_unused]] Hpackage::PkgManager *pkgManager = nullptr) override {}
 
     int32_t TestGetPartitionInfoIndexByName(const std::vector<Ptable::PtnInfo> &ptnInfo, const std::string &name)
     {
         return GetPartitionInfoIndexByName(ptnInfo, name);
     }
+
     bool TestIsPtableChanged(const std::vector<Ptable::PtnInfo> &devicePtnInfo,
         const std::vector<Ptable::PtnInfo> &pkgPtnInfo)
     {
@@ -42,7 +45,9 @@ public:
 class UTestPtableManager : public ::testing::Test {
 public:
     UTestPtableManager() {}
+
     ~UTestPtableManager() = default;
+
     void TestGetPartitionInfoIndexByName()
     {
         PtableManagerTest context {};
@@ -66,6 +71,7 @@ public:
         ret = context.TestGetPartitionInfoIndexByName(ptnInfo, name);
         ASSERT_NE(ret, -1);
     }
+
     void TestIsPtableChanged()
     {
         PtableManagerTest context {};
@@ -73,12 +79,7 @@ public:
         std::vector<Ptable::PtnInfo> pkgPtnInfo;
         bool ret = context.TestIsPtableChanged(devicePtnInfo, pkgPtnInfo);
         ASSERT_EQ(ret, false);
-        Ptable::PtnInfo tmp;
-        tmp.dispName = "TestIsPtableChanged";
-        tmp.lun = 1;
-        tmp.startAddr = 1;
-        tmp. partitionSize = 1;
-        tmp.partitionTypeGuid[0] = 1;
+        Ptable::PtnInfo tmp = {1, 1, 1, {1}, "TestIsPtableChanged"};
         pkgPtnInfo.push_back(tmp);
         ret = context.TestIsPtableChanged(devicePtnInfo, pkgPtnInfo);
         ASSERT_EQ(ret, true);
@@ -111,6 +112,7 @@ HWTEST_F(UTestPtableManager, TestGetPartitionInfoIndexByName, TestSize.Level1)
 {
     UTestPtableManager {}.TestGetPartitionInfoIndexByName();
 }
+
 HWTEST_F(UTestPtableManager, TestIsPtableChanged, TestSize.Level1)
 {
     UTestPtableManager {}.TestIsPtableChanged();
