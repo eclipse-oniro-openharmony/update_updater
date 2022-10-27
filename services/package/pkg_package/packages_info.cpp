@@ -130,12 +130,12 @@ std::vector<std::string> PackagesInfo::GetBoardID(Hpackage::PkgManager::PkgManag
     }
     int32_t ret = manager->CreatePkgStream(outStream, boardIdName, info->unpackedSize,
         PkgStream::PkgStreamType_MemoryMap);
-    if (outStream == nullptr || ret == -1) {
+    if (outStream == nullptr || ret != PKG_SUCCESS) {
         PKG_LOGE("Create stream fail %s", boardIdName.c_str());
         return boardlist;
     }
     ret = manager->ExtractFile(boardIdName, outStream);
-    if (ret == PKG_INVALID_STATE || ret == PKG_INVALID_PARAM) {
+    if (ret != PKG_SUCCESS) {
         PKG_LOGE("ExtractFile error, ret =  %d", ret);
         return boardlist;
     }

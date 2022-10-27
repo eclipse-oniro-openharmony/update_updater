@@ -244,6 +244,8 @@ int32_t BlocksStreamPatch::RestoreDiffData(const ControlData &ctrlData)
         return ret;
     }
 
+    size_t oldOffset = static_cast<size_t>(oldOffset_);
+    size_t oldLength = stream_->GetFileLength();
     PkgBuffer buffer {};
     if (stream_->GetStreamType() == PkgStream::PkgStreamType_MemoryMap ||
         stream_->GetStreamType() == PkgStream::PkgStreamType_Buffer) {
@@ -259,6 +261,12 @@ int32_t BlocksStreamPatch::RestoreDiffData(const ControlData &ctrlData)
         if (ret != 0 || readLen != static_cast<size_t>(ctrlData.diffLength)) {
             PATCH_LOGE("Failed to get old buffer");
             return ret;
+        }
+        oldOffset = 0;
+    }
+    for (int64_t i = 0; i < ctrlData.diffLength; i++) {
+        if ((oldOffset_ + i >= 0) && (static_cast<size_t>(oldOffset_ + i) < oldLength)) {
+            diffData[i] += buffer.buffer[static_cast<int64_t>(oldOffset) + i];
         }
     }
     // write
