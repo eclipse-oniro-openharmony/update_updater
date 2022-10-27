@@ -128,10 +128,11 @@ public:
         std::stringstream tgt;
         std::apply([&tgt] (auto && ... args) {
             ((tgt << args << "  "), ...);
-            tgt << std::endl; }, input);
+            tgt << std::endl;
+            }, input);
         std::apply([&context] (auto && ... args) {
             AddInputParam(context, args...);
-        }, input);
+            }, input);
         EXPECT_EQ(instruction->Execute(env, context), USCRIPT_SUCCESS);
         std::vector<UScriptValuePtr> output = context.GetOutVar();
         EXPECT_EQ(output.size(), 0);

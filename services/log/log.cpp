@@ -64,14 +64,14 @@ UpdaterLogger::~UpdaterLogger()
             OHOS::HiviewDFX::HiLog::Warn(g_logLabel, "%{public}s", str.c_str());
             break;
         default:
-            break;            
+            break;
     }
 #endif
     oss_.str("");
     oss_ << std::endl << std::flush;
     if (g_updaterLog.is_open()) {
         g_updaterLog << realTime_ <<  "  " << "[" << logLevelMap_[level_] << "]" <<
-            g_logTag << " " << str << std::endl << std::flush; 
+            g_logTag << " " << str << std::endl << std::flush;
     }
 }
 

@@ -152,7 +152,7 @@ HWTEST_F(MountUnitTest, GetBlockDeviceByMountPoint_unitest, TestSize.Level1)
     if (mount(vendorSource.c_str(), "/vendor", "ext4", mountFlag, nullptr) != 0) {
         std::cout << "Cannot re-mount vendor\n";
     }
-    auto ret = open(tmpPath.c_str(), O_RDONLY|O_CREAT|O_TRUNC, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
+    auto ret = open(tmpPath.c_str(), O_RDONLY | O_CREAT | O_TRUNC, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
     if (ret < 0) {
         std::cout << "Cannot open \"/vendor/etc/fstab.updater\" file: " << errno << "\n";
         return;
