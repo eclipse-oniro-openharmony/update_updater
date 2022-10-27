@@ -44,7 +44,8 @@ public:
         EXPECT_NE(pkgManager_, nullptr);
         std::vector<std::string> components;
         // 使用上面打包的包进行解析
-        int32_t ret = pkgManager_->LoadPackage(TEST_PATH_TO + testPackageName, GetTestCertName(type), components);
+        int32_t ret = pkgManager_->LoadPackage(
+            "/data/updater/package/test_package.zip", GetTestCertName(type), components);
         EXPECT_EQ(ret, PKG_SUCCESS);
 
         for (size_t i = 0; i < components.size(); i++) {
