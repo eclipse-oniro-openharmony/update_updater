@@ -132,8 +132,10 @@ std::ostream& StageLogger::OutputUpdaterStage()
         if (stage_ == UPDATE_STAGE_OUT) {
             return g_updaterStage << realTime << "  " << g_logTag << " ";
         }
-        return g_updaterStage << realTime << "  " << g_logTag << " status is : " <<
-            updaterStageMap[stage_] << ", stage is ";
+        if (stage_ < UPDATE_STAGE_OUT && stage_ >= UPDATE_STAGE_BEGIN) {
+            return g_updaterStage << realTime << "  " << g_logTag << " status is : " <<
+                updaterStageMap[stage_] << ", stage is ";
+        }
     }
     return std::cout;
 }
