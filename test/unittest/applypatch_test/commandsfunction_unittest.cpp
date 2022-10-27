@@ -28,7 +28,8 @@
 using namespace testing::ext;
 using namespace Updater;
 using namespace std;
-namespace UpdaterUt{
+namespace UpdaterUt
+{
 class CommandFunctionUnitTest : public testing::Test {
 public:
     static void SetUpTestCase(void);
@@ -52,21 +53,22 @@ void CommandFunctionUnitTest::TearDown()
     cout << "Updater Unit CommandFunctionUnitTest End!" << endl;
 }
 
-HWTEST_F(CommandFunctionUnitTest, command_function_test_001, TestSize.Level1){
+HWTEST_F(CommandFunctionUnitTest, command_function_test_001, TestSize.Level1)
+{
     Command* cmd = new Command();
-    std::string cmd_line = std::string("abort");
-    cmd->Init(cmd_line);
-    AbortCommandFn cmd_abort;
-    EXPECT_EQ(cmd_abort.Execute(*cmd), 0);
+    std::string cmdLine = std::string("abort");
+    cmd->Init(cmdLine);
+    AbortCommandFn cmdAbort;
+    EXPECT_EQ(cmdAbort.Execute(*cmd), 0);
     cmd->SetFileDescriptor(0);
-    cmd_line = "new 2,0,1";
-    cmd->Init(cmd_line);
-    NewCommandFn cmd_new;
-    EXPECT_EQ(cmd_new.Execute(*cmd), -1);
-    cmd_line = "erase 1,1";
-    cmd->Init(cmd_line);
-    ZeroAndEraseCommandFn cmd_erase;
-    EXPECT_EQ(cmd_erase.Execute(*cmd), -1);
+    cmdLine = "new 2,0,1";
+    cmd->Init(cmdLine);
+    NewCommandFn cmdNew;
+    EXPECT_EQ(cmdNew.Execute(*cmd), -1);
+    cmdLine = "erase 1,1";
+    cmd->Init(cmdLine);
+    ZeroAndEraseCommandFn cmdErase;
+    EXPECT_EQ(cmdErase.Execute(*cmd), -1);
     delete cmd;
 }
 }
