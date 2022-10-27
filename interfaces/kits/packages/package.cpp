@@ -294,3 +294,15 @@ int32_t ExtraPackageFile(const char *packagePath, const char *file, const char *
     PkgManager::ReleasePackageInstance(manager);
     return PKG_SUCCESS;
 }
+
+int32_t ExtraPackageDir(const char *packagePath, [[maybe_unused]] const char *keyPath, const char *dir,
+    const char *outPath)
+{
+    return ExtraPackageDir(packagePath, dir, outPath);
+}
+
+int32_t ExtraPackageFile(const char *packagePath, [[maybe_unused]] const char *keyPath, const char *file,
+    const char *outPath)
+{
+    return ExtraPackageFile(packagePath, file, outPath);
+}
