@@ -43,7 +43,7 @@ public:
     ~Scanner() override {}
     // 不需要手动实现这个函数，Flex会生成YY_DECL宏定义的代码来实现这个函数
     virtual Uscript::Parser::symbol_type nextToken();
-    virtual int yywrap()
+    int yywrap() override
     {
         return 1;
     }
