@@ -118,6 +118,7 @@ HWTEST_F(FLashServiceUnitTest, UpdateCommanderDoCommand, TestSize.Level1)
     commander->DoCommand(payload, payloadSize);
     EXPECT_EQ(UpdaterState::FAIL, ret);
 }
+
 HWTEST_F(FLashServiceUnitTest, EraseCommanderDoCommand, TestSize.Level1)
 {
     LoadFstab();
@@ -145,6 +146,7 @@ HWTEST_F(FLashServiceUnitTest, EraseCommanderDoCommand, TestSize.Level1)
     commander->DoCommand(payload, payloadSize);
     EXPECT_EQ(UpdaterState::FAIL, ret);
 }
+
 HWTEST_F(FLashServiceUnitTest, FlashCommanderDoCommand, TestSize.Level1)
 {
     LoadFstab();
@@ -172,6 +174,7 @@ HWTEST_F(FLashServiceUnitTest, FlashCommanderDoCommand, TestSize.Level1)
     commander->DoCommand(payload, payloadSize);
     EXPECT_EQ(UpdaterState::SUCCESS, ret);
 }
+
 HWTEST_F(FLashServiceUnitTest, GetFileName, TestSize.Level1)
 {
     std::string testStr = "data/test/test.zip";
@@ -186,6 +189,7 @@ HWTEST_F(FLashServiceUnitTest, GetFileName, TestSize.Level1)
     res = GetFileName(testStr);
     EXPECT_EQ("", res);
 }
+
 HWTEST_F(FLashServiceUnitTest, Split, TestSize.Level1)
 {
     std::string input = "";
