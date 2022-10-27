@@ -231,19 +231,19 @@ int32_t CreatePackageL1(const UpgradePkgInfoExt *pkgInfo, ComponentInfoExt *comp
     return ret;
 }
 
-int32_t ExtraPackageDir(const char *packagePath, const char *keyPath, const char *dir,
+int32_t ExtraPackageDir(const char *packagePath, [[maybe_unused]] const char *keyPath, const char *dir,
     const char *outPath)
 {
     PkgManager::PkgManagerPtr manager = PkgManager::GetPackageInstance();
-    if (packagePath == nullptr || keyPath == nullptr || outPath == nullptr || manager == nullptr) {
+    if (packagePath == nullptr || outPath == nullptr || manager == nullptr) {
         LOG(ERROR) << "Check param fail ";
         return PKG_INVALID_PARAM;
     }
 
     std::vector<std::string> components;
-    int32_t ret = manager->LoadPackage(std::string(packagePath), std::string(keyPath), components);
+    int32_t ret = manager->LoadPackageWithoutUnPack(std::string(packagePath), components);
     if (ret != PKG_SUCCESS) {
-        LOG(ERROR) << "LoadPackage fail";
+        LOG(ERROR) << "LoadPackageWithoutUnPack fail";
         PkgManager::ReleasePackageInstance(manager);
         return ret;
     }
@@ -266,19 +266,19 @@ int32_t ExtraPackageDir(const char *packagePath, const char *keyPath, const char
     return PKG_SUCCESS;
 }
 
-int32_t ExtraPackageFile(const char *packagePath, const char *keyPath, const char *file,
+int32_t ExtraPackageFile(const char *packagePath, [[maybe_unused]] const char *keyPath, const char *file,
     const char *outPath)
 {
     PkgManager::PkgManagerPtr manager = PkgManager::GetPackageInstance();
-    if (packagePath == nullptr || keyPath == nullptr || outPath == nullptr || manager == nullptr) {
+    if (packagePath == nullptr || outPath == nullptr || file == nullptr || manager == nullptr) {
         LOG(ERROR) << "Check param fail ";
         return PKG_INVALID_PARAM;
     }
 
     std::vector<std::string> components;
-    int32_t ret = manager->LoadPackage(std::string(packagePath), std::string(keyPath), components);
+    int32_t ret = manager->LoadPackageWithoutUnPack(std::string(packagePath), components);
     if (ret != PKG_SUCCESS) {
-        LOG(ERROR) << "LoadPackage fail";
+        LOG(ERROR) << "LoadPackageWithoutUnPack fail";
         PkgManager::ReleasePackageInstance(manager);
         return ret;
     }
