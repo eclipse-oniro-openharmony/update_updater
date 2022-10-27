@@ -31,7 +31,6 @@ enum EXIT_CODES {
 int main(int argc, char **argv)
 {
     constexpr int lessArgIndex = 2;
-    constexpr int withRetry = 3;
     constexpr int decimal = 10;
     if (argc < lessArgIndex) {
         std::cout << "Invalid arguments\n";

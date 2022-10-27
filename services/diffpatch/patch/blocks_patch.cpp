@@ -244,7 +244,6 @@ int32_t BlocksStreamPatch::RestoreDiffData(const ControlData &ctrlData)
         return ret;
     }
 
-    size_t oldLength = stream_->GetFileLength();
     PkgBuffer buffer {};
     if (stream_->GetStreamType() == PkgStream::PkgStreamType_MemoryMap ||
         stream_->GetStreamType() == PkgStream::PkgStreamType_Buffer) {
