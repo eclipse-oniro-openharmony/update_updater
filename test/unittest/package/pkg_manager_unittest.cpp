@@ -64,7 +64,7 @@ public:
     {
         return PKG_SUCCESS;
     }
-    virtual int32_t Seek(long int sizeT, int whence) override
+    int32_t Seek(long int sizeT, int whence) override
     {
         return PKG_SUCCESS;
     }
@@ -550,7 +550,7 @@ public:
         });
         PKG_CHECK(outStream != nullptr, close(fd); return -1, "Can not create stream ");
 
-        void* mappedData = mmap(nullptr, (size_t)fileSize, PROT_READ, MAP_SHARED, fd, 0);
+        void* mappedData = mmap(nullptr, static_cast<size_t>(fileSize), PROT_READ, MAP_SHARED, fd, 0);
         PKG_CHECK(mappedData != MAP_FAILED, close(fd); return -2, "Can not mmap ");
 
         size_t addrOffset = 4;
@@ -642,7 +642,7 @@ public:
         });
         PKG_CHECK(outStream != nullptr, close(fd); return -1, "Can not create stream ");
 
-        void* mappedData = mmap(nullptr, (size_t)fileSize, PROT_READ, MAP_SHARED, fd, 0);
+        void* mappedData = mmap(nullptr, static_cast<size_t>(fileSize), PROT_READ, MAP_SHARED, fd, 0);
         PKG_CHECK(mappedData != MAP_FAILED, close(fd); return -2, "Can not mmap ");
 
         pkgManager_ = static_cast<PkgManagerImpl*>(PkgManager::GetPackageInstance());

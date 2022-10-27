@@ -32,7 +32,7 @@ PkgAlgorithmLz4::PkgAlgorithmLz4(const Lz4FileInfo &config) : PkgAlgorithm(),
     // contentChecksumFlag_ 0 disable
     // blockSizeID_ LZ4F_default=0
     if (compressionLevel_ < 1) {
-        compressionLevel_ = 2;
+        compressionLevel_ = 2; // 2 : set compressionLevel_ 2
     }
     if (compressionLevel_ >= LZ4HC_CLEVEL_MAX) {
         compressionLevel_ = LZ4HC_CLEVEL_MAX;
@@ -44,7 +44,7 @@ int32_t PkgAlgorithmLz4::AdpLz4Compress(const uint8_t *src, uint8_t *dest,
 {
     if (compressionLevel_ < LZ4HC_CLEVEL_MIN) { // hc 最小是3
         return LZ4_compress_default(reinterpret_cast<const char *>(src), reinterpret_cast<char *>(dest),
-            (int32_t)srcSize, (int32_t)dstCapacity);
+            static_cast<int32_t>(srcSize), static_cast<int32_t>(dstCapacity));
     }
     return LZ4_compress_HC(reinterpret_cast<const char *>(src), reinterpret_cast<char *>(dest), srcSize, dstCapacity,
         compressionLevel_);

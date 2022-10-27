@@ -146,7 +146,7 @@ bool Ptable::MemReadWithOffset(const std::string &filePath, const uint64_t offse
         return false;
     }
 
-    if (!fin.read((char *)(outData), dataSize)) {
+    if (!fin.read(reinterpret_cast<char *>(outData), dataSize)) {
         LOG(ERROR) << "read 0x" << std::hex << dataSize << " bytes in " << filePath <<
             " failed. only read 0x" << std::hex << fin.gcount() << std::dec;
         fin.close();

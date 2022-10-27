@@ -158,9 +158,11 @@ public:
                 }
             };
             std::apply([&toString, &tgt] (auto && ... args) {
-                ((tgt << toString(args)), ...); }, input);
+                ((tgt << toString(args)), ...);
+                }, input);
             std::apply([&context] (auto && ... args) {
-                AddInputParam(context, args...); }, input);
+                AddInputParam(context, args...);
+                }, input);
             EXPECT_EQ(instruction->Execute(env, context), USCRIPT_SUCCESS);
             std::vector<UScriptValuePtr> output = context.GetOutVar();
             ASSERT_EQ(output.size(), 1);
