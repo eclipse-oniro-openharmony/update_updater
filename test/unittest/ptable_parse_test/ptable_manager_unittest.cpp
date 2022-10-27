@@ -79,7 +79,7 @@ public:
         std::vector<Ptable::PtnInfo> pkgPtnInfo;
         bool ret = context.TestIsPtableChanged(devicePtnInfo, pkgPtnInfo);
         ASSERT_EQ(ret, false);
-        Ptable::PtnInfo tmp = {1, 1, 1, {1}, "TestIsPtableChanged"};
+        Ptable::PtnInfo tmp = {1, 1, {1}, 1, "TestIsPtableChanged"};
         pkgPtnInfo.push_back(tmp);
         ret = context.TestIsPtableChanged(devicePtnInfo, pkgPtnInfo);
         ASSERT_EQ(ret, true);
