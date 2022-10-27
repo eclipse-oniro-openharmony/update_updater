@@ -18,9 +18,7 @@
 #include <gtest/gtest.h>
 #include <iostream>
 #include <string>
-#define private public
 #include "../applypatch/command_process.h"
-#undef private
 #include "log/log.h"
 #include "applypatch/transfer_manager.h"
 
@@ -28,8 +26,7 @@
 using namespace testing::ext;
 using namespace Updater;
 using namespace std;
-namespace UpdaterUt
-{
+namespace UpdaterUt {
 class CommandFunctionUnitTest : public testing::Test {
 public:
     static void SetUpTestCase(void);
