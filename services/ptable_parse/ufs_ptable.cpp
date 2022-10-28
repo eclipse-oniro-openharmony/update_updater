@@ -104,9 +104,9 @@ bool UfsPtable::UfsReadGpt(const uint8_t *gptImage, const uint32_t len,
             // add a new partition info into partitionInfo_ vector
             PtnInfo newPtnInfo;
             (void)memset_s(&newPtnInfo, sizeof(newPtnInfo), 0, sizeof(newPtnInfo));
-            newPtnInfo.startAddr = firstLba * (uint64_t)MIN_UFS_WRITE_SIZE;
+            newPtnInfo.startAddr = firstLba * static_cast<uint64_t>(MIN_UFS_WRITE_SIZE);
             // General algorithm : calculate partition size by lba
-            newPtnInfo.partitionSize = (lastLba - firstLba + 1) * (uint64_t)MIN_UFS_WRITE_SIZE;
+            newPtnInfo.partitionSize = (lastLba - firstLba + 1) * static_cast<uint64_t>(MIN_UFS_WRITE_SIZE);
             const uint8_t *nameOffset = data + (j * PARTITION_ENTRY_SIZE + GPT_PARTITION_NAME_OFFSET);
             // 2 bytes for 1 charactor of partition name
             ParsePartitionName(nameOffset, MAX_GPT_NAME_SIZE, newPtnInfo.dispName, MAX_GPT_NAME_SIZE / 2);

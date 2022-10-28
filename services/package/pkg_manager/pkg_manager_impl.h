@@ -113,7 +113,7 @@ private:
 
     int32_t SetSignVerifyKeyName(const std::string &keyName);
 
-    int32_t CreatePkgStream(PkgStreamPtr &stream, const std::string &, size_t, int32_t);
+    int32_t CreatePkgStream(PkgStreamPtr &stream, const std::string &fileName, size_t size, int32_t type);
 
     int32_t CreatePkgStream(PkgStreamPtr &stream, const std::string &fileName,
         PkgStream::ExtractFileProcessor processor, const void *context);

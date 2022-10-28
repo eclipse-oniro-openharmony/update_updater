@@ -20,8 +20,8 @@
 
 namespace Updater {
 namespace Lang {
-constexpr int minLvl = 0; // min resource level
-constexpr int maxLvl = 2; // max resource level
+constexpr int MINLvl = 0; // min resource level
+constexpr int MAXLvl = 2; // max resource level
 constexpr const char *DEFAULT_KEY = "DEFAULT_STRING";
 
 // map value zh/en/spa is used in string.json to specify language type for each string key
@@ -40,7 +40,7 @@ const std::unordered_map<std::string, Language> LanguageUI::LOCALES {
 
 LanguageUI::LanguageUI() : strMap_ {}, res_ {}, langRes_ {}, language_ {Language::ENGLISH}
 {
-    res_.resize(maxLvl + 1);
+    res_.resize(MAXLvl + 1);
 }
 
 LanguageUI &LanguageUI::GetInstance()
@@ -105,7 +105,7 @@ bool LanguageUI::ParseJson(const std::string &file)
 
 bool LanguageUI::CheckLevel(int level)
 {
-    if (level < minLvl || level > maxLvl) {
+    if (level < MINLvl || level > MAXLvl) {
         LOG(ERROR) << "level invalid : " << level;
         return false;
     }

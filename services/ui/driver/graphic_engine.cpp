@@ -111,7 +111,7 @@ OHOS::BufferInfo *GraphicEngine::GetFBBufferInfo()
     buffInfo_->color = bkgColor_;
     buffInfo_->virAddr = virAddr_.get();
     buffInfo_->phyAddr = buffInfo_->virAddr;
-    buffInfo_->stride = static_cast<int>(width_ * pixelBytes);
+    buffInfo_->stride = static_cast<int32_t>(width_ * pixelBytes);
     buffInfo_->width = width_;
     buffInfo_->height = height_;
 

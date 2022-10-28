@@ -53,7 +53,8 @@ public:
     {
         return 0;
     }
-    const FileInfo *GetFileInfo(const std::string &fileId) override {
+    const FileInfo *GetFileInfo(const std::string &fileId) override
+    {
         static FileInfo fileInfo {};
         if (fileId == "script") {
             return &fileInfo;

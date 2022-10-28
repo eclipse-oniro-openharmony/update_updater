@@ -292,7 +292,7 @@ bool PackagePtable::GetPtableBufferFromPkg(Hpackage::PkgManager *pkgManager, uin
     size_t bufSize = 0;
     uint8_t* buffer = nullptr;
     outStream->GetBuffer(buffer, bufSize);
-    if (memcpy_s(imageBuf, size, buffer, std::min((size_t)size, bufSize))) {
+    if (memcpy_s(imageBuf, size, buffer, std::min(static_cast<size_t>(size), bufSize))) {
         LOG(ERROR) << "memcpy to imageBuf fail";
         pkgManager->ClosePkgStream(outStream);
         return false;
