@@ -23,6 +23,7 @@ ohos_unittest("package_unittest") {
       "//base/update/updater/test/unittest/test_data/ohos_test.xml"
   module_out_path = MODULE_OUTPUT_PATH
   sources = [
+    "package_unittest.cpp",
     "pkg_algo_unittest.cpp",
     "pkg_manager_unittest.cpp",
     "pkg_package_unittest.cpp",
