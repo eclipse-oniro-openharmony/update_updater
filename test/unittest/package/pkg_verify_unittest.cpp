@@ -48,36 +48,40 @@ public:
 
     int TestExtraPackageFile()
     {
-        int32_t ret = ExtraPackageFile(nullptr, nullptr, nullptr);
+        int32_t ret = ExtraPackageFile(nullptr, nullptr, nullptr, nullptr);
         EXPECT_EQ(ret, PKG_INVALID_PARAM);
 
         std::string packagePath = "invalid_path";
+        std::string keyPath = "invalid_key";
         std::string file = "invalid_file";
         std::string outPath = "invalid_path";
-        ret = ExtraPackageFile(packagePath.c_str(), file.c_str(), outPath.c_str());
+        ret = ExtraPackageFile(packagePath.c_str(), keyPath.c_str(), file.c_str(), outPath.c_str());
         EXPECT_EQ(ret, PKG_INVALID_FILE);
 
         packagePath = "/data/updater/package/test_package.zip";
+        keyPath = "/data/updater/src/signing_cert.crt";
         file = "updater.bin";
         outPath = "/data/updater/package/";
-        ret = ExtraPackageFile(packagePath.c_str(), file.c_str(), outPath.c_str());
+        ret = ExtraPackageFile(packagePath.c_str(), keyPath.c_str(), file.c_str(), outPath.c_str());
         EXPECT_EQ(ret, PKG_SUCCESS);
         return 0;
     }
 
     int TestExtraPackageDir()
     {
-        int32_t ret = ExtraPackageDir(nullptr, nullptr, nullptr);
+        int32_t ret = ExtraPackageDir(nullptr, nullptr, nullptr, nullptr);
         EXPECT_EQ(ret, PKG_INVALID_PARAM);
 
         std::string packagePath = "invalid_path";
+        std::string keyPath = "invalid_key";
         std::string outPath = "invalid_path";
-        ret = ExtraPackageDir(packagePath.c_str(), nullptr, outPath.c_str());
+        ret = ExtraPackageDir(packagePath.c_str(), keyPath.c_str(), nullptr, outPath.c_str());
         EXPECT_EQ(ret, PKG_INVALID_FILE);
 
         packagePath = "/data/updater/package/test_package.zip";
+        keyPath = "/data/updater/src/signing_cert.crt";
         outPath = "/data/updater/package/";
-        ret = ExtraPackageDir(packagePath.c_str(), nullptr, outPath.c_str());
+        ret = ExtraPackageDir(packagePath.c_str(), keyPath.c_str(), nullptr, outPath.c_str());
         EXPECT_EQ(ret, PKG_SUCCESS);
         return 0;
     }
