@@ -26,7 +26,7 @@ public:
     ~FormatCommander() override {};
     void DoCommand(const uint8_t *payload, int payloadSize) override;
     void PostCommand() override;
-    void DoCommand(const std::string &cmmParam, size_t fileSize) override;
+    void DoCommand([[maybe_unused]] const std::string &cmmParam, [[maybe_unused]] size_t fileSize) override;
 
 private:
     int DoFormat(const std::string &partitionName) const;

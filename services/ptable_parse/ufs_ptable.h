@@ -25,7 +25,7 @@ public:
     DISALLOW_COPY_MOVE(UfsPtable);
     ~UfsPtable() override {}
 
-    uint32_t GetDeviceLunNum();
+    uint32_t GetDeviceLunNum() const;
     bool ParsePartitionFromBuffer(uint8_t *ptbImgBuffer, const uint32_t imgBufSize) override;
     bool LoadPtableFromDevice() override;
     bool WritePartitionTable() override;

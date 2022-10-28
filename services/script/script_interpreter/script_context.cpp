@@ -145,7 +145,7 @@ void UScriptInterpretContext::UpdateVariables(const ScriptInterpreter &inter,
     }
 }
 
-UScriptValuePtr UScriptValue::Computer(int32_t action, UScriptValuePtr rightValue)
+UScriptValuePtr UScriptValue::Computer(int32_t action, UScriptValuePtr value)
 {
     return std::make_shared<ErrorValue>(USCRIPT_ERROR_INTERPRET);
 }
@@ -382,7 +382,7 @@ UScriptValuePtr FloatValue::Computer(int32_t action, UScriptValuePtr value)
     return retValue;
 }
 
-bool FloatValue::ComputerEqual(UScriptValuePtr rightValue)
+bool FloatValue::ComputerEqual(const UScriptValuePtr rightValue) const
 {
     if (rightValue->GetValueType() == UScriptValue::VALUE_TYPE_INTEGER) {
         IntegerValue* value = (IntegerValue*)(rightValue.get());
@@ -444,20 +444,20 @@ UScriptValuePtr StringValue::Computer(int32_t action, UScriptValuePtr value)
     std::string str;
     if (action == UScriptExpression::ADD_OPERATOR) {
         if (rightValue->GetValueType() == UScriptValue::VALUE_TYPE_INTEGER) {
-            IntegerValue* value = (IntegerValue*)(rightValue.get());
-            USCRIPT_CHECK(value != nullptr, return defReturn, "Failed to cast ");
+            IntegerValue* integerValue = (IntegerValue*)(rightValue.get());
+            USCRIPT_CHECK(integerValue != nullptr, return defReturn, "Failed to cast ");
             str.assign(this->GetValue());
-            return make_shared<StringValue>(str + to_string(value->GetValue()));
+            return make_shared<StringValue>(str + to_string(integerValue->GetValue()));
         } else if (rightValue->GetValueType() == UScriptValue::VALUE_TYPE_FLOAT) {
-            FloatValue* value = (FloatValue*)(rightValue.get());
-            USCRIPT_CHECK(value != nullptr, return defReturn, "Failed to cast ");
+            FloatValue* floatValue = (FloatValue*)(rightValue.get());
+            USCRIPT_CHECK(floatValue != nullptr, return defReturn, "Failed to cast ");
             str.assign(this->GetValue());
-            return make_shared<StringValue>(str + to_string(value->GetValue()));
+            return make_shared<StringValue>(str + to_string(floatValue->GetValue()));
         } else {
-            StringValue* value = (StringValue*)(rightValue.get());
-            USCRIPT_CHECK(value != nullptr, return defReturn, "Failed to cast ");
+            StringValue* stringValue = (StringValue*)(rightValue.get());
+            USCRIPT_CHECK(stringValue != nullptr, return defReturn, "Failed to cast ");
             str.assign(this->GetValue());
-            return make_shared<StringValue>(str + value->GetValue());
+            return make_shared<StringValue>(str + stringValue->GetValue());
         }
     }
     if (rightValue->GetValueType() != UScriptValue::VALUE_TYPE_STRING) {

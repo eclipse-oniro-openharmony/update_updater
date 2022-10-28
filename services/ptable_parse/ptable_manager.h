@@ -53,7 +53,7 @@ protected:
         const std::vector<Ptable::PtnInfo> &pkgPtnInfo);
     int32_t GetPartitionInfoIndexByName(const std::vector<Ptable::PtnInfo> &ptnInfo, const std::string &name);
 
-    StorageType GetDeviceStorageType();
+    StorageType GetDeviceStorageType() const;
 };
 
 

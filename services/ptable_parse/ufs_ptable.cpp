@@ -25,7 +25,7 @@
 #include "updater/updater_const.h"
 
 namespace Updater {
-uint32_t UfsPtable::GetDeviceLunNum()
+uint32_t UfsPtable::GetDeviceLunNum() const
 {
     return deviceLunNum_;
 }
@@ -194,7 +194,7 @@ bool UfsPtable::ParsePartitionFromBuffer(uint8_t *ptbImgBuffer, const uint32_t i
     LOG(INFO) << "lun number of ptable:" << deviceLunNum_;
 
     for (uint32_t i = 0; i < deviceLunNum_; i++) {
-        UfsPartitionDataInfo newLunPtnDataInfo;
+        UfsPartitionDataInfo newLunPtnDataInfo = {};
         (void)memset_s(newLunPtnDataInfo.data, TMP_DATA_SIZE, 0, TMP_DATA_SIZE);
         uint8_t *lunStart = GetPtableImageUfsLunPmbrStart(ptbImgBuffer, i);
         uint8_t *gptHeaderStart = GetPtableImageUfsLunGptHeaderStart(ptbImgBuffer, i);

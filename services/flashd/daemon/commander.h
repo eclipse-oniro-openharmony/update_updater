@@ -32,7 +32,7 @@ class Commander {
 public:
     explicit Commander(callbackFun callback) : callback_(callback) {}
     virtual ~Commander() = default;
-    virtual void DoCommand(const std::string &cmmParam, size_t fileSize) = 0;
+    virtual void DoCommand([[maybe_unused]] const std::string &cmmParam, [[maybe_unused]] size_t fileSize) = 0;
     virtual void DoCommand(const uint8_t *payload, int payloadSize) = 0;
     virtual void PostCommand() = 0;
 

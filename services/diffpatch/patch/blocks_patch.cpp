@@ -70,7 +70,7 @@ int32_t BlocksPatch::ApplyPatch()
 
     while (newOffset_ < newSize_) {
         ControlData ctrlData {};
-        int32_t ret = ReadControlData(ctrlData);
+        ret = ReadControlData(ctrlData);
         if (ret != 0) {
             PATCH_LOGE("Failed to read control data");
             return ret;

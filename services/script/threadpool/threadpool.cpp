@@ -143,8 +143,8 @@ int32_t ThreadPool::AcquireWorkIndex()
 
 void ThreadPool::RunTask(Task &&task, int32_t index)
 {
-    taskQueue_[index].task = std::move(task);
     int32_t workSize = task.workSize;
+    taskQueue_[index].task = std::move(task);
     // Mark each task should be executed
     for (int32_t i = 1; i < workSize; ++i) {
         *taskQueue_[index].subTaskFlag[i] = true;

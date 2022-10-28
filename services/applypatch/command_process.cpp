@@ -138,7 +138,6 @@ CommandResult DiffAndMoveCommandFn::Execute(const Command &params)
         if (ret != 0) {
             UPDATER_CHECK_ONLY_RETURN(errno != EIO, return NEED_RETRY);
             return FAILED;
-            UPDATER_INFO_CHECK_NOT_RETURN(ret == 0, "Skipping patching");
         }
     } else {
         LOG(INFO) << "Moving " << tgtBlockSize << " blocks to target position";

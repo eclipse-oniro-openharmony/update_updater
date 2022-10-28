@@ -137,8 +137,8 @@ int32_t Lz4FrameAdapter::WriteData(const BlockBuffer &srcData)
         currDataSize_ = 0;
         while (remainLen >= inData_.size()) {
             size_t length = (blockSize <= remainLen) ? blockSize : remainLen;
-            BlockBuffer data = {srcData.buffer + srcData.length - remainLen, length};
-            ret = CompressData(data);
+            BlockBuffer blockBuffer = {srcData.buffer + srcData.length - remainLen, length};
+            ret = CompressData(blockBuffer);
             if (ret != 0) {
                 PATCH_LOGE("Failed compress data ");
                 return -1;
