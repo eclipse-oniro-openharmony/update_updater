@@ -207,4 +207,20 @@ HWTEST_F(FLashServiceUnitTest, Split, TestSize.Level1)
     }
     EXPECT_EQ("flashupdaterupdater.img", res);
 }
+
+HWTEST_F(FLashServiceUnitTest, PartitionDoErase, TestSize.Level1)
+{
+    std::string partitionName = "test";
+    Partition partTest(partitionName);
+    int ret = partTest.DoErase();
+    EXPECT_EQ(FLASHING_OPEN_PART_ERROR, ret);
+}
+
+HWTEST_F(FLashServiceUnitTest, PartitionDoFormat, TestSize.Level1)
+{
+    std::string partitionName = "test";
+    Partition partTest(partitionName);
+    int ret = partTest.DoFormat();
+    EXPECT_EQ(-1, ret);
+}
 } // namespace
