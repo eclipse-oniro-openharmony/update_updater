@@ -25,19 +25,29 @@ namespace {
 class PtableManagerTest : public PtableManager {
 public:
     PtableManagerTest() {}
+
     ~PtableManagerTest() {}
+
     void LoadPartitionInfo([[maybe_unused]] Hpackage::PkgManager *pkgManager = nullptr) override {}
 
     int32_t TestGetPartitionInfoIndexByName(const std::vector<Ptable::PtnInfo> &ptnInfo, const std::string &name)
     {
         return GetPartitionInfoIndexByName(ptnInfo, name);
     }
+
+    bool TestIsPtableChanged(const std::vector<Ptable::PtnInfo> &devicePtnInfo,
+        const std::vector<Ptable::PtnInfo> &pkgPtnInfo)
+    {
+        return IsPtableChanged(devicePtnInfo, pkgPtnInfo);
+    }
 };
 
 class UTestPtableManager : public ::testing::Test {
 public:
     UTestPtableManager() {}
+
     ~UTestPtableManager() = default;
+
     void TestGetPartitionInfoIndexByName()
     {
         PtableManagerTest context {};
@@ -59,7 +69,38 @@ public:
         ASSERT_EQ(ret, -1);
         name = "TestGetPartitionInfoIndexByName";
         ret = context.TestGetPartitionInfoIndexByName(ptnInfo, name);
-        ASSERT_EQ(ret, -1);
+        ASSERT_NE(ret, -1);
+    }
+
+    void TestIsPtableChanged()
+    {
+        PtableManagerTest context {};
+        std::vector<Ptable::PtnInfo> devicePtnInfo;
+        std::vector<Ptable::PtnInfo> pkgPtnInfo;
+        bool ret = context.TestIsPtableChanged(devicePtnInfo, pkgPtnInfo);
+        ASSERT_EQ(ret, false);
+        Ptable::PtnInfo tmp = {1, 1, {1}, 1, "TestIsPtableChanged"};
+        pkgPtnInfo.push_back(tmp);
+        ret = context.TestIsPtableChanged(devicePtnInfo, pkgPtnInfo);
+        ASSERT_EQ(ret, true);
+        devicePtnInfo.push_back(tmp);
+        ret = context.TestIsPtableChanged(devicePtnInfo, pkgPtnInfo);
+        ASSERT_EQ(ret, false);
+        devicePtnInfo.push_back(tmp);
+        ret = context.TestIsPtableChanged(devicePtnInfo, pkgPtnInfo);
+        ASSERT_EQ(ret, true);
+        devicePtnInfo.pop_back();
+        devicePtnInfo[0].startAddr = 0;
+        ret = context.TestIsPtableChanged(devicePtnInfo, pkgPtnInfo);
+        ASSERT_EQ(ret, true);
+        devicePtnInfo[0].startAddr = 1;
+        devicePtnInfo[0].partitionSize = 0;
+        ret = context.TestIsPtableChanged(devicePtnInfo, pkgPtnInfo);
+        ASSERT_EQ(ret, true);
+        devicePtnInfo[0].partitionSize = 1;
+        devicePtnInfo[0].dispName = "TestIsPtableChanged1";
+        ret = context.TestIsPtableChanged(devicePtnInfo, pkgPtnInfo);
+        ASSERT_EQ(ret, true);
     }
 protected:
     void SetUp() {}
@@ -70,5 +111,10 @@ protected:
 HWTEST_F(UTestPtableManager, TestGetPartitionInfoIndexByName, TestSize.Level1)
 {
     UTestPtableManager {}.TestGetPartitionInfoIndexByName();
+}
+
+HWTEST_F(UTestPtableManager, TestIsPtableChanged, TestSize.Level1)
+{
+    UTestPtableManager {}.TestIsPtableChanged();
 }
 }

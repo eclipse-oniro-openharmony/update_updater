@@ -25,15 +25,19 @@ namespace {
 class PtableTest : public Ptable {
 public:
     PtableTest() {}
+
     ~PtableTest() {}
+
     bool ParsePartitionFromBuffer(uint8_t *ptbImgBuffer, const uint32_t imgBufSize) override
     {
         return true;
     }
+
     bool LoadPtableFromDevice() override
     {
         return true;
     }
+
     bool WritePartitionTable() override
     {
         return true;
@@ -43,10 +47,12 @@ public:
     {
         return GetPartionInfoByName(partitionName, ptnInfo, index);
     }
+
     int TestCalculateCrc32(const uint8_t *buffer, const uint32_t len)
     {
         return static_cast<int>(CalculateCrc32(buffer, len));
     }
+
     void ChangePartitionInfo(std::vector<PtnInfo> partitionInfo)
     {
         partitionInfo_ = partitionInfo;
@@ -56,7 +62,9 @@ public:
 class UTestPtable : public ::testing::Test {
 public:
     UTestPtable() {}
+
     ~UTestPtable() = default;
+
     void TestGetPartionInfoByName()
     {
         PtableTest ptableTest {};
@@ -75,10 +83,11 @@ public:
         ret = ptableTest.TestGetPartionInfoByName(partionName, ptnInfo, index);
         ASSERT_NE(ret, false);
     }
+
     void TestCalculateCrc32()
     {
         PtableTest ptableTest {};
-        uint8_t buffer[128]; // 128 : set buffer size
+        uint8_t buffer[128] = {1}; // 128 : set buffer size
         uint8_t *nullBuffer = nullptr;
         uint32_t len = 0;
         int ret = ptableTest.TestCalculateCrc32(buffer, len);
@@ -101,6 +110,7 @@ HWTEST_F(UTestPtable, TestGetPartionInfoByName, TestSize.Level1)
 {
     UTestPtable {}.TestGetPartionInfoByName();
 }
+
 HWTEST_F(UTestPtable, TestCalculateCrc32, TestSize.Level1)
 {
     UTestPtable {}.TestCalculateCrc32();
