@@ -97,6 +97,8 @@ static void GetAllPkgPeogress(UpdaterParams &upParam, std::string allPkgPath)
     std::vector<std::string> updatePackageAllPath = SplitString(allPkgPath, ", ");
     size_t allPkgSize = 0;
     char realPath[PATH_MAX + 1] = {0};
+    size_t nowPosition = 0;
+    size_t pkgSize = 0;
     for(auto path : updatePackageAllPath) {
         if (realpath(path.c_str(), realPath) == nullptr) {
             continue;
@@ -104,34 +106,21 @@ static void GetAllPkgPeogress(UpdaterParams &upParam, std::string allPkgPath)
         std::ifstream fin(realPath);
         if (fin.is_open()) {
             fin.seekg(0, std::ios::end);
+            if (path == upParam.updatePackage) {
+                pkgSize = fin.tellg();
+            }
+            if (pkgSize == 0) {
+                nowPosition += fin.tellg();
+            }
             allPkgSize += fin.tellg();
-            fin.close();
         }
     }
-    size_t nowPosition = 0;
-    for(auto path : updatePackageAllPath) {
-        if (path == upParam.updatePackage) {
-            break;
-        }
-        if (realpath(path.c_str(), realPath) == nullptr) {
-            continue;
-        }
-        std::ifstream fin(realPath);
-        if (fin.is_open()) {
-            fin.seekg(0, std::ios::end);
-            nowPosition += fin.tellg();
-            fin.close();
-        }
+    if (allPkgSize <= 0) {
+        LOG(ERROR) << "All pkg size is 0";
+        return;
     }
     upParam.initialProgress = static_cast<float>(nowPosition) / static_cast<float>(allPkgSize);
-    if(realpath(upParam.updatePackage.c_str(), realPath) == nullptr) {
-        std::ifstream fin(realPath);
-        if (fin.is_open()) {
-            fin.seekg(0, std::ios::end);
-            upParam.currentPercentage = static_cast<float>(fin.tellg()) / static_cast<float>(allPkgSize);
-            fin.close();
-        }
-    }
+    upParam.currentPercentage = static_cast<float>(pkgSize) / static_cast<float>(allPkgSize);
 }
 
 static int DoFactoryReset(FactoryResetMode mode, const std::string &path)
@@ -156,11 +145,6 @@ int FactoryReset(FactoryResetMode mode, const std::string &path)
     return DoFactoryReset(mode, path);
 }
 
-std::string GetSdcardPkgPath()
-{
-    return SDCARD_CARD_PKG_PATH;
-}
-
 UpdaterStatus UpdaterFromSdcard()
 {
 #ifndef UPDATER_UT
@@ -181,17 +165,7 @@ UpdaterStatus UpdaterFromSdcard()
         }
     }
 #endif
-
-    std::vector<std::string> pkgAllPath = SplitString(GetSdcardPkgPath(), ",");
-    std::vector<std::string> pkgUpgradePath;
-    bool isPkgInSdCard = false;
-    for(auto path : pkgAllPath) {
-        if (access(path.c_str(), 0) == 0) {
-            isPkgInSdCard = true;
-            pkgUpgradePath.push_back(pkgAllPath[i]);
-        }
-    }
-    if (!isPkgInSdCard) {
+    if (access(SDCARD_CARD_PKG_PATH, 0) != 0) {
         LOG(ERROR) << "package is not exist";
         UPDATER_UI_INSTANCE.ShowLog(TR(LOG_NOPKG), true);
         return UPDATE_ERROR;
@@ -202,28 +176,20 @@ UpdaterStatus UpdaterFromSdcard()
         LOG(ERROR) << "pkgManager is nullptr";
         return UPDATE_ERROR;
     }
-
     UpdaterParams upParam {
-        false, false, 0, 0, 0, ""
+        false, false, 0, 0, 0, SDCARD_CARD_PKG_PATH
     }
-    // LOG(INFO) << "UpdaterFromSdcard start, sdcard updaterPath : " << SDCARD_CARD_PKG_PATH;
-    UpdaterStatus updateRet = UPDATE_ERROR;
-    for (auto path : pkgUpgradePath) {
-        LOG(INFO) << "UpdaterFromSdcard start, sdcard updaterPath : " << path;
-        UPDATER_UI_INSTANCE.ShowLog(TR(LOG_SDCARD_NOTMOVE));
-        upParam.updatePackage = path;
-        GetAllPkgPeogress(upParam, GetSdcardPkgPath());
-        updateRet = DoInstallUpdaterPackage(pkgManager, upParam, SDCARD_UPDATE);
-        if (updateRet != UPDATE_SUCCESS) {
-            UPDATER_UI_INSTANCE.Sleep(UI_SHOW_DURATION);
-            UPDATER_UI_INSTANCE.ShowLog(TR(LOG_SDCARD_FAIL));
-            STAGE(UPDATE_STAGE_FAIL) << "UpdaterFromSdcard failed";
-            break;
-        } else {
-            LOG(INFO) << path << "update from SD Card successfully!";
-            STAGE(UPDATE_STAGE_SUCCESS) << "UpdaterFromSdcard success";
-        }
-    }
+    STAGE(UPDATE_STAGE_BEGIN) << "UpdaterFromSdcard";
+    LOG(INFO) << "UpdaterFromSdcard start, sdcard updaterPath : " << SDCARD_CARD_PKG_PATH;
+    UPDATER_UI_INSTANCE.ShowLog(TR(LOG_SDCARD_NOTMOVE));
+    UpdaterStatus updateRet = DoInstallUpdaterPackage(pkgManager, upParam, SDCARD_UPDATE);
+    if (updateRet != UPDATE_SUCCESS) {
+        UPDATER_UI_INSTANCE.Sleep(UI_SHOW_DURATION);
+        UPDATER_UI_INSTANCE.ShowLog(TR(LOG_SDCARD_FAIL));
+        STAGE(UPDATE_STAGE_FAIL) << "UpdaterFromSdcard failed";
+    } else {
+        LOG(INFO) << "Update from SD Card successfully!";
+        STAGE(UPDATE_STAGE_SUCCESS) << "UpdaterFromSdcard success";
     PkgManager::ReleasePackageInstance(pkgManager);
     return updateRet;
 }
