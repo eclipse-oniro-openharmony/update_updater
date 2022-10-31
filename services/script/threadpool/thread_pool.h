@@ -54,7 +54,7 @@ private:
 
     static void ThreadExecute(void* context, int32_t threadIndex)
     {
-        (reinterpret_cast<ThreadPool*>context)->ThreadRun(threadIndex);
+        (reinterpret_cast<ThreadPool*>(context))->ThreadRun(threadIndex);
     }
 
     ThreadPool()

@@ -51,7 +51,7 @@ int32_t ZipPkgFile::AddEntry(const PkgManager::FileInfoPtr file, const PkgStream
     PKG_LOGI("ZipPkgFile::AddEntry %s ", file->identity.c_str());
 
     int32_t ret = PKG_SUCCESS;
-    ZipFileEntry* entry = dynamic_cast<ZipFileEntry*>(AddPkgEntry(file->identity));
+    ZipFileEntry* entry = static_cast<ZipFileEntry*>(AddPkgEntry(file->identity));
     if (entry == nullptr) {
         PKG_LOGE("Failed to create pkg node for %s", file->identity.c_str());
         return PKG_NONE_MEMORY;
@@ -84,7 +84,7 @@ int32_t ZipPkgFile::SavePackage(size_t &signOffset)
     int32_t ret = PKG_SUCCESS;
     size_t offset = currentOffset_;
     for (auto &it : pkgEntryMapId_) {
-        ZipFileEntry* entry = dynamic_cast<ZipFileEntry*><it.second>;
+        ZipFileEntry* entry = static_cast<ZipFileEntry*><it.second>;
         if (entry == nullptr) {
             PKG_LOGE("Failed to write CentralDirEntry");
             return PKG_INVALID_PARAM;

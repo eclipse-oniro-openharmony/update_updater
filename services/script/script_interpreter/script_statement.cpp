@@ -42,7 +42,7 @@ void UScriptStatementResult::UpdateStatementResult(UScriptValuePtr value)
             SetResultType(UScriptStatementResult::STATEMENT_RESULT_TYPE_ERROR);
             SetError(USCRIPT_ERROR_INTERPRET);
             if (value->GetValueType() == UScriptValue::VALUE_TYPE_ERROR) {
-                SetError((dynamic_cast<ErrorValue*>(value.get()))->GetValue());
+                SetError((static_cast<ErrorValue*>(value.get()))->GetValue());
             }
             break;
         case UScriptValue::VALUE_TYPE_LIST:
@@ -352,7 +352,7 @@ UScriptStatementResult UScriptReturnStatement::Execute(ScriptInterpreter &interp
         UScriptValuePtr var = id->Execute(interpreter, context);
         INTERPRETER_LOGI(interpreter, context, "params result: %s", UScriptValue::ScriptToString(var).c_str());
         if (var->GetValueType() == UScriptValue::VALUE_TYPE_LIST) {
-            retValue->AddValues((dynamic_cast<ReturnValue*>(var.get()))->GetValues());
+            retValue->AddValues((static_cast<ReturnValue*>(var.get()))->GetValues());
         } else {
             retValue->AddValue(var);
         }
