@@ -245,8 +245,8 @@ int32_t USInstrImageShaCheck::CheckHash(const CheckPara &para)
         LOG(ERROR) << "PatchMapFile error";
         return USCRIPT_ERROR_EXECUTE;
     }
-
-    UpdatePatch::BlockBuffer data = { mapBuffer.memory, mapBuffer.length };
+    size_t length = std::stoul(para.srcSize);
+    UpdatePatch::BlockBuffer data = { mapBuffer.memory, length };
     std::string resultSha = UpdatePatch::GeneraterBufferHash(data);
     std::transform(resultSha.begin(), resultSha.end(), resultSha.begin(), ::toupper);
     if (resultSha != para.srcHash) {
