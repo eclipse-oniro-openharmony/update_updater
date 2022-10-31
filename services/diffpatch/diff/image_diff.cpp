@@ -408,7 +408,7 @@ int32_t ZipImageDiff::TestAndSetConfig(const BlockBuffer &buffer, const std::str
         PATCH_LOGE("Failed to get file info");
         return -1;
     }
-    ZipFileInfo *info = (ZipFileInfo *)fileInfo;
+    ZipFileInfo *info = reinterpret_cast<ZipFileInfo *>(fileInfo);
     method_ = info->method;
     level_ = info->level;
     windowBits_ = info->windowBits;
@@ -498,7 +498,7 @@ int32_t Lz4ImageDiff::TestAndSetConfig(const BlockBuffer &buffer, const std::str
 {
     const FileInfo *fileInfo = newParser_->GetFileInfo(fileName);
     PATCH_CHECK(fileInfo != nullptr, return -1, "Failed to get file info");
-    Lz4FileInfo *info = (Lz4FileInfo *)fileInfo;
+    Lz4FileInfo *info = reinterpret_cast<Lz4FileInfo *>(fileInfo);
     method_ = static_cast<int32_t>(info->fileInfo.packMethod);
     compressionLevel_ = info->compressionLevel;
     blockIndependence_ = info->blockIndependence;

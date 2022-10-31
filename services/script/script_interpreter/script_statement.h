@@ -217,7 +217,7 @@ public:
     static UScriptStatementList* CreateInstance(UScriptStatement *statement);
     void AddScriptStatement(UScriptStatement *statement);
 
-    UScriptStatementResult Execute(ScriptInterpreter &interpreter, UScriptContextPtr context);
+    UScriptStatementResult Execute(ScriptInterpreter &inter, UScriptContextPtr context);
 
     static UScriptStatementResult DoExecute(ScriptInterpreter &inter, UScriptContextPtr context,
         UScriptStatementList *statements);

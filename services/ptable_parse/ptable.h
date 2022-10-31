@@ -145,7 +145,7 @@ protected:
     bool GetCapacity(const std::string &filePath, uint64_t &lunCapacity);
     bool GetPartitionGptHeaderInfo(const uint8_t *buffer, const uint32_t bufferLen, GPTHeaderInfo& gptHeaderInfo);
     bool PartitionCheckGptHeader(const uint8_t *gptImage, const uint32_t len, const uint64_t lbaNum,
-        const uint32_t blockSize, GPTHeaderInfo& gptHeaderInfo);
+        const uint32_t blockSize, const GPTHeaderInfo& gptHeaderInfo);
     void ParsePartitionName(const uint8_t *data, const uint32_t dataLen,
         std::string &name, const uint32_t nameLen);
     uint32_t CalculateCrc32(const uint8_t *buffer, const uint32_t len);

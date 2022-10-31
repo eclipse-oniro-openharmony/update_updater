@@ -185,7 +185,7 @@ public:
     int32_t LoadPackage(std::vector<std::string> &fileNames, VerifyFunction verifier = nullptr) override;
 
 private:
-    int32_t LoadPackage(std::vector<std::string> &fileNames, const PkgBuffer &buff,
+    int32_t LoadPackage(std::vector<std::string> &fileNames, const PkgBuffer &buffer,
         uint32_t endDirLen, size_t endDirPos, size_t &readLen);
     int32_t ParseFileEntries(std::vector<std::string> &fileNames, const EndCentralDir &endDir,
         size_t currentPos, size_t fileLen);

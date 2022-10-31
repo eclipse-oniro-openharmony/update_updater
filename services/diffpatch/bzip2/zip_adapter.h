@@ -27,10 +27,7 @@ namespace UpdatePatch {
 class ZipAdapter : public DeflateAdapter {
 public:
     ZipAdapter(UpdatePatchWriterPtr outStream, size_t offset, const Hpackage::PkgManager::FileInfoPtr fileInfo);
-    ~ZipAdapter() override
-    {
-        Close();
-    }
+    ~ZipAdapter() override {}
 
     int32_t Open() override;
     int32_t Close() override;

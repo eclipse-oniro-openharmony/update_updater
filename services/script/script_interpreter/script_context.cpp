@@ -137,7 +137,7 @@ void UScriptInterpretContext::UpdateVariables(const ScriptInterpreter &inter,
         return;
     }
 
-    ReturnValue* values = (ReturnValue*)(value.get());
+    ReturnValue* values = dynamic_cast<ReturnValue*>(value.get());
     for (auto out : values->GetValues()) {
         USCRIPT_CHECK(startIndex < ids.size(), return, "Invalid startIndex %d", startIndex);
         UpdateVariable(inter, ids[startIndex], out);
@@ -385,7 +385,7 @@ UScriptValuePtr FloatValue::Computer(int32_t action, UScriptValuePtr value)
 bool FloatValue::ComputerEqual(const UScriptValuePtr rightValue) const
 {
     if (rightValue->GetValueType() == UScriptValue::VALUE_TYPE_INTEGER) {
-        IntegerValue* value = (IntegerValue*)(rightValue.get());
+        IntegerValue* value = dynamic_cast<IntegerValue*>(rightValue.get());
         USCRIPT_CHECK(value != nullptr, return 0, "Failed to cast ");
         float v2 = value->GetValue();
         USCRIPT_LOGI("ComputerEqual %f   v2: %f", GetValue(), v2);
@@ -393,7 +393,7 @@ bool FloatValue::ComputerEqual(const UScriptValuePtr rightValue) const
         diff = abs(diff);
         return diff < 0.0001f;
     } else if (rightValue->GetValueType() == UScriptValue::VALUE_TYPE_FLOAT) {
-        FloatValue* value = (FloatValue*)(rightValue.get());
+        FloatValue* value = dynamic_cast<FloatValue*>(rightValue.get());
         USCRIPT_CHECK(value != nullptr, return 0, "Failed to cast ");
         float diff = GetValue() - value->GetValue();
         diff = abs(diff);
@@ -444,17 +444,17 @@ UScriptValuePtr StringValue::Computer(int32_t action, UScriptValuePtr value)
     std::string str;
     if (action == UScriptExpression::ADD_OPERATOR) {
         if (rightValue->GetValueType() == UScriptValue::VALUE_TYPE_INTEGER) {
-            IntegerValue* integerValue = (IntegerValue*)(rightValue.get());
+            IntegerValue* integerValue = dynamic_cast<IntegerValue*>(rightValue.get());
             USCRIPT_CHECK(integerValue != nullptr, return defReturn, "Failed to cast ");
             str.assign(this->GetValue());
             return make_shared<StringValue>(str + to_string(integerValue->GetValue()));
         } else if (rightValue->GetValueType() == UScriptValue::VALUE_TYPE_FLOAT) {
-            FloatValue* floatValue = (FloatValue*)(rightValue.get());
+            FloatValue* floatValue = dynamic_cast<FloatValue*>(rightValue.get());
             USCRIPT_CHECK(floatValue != nullptr, return defReturn, "Failed to cast ");
             str.assign(this->GetValue());
             return make_shared<StringValue>(str + to_string(floatValue->GetValue()));
         } else {
-            StringValue* stringValue = (StringValue*)(rightValue.get());
+            StringValue* stringValue = dynamic_cast<StringValue*>(rightValue.get());
             USCRIPT_CHECK(stringValue != nullptr, return defReturn, "Failed to cast ");
             str.assign(this->GetValue());
             return make_shared<StringValue>(str + stringValue->GetValue());
@@ -469,7 +469,7 @@ UScriptValuePtr StringValue::Computer(int32_t action, UScriptValuePtr value)
 
 int32_t StringValue::ComputerLogic(UScriptValuePtr rightValue) const
 {
-    StringValue* value = (StringValue*)(rightValue.get());
+    StringValue* value = dynamic_cast<StringValue*>(rightValue.get());
     USCRIPT_CHECK(value != nullptr, return -1, "Failed to cast ");
     std::string str;
     str.assign(this->GetValue());
@@ -564,7 +564,7 @@ std::string UScriptValue::ScriptToString(UScriptValuePtr value)
 UScriptValuePtr UScriptValue::GetRightCompluteValue(UScriptValuePtr rightValue)
 {
     if (rightValue->GetValueType() == VALUE_TYPE_LIST) {
-        ReturnValue* value = (ReturnValue*)(rightValue.get());
+        ReturnValue* value = dynamic_cast<ReturnValue*>(rightValue.get());
         std::vector<UScriptValuePtr> retValues = value->GetValues();
         if (retValues.size() == 0 || retValues.size() > 1) {
             return nullptr;

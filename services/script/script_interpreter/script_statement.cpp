@@ -42,7 +42,7 @@ void UScriptStatementResult::UpdateStatementResult(UScriptValuePtr value)
             SetResultType(UScriptStatementResult::STATEMENT_RESULT_TYPE_ERROR);
             SetError(USCRIPT_ERROR_INTERPRET);
             if (value->GetValueType() == UScriptValue::VALUE_TYPE_ERROR) {
-                SetError(((ErrorValue*)value.get())->GetValue());
+                SetError((dynamic_cast<ErrorValue*>(value.get()))->GetValue());
             }
             break;
         case UScriptValue::VALUE_TYPE_LIST:
@@ -215,13 +215,13 @@ UScriptStatementResult UScriptForStatement::Execute(ScriptInterpreter &interpret
 
 UScriptStatementResult UScriptWhileStatement::Execute(ScriptInterpreter &interpreter, UScriptContextPtr local)
 {
-    INTERPRETER_LOGI(interpreter, local, "UScriptStatementResult::statement ");
+    INTERPRETER_LOGI(interpreter, context, "UScriptStatementResult::statement ");
     UScriptStatementResult result(UScriptStatementResult::STATEMENT_RESULT_TYPE_NORMAL, nullptr);
     while (1) {
         if (condition_ != nullptr) {
-            UScriptValuePtr v = condition_->Execute(interpreter, local);
+            UScriptValuePtr v = condition_->Execute(interpreter, context);
             if (v == nullptr || v->GetValueType() == UScriptValue::VALUE_TYPE_ERROR) {
-                INTERPRETER_LOGE(interpreter, local, "Execute while condition failed: %s",
+                INTERPRETER_LOGE(interpreter, context, "Execute while condition failed: %s",
                     UScriptValue::ScriptToString(v).c_str());
                 result.SetResultType(UScriptStatementResult::STATEMENT_RESULT_TYPE_ERROR);
                 result.SetError(USCRIPT_INVALID_PARAM);
@@ -231,8 +231,8 @@ UScriptStatementResult UScriptWhileStatement::Execute(ScriptInterpreter &interpr
                 break;
             }
         }
-        UScriptStatementResult centerResult = statements_->Execute(interpreter, local);
-        INTERPRETER_LOGI(interpreter, local, "Execute statements result %s ",
+        UScriptStatementResult centerResult = statements_->Execute(interpreter, context);
+        INTERPRETER_LOGI(interpreter, context, "Execute statements result %s ",
             UScriptStatementResult::ScriptToString(&centerResult).c_str());
         if (centerResult.GetResultType() == UScriptStatementResult::STATEMENT_RESULT_TYPE_BREAK) {
             break;
@@ -352,7 +352,7 @@ UScriptStatementResult UScriptReturnStatement::Execute(ScriptInterpreter &interp
         UScriptValuePtr var = id->Execute(interpreter, context);
         INTERPRETER_LOGI(interpreter, context, "params result: %s", UScriptValue::ScriptToString(var).c_str());
         if (var->GetValueType() == UScriptValue::VALUE_TYPE_LIST) {
-            retValue->AddValues(((ReturnValue*)var.get())->GetValues());
+            retValue->AddValues((dynamic_cast<ReturnValue*>(var.get()))->GetValues());
         } else {
             retValue->AddValue(var);
         }
