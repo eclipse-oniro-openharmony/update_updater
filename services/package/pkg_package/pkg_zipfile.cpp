@@ -84,7 +84,7 @@ int32_t ZipPkgFile::SavePackage(size_t &signOffset)
     int32_t ret = PKG_SUCCESS;
     size_t offset = currentOffset_;
     for (auto &it : pkgEntryMapId_) {
-        ZipFileEntry* entry = static_cast<ZipFileEntry*><it.second>;
+        ZipFileEntry* entry = static_cast<ZipFileEntry*>(it.second);
         if (entry == nullptr) {
             PKG_LOGE("Failed to write CentralDirEntry");
             return PKG_INVALID_PARAM;

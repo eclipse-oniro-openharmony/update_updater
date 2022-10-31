@@ -213,7 +213,7 @@ UScriptStatementResult UScriptForStatement::Execute(ScriptInterpreter &interpret
     return result;
 }
 
-UScriptStatementResult UScriptWhileStatement::Execute(ScriptInterpreter &interpreter, UScriptContextPtr local)
+UScriptStatementResult UScriptWhileStatement::Execute(ScriptInterpreter &interpreter, UScriptContextPtr context)
 {
     INTERPRETER_LOGI(interpreter, context, "UScriptStatementResult::statement ");
     UScriptStatementResult result(UScriptStatementResult::STATEMENT_RESULT_TYPE_NORMAL, nullptr);
