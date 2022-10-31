@@ -169,64 +169,6 @@ public:
         return 0;
     }
 
-    int TestPkgMmmapStream()
-    {
-        pkgManager_ = static_cast<PkgManagerImpl*>(PkgManager::GetPackageInstance());
-        if (pkgManager_ == nullptr) {
-            return PKG_SUCCESS;
-        }
-        PKG_LOGI("\n\n ************* TestCombinePkgUNpack %s \r\n", testCombinePkgName.c_str());
-        std::vector<std::string> components;
-        int32_t ret = pkgManager_->LoadPackage(TEST_PATH_TO + testCombinePkgName, GetTestCertName(0), components);
-        if (ret != PKG_SUCCESS) {
-            PKG_LOGE("LoadPackage fail ret:%d", ret);
-            return ret;
-        }
-
-        if (components.size() < 1) {
-            return ret;
-        }
-        // 测试文件提取
-        PkgManager::StreamPtr outStream = nullptr;
-        const FileInfo *info = pkgManager_->GetFileInfo(components[0]);
-        if (info == nullptr) {
-            return PKG_INVALID_FILE;
-        }
-
-        ret = pkgManager_->CreatePkgStream(outStream,
-            components[0], info->unpackedSize, PkgStream::PkgStreamType_MemoryMap);
-        EXPECT_NE(outStream, nullptr);
-
-        ret = ((MemoryMapStream *)(outStream))->GetStreamType();
-        EXPECT_EQ(PkgStream::PkgStreamType_MemoryMap, ret);
-
-        ret = pkgManager_->ExtractFile(components[0], outStream);
-        EXPECT_NE(outStream, nullptr);
-
-        MemoryMapStream *memStream = (MemoryMapStream*)outStream;
-        constexpr size_t buffSize = 100;
-        std::vector<uint8_t> buff(buffSize);
-        size_t len = 0;
-        PkgBuffer data = {buff};
-        ret = memStream->Read(data, 0, buffSize, len);
-        EXPECT_EQ(ret, PKG_SUCCESS);
-
-        long int offset = 10;
-        ret = memStream->Seek(offset, SEEK_SET);
-        EXPECT_EQ(ret, PKG_SUCCESS);
-        ret = memStream->Seek(offset, SEEK_CUR);
-        EXPECT_EQ(ret, PKG_SUCCESS);
-        offset = 0 - offset;
-        ret = memStream->Seek(offset, SEEK_END);
-        EXPECT_EQ(ret, PKG_SUCCESS);
-        ret = memStream->Flush(offset);
-        EXPECT_EQ(0, ret);
-        ret = memStream->GetBuffer(data);
-        EXPECT_EQ(0, ret);
-        pkgManager_->ClosePkgStream(outStream);
-        return ret;
-    }
-
     int TestPkgStreamImpl()
     {
         std::string path = TEST_PATH_TO + testCombinePkgName;
@@ -248,95 +190,6 @@ public:
         EXPECT_EQ(PkgStream::PkgStreamType_Read, ret);
 
         return 0;
-    }
-
-    int TestPkgFileStream()
-    {
-        pkgManager_ = static_cast<PkgManagerImpl*>(PkgManager::GetPackageInstance());
-        if (pkgManager_ == nullptr) {
-            return PKG_SUCCESS;
-        }
-        PKG_LOGI("\n\n ************* TestCombinePkgUNpack %s \r\n", testCombinePkgName.c_str());
-        std::vector<std::string> components;
-        int32_t ret = pkgManager_->LoadPackage(TEST_PATH_TO + testCombinePkgName, GetTestCertName(0), components);
-        if (ret != PKG_SUCCESS) {
-            PKG_LOGI("LoadPackage fail ret:%d", ret);
-            return ret;
-        }
-
-        if (components.size() < 1) {
-            return ret;
-        }
-        // 测试文件提取
-        PkgManager::StreamPtr outStream = nullptr;
-        const FileInfo *info = pkgManager_->GetFileInfo(components[0]);
-        if (info == nullptr) {
-            return PKG_INVALID_FILE;
-        }
-
-        ret = pkgManager_->CreatePkgStream(outStream,
-            TEST_PATH_TO + components[0], info->unpackedSize, PkgStream::PkgStreamType_Write);
-        EXPECT_NE(outStream, nullptr);
-
-        ret = ((FileStream *)(outStream))->GetStreamType();
-        EXPECT_EQ(PkgStream::PkgStreamType_Write, ret);
-
-        ret = pkgManager_->CreatePkgStream(outStream,
-            TEST_PATH_TO + components[0], info->unpackedSize, PkgStream::PkgStreamType_Write);
-        EXPECT_NE(outStream, nullptr);
-        ret = pkgManager_->ExtractFile(components[0], outStream);
-        EXPECT_NE(outStream, nullptr);
-        return ret;
-    }
-
-    int TestPkgProcessStream()
-    {
-        pkgManager_ = static_cast<PkgManagerImpl*>(PkgManager::GetPackageInstance());
-        if (pkgManager_ == nullptr) {
-            return PKG_SUCCESS;
-        }
-        PKG_LOGI("\n\n ************* TestCombinePkgUNpack %s \r\n", testCombinePkgName.c_str());
-        std::vector<std::string> components;
-        int32_t ret = pkgManager_->LoadPackage(TEST_PATH_TO + testCombinePkgName, GetTestCertName(0), components);
-        if (ret != PKG_SUCCESS) {
-            PKG_LOGI("LoadPackage fail ret:%d", ret);
-            return ret;
-        }
-
-        if (components.size() < 1) {
-            return ret;
-        }
-        // 测试文件提取
-        PkgManager::StreamPtr outStream = nullptr;
-        const FileInfo *info = pkgManager_->GetFileInfo(components[0]);
-        if (info == nullptr) {
-            return PKG_INVALID_FILE;
-        }
-
-        ret = pkgManager_->CreatePkgStream(outStream,
-            components[0], TestStreamProcess, this);
-        EXPECT_NE(outStream, nullptr);
-
-        ret = ((ProcessorStream *)(outStream))->GetStreamType();
-        EXPECT_EQ(PkgStream::PkgStreamType_Process, ret);
-
-        ret = pkgManager_->ExtractFile(components[0], outStream);
-        EXPECT_NE(outStream, nullptr);
-
-        size_t len = 0;
-        size_t bufferSize = 100;
-        long int offset = -10;
-        PkgBuffer buffer(bufferSize);
-        ret = outStream->Read(buffer, 0, bufferSize, len);
-        EXPECT_EQ(ret, PKG_INVALID_STREAM);
-        ret = ((ProcessorStream*)outStream)->Seek(offset, SEEK_END);
-        EXPECT_EQ(ret, PKG_SUCCESS);
-        ret = ((ProcessorStream*)outStream)->Flush(offset);
-        EXPECT_EQ(0, ret);
-        ret = ((ProcessorStream*)outStream)->GetFileLength();
-        EXPECT_EQ(0, ret);
-        pkgManager_->ClosePkgStream(outStream);
-        return ret;
     }
 
     int TestInvalidStream()
@@ -757,24 +610,6 @@ HWTEST_F(PkgMangerTest, TestPkgStreamImpl, TestSize.Level1)
 {
     PkgMangerTest test;
     EXPECT_EQ(0, test.TestPkgStreamImpl());
-}
-
-HWTEST_F(PkgMangerTest, TestPkgMmmapStream, TestSize.Level1)
-{
-    PkgMangerTest test;
-    EXPECT_EQ(0, test.TestPkgMmmapStream());
-}
-
-HWTEST_F(PkgMangerTest, TestPkgFileStream, TestSize.Level1)
-{
-    PkgMangerTest test;
-    EXPECT_EQ(0, test.TestPkgFileStream());
-}
-
-HWTEST_F(PkgMangerTest, TestPkgProcessStream, TestSize.Level1)
-{
-    PkgMangerTest test;
-    EXPECT_EQ(0, test.TestPkgProcessStream());
 }
 
 HWTEST_F(PkgMangerTest, TestInvalidStream, TestSize.Level1)

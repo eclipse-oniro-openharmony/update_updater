@@ -176,7 +176,7 @@ private:
     uint32_t Reflect(uint32_t data, const uint32_t len);
 
     bool CheckGptHeader(uint8_t *buffer, const uint32_t bufferLen, const uint64_t lbaNum,
-        GPTHeaderInfo& gptHeaderInfo);
+        const GPTHeaderInfo& gptHeaderInfo);
     void SetPartitionName(const std::string &name, uint8_t *data, const uint32_t size);
     bool ParsePtableDataNode(const JsonNode &ptableDataNode);
     bool ParsePtableData();

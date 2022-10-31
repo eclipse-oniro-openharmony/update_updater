@@ -151,21 +151,25 @@ int32_t VerifyPackageWithCallback(const std::string &packagePath, const std::str
  * Extra dir in package
  *
  * @param packagePath   path of the update package
+ * @param keyPath       path of the key used for verification
  * @param dir           dir in package, empty means extra all files
  * @param outPath       package file output path
  * @return              Extra package creation result
  */
-int32_t ExtraPackageDir(const char *packagePath, const char *dir, const char *outPath);
+int32_t ExtraPackageDir(const char *packagePath, const char *keyPath, const char *dir,
+    const char *outPath);
 
 /**
  * Extra file in package
  *
  * @param packagePath   path of the update package
+ * @param keyPath       path of the key used for verification
  * @param file          file in package
  * @param outPath       package file output path
  * @return              Extra package creation result
  */
-int32_t ExtraPackageFile(const char *packagePath, const char *file, const char *outPath);
+int32_t ExtraPackageFile(const char *packagePath, const char *keyPath, const char *file,
+    const char *outPath);
 
 #ifdef __cplusplus
 }

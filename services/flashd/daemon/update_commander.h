@@ -28,7 +28,7 @@ public:
     void DoCommand(const std::string &cmmParam, size_t fileSize) override;
 
 private:
-    bool DoUpdate(const uint8_t *buffer, int bufferSize);
+    bool DoUpdate(const uint8_t *payload, int payloadSize);
     bool ExecUpdate() const;
     void SaveLog() const;
     std::string filePath_ = "";

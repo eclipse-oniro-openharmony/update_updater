@@ -121,6 +121,23 @@
     <target name="package_unittest">
         <preparer>
             <option name="push" value="package/test_package.zip -> /data/updater/package" src="res"/>
+            <option name="push" value="src/signing.cert -> /data/updater/src" src="res"/>
+            <option name="push" value="applypatch/TestDecompressGzip.new.gz -> /data/updater/applypatch" src="res"/>
+            <option name="push" value="diffpatch/PatchLz4test_new.lz4 -> /data/updater/diffpatch" src="res"/>
+            <option name="push" value="src/libcrypto.a -> /data/updater/src" src="res"/>
+            <option name="push" value="src/ggg.zip -> /data/updater/src" src="res"/>
+            <option name="push" value="src/test_math.us -> /data/updater/src" src="res"/>
+            <option name="push" value="src/test_if.us -> /data/updater/src" src="res"/>
+            <option name="push" value="src/registerCmd.us -> /data/updater/src" src="res"/>
+            <option name="push" value="src/test_native.us -> /data/updater/src" src="res"/>
+            <option name="push" value="src/testscript.us -> /data/updater/src" src="res"/>
+            <option name="push" value="src/loadScript.us -> /data/updater/src" src="res"/>
+            <option name="push" value="src/Verse-script.us -> /data/updater/src" src="res"/>
+            <option name="push" value="src/test_function.us -> /data/updater/src" src="res"/>
+            <option name="push" value="src/test_logic.us -> /data/updater/src" src="res"/>
+            <option name="push" value="src/rsa_private_key384.pem -> /data/updater/src" src="res"/>
+            <option name="push" value="src/rsa_private_key2048.pem -> /data/updater/src" src="res"/>
+            <option name="push" value="src/test_gzip_package.gz -> /data/updater/src" src="res"/>
         </preparer>
     </target>
     <target name="script_unittest">
@@ -153,6 +170,11 @@
             <option name="push" value="ui/layout/noPageInfo.json -> /data/updater/ui" src="res"/>
             <option name="push" value="ui/layout/subpage.json -> /data/updater/ui" src="res"/>
             <option name="push" value="ui/layout/typeInvalid.json -> /data/updater/ui" src="res"/>
+        </preparer>
+    </target>
+    <target name="flashd_unittest">
+        <preparer>
+            <option name="push" value="updater/updater/libupdate_hdi_impl.z.so -> /system/lib" src="out"/>
         </preparer>
     </target>
 </configuration>

@@ -186,7 +186,7 @@ int32_t ZipPkgFile::LoadPackage(std::vector<std::string>& fileNames, VerifyFunct
     if (magic != END_CENTRAL_SIGNATURE) { // 按签名处理
         size_t signatureStart = 0;
         ZipPkgParse zipParse;
-        int32_t ret = zipParse.ParseZipPkg(pkgStream_, signatureStart, signatureLen);
+        ret = zipParse.ParseZipPkg(pkgStream_, signatureStart, signatureLen);
         PKG_CHECK(ret == PKG_SUCCESS, return ret, "Parse zip package signature failed");
 
         endDirPos -= signatureLen;
