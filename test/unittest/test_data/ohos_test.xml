@@ -121,7 +121,8 @@
     <target name="package_unittest">
         <preparer>
             <option name="push" value="package/test_package.zip -> /data/updater/package" src="res"/>
-            <option name="push" value="src/signing.cert -> /data/updater/src" src="res"/>
+            <option name="push" value="src/signing_cert.crt -> /data/updater/src" src="res"/>
+            <option name="push" value="src/signing_cert384.crt -> /data/updater/src" src="res"/>
             <option name="push" value="applypatch/TestDecompressGzip.new.gz -> /data/updater/applypatch" src="res"/>
             <option name="push" value="diffpatch/PatchLz4test_new.lz4 -> /data/updater/diffpatch" src="res"/>
             <option name="push" value="src/libcrypto.a -> /data/updater/src" src="res"/>
