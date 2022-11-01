@@ -20,8 +20,8 @@
 
 namespace Updater {
 namespace Lang {
-constexpr int MINLvl = 0; // min resource level
-constexpr int MAXLvl = 2; // max resource level
+constexpr int MINLvl = 0; // 0 : min resource level
+constexpr int MAXLvl = 2; // 2 : max resource level
 constexpr const char *DEFAULT_KEY = "DEFAULT_STRING";
 
 // map value zh/en/spa is used in string.json to specify language type for each string key
