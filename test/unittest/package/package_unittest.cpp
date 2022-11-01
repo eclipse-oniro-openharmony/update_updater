@@ -75,7 +75,26 @@ public:
         }
         return ret;
     }
+
+    int TestVerifyUpgradePackage()
+    {
+        constexpr size_t digestSize = 32;
+        std::vector<uint8_t> digest(digestSize);
+        std::string path = "/data/updater/package/test_package.zip";
+        BuildFileDigest(*digest.data(), digest.capacity(), path.c_str());
+        int ret = VerifyPackage(path.c_str(), GetTestCertName(0).c_str(), "", digest.data(), digest.capacity());
+        EXPECT_EQ(0, ret);
+        ret = VerifyPackage(nullptr, nullptr, nullptr, nullptr, digest.capacity());
+        EXPECT_EQ(PKG_INVALID_PARAM, ret);
+        return 0;
+    }
 };
+
+HWTEST_F(PackageUnitTest, TestVerifyUpgradePackage, TestSize.Level1)
+{
+    PackageUnitTest test;
+    EXPECT_EQ(0, test.TestVerifyUpgradePackage());
+}
 
 HWTEST_F(PackageUnitTest, TestPackage, TestSize.Level1)
 {
