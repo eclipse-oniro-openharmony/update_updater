@@ -32,7 +32,7 @@ ohos_static_library("libutils") {
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/cJSON:cjson_static",
   ]
-  external_deps += [ "init:libbegetutil" ]
+  external_deps = [ "init:libbegetutil" ]
 
   subsystem_name = "updater"
   part_name = "updater"
@@ -73,7 +73,7 @@ ohos_executable("write_updater") {
     "//base/update/updater/interfaces/kits/misc_info:libmiscinfo",
     "//third_party/bounds_checking_function:libsec_static",
   ]
-  external_deps += [ "init:libbegetutil" ]
+  external_deps = [ "init:libbegetutil" ]
 
   install_enable = true
   part_name = "updater"

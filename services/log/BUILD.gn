@@ -10,9 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-if (!is_linux && !is_mingw && !is_mac) {
-  import("//base/update/updater/updater_default_cfg.gni")
-}
 import("//build/ohos.gni")
 
 config("log_config") {
@@ -35,6 +32,9 @@ ohos_static_library("libupdaterlog") {
   ]
 
   public_configs = [ ":log_config" ]
+  if (!is_linux && !is_mingw && !is_mac) {
+    external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+  }
 
   deps = [ "//third_party/bounds_checking_function:libsec_static" ]
   subsystem_name = "updater"

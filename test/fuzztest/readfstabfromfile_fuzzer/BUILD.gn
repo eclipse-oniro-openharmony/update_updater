@@ -41,7 +41,7 @@ ohos_fuzztest("ReadFstabFromFileFuzzTest") {
     "//base/update/updater/services/log:libupdaterlog",
   ]
 
-  external_deps += [ "init:libbegetutil" ]
+  external_deps = [ "init:libbegetutil" ]
 
   cflags = [
     "-g",

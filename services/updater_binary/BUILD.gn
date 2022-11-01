@@ -78,7 +78,7 @@ ohos_executable("updater_binary") {
     defines = [ "UPDATER_USE_PTABLE" ]
   }
 
-  external_deps += [ "init:libfsmanager_static" ]
+  external_deps = [ "init:libfsmanager_static" ]
 
   install_enable = true
   install_images = [

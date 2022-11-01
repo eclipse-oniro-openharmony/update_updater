@@ -78,7 +78,7 @@ ohos_static_library("libupdaterscript") {
   ]
   configs = [ ":script_config" ]
 
-  external_deps += [ "c_utils:utils" ]
+  external_deps = [ "c_utils:utils" ]
   deps = [
     "//base/update/updater/services/script:gen_yacc",
     "//third_party/bounds_checking_function:libsec_static",
