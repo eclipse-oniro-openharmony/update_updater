@@ -88,12 +88,27 @@ public:
         EXPECT_EQ(PKG_INVALID_PARAM, ret);
         return 0;
     }
+
+    int TestVerifyPackageWithCallback()
+    {
+        std::string path = "/data/updater/package/test_package.zip";
+        int ret = VerifyPackageWithCallback(path.c_str(), GetTestCertName(0).c_str(),
+            [](int32_t result, uint32_t percent) { PKG_LOGI("current progress: %u\n", percent); });
+        EXPECT_EQ(0, ret);
+        return 0;
+    }
 };
 
 HWTEST_F(PackageUnitTest, TestVerifyUpgradePackage, TestSize.Level1)
 {
     PackageUnitTest test;
     EXPECT_EQ(0, test.TestVerifyUpgradePackage());
+}
+
+HWTEST_F(PackageUnitTest, TestVerifyPackageWithCallback, TestSize.Level1)
+{
+    PackageUnitTest test;
+    EXPECT_EQ(0, test.TestVerifyPackageWithCallback());
 }
 
 HWTEST_F(PackageUnitTest, TestPackage, TestSize.Level1)
