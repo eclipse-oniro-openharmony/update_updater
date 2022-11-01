@@ -223,4 +223,31 @@ HWTEST_F(FLashServiceUnitTest, PartitionDoFormat, TestSize.Level1)
     int ret = partTest.DoFormat();
     EXPECT_EQ(-1, ret);
 }
+
+HWTEST_F(FLashServiceUnitTest, PartitionDoFlash, TestSize.Level1)
+{
+    std::string temp = "test.img";
+    uint8_t *buffer = (uint8_t *)temp.c_str();
+    int bufferSize = 0;
+    std::unique_ptr<FlashdWriter> writer = nullptr;
+    std::string partName = "updater";
+    std::string cmdstr = "flash updater updater.img";
+    uint8_t *payload = (uint8_t *)cmdstr.c_str();
+    int payloadSize = 26;
+    std::unique_ptr<Partition> partition_ = std::make_unique<Partition>(partName, std::move(writer));
+    EXPECT_NE(nullptr, partition_);
+    int ret = partition_->DoFlash(payload, payloadSize);
+    EXPECT_EQ(FLASHING_ARG_INVALID, ret);
+    writer = FlashdImageWriter::GetInstance().GetWriter(partName, buffer, bufferSize);
+    EXPECT_NE(nullptr, partition_);
+
+    payloadSize = 0;
+    partition_ = std::make_unique<Partition>(partName, std::move(writer));
+    ret = partition_->DoFlash(payload, payloadSize);
+    EXPECT_EQ(FLASHING_ARG_INVALID, ret);
+    payloadSize = 26;
+    payload = nullptr;
+    ret = partition_->DoFlash(payload, payloadSize);
+    EXPECT_EQ(FLASHING_ARG_INVALID, ret);
+}
 } // namespace
