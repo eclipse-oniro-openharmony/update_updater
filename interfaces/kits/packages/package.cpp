@@ -204,33 +204,6 @@ int32_t VerifyPackageWithCallback(const std::string &packagePath,
     return ret;
 }
 
-int32_t CreatePackageL1(const UpgradePkgInfoExt *pkgInfo, ComponentInfoExt *comp,
-    const char *path, uint32_t *offset, char **hashCode)
-{
-    PkgManager::PkgManagerPtr manager = PkgManager::GetPackageInstance();
-    if (pkgInfo == nullptr || path == nullptr || hashCode == nullptr || manager == nullptr || offset == nullptr) {
-        LOG(ERROR) << "Check param fail ";
-        return PKG_INVALID_PARAM;
-    }
-    if (pkgInfo->pkgType != PKG_PACK_TYPE_UPGRADE) {
-        LOG(ERROR) << "Invalid type for l1";
-        return PKG_INVALID_PARAM;
-    }
-    UpgradePkgInfo upgradePackageInfo;
-    std::vector<std::pair<std::string, ComponentInfo>> files;
-    int32_t ret = GetUpgradePkgInfo(&upgradePackageInfo, files, pkgInfo, comp);
-    if (ret == PKG_SUCCESS) {
-        std::string hashValue;
-        upgradePackageInfo.pkgInfo.pkgFlags |= PKG_SUPPORT_L1;
-        size_t signOffset = 0;
-        ret = manager->CreatePackage(path, &upgradePackageInfo.pkgInfo, files, signOffset, hashValue);
-        *offset = signOffset;
-        *hashCode = strdup(hashValue.c_str());
-    }
-    PkgManager::ReleasePackageInstance(manager);
-    return ret;
-}
-
 int32_t ExtraPackageDir(const char *packagePath, [[maybe_unused]] const char *keyPath, const char *dir,
     const char *outPath)
 {
