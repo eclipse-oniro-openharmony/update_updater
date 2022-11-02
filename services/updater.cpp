@@ -176,6 +176,7 @@ UpdaterStatus IsSpaceCapacitySufficient(const std::string &packagePath)
         PkgManager::ReleasePackageInstance(pkgManager);
         return UPDATE_CORRUPT;
     }
+    size_t unpackedSize = info->unpackedSize;
     PkgManager::ReleasePackageInstance(pkgManager);
 
     struct statvfs64 updaterVfs;
@@ -194,7 +195,7 @@ UpdaterStatus IsSpaceCapacitySufficient(const std::string &packagePath)
     auto freeSpaceSize = static_cast<uint64_t>(updaterVfs.f_bfree);
     auto blockSize = static_cast<uint64_t>(updaterVfs.f_bsize);
     uint64_t totalFreeSize = freeSpaceSize * blockSize;
-    if (totalFreeSize <= static_cast<uint64_t>(info->unpackedSize + MAX_LOG_SPACE)) {
+    if (totalFreeSize <= static_cast<uint64_t>(unpackedSize + MAX_LOG_SPACE)) {
         LOG(ERROR) << "Can not update, free space is not enough";
         UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_SPACE_NOTENOUGH), true);
         UPDATER_UI_INSTANCE.Sleep(UI_SHOW_DURATION);
