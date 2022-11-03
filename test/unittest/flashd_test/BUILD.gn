@@ -24,6 +24,17 @@ ohos_unittest("flashd_unittest") {
       "//base/update/updater/test/unittest/test_data/ohos_test.xml"
   module_out_path = MODULE_OUTPUT_PATH
   sources = [
+    "//base/update/updater/services/flashd/daemon/commander.cpp",
+    "//base/update/updater/services/flashd/daemon/commander_factory.cpp",
+    "//base/update/updater/services/flashd/daemon/daemon_updater.cpp",
+    "//base/update/updater/services/flashd/daemon/erase_commander.cpp",
+    "//base/update/updater/services/flashd/daemon/flash_commander.cpp",
+    "//base/update/updater/services/flashd/daemon/flashd_main.cpp",
+    "//base/update/updater/services/flashd/daemon/flashd_utils.cpp",
+    "//base/update/updater/services/flashd/daemon/format_commander.cpp",
+    "//base/update/updater/services/flashd/daemon/update_commander.cpp",
+    "//base/update/updater/services/flashd/image_writer/image_writer.cpp",
+    "//base/update/updater/services/flashd/partition.cpp",
     "//base/update/updater/services/updater_utils.cpp",
     "flashd_unittest.cpp",
   ]
@@ -58,9 +69,7 @@ ohos_unittest("flashd_unittest") {
     "//base/update/updater/services:updater",
     "//base/update/updater/services/applypatch:libapplypatch",
     "//base/update/updater/services/diffpatch/patch:libpatch",
-    "//base/update/updater/services/flashd:libflashd",
     "//base/update/updater/services/fs_manager:libfsmanager",
-    "//base/update/updater/services/hdi/server:libupdate_hdi_impl",
     "//base/update/updater/services/log:libupdaterlog",
     "//base/update/updater/services/package:libupdaterpackage",
     "//base/update/updater/services/script:libupdaterscript",
