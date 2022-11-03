@@ -250,4 +250,23 @@ HWTEST_F(FLashServiceUnitTest, PartitionDoFlash, TestSize.Level1)
     ret = partition_->DoFlash(payload, payloadSize);
     EXPECT_EQ(FLASHING_ARG_INVALID, ret);
 }
+
+HWTEST_F(FLashServiceUnitTest, UpdateCommanderDoCommand2, TestSize.Level1)
+{
+    LoadFstab();
+    std::unique_ptr<Flashd::Commander> commander = nullptr;
+    Flashd::UpdaterState ret = UpdaterState::DOING;
+    auto callbackFail = [&ret](Flashd::CmdType type, Flashd::UpdaterState state, const std::string &msg) {
+        ret = state;
+    };
+    commander = Flashd::CommanderFactory::GetInstance().CreateCommander(Hdc::CMDSTR_UPDATE_SYSTEM, callbackFail);
+    EXPECT_NE(nullptr, commander);
+    std::string cmd = "update";
+    size_t size = 12;
+    commander->DoCommand(cmd, size);
+    EXPECT_EQ(UpdaterState::FAIL, ret);
+    cmd = "update test test.zip";
+    commander->DoCommand(cmd, size);
+    EXPECT_EQ(UpdaterState::FAIL, ret);
+}
 } // namespace
