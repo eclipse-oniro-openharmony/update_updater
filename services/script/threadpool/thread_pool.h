@@ -38,7 +38,7 @@ public:
     static void AddTask(Task &&task);
     static void Destroy();
 
-    void Init(int32_t number);
+    void Init(int32_t numberThread);
 
     void AddNewTask(Task &&task);
 
@@ -54,7 +54,7 @@ private:
 
     static void ThreadExecute(void* context, int32_t threadIndex)
     {
-        ((ThreadPool*)context)->ThreadRun(threadIndex);
+        (reinterpret_cast<ThreadPool*>(context))->ThreadRun(threadIndex);
     }
 
     ThreadPool()

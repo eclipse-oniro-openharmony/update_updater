@@ -39,15 +39,15 @@ void HdcDaemon::ClearInstanceResource()
     TryStopInstance();
     Base::TryCloseLoop(&loopMain, "HdcDaemon::~HdcDaemon");
     if (clsTCPServ) {
-        delete (HdcDaemonTCP *)clsTCPServ;
+        delete reinterpret_cast<HdcDaemonTCP *>(clsTCPServ);
         clsTCPServ = nullptr;
     }
     if (clsUSBServ) {
-        delete (HdcDaemonUSB *)clsUSBServ;
+        delete reinterpret_cast<HdcDaemonUSB *>(clsUSBServ);
         clsUSBServ = nullptr;
     }
     if (clsJdwp) {
-        delete (HdcJdwp *)clsJdwp;
+        delete reinterpret_cast<HdcJdwp *>(clsJdwp);
         clsJdwp = nullptr;
     }
     WRITE_LOG(LOG_DEBUG, "~HdcDaemon finish");
@@ -58,13 +58,13 @@ void HdcDaemon::TryStopInstance()
     ClearSessions();
     if (clsTCPServ) {
         WRITE_LOG(LOG_DEBUG, "Stop TCP");
-        ((HdcDaemonTCP *)clsTCPServ)->Stop();
+        (reinterpret_cast<HdcDaemonTCP *>(clsTCPServ))->Stop();
     }
     if (clsUSBServ) {
         WRITE_LOG(LOG_DEBUG, "Stop USB");
-        ((HdcDaemonUSB *)clsUSBServ)->Stop();
+        (reinterpret_cast<HdcDaemonUSB *>(clsUSBServ))->Stop();
     }
-    ((HdcJdwp *)clsJdwp)->Stop();
+    (reinterpret_cast<HdcJdwp *>(clsJdwp))->Stop();
     // workaround temply remove MainLoop instance clear
     ReMainLoopForInstanceClear();
     WRITE_LOG(LOG_DEBUG, "Stop loopmain");
@@ -76,16 +76,16 @@ void HdcDaemon::InitMod(bool bEnableTCP, bool bEnableUSB)
     if (bEnableTCP) {
         // tcp
         clsTCPServ = new HdcDaemonTCP(false, this);
-        ((HdcDaemonTCP *)clsTCPServ)->Initial();
+        (reinterpret_cast<HdcDaemonTCP *>(clsTCPServ))->Initial();
     }
     if (bEnableUSB) {
         // usb
         clsUSBServ = new HdcDaemonUSB(false, this);
-        ((HdcDaemonUSB *)clsUSBServ)->Initial();
+        (reinterpret_cast<HdcDaemonUSB *>(clsUSBServ))->Initial();
     }
 
     clsJdwp = new HdcJdwp(&loopMain);
-    ((HdcJdwp *)clsJdwp)->Initial();
+    (reinterpret_cast<HdcJdwp *>(clsJdwp))->Initial();
 
     // enable security
     string secure;
@@ -151,7 +151,8 @@ bool HdcDaemon::HandDaemonAuth(HSession hSession, const uint32_t channelId, Sess
             handshake.authType = AUTH_TOKEN;
             handshake.buf = hSession->tokenRSA;
             string bufString = SerialStruct::SerializeToString(handshake);
-            Send(hSession->sessionId, channelId, CMD_KERNEL_HANDSHAKE, (uint8_t *)bufString.c_str(), bufString.size());
+            Send(hSession->sessionId, channelId, CMD_KERNEL_HANDSHAKE,
+                reinterpret_cast<uint8_t *>(const_cast<char *>(bufString.c_str())), bufString.size());
             ret = true;
             break;
         }
@@ -163,14 +164,14 @@ bool HdcDaemon::HandDaemonAuth(HSession hSession, const uint32_t channelId, Sess
             // jump out dialog, and click the system, the system will store the Host public key certificate in the
             // device locally, and the signature authentication will be correct when the subsequent connection is
             // connected.
-            if (!HdcAuth::AuthVerify((uint8_t *)hSession->tokenRSA.c_str(),
-                (uint8_t *)handshake.buf.c_str(), handshake.buf.size())) {
+            if (!HdcAuth::AuthVerify(reinterpret_cast<uint8_t *>(const_cast<char *>(hSession->tokenRSA.c_str())),
+                reinterpret_cast<uint8_t *>(const_cast<char *>(handshake.buf.c_str())), handshake.buf.size())) {
                 // Next auth
                 handshake.authType = AUTH_TOKEN;
                 handshake.buf = hSession->tokenRSA;
                 string bufString = SerialStruct::SerializeToString(handshake);
-                Send(hSession->sessionId, channelId, CMD_KERNEL_HANDSHAKE, (uint8_t *)bufString.c_str(),
-                     bufString.size());
+                Send(hSession->sessionId, channelId, CMD_KERNEL_HANDSHAKE,
+                    reinterpret_cast<uint8_t *>(const_cast<char *>(bufString.c_str())), bufString.size());
                 break;
             }
             ret = true;
@@ -190,7 +191,7 @@ bool HdcDaemon::HandDaemonAuth(HSession hSession, const uint32_t channelId, Sess
 bool HdcDaemon::DaemonSessionHandshake(HSession hSession, const uint32_t channelId, uint8_t *payload, int payloadSize)
 {
     // session handshake step2
-    string s = string((char *)payload, payloadSize);
+    string s = string(reinterpret_cast<char *>(payload), payloadSize);
     SessionHandShake handshake;
     string err;
     SerialStruct::ParseFromString(handshake, s);
@@ -223,7 +224,8 @@ bool HdcDaemon::DaemonSessionHandshake(HSession hSession, const uint32_t channel
     handshake.authType = AUTH_OK;
     handshake.buf = hostName;
     string bufString = SerialStruct::SerializeToString(handshake);
-    Send(hSession->sessionId, channelId, CMD_KERNEL_HANDSHAKE, (uint8_t *)bufString.c_str(), bufString.size());
+    Send(hSession->sessionId, channelId, CMD_KERNEL_HANDSHAKE,
+        reinterpret_cast<uint8_t *>(const_cast<char *>(bufString.c_str())), bufString.size());
     hSession->handshakeOK = true;
     return true;
 }
@@ -291,14 +293,14 @@ bool HdcDaemon::RemoveInstanceTask(const uint8_t op, HTaskInfo hTask)
 bool HdcDaemon::ServerCommand(const uint32_t sessionId, const uint32_t channelId, const uint16_t command,
                               uint8_t *bufPtr, const int size)
 {
-    return Send(sessionId, channelId, command, (uint8_t *)bufPtr, size) > 0;
+    return Send(sessionId, channelId, command, bufPtr, size) > 0;
 }
 
 void HdcDaemon::JdwpNewFileDescriptor(const uint8_t *buf, const int bytesIO)
 {
-    uint32_t pid = *(uint32_t *)(buf + 1);
-    uint32_t fd = *(uint32_t *)(buf + 5);  // 5 : fd offset
-    ((HdcJdwp *)clsJdwp)->SendJdwpNewFD(pid, fd);
+    uint32_t pid = *(reinterpret_cast<uint32_t *>(const_cast<uint8_t *>(buf + 1)));
+    uint32_t fd = *(reinterpret_cast<uint32_t *>(const_cast<uint8_t *>(buf + 5)));  // 5 : fd offset
+    (reinterpret_cast<HdcJdwp *>(clsJdwp))->SendJdwpNewFD(pid, fd);
 };
 
 void HdcDaemon::NotifyInstanceSessionFree(HSession hSession, bool freeOrClear)

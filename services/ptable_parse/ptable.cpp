@@ -357,7 +357,7 @@ bool Ptable::CheckGptHeader(uint8_t *buffer, const uint32_t bufferLen, const uin
 }
 
 bool Ptable::PartitionCheckGptHeader(const uint8_t *gptImage, const uint32_t len, const uint64_t lbaNum,
-    const uint32_t blockSize, GPTHeaderInfo& gptHeaderInfo)
+    const uint32_t blockSize, const GPTHeaderInfo& gptHeaderInfo)
 {
     if (len < ptableData_.writeDeviceLunSize || lbaNum == 0) {
         LOG(ERROR) << "len < ptableData_.writeDeviceLunSize || lbaNum == 0";

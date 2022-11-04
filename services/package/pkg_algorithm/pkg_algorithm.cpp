@@ -162,7 +162,7 @@ PkgAlgorithm::PkgAlgorithmPtr PkgAlgorithmFactory::GetAlgorithm(const PkgManager
                 PKG_LOGE("Invalid param config");
                 return nullptr;
             }
-            const ZipFileInfo *info = (ZipFileInfo *)config;
+            const ZipFileInfo *info = reinterpret_cast<ZipFileInfo *>(config);
             return std::make_shared<PkgAlgoDeflate>(*info);
         }
         case PKG_COMPRESS_METHOD_NONE:
@@ -172,7 +172,7 @@ PkgAlgorithm::PkgAlgorithmPtr PkgAlgorithmFactory::GetAlgorithm(const PkgManager
                 PKG_LOGE("Invalid param config");
                 return nullptr;
             }
-            const Lz4FileInfo *info = (Lz4FileInfo *)config;
+            const Lz4FileInfo *info = reinterpret_cast<Lz4FileInfo *>(config);
             return std::make_shared<PkgAlgorithmLz4>(*info);
         }
         case PKG_COMPRESS_METHOD_LZ4_BLOCK: {
@@ -180,7 +180,7 @@ PkgAlgorithm::PkgAlgorithmPtr PkgAlgorithmFactory::GetAlgorithm(const PkgManager
                 PKG_LOGE("Invalid param config");
                 return nullptr;
             }
-            const Lz4FileInfo *info = (Lz4FileInfo *)config;
+            const Lz4FileInfo *info = reinterpret_cast<Lz4FileInfo *>(config);
             return std::make_shared<PkgAlgorithmBlockLz4>(*info);
         }
         default:

@@ -26,7 +26,7 @@ int32_t Lz4FileEntry::Init(const PkgManager::FileInfoPtr fileInfo, PkgStreamPtr 
         PKG_LOGE("Fail to check input param");
         return PKG_INVALID_PARAM;
     }
-    Lz4FileInfo *info = (Lz4FileInfo *)fileInfo;
+    Lz4FileInfo *info = reinterpret_cast<Lz4FileInfo *>(fileInfo);
     if (info != nullptr) {
         fileInfo_.compressionLevel = info->compressionLevel;
         fileInfo_.blockIndependence = info->blockIndependence;

@@ -52,10 +52,7 @@ class Lz4FrameAdapter : public Lz4Adapter {
 public:
     Lz4FrameAdapter(UpdatePatchWriterPtr outStream, size_t offset,
         const Hpackage::PkgManager::FileInfoPtr fileInfo) : Lz4Adapter(outStream, offset, fileInfo) {}
-    ~Lz4FrameAdapter() override
-    {
-        Close();
-    }
+    ~Lz4FrameAdapter() override {}
 
     int32_t Open() override;
     int32_t Close() override;
@@ -73,10 +70,7 @@ class Lz4BlockAdapter : public Lz4FrameAdapter {
 public:
     Lz4BlockAdapter(UpdatePatchWriterPtr outStream, size_t offset,
         const Hpackage::PkgManager::FileInfoPtr fileInfo) : Lz4FrameAdapter(outStream, offset, fileInfo) {}
-    ~Lz4BlockAdapter() override
-    {
-        Close();
-    }
+    ~Lz4BlockAdapter() override {}
 
     int32_t Open() override;
     int32_t Close() override;

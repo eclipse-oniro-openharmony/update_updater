@@ -85,7 +85,7 @@ public:
         if (header == nullptr || header->entryCount == 0) {
             return;
         }
-        UpgradePkgInfo *info = (UpgradePkgInfo *)(header);
+        UpgradePkgInfo *info = reinterpret_cast<UpgradePkgInfo *>(header);
         pkgInfo_ = std::move(*info);
     }
 
