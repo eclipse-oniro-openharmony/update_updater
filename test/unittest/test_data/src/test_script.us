@@ -75,14 +75,6 @@ Stdout("Test NE-float ", NE(100.1, 200, 200));
 #Stdout("Test NE-string ", NE("200.0", 200.0, 10));
 Stdout("Test NE-string ", NE("200.0", "200.0", "10"));
 
-function NE(a, b, c)
-{
-    Stdout("Test NE ", a, b, c);
-    d = a != b;
-    e = a != c;
-    return d, e;
-}
-
 Stdout("Test NE-int ", NE(100, 100, 10.0));
 Stdout("Test NE-float ", NE(100.1, 200.1, 200));
 Stdout("Test NE-float ", NE(100.1, 200, 200));
