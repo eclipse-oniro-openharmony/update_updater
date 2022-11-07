@@ -38,6 +38,29 @@ public:
     PackageUnitTest() {}
     ~PackageUnitTest() override {}
 public:
+    int TestInvalidCreatePackage()
+    {
+        ComponentInfoExt compInfo;
+        uint8_t pkgType = 5;
+        int ret = CreatePackage(nullptr, &compInfo, nullptr, GetTestPrivateKeyName(0).c_str());
+        EXPECT_EQ(ret, PKG_INVALID_PARAM);
+
+        UpgradePkgInfoExt pkgInfoExt;
+        pkgInfoExt.pkgType = pkgType;
+        ret = CreatePackage(&pkgInfoExt, &compInfo, nullptr, GetTestPrivateKeyName(0).c_str());
+        EXPECT_EQ(ret, PKG_INVALID_PARAM);
+
+        constexpr uint32_t digestLen = 32;
+        ret = VerifyPackage(nullptr, GetTestCertName(0).c_str(), nullptr, nullptr, digestLen);
+        EXPECT_EQ(ret, PKG_INVALID_PARAM);
+
+        std::string packagePath = TEST_PATH_TO + testPackageName;
+        pkgInfoExt.pkgType = pkgType;
+        ret = CreatePackage(&pkgInfoExt, &compInfo, packagePath.c_str(), GetTestPrivateKeyName(0).c_str());
+        EXPECT_EQ(ret, PKG_INVALID_PARAM);
+        return 0;
+    }
+
     int TestPackageUnpack(int type)
     {
         pkgManager_ = static_cast<PkgManagerImpl*>(PkgManager::GetPackageInstance());
@@ -98,6 +121,12 @@ public:
         return 0;
     }
 };
+
+HWTEST_F(PackageUnitTest, TestInvalidCreatePackage, TestSize.Level1)
+{
+    PackageUnitTest test;
+    EXPECT_EQ(0, test.TestInvalidCreatePackage());
+}
 
 HWTEST_F(PackageUnitTest, TestVerifyUpgradePackage, TestSize.Level1)
 {
