@@ -140,6 +140,12 @@ HWTEST_F(FLashServiceUnitTest, EraseCommanderDoCommand, TestSize.Level1)
     commander->DoCommand(payload, payloadSize);
     EXPECT_EQ(UpdaterState::FAIL, ret);
 
+    cmdstr = "erase";
+    payload = (uint8_t *)cmdstr.c_str();
+    payloadSize = 5;
+    commander->DoCommand(payload, payloadSize);
+    EXPECT_EQ(UpdaterState::FAIL, ret);
+
     cmdstr = "erase misctest";
     payload = (uint8_t *)cmdstr.c_str();
     payloadSize = 15;
@@ -251,6 +257,14 @@ HWTEST_F(FLashServiceUnitTest, PartitionDoFlash, TestSize.Level1)
     EXPECT_EQ(FLASHING_ARG_INVALID, ret);
 }
 
+HWTEST_F(FLashServiceUnitTest, UpdateProgress, TestSize.Level1)
+{
+    std::string partitionName = "test";
+    Partition partTest(partitionName);
+    int ret = partTest.DoFormat();
+    EXPECT_EQ(-1, ret);
+}
+
 HWTEST_F(FLashServiceUnitTest, UpdateCommanderDoCommand2, TestSize.Level1)
 {
     LoadFstab();
@@ -269,4 +283,26 @@ HWTEST_F(FLashServiceUnitTest, UpdateCommanderDoCommand2, TestSize.Level1)
     commander->DoCommand(cmd, size);
     EXPECT_EQ(UpdaterState::FAIL, ret);
 }
+
+HWTEST_F(FLashServiceUnitTest, FlashCommanderDoCommand2, TestSize.Level1)
+{
+    LoadFstab();
+    std::unique_ptr<Flashd::Commander> commander = nullptr;
+    Flashd::UpdaterState ret = UpdaterState::DOING;
+    auto callbackFail = [&ret](Flashd::CmdType type, Flashd::UpdaterState state, const std::string &msg) {
+        ret = state;
+    };
+    commander = Flashd::CommanderFactory::GetInstance().CreateCommander(Hdc::CMDSTR_FLASH_PARTITION, callbackFail);
+    EXPECT_NE(nullptr, commander);
+    std::string cmd = "flash";
+    size_t size = 12;
+    commander->DoCommand(cmd, size);
+    EXPECT_EQ(UpdaterState::FAIL, ret);
+
+    cmd = "flash test test.img";
+    size = 20;
+    commander->DoCommand(cmd, size);
+    EXPECT_EQ(UpdaterState::FAIL, ret);
+}
+
 } // namespace
