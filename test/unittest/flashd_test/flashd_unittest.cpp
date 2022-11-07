@@ -214,6 +214,23 @@ HWTEST_F(FLashServiceUnitTest, Split, TestSize.Level1)
     EXPECT_EQ("flashupdaterupdater.img", res);
 }
 
+HWTEST_F(FLashServiceUnitTest, GetWriter, TestSize.Level1)
+{
+    std::string partName = "";
+    std::string temp = "";
+    uint8_t *buffer = (uint8_t *)temp.c_str();
+    int bufferSize = 24;
+    std::unique_ptr<FlashdWriter> writer = FlashdImageWriter::GetInstance().GetWriter(partName, buffer, bufferSize);
+    if (writer == nullptr) {
+        std::cout << "writer is nullptr";
+    }
+    EXPECT_NE(nullptr, writer);
+
+    partName = "test";
+    writer = FlashdImageWriter::GetInstance().GetWriter(partName, buffer, bufferSize);
+    EXPECT_NE(nullptr, writer);
+}
+
 HWTEST_F(FLashServiceUnitTest, PartitionDoErase, TestSize.Level1)
 {
     std::string partitionName = "test";
