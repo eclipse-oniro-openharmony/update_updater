@@ -541,15 +541,17 @@ bool RemoveDir(const std::string &path)
         struct dirent *dt = nullptr;
         dt = readdir(d);
         while (dt != nullptr) {
-            if (strcmp(dt->d_name, "..") != 0 && strcmp(dt->d_name, ".") != 0) {
-                struct stat st {};
-                auto file_name = strPath + std::string(dt->d_name);
-                stat(file_name.c_str(), &st);
-                if (S_ISDIR(st.st_mode)) {
-                    RemoveDir(file_name);
-                } else {
-                    remove(file_name.c_str());
-                }
+            if (strcmp(dt->d_name, "..") == 0 || strcmp(dt->d_name, ".") == 0) {
+                dt = readdir(d);
+                continue;
+            }
+            struct stat st {};
+            auto file_name = strPath + std::string(dt->d_name);
+            stat(file_name.c_str(), &st);
+            if (S_ISDIR(st.st_mode)) {
+                RemoveDir(file_name);
+            } else {
+                remove(file_name.c_str());
             }
             dt = readdir(d);
         }

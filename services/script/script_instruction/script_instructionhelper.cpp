@@ -116,12 +116,13 @@ int32_t ScriptInstructionHelper::RegisterUserInstruction(const std::string& libN
     userInstrLibName_.assign(realLibName);
     Uscript::UScriptInstructionFactoryPtr factory = nullptr;
     if (instrLib_ == nullptr) {
-        instrLib_ = dlopen(realLibName.c_str(),  RTLD_LAZY|RTLD_LOCAL);
+        instrLib_ = dlopen(realLibName.c_str(), RTLD_LAZY | RTLD_LOCAL);
     }
     USCRIPT_CHECK(instrLib_ != nullptr, return USCRIPT_INVALID_PARAM,
         "Fail to dlopen %s ", libName.c_str());
     auto pGetInstructionFactory = (Uscript::UScriptInstructionFactoryPtr(*)())dlsym(instrLib_, "GetInstructionFactory");
-    auto pReleaseInstructionFactory = (void(*)(Uscript::UScriptInstructionFactoryPtr))dlsym(instrLib_, "ReleaseInstructionFactory");
+    auto pReleaseInstructionFactory =
+        (void(*)(Uscript::UScriptInstructionFactoryPtr))dlsym(instrLib_, "ReleaseInstructionFactory");
     if (pReleaseInstructionFactory == nullptr || pGetInstructionFactory == nullptr) {
         USCRIPT_LOGE("Fail to get sym %s", libName.c_str());
         return USCRIPT_INVALID_PARAM;
