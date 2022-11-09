@@ -28,7 +28,7 @@ using namespace Updater;
 namespace OHOS {
     bool FuzzFormatPartition(const uint8_t* data, size_t size)
     {
-        if (size < 20) {  /* fstable name length */
+        if (size < 20) { // 20 : fstable name length
             LoadSpecificFstab("/data/fuzz/test/FormatPartition_fuzzer.fstable");
             FormatPartition(reinterpret_cast<const char*>(data));
         }

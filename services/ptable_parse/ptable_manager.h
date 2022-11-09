@@ -87,7 +87,7 @@ public:
 
     void LoadPartitionInfo([[maybe_unused]] Hpackage::PkgManager *pkgManager = nullptr) override;
     bool ComparePtable(PtableManager &newPtbManager);
-    bool ComparePartition(PtableManager &newPtbManager, std::string partitionName);
+    bool ComparePartition(PtableManager &newPtbManager, const std::string partitionName);
 private:
     DevicePtable();
 };

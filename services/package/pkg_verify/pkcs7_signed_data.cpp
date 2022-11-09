@@ -107,7 +107,7 @@ int32_t Pkcs7SignedData::Init(const uint8_t *sourceData, const uint32_t sourceDa
         PKG_LOGE("BIO_new error!");
         return -1;
     }
-    if (BIO_write(p7Bio, sourceData, sourceDataLen) != sourceDataLen) {
+    if (static_cast<uint32_t>(BIO_write(p7Bio, sourceData, sourceDataLen)) != sourceDataLen) {
         PKG_LOGE("BIO_write error!");
         BIO_free(p7Bio);
         return -1;
