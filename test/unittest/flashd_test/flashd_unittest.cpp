@@ -67,19 +67,19 @@ HWTEST_F(FLashServiceUnitTest, FormatCommanderDoCommand, TestSize.Level1)
     commander->DoCommand(payload, payloadSize);
     EXPECT_EQ(UpdaterState::FAIL, ret);
 
-    payload = (uint8_t *)cmdstr.c_str();
+    payload = static_cast<uint8_t*>(cmdstr.c_str());
     payloadSize = 0;
     commander->DoCommand(payload, payloadSize);
     EXPECT_EQ(UpdaterState::FAIL, ret);
 
     cmdstr = "format";
-    payload = (uint8_t *)cmdstr.c_str();
+    payload = static_cast<uint8_t*>(cmdstr.c_str());
     payloadSize = 5;
     commander->DoCommand(payload, payloadSize);
     EXPECT_EQ(UpdaterState::FAIL, ret);
 
     cmdstr = "format databack";
-    payload = (uint8_t *)cmdstr.c_str();
+    payload = static_cast<uint8_t*>(cmdstr.c_str());
     payloadSize = 16;
     commander->DoCommand(payload, payloadSize);
     EXPECT_EQ(UpdaterState::FAIL, ret);
@@ -101,19 +101,19 @@ HWTEST_F(FLashServiceUnitTest, UpdateCommanderDoCommand, TestSize.Level1)
     commander->DoCommand(payload, payloadSize);
     EXPECT_EQ(UpdaterState::FAIL, ret);
 
-    payload = (uint8_t *)cmdstr.c_str();
+    payload = static_cast<uint8_t*>(cmdstr.c_str());
     payloadSize = 0;
     commander->DoCommand(payload, payloadSize);
     EXPECT_EQ(UpdaterState::FAIL, ret);
 
     cmdstr = "update 123.zip";
-    payload = (uint8_t *)cmdstr.c_str();
+    payload = static_cast<uint8_t*>(cmdstr.c_str());
     payloadSize = 5;
     commander->DoCommand(payload, payloadSize);
     EXPECT_EQ(UpdaterState::FAIL, ret);
 
     cmdstr = "format databack";
-    payload = (uint8_t *)cmdstr.c_str();
+    payload = static_cast<uint8_t*>(cmdstr.c_str());
     payloadSize = 16;
     commander->DoCommand(payload, payloadSize);
     EXPECT_EQ(UpdaterState::FAIL, ret);
@@ -135,19 +135,19 @@ HWTEST_F(FLashServiceUnitTest, EraseCommanderDoCommand, TestSize.Level1)
     commander->DoCommand(payload, payloadSize);
     EXPECT_EQ(UpdaterState::FAIL, ret);
 
-    payload = (uint8_t *)cmdstr.c_str();
+    payload = static_cast<uint8_t*>(cmdstr.c_str());
     payloadSize = 0;
     commander->DoCommand(payload, payloadSize);
     EXPECT_EQ(UpdaterState::FAIL, ret);
 
     cmdstr = "erase";
-    payload = (uint8_t *)cmdstr.c_str();
+    payload = static_cast<uint8_t*>(cmdstr.c_str());
     payloadSize = 5;
     commander->DoCommand(payload, payloadSize);
     EXPECT_EQ(UpdaterState::FAIL, ret);
 
     cmdstr = "erase misctest";
-    payload = (uint8_t *)cmdstr.c_str();
+    payload = static_cast<uint8_t*>(cmdstr.c_str());
     payloadSize = 15;
     commander->DoCommand(payload, payloadSize);
     EXPECT_EQ(UpdaterState::FAIL, ret);
@@ -169,13 +169,13 @@ HWTEST_F(FLashServiceUnitTest, FlashCommanderDoCommand, TestSize.Level1)
     commander->DoCommand(payload, payloadSize);
     EXPECT_EQ(UpdaterState::FAIL, ret);
 
-    payload = (uint8_t *)cmdstr.c_str();
+    payload = static_cast<uint8_t*>(cmdstr.c_str());
     payloadSize = 0;
     commander->DoCommand(payload, payloadSize);
     EXPECT_EQ(UpdaterState::FAIL, ret);
 
     cmdstr = "flash updatertest updater.img";
-    payload = (uint8_t *)cmdstr.c_str();
+    payload = static_cast<uint8_t*>(cmdstr.c_str());
     payloadSize = 30;
     commander->DoCommand(payload, payloadSize);
     EXPECT_EQ(UpdaterState::SUCCESS, ret);
@@ -218,7 +218,7 @@ HWTEST_F(FLashServiceUnitTest, GetWriter, TestSize.Level1)
 {
     std::string partName = "";
     std::string temp = "";
-    uint8_t *buffer = (uint8_t *)temp.c_str();
+    uint8_t *buffer = static_cast<uint8_t*>(temp.c_str());
     int bufferSize = 24;
     std::unique_ptr<FlashdWriter> writer = FlashdImageWriter::GetInstance().GetWriter(partName, buffer, bufferSize);
     if (writer == nullptr) {
@@ -250,12 +250,12 @@ HWTEST_F(FLashServiceUnitTest, PartitionDoFormat, TestSize.Level1)
 HWTEST_F(FLashServiceUnitTest, PartitionDoFlash, TestSize.Level1)
 {
     std::string temp = "test.img";
-    uint8_t *buffer = (uint8_t *)temp.c_str();
+    uint8_t *buffer = static_cast<uint8_t*>(temp.c_str());
     int bufferSize = 0;
     std::unique_ptr<FlashdWriter> writer = nullptr;
     std::string partName = "updater";
     std::string cmdstr = "flash updater updater.img";
-    uint8_t *payload = (uint8_t *)cmdstr.c_str();
+    uint8_t *payload = static_cast<uint8_t*>(cmdstr.c_str());
     int payloadSize = 26;
     std::unique_ptr<Partition> partition_ = std::make_unique<Partition>(partName, std::move(writer));
     EXPECT_NE(nullptr, partition_);
