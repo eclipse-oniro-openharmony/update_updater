@@ -61,6 +61,57 @@ public:
         return 0;
     }
 
+    int TestPackagePack(int type = PKG_DIGEST_TYPE_SHA256)
+    {
+        int32_t ret;
+        uint32_t updateFileVersion = 1000;
+        UpgradePkgInfoExt pkgInfo;
+        pkgInfo.softwareVersion = strdup("100.100.100.100");
+        pkgInfo.date = strdup("2021-02-02");
+        pkgInfo.time = strdup("21:23:49");
+        pkgInfo.productUpdateId = strdup("555.555.100.555");
+        pkgInfo.entryCount = testFileNames_.size();
+        pkgInfo.digestMethod = type;
+        pkgInfo.signMethod = PKG_SIGN_METHOD_RSA;
+        pkgInfo.pkgType = PKG_PACK_TYPE_UPGRADE;
+        pkgInfo.updateFileVersion = updateFileVersion;
+        std::string filePath;
+        uint32_t componentIdBase = 100;
+        uint8_t componentFlags = 22;
+        ComponentInfoExt comp[testFileNames_.size()];
+        for (size_t i = 0; i < testFileNames_.size(); i++) {
+            comp[i].componentAddr = strdup(testFileNames_[i].c_str());
+            filePath = TEST_PATH_FROM;
+            filePath += testFileNames_[i].c_str();
+            comp[i].filePath = strdup(filePath.c_str());
+            comp[i].version = strdup("55555555");
+            ret = BuildFileDigest(*comp[i].digest, sizeof(comp[i].digest), filePath);
+            EXPECT_EQ(ret, PKG_SUCCESS);
+            comp[i].size = GetFileSize(filePath);
+            comp[i].originalSize = comp[i].size;
+            comp[i].id = i + componentIdBase;
+            comp[i].resType = 1;
+            comp[i].type = 1;
+            comp[i].flags = componentFlags;
+            filePath.clear();
+        }
+        std::string packagePath = TEST_PATH_TO;
+        packagePath += testPackageName;
+        ret = CreatePackage(&pkgInfo, comp, packagePath.c_str(),
+            GetTestPrivateKeyName(pkgInfo.digestMethod).c_str());
+        EXPECT_EQ(ret, PKG_SUCCESS);
+        for (size_t i = 0; i < testFileNames_.size(); i++) {
+            free(comp[i].componentAddr);
+            free(comp[i].filePath);
+            free(comp[i].version);
+        }
+        free(pkgInfo.softwareVersion);
+        free(pkgInfo.date);
+        free(pkgInfo.time);
+        free(pkgInfo.productUpdateId);
+        return ret;
+    }
+
     int TestPackageUnpack(int type)
     {
         pkgManager_ = static_cast<PkgManagerImpl*>(PkgManager::GetPackageInstance());
@@ -143,6 +194,7 @@ HWTEST_F(PackageUnitTest, TestVerifyPackageWithCallback, TestSize.Level1)
 HWTEST_F(PackageUnitTest, TestPackage, TestSize.Level1)
 {
     PackageUnitTest test;
+    EXPECT_EQ(0, test.TestPackagePack(PKG_DIGEST_TYPE_SHA256));
     EXPECT_EQ(0, test.TestPackageUnpack(PKG_DIGEST_TYPE_SHA256));
 }
 
