@@ -33,6 +33,14 @@ public:
     static void TearDownTestCase(void) {};
     void SetUp();
     void TearDown();
+    CommandResult TestCommandFnExec(std::shared_ptr<Command> cmd, std::string cmdLine)
+    {
+        cmd->Init(cmdLine);
+        std::unique_ptr<CommandFunction> cf = CommandFunctionFactory::GetCommandFunction(cmd->GetCommandType);
+        CommandResult ret = cf->Execute(const_cast<Command &>(*cmd.get()));
+        CommandFunctionFactory::ReleaseCommandFunction(cf);
+        return ret;
+    }
 };
 
 void CommandFunctionUnitTest::SetUpTestCase()
@@ -67,5 +75,31 @@ HWTEST_F(CommandFunctionUnitTest, command_function_test_001, TestSize.Level1)
     ZeroAndEraseCommandFn cmdErase;
     EXPECT_EQ(cmdErase.Execute(*cmd), -1);
     delete cmd;
+}
+
+HWTEST_F(CommandFunctionUnitTest, command_function_test_002, TestSize.Level1)
+{
+    std::string filepath = "/data/updater/updater/allCmdUnitTest.bin";
+    std::unique_ptr<Command> cmd;
+    cmd = std::make_unique<Command>();
+    TransferManagerPtr tm = TransferManager::GetTransferManagerInstance();
+    mode_t dirMode = S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH;
+    tm->GetGlobalParams()->storeBase = "data/updater/updater/tmp/cmdtest";
+    Store::DoFreeSpace(TransferManager::GetTransferManagerInstance()->GetGlobalParams()->storeBase);
+    Utils::MkdirRecursive(TransferManager::GetTransferManagerInstance()->GetGlobalParams()->storeBase, dirMode);
+    int fd = open(filePath.c_str(), O_RDWR | O_CREAT, dirMode);
+    if (fd < 0) {
+        printf("Failed to open block %s, errno: %d\n", filePath.c_str(), errno);
+        return;
+    }
+    lseek64(fd, 0, SEEK_SET);
+    cmd->SetFileDescriptor(fd);
+    std::string cmdLine = std::string("erase 2,0,1");
+    CommandResult ret = CommandFunctionUnitTest::TestCommandFnExec(cmd, cmdLine);
+    EXPECT_EQ(ret, 0);
+    cmdLine = "free 2,0,1";
+    ret = CommandFunctionUnitTest::TestCommandFnExec(cmd, cmdLine);
+    tm->GetGlobalParams()->storeCreated = 0;
+    EXPECT_EQ(ret, 0);
 }
 }
