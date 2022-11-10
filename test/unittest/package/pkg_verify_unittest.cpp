@@ -27,6 +27,9 @@
 
 #include "package.h"
 #include "cert_verify.h"
+#include "openssl_util.h"
+#include "pkg_verify_util.h"
+#include "zip_pkg_parse.h"
 #include "pkcs7_signed_data.h"
 
 using namespace std;
@@ -85,7 +88,33 @@ public:
         EXPECT_EQ(ret, PKG_SUCCESS);
         return 0;
     }
+
+    int TestCertVerifyFailed()
+    {
+        BIO *certbio = BIO_new_file(keyName_.c_str(), "r");
+        X509 *rcert = PEM_read_bio_X509(certbio, nullptr, nullptr, nullptr);
+        BIO_free(certbio);
+
+        SingleCertHelper singleCert;
+        int32_t ret = singleCert.CertChainCheck(nullptr, nullptr);
+        EXPECT_EQ(ret, -1);
+        int32_t ret = singleCert.CertChainCheck(nullptr, rcert);
+        EXPECT_EQ(ret, -1);
+
+        ret = CertVerify::GetInstance().CheckCertChain(nullptr, nullptr);
+        EXPECT_EQ(ret, -1);
+
+        bool result = VerifyX509CertByIssuerCert(nullptr, nullptr);
+        EXPECT_EQ(result, false);
+        result = VerifyX509CertByIssuerCert(rcert, rcert);
+        EXPECT_EQ(result, false);
 };
+
+HWTEST_F(PackageVerifyTest, TestCertVerifyFailed, TestSize.Level1)
+{
+    PackageVerifyTest test;
+    EXPECT_EQ(0, test.TestCertVerifyFailed());
+}
 
 HWTEST_F(PackageVerifyTest, TestExtraPackageDir, TestSize.Level1)
 {
