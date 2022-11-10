@@ -67,8 +67,8 @@
         },
         "build": {
             "sub_component": [
-                "//base/update/updater/etc:updater_files",
                 "//base/update/updater/resources:updater_resources",
+                "//base/update/updater/services/etc:updater_files",
                 "//base/update/updater/services/package:libupdaterpackage",
                 "//base/update/updater/services/script:libupdaterscript",
                 "//base/update/updater/services/log:libupdaterlog",
