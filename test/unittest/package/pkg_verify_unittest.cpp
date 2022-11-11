@@ -108,6 +108,7 @@ public:
         EXPECT_EQ(result, false);
         result = VerifyX509CertByIssuerCert(rcert, rcert);
         EXPECT_EQ(result, false);
+    }
 };
 
 HWTEST_F(PackageVerifyTest, TestCertVerifyFailed, TestSize.Level1)
