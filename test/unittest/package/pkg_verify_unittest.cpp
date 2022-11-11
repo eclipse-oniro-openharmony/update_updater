@@ -139,7 +139,7 @@ public:
 
         ret = VerifyDigestByPubKey(nullptr, 0, asn1Data, asn1Data);
         EXPECT_EQ(ret, -1);
-        ret = CalcSha256Digest(nullptr, 0, asn1Data, asn1Data);
+        ret = CalcSha256Digest(nullptr, 0, asn1Data);
         EXPECT_EQ(ret, -1);
 
         std::string stringResult = GetStringFromX509Name(nullptr);
