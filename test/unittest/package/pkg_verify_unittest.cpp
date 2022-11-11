@@ -91,10 +91,11 @@ public:
 
     int TestCertVerifyFailed()
     {
-        BIO *certbio = BIO_new_file(keyName_.c_str(), "r");
+        BIO *certbio = BIO_new_file(GetTestPrivateKeyName(0).c_str(), "r");
         X509 *rcert = PEM_read_bio_X509(certbio, nullptr, nullptr, nullptr);
-        BIO_free(certbio);
-
+        if (certbio != nullptr) {
+            BIO_free(certbio);
+        }
         SingleCertHelper singleCert;
         int32_t ret = singleCert.CertChainCheck(nullptr, nullptr);
         EXPECT_EQ(ret, -1);
@@ -108,8 +109,58 @@ public:
         EXPECT_EQ(result, false);
         result = VerifyX509CertByIssuerCert(rcert, rcert);
         EXPECT_EQ(result, false);
+        return 0;
+    }
+
+    int TestOpensslUtilFailed()
+    {
+        std::vector<uint8_t> &asn1Data;
+        int32_t ret = GetASN1OctetStringData(nullptr, asn1Data);
+        EXPECT_EQ(ret, -1);
+
+        int32_t algoNid {};
+        ret = GetX509AlgorithmNid(nullptr, algoNid);
+        EXPECT_EQ(ret, -1);
+
+        X509 *result = GetX509CertFromPemString(" ");
+        EXPECT_EQ(result, nullptr);
+        result = GetX509CertFromPemFile("invalid_file");
+        EXPECT_EQ(result, nullptr);
+
+        BIO *certbio = BIO_new_file(GetTestPrivateKeyName(0).c_str(), "r");
+        X509 *cert = PEM_read_bio_X509(certbio, nullptr, nullptr, nullptr);
+        if (certbio != nullptr) {
+            BIO_free(certbio);
+        }
+        bool boolResult = VerifyX509CertByIssuerCert(nullptr, nullptr);
+        EXPECT_EQ(boolResult, false);
+        boolResult = VerifyX509CertByIssuerCert(cert, cert);
+        EXPECT_EQ(boolResult, false);
+
+        ret = VerifyDigestByPubKey(nullptr, 0, asn1Data, asn1Data);
+        EXPECT_EQ(ret, -1);
+        ret = CalcSha256Digest(nullptr, 0, asn1Data, asn1Data);
+        EXPECT_EQ(ret, -1);
+
+        std::string stringResult = GetStringFromX509Name(nullptr);
+        EXPECT_EQ(stringResult, "");
+        std::string stringResult = GetX509CertSubjectName(nullptr);
+        EXPECT_EQ(stringResult, "");
+        std::string stringResult = GetX509CertSubjectName(cert);
+        EXPECT_EQ(stringResult, "");
+        std::string stringResult = GetX509CertIssuerName(nullptr);
+        EXPECT_EQ(stringResult, "");
+        std::string stringResult = GetX509CertIssuerName(cert);
+        EXPECT_EQ(stringResult, "");
+        return 0;
     }
 };
+
+HWTEST_F(PackageVerifyTest, TestOpensslUtilFailed, TestSize.Level1)
+{
+    PackageVerifyTest test;
+    EXPECT_EQ(0, test.TestOpensslUtilFailed());
+}
 
 HWTEST_F(PackageVerifyTest, TestCertVerifyFailed, TestSize.Level1)
 {
