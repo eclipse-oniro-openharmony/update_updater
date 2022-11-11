@@ -99,7 +99,7 @@ public:
         SingleCertHelper singleCert;
         int32_t ret = singleCert.CertChainCheck(nullptr, nullptr);
         EXPECT_EQ(ret, -1);
-        int32_t ret = singleCert.CertChainCheck(nullptr, rcert);
+        ret = singleCert.CertChainCheck(nullptr, rcert);
         EXPECT_EQ(ret, -1);
 
         ret = CertVerify::GetInstance().CheckCertChain(nullptr, nullptr);
@@ -114,7 +114,7 @@ public:
 
     int TestOpensslUtilFailed()
     {
-        std::vector<uint8_t> &asn1Data;
+        std::vector<uint8_t> asn1Data;
         int32_t ret = GetASN1OctetStringData(nullptr, asn1Data);
         EXPECT_EQ(ret, -1);
 
@@ -144,13 +144,13 @@ public:
 
         std::string stringResult = GetStringFromX509Name(nullptr);
         EXPECT_EQ(stringResult, "");
-        std::string stringResult = GetX509CertSubjectName(nullptr);
+        stringResult = GetX509CertSubjectName(nullptr);
         EXPECT_EQ(stringResult, "");
-        std::string stringResult = GetX509CertSubjectName(cert);
+        stringResult = GetX509CertSubjectName(cert);
         EXPECT_EQ(stringResult, "");
-        std::string stringResult = GetX509CertIssuerName(nullptr);
+        stringResult = GetX509CertIssuerName(nullptr);
         EXPECT_EQ(stringResult, "");
-        std::string stringResult = GetX509CertIssuerName(cert);
+        stringResult = GetX509CertIssuerName(cert);
         EXPECT_EQ(stringResult, "");
         return 0;
     }
