@@ -27,6 +27,9 @@
 
 #include "package.h"
 #include "cert_verify.h"
+#include "openssl_util.h"
+#include "pkg_verify_util.h"
+#include "zip_pkg_parse.h"
 #include "pkcs7_signed_data.h"
 
 using namespace std;
@@ -85,7 +88,85 @@ public:
         EXPECT_EQ(ret, PKG_SUCCESS);
         return 0;
     }
+
+    int TestCertVerifyFailed()
+    {
+        BIO *certbio = BIO_new_file(GetTestPrivateKeyName(0).c_str(), "r");
+        X509 *rcert = PEM_read_bio_X509(certbio, nullptr, nullptr, nullptr);
+        if (certbio != nullptr) {
+            BIO_free(certbio);
+        }
+        SingleCertHelper singleCert;
+        int32_t ret = singleCert.CertChainCheck(nullptr, nullptr);
+        EXPECT_EQ(ret, -1);
+        ret = singleCert.CertChainCheck(nullptr, rcert);
+        EXPECT_EQ(ret, -1);
+
+        ret = CertVerify::GetInstance().CheckCertChain(nullptr, nullptr);
+        EXPECT_EQ(ret, -1);
+
+        bool result = VerifyX509CertByIssuerCert(nullptr, nullptr);
+        EXPECT_EQ(result, false);
+        result = VerifyX509CertByIssuerCert(rcert, rcert);
+        EXPECT_EQ(result, false);
+        return 0;
+    }
+
+    int TestOpensslUtilFailed()
+    {
+        std::vector<uint8_t> asn1Data;
+        int32_t ret = GetASN1OctetStringData(nullptr, asn1Data);
+        EXPECT_EQ(ret, -1);
+
+        int32_t algoNid {};
+        ret = GetX509AlgorithmNid(nullptr, algoNid);
+        EXPECT_EQ(ret, -1);
+
+        X509 *result = GetX509CertFromPemString(" ");
+        EXPECT_EQ(result, nullptr);
+        result = GetX509CertFromPemFile("invalid_file");
+        EXPECT_EQ(result, nullptr);
+
+        BIO *certbio = BIO_new_file(GetTestPrivateKeyName(0).c_str(), "r");
+        X509 *cert = PEM_read_bio_X509(certbio, nullptr, nullptr, nullptr);
+        if (certbio != nullptr) {
+            BIO_free(certbio);
+        }
+        bool boolResult = VerifyX509CertByIssuerCert(nullptr, nullptr);
+        EXPECT_EQ(boolResult, false);
+        boolResult = VerifyX509CertByIssuerCert(cert, cert);
+        EXPECT_EQ(boolResult, false);
+
+        ret = VerifyDigestByPubKey(nullptr, 0, asn1Data, asn1Data);
+        EXPECT_EQ(ret, -1);
+        ret = CalcSha256Digest(nullptr, 0, asn1Data);
+        EXPECT_EQ(ret, -1);
+
+        std::string stringResult = GetStringFromX509Name(nullptr);
+        EXPECT_EQ(stringResult, "");
+        stringResult = GetX509CertSubjectName(nullptr);
+        EXPECT_EQ(stringResult, "");
+        stringResult = GetX509CertSubjectName(cert);
+        EXPECT_EQ(stringResult, "");
+        stringResult = GetX509CertIssuerName(nullptr);
+        EXPECT_EQ(stringResult, "");
+        stringResult = GetX509CertIssuerName(cert);
+        EXPECT_EQ(stringResult, "");
+        return 0;
+    }
 };
+
+HWTEST_F(PackageVerifyTest, TestOpensslUtilFailed, TestSize.Level1)
+{
+    PackageVerifyTest test;
+    EXPECT_EQ(0, test.TestOpensslUtilFailed());
+}
+
+HWTEST_F(PackageVerifyTest, TestCertVerifyFailed, TestSize.Level1)
+{
+    PackageVerifyTest test;
+    EXPECT_EQ(0, test.TestCertVerifyFailed());
+}
 
 HWTEST_F(PackageVerifyTest, TestExtraPackageDir, TestSize.Level1)
 {
