@@ -40,6 +40,16 @@ public:
     {
         return IsPtableChanged(devicePtnInfo, pkgPtnInfo);
     }
+
+    bool TestInitPtableManager()
+    {
+        return InitPtableManager();
+    }
+
+    void TestSetDeviceStorageType()
+    {
+        SetDeviceStorageType();
+    }
 };
 
 class UTestPtableManager : public ::testing::Test {
@@ -102,6 +112,18 @@ public:
         ret = context.TestIsPtableChanged(devicePtnInfo, pkgPtnInfo);
         ASSERT_EQ(ret, true);
     }
+
+    void TestInitPtableManagerAndSetDeviceStorageType()
+    {
+        PtableManagerTest context {};
+        bool ret = context.TestInitPtableManager();
+        ASSERT_EQ(ret, false);
+        context.TestSetDeviceStorageType();
+        ASSERT_EQ(context.storage_, PtableManagerTest::StorageType::STORAGE_UFS);
+        context.storage_ = PtableManagerTest::StorageType::STORAGE_EMMC;
+        context.TestSetDeviceStorageType();
+        ASSERT_EQ(context.storage_, PtableManagerTest::StorageType::STORAGE_EMMC);
+    }
 protected:
     void SetUp() {}
     void TearDown() {}
@@ -116,5 +138,10 @@ HWTEST_F(UTestPtableManager, TestGetPartitionInfoIndexByName, TestSize.Level1)
 HWTEST_F(UTestPtableManager, TestIsPtableChanged, TestSize.Level1)
 {
     UTestPtableManager {}.TestIsPtableChanged();
+}
+
+HWTEST_F(UTestPtableManager, TestInitPtableManagerAndSetDeviceStorageType, TestSize.Level1)
+{
+    UTestPtableManager {}.TestInitPtableManagerAndSetDeviceStorageType();
 }
 }
