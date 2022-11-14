@@ -156,28 +156,32 @@ int UpdatePreProcess(PkgManager::PkgManagerPtr pkgManager, const std::string &pa
     return ret;
 }
 
-UpdaterStatus IsSpaceCapacitySufficient(const std::string &packagePath)
+UpdaterStatus IsSpaceCapacitySufficient(const std::vector<std::string> &packagePath)
 {
-    PkgManager::PkgManagerPtr pkgManager = Hpackage::PkgManager::CreatePackageInstance();
-    if (pkgManager == nullptr) {
-        LOG(ERROR) << "pkgManager is nullptr";
-        return UPDATE_CORRUPT;
-    }
-    std::vector<std::string> fileIds;
-    int ret = pkgManager->LoadPackageWithoutUnPack(packagePath, fileIds);
-    if (ret != PKG_SUCCESS) {
-        LOG(ERROR) << "LoadPackageWithoutUnPack failed";
-        PkgManager::ReleasePackageInstance(pkgManager);
-        return UPDATE_CORRUPT;
-    }
+    uint64_t totalPkgSize = 0;
+    for (auto path : packagePath) {
+        PkgManager::PkgManagerPtr pkgManager = Hpackage::PkgManager::CreatePackageInstance();
+        if (pkgManager == nullptr) {
+            LOG(ERROR) << "pkgManager is nullptr";
+            return UPDATE_CORRUPT;
+        }
+        std::vector<std::string> fileIds;
+        int ret = pkgManager->LoadPackageWithoutUnPack(path, fileIds);
+        if (ret != PKG_SUCCESS) {
+            LOG(ERROR) << "LoadPackageWithoutUnPack failed";
+            PkgManager::ReleasePackageInstance(pkgManager);
+            return UPDATE_CORRUPT;
+        }
 
-    const FileInfo *info = pkgManager->GetFileInfo("update.bin");
-    if (info == nullptr) {
-        LOG(ERROR) << "update.bin is not exist";
+        const FileInfo *info = pkgManager->GetFileInfo("update.bin");
+        if (info == nullptr) {
+            LOG(ERROR) << "update.bin is not exist";
+            PkgManager::ReleasePackageInstance(pkgManager);
+            return UPDATE_CORRUPT;
+        }
         PkgManager::ReleasePackageInstance(pkgManager);
-        return UPDATE_CORRUPT;
+        totalPkgSize += static_cast<uint64_t>(info->unpackedSize + MAX_LOG_SPACE);
     }
-    PkgManager::ReleasePackageInstance(pkgManager);
 
     struct statvfs64 updaterVfs;
     if (access("/sdcard/updater", 0) == 0) {
@@ -192,10 +196,7 @@ UpdaterStatus IsSpaceCapacitySufficient(const std::string &packagePath)
         }
     }
 
-    auto freeSpaceSize = static_cast<uint64_t>(updaterVfs.f_bfree);
-    auto blockSize = static_cast<uint64_t>(updaterVfs.f_bsize);
-    uint64_t totalFreeSize = freeSpaceSize * blockSize;
-    if (totalFreeSize <= static_cast<uint64_t>(info->unpackedSize + MAX_LOG_SPACE)) {
+    if (static_cast<uint64_t>(updaterVfs.f_bfree) * static_cast<uint64_t>(updaterVfs.f_bsize) <= totalPkgSize) {
         LOG(ERROR) << "Can not update, free space is not enough";
         UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_SPACE_NOTENOUGH), true);
         UPDATER_UI_INSTANCE.Sleep(UI_SHOW_DURATION);
@@ -248,35 +249,12 @@ bool PtableProcess(PkgManager::PkgManagerPtr pkgManager, PackageUpdateMode updat
 }
 #endif
 
-void GetUpdaterPackagePath(std::vector<std::string> &args)
-{
-    UpdateMessage boot {};
-    bool readMiscResult = ReadUpdaterMiscMsg(boot);
-    if (!readMiscResult) {
-        LOG(ERROR) << "read misc failed";
-        return;
-    }
-    std::vector<std::string> miscInfo = SplitString(boot.update, "\n");
-    if (miscInfo.size() < 2) { // 2 : the message before path
-        LOG(ERROR) << "SplitString update failed";
-        return;
-    }
-    std::vector<std::string> allPkgPath = SplitString(miscInfo[1], ", =");
-    if (allPkgPath.size() < 1) {
-        LOG(ERROR) << "SplitString miscInfo failed";
-        return;
-    }
-    for (int32_t i = 1; i < allPkgPath.size(); i++) {
-        args.push_back(allPkgPath[i]);
-    }
-}
-
 UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, UpdaterParams &upParams,
     PackageUpdateMode updateMode)
 {
     UPDATER_INIT_RECORD;
     UPDATER_UI_INSTANCE.ShowProgressPage();
-    UPDATER_UI_INSTANCE.ShowProgressPage(upParams.initialProgress * FULL_PERCENT_PROGRESS);
+    UPDATER_UI_INSTANCE.ShowProgress(upParams.initialProgress * FULL_PERCENT_PROGRESS);
     UPDATER_ERROR_CHECK(pkgManager != nullptr, "Fail to GetPackageInstance", UPDATER_LAST_WORD(UPDATE_CORRUPT);
         return UPDATE_CORRUPT);
     UPDATER_CHECK_ONLY_RETURN(SetupPartitions(updateMode) == 0,
@@ -287,38 +265,30 @@ UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, Upda
     LOG(INFO) << "Verify package...";
     UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_VERIFYPKG));
 
-    UPDATER_ERROR_CHECK(access(packagePath.c_str(), 0) == 0, "package is not exist",
+    UPDATER_ERROR_CHECK(access(upParams.updatePackage[upParams.pkgLocation].c_str(), 0) == 0, "package is not exist",
         UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_NOPKG), true);
         UPDATER_LAST_WORD(UPDATE_ERROR);
         return UPDATE_ERROR);
 
-    int32_t verifyret = OtaUpdatePreCheck(pkgManager, packagePath);
+    int32_t verifyret = OtaUpdatePreCheck(pkgManager, upParams.updatePackage[upParams.pkgLocation]);
     UPDATER_ERROR_CHECK(verifyret == PKG_SUCCESS, "package verify failed",
         UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_VERIFYPKGFAIL), true);
         UPDATER_LAST_WORD(UPDATE_CORRUPT);
         return UPDATE_CORRUPT);
 
-    if (retryCount > 0) {
-        LOG(INFO) << "Retry for " << retryCount << " time(s)";
+    if (upParams.retryCount > 0) {
+        LOG(INFO) << "Retry for " << upParams.retryCount << " time(s)";
     } else {
-        UpdaterStatus ret = IsSpaceCapacitySufficient(packagePath);
-        // Only handle UPATE_ERROR and UPDATE_SUCCESS here.
-        // If it returns UPDATE_CORRUPT, which means something wrong with package manager.
-        // Let package verify handle this.
-        if (ret == UPDATE_ERROR) {
-            return ret;
-        } else if (ret == UPDATE_SUCCESS) {
-            pkgManager = PkgManager::GetPackageInstance();
-        }
+        pkgManager = PkgManager::GetPackageInstance();
     }
 
-    verifyret = GetUpdatePackageInfo(pkgManager, packagePath);
+    verifyret = GetUpdatePackageInfo(pkgManager, upParams.updatePackage[upParams.pkgLocation]);
     ProgressSmoothHandler(static_cast<int>(upParams.initialProgress * FULL_PERCENT_PROGRESS + 5)); // 5 : verify
     UPDATER_ERROR_CHECK(verifyret == PKG_SUCCESS, "Verify package Fail...",
         UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_VERIFYFAIL), true);
         return UPDATE_CORRUPT);
     LOG(INFO) << "Package verified. start to install package...";
-    int32_t versionRet = UpdatePreProcess(pkgManager, packagePath);
+    int32_t versionRet = UpdatePreProcess(pkgManager, upParams.updatePackage[upParams.pkgLocation]);
     UPDATER_ERROR_CHECK(versionRet == PKG_SUCCESS, "Version Check Fail...", return UPDATE_CORRUPT);
 
 #ifdef UPDATER_USE_PTABLE
@@ -329,7 +299,7 @@ UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, Upda
 #endif
 
     int maxTemperature;
-    UpdaterStatus updateRet = StartUpdaterProc(pkgManager, packagePath, retryCount, maxTemperature);
+    UpdaterStatus updateRet = StartUpdaterProc(pkgManager, upParams, maxTemperature);
     if (updateRet != UPDATE_SUCCESS) {
         UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_INSTALL_FAIL));
         LOG(ERROR) << "Install package failed.";
@@ -339,8 +309,6 @@ UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, Upda
 
 namespace {
 #ifdef UPDATER_UI_SUPPORT
-float 
-
 void SetProgress(const std::vector<std::string> &output, UpdaterParams &upParams)
 {
     if (output.size() < DEFAULT_PROCESS_NUM) {
@@ -371,8 +339,7 @@ void SetProgress(const std::vector<std::string> &output, UpdaterParams &upParams
 }
 #endif
 
-void HandleChildOutput(const std::string &buffer, int32_t bufferLen, bool &retryUpdate,
-    UpdaterParams &upParams)
+void HandleChildOutput(const std::string &buffer, int32_t bufferLen, bool &retryUpdate, UpdaterParams &upParams)
 {
     if (bufferLen == 0) {
         return;
@@ -448,7 +415,7 @@ UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, UpdaterPara
         close(pipeRead);   // close read endpoint
         std::string fullPath = GetWorkPath() + std::string(UPDATER_BINARY);
 #ifdef UPDATER_UT
-        if (upParams.updatePackage.find("updater_binary_abnormal") != std::string::npos) {
+        if (upParams.updatePackage[upParams.pkgLocation].find("updater_binary_abnormal") != std::string::npos) {
             fullPath = "/system/bin/updater_binary_abnormal";
         } else {
             fullPath = "/system/bin/test_update_binary";
@@ -476,9 +443,11 @@ UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, UpdaterPara
             }
         }
         if (upParams.retryCount > 0) {
-            execl(fullPath.c_str(), upParams.updatePackage.c_str(), std::to_string(pipeWrite).c_str(), "retry", nullptr);
+            execl(fullPath.c_str(), upParams.updatePackage[upParams.pkgLocation].c_str(),
+                std::to_string(pipeWrite).c_str(), "retry", nullptr);
         } else {
-            execl(fullPath.c_str(), upParams.updatePackage.c_str(), std::to_string(pipeWrite).c_str(), nullptr);
+            execl(fullPath.c_str(), upParams.updatePackage[upParams.pkgLocation].c_str(),
+                std::to_string(pipeWrite).c_str(), nullptr);
         }
         LOG(INFO) << "Execute updater binary failed";
         UPDATER_LAST_WORD(UPDATE_ERROR);

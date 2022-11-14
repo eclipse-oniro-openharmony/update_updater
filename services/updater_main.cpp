@@ -92,21 +92,20 @@ static void SetRetryCountToMisc(int retryCount, const std::vector<std::string> a
     }
 }
 
-static void GetAllPkgPeogress(UpdaterParams &upParam, std::string allPkgPath)
+static void GetAllPkgProgress(UpdaterParams &upParams, std::string nowPkgLocation)
 {
-    std::vector<std::string> updatePackageAllPath = SplitString(allPkgPath, ", ");
     size_t allPkgSize = 0;
     char realPath[PATH_MAX + 1] = {0};
     size_t nowPosition = 0;
     size_t pkgSize = 0;
-    for(auto path : updatePackageAllPath) {
-        if (realpath(path.c_str(), realPath) == nullptr) {
+    for(auto i = 0; i < upParams.updatePackage.size(); i++) {
+        if (realpath(upParams.updatePackage[i].c_str(), realPath) == nullptr) {
             continue;
         }
         std::ifstream fin(realPath);
         if (fin.is_open()) {
             fin.seekg(0, std::ios::end);
-            if (path == upParam.updatePackage) {
+            if (upParams.updatePackage[i] == nowPkgLocation) {
                 pkgSize = fin.tellg();
             }
             if (pkgSize == 0) {
@@ -119,8 +118,8 @@ static void GetAllPkgPeogress(UpdaterParams &upParam, std::string allPkgPath)
         LOG(ERROR) << "All pkg size is 0";
         return;
     }
-    upParam.initialProgress = static_cast<float>(nowPosition) / static_cast<float>(allPkgSize);
-    upParam.currentPercentage = static_cast<float>(pkgSize) / static_cast<float>(allPkgSize);
+    upParams.initialProgress = static_cast<float>(nowPosition) / static_cast<float>(allPkgSize);
+    upParams.currentPercentage = static_cast<float>(pkgSize) / static_cast<float>(allPkgSize);
 }
 
 static int DoFactoryReset(FactoryResetMode mode, const std::string &path)
@@ -176,13 +175,13 @@ UpdaterStatus UpdaterFromSdcard()
         LOG(ERROR) << "pkgManager is nullptr";
         return UPDATE_ERROR;
     }
-    UpdaterParams upParam {
-        false, false, 0, 0, 0, SDCARD_CARD_PKG_PATH
-    }
+    UpdaterParams upParams {
+        false, false, 0, 0, 0, 0, {SDCARD_CARD_PKG_PATH}
+    };
     STAGE(UPDATE_STAGE_BEGIN) << "UpdaterFromSdcard";
     LOG(INFO) << "UpdaterFromSdcard start, sdcard updaterPath : " << SDCARD_CARD_PKG_PATH;
     UPDATER_UI_INSTANCE.ShowLog(TR(LOG_SDCARD_NOTMOVE));
-    UpdaterStatus updateRet = DoInstallUpdaterPackage(pkgManager, upParam, SDCARD_UPDATE);
+    UpdaterStatus updateRet = DoInstallUpdaterPackage(pkgManager, upParams, SDCARD_UPDATE);
     if (updateRet != UPDATE_SUCCESS) {
         UPDATER_UI_INSTANCE.Sleep(UI_SHOW_DURATION);
         UPDATER_UI_INSTANCE.ShowLog(TR(LOG_SDCARD_FAIL));
@@ -190,6 +189,7 @@ UpdaterStatus UpdaterFromSdcard()
     } else {
         LOG(INFO) << "Update from SD Card successfully!";
         STAGE(UPDATE_STAGE_SUCCESS) << "UpdaterFromSdcard success";
+    }
     PkgManager::ReleasePackageInstance(pkgManager);
     return updateRet;
 }
@@ -288,28 +288,29 @@ static UpdaterStatus InstallUpdaterPackage(UpdaterParams &upParams, const std::v
     return status;
 }
 
-
 static UpdaterStatus InstallUpdaterPackageSupport(UpdaterParams &upParams, const std::vector<std::string> &args,
     PkgManager::PkgManagerPtr manager)
 {
     UpdaterStatus status = UPDATE_UNKNOWN;
-    UpdaterParams upParam {
-        upParams.factoryWipeData, upParams.userWipeData, upParams.retryCount, 0, 0, ""
-    };
     if (SetupPartitions() != 0) {
         UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_SETPART_FAIL), true);
         return UPDATE_ERROR;
     }
-    std::vector<std::string> updatePackageAllPath = SplitString(upParams.updatePackage, ", ");
-
+    status = IsSpaceCapacitySufficient(upParams.updatePackage);
+    // Only handle UPATE_ERROR and UPDATE_SUCCESS here.
+    // If it returns UPDATE_CORRUPT, which means something wrong with package manager.
+    // Let package verify handle this.
+    if (status == UPDATE_ERROR) {
+        return status;
+    }
     UPDATER_UI_INSTANCE.ShowProgress(0);
-    for (auto path : updatePackageAllPath) {
-        upParam.updatePackage = path;
-        GetAllPkgPeogress(upParam, upParams.updatePackage);
-        status = InstallUpdaterPackage(upParam, args, manager);
-        ProgressSmoothHandler(static_cast<int>((upParam.initialProgress + upParam.currentPercentage) * 100));
+    for (; upParams.pkgLocation < upParams.updatePackage.size(); upParams.pkgLocation++) {
+        GetAllPkgProgress(upParams, upParams.updatePackage[upParams.pkgLocation]);
+        status = InstallUpdaterPackage(upParams, args, manager);
+        ProgressSmoothHandler(static_cast<int>((upParams.initialProgress +
+            upParams.currentPercentage) * FULL_PERCENT_PROGRESS));
         if (status != UPDATE_SUCCESS) {
-            LOG(ERROR) << "InstallUpdaterPackage failed! The package is " << updatePackageAllPath[i];
+            LOG(ERROR) << "InstallUpdaterPackage failed! The package is " << upParams.updatePackage[upParams.pkgLocation];
             return status;
         }
     }
@@ -321,7 +322,7 @@ static UpdaterStatus StartUpdaterEntry(PkgManager::PkgManagerPtr manager,
     const std::vector<std::string> &args, UpdaterParams &upParams)
 {
     UpdaterStatus status = UPDATE_UNKNOWN;
-    if (upParams.updatePackage != "") {
+    if (upParams.updatePackage.size() > 0) {
         UPDATER_UI_INSTANCE.ShowProgressPage();
         status = InstallUpdaterPackageSupport(upParams, args, manager);
         if (status != UPDATE_SUCCESS) {
@@ -367,7 +368,7 @@ static UpdaterStatus StartUpdater(PkgManager::PkgManagerPtr manager, const std::
     char **argv, PackageUpdateMode &mode)
 {
     UpdaterParams upParams {
-        false, false, 0, ""
+        false, false, 0, 0, 0, 0
     };
     std::vector<char *> extractedArgs;
     int rc;
@@ -383,7 +384,7 @@ static UpdaterStatus StartUpdater(PkgManager::PkgManagerPtr manager, const std::
             case 0: {
                 std::string option = OPTIONS[optionIndex].name;
                 if (option == "update_package") {
-                    upParams.updatePackage = optarg;
+                    upParams.updatePackage.push_back(optarg);
                     (void)UPDATER_UI_INSTANCE.SetMode(UpdaterMode::OTA);
                     mode = HOTA_UPDATE;
                 } else if (option == "retry_count") {

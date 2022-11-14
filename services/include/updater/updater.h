@@ -39,12 +39,13 @@ enum PackageUpdateMode {
 };
 
 struct UpdaterParams {
-    bool factoryWipeData;
-    bool userWipeData;
-    int retryCount;
-    float initialProgress;
-    float currentPercentage;
-    std::string updatePackage;
+    bool factoryWipeData {};
+    bool userWipeData {};
+    int retryCount {};
+    float initialProgress {};
+    float currentPercentage {};
+    int pkgLocation {};
+    std::vector<std::string> updatePackage {};
 };
 
 void ProgressSmoothHandler(int progress);
@@ -64,7 +65,7 @@ bool PtableProcess(Hpackage::PkgManager::PkgManagerPtr pkgManager, PackageUpdate
 
 int ExecUpdate(Hpackage::PkgManager::PkgManagerPtr pkgManager, int retry, PostMessageFunction postMessage);
 
-UpdaterStatus IsSpaceCapacitySufficient(const std::string &packagePath);
+UpdaterStatus IsSpaceCapacitySufficient(const std::vector<std::string> &packagePath);
 
 bool IsSDCardExist(const std::string &sdcard_path);
 
