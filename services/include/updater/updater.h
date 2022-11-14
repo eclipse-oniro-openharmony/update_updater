@@ -44,7 +44,8 @@ struct UpdaterParams {
     int retryCount;
     float initialProgress;
     float currentPercentage;
-    std::string updatePackage;
+    int pkgLocation;
+    std::vector<std::string> updatePackage;
 };
 
 void ProgressSmoothHandler(int progress);
