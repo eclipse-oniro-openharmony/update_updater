@@ -265,9 +265,7 @@ int32_t CompressedImageDiff::MakePatch(const std::string &patchName)
     }
     BlockBuffer newBuffer;
     BlockBuffer oldBuffer;
-    int32_t ret = newParser_->GetPkgBuffer(newBuffer);
-    int32_t ret1 = oldParser_->GetPkgBuffer(oldBuffer);
-    if (ret != 0 || ret1 != 0) {
+    if (newParser_->GetPkgBuffer(newBuffer) != 0 || oldParser_->GetPkgBuffer(oldBuffer) != 0) {
         PATCH_LOGE("Failed to get pkgbuffer");
         return -1;
     }
@@ -275,8 +273,10 @@ int32_t CompressedImageDiff::MakePatch(const std::string &patchName)
     if (limit_ != 0 && newBuffer.length >= limit_) {
         PatchBuffer oldInfo = { oldBuffer.buffer, 0, oldBuffer.length };
         PatchBuffer newInfo = { newBuffer.buffer, 0, newBuffer.length };
-        ret = SplitImage(oldInfo, newInfo);
-        PATCH_CHECK(ret == 0, return -1, "Failed to split imgage");
+        if (SplitImage(oldInfo, newInfo) != 0) {
+            PATCH_LOGE("Failed to split imgage");
+            return -1;
+        }
         return DiffImage(patchName);
     }
 
@@ -285,8 +285,10 @@ int32_t CompressedImageDiff::MakePatch(const std::string &patchName)
     for (size_t i = 0; i < newParser_->GetFileIds().size(); i++) {
         PATCH_LOGI("CompressedImageDiff::DiffFile %s oldOffset:%zu newOffset:%zu",
             newParser_->GetFileIds()[i].c_str(), oldOffset, newOffset);
-        ret = DiffFile(newParser_->GetFileIds()[i], oldOffset, newOffset);
-        PATCH_CHECK(ret == 0, break, "Failed to generate patch");
+        if (DiffFile(newParser_->GetFileIds()[i], oldOffset, newOffset) != 0) {
+            PATCH_LOGE("Failed to generate patch");
+            break;
+        }
     }
     if (ret != 0) {
         updateBlocks_.clear();

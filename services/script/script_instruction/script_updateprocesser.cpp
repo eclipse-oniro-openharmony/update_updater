@@ -25,7 +25,10 @@ int32_t UScriptInstructionSetProcess::Execute(Uscript::UScriptEnv &env, Uscript:
 {
     float setProcess = 0.0f;
     int32_t ret = context.GetParam(0, setProcess);
-    USCRIPT_CHECK(ret == USCRIPT_SUCCESS, return ret, "Failed to get param");
+    if (ret != USCRIPT_SUCCESS) {
+        USCRIPT_LOGE("Failed to get param");
+        return ret;
+    }
     std::string content;
     std::stringstream sstream;
     sstream << setProcess;
@@ -39,9 +42,15 @@ int32_t UScriptInstructionShowProcess::Execute(Uscript::UScriptEnv &env, Uscript
     float startProcess = 0.0f;
     float endProcess = 0.0f;
     int32_t ret = context.GetParam(0, startProcess);
-    USCRIPT_CHECK(ret == USCRIPT_SUCCESS, return ret, "Failed to get param");
+    if (ret != USCRIPT_SUCCESS) {
+        USCRIPT_LOGE("Failed to get param");
+        return ret;
+    }
     ret = context.GetParam(1, endProcess);
-    USCRIPT_CHECK(ret == USCRIPT_SUCCESS, return ret, "Failed to get param");
+    if (ret != USCRIPT_SUCCESS) {
+        USCRIPT_LOGE("Failed to get param");
+        return ret;
+    }
     std::string content;
     std::stringstream sstream;
     sstream << startProcess;
@@ -56,7 +65,10 @@ int32_t UScriptInstructionUiPrint::Execute(Uscript::UScriptEnv &env, Uscript::US
 {
     std::string message;
     int32_t ret = context.GetParam(0, message);
-    USCRIPT_CHECK(ret == USCRIPT_SUCCESS, return ret, "Failed to get param");
+    if (ret != USCRIPT_SUCCESS) {
+        USCRIPT_LOGE("Failed to get param");
+        return ret;
+    }
     env.PostMessage("ui_log", message);
     return USCRIPT_SUCCESS;
 }

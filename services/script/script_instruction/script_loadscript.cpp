@@ -24,14 +24,23 @@ namespace BasicInstruction {
 int32_t ScriptLoadScript::Execute(UScriptEnv &env, UScriptContext &context)
 {
     ScriptInstructionHelper* helper = ScriptInstructionHelper::GetBasicInstructionHelper();
-    USCRIPT_CHECK(helper != nullptr, return USCRIPT_INVALID_PARAM, "Failed to get instruction helper");
+    if (helper == nullptr) {
+        USCRIPT_LOGE("Failed to get instruction helper");
+        return USCRIPT_INVALID_PARAM;
+    }
 
     std::string scriptName;
     int32_t priority = 0;
     int32_t ret = context.GetParam(0, scriptName);
-    USCRIPT_CHECK(ret == USCRIPT_SUCCESS, return ret, "Failed to get param");
+    if (ret != USCRIPT_SUCCESS) {
+        USCRIPT_LOGE("Failed to get param");
+        return ret;
+    }
     ret = context.GetParam(1, priority);
-    USCRIPT_CHECK(ret == USCRIPT_SUCCESS, return ret, "Failed to get param");
+    if (ret != USCRIPT_SUCCESS) {
+        USCRIPT_LOGE("Failed to get param");
+        return ret;
+    }
     USCRIPT_LOGI("ScriptLoadScript %s priority:%d", scriptName.c_str(), priority);
     return helper->AddScript(scriptName, priority);
 }

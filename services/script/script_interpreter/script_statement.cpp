@@ -64,7 +64,10 @@ void UScriptStatementResult::UpdateStatementResult(UScriptValuePtr value)
 std::string UScriptStatementResult::ScriptToString(UScriptStatementResult *result)
 {
     std::string str;
-    USCRIPT_CHECK(result != nullptr, return str, "null value");
+    if (result == nullptr) {
+        USCRIPT_LOGE("null value");
+        return str;
+    }
 
     str.append("type: " + to_string(result->GetResultType()));
     if (result->GetResultType() == UScriptStatementResult::STATEMENT_RESULT_TYPE_ERROR) {
@@ -93,7 +96,10 @@ UScriptStatement* UScriptStatement::CreateIfStatement(UScriptExpression *conditi
     UScriptStatement *nextIfState)
 {
     auto ifStatement = new(std::nothrow) UScriptIfStatement(condition, list1);
-    USCRIPT_CHECK(ifStatement != nullptr, return nullptr, "Create if statement failed ");
+    if (ifStatement == nullptr) {
+        USCRIPT_LOGE("Create if statement failed ");
+        return nullptr;
+    }
     ifStatement->AddFalseStatementList(list2);
     ifStatement->AddNextStatement(reinterpret_cast<UScriptIfStatement*>(nextIfState));
     return ifStatement;
@@ -117,7 +123,10 @@ UScriptStatement* UScriptStatement::CreateWhileStatement(UScriptExpression *cond
 UScriptStatementList* UScriptStatementList::CreateInstance(UScriptStatement *statement)
 {
     auto list = new(std::nothrow) UScriptStatementList();
-    USCRIPT_CHECK(list != nullptr, return nullptr, "Failed to create statement list ");
+    if (list == nullptr) {
+        USCRIPT_LOGE("Failed to create statement list ");
+        return nullptr;
+    }
     list->AddScriptStatement(statement);
     return list;
 }
@@ -334,7 +343,10 @@ UScriptReturnStatement::~UScriptReturnStatement()
 UScriptReturnStatement* UScriptReturnStatement::CreateStatement(ScriptParams *params)
 {
     auto statement = new(std::nothrow) UScriptReturnStatement();
-    USCRIPT_CHECK(statement != nullptr, return nullptr, "Create statement failed");
+    if (statement == nullptr) {
+        USCRIPT_LOGE("Create statement failed");
+        return nullptr;
+    }
     if (params != nullptr) {
         statement->AddParams(params);
     }
@@ -344,10 +356,16 @@ UScriptReturnStatement* UScriptReturnStatement::CreateStatement(ScriptParams *pa
 UScriptStatementResult UScriptReturnStatement::Execute(ScriptInterpreter &interpreter, UScriptContextPtr context)
 {
     UScriptStatementResult result(UScriptStatementResult::STATEMENT_RESULT_TYPE_RTN, nullptr);
-    USCRIPT_CHECK(params_ != nullptr, return result, "Invalid parm");
+    if (params_ == nullptr) {
+        USCRIPT_LOGE("Invalid parm");
+        return result;
+    }
 
     std::shared_ptr<ReturnValue> retValue = std::make_shared<ReturnValue>();
-    USCRIPT_CHECK(retValue != nullptr, return result, "Create ret value failed");
+    if (retValue == nullptr) {
+        USCRIPT_LOGE("Create ret value failed");
+        return result;
+    }
     for (auto id : params_->GetParams()) {
         UScriptValuePtr var = id->Execute(interpreter, context);
         INTERPRETER_LOGI(interpreter, context, "params result: %s", UScriptValue::ScriptToString(var).c_str());

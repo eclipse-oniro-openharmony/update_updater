@@ -22,7 +22,10 @@ static std::mutex g_initMutex;
 
 ThreadPool* ThreadPool::CreateThreadPool(int number)
 {
-    USCRIPT_CHECK(number > 1, return nullptr, "Invalid number %d", number);
+    if (number <= 1) {
+        USCRIPT_LOGE("Invalid number %d", number);
+        return nullptr;
+    }
     std::lock_guard<std::mutex> lock(g_initMutex);
     if (g_threadPool != nullptr) {
         return g_threadPool;
