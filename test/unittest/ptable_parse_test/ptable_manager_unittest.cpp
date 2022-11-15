@@ -50,6 +50,11 @@ public:
     {
         SetDeviceStorageType();
     }
+    bool TestIsPartitionChanged(const std::vector<Ptable::PtnInfo> &devicePtnInfo,
+        const std::vector<Ptable::PtnInfo> &pkgPtnInfo, const std::string &partitionName)
+    {
+        return IsPartitionChanged(devicePtnInfo, pkgPtnInfo, partitionName);
+    }
 };
 
 class UTestPtableManager : public ::testing::Test {
@@ -143,6 +148,40 @@ public:
         ret = context.GetPartionInfoByName(partitionName, ptnInfo);
         ASSERT_EQ(ret, false);
     }
+
+    void TestIsPartitionChanged()
+    {
+        PtableManagerTest context {};
+        std::vector<Ptable::PtnInfo> devicePtnInfo;
+        std::vector<Ptable::PtnInfo> pkgPtnInfo;
+        std::string partitionName;
+        bool ret = context.TestIsPartitionChanged(devicePtnInfo, pkgPtnInfo, partitionName);
+        ASSERT_EQ(ret, false);
+        Ptable::PtnInfo ptnInfo = {0, 0, {0}, 0, "TestIsPartitionChangedForCheck"};
+        pkgPtnInfo.push_back(ptnInfo);
+        ret = context.TestIsPartitionChanged(devicePtnInfo, pkgPtnInfo, partitionName);
+        ASSERT_EQ(ret, true);
+        devicePtnInfo.push_back(ptnInfo);
+        ret = context.TestIsPartitionChanged(devicePtnInfo, pkgPtnInfo, partitionName);
+        ASSERT_EQ(ret, true);
+        partitionName = "TestIsPartitionChanged";
+        ret = context.TestIsPartitionChanged(devicePtnInfo, pkgPtnInfo, partitionName);
+        ASSERT_EQ(ret, true);
+        ptnInfo.dispName = "TestIsPartitionChanged";
+        devicePtnInfo.push_back(ptnInfo);
+        ret = context.TestIsPartitionChanged(devicePtnInfo, pkgPtnInfo, partitionName);
+        ASSERT_EQ(ret, true);
+        pkgPtnInfo.push_back(ptnInfo);
+        ret = context.TestIsPartitionChanged(devicePtnInfo, pkgPtnInfo, partitionName);
+        ASSERT_EQ(ret, false);
+        devicePtnInfo[1].startAddr = 1;
+        devicePtnInfo[1].partitionSize = 1;
+        ret = context.TestIsPartitionChanged(devicePtnInfo, pkgPtnInfo, partitionName);
+        ASSERT_EQ(ret, true);
+        devicePtnInfo[1].startAddr = 0;
+        ret = context.TestIsPartitionChanged(devicePtnInfo, pkgPtnInfo, partitionName);
+        ASSERT_EQ(ret, true);
+    }
 protected:
     void SetUp() {}
     void TearDown() {}
@@ -167,5 +206,10 @@ HWTEST_F(UTestPtableManager, TestInitPtableManagerAndSetDeviceStorageType, TestS
 HWTEST_F(UTestPtableManager, TestGetPartionInfoByName, TestSize.Level1)
 {
     UTestPtableManager {}.TestGetPartionInfoByName();
+}
+
+HWTEST_F(UTestPtableManager, TestIsPartitionChanged, TestSize.Level1)
+{
+    UTestPtableManager {}.TestIsPartitionChanged();
 }
 }
