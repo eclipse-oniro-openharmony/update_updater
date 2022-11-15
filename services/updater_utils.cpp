@@ -153,11 +153,17 @@ void PostUpdater(bool clearMisc)
 
     // save logs
     bool ret = CopyUpdaterLogs(TMP_LOG, updaterLogPath);
-    UPDATER_ERROR_CHECK_NOT_RETURN(ret, "Copy updater log failed!");
+    if (!ret) {
+        LOG(ERROR) << "Copy updater log failed!";
+    }
     ret = CopyUpdaterLogs(TMP_ERROR_CODE_PATH, errorCodePath);
-    UPDATER_ERROR_CHECK_NOT_RETURN(ret, "Copy error code log failed!");
+    if (!ret) {
+        LOG(ERROR) << "Copy error code log failed!";
+    }
     ret = CopyUpdaterLogs(Flashd::FLASHD_HDC_LOG_PATH, UPDATER_HDC_LOG);
-    UPDATER_ERROR_CHECK_NOT_RETURN(ret, "Copy error hdc log failed!");
+    if (!ret) {
+        LOG(ERROR) << "Copy error hdc log failed!";
+    }
 
     mode_t mode = 0640;
     chmod(updaterLogPath.c_str(), mode);
@@ -166,7 +172,9 @@ void PostUpdater(bool clearMisc)
     STAGE(UPDATE_STAGE_SUCCESS) << "PostUpdater";
     ret = CopyUpdaterLogs(TMP_STAGE_LOG, stageLogPath);
     chmod(stageLogPath.c_str(), mode);
-    UPDATER_ERROR_CHECK_NOT_RETURN(ret, "Copy stage log failed!");
+    if (!ret) {
+        LOG(ERROR) << "Copy stage log failed!";
+    }
 }
 
 std::vector<std::string> ParseParams(int argc, char **argv)

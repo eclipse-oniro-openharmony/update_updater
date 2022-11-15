@@ -28,15 +28,24 @@ static int32_t g_instanceId = 0;
 
 int32_t ScriptInterpreter::ExecuteScript(ScriptManagerImpl *manager, Hpackage::PkgManager::StreamPtr pkgStream)
 {
-    USCRIPT_CHECK(pkgStream != nullptr, UPDATER_LAST_WORD(USCRIPT_INVALID_PARAM);
-        return USCRIPT_INVALID_PARAM, "Param error");
+    if (pkgStream == nullptr) {
+        USCRIPT_LOGE("Param error");
+        UPDATER_LAST_WORD(USCRIPT_INVALID_PARAM);
+        return USCRIPT_INVALID_PARAM;
+    }
     USCRIPT_LOGI("ExecuteScript %s", pkgStream->GetFileName().c_str());
     auto inter = new ScriptInterpreter(manager);
-    USCRIPT_CHECK(inter != nullptr, UPDATER_LAST_WORD(USCRIPT_ERROR_CREATE_OBJ); return USCRIPT_ERROR_CREATE_OBJ,
-        "Fail to create ScriptInterpreter for script %s", pkgStream->GetFileName().c_str());
+    if (inter == nullptr) {
+        USCRIPT_LOGE("Fail to create ScriptInterpreter for script %s", pkgStream->GetFileName().c_str());
+        UPDATER_LAST_WORD(USCRIPT_ERROR_CREATE_OBJ);
+        return USCRIPT_ERROR_CREATE_OBJ;
+    }
     int32_t ret = inter->LoadScript(pkgStream);
-    USCRIPT_CHECK(ret == USCRIPT_SUCCESS, UPDATER_LAST_WORD(USCRIPT_ERROR_CREATE_OBJ);
-        return ret, "Fail to loadScript script %s", pkgStream->GetFileName().c_str());
+    if (ret != USCRIPT_SUCCESS) {
+        USCRIPT_LOGE("Fail to loadScript script %s", pkgStream->GetFileName().c_str());
+        UPDATER_LAST_WORD(USCRIPT_ERROR_CREATE_OBJ);
+        return ret;
+    }
     ret = inter->Execute();
     delete inter;
     inter = nullptr;
@@ -166,10 +175,16 @@ UScriptValuePtr ScriptInterpreter::ExecuteNativeFunc(UScriptContextPtr context,
     std::shared_ptr<ReturnValue> retValue = std::make_shared<ReturnValue>();
     INTERPRETER_LOGI(*this, context, "ExecuteNativeFunc::Execute %s ", name.c_str());
     UScriptInstruction* instruction = scriptManager_->FindInstruction(name);
-    USCRIPT_CHECK(instruction != nullptr, return error, "Fail to find instruction %s", name.c_str());
+    if (instruction == nullptr) {
+        USCRIPT_LOGE("Fail to find instruction %s", name.c_str());
+        return error;
+    }
 
     std::shared_ptr<UScriptInstructionContext> funcContext = std::make_shared<UScriptInstructionContext>();
-    USCRIPT_CHECK(funcContext != nullptr, return error, "Fail to create context %s", name.c_str());
+    if (funcContext == nullptr) {
+        USCRIPT_LOGE("Fail to create context %s", name.c_str());
+        return error;
+    }
     if (params == nullptr) {
         int32_t ret = instruction->Execute(*scriptManager_->GetScriptEnv(name), *funcContext.get());
         retValue->AddValues(funcContext->GetOutVar());

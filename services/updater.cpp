@@ -59,8 +59,11 @@ int32_t ExtractUpdaterBinary(PkgManager::PkgManagerPtr manager, const std::strin
     PkgManager::StreamPtr outStream = nullptr;
     int32_t ret = manager->CreatePkgStream(outStream,  GetWorkPath() + updaterBinary,
         0, PkgStream::PkgStreamType_Write);
-    UPDATER_ERROR_CHECK(ret == PKG_SUCCESS, "ExtractUpdaterBinary create stream fail",
-        UPDATER_LAST_WORD(UPDATE_CORRUPT); return UPDATE_CORRUPT);
+    if (ret != PKG_SUCCESS) {
+        LOG(ERROR) << "ExtractUpdaterBinary create stream fail";
+        UPDATER_LAST_WORD(UPDATE_CORRUPT);
+        return UPDATE_CORRUPT;
+    }
     ret = manager->ExtractFile(updaterBinary, outStream);
     manager->ClosePkgStream(outStream);
     return ret;

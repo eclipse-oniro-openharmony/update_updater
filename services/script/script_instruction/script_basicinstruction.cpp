@@ -24,7 +24,10 @@ int32_t UScriptInstructionAbort::Execute(Uscript::UScriptEnv &env, Uscript::UScr
 {
     int32_t result = 1;
     int32_t ret = context.GetParam(0, result);
-    USCRIPT_CHECK(ret == USCRIPT_SUCCESS, return ret, "Failed to get param");
+    if (ret != USCRIPT_SUCCESS) {
+        USCRIPT_LOGE("Failed to get param");
+        return ret;
+    }
     return ((result == 0) ? USCRIPT_ABOART : USCRIPT_SUCCESS);
 }
 
@@ -32,7 +35,10 @@ int32_t UScriptInstructionAssert::Execute(Uscript::UScriptEnv &env, Uscript::USc
 {
     int32_t result = 1;
     int32_t ret = context.GetParam(0, result);
-    USCRIPT_CHECK(ret == USCRIPT_SUCCESS, return ret, "Failed to get param");
+    if (ret != USCRIPT_SUCCESS) {
+        USCRIPT_LOGE("Failed to get param");
+        return ret;
+    }
     return ((result == 0) ? USCRIPT_ASSERT : USCRIPT_SUCCESS);
 }
 
@@ -40,7 +46,10 @@ int32_t UScriptInstructionSleep::Execute(Uscript::UScriptEnv &env, Uscript::UScr
 {
     int32_t seconds = 1;
     int32_t ret = context.GetParam(0, seconds);
-    USCRIPT_CHECK(ret == USCRIPT_SUCCESS, return ret, "Failed to get param");
+    if (ret != USCRIPT_SUCCESS) {
+        USCRIPT_LOGE("Failed to get param");
+        return ret;
+    }
     sleep(seconds);
     return USCRIPT_SUCCESS;
 }
@@ -50,28 +59,40 @@ int32_t UScriptInstructionConcat::Execute(Uscript::UScriptEnv &env, Uscript::USc
     int32_t ret = 0;
     std::string str;
     ret = context.GetParam(0, str);
-    USCRIPT_CHECK(ret == USCRIPT_SUCCESS, return ret, "Failed to get param");
+    if (ret != USCRIPT_SUCCESS) {
+        USCRIPT_LOGE("Failed to get param");
+        return ret;
+    }
 
     for (int32_t i = 1; i < context.GetParamCount(); i++) {
         switch (context.GetParamType(i)) {
             case UScriptContext::PARAM_TYPE_INTEGER: {
                 int32_t v;
                 ret = context.GetParam(i, v);
-                USCRIPT_CHECK(ret == USCRIPT_SUCCESS, return ret, "Failed to get param");
+                if (ret != USCRIPT_SUCCESS) {
+                    USCRIPT_LOGE("Failed to get param");
+                    return ret;
+                }
                 str.append(to_string(v));
                 break;
             }
             case UScriptContext::PARAM_TYPE_FLOAT: {
                 float v;
                 ret = context.GetParam(i, v);
-                USCRIPT_CHECK(ret == USCRIPT_SUCCESS, return ret, "Failed to get param");
+                if (ret != USCRIPT_SUCCESS) {
+                    USCRIPT_LOGE("Failed to get param");
+                    return ret;
+                }
                 str.append(to_string(v));
                 break;
             }
             case UScriptContext::PARAM_TYPE_STRING: {
                 std::string v;
                 ret = context.GetParam(i, v);
-                USCRIPT_CHECK(ret == USCRIPT_SUCCESS, return ret, "Failed to get param");
+                if (ret != USCRIPT_SUCCESS) {
+                    USCRIPT_LOGE("Failed to get param");
+                    return ret;
+                }
                 str.append(v);
                 break;
             }
@@ -88,9 +109,15 @@ int32_t UScriptInstructionIsSubString::Execute(Uscript::UScriptEnv &env, Uscript
     std::string str;
     std::string subStr;
     int32_t ret = context.GetParam(0, str);
-    USCRIPT_CHECK(ret == USCRIPT_SUCCESS, return ret, "Failed to get param");
+    if (ret != USCRIPT_SUCCESS) {
+        USCRIPT_LOGE("Failed to get param");
+        return ret;
+    }
     ret = context.GetParam(1, subStr);
-    USCRIPT_CHECK(ret == USCRIPT_SUCCESS, return ret, "Failed to get param");
+    if (ret != USCRIPT_SUCCESS) {
+        USCRIPT_LOGE("Failed to get param");
+        return ret;
+    }
     string::size_type last = str.find(subStr);
     if (last == string::npos) {
         context.PushParam(0);
@@ -107,17 +134,26 @@ int32_t UScriptInstructionStdout::Execute(Uscript::UScriptEnv &env, Uscript::USc
         if (context.GetParamType(i) == UScriptContext::PARAM_TYPE_INTEGER) {
             int32_t v;
             ret = context.GetParam(i, v);
-            USCRIPT_CHECK(ret == USCRIPT_SUCCESS, return ret, "Failed to get param");
+            if (ret != USCRIPT_SUCCESS) {
+                USCRIPT_LOGE("Failed to get param");
+                return ret;
+            }
             std::cout << v << "  ";
         } else if (context.GetParamType(i) == UScriptContext::PARAM_TYPE_FLOAT) {
             float v;
             ret = context.GetParam(i, v);
-            USCRIPT_CHECK(ret == USCRIPT_SUCCESS, return ret, "Failed to get param");
+            if (ret != USCRIPT_SUCCESS) {
+                USCRIPT_LOGE("Failed to get param");
+                return ret;
+            }
             std::cout << v << "  ";
         } else if (context.GetParamType(i) == UScriptContext::PARAM_TYPE_STRING) {
             std::string v;
             ret = context.GetParam(i, v);
-            USCRIPT_CHECK(ret == USCRIPT_SUCCESS, return ret, "Failed to get param");
+            if (ret != USCRIPT_SUCCESS) {
+                USCRIPT_LOGE("Failed to get param");
+                return ret;
+            }
             std::cout << v << "  ";
         }
     }
