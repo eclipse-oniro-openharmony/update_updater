@@ -25,11 +25,20 @@ config("utest_config") {
     "-Wno-implicit-fallthrough",
     "-Wno-unused-function",
   ]
-  cflags_cc = [ "-Wno-implicit-fallthrough" ]
+  cflags_cc = [
+    "-Wno-implicit-fallthrough",
+    "-fexceptions",
+  ]
 
   ldflags = [ "--coverage" ]
 
-  configs = [ "//build/config/compiler:exceptions" ]
+  defines = [
+    "UPDATER_UT",
+    "BUILD_OHOS",
+    "HDC_DEBUG",
+    "HDC_SUPPORT_FLASHD",
+    "HARMONY_PROJECT",
+  ]
 }
 
 ohos_unittest("updater_unittest") {
@@ -49,7 +58,6 @@ ohos_unittest("updater_unittest") {
     "misc_info_test/misc_info_unittest.cpp",
     "ptable_parse_test/ptable_manager_unittest.cpp",
     "ptable_parse_test/ptable_unittest.cpp",
-    "updater_binary/update_image_block_test.cpp",
     "updaterkits_test/updaterkits_unittest.cpp",
   ]
 
@@ -113,10 +121,6 @@ ohos_unittest("updater_unittest") {
     "//base/update/updater/services/script/script_manager/script_managerImpl.cpp",
     "//base/update/updater/services/script/script_manager/script_utils.cpp",
     "//base/update/updater/services/script/threadpool/threadpool.cpp",
-    "//base/update/updater/services/updater_binary/update_image_block.cpp",
-    "//base/update/updater/services/updater_binary/update_image_patch.cpp",
-    "//base/update/updater/services/updater_binary/update_partitions.cpp",
-    "//base/update/updater/services/updater_binary/update_processor.cpp",
     "//base/update/updater/services/updater_utils.cpp",
     "//base/update/updater/utils/utils.cpp",
   ]
@@ -142,7 +146,6 @@ ohos_unittest("updater_unittest") {
     "//base/update/updater/services/package/pkg_manager",
     "//base/update/updater/services/package/pkg_package",
     "//base/update/updater/services/package/pkg_verify",
-    "//base/update/updater/services/updater_binary",
     "//base/update/updater/services/include/fs_manager",
     "//base/update/updater/services/fs_manager",
     "//base/update/updater/services/applypatch",
@@ -210,16 +213,6 @@ ohos_unittest("updater_unittest") {
   external_deps = [
     "hiviewdfx_hilog_native:libhilog",
     "init:libbegetutil",
-  ]
-
-  cflags_cc = [ "-fexceptions" ]
-
-  defines = [
-    "UPDATER_UT",
-    "BUILD_OHOS",
-    "HDC_DEBUG",
-    "HDC_SUPPORT_FLASHD",
-    "HARMONY_PROJECT",
   ]
 
   public_configs = [ ":utest_config" ]
