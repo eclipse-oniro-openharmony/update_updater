@@ -276,8 +276,8 @@ UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, Upda
         UPDATER_LAST_WORD(UPDATE_CORRUPT);
         return UPDATE_CORRUPT);
 
-    if (upParams.upParams.retryCount > 0) {
-        LOG(INFO) << "Retry for " << upParams.upParams.retryCount << " time(s)";
+    if (upParams.retryCount > 0) {
+        LOG(INFO) << "Retry for " << upParams.retryCount << " time(s)";
     } else {
         pkgManager = PkgManager::GetPackageInstance();
     }
@@ -443,11 +443,11 @@ UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, UpdaterPara
             }
         }
         if (upParams.retryCount > 0) {
-            execl(fullPath.c_str(), upParams.updatePackage[upParams.pkgLocation][upParams.pkgLocation].c_str(),
+            execl(fullPath.c_str(), upParams.updatePackage[upParams.pkgLocation].c_str(),
                
                 std::to_string(pipeWrite).c_str(), "retry", nullptr);
         } else {
-            execl(fullPath.c_str(), upParams.updatePackage[upParams.pkgLocation][upParams.pkgLocation].c_str(),
+            execl(fullPath.c_str(), upParams.updatePackage[upParams.pkgLocation].c_str(),
                
                 std::to_string(pipeWrite).c_str(), nullptr);
         }
