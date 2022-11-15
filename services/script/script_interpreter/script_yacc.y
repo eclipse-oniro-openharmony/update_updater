@@ -137,12 +137,33 @@ function_definition: FUNCTION IDENTIFIER LP arglist RP block
         }
         ;
 statement:expression_statement
+        {
+                $$ = $1;
+        }
         |for_statement
+        {
+                $$ = $1;
+        }
         |while_statement
+        {
+                $$ = $1;
+        }
         |if_statement
+        {
+                $$ = $1;
+        }
         |break_statement
+        {
+                $$ = $1;
+        }
         |continue_statement
+        {
+                $$ = $1;
+        }
         |return_statement
+        {
+                $$ = $1;
+        }
         ;
 expression_statement:expression SEMICOLON
         {
@@ -150,6 +171,9 @@ expression_statement:expression SEMICOLON
         }
         ;
 expression: value_expression
+        {
+                $$ = $1;
+        }
         |IDENTIFIER ASSIGN expression
         {
                 $$ = AssignExpression::CreateExpression($1, $3);
@@ -174,6 +198,9 @@ expression: value_expression
         }
         ;
 value_expression: compare_expression
+        {
+                $$ = $1;
+        }
         |value_expression EQ compare_expression
         {
                 $$ = BinaryExpression::CreateExpression(UScriptExpression::EQ_OPERATOR, $1, $3);
@@ -192,6 +219,9 @@ value_expression: compare_expression
         }
         ;
 compare_expression:add_sub_expression
+        {
+                $$ = $1;
+        }
         |compare_expression GT add_sub_expression
         {
                 $$ = BinaryExpression::CreateExpression(UScriptExpression::GT_OPERATOR, $1, $3);
@@ -210,6 +240,9 @@ compare_expression:add_sub_expression
         }
         ;
 add_sub_expression:mul_div_expression
+        {
+                $$ = $1;
+        }
         |add_sub_expression ADD mul_div_expression
         {
                 $$ = BinaryExpression::CreateExpression(UScriptExpression::ADD_OPERATOR, $1, $3);
@@ -220,6 +253,9 @@ add_sub_expression:mul_div_expression
         }
         ;
 mul_div_expression:primary_expression
+        {
+                $$ = $1;
+        }
         |mul_div_expression DIV primary_expression
         {
                 $$ = BinaryExpression::CreateExpression(UScriptExpression::DIV_OPERATOR, $1, $3);
@@ -291,12 +327,18 @@ arglist:arglist COMMA arg
         }
         ;
 arg:    value_expression
+        {
+                $$ = $1;
+        }
         ;
 expression_option:
         {
                 $$=nullptr;
         }
         |expression
+        {
+                $$ = $1;
+        }
         ;
 for_statement: FOR LP expression_option SEMICOLON expression_option SEMICOLON expression_option  RP block
         {

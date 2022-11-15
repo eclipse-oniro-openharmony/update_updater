@@ -146,7 +146,7 @@ bool Ptable::MemReadWithOffset(const std::string &filePath, const uint64_t offse
         return false;
     }
 
-    if (!fin.read((char *)(outData), dataSize)) {
+    if (!fin.read(reinterpret_cast<char *>(outData), dataSize)) {
         LOG(ERROR) << "read 0x" << std::hex << dataSize << " bytes in " << filePath <<
             " failed. only read 0x" << std::hex << fin.gcount() << std::dec;
         fin.close();
@@ -309,7 +309,7 @@ bool Ptable::GetPartitionGptHeaderInfo(const uint8_t *buffer, const uint32_t buf
 }
 
 bool Ptable::CheckGptHeader(uint8_t *buffer, const uint32_t bufferLen, const uint64_t lbaNum,
-    GPTHeaderInfo& gptHeaderInfo)
+    const GPTHeaderInfo& gptHeaderInfo)
 {
     if (bufferLen < LBA_LENGTH || lbaNum == 0) {
         LOG(ERROR) << "bufferLen < LBA_LENGTH || lbaNum == 0";
@@ -471,29 +471,6 @@ bool Ptable::WriteBufferToPath(const std::string &path, const uint64_t offset,
     }
     DataWriter::ReleaseDataWriter(writer);
     return true;
-}
-
-void Ptable::SetPartitionName(const std::string &name, uint8_t *data, const uint32_t size)
-{
-    if (data == nullptr || size == 0) {
-        LOG(ERROR) << "invalid input";
-        return;
-    }
-    // convert utf8 to utf16, 2 bytes for 1 charactor of partition name
-    if (name.length() * 2 >= MAX_GPT_NAME_SIZE) {
-        LOG(ERROR) << "name size too large";
-        return;
-    }
-
-    char utf16Name[MAX_GPT_NAME_SIZE] = {0};
-    for (uint32_t i = 0; i <= name.length(); i++) {
-        // convert utf8 to utf16, 2 bytes for 1 charactor of partition name
-        utf16Name[i * 2] = static_cast<char>(tolower(name[i]));
-    }
-    if (memcpy_s(data, size, utf16Name, sizeof(utf16Name)) != EOK) {
-        LOG(ERROR) << "copy name failed";
-    }
-    return;
 }
 
 bool Ptable::GetPartionInfoByName(const std::string &partitionName, PtnInfo &ptnInfo, int32_t &index)

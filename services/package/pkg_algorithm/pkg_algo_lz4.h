@@ -47,7 +47,7 @@ public:
 protected:
     int32_t GetBlockSizeFromBlockId(int32_t id) const
     {
-        return (1 << (8 + (2 * id)));
+        return (1 << (8 + (2 * id))); // 8,2 : Get block size from block ID
     }
     int32_t GetPackParam(LZ4F_compressionContext_t &ctx, LZ4F_preferences_t &preferences,
         size_t &inBuffSize, size_t &outBuffSize) const;

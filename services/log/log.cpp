@@ -18,6 +18,9 @@
 #include <memory>
 #include <unordered_map>
 #include <vector>
+#ifndef DIFF_PATCH_SDK
+#include "hilog/log.h"
+#endif
 #include "securec.h"
 
 namespace Updater {
@@ -64,14 +67,14 @@ UpdaterLogger::~UpdaterLogger()
             OHOS::HiviewDFX::HiLog::Warn(g_logLabel, "%{public}s", str.c_str());
             break;
         default:
-            break;            
+            break;
     }
 #endif
     oss_.str("");
     oss_ << std::endl << std::flush;
     if (g_updaterLog.is_open()) {
         g_updaterLog << realTime_ <<  "  " << "[" << logLevelMap_[level_] << "]" <<
-            g_logTag << " " << str << std::endl << std::flush; 
+            g_logTag << " " << str << std::endl << std::flush;
     }
 }
 
@@ -140,7 +143,7 @@ std::ostream& StageLogger::OutputUpdaterStage()
 
 void Logger(int level, const char* fileName, int32_t line, const char* format, ...)
 {
-    static std::vector<char> buff(1024);
+    static std::vector<char> buff(1024); // 1024 : max length of buff
     va_list list;
     va_start(list, format);
     int size = vsnprintf_s(reinterpret_cast<char*>(buff.data()), buff.capacity(), buff.capacity(), format, list);

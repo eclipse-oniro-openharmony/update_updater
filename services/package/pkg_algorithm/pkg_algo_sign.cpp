@@ -32,8 +32,7 @@ namespace Hpackage {
 #ifndef BIO_FP_READ
 constexpr uint32_t BIO_FP_READ = 0x02;
 #endif
-int32_t SignAlgorithmRsa::SignBuffer(const PkgBuffer &buffer, std::vector<uint8_t> &signedData,
-    size_t &signLen) const
+int32_t SignAlgorithmRsa::SignBuffer(const PkgBuffer &buffer, std::vector<uint8_t> &sign, size_t &signLen) const
 {
     if (buffer.buffer == nullptr) {
         PKG_LOGE("Param null!");
@@ -61,20 +60,19 @@ int32_t SignAlgorithmRsa::SignBuffer(const PkgBuffer &buffer, std::vector<uint8_
 
     // Adjust key size
     uint32_t size = static_cast<uint32_t>(RSA_size(rsa));
-    signedData.resize(size);
+    sign.resize(size);
     ret = 0;
     if (digestMethod_ == PKG_DIGEST_TYPE_SHA256) {
-        ret = RSA_sign(NID_sha256, buffer.buffer, buffer.length, signedData.data(), &size, rsa);
+        ret = RSA_sign(NID_sha256, buffer.buffer, buffer.length, sign.data(), &size, rsa);
     } else if (digestMethod_ == PKG_DIGEST_TYPE_SHA384) {
-        ret = RSA_sign(NID_sha384, buffer.buffer, buffer.length, signedData.data(), &size, rsa);
+        ret = RSA_sign(NID_sha384, buffer.buffer, buffer.length, sign.data(), &size, rsa);
     }
     signLen = size;
     RSA_free(rsa);
     return ((ret == 1) ? PKG_SUCCESS : PKG_INVALID_SIGNATURE);
 }
 
-int32_t SignAlgorithmEcc::SignBuffer(const PkgBuffer &buffer, std::vector<uint8_t> &signedData,
-    size_t &signLen) const
+int32_t SignAlgorithmEcc::SignBuffer(const PkgBuffer &buffer, std::vector<uint8_t> &sign, size_t &signLen) const
 {
     if (buffer.buffer == nullptr) {
         PKG_LOGE("Param null!");
@@ -102,9 +100,9 @@ int32_t SignAlgorithmEcc::SignBuffer(const PkgBuffer &buffer, std::vector<uint8_
 
     // Adjust key size
     uint32_t size = static_cast<uint32_t>(ECDSA_size(ecKey));
-    signedData.resize(size + sizeof(uint32_t));
-    ret = ECDSA_sign(0, buffer.buffer, buffer.length, signedData.data() + sizeof(uint32_t), &size, ecKey);
-    WriteLE32(signedData.data(), size);
+    sign.resize(size + sizeof(uint32_t));
+    ret = ECDSA_sign(0, buffer.buffer, buffer.length, sign.data() + sizeof(uint32_t), &size, ecKey);
+    WriteLE32(sign.data(), size);
     signLen = size + sizeof(uint32_t);
     EC_KEY_free(ecKey);
     return ((ret == 1) ? PKG_SUCCESS : PKG_INVALID_SIGNATURE);

@@ -53,7 +53,7 @@ ohos_fuzztest("DoPartitionsFuzzTest") {
     "//third_party/zlib:libz",
   ]
 
-  external_deps += [
+  external_deps = [
     "c_utils:utils",
     "init:libbegetutil",
   ]

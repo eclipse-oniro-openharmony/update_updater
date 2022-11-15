@@ -57,7 +57,7 @@ ohos_source_set("flashd_deamon") {
 
   configs = [ ":flashd_hdc_config" ]
 
-  external_deps += [ "c_utils:utils" ]
+  external_deps = [ "c_utils:utils" ]
   deps = [
     "//third_party/libuv:uv",
     "//third_party/lz4:liblz4_static",
@@ -185,7 +185,7 @@ ohos_static_library("libflashd") {
     defines += [ "UPDATER_USE_PTABLE" ]
   }
 
-  external_deps += [
+  external_deps = [
     "c_utils:utils",
     "init:libbegetutil",
   ]

@@ -29,7 +29,7 @@ public:
     void PostCommand() override;
 
 private:
-    int DoFlash(const uint8_t *buffer, int bufferSize);
+    int DoFlash(const uint8_t *payload, int payloadSize);
     bool InitPartition(const std::string &partName, const uint8_t *buffer, int bufferSize);
 
     std::string partName_ = {};

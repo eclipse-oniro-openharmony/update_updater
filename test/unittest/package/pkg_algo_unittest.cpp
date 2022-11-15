@@ -32,7 +32,6 @@ using namespace testing::ext;
 
 namespace UpdaterUt {
 constexpr size_t BUFFER_LEN = 10;
-constexpr size_t DIGEST_LEN = 32;
 class PkgAlgoUnitTest : public PkgTest {
 public:
     PkgAlgoUnitTest() {}
@@ -131,77 +130,6 @@ public:
         return 0;
     }
 
-    int TestSignVerify(int8_t signMethod, std::string privateKey, std::string certName, uint8_t hashType)
-    {
-        PkgBuffer digest(DIGEST_LEN);
-        std::string filePath = TEST_PATH_FROM;
-        filePath += "loadScript.us";
-        int ret = BuildFileDigest(*digest.buffer, digest.length, filePath);
-        EXPECT_EQ(ret, PKG_SUCCESS);
-        // 签名
-        filePath = TEST_PATH_FROM + privateKey;
-        SignAlgorithm::SignAlgorithmPtr algorithm = PkgAlgorithmFactory::GetSignAlgorithm(filePath,
-            signMethod, hashType);
-        EXPECT_NE(nullptr, algorithm);
-        std::vector<uint8_t> signature;
-        size_t signLen = 0;
-        ret = algorithm->SignBuffer(digest, signature, signLen);
-        EXPECT_EQ(ret, PKG_SUCCESS);
-
-        ret = algorithm->VerifyDigest(digest.data, signature);
-        EXPECT_EQ(ret, PKG_INVALID_SIGNATURE);
-
-        filePath = TEST_PATH_FROM + certName;
-        algorithm = PkgAlgorithmFactory::GetVerifyAlgorithm(filePath, hashType);
-        // 验证
-        ret = algorithm->SignBuffer(digest, signature, signLen);
-        EXPECT_EQ(ret, PKG_INVALID_SIGNATURE);
-
-        ret = algorithm->VerifyDigest(digest.data, signature);
-        EXPECT_EQ(ret, PKG_SUCCESS);
-        return 0;
-    }
-
-    int TestEccUserPackage(int8_t signMethod, std::string privateKey, std::string certName)
-    {
-        PKG_LOGI("\n\n ************* TestPackageCreate %s \r\n", testPackageName.c_str());
-        uint32_t updateFileVersion = 1000;
-        UpgradePkgInfoExt pkgInfo;
-        pkgInfo.entryCount = testFileNames_.size();
-        pkgInfo.digestMethod = PKG_DIGEST_TYPE_SHA256;
-        pkgInfo.signMethod = signMethod;
-        pkgInfo.pkgType = PKG_PACK_TYPE_ZIP;
-        pkgInfo.updateFileVersion = updateFileVersion;
-        std::string filePath;
-        uint8_t componentFlags = 22;
-        ComponentInfoExt comp[testFileNames_.size()];
-        for (size_t i = 0; i < testFileNames_.size(); i++) {
-            comp[i].componentAddr = strdup(testFileNames_[i].c_str());
-            filePath = TEST_PATH_FROM;
-            filePath += testFileNames_[i].c_str();
-            comp[i].filePath = strdup(filePath.c_str());
-            comp[i].flags = componentFlags;
-            filePath.clear();
-        }
-        std::string packagePath = TEST_PATH_TO;
-        packagePath += testPackageName;
-        std::string keyName = TEST_PATH_FROM;
-        keyName += privateKey;
-        int32_t ret = CreatePackage(&pkgInfo, comp, packagePath.c_str(), keyName.c_str());
-        for (size_t i = 0; i < testFileNames_.size(); i++) {
-            free(comp[i].componentAddr);
-            free(comp[i].filePath);
-        }
-        EXPECT_EQ(ret, PKG_SUCCESS);
-        uint8_t digest[DIGEST_LEN] = {0};
-        ret = BuildFileDigest(*digest, sizeof(digest), packagePath);
-        EXPECT_EQ(ret, PKG_SUCCESS);
-        keyName = TEST_PATH_FROM;
-        keyName += certName;
-        ret = VerifyPackage(packagePath.c_str(), keyName.c_str(), "", digest, DIGEST_LEN);
-        return ret;
-    }
-
 private:
     std::string testPackageName = "test_ecc_package.zip";
     std::vector<std::string> testFileNames_ = {
@@ -224,33 +152,6 @@ HWTEST_F(PkgAlgoUnitTest, TestHash256Digest, TestSize.Level1)
     EXPECT_EQ(0, test.TestCrcDigest());
     EXPECT_EQ(0, test.TestHash256Digest());
     EXPECT_EQ(0, test.TestHash384Digest());
-}
-
-HWTEST_F(PkgAlgoUnitTest, TestRsaSignVerify, TestSize.Level1)
-{
-    PkgAlgoUnitTest test;
-    EXPECT_EQ(0, test.TestSignVerify(PKG_SIGN_METHOD_RSA,
-        "rsa_private_key2048.pem", "signing_cert.crt", PKG_DIGEST_TYPE_SHA256));
-}
-
-HWTEST_F(PkgAlgoUnitTest, TestRsaSignVerify384, TestSize.Level1)
-{
-    PkgAlgoUnitTest test;
-    EXPECT_EQ(0, test.TestSignVerify(PKG_SIGN_METHOD_RSA,
-        "rsa_private_key384.pem", "signing_cert384.crt", PKG_DIGEST_TYPE_SHA384));
-}
-
-HWTEST_F(PkgAlgoUnitTest, TestEccSignVerify, TestSize.Level1)
-{
-    PkgAlgoUnitTest test;
-    EXPECT_EQ(0, test.TestSignVerify(PKG_SIGN_METHOD_ECDSA,
-        "ecc/prime256v1-key.pem", "ecc/signing_cert.crt", PKG_DIGEST_TYPE_SHA256));
-}
-
-HWTEST_F(PkgAlgoUnitTest, TestEccUserPackage, TestSize.Level1)
-{
-    PkgAlgoUnitTest test;
-    EXPECT_EQ(0, test.TestEccUserPackage(PKG_SIGN_METHOD_ECDSA, "ecc/prime256v1-key.pem", "ecc/signing_cert.crt"));
 }
 
 HWTEST_F(PkgAlgoUnitTest, TestInvalid, TestSize.Level1)
