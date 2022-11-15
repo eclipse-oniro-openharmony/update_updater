@@ -33,5 +33,6 @@ group("unittest") {
     "test/unittest/script:user_instruction_invalid",
     "test/unittest/updater_ui_test:ui_unittest",
     "test/unittest/utils:utils_test",
+    "test/unittest/updater_binary:binary_unittest",
   ]
 }
