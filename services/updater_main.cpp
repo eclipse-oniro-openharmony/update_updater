@@ -118,8 +118,8 @@ static void GetAllPkgProgress(UpdaterParams &upParams, std::string nowPkgLocatio
         LOG(ERROR) << "All pkg size is 0";
         return;
     }
-    upParams.initialProgress = static_cast<float>(nowPosition) / static_cast<float>(allPkgSize);
-    upParams.currentPercentage = static_cast<float>(pkgSize) / static_cast<float>(allPkgSize);
+    upParamss.initialProgress = static_cast<float>(nowPosition) / static_cast<float>(allPkgSize);
+    upParamss.currentPercentage = static_cast<float>(pkgSize) / static_cast<float>(allPkgSize);
 }
 
 static int DoFactoryReset(FactoryResetMode mode, const std::string &path)
@@ -175,13 +175,13 @@ UpdaterStatus UpdaterFromSdcard()
         LOG(ERROR) << "pkgManager is nullptr";
         return UPDATE_ERROR;
     }
-    UpdaterParams upParams {
-        false, false, 0, 0, 0, 0, {SDCARD_CARD_PKG_PATH}
-    };
+    UpdaterParams upParamss {
+        false, false, 0, 0, 0, 0, {0, {SDCARD_CARD_PKG_PATH}}
+    };;
     STAGE(UPDATE_STAGE_BEGIN) << "UpdaterFromSdcard";
     LOG(INFO) << "UpdaterFromSdcard start, sdcard updaterPath : " << SDCARD_CARD_PKG_PATH;
     UPDATER_UI_INSTANCE.ShowLog(TR(LOG_SDCARD_NOTMOVE));
-    UpdaterStatus updateRet = DoInstallUpdaterPackage(pkgManager, upParams, SDCARD_UPDATE);
+    UpdaterStatus updateRet = DoInstallUpdaterPackage(pkgManager, upParamss, SDCARD_UPDATE);
     if (updateRet != UPDATE_SUCCESS) {
         UPDATER_UI_INSTANCE.Sleep(UI_SHOW_DURATION);
         UPDATER_UI_INSTANCE.ShowLog(TR(LOG_SDCARD_FAIL));
@@ -189,6 +189,7 @@ UpdaterStatus UpdaterFromSdcard()
     } else {
         LOG(INFO) << "Update from SD Card successfully!";
         STAGE(UPDATE_STAGE_SUCCESS) << "UpdaterFromSdcard success";
+    }
     }
     PkgManager::ReleasePackageInstance(pkgManager);
     return updateRet;
