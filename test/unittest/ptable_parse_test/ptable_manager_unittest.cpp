@@ -124,6 +124,25 @@ public:
         context.TestSetDeviceStorageType();
         ASSERT_EQ(context.storage_, PtableManagerTest::StorageType::STORAGE_EMMC);
     }
+
+    void TestGetPartionInfoByName()
+    {
+        PtableManagerTest context {};
+        std::string partitionName = "";
+        Ptable::PtnInfo ptnInfo;
+        context.pPtable_ = nullptr;
+        bool ret = context.GetPartionInfoByName(partitionName, ptnInfo);
+        ASSERT_EQ(ret, false);
+        context.pPtable_ = std::make_unique<UfsPtable>();
+        ret = context.GetPartionInfoByName(partitionName, ptnInfo);
+        ASSERT_EQ(ret, false);
+        ptnInfo.dispName = "testPartition";
+        ret = context.GetPartionInfoByName(partitionName, ptnInfo);
+        ASSERT_EQ(ret, false);
+        partitionName = "testPartition";
+        ret = context.GetPartionInfoByName(partitionName, ptnInfo);
+        ASSERT_EQ(ret, false);
+    }
 protected:
     void SetUp() {}
     void TearDown() {}
@@ -143,5 +162,10 @@ HWTEST_F(UTestPtableManager, TestIsPtableChanged, TestSize.Level1)
 HWTEST_F(UTestPtableManager, TestInitPtableManagerAndSetDeviceStorageType, TestSize.Level1)
 {
     UTestPtableManager {}.TestInitPtableManagerAndSetDeviceStorageType();
+}
+
+HWTEST_F(UTestPtableManager, TestGetPartionInfoByName, TestSize.Level1)
+{
+    UTestPtableManager {}.TestGetPartionInfoByName();
 }
 }
