@@ -17,7 +17,7 @@ UPDATER_TEST_ROOT = "//base/update/updater/test/unittest"
 
 MODULE_OUTPUT_PATH = "updater/updater_test"
 
-ohos_unittest("applypatch_test") {
+ohos_unittest("applypatch_unittest") {
   testonly = true
   resource_config_file =
       "//base/update/updater/test/unittest/test_data/ohos_test.xml"
@@ -30,6 +30,16 @@ ohos_unittest("applypatch_test") {
     "store_unittest.cpp",
     "transfer_manager_unittest.cpp",
     "commandsfunction_unittest.cpp",
+  ]
+  sources += [
+    "//base/update/updater/services/applypatch/block_set.cpp",
+    "//base/update/updater/services/applypatch/command.cpp",
+    "//base/update/updater/services/applypatch/command_function.cpp",
+    "//base/update/updater/services/applypatch/command_process.cpp",
+    "//base/update/updater/services/applypatch/data_writer.cpp",
+    "//base/update/updater/services/applypatch/raw_writer.cpp",
+    "//base/update/updater/services/applypatch/store.cpp",
+    "//base/update/updater/services/applypatch/transfer_manager.cpp",
   ]
   include_dirs = [
     "//base/update/updater/interfaces/kits/include",
