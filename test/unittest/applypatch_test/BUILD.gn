@@ -26,10 +26,10 @@ ohos_unittest("applypatch_unittest") {
     "all_cmd_unittest.cpp",
     "blockset_unittest.cpp",
     "commands_unittest.cpp",
+    "commandsfunction_unittest.cpp",
     "partition_update_record_unittest.cpp",
     "store_unittest.cpp",
     "transfer_manager_unittest.cpp",
-    "commandsfunction_unittest.cpp",
   ]
   sources += [
     "//base/update/updater/services/applypatch/block_set.cpp",
@@ -38,10 +38,10 @@ ohos_unittest("applypatch_unittest") {
     "//base/update/updater/services/applypatch/command_function.cpp",
     "//base/update/updater/services/applypatch/command_process.cpp",
     "//base/update/updater/services/applypatch/data_writer.cpp",
+    "//base/update/updater/services/applypatch/partition_update_record.cpp",
     "//base/update/updater/services/applypatch/raw_writer.cpp",
     "//base/update/updater/services/applypatch/store.cpp",
     "//base/update/updater/services/applypatch/transfer_manager.cpp",
-    "//base/update/updater/services/applypatch/partition_update_record.cpp",
   ]
   include_dirs = [
     "//base/update/updater/interfaces/kits/include",
