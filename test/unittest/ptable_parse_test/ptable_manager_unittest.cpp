@@ -41,6 +41,15 @@ public:
         return IsPtableChanged(devicePtnInfo, pkgPtnInfo);
     }
 
+    bool TestInitPtableManager()
+    {
+        return InitPtableManager();
+    }
+
+    void TestSetDeviceStorageType()
+    {
+        SetDeviceStorageType();
+    }
     bool TestIsPartitionChanged(const std::vector<Ptable::PtnInfo> &devicePtnInfo,
         const std::vector<Ptable::PtnInfo> &pkgPtnInfo, const std::string &partitionName)
     {
@@ -109,6 +118,37 @@ public:
         ASSERT_EQ(ret, true);
     }
 
+    void TestInitPtableManagerAndSetDeviceStorageType()
+    {
+        PtableManagerTest context {};
+        bool ret = context.TestInitPtableManager();
+        ASSERT_EQ(ret, false);
+        context.TestSetDeviceStorageType();
+        ASSERT_EQ(context.storage_, PtableManagerTest::StorageType::STORAGE_UFS);
+        context.storage_ = PtableManagerTest::StorageType::STORAGE_EMMC;
+        context.TestSetDeviceStorageType();
+        ASSERT_EQ(context.storage_, PtableManagerTest::StorageType::STORAGE_EMMC);
+    }
+
+    void TestGetPartionInfoByName()
+    {
+        PtableManagerTest context {};
+        std::string partitionName = "";
+        Ptable::PtnInfo ptnInfo;
+        context.pPtable_ = nullptr;
+        bool ret = context.GetPartionInfoByName(partitionName, ptnInfo);
+        ASSERT_EQ(ret, false);
+        context.pPtable_ = std::make_unique<UfsPtable>();
+        ret = context.GetPartionInfoByName(partitionName, ptnInfo);
+        ASSERT_EQ(ret, false);
+        ptnInfo.dispName = "testPartition";
+        ret = context.GetPartionInfoByName(partitionName, ptnInfo);
+        ASSERT_EQ(ret, false);
+        partitionName = "testPartition";
+        ret = context.GetPartionInfoByName(partitionName, ptnInfo);
+        ASSERT_EQ(ret, false);
+    }
+
     void TestIsPartitionChanged()
     {
         PtableManagerTest context {};
@@ -157,6 +197,17 @@ HWTEST_F(UTestPtableManager, TestIsPtableChanged, TestSize.Level1)
 {
     UTestPtableManager {}.TestIsPtableChanged();
 }
+
+HWTEST_F(UTestPtableManager, TestInitPtableManagerAndSetDeviceStorageType, TestSize.Level1)
+{
+    UTestPtableManager {}.TestInitPtableManagerAndSetDeviceStorageType();
+}
+
+HWTEST_F(UTestPtableManager, TestGetPartionInfoByName, TestSize.Level1)
+{
+    UTestPtableManager {}.TestGetPartionInfoByName();
+}
+
 HWTEST_F(UTestPtableManager, TestIsPartitionChanged, TestSize.Level1)
 {
     UTestPtableManager {}.TestIsPartitionChanged();
