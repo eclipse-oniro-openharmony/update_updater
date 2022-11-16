@@ -22,9 +22,7 @@ ohos_unittest("binary_unittest") {
   resource_config_file =
       "//base/update/updater/test/unittest/test_data/ohos_test.xml"
   module_out_path = MODULE_OUTPUT_PATH
-  sources = [
-    "update_image_block_test.cpp",
-  ]
+  sources = [ "update_image_block_test.cpp" ]
 
   sources += [
     "//base/update/updater/services/updater_binary/update_image_block.cpp",
@@ -59,12 +57,12 @@ ohos_unittest("binary_unittest") {
     "//base/update/updater/services/script:libupdaterscript",
     "//third_party/bzip2:libbz2",
     "//third_party/cJSON:cjson_static",
+    "//third_party/googletest:gmock_main",
+    "//third_party/googletest:gtest_main",
     "//third_party/lz4:liblz4_static",
     "//third_party/openssl:libcrypto_static",
     "//third_party/openssl:ssl_source",
     "//third_party/zlib:libz",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
   ]
 
   configs = [ "$UPDATER_TEST_ROOT:utest_config" ]
