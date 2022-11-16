@@ -108,7 +108,8 @@ protected:
         uint64_t res = static_cast<unsigned long long>(*x) |
             (static_cast<unsigned long long>(*(x + 1)) << 8) |
             (static_cast<unsigned long long>(*(x + 2)) << 16) |
-            (static_cast<unsigned long long>(*(x + 3)) << 32) |
+            (static_cast<unsigned long long>(*(x + 3)) << 24) |
+            (static_cast<unsigned long long>(*(x + 4)) << 32) |
             (static_cast<unsigned long long>(*(x + 5)) << 40) |
             (static_cast<unsigned long long>(*(x + 6)) << 48) |
             (static_cast<unsigned long long>(*(x + 7)) << 56);
