@@ -21,6 +21,8 @@
 #include "../applypatch/command_process.h"
 #include "log/log.h"
 #include "applypatch/transfer_manager.h"
+#include "applypatch/store.h"
+#include "util.h"
 
 
 using namespace testing::ext;
