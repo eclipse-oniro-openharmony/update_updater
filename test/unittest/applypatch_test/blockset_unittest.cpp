@@ -133,4 +133,28 @@ HWTEST_F(BlockSetUnitTest, blockset_test_005, TestSize.Level1)
     close(fd);
     delete cmd;
 }
+
+HWTEST_F(BlockSetUnitTest, blockset_test_006, TestSize.Level1)
+{
+    int fd = open("/data/updater/updater/blocksetTest.txt", O_CREAT | O_WRONLY, S_IRWXU | S_IRWXG | S_IRWXO);
+    if (fd < 0) {
+        printf("Open file failed");
+        return;
+    }
+    std::vector<uint8_t> buffer;
+    buffer.resize(H_BLOCK_SIZE);
+    BlockSet myBlock;
+    int ret = myBlock.ReadDataFromBlock(fd, buffer);
+    EXPECT_EQ(ret, 0);
+    BlockSet myBlock2({std::vector<BlockPair>{}});
+    BlockSet myBlock3({std::vector<BlockPair>{BlockPair{0, 1}}});
+    BlockSet myBlock4({std::vector<BlockPair>{BlockPair{-1, 0}}});
+    ret = myBlock3.ReadDataFromBlock(fd, buffer);
+    EXPECT_EQ(ret, -1);
+    ret = myBlock3.WriteDataToBlock(fd, buffer);
+    EXPECT_EQ(ret, 4096);
+    ret = myBlock4.ReadDataFromBlock(fd, buffer);
+    EXPECT_EQ(ret, 0);
+    close(fd);
+}
 }
