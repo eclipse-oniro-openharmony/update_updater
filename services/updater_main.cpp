@@ -98,7 +98,7 @@ static void GetAllPkgProgress(UpdaterParams &upParams, std::string nowPkgLocatio
     char realPath[PATH_MAX + 1] = {0};
     size_t nowPosition = 0;
     size_t pkgSize = 0;
-    for(auto i = 0; i < upParams.updatePackage.size(); i++) {
+    for (auto i = 0; i < upParams.updatePackage.size(); i++) {
         if (realpath(upParams.updatePackage[i].c_str(), realPath) == nullptr) {
             continue;
         }
@@ -310,7 +310,8 @@ static UpdaterStatus InstallUpdaterPackageSupport(UpdaterParams &upParams, const
         ProgressSmoothHandler(static_cast<int>((upParams.initialProgress +
             upParams.currentPercentage) * FULL_PERCENT_PROGRESS));
         if (status != UPDATE_SUCCESS) {
-            LOG(ERROR) << "InstallUpdaterPackage failed! The package is " << upParams.updatePackage[upParams.pkgLocation];
+            LOG(ERROR) << "InstallUpdaterPackage failed! The package is " <<
+                upParams.updatePackage[upParams.pkgLocation];
             return status;
         }
     }

@@ -415,7 +415,7 @@ UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, UpdaterPara
         close(pipeRead);   // close read endpoint
         std::string fullPath = GetWorkPath() + std::string(UPDATER_BINARY);
 #ifdef UPDATER_UT
-        if (upParams.updatePackage[upParams.pkgLocation][upParams.pkgLocation].find("updater_binary_abnormal") != std::string::npos) {
+        if (upParams.updatePackage[upParams.pkgLocation].find("updater_binary_abnormal") != std::string::npos) {
             fullPath = "/system/bin/updater_binary_abnormal";
         } else {
             fullPath = "/system/bin/test_update_binary";
