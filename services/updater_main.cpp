@@ -190,7 +190,6 @@ UpdaterStatus UpdaterFromSdcard()
         LOG(INFO) << "Update from SD Card successfully!";
         STAGE(UPDATE_STAGE_SUCCESS) << "UpdaterFromSdcard success";
     }
-    }
     PkgManager::ReleasePackageInstance(pkgManager);
     return updateRet;
 }
