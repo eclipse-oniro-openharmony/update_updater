@@ -122,8 +122,10 @@ int32_t ScriptInstructionHelper::RegisterUserInstruction(const std::string& libN
         USCRIPT_LOGE("Fail to dlopen %s ", libName.c_str());
         return USCRIPT_INVALID_PARAM;
     }
-    auto pGetInstructionFactory = (Uscript::UScriptInstructionFactoryPtr(*)())dlsym(instrLib_, "GetInstructionFactory");
-    auto pReleaseInstructionFactory = (void(*)(Uscript::UScriptInstructionFactoryPtr))dlsym(instrLib_, "ReleaseInstructionFactory");
+    auto pGetInstructionFactory =
+        (Uscript::UScriptInstructionFactoryPtr(*)())dlsym(instrLib_, "GetInstructionFactory");
+    auto pReleaseInstructionFactory =
+        (void(*)(Uscript::UScriptInstructionFactoryPtr))dlsym(instrLib_, "ReleaseInstructionFactory");
     if (pReleaseInstructionFactory == nullptr || pGetInstructionFactory == nullptr) {
         USCRIPT_LOGE("Fail to get sym %s", libName.c_str());
         return USCRIPT_INVALID_PARAM;
