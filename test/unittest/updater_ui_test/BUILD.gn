@@ -23,6 +23,7 @@ ohos_unittest("ui_unittest") {
       "//base/update/updater/test/unittest/test_data/ohos_test.xml"
   module_out_path = MODULE_OUTPUT_PATH
   defines = [
+    "UPDATER_UT",
     "ENABLE_BITMAP_FONT = 0",
     "ENABLE_ICU = 0",
     "ENABLE_MULTI_FONT = 0",
@@ -32,11 +33,6 @@ ohos_unittest("ui_unittest") {
   ]
   sources = [ "ui_layout_unittest.cpp" ]
   sources += [
-    "//base/update/updater/services/ui/driver/drm_driver.cpp",
-    "//base/update/updater/services/ui/driver/fbdev_driver.cpp",
-    "//base/update/updater/services/ui/driver/graphic_engine.cpp",
-    "//base/update/updater/services/ui/driver/input_event.cpp",
-    "//base/update/updater/services/ui/driver/surface_dev.cpp",
     "//base/update/updater/services/ui/language/language_ui.cpp",
     "//base/update/updater/services/ui/strategy/logo_strategy.cpp",
     "//base/update/updater/services/ui/strategy/progress_strategy.cpp",
