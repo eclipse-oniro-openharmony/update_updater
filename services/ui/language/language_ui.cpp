@@ -87,8 +87,8 @@ bool LanguageUI::Parse()
 bool LanguageUI::ParseJson(const std::string &file)
 {
     JsonNode root {std::filesystem::path { file }};
-    if (root.Type() == NodeType::UNKNOWN) {
-        LOG(ERROR) << file << " is invalid";
+    if (root.Type() != NodeType::ARRAY) {
+        LOG(ERROR) << file << " is invalid, nodetype is " << static_cast<int>(root.Type());
         return false;
     }
     for (auto &node : root) {
@@ -138,9 +138,7 @@ bool LanguageUI::LoadLangRes(const JsonNode &node)
         return false;
     }
     // clear resources
-    for (auto &res : res_) {
-        res = "";
-    }
+    std::vector<std::string>().swap(res_);
     // load resources
     for (auto &res : langRes_.res) {
         if (!SetRes(res)) {
