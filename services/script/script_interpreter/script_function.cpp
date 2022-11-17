@@ -46,7 +46,7 @@ UScriptValuePtr ScriptFunction::Execute(ScriptInterpreter &inter,
             return std::make_shared<ErrorValue>(USCRIPT_ERROR_INTERPRET);
         }
     } else {
-        if (params_->GetParams().size() != params_->GetParams().size()) {
+        if (params_->GetParams().size() != inputParams->GetParams().size()) {
             USCRIPT_LOGE("[interpreter-%d] ScriptFunction::Execute param not match %s",
                 inter.GetInstanceId(), functionName_.c_str());
             return std::make_shared<ErrorValue>(USCRIPT_ERROR_INTERPRET);
