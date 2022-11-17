@@ -1,0 +1,4 @@
+{
+    "comment" : "when en/es/zh string not exist, should failed",
+    "REBOOT_DEVICE" : {}
+}
