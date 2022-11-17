@@ -18,6 +18,7 @@
 #include <iostream>
 #include <memory>
 #include "log.h"
+#include "packages_info.h"
 #include "pkg_algorithm.h"
 #include "pkg_gzipfile.h"
 #include "pkg_lz4file.h"
@@ -164,7 +165,34 @@ public:
     {
         *reinterpret_cast<size_t *>(buff) = size;
     }
+
+    int TestPackageInfoFail()
+    {
+        PkgManager::PkgManagerPtr manager = PkgManager::GetPackageInstance();
+        PackagesInfoPtr pkginfomanager = PackagesInfo::GetPackagesInfoInstance();
+        std::vector<std::string> target;
+        std::vector<std::string> tmp;
+
+        target = pkginfomanager->GetOTAVersion(nullptr, "", "");
+        EXPECT_EQ(target, tmp);
+        target = pkginfomanager->GetOTAVersion(manager, "", "");
+        EXPECT_EQ(target, tmp);
+        target = pkginfomanager->GetBoardID(nullptr, "", "");
+        EXPECT_EQ(target, tmp);
+        target = pkginfomanager->GetBoardID(manager, "", "");
+        EXPECT_EQ(target, tmp);
+
+        bool ret = pkginfomanager->IsAllowRollback();
+        EXPECT_EQ(ret, false);
+        PackagesInfo::ReleasePackagesInfoInstance(pkginfomanager);
+    }
 };
+
+HWTEST_F(PkgPackageTest, TestPackageInfoFail, TestSize.Level1)
+{
+    PkgPackageTest test;
+    EXPECT_EQ(0, test.TestPackageInfoFail());
+}
 
 HWTEST_F(PkgPackageTest, TestPkgFile, TestSize.Level1)
 {
