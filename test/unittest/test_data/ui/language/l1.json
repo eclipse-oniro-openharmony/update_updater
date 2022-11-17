@@ -1,0 +1,12 @@
+{
+    "SDCARD_UPDATE" : {
+        "en": "update from sdcard",
+        "zh": "SD卡升级",
+        "spa": ""
+    },
+    "DEFAULT_STRING" : {
+        "en" : "default text",
+        "zh" : "默认文字",
+        "spa" : ""
+    }
+}

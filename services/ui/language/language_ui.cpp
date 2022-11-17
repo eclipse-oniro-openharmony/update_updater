@@ -49,13 +49,14 @@ LanguageUI &LanguageUI::GetInstance()
     return instance;
 }
 
-bool LanguageUI::Init(const Language language)
+bool LanguageUI::Init(Language language)
 {
     language_ = language;
-    static bool res = [this] () {
-        return Parse();
-    } ();
-    return res;
+    if (!Parse()) {
+        LOG(ERROR) << "parse language resources failed";
+        return false;
+    }
+    return true;
 }
 
 bool LanguageUI::SetRes(const Res &res)
@@ -69,9 +70,10 @@ bool LanguageUI::SetRes(const Res &res)
 
 bool LanguageUI::Parse()
 {
+    strMap_.clear();
     for (auto &file : res_) {
         if (file.empty()) {
-            LOG(DEBUG) << "file name empty";
+            LOG(WARNING) << "file name empty";
             continue;
         }
         if (!ParseJson(file)) {
@@ -85,12 +87,16 @@ bool LanguageUI::Parse()
 bool LanguageUI::ParseJson(const std::string &file)
 {
     JsonNode root {std::filesystem::path { file }};
+    if (root.Type() == NodeType::UNKNOWN) {
+        LOG(ERROR) << file << " is invalid";
+        return false;
+    }
     for (auto &node : root) {
         const JsonNode &strNode = node.get();
         std::string key = strNode.Key().value_or("");
         if (key.empty()) {
             LOG(ERROR) << "key is empty";
-            continue;
+            return false;
         }
         if (auto optionalStr = strNode[g_languageDataVars[language_]].As<std::string>();
             optionalStr != std::nullopt) {
@@ -124,35 +130,32 @@ const std::string &LanguageUI::Translate(const std::string &key, UpdaterUiMsgID 
     return emptyStr;
 }
 
-void LanguageUI::SetLanguage(Language language)
-{
-    if (language_ != language) {
-        language_ = language;
-        Parse();
-    }
-}
-
 bool LanguageUI::LoadLangRes(const JsonNode &node)
 {
-    bool ret = Visit<SETVAL>(node[LANG_RES_KEY], langRes_);
-    if (!ret) {
+    langRes_ = {};
+    if (!Visit<SETVAL>(node[LANG_RES_KEY], langRes_)) {
         LOG(ERROR) << "parse language res error";
         return false;
     }
+    // clear resources
+    for (auto &res : res_) {
+        res = "";
+    }
+    // load resources
     for (auto &res : langRes_.res) {
         if (!SetRes(res)) {
             return false;
         }
     }
-    if (!Init(GetLanguage())) {
+    if (!Init(ParseLanguage())) {
         LOG(ERROR) << "init failed";
         return false;
     }
-    LOG(DEBUG) << "load language resource success";
+    LOG(INFO) << "load language resource success";
     return true;
 }
 
-Language LanguageUI::GetLanguage() const
+Language LanguageUI::ParseLanguage() const
 {
     constexpr Language DEFAULT_LOCALE = Language::CHINESE;
     constexpr size_t localeLen = 2; // zh|es|en
@@ -163,11 +166,6 @@ Language LanguageUI::GetLanguage() const
     }
 
     std::ifstream ifs(realPath);
-    if (!ifs.is_open()) {
-        LOG(ERROR) << realPath << " not exist";
-        return DEFAULT_LOCALE;
-    }
-
     std::string content {std::istreambuf_iterator<char> {ifs}, {}};
     const std::string &locale = content.substr(0, localeLen);
     if (auto it = LOCALES.find(locale); it != LOCALES.end()) {
