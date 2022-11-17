@@ -58,5 +58,21 @@ public:
     virtual ~UScriptInstructionIsSubString() {}
     int32_t Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context) override;
 };
+
+class UScriptInstructionDeleteFile : public Uscript::UScriptInstruction {
+public:
+    UScriptInstructionDeleteFile() {}
+    virtual ~UScriptInstructionDeleteFile() {}
+    int32_t Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context) override;
+};
+
+class UScriptInstructionDeleteDir : public Uscript::UScriptInstruction {
+public:
+    UScriptInstructionDeleteDir() {}
+    virtual ~UScriptInstructionDeleteDir() {}
+    int32_t Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context) override;
+};
+
+
 } // namespace BasicInstruction
 #endif // USCRIPT_BASIC_INSTRUCTION_H

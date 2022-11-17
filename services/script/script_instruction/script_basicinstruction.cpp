@@ -15,6 +15,7 @@
 #include "script_basicinstruction.h"
 #include <unistd.h>
 #include "script_utils.h"
+#include "utils.h"
 
 using namespace Uscript;
 using namespace std;
@@ -122,6 +123,46 @@ int32_t UScriptInstructionStdout::Execute(Uscript::UScriptEnv &env, Uscript::USc
         }
     }
     std::cout << std::endl;
+    return USCRIPT_SUCCESS;
+}
+
+int32_t UScriptInstructionDeleteFile::Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context)
+{
+    std::string file;
+    int32_t ret;
+    for (int32_t i = 0; i < context.GetParamCount(); i++) {
+        ret = context.GetParam(i, file);
+        if (ret != USCRIPT_SUCCESS) {
+            USCRIPT_LOGE("Failed to get param");
+            return ret;
+        }
+        USCRIPT_LOGI("delete file %s", file.c_str());
+        ret = Updater::Utils::DeleteFile(file.c_str());
+        if (ret != USCRIPT_SUCCESS) {
+            USCRIPT_LOGE("Failed to delete file");
+            return ret;
+        }
+    }
+    return USCRIPT_SUCCESS;
+}
+
+int32_t UScriptInstructionDeleteDir::Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context)
+{
+    std::string path;
+    int32_t ret;
+    for (int32_t i = 0; i < context.GetParamCount(); i++) {
+        ret = context.GetParam(i, path);
+        if (ret != USCRIPT_SUCCESS) {
+            USCRIPT_LOGE("Failed to get param");
+            return ret;
+        }
+        USCRIPT_LOGI("delete dir %s", path.c_str());
+        ret = Updater::Utils::RemoveDir(path.c_str());
+        if (ret != USCRIPT_SUCCESS) {
+            USCRIPT_LOGE("Failed to remove dir");
+            return ret;
+        }
+    }
     return USCRIPT_SUCCESS;
 }
 } // namespace BasicInstruction

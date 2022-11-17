@@ -75,6 +75,8 @@ int32_t ScriptInstructionHelper::RegisterInstructions() const
     scriptManager_->AddInstruction("set_progress", new UScriptInstructionSetProcess());
     scriptManager_->AddInstruction("show_progress", new UScriptInstructionShowProcess());
     scriptManager_->AddInstruction("ui_print", new UScriptInstructionUiPrint());
+    scriptManager_->AddInstruction("DeleteFile", new UScriptInstructionDeleteFile());
+    scriptManager_->AddInstruction("DeleteDir", new UScriptInstructionDeleteDir());
     return USCRIPT_SUCCESS;
 }
 
