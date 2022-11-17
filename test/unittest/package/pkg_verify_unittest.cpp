@@ -154,7 +154,31 @@ public:
         EXPECT_EQ(stringResult, "");
         return 0;
     }
+
+    int TestPkcs7SignedDataFailed()
+    {
+        Pkcs7SignedData signedData;
+		uint8_t testData['A'];
+        uint8_t *srcData = testData;
+        std::vector<uint8_t> hash;
+
+        int32_t ret = signedData.Verify();
+        EXPECT_EQ(ret, -1);
+        ret = signedData.GetHashFromSignBlock(nullptr, 0, hash);
+        EXPECT_EQ(ret, -1);
+        ret = signedData.GetHashFromSignBlock(srcData, 0, hash);
+        EXPECT_EQ(ret, -1);
+        ret = signedData.GetHashFromSignBlock(srcData, 1, hash);
+        EXPECT_EQ(ret, -1);
+        return 0;
+    }
 };
+
+HWTEST_F(PackageVerifyTest, TestPkcs7SignedDataFailed, TestSize.Level1)
+{
+    PackageVerifyTest test;
+    EXPECT_EQ(0, test.TestPkcs7SignedDataFailed());
+}
 
 HWTEST_F(PackageVerifyTest, TestOpensslUtilFailed, TestSize.Level1)
 {
