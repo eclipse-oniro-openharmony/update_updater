@@ -41,7 +41,6 @@ ohos_unittest("binary_unittest") {
     "//base/update/updater/utils/include",
     "//base/update/updater/utils/json",
     "//base/update/updater/services/include/applypatch",
-    "//base/startup/init/interfaces/innerkits/include",
     "//base/update/updater/services/script/script_manager",
     "//base/update/updater/test/unittest",
     "//base/update/updater/services/updater_binary",
