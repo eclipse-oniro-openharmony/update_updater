@@ -107,6 +107,6 @@ HWTEST_F(CommandFunctionUnitTest, command_function_test_001, TestSize.Level1)
     cmd->Init(cmdLine);
     std::unique_ptr<CommandFunction> cf = CommandFunctionFactory::GetCommandFunction(cmd->GetCommandType());
     EXPECT_EQ(cf, nullptr);
-    unlink(filepath.c_str());
+    unlink(filePath.c_str());
 }
 }
