@@ -40,9 +40,6 @@ public:
     int32_t CreatePackage(const std::string &path, const std::string &keyName, PkgInfoPtr header,
         std::vector<std::pair<std::string, Lz4FileInfo>> &files) override;
 
-    int32_t CreatePackage(const std::string &path, PkgInfoPtr header,
-        std::vector<std::pair<std::string, ComponentInfo>> &files, size_t &offset, std::string &hashValue) override;
-
     int32_t VerifyPackage(const std::string &packagePath, const std::string &keyPath, const std::string &version,
         const PkgBuffer &digest, VerifyCallback cb) override;
 
