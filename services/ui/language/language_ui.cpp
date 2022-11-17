@@ -87,7 +87,18 @@ bool LanguageUI::Parse()
 bool LanguageUI::ParseJson(const std::string &file)
 {
     JsonNode root {std::filesystem::path { file }};
-    if (root.Type() != NodeType::ARRAY) {
+    /*
+     * an example:
+     *	{
+     *      "LABEL_REBOOT_DEVICE": {
+     *            "zh" : "",
+     *            "en" : "",
+     *            "spa" : ""
+     *      }
+     *  }
+     *  , this is an object node
+     */
+    if (root.Type() != NodeType::OBJECT) {
         LOG(ERROR) << file << " is invalid, nodetype is " << static_cast<int>(root.Type());
         return false;
     }
@@ -138,7 +149,7 @@ bool LanguageUI::LoadLangRes(const JsonNode &node)
         return false;
     }
     // clear resources
-    std::vector<std::string>().swap(res_);
+    std::vector<std::string>{3, ""}.swap(res_);
     // load resources
     for (auto &res : langRes_.res) {
         if (!SetRes(res)) {
