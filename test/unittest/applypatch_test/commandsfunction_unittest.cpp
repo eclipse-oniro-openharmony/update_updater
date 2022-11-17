@@ -37,7 +37,7 @@ public:
     CommandResult TestCommandFnExec(std::shared_ptr<Command> cmd, std::string cmdLine)
     {
         cmd->Init(cmdLine);
-        std::unique_ptr<CommandFunction> cf = CommandFunctionFactory::GetCommandFunction(cmd->GetCommandType);
+        std::unique_ptr<CommandFunction> cf = CommandFunctionFactory::GetCommandFunction(cmd->GetCommandType());
         CommandResult ret = cf->Execute(const_cast<Command &>(*cmd.get()));
         CommandFunctionFactory::ReleaseCommandFunction(cf);
         return ret;
@@ -61,9 +61,9 @@ void CommandFunctionUnitTest::TearDown()
 
 HWTEST_F(CommandFunctionUnitTest, command_function_test_001, TestSize.Level1)
 {
-    std::string filepath = "/data/updater/updater/allCmdUnitTest.bin";
-    std::unique_ptr<Command> cmd;
-    cmd = std::make_unique<Command>();
+    std::string filePath = "/data/updater/updater/allCmdUnitTest.bin";
+    std::shared_ptr<Command> cmd;
+    cmd = std::make_shared<Command>();
     TransferManagerPtr tm = TransferManager::GetTransferManagerInstance();
     mode_t dirMode = S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH;
     tm->GetGlobalParams()->storeBase = "data/updater/updater/tmp/cmdtest";
@@ -105,7 +105,7 @@ HWTEST_F(CommandFunctionUnitTest, command_function_test_001, TestSize.Level1)
     EXPECT_EQ(ret, 0);
     cmdLine = "ppop";
     cmd->Init(cmdLine);
-    std::unique_ptr<CommandFunction> cf = CommandFunctionFactory::GetCommandFunction(cmd->GetCommandType);
+    std::unique_ptr<CommandFunction> cf = CommandFunctionFactory::GetCommandFunction(cmd->GetCommandType());
     EXPECT_EQ(cf, nullptr);
     unlink(filepath.c_str());
 }
