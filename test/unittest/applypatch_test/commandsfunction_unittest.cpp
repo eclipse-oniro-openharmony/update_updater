@@ -19,11 +19,10 @@
 #include <iostream>
 #include <string>
 #include "../applypatch/command_process.h"
-#include "log/log.h"
 #include "applypatch/transfer_manager.h"
 #include "applypatch/store.h"
-#include "util.h"
-
+#include "log/log.h"
+#include "utils.h"
 
 using namespace testing::ext;
 using namespace Updater;
