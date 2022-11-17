@@ -111,19 +111,6 @@ int32_t CreatePackage(const UpgradePkgInfoExt *pkgInfo, ComponentInfoExt comp[],
     const char *path, const char *keyPath);
 
 /**
- * create upgrade package
- *
- * @param pkgInfo       package information
- * @param comp          component information list
- * @param path          package file output path
- * @param offset        offset for sign
- * @param hashCode      hash code for sign
- * @return              update package creation result
- */
-int32_t CreatePackageL1(const UpgradePkgInfoExt *pkgInfo, ComponentInfoExt comp[],
-    const char *path, uint32_t *offset, char **hashCode);
-
-/**
  * Signature verification of upgrade package
  *
  * @param packagePath       path of the update package

@@ -37,11 +37,6 @@ public:
     {
         return PKG_SUCCESS;
     }
-    int32_t CreatePackage(const std::string &path, PkgInfoPtr header,
-        std::vector<std::pair<std::string, ComponentInfo>> &files, size_t &offset, std::string &hashValue) override
-    {
-        return PKG_SUCCESS;
-    }
     int32_t VerifyPackage(const std::string &packagePath, const std::string &keyPath,
         const std::string &version, const PkgBuffer &digest, VerifyCallback cb) override
     {
