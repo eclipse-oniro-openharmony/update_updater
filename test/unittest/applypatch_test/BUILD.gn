@@ -63,7 +63,10 @@ ohos_unittest("applypatch_unittest") {
     "//third_party/openssl:libcrypto_static",
     "//third_party/openssl:ssl_source",
   ]
-  external_deps = [ "init:libbegetutil" ]
+  external_deps = [
+    "hiviewdfx_hilog_native:libhilog",
+    "init:libbegetutil",
+    ]
   configs = [ "$UPDATER_TEST_ROOT:utest_config" ]
   install_enable = true
   part_name = "updater"

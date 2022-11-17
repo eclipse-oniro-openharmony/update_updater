@@ -22,6 +22,9 @@
 #include <string>
 #include <unordered_map>
 #include "error_code.h"
+#ifndef DIFF_PATCH_SDK
+#include "hilog/log.h"
+#endif
 
 namespace Updater {
 #ifdef __WIN32

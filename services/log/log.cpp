@@ -18,9 +18,6 @@
 #include <memory>
 #include <unordered_map>
 #include <vector>
-#ifndef DIFF_PATCH_SDK
-#include "hilog/log.h"
-#endif
 #include "securec.h"
 
 namespace Updater {
