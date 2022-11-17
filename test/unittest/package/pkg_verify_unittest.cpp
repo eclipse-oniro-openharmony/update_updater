@@ -158,7 +158,7 @@ public:
     int TestPkcs7SignedDataFailed()
     {
         Pkcs7SignedData signedData;
-		uint8_t testData['A'];
+        uint8_t testData['A'];
         uint8_t *srcData = testData;
         std::vector<uint8_t> hash;
 
