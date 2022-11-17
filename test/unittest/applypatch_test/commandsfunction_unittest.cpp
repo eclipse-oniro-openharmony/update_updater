@@ -19,9 +19,10 @@
 #include <iostream>
 #include <string>
 #include "../applypatch/command_process.h"
-#include "log/log.h"
 #include "applypatch/transfer_manager.h"
-
+#include "applypatch/store.h"
+#include "log/log.h"
+#include "utils.h"
 
 using namespace testing::ext;
 using namespace Updater;
@@ -36,7 +37,7 @@ public:
     CommandResult TestCommandFnExec(std::shared_ptr<Command> cmd, std::string cmdLine)
     {
         cmd->Init(cmdLine);
-        std::unique_ptr<CommandFunction> cf = CommandFunctionFactory::GetCommandFunction(cmd->GetCommandType);
+        std::unique_ptr<CommandFunction> cf = CommandFunctionFactory::GetCommandFunction(cmd->GetCommandType());
         CommandResult ret = cf->Execute(const_cast<Command &>(*cmd.get()));
         CommandFunctionFactory::ReleaseCommandFunction(cf);
         return ret;
@@ -60,28 +61,9 @@ void CommandFunctionUnitTest::TearDown()
 
 HWTEST_F(CommandFunctionUnitTest, command_function_test_001, TestSize.Level1)
 {
-    Command* cmd = new Command();
-    std::string cmdLine = std::string("abort");
-    cmd->Init(cmdLine);
-    AbortCommandFn cmdAbort;
-    EXPECT_EQ(cmdAbort.Execute(*cmd), 0);
-    cmd->SetFileDescriptor(0);
-    cmdLine = "new 2,0,1";
-    cmd->Init(cmdLine);
-    NewCommandFn cmdNew;
-    EXPECT_EQ(cmdNew.Execute(*cmd), -1);
-    cmdLine = "erase 1,1";
-    cmd->Init(cmdLine);
-    ZeroAndEraseCommandFn cmdErase;
-    EXPECT_EQ(cmdErase.Execute(*cmd), -1);
-    delete cmd;
-}
-
-HWTEST_F(CommandFunctionUnitTest, command_function_test_002, TestSize.Level1)
-{
-    std::string filepath = "/data/updater/updater/allCmdUnitTest.bin";
-    std::unique_ptr<Command> cmd;
-    cmd = std::make_unique<Command>();
+    std::string filePath = "/data/updater/updater/allCmdUnitTest.bin";
+    std::shared_ptr<Command> cmd;
+    cmd = std::make_shared<Command>();
     TransferManagerPtr tm = TransferManager::GetTransferManagerInstance();
     mode_t dirMode = S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH;
     tm->GetGlobalParams()->storeBase = "data/updater/updater/tmp/cmdtest";
@@ -101,5 +83,30 @@ HWTEST_F(CommandFunctionUnitTest, command_function_test_002, TestSize.Level1)
     ret = CommandFunctionUnitTest::TestCommandFnExec(cmd, cmdLine);
     tm->GetGlobalParams()->storeCreated = 0;
     EXPECT_EQ(ret, 0);
+    cmdLine = "move ad7facb2586fc6e966c004d7d1d16b024f5805ff7cb47c7a85dabd8b48892ca7 2,3,4 1 2,1,2";
+    lseek64(fd, 0, SEEK_SET);
+    ret = CommandFunctionUnitTest::TestCommandFnExec(cmd, cmdLine);
+    EXPECT_EQ(ret, 0);
+    cmdLine = R"(bsdiff 0 132 ad7facb2586fc6e966c004d7d1d16b024f5805ff7cb4
+    7c7a85dabd8b48892ca7 3431383721510cf1c211de027cf958c183e16db5fabb6b230
+    eb284c85e196aa9 2,0,1 1 - ad7facb2586fc6e966c004d7d1d16b024f5805ff7cb4
+    7c7a85dabd8b48892ca7:2,0,1)";
+    lseek64(fd, 0, SEEK_SET);
+    ret = CommandFunctionUnitTest::TestCommandFnExec(cmd, cmdLine);
+    EXPECT_EQ(ret, -1);
+    cmdLine = "abort";
+    ret = CommandFunctionUnitTest::TestCommandFnExec(cmd, cmdLine);
+    EXPECT_EQ(ret, 0);
+    cmdLine = "new 2,0,1";
+    ret = CommandFunctionUnitTest::TestCommandFnExec(cmd, cmdLine);
+    EXPECT_EQ(ret, -1);
+    cmdLine = "stash ad7facb2586fc6e966c004d7d1d16b024f5805ff7cb47c7a85dabd8b48892ca7 2,2,3";
+    ret = CommandFunctionUnitTest::TestCommandFnExec(cmd, cmdLine);
+    EXPECT_EQ(ret, 0);
+    cmdLine = "ppop";
+    cmd->Init(cmdLine);
+    std::unique_ptr<CommandFunction> cf = CommandFunctionFactory::GetCommandFunction(cmd->GetCommandType());
+    EXPECT_EQ(cf, nullptr);
+    unlink(filePath.c_str());
 }
 }
