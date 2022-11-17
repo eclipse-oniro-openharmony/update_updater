@@ -137,7 +137,9 @@ public:
         GetUpgradePkgInfo(pkgInfo, files);
         std::string packagePath = TEST_PATH_TO;
         packagePath += testPackageName;
-        int32_t ret = pkgManager_->CreatePackage(packagePath, GetTestPrivateKeyName(0), &pkgInfo.pkgInfo, files);
+        int32_t ret = pkgManager_->CreatePackage(packagePath, "", &pkgInfo.pkgInfo, files);
+        EXPECT_EQ(ret, PKG_INVALID_FILE);
+        ret = pkgManager_->CreatePackage(packagePath, GetTestPrivateKeyName(0), &pkgInfo.pkgInfo, files);
         EXPECT_EQ(ret, PKG_SUCCESS);
         return 0;
     }
@@ -293,7 +295,11 @@ public:
         pkgInfo.pkgType = PKG_PACK_TYPE_GZIP;
         std::string fileName = TEST_PATH_TO;
         fileName += testGZipPackageName;
-        int ret = pkgManager_->CreatePackage(fileName, GetTestPrivateKeyName(0), &pkgInfo, files);
+        int ret = pkgManager_->CreatePackage(fileName, "", &pkgInfo, files);
+        EXPECT_EQ(ret, PKG_INVALID_FILE);
+        ret = pkgManager_->CreatePackage(fileName, GetTestPrivateKeyName(0), nullptr, files);
+        EXPECT_EQ(ret, PKG_INVALID_PARAM);
+        ret = pkgManager_->CreatePackage(fileName, GetTestPrivateKeyName(0), &pkgInfo, files);
         EXPECT_EQ(ret, PKG_INVALID_FILE);
         return 0;
     }
@@ -340,7 +346,11 @@ public:
         pkgInfo.pkgType  = PKG_PACK_TYPE_ZIP;
         std::string fileName = TEST_PATH_TO;
         fileName += testZipPackageName;
-        int ret = pkgManager_->CreatePackage(fileName, GetTestPrivateKeyName(0), &pkgInfo, files);
+        int ret = pkgManager_->CreatePackage(fileName, "", &pkgInfo, files);
+        EXPECT_EQ(ret, PKG_INVALID_FILE);
+        ret = pkgManager_->CreatePackage(fileName, GetTestPrivateKeyName(0), nullptr, files);
+        EXPECT_EQ(ret, PKG_INVALID_PARAM);
+        ret = pkgManager_->CreatePackage(fileName, GetTestPrivateKeyName(0), &pkgInfo, files);
         EXPECT_EQ(ret, PKG_INVALID_FILE);
         return 0;
     }
@@ -557,6 +567,19 @@ public:
         PKG_LOGE("digest cmp result %d", ret);
         return ret;
     }
+
+    void TestReadWriteLENull()
+    {
+        uint8_t *buff = nullptr;
+        WriteLE16(buff, 0);
+        uint16_t ret16 = ReadLE16(buff);
+        EXPECT_EQ(ret16, 0);
+        WriteLE32(buff, 0);
+        uint32_t ret32 = ReadLE32(buff);
+        EXPECT_EQ(ret32, 0);
+        uint64_t ret64 = ReadLE64(buff);
+        EXPECT_EQ(ret64, 0);
+    }
 };
 
 HWTEST_F(PkgMangerTest, TestGZipBuffer, TestSize.Level1)
@@ -644,5 +667,11 @@ HWTEST_F(PkgMangerTest, TestLoadPackageFail, TestSize.Level1)
 {
     PkgMangerTest test;
     EXPECT_EQ(0, test.TestLoadPackageFail());
+}
+
+HWTEST_F(PkgMangerTest, TestReadWriteLENull, TestSize.Level1)
+{
+    PkgMangerTest test;
+    test.TestReadWriteLENull();
 }
 }

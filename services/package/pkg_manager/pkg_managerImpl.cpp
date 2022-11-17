@@ -162,40 +162,6 @@ int32_t PkgManagerImpl::CreatePackage(const std::string &path, const std::string
     return ret;
 }
 
-int32_t PkgManagerImpl::CreatePackage(const std::string &path, PkgInfoPtr header,
-    std::vector<std::pair<std::string, ComponentInfo>> &files, size_t &offset, std::string &hashValue)
-{
-    if (files.size() <= 0 || header == nullptr) {
-        PKG_LOGE("Invalid param");
-        return PKG_INVALID_PARAM;
-    }
-    PkgFilePtr pkgFile = CreatePackage<ComponentInfo>(path, header, files, offset);
-    if (pkgFile == nullptr) {
-        return PKG_INVALID_FILE;
-    }
-    int32_t ret = 0;
-    if (header->pkgFlags & PKG_SUPPORT_L1) {
-        size_t digestLen = DigestAlgorithm::GetDigestLen(header->digestMethod);
-        std::vector<std::vector<uint8_t>> digestInfos(DIGEST_INFO_SIGNATURE + 1);
-        digestInfos[DIGEST_INFO_HAS_SIGN].resize(digestLen);
-        ret = GenerateFileDigest(pkgFile->GetPkgStream(),
-            header->digestMethod, DIGEST_FLAGS_HAS_SIGN, digestInfos, offset);
-        offset = (header->digestMethod == PKG_DIGEST_TYPE_SHA384) ? (offset + SIGN_SHA256_LEN) : offset;
-        if (ret != PKG_SUCCESS) {
-            PKG_LOGE("Fail to generate signature %s", pkgFile->GetPkgStream()->GetFileName().c_str());
-            return ret;
-        }
-        hashValue = ConvertShaHex(digestInfos[DIGEST_INFO_HAS_SIGN]);
-        PKG_LOGI("PkgManagerImpl::CreatePackage sign offset %zu ", offset);
-    } else {
-        offset = (header->digestMethod == PKG_DIGEST_TYPE_SHA384) ? (offset + SIGN_SHA256_LEN) : offset;
-        ret = Sign(pkgFile->GetPkgStream(), offset, header);
-    }
-    delete pkgFile;
-    pkgFile = nullptr;
-    return ret;
-}
-
 template<class T>
 PkgFilePtr PkgManagerImpl::CreatePackage(const std::string &path, PkgInfoPtr header,
     std::vector<std::pair<std::string, T>> &files, size_t &offset)
