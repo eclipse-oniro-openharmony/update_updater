@@ -16,6 +16,7 @@
 #include "sub_page.h"
 #include "dock/focus_manager.h"
 #include "log/log.h"
+#include "scope_guard.h"
 
 namespace Updater {
 using namespace OHOS;
@@ -32,20 +33,30 @@ void SubPage::Reset()
 {
     isVisible_ = false;
     focusedView_ = nullptr;
+    pageId_ = "";
+    comsId_ = {};
+    color_ = Color::Black();
 }
 
 bool SubPage::BuildSubPage(UxSubPageInfo &subpageInfo)
 {
+    Reset();
     if (!IsValid()) {
         return false;
     }
-    Reset();
+    ON_SCOPE_EXIT(reset) {
+        Reset();
+    };
     color_ = StrToColor(subpageInfo.bgColor);
     comsId_ = std::move(subpageInfo.coms);
     int minY = INT16_MAX;
     std::string focusedId {};
     for (auto &id : comsId_) {
-        if (basePage_->IsValidCom(id) && (*basePage_)[id]->IsFocusable() && (*basePage_)[id]->GetY() < minY) {
+        if (!basePage_->IsValidCom(id)) {
+            LOG(ERROR) << "invalid id for subpage: " << id;
+            return false;
+        }
+        if ((*basePage_)[id]->IsFocusable() && (*basePage_)[id]->GetY() < minY) {
             minY = (*basePage_)[id]->GetY();
             focusedId = id;
         }
@@ -53,6 +64,7 @@ bool SubPage::BuildSubPage(UxSubPageInfo &subpageInfo)
     if (!focusedId.empty()) {
         focusedView_ = (*basePage_)[focusedId].As();
     }
+    CANCEL_SCOPE_EXIT_GUARD(reset);
     return true;
 }
 
@@ -124,6 +136,9 @@ bool SubPage::IsValid() const
 bool SubPage::IsValidCom(const std::string &id) const
 {
     if (!IsValid()) {
+        return false;
+    }
+    if (std::find(comsId_.begin(), comsId_.end(), id) == comsId_.end()) {
         return false;
     }
     return basePage_->IsValidCom(id);

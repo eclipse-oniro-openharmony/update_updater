@@ -38,13 +38,16 @@ public:
     Page &operator[](const std::string &id) const;
     void ShowMainPage();
     ViewProxy &operator[](const ComInfo &comInfo) const;
+    void Reset();
+#ifdef UPDATER_UT
+    std::vector<std::string> Report();
+#endif
 private:
     PageManager() = default;
     ~PageManager() = default;
-    void Reset();
-    void InitImpl(UxPageInfo &pageInfo, std::string_view entry);
+    bool InitImpl(UxPageInfo &pageInfo, std::string_view entry);
     void EnQueuePage(const std::shared_ptr<Page> &page);
-    void BuildSubPages(const std::string &pageId, const std::shared_ptr<Page> &basePage,
+    bool BuildSubPages(const std::string &pageId, const std::shared_ptr<Page> &basePage,
         std::vector<UxSubPageInfo> &subPageInfos, std::string_view entry);
     bool IsValidPage(const std::shared_ptr<Page> &pg) const;
     static constexpr size_t MAX_PAGE_QUEUE_SZ = 3;
