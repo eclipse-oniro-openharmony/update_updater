@@ -185,6 +185,7 @@ public:
         bool ret = pkginfomanager->IsAllowRollback();
         EXPECT_EQ(ret, false);
         PackagesInfo::ReleasePackagesInfoInstance(pkginfomanager);
+        return 0;
     }
 };
 
