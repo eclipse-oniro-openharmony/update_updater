@@ -23,9 +23,9 @@ ohos_unittest("binary_unittest") {
       "//base/update/updater/test/unittest/test_data/ohos_test.xml"
   module_out_path = MODULE_OUTPUT_PATH
   sources = [
-      "update_image_block_test.cpp",
-      "update_image_patch_unittest.cpp",
-    ]
+    "update_image_block_test.cpp",
+    "update_image_patch_unittest.cpp",
+  ]
 
   sources += [
     "//base/update/updater/services/updater_binary/update_image_block.cpp",
