@@ -150,6 +150,28 @@ public:
         return ret;
     }
 
+    int TestGZipPkgCompress()
+    {
+        int ret = TestPackagePack();
+        EXPECT_EQ(ret, PKG_SUCCESS);
+        pkgManager_ = static_cast<PkgManagerImpl*>(PkgManager::GetPackageInstance());
+        EXPECT_NE(pkgManager_, nullptr);
+        std::vector<std::pair<std::string, ZipFileInfo>> files;
+        ZipFileInfo file;
+        file.fileInfo.identity = testPackageName;
+        file.fileInfo.packMethod = PKG_COMPRESS_METHOD_GZIP;
+        file.fileInfo.digestMethod = PKG_DIGEST_TYPE_CRC;
+        std::string fileName = TEST_PATH_TO + testPackageName;
+        files.push_back(std::pair<std::string, ZipFileInfo>(fileName, file));
+
+        PkgInfo pkgInfo;
+        pkgInfo.signMethod = PKG_SIGN_METHOD_RSA;
+        pkgInfo.digestMethod  = PKG_DIGEST_TYPE_SHA256;
+        pkgInfo.pkgType = PKG_PACK_TYPE_GZIP;
+        return pkgManager_->CreatePackage(TEST_PATH_TO + testGZipPackageName,
+            GetTestPrivateKeyName(pkgInfo.digestMethod), &pkgInfo, files);
+    }
+
     int TestVerifyUpgradePackage()
     {
         constexpr size_t digestSize = 32;
@@ -203,5 +225,11 @@ HWTEST_F(PackageUnitTest, TestZipPackage, TestSize.Level1)
     PackageUnitTest test;
     EXPECT_EQ(0, test.TestZipPkgCompress(PKG_DIGEST_TYPE_SHA256));
     EXPECT_EQ(0, test.TestZipPkgDecompress(PKG_DIGEST_TYPE_SHA256));
+}
+
+HWTEST_F(PackageUnitTest, TestGZipPkg, TestSize.Level1)
+{
+    PackageUnitTest test;
+    EXPECT_EQ(0, test.TestGZipPkgCompress());
 }
 }
