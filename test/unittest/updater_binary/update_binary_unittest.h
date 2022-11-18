@@ -19,19 +19,16 @@
 #include "script_instruction.h"
 #include "script_unittest.h"
 
-using namespace Uscript;
-using namespace Hpackage;
-
 namespace UpdaterUt {
 class UTestBinaryEnv : public Uscript::UScriptEnv {
 public:
-    explicit UTestBinaryEnv(PkgManager::PkgManagerPtr pkgManager) : Uscript::UScriptEnv(pkgManager) {}
+    explicit UTestBinaryEnv(Hpackage::PkgManager::PkgManagerPtr pkgManager) : Uscript::UScriptEnv(pkgManager) {}
 
     ~UTestBinaryEnv() = default;
 
     void PostMessage(const std::string &cmd, std::string content) {}
 
-    UScriptInstructionFactoryPtr GetInstructionFactory()
+    Uscript::UScriptInstructionFactoryPtr GetInstructionFactory()
     {
         return nullptr;
     }
@@ -51,20 +48,20 @@ public:
         return isRetry_ = retry;
     }
 
-    UScriptInstructionFactory *factory_ = nullptr;
+    Uscript::UScriptInstructionFactory *factory_ = nullptr;
 private:
     bool isRetry_ = false;
 };
 
-class TestPkgMgr : public TestScriptPkgManager {
+class TestPkgMgr : public Hpackage::TestScriptPkgManager {
 public:
-    int32_t ExtractFile(const std::string &fileId, StreamPtr output) override
+    int32_t ExtractFile(const std::string &fileId, Hpackage::PkgManager::StreamPtr output) override
     {
-        return PKG_SUCCESS;
+        return Hpackage::PKG_SUCCESS;
     }
-    const FileInfo *GetFileInfo(const std::string &fileId) override
+    const Hpackage::FileInfo *GetFileInfo(const std::string &fileId) override
     {
-        static FileInfo fileInfo {};
+        static Hpackage::FileInfo fileInfo {};
         if (fileId == "binary") {
             return &fileInfo;
         }
@@ -72,30 +69,30 @@ public:
     }
 };
 
-class TestPkgMgrStream1 : public TestScriptPkgManager {
+class TestPkgMgrStream1 : public Hpackage::TestScriptPkgManager {
 public:
-    int32_t CreatePkgStream(StreamPtr &stream, const std::string &fileName, size_t size,
+    int32_t CreatePkgStream(Hpackage::PkgManager::StreamPtr &stream, const std::string &fileName, size_t size,
         int32_t type) override
     {
-        return PKG_ERROR_BASE;
+        return Hpackage::PKG_ERROR_BASE;
     }
 };
 
-class TestPkgMgrStream2 : public TestScriptPkgManager {
+class TestPkgMgrStream2 : public Hpackage::TestScriptPkgManager {
 public:
-    int32_t CreatePkgStream(StreamPtr &stream, const std::string &fileName, size_t size,
+    int32_t CreatePkgStream(Hpackage::PkgManager::StreamPtr &stream, const std::string &fileName, size_t size,
         int32_t type) override
     {
         stream = nullptr;
-        return PKG_SUCCESS;
+        return Hpackage::PKG_SUCCESS;
     }
 };
 
-class TestPkgMgrExtract1 : public TestScriptPkgManager {
+class TestPkgMgrExtract1 : public Hpackage::TestScriptPkgManager {
 public:
-    int32_t ExtractFile(const std::string &fileId, StreamPtr output) override
+    int32_t ExtractFile(const std::string &fileId, Hpackage::PkgManager::StreamPtr output) override
     {
-        return PKG_ERROR_BASE;
+        return Hpackage::PKG_ERROR_BASE;
     }
 };
 }
