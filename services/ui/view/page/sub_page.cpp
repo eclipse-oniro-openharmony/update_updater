@@ -33,20 +33,18 @@ void SubPage::Reset()
 {
     isVisible_ = false;
     focusedView_ = nullptr;
-    pageId_ = "";
     comsId_ = {};
     color_ = Color::Black();
 }
 
 bool SubPage::BuildSubPage(UxSubPageInfo &subpageInfo)
 {
-    Reset();
-    if (!IsValid()) {
-        return false;
-    }
     ON_SCOPE_EXIT(reset) {
         Reset();
     };
+    if (!IsValid()) {
+        return false;
+    }
     color_ = StrToColor(subpageInfo.bgColor);
     comsId_ = std::move(subpageInfo.coms);
     int minY = INT16_MAX;

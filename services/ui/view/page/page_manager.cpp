@@ -60,8 +60,10 @@ bool PageManager::InitImpl(UxPageInfo &pageInfo, std::string_view entry)
 
 bool PageManager::Init(std::vector<UxPageInfo> &pageInfos, std::string_view entry)
 {
-    ON_SCOPE_EXIT(reset) { Reset(); };
     Reset();
+    ON_SCOPE_EXIT(reset) {
+        Reset();
+    };
     for (auto &pageInfo : pageInfos) {
         if (!InitImpl(pageInfo, entry)) {
             return false;
@@ -211,7 +213,7 @@ void PageManager::Reset()
 #ifdef UPDATER_UT
 std::vector<std::string> PageManager::Report()
 {
-    std::vector<std::string> result{};
+    std::vector<std::string> result {};
     for (auto &[id, pg] : pageMap_) {
         if (pg->IsVisible()) {
             result.push_back(id);
