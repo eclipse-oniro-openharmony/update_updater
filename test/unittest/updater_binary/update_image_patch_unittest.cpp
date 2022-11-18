@@ -18,31 +18,34 @@
 #include "update_binary_unittest.h"
 #include "script_context.h"
 #include "update_image_patch.h"
+#include "mount.h"
 
+using namespace Uscript;
+using namespace Updater;
 using namespace testing::ext;
+using namespace Hpackage;
 
+namespace UpdaterUt {
 class ImgPatchUnittest : public ::testing::Test {
 public:
     ImgPatchUnittest() {}
     ~ImgPatchUnittest() {}
 
     /* GetParam(): 脚本指令image_patch，参数个数为IMAGE_PATCH_CMD_LEN:6，入参为空 */
-    void TestImgPatch01() const
+    void TestImgPatch01()
     {
-        UTestBinaryEnv env(&pkgManager_);
-        ScriptManagerImpl scriptManager(&env);
+        UTestBinaryEnv env {&pkgManager_};
         UScriptInstructionContext context {};
         auto instruction = std::make_unique<USInstrImagePatch>();
         EXPECT_EQ(instruction->Execute(env, context), USCRIPT_INVALID_PARAM);
         std::vector<UScriptValuePtr> output = context.GetOutVar();
-        EXPECT_EQ(output.size(), 0);
+        EXPECT_EQ(output.size(), 1);
     }
 
     /* GetParam(): 指令入参参数格式不对 */
-    void TestImgPatch02() const
+    void TestImgPatch02()
     {
-        UTestBinaryEnv env(&pkgManager_);
-        ScriptManagerImpl scriptManager(&env);
+        UTestBinaryEnv env {&pkgManager_};
         UScriptInstructionContext context {};
         context.AddInputParam(std::make_shared<IntegerValue>(1));
         context.AddInputParam(std::make_shared<IntegerValue>(2));
@@ -53,14 +56,13 @@ public:
         auto instruction = std::make_unique<USInstrImagePatch>();
         EXPECT_EQ(instruction->Execute(env, context), USCRIPT_INVALID_PARAM);
         std::vector<UScriptValuePtr> output = context.GetOutVar();
-        EXPECT_EQ(output.size(), 0);
+        EXPECT_EQ(output.size(), 1);
     }
 
     /* GetParam(): 根据指令入参解析fstab设备文件失败 */
-    void TestImgPatch03() const
+    void TestImgPatch03()
     {
-        UTestBinaryEnv env(&pkgManager_);
-        ScriptManagerImpl scriptManager(&env);
+        UTestBinaryEnv env {&pkgManager_};
         UScriptInstructionContext context {};
         context.AddInputParam(std::make_shared<StringValue>(""));
         context.AddInputParam(std::make_shared<StringValue>("srcSize"));
@@ -71,14 +73,13 @@ public:
         auto instruction = std::make_unique<USInstrImagePatch>();
         EXPECT_EQ(instruction->Execute(env, context), USCRIPT_ERROR_EXECUTE);
         std::vector<UScriptValuePtr> output = context.GetOutVar();
-        EXPECT_EQ(output.size(), 0);
+        EXPECT_EQ(output.size(), 1);
     }
 
     /* GetParam(): 解析命令行参数成功 */
-    void TestImgPatch04() const
+    void TestImgPatch04()
     {
-        UTestBinaryEnv env(&pkgManager_);
-        ScriptManagerImpl scriptManager(&env);
+        UTestBinaryEnv env {&pkgManager_};
         UScriptInstructionContext context {};
         context.AddInputParam(std::make_shared<StringValue>("/vendortest"));
         context.AddInputParam(std::make_shared<StringValue>("srcSize"));
@@ -87,18 +88,17 @@ public:
         context.AddInputParam(std::make_shared<StringValue>("destHash"));
         context.AddInputParam(std::make_shared<StringValue>("/data/updater/patchfile"));
         auto instruction = std::make_unique<USInstrImagePatch>();
-        EXPECT_EQ(instruction->Execute(env, context), USCRIPT_SUCCESS);
+        EXPECT_EQ(instruction->Execute(env, context), USCRIPT_ERROR_EXECUTE);
         std::vector<UScriptValuePtr> output = context.GetOutVar();
-        EXPECT_EQ(output.size(), 0);
+        EXPECT_EQ(output.size(), 1);
     }
 
     /* GetPatchFile(): retry为true, 获取文件失败, 创建文件流失败 */
-    void TestImgPatch05() const
+    void TestImgPatch05()
     {
         PkgManager::PkgManagerPtr pkgMgr = nullptr;
-        UTestBinaryEnv env1(pkgMgr);
+        UTestBinaryEnv env1 {pkgMgr};
         env1.SetRetry(true);
-        ScriptManagerImpl scriptManager(&env1);
         UScriptInstructionContext context {};
         context.AddInputParam(std::make_shared<StringValue>("/vendortest"));
         context.AddInputParam(std::make_shared<StringValue>("srcSize"));
@@ -109,7 +109,7 @@ public:
         auto instruction = std::make_unique<USInstrImagePatch>();
         EXPECT_EQ(instruction->Execute(env1, context), USCRIPT_ERROR_EXECUTE);
         std::vector<UScriptValuePtr> output = context.GetOutVar();
-        EXPECT_EQ(output.size(), 0);
+        EXPECT_EQ(output.size(), 1);
 
         UTestBinaryEnv env2(&pkgManager_);
         EXPECT_EQ(instruction->Execute(env2, context), USCRIPT_ERROR_EXECUTE);
@@ -128,10 +128,9 @@ public:
     }
 
     /* GetPatchFile(): 获取文件成功，patchfile=/data/udpater/binary */
-    void TestImgPatch06() const
+    void TestImgPatch06()
     {
-        UTestBinaryEnv env(&pkgManager_);
-        ScriptManagerImpl scriptManager(&env);
+        UTestBinaryEnv env {&pkgManager_};
         UScriptInstructionContext context {};
         context.AddInputParam(std::make_shared<StringValue>("binary"));
         context.AddInputParam(std::make_shared<StringValue>("srcSize"));
@@ -140,9 +139,9 @@ public:
         context.AddInputParam(std::make_shared<StringValue>("destHash"));
         context.AddInputParam(std::make_shared<StringValue>("/data/updater/patchfile"));
         auto instruction = std::make_unique<USInstrImagePatch>();
-        EXPECT_EQ(instruction->Execute(env1, context), USCRIPT_ERROR_EXECUTE);
+        EXPECT_EQ(instruction->Execute(env, context), USCRIPT_ERROR_EXECUTE);
         std::vector<UScriptValuePtr> output = context.GetOutVar();
-        EXPECT_EQ(output.size(), 0);
+        EXPECT_EQ(output.size(), 1);
     }
 
 protected:
@@ -186,4 +185,5 @@ HWTEST_F(ImgPatchUnittest, TestImgPatch05, TestSize.Level1)
 HWTEST_F(ImgPatchUnittest, TestImgPatch06, TestSize.Level1)
 {
     ImgPatchUnittest {}.TestImgPatch06();
+}
 }
