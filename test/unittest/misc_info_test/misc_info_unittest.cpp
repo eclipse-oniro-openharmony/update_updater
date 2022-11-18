@@ -51,7 +51,7 @@ HWTEST_F(MiscInfoUnitTest, misc_info_test_001, TestSize.Level1)
     bool ret = WriteUpdaterMessage(path, boot);
     EXPECT_EQ(ret, false);
 
-    path = "/data/test/misc";
+    path = MISC_FILE;
     ret = WriteUpdaterMessage(path, boot);
     EXPECT_EQ(ret, true);
 
@@ -60,7 +60,7 @@ HWTEST_F(MiscInfoUnitTest, misc_info_test_001, TestSize.Level1)
     EXPECT_EQ(ret, false);
     unlink(path.c_str());
 
-    path = "/data/test/misc";
+    path = MISC_FILE;
     ret = ReadUpdaterMessage(path, boot);
     EXPECT_EQ(ret, true);
 
