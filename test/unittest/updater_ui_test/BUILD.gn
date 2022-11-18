@@ -31,7 +31,11 @@ ohos_unittest("ui_unittest") {
     "ENABLE_STATIC_FONT = 0",
     "ENABLE_VECTOR_FONT = 1",
   ]
-  sources = [ "ui_layout_unittest.cpp" ]
+  sources = [
+    "ui_language_unittest.cpp",
+    "ui_layout_unittest.cpp",
+    "ui_view_proxy_unittest.cpp",
+  ]
   sources += [
     "//base/update/updater/services/ui/language/language_ui.cpp",
     "//base/update/updater/services/ui/strategy/logo_strategy.cpp",

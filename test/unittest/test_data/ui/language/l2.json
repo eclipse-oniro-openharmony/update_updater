@@ -1,0 +1,22 @@
+{
+    "SHUTDOWN_DEVICE" : {
+        "en": "shutdown",
+        "zh": "关机",
+        "spa": ""
+    },
+    "FACTORY_RESET" : {
+        "en": "factory reset",
+        "zh": "恢复出厂设置",
+        "spa": ""
+    },
+    "SDCARD_UPDATE" : {
+        "en": "sdcard update",
+        "zh": "SD卡升级",
+        "spa": ""
+    },
+    "DEFAULT_STRING" : {
+        "en" : "default",
+        "zh" : "默认",
+        "spa" : ""
+    }
+}

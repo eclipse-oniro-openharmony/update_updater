@@ -171,6 +171,16 @@
             <option name="push" value="ui/layout/noPageInfo.json -> /data/updater/ui" src="res"/>
             <option name="push" value="ui/layout/subpage.json -> /data/updater/ui" src="res"/>
             <option name="push" value="ui/layout/typeInvalid.json -> /data/updater/ui" src="res"/>
+            <!-- language test -->
+            <option name="push" value="ui/language/l0.json -> /data/updater/ui" src="res"/>
+            <option name="push" value="ui/language/l1.json -> /data/updater/ui" src="res"/>
+            <option name="push" value="ui/language/l2.json -> /data/updater/ui" src="res"/>
+            <option name="push" value="ui/language/correct_all.json -> /data/updater/ui" src="res"/>
+            <option name="push" value="ui/language/correct_en.json -> /data/updater/ui" src="res"/>
+            <option name="push" value="ui/language/correct_es.json -> /data/updater/ui" src="res"/>
+            <option name="push" value="ui/language/correct_zh.json -> /data/updater/ui" src="res"/>
+            <option name="push" value="ui/language/keyEmpty.json -> /data/updater/ui" src="res"/>
+            <option name="push" value="ui/language/strNotExist.json -> /data/updater/ui" src="res"/>
         </preparer>
     </target>
 </configuration>

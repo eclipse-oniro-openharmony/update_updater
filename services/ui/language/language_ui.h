@@ -35,17 +35,16 @@ class LanguageUI final {
 public:
     static LanguageUI &GetInstance();
     [[nodiscard]] bool Init(const Language language);
-    void SetLanguage(Language language);
     // msgId used here to specify validation of msgId
     const std::string &Translate(const std::string &key,
         [[maybe_unused]] UpdaterUiMsgID msgId = UpdaterUiMsgID::DEFAULT_STRING) const;
-    bool SetRes(const Res &res);
-    bool LoadLangRes(const JsonNode &node);
-    Language GetLanguage() const;
+    [[nodiscard]] bool LoadLangRes(const JsonNode &node);
+    Language ParseLanguage() const;
 private:
     ~LanguageUI() = default;
     LanguageUI();
     bool Parse();
+    bool SetRes(const Res &res);
     bool CheckLevel(int level);
     bool ParseJson(const std::string &file);
     std::unordered_map<std::string, std::string> strMap_;
