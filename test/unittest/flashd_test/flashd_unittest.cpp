@@ -296,7 +296,18 @@ HWTEST_F(FLashServiceUnitTest, UpdateCommanderDoCommand2, TestSize.Level1)
     size_t size = cmd.size();
     commander->DoCommand(cmd, size);
     EXPECT_EQ(UpdaterState::FAIL, ret);
-    cmd = "update test test.zip";
+
+    cmd = "";
+    size = cmd.size();
+    commander->DoCommand(cmd, size);
+    EXPECT_EQ(UpdaterState::FAIL, ret);
+
+    cmd = "update test.zip";
+    commander->DoCommand(cmd, size);
+    EXPECT_EQ(UpdaterState::FAIL, ret);
+
+    LoadSpecificFstab("/data/updater/updater/etc/fstab.ut.updater");
+    cmd = "update test.zip";
     commander->DoCommand(cmd, size);
     EXPECT_EQ(UpdaterState::FAIL, ret);
 }
