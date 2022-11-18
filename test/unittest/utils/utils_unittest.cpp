@@ -24,7 +24,6 @@
 using namespace Updater;
 using namespace testing::ext;
 using namespace std;
-using namespace Utils;
 
 namespace UpdaterUt {
 class UtilsUnitTest : public testing::Test {
@@ -45,7 +44,7 @@ HWTEST_F(UtilsUnitTest, updater_utils_test_001, TestSize.Level0)
     EXPECT_STREQ(emptyStr.c_str(), "aa");
 }
 
-HWTEST_F(UtilsUnitTest, ConvertSha256Hex, TestSize.Level0)
+HWTEST_F(UtilsUnitTest, updater_utils_test_002, TestSize.Level0)
 {
     uint8_t a[1] = {0};
     a[0] = 1;
@@ -61,19 +60,9 @@ HWTEST_F(UtilsUnitTest, updater_utils_test_003, TestSize.Level0)
     EXPECT_EQ(newStr[1], "bbb");
 }
 
-HWTEST_F(UtilsUnitTest, MkdirRecursive, TestSize.Level0)
+HWTEST_F(UtilsUnitTest, updater_utils_test_004, TestSize.Level0)
 {
-    std::string path(5000, 'a');
-    int ret = MkdirRecursive("/data/xx?xx", S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
-    EXPECT_EQ(ret, 0);
-
-    path = path + "/";
-    ret = MkdirRecursive(path, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
-    EXPECT_EQ(ret, -1);
-
-    path = "/test/xx?xx";
-    ret = MkdirRecursive(path, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
-    EXPECT_EQ(ret, -1);
+    EXPECT_EQ(Utils::MkdirRecursive("/data/xx?xx", S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH), 0);
 }
 
 HWTEST_F(UtilsUnitTest, updater_utils_test_005, TestSize.Level0)
@@ -86,16 +75,11 @@ HWTEST_F(UtilsUnitTest, updater_utils_test_005, TestSize.Level0)
     EXPECT_EQ(output, 1);
 }
 
-HWTEST_F(UtilsUnitTest, GetFilesFromDirectory, TestSize.Level0)
+HWTEST_F(UtilsUnitTest, updater_utils_test_006, TestSize.Level0)
 {
     std::vector<std::string> files;
-    string path = "";
-    int ret = GetFilesFromDirectory(path, files, true);
-    EXPECT_EQ(ret, -1);
-
-    path = "/data/updater";     //构造文件目录
-    ret = GetFilesFromDirectory(path, files, true);
-    EXPECT_EQ(ret, -1);
+    string path = "/data";
+    Utils::GetFilesFromDirectory(path, files, true);
 }
 
 HWTEST_F(UtilsUnitTest, RemoveDirTest, TestSize.Level0)
@@ -121,53 +105,4 @@ HWTEST_F(UtilsUnitTest, IsUpdaterMode, TestSize.Level0)
 {
     EXPECT_EQ(Utils::IsUpdaterMode(), false);
 }
-
-HWTEST_F(UtilsUnitTest, DeleteFile, TestSize.Level0)
-{
-    std::string path = "";
-    int32_t ret = DeleteFile(path);
-    EXPECT_EQ(ret, -1);
-
-    path = "data/test/UtilDel.txt";
-    ret = DeleteFile(path);
-    EXPECT_EQ(ret, 0);
-}
-
-HWTEST_F(UtilsUnitTest, WriteFully, TestSize.Level0)
-{
-    std::string path = "/data/test/WriteFullyTest.txt";
-    int fd = open(path.c_str() ,O_RDWR | O_CREAT, 0666);
-    std::string str = "aaaaa";
-    uint8_t *data = reinterpret_cast<uint8_t*>(str.data());
-    bool ret = WriteFully(fd, data, str.size());
-    EXPECT_EQ(ret, true);
-}
-
-HWTEST_F(UtilsUnitTest, ReadFileToString, TestSize.Level0)
-{
-    std::string path = "/data/test/WriteFullyTest.txt";
-    int fd = open(path.c_str() ,O_RDWR | O_CREAT, 0666);
-    std::string str = "";
-    bool ret = ReadFileToString(fd, str);
-    EXPECT_EQ(ret, true);
-}
-
-HWTEST_F(UtilsUnitTest, WriteStringToFile, TestSize.Level0)
-{
-    std::string path = "/data/test/WriteFullyTest.txt";
-    int fd = open(path.c_str() ,O_RDWR | O_CREAT, 0666);
-    std::string str = "aaaaabbbb";
-    bool ret = WriteStringToFile(fd, str);
-    EXPECT_EQ(ret, true);
-}
-
-HWTEST_F(UtilsUnitTest, CopyFile, TestSize.Level0)
-{
-    std::string src = "";
-    std::string dest = "";
-    bool ret = CopyFile(src, dest);
-    EXPECT_EQ(ret, false);
-}
-
-
 } // updater_ut
