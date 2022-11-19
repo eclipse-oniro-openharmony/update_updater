@@ -176,14 +176,14 @@ public:
     {
         PkgVerifyUtil pkgVerify;
         std::vector<uint8_t> data;
-        size_t test_data = 0;
+        size_t testData = 0;
         int32_t ret = pkgVerify.VerifyPackageSign(nullptr);
         EXPECT_EQ(ret, PKG_INVALID_PARAM);
-        ret = pkgVerify.GetSignature(nullptr, test_data, data);
+        ret = pkgVerify.GetSignature(nullptr, testData, data);
         EXPECT_NE(ret, PKG_SUCCESS);
-        ret = pkgVerify.HashCheck(nullptr, test_data, data);
+        ret = pkgVerify.HashCheck(nullptr, testData, data);
         EXPECT_EQ(ret, PKG_INVALID_PARAM);
-        ret = pkgVerify.ParsePackage(nullptr, test_data, test_data);
+        ret = pkgVerify.ParsePackage(nullptr, testData, testData);
         EXPECT_NE(ret, PKG_SUCCESS);
         ret = pkgVerify.Pkcs7verify(data, data);
         EXPECT_NE(ret, PKG_SUCCESS);
