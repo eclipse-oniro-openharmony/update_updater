@@ -68,9 +68,6 @@ HWTEST_F(UpdaterUtilUnitTest, IsSDCardExist, TestSize.Level1)
     std::string sdcardStr = "";
     bool ret = IsSDCardExist(sdcardStr);
     EXPECT_EQ(ret, true);
-    sdcardStr = GetBlockDeviceByMountPoint(SDCARD_PATH);
-    ret = IsSDCardExist(sdcardStr);
-    EXPECT_EQ(ret, true);
 }
 
 HWTEST_F(UpdaterUtilUnitTest, GetBootMode, TestSize.Level1)
