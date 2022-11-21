@@ -243,8 +243,6 @@ public:
         std::vector<std::pair<std::string, ComponentInfo>> &files) = 0;
     virtual int32_t CreatePackage(const std::string &path, const std::string &keyName, PkgInfoPtr header,
         std::vector<std::pair<std::string, Lz4FileInfo>> &files) = 0;
-    virtual int32_t CreatePackage(const std::string &path, PkgInfoPtr header,
-        std::vector<std::pair<std::string, ComponentInfo>> &files, size_t &offset, std::string &hashValue) = 0;
 
     /**
      * Verify the signature of the upgrade package.
