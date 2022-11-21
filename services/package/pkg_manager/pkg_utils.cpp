@@ -106,7 +106,7 @@ int32_t CheckFile(const std::string &fileName)
 #ifdef __WIN32
         mkdir(path.c_str());
 #else
-        mkdir(path.c_str(), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
+        MkdirRecursive(path.c_str(), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
 #endif
     }
     // If the path writable
