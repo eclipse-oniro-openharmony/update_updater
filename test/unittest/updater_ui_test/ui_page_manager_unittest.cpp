@@ -13,16 +13,17 @@
  * limitations under the License.
  */
 
+#include <utility>
 #include "gtest/gtest.h"
 #include "view/component/img_view_adapter.h"
 #include "view/component/text_label_adapter.h"
 #include "view/page/page_manager.h"
-#include <utility>
 
 using namespace Updater;
 using namespace std;
 using namespace testing::ext;
 
+namespace {
 class TestGraphicEngine : public OHOS::BaseGfxEngine {
     DISALLOW_COPY_MOVE(TestGraphicEngine);
 public:
@@ -67,7 +68,6 @@ std::string ToString(const std::vector<std::string> &vec)
     return res;
 }
 
-namespace {
 class UpdaterUiPageManagerUnitTest : public testing::Test {
 public:
     static void SetUpTestCase(void)
@@ -99,46 +99,46 @@ constexpr std::array VALID_COMINFOS {
 const std::vector<UxPageInfo> UpdaterUiPageManagerUnitTest::pageInfos_ = {
     {"page1",
      "#000000ff",
-     {UxViewInfo{
-          UxViewCommonInfo{
-              300, 400, 600, 200, "label_id_0", "UILabel", true},
-          UxLabelInfo{
-              50, "this is page1", "center", "#ff0000ff", "#000000ff"}},
-      UxViewInfo{
-          UxViewCommonInfo{
+     {UxViewInfo {
+         UxViewCommonInfo {
+             300, 400, 600, 200, "label_id_0", "UILabel", true},
+         UxLabelInfo {
+             50, "this is page1", "center", "#ff0000ff", "#000000ff"}},
+      UxViewInfo {
+          UxViewCommonInfo {
               300, 700, 400, 400, "image_view", "UIImageView", false},
-          UxImageInfo{
+          UxImageInfo {
               "/resources/img1", "empty", 100, 0 // just test page manger, image need not to exist
           }}},
-     {UxSubPageInfo{"subpage1", "#000000ff", {"label_id_0", "image_view"}},
-      UxSubPageInfo{"subpage2", "#000000ff", {"image_view"}},
-      UxSubPageInfo{"subpage3", "#000000ff", {"label_id_0"}}}},
+     {UxSubPageInfo {"subpage1", "#000000ff", {"label_id_0", "image_view"}},
+      UxSubPageInfo {"subpage2", "#000000ff", {"image_view"}},
+      UxSubPageInfo {"subpage3", "#000000ff", {"label_id_0"}}}},
     {"page2",
      "#ffffffff",
-     {UxViewInfo{
-          UxViewCommonInfo{
-              300, 400, 600, 200, "label_id_0", "UILabel", true},
-          UxLabelInfo{
-              50, "this is page2", "center", "#00ff00ff", "#000000ff"}},
-      UxViewInfo{
-          UxViewCommonInfo{
+     {UxViewInfo {
+         UxViewCommonInfo {
+             300, 400, 600, 200, "label_id_0", "UILabel", true},
+         UxLabelInfo {
+             50, "this is page2", "center", "#00ff00ff", "#000000ff"}},
+      UxViewInfo {
+          UxViewCommonInfo {
               300, 700, 400, 400, "image_view", "UIImageView", false},
-          UxImageInfo{
+          UxImageInfo {
               "/resources/img2", "empty", 100, 0 // just test page manger, image need not to exist
           }}},
-     {UxSubPageInfo{"subpage1", "#000000ff", {"label_id_0"}},
-      UxSubPageInfo{"subpage2", "#000000ff", {"image_view"}}}},
+     {UxSubPageInfo {"subpage1", "#000000ff", {"label_id_0"}},
+      UxSubPageInfo {"subpage2", "#000000ff", {"image_view"}}}},
     {"page3",
      "#000000ff",
-     {UxViewInfo{
-          UxViewCommonInfo{
-              300, 400, 600, 200, "label_id_0", "UILabel", true},
-          UxLabelInfo{
-              50, "this is page2", "center", "#0000ffff", "#000000ff"}},
-      UxViewInfo{
-          UxViewCommonInfo{
+     {UxViewInfo {
+         UxViewCommonInfo {
+             300, 400, 600, 200, "label_id_0", "UILabel", true},
+         UxLabelInfo {
+             50, "this is page2", "center", "#0000ffff", "#000000ff"}},
+      UxViewInfo {
+          UxViewCommonInfo {
               300, 700, 400, 400, "image_view", "UIImageView", false},
-          UxImageInfo{
+          UxImageInfo {
               "/resources/img2", "empty", 100, 0 // just test page manger, image need not to exist
           }}}}};
 
@@ -167,10 +167,10 @@ HWTEST_F(UpdaterUiPageManagerUnitTest, test_page_manager_init_failed, TestSize.L
         pageInfo = {
             {"page1",
             "#000000ff",
-            {UxViewInfo{
-                UxViewCommonInfo{
+            {UxViewInfo {
+                UxViewCommonInfo {
                     300, 400, 600, 200, "label_id_0", "UILabel", true},
-                UxLabelInfo{
+                UxLabelInfo {
                     50, "this is page1", "center", "#ff0ff", "#0"}}}, {}}
         };
         EXPECT_FALSE(GetInstance().Init(pageInfo, "page1"));
@@ -178,24 +178,24 @@ HWTEST_F(UpdaterUiPageManagerUnitTest, test_page_manager_init_failed, TestSize.L
     {
         GetInstance().Reset();
         // invalid subpage id
-        std::vector<UxPageInfo> pageInfo{
+        std::vector<UxPageInfo> pageInfo {
             {"page1",
              "#000000ff",
-             {UxViewInfo{
-                 UxViewCommonInfo{
+             {UxViewInfo {
+                 UxViewCommonInfo {
                      300, 400, 600, 200, "label_id_0", "UILabel", true},
-                 UxLabelInfo{
+                 UxLabelInfo {
                      50, "this is page1", "center", "#000000ff", "#000000ff"}}},
-             {{UxSubPageInfo{"", "#000000ff", {"label_id_0"}}}}}};
+             {{UxSubPageInfo {"", "#000000ff", {"label_id_0"}}}}}};
         EXPECT_FALSE(GetInstance().Init(pageInfo, "page1"));
 
         // duplicate subpage id
-        pageInfo[0].subpages = { UxSubPageInfo{"subpage1", "#000000ff", {"label_id_0"}},
-            UxSubPageInfo{"subpage1", "#000000ff", {"label_id_0"}}};
+        pageInfo[0].subpages = { UxSubPageInfo {"subpage1", "#000000ff", {"label_id_0"}},
+            UxSubPageInfo {"subpage1", "#000000ff", {"label_id_0"}}};
         EXPECT_FALSE(GetInstance().Init(pageInfo, "page1"));
 
         // invalid subpage's component id
-        pageInfo[0].subpages = {UxSubPageInfo{"subpage1", "#000000ff", {"invalid_id"}}};
+        pageInfo[0].subpages = {UxSubPageInfo {"subpage1", "#000000ff", {"invalid_id"}}};
         EXPECT_FALSE(GetInstance().Init(pageInfo, "page1"));
     }
     {
@@ -214,10 +214,10 @@ HWTEST_F(UpdaterUiPageManagerUnitTest, test_page_manager_is_valid_com, TestSize.
     auto pageInfo = pageInfos_;
     ASSERT_EQ(GetInstance().Init(pageInfo, MAIN_PAGE_ID), true);
     for (auto [pageId, comId] : VALID_COMINFOS) {
-        EXPECT_TRUE(GetInstance().IsValidCom({pageId, comId})) << pageId << "[" << comId << "] is invalid";
+        EXPECT_TRUE(GetInstance().IsValidCom(ComInfo {pageId, comId})) << pageId << "[" << comId << "] is invalid";
     }
     const std::array inValidCominfos {
-        ComInfo {"page1", "invalid"}, ComInfo{"invalid", "image_view"}, ComInfo{"page1:subpage2", "label_id_0"}
+        ComInfo {"page1", "invalid"}, ComInfo {"invalid", "image_view"}, ComInfo {"page1:subpage2", "label_id_0"}
     };
     for (auto cominfo : inValidCominfos) {
         EXPECT_FALSE(GetInstance().IsValidCom(cominfo)) << cominfo.pageId << "[" << cominfo.comId << "] is valid";
