@@ -92,36 +92,6 @@ static void SetRetryCountToMisc(int retryCount, const std::vector<std::string> a
     }
 }
 
-static void GetAllPkgProgress(UpdaterParams &upParams, std::string nowPkgLocation)
-{
-    size_t allPkgSize = 0;
-    char realPath[PATH_MAX + 1] = {0};
-    size_t nowPosition = 0;
-    size_t pkgSize = 0;
-    for (auto i = 0; i < upParams.updatePackage.size(); i++) {
-        if (realpath(upParams.updatePackage[i].c_str(), realPath) == nullptr) {
-            continue;
-        }
-        std::ifstream fin(realPath);
-        if (fin.is_open()) {
-            fin.seekg(0, std::ios::end);
-            if (upParams.updatePackage[i] == nowPkgLocation) {
-                pkgSize = fin.tellg();
-            }
-            if (pkgSize == 0) {
-                nowPosition += fin.tellg();
-            }
-            allPkgSize += fin.tellg();
-        }
-    }
-    if (allPkgSize <= 0) {
-        LOG(ERROR) << "All pkg size is 0";
-        return;
-    }
-    upParams.initialProgress = static_cast<float>(nowPosition) / static_cast<float>(allPkgSize);
-    upParams.currentPercentage = static_cast<float>(pkgSize) / static_cast<float>(allPkgSize);
-}
-
 static int DoFactoryReset(FactoryResetMode mode, const std::string &path)
 {
     if (mode == USER_WIPE_DATA) {
@@ -297,21 +267,39 @@ static UpdaterStatus InstallUpdaterPackageSupport(UpdaterParams &upParams, const
         return UPDATE_ERROR;
     }
     status = IsSpaceCapacitySufficient(upParams.updatePackage);
-    // Only handle UPATE_ERROR and UPDATE_SUCCESS here.
-    // If it returns UPDATE_CORRUPT, which means something wrong with package manager.
-    // Let package verify handle this.
+    // Only handle UPATE_ERROR and UPDATE_SUCCESS here.Let package verify handle others.
     if (status == UPDATE_ERROR) {
         return status;
     }
     UPDATER_UI_INSTANCE.ShowProgress(0);
+    uint64_t allPkgSize = 0;
+    uint64_t nowPosition = 0;
+    std::vector<uint64_t> everyPkgSize;
+    for (auto path : upParams.updatePackage) {
+        char realPath[PATH_MAX + 1] = {0};
+        if (realpath(path.c_str(), realPath) == nullptr) {
+            LOG(ERROR) << "Can not find updatePackage : " << path;
+            return UPDATE_ERROR;
+        }
+        std::ifstream fin(realPath);
+        if (fin.is_open()) {
+            fin.seekg(0, std::ios::end);
+            everyPkgSize.push_back(fin.tellg());
+            allPkgSize += fin.tellg();
+        }
+    }
     for (; upParams.pkgLocation < upParams.updatePackage.size(); upParams.pkgLocation++) {
-        GetAllPkgProgress(upParams, upParams.updatePackage[upParams.pkgLocation]);
+        upParams.currentPercentage =
+            static_cast<double>(everyPkgSize[upParams.pkgLocation]) / static_cast<double>(allPkgSize);
+        if (upParams.pkgLocation != 0) {
+            upParams.initialProgress += static_cast<double>(nowPosition +
+                everyPkgSize[upParams.pkgLocation - 1]) / static_cast<double>(allPkgSize);
+        }
         status = InstallUpdaterPackage(upParams, args, manager);
         ProgressSmoothHandler(static_cast<int>((upParams.initialProgress +
             upParams.currentPercentage) * FULL_PERCENT_PROGRESS));
         if (status != UPDATE_SUCCESS) {
-            LOG(ERROR) << "InstallUpdaterPackage failed! The package is " <<
-                upParams.updatePackage[upParams.pkgLocation];
+            LOG(ERROR) << "InstallUpdaterPackage failed! Pkg is " << upParams.updatePackage[upParams.pkgLocation];
             return status;
         }
     }
