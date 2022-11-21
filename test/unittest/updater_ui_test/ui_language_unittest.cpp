@@ -74,7 +74,7 @@ std::string GetTestJson(LangResource &langRes)
     for (auto &res : langRes.res) {
         ss << R"({"path" : ")";
         ss << res.path;
-        ss << R"(", "level" : )";
+        ss << R"(", "level" :)";
         ss << res.level;
         ss << R"(},)";
     }
