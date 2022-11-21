@@ -1,0 +1,17 @@
+{
+    "REBOOT_DEVICE" : {
+        "en": "reboot devices",
+        "zh": "重启设备",
+        "spa": ""
+    },
+    "SHUTDOWN_DEVICE" : {
+        "en": "shutdown device",
+        "zh": "关闭设备",
+        "spa": ""
+    },
+    "FACTORY_RESET" : {
+        "en": "factory reset",
+        "zh": "清除用户数据",
+        "spa": ""
+    }
+}
