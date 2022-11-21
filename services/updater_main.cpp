@@ -266,16 +266,15 @@ static UpdaterStatus InstallUpdaterPackageSupport(UpdaterParams &upParams, const
         UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_SETPART_FAIL), true);
         return UPDATE_ERROR;
     }
-    status = IsSpaceCapacitySufficient(upParams.updatePackage);
     // Only handle UPATE_ERROR and UPDATE_SUCCESS here.Let package verify handle others.
-    if (status == UPDATE_ERROR) {
+    if (IsSpaceCapacitySufficient(upParams.updatePackage) == UPDATE_ERROR) {
         return status;
     }
     UPDATER_UI_INSTANCE.ShowProgress(0);
     uint64_t allPkgSize = 0;
     uint64_t nowPosition = 0;
     std::vector<uint64_t> everyPkgSize;
-    for (auto path : upParams.updatePackage) {
+    for (const auto &path : upParams.updatePackage) {
         char realPath[PATH_MAX + 1] = {0};
         if (realpath(path.c_str(), realPath) == nullptr) {
             LOG(ERROR) << "Can not find updatePackage : " << path;
@@ -287,6 +286,10 @@ static UpdaterStatus InstallUpdaterPackageSupport(UpdaterParams &upParams, const
             everyPkgSize.push_back(fin.tellg());
             allPkgSize += fin.tellg();
         }
+    }
+    if (allPkgSize <= 0) {
+        LOG(ERROR) << "All pkg size is 0.";
+        return;
     }
     for (; upParams.pkgLocation < upParams.updatePackage.size(); upParams.pkgLocation++) {
         upParams.currentPercentage =
