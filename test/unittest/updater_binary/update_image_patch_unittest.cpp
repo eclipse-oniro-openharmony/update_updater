@@ -48,10 +48,10 @@ public:
         UTestBinaryEnv env {&pkgManager_};
         UScriptInstructionContext context {};
         context.AddInputParam(std::make_shared<IntegerValue>(1));
-        context.AddInputParam(std::make_shared<IntegerValue>(2));
-        context.AddInputParam(std::make_shared<IntegerValue>(3));
-        context.AddInputParam(std::make_shared<IntegerValue>(4));
-        context.AddInputParam(std::make_shared<IntegerValue>(5));
+        context.AddInputParam(std::make_shared<IntegerValue>(1));
+        context.AddInputParam(std::make_shared<IntegerValue>(1));
+        context.AddInputParam(std::make_shared<IntegerValue>(1));
+        context.AddInputParam(std::make_shared<IntegerValue>(1));
         context.AddInputParam(std::make_shared<StringValue>("/data/updater/patchfile"));
         auto instruction = std::make_unique<USInstrImagePatch>();
         EXPECT_EQ(instruction->Execute(env, context), USCRIPT_INVALID_PARAM);
