@@ -64,11 +64,11 @@ std::unordered_map<UpdaterMode, UiStrategyCfg> &UiStrategy::GetStrategy()
 
 bool UiStrategy::LoadStrategy(const JsonNode &node, UpdaterMode mode)
 {
-    const JsonNode &defaultNode = node[Traits<UiStrategyCfg>::STRUCT_KEY][DEFAULT_KEY];
     auto it = modeStr_.find(mode);
     if (it == modeStr_.end()) {
         return false;
     }
+    const JsonNode &defaultNode = node[Traits<UiStrategyCfg>::STRUCT_KEY][DEFAULT_KEY];
     const JsonNode &specificNode = node[Traits<UiStrategyCfg>::STRUCT_KEY][it->second];
     if (!Visit<SETVAL>(specificNode, defaultNode, strategies_[mode])) {
         LOG(ERROR) << "parse strategy config error";
@@ -80,6 +80,7 @@ bool UiStrategy::LoadStrategy(const JsonNode &node, UpdaterMode mode)
 
 bool UiStrategy::LoadStrategy(const JsonNode &node)
 {
+    std::unordered_map<UpdaterMode, UiStrategyCfg>().swap(strategies_);
     constexpr std::array strategies {UpdaterMode::OTA, UpdaterMode::FACTORYRST,
         UpdaterMode::SDCARD, UpdaterMode::REBOOTFACTORYRST};
     for (auto mode : strategies) {

@@ -181,6 +181,9 @@
             <option name="push" value="ui/language/correct_zh.json -> /data/updater/ui" src="res"/>
             <option name="push" value="ui/language/keyEmpty.json -> /data/updater/ui" src="res"/>
             <option name="push" value="ui/language/strNotExist.json -> /data/updater/ui" src="res"/>
+            <!-- strategy test -->
+            <option name="push" value="ui/strategy/strategy_valid.json -> /data/updater/ui/strategy" src="res"/>
+            <option name="push" value="ui/strategy/strategy_invalid.json -> /data/updater/ui/strategy" src="res"/>
         </preparer>
     </target>
     <target name="flashd_unittest">

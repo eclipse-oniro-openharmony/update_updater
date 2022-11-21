@@ -32,16 +32,15 @@ ohos_unittest("ui_unittest") {
     "ENABLE_VECTOR_FONT = 1",
   ]
   sources = [
-    "ui_language_unittest.cpp",
-    "ui_layout_unittest.cpp",
-    "ui_page_manager_unittest.cpp",
-    "ui_view_api_unittest.cpp",
-    "ui_view_proxy_unittest.cpp",
+    "lang/ui_language_unittest.cpp",
+    "strategy/ui_strategy_unittest.cpp",
+    "view/ui_layout_unittest.cpp",
+    "view/ui_page_manager_unittest.cpp",
+    "view/ui_view_api_unittest.cpp",
+    "view/ui_view_proxy_unittest.cpp",
   ]
   sources += [
     "//base/update/updater/services/ui/language/language_ui.cpp",
-    "//base/update/updater/services/ui/strategy/logo_strategy.cpp",
-    "//base/update/updater/services/ui/strategy/progress_strategy.cpp",
     "//base/update/updater/services/ui/strategy/ui_strategy.cpp",
     "//base/update/updater/services/ui/view/component/box_progress_adapter.cpp",
     "//base/update/updater/services/ui/view/component/component_factory.cpp",
@@ -80,6 +79,7 @@ ohos_unittest("ui_unittest") {
     "//base/update/updater/services/ui/include",
     "//base/update/updater/services/ui/control",
     "//base/update/updater/services/ui/driver",
+    "//base/update/updater/services/ui/strategy",
     "//base/update/updater/services/ui/view",
     "//base/update/updater/services/ui/language",
     "//foundation/graphic/ui/frameworks",

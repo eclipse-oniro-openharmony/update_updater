@@ -1,0 +1,11 @@
+{
+    "strategy" : {
+        "default" : {
+            "confirmPageId" : "confirm",
+            "labelLogResId" : {
+                "pageId" : "",
+                "comId" : ""
+            }
+        }
+    }
+}
