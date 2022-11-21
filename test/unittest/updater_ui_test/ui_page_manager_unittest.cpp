@@ -67,13 +67,11 @@ std::string ToString(const std::vector<std::string> &vec)
     return res;
 }
 
-namespace
-{
-class UpdaterUiPageManagerUnitTest : public testing::Test
-{
+namespace {
+class UpdaterUiPageManagerUnitTest : public testing::Test {
 public:
     static void SetUpTestCase(void)
-	{
+    {
         TestGraphicEngine::GetInstance();
     }
     static void TearDownTestCase(void) {}
@@ -106,15 +104,15 @@ const std::vector<UxPageInfo> UpdaterUiPageManagerUnitTest::pageInfos_ = {
                 300, 400, 600, 200, "label_id_0", "UILabel", true},
             UxLabelInfo{
                 50, "this is page1", "center", "#ff0000ff", "#000000ff"}},
-        UxViewInfo{
+         UxViewInfo{
             UxViewCommonInfo{
                 300, 700, 400, 400, "image_view", "UIImageView", false},
             UxImageInfo{
                 "/resources/img1", "empty", 100, 0 // just test page manger, image need not to exist
             }}},
         {UxSubPageInfo{"subpage1", "#000000ff", {"label_id_0", "image_view"}},
-        UxSubPageInfo{"subpage2", "#000000ff", {"image_view"}},
-        UxSubPageInfo{"subpage3", "#000000ff", {"label_id_0"}}}},
+         UxSubPageInfo{"subpage2", "#000000ff", {"image_view"}},
+         UxSubPageInfo{"subpage3", "#000000ff", {"label_id_0"}}}},
     {"page2",
         "#ffffffff",
         {UxViewInfo{
@@ -122,14 +120,14 @@ const std::vector<UxPageInfo> UpdaterUiPageManagerUnitTest::pageInfos_ = {
                 300, 400, 600, 200, "label_id_0", "UILabel", true},
             UxLabelInfo{
                 50, "this is page2", "center", "#00ff00ff", "#000000ff"}},
-        UxViewInfo{
+         UxViewInfo{
             UxViewCommonInfo{
                 300, 700, 400, 400, "image_view", "UIImageView", false},
             UxImageInfo{
                 "/resources/img2", "empty", 100, 0 // just test page manger, image need not to exist
             }}},
         {UxSubPageInfo{"subpage1", "#000000ff", {"label_id_0"}},
-        UxSubPageInfo{"subpage2", "#000000ff", {"image_view"}}}},
+         UxSubPageInfo{"subpage2", "#000000ff", {"image_view"}}}},
     {"page3",
         "#000000ff",
         {UxViewInfo{
@@ -137,7 +135,7 @@ const std::vector<UxPageInfo> UpdaterUiPageManagerUnitTest::pageInfos_ = {
                 300, 400, 600, 200, "label_id_0", "UILabel", true},
             UxLabelInfo{
                 50, "this is page2", "center", "#0000ffff", "#000000ff"}},
-        UxViewInfo{
+         UxViewInfo{
             UxViewCommonInfo{
                 300, 700, 400, 400, "image_view", "UIImageView", false},
             UxImageInfo{
@@ -173,7 +171,7 @@ HWTEST_F(UpdaterUiPageManagerUnitTest, test_page_manager_init_failed, TestSize.L
                 UxViewCommonInfo{
                     300, 400, 600, 200, "label_id_0", "UILabel", true},
                 UxLabelInfo{
-                    50, "this is page1", "center", "#ff0ff", "#0"}}},{}}
+                    50, "this is page1", "center", "#ff0ff", "#0"}}}, {}}
         };
         EXPECT_FALSE(GetInstance().Init(pageInfo, "page1"));
     }
@@ -192,7 +190,7 @@ HWTEST_F(UpdaterUiPageManagerUnitTest, test_page_manager_init_failed, TestSize.L
         EXPECT_FALSE(GetInstance().Init(pageInfo, "page1"));
 
         // duplicate subpage id
-        pageInfo[0].subpages = { UxSubPageInfo{"subpage1", "#000000ff", {"label_id_0"}}, 
+        pageInfo[0].subpages = { UxSubPageInfo{"subpage1", "#000000ff", {"label_id_0"}},
             UxSubPageInfo{"subpage1", "#000000ff", {"label_id_0"}}};
         EXPECT_FALSE(GetInstance().Init(pageInfo, "page1"));
 
