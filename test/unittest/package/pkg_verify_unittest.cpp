@@ -171,7 +171,31 @@ public:
         EXPECT_EQ(ret, -1);
         return 0;
     }
+
+    int TestPkgVerifyFailed()
+    {
+        PkgVerifyUtil pkgVerify;
+        std::vector<uint8_t> data;
+        size_t testData = 0;
+        int32_t ret = pkgVerify.VerifyPackageSign(nullptr);
+        EXPECT_EQ(ret, PKG_INVALID_PARAM);
+        ret = pkgVerify.GetSignature(nullptr, testData, data);
+        EXPECT_NE(ret, PKG_SUCCESS);
+        ret = pkgVerify.HashCheck(nullptr, testData, data);
+        EXPECT_EQ(ret, PKG_INVALID_PARAM);
+        ret = pkgVerify.ParsePackage(nullptr, testData, testData);
+        EXPECT_NE(ret, PKG_SUCCESS);
+        ret = pkgVerify.Pkcs7verify(data, data);
+        EXPECT_NE(ret, PKG_SUCCESS);
+        return 0;
+    }
 };
+
+HWTEST_F(PackageVerifyTest, TestPkgVerifyFailed, TestSize.Level1)
+{
+    PackageVerifyTest test;
+    EXPECT_EQ(0, test.TestPkgVerifyFailed());
+}
 
 HWTEST_F(PackageVerifyTest, TestPkcs7SignedDataFailed, TestSize.Level1)
 {

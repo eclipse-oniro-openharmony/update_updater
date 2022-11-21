@@ -193,7 +193,38 @@ public:
         EXPECT_EQ(0, ret);
         return 0;
     }
+
+    int TestLz4PkgCompress()
+    {
+        pkgManager_ = static_cast<PkgManagerImpl*>(PkgManager::GetPackageInstance());
+        EXPECT_NE(pkgManager_, nullptr);
+        std::vector<std::pair<std::string, Lz4FileInfo>> files;
+        Lz4FileInfo file;
+        int8_t compressionLevel = 14;
+        file.fileInfo.identity = testPackageName;
+        file.fileInfo.packMethod = PKG_COMPRESS_METHOD_LZ4;
+        file.fileInfo.digestMethod = PKG_DIGEST_TYPE_CRC;
+        file.compressionLevel = compressionLevel;
+        file.blockSizeID = 0;
+        file.contentChecksumFlag = 0;
+        file.blockIndependence = 0;
+        std::string fileName = TEST_PATH_TO + testPackageName;
+        files.push_back(std::pair<std::string, Lz4FileInfo>(fileName, file));
+
+        PkgInfo pkgInfo;
+        pkgInfo.pkgType = PKG_PACK_TYPE_LZ4;
+        pkgInfo.signMethod = PKG_SIGN_METHOD_RSA;
+        pkgInfo.digestMethod  = PKG_DIGEST_TYPE_SHA256;
+        return pkgManager_->CreatePackage(TEST_PATH_TO + testLz4PackageName,
+            GetTestPrivateKeyName(pkgInfo.digestMethod), &pkgInfo, files);
+    }
 };
+
+HWTEST_F(PackageUnitTest, TestLz4Package, TestSize.Level1)
+{
+    PackageUnitTest test;
+    EXPECT_EQ(0, test.TestLz4PkgCompress());
+}
 
 HWTEST_F(PackageUnitTest, TestInvalidCreatePackage, TestSize.Level1)
 {

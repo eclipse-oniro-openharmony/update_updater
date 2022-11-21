@@ -22,6 +22,7 @@ ohos_unittest("package_unittest") {
   resource_config_file =
       "//base/update/updater/test/unittest/test_data/ohos_test.xml"
   module_out_path = MODULE_OUTPUT_PATH
+  defines = [ "UPDATER_UT" ]
   sources = [
     "package_unittest.cpp",
     "pkg_algo_unittest.cpp",
@@ -75,7 +76,6 @@ ohos_unittest("package_unittest") {
   deps = [
     "//base/update/updater/interfaces/kits/packages:libpackageExt",
     "//base/update/updater/services/log:libupdaterlog",
-    "//base/update/updater/services/package:libupdaterpackage",
     "//base/update/updater/utils:libutils",
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/bzip2:libbz2",
