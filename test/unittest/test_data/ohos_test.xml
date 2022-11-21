@@ -188,6 +188,12 @@
             <option name="push" value="updater/updater/libupdate_hdi_impl.z.so -> /system/lib" src="out"/>
         </preparer>
     </target>
+    <target name="updater_service_unittest">
+        <preparer>
+            <option name="push" value="updater/updater_full.zip -> /data/updater/updater" src="res"/>
+            <option name="push" value="src/signing_cert.crt -> /data/updater/src" src="res"/>
+        </preparer>
+    </target>
     <target name="binary_unittest">
         <preparer>
             <option name="push" value="applypatch/etc/fstab.ut.updater -> /data/updater/applypatch/etc" src="res"/>
