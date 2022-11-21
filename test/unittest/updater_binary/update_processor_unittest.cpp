@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,34 +19,41 @@
 #include <iostream>
 #include <sys/mount.h>
 #include <unistd.h>
-#include "fs_manager/mount.h"
-#include "log/log.h"
-#include "package/pkg_manager.h"
+#include "mount.h"
+#include "store.h"
 #include "unittest_comm.h"
 #include "update_processor.h"
-#include "updater_main.h"
-#include "updater/updater.h"
-#include "utils.h"
 
 using namespace Updater;
-using namespace testing::ext;
-using namespace Uscript;
 using namespace std;
 using namespace Hpackage;
+using namespace testing::ext;
 
 namespace UpdaterUt {
-using namespace testing::ext;
-using namespace UpdaterUt;
-using namespace testing;
+constexpr const char *UT_MISC_PARTITION_NAME = "/misc";
+constexpr const uint32_t UT_MISC_BUFFER_SIZE = 2048;
 
 void UpdateProcessorUnitTest::SetUp(void)
 {
-    cout << "Updater Unit UpdatePartitionsUnitTest Begin!" << endl;
+    cout << "Updater Unit UpdateProcessorUnitTest Begin!" << endl;
+
+    LoadSpecificFstab("/data/updater/applypatch/etc/fstab.ut.updater");
+
+    /* create 2k size test file */
+    string devPath = GetBlockDeviceByMountPoint(UT_MISC_PARTITION_NAME);
+    vector<uint8_t> buffer(UT_MISC_BUFFER_SIZE, 0);
+    auto ret = Store::WriteDataToStore("/", devPath, buffer, UT_MISC_BUFFER_SIZE);
+    printf("WriteDataToStore ret: %d\n", ret);
 }
 
 void UpdateProcessorUnitTest::TearDown(void)
 {
-    cout << "Updater Unit UpdatePartitionsUnitTest End!" << endl;
+    cout << "Updater Unit UpdateProcessorUnitTest End!" << endl;
+
+    /* delete 2k size test file */
+    string devPath = GetBlockDeviceByMountPoint(UT_MISC_PARTITION_NAME);
+    auto ret = Store::FreeStore("/", devPath);
+    printf("FreeStore ret: %d\n", ret);
 }
 
 // do something at the each function begining
@@ -55,37 +62,24 @@ void UpdateProcessorUnitTest::SetUpTestCase(void) {}
 // do something at the each function end
 void UpdateProcessorUnitTest::TearDownTestCase(void) {}
 
+/* ota update,zip has 2k size misc.img */
 HWTEST_F(UpdateProcessorUnitTest, UpdateProcessor_001, TestSize.Level1)
 {
-    LoadSpecificFstab("/data/updater/applypatch/etc/fstab.ut.updater");
-    const string packagePath = "/data/updater/updater/raw_image_write.zip";
-    PkgManager::PkgManagerPtr pkgManager = PkgManager::GetPackageInstance();
-    std::vector<std::string> components;
-    int32_t ret = pkgManager->LoadPackage(packagePath, GetTestCertName(), components);
-    printf("load package's ret : %d\n", ret);
-    UpdaterEnv* env = new UpdaterEnv(pkgManager, nullptr, false); // retry
-    ScriptManager* scriptManager = ScriptManager::GetScriptManager(env);
+    const string packagePath = "/data/updater/updater/updater_write_misc_img.zip";
+    int32_t ret = ProcessUpdater(false, STDOUT_FILENO, packagePath, GetTestCertName());
+    EXPECT_EQ(ret, 0);
+}
 
-    const string partitionName = "/rawwriter";
-    const string devPath = GetBlockDeviceByMountPoint(partitionName);
-    const string devDir = "/data/updater/ut/datawriter/";
-    Updater::Utils::MkdirRecursive(devDir, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
-    int fd = open(devPath.c_str(), O_CREAT | O_WRONLY | O_EXCL, 0664);
-    printf("@@@ devPath = %s, fd=%d\n", devPath.c_str(), fd);
-    if (fd < 0) {
-        printf("Open failed, fd = %d", fd);
-        FAIL();
-        return;
-    }
-    close(fd);
+/* diff update,zip has 2k size misc.img, base is zero, dst is urandom */
+HWTEST_F(UpdateProcessorUnitTest, UpdateProcessor_002, TestSize.Level1)
+{
+    vector<uint8_t> buffer(UT_MISC_BUFFER_SIZE, 0);
+    int32_t ret = Store::WriteDataToStore("/", GetBlockDeviceByMountPoint(UT_MISC_PARTITION_NAME),
+        buffer, UT_MISC_BUFFER_SIZE);
+    EXPECT_EQ(ret, 0);
 
-    for (int32_t i = 0; i < ScriptManager::MAX_PRIORITY; i++) {
-        ret = scriptManager->ExecuteScript(i);
-        EXPECT_EQ(0, ret);
-        printf(" execute ret : %d\n", ret);
-    }
-    delete env;
-    ScriptManager::ReleaseScriptManager();
-    PkgManager::ReleasePackageInstance(pkgManager);
+    const string packagePath = "/data/updater/updater/updater_write_diff_misc_img.zip";
+    ret = ProcessUpdater(false, STDOUT_FILENO, packagePath, GetTestCertName());
+    EXPECT_EQ(ret, 0);
 }
 } // namespace updater_ut
