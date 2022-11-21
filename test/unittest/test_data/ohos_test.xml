@@ -118,6 +118,19 @@
             <option name="push" value="src/Verse-script.us -> /data/updater/src" src="res"/>
         </preparer>
     </target>
+    <target name="applypatch_unittest">
+        <preparer>
+            <option name="push" value="updater/allCmdUnitTest.bin -> /data/updater/updater" src="res"/>
+            <option name="push" value="applypatch/TestGZipModeImagePatch.gz.patch -> /data/updater/applypatch" src="res"/>
+            <option name="push" value="applypatch/cmd_001_correct.transfer.list -> /data/updater/applypatch" src="res"/>
+            <option name="push" value="applypatch/TestDecompressGzip.new.gz -> /data/updater/applypatch" src="res"/>
+            <option name="push" value="applypatch/source.zip -> /data/updater/applypatch" src="res"/>
+            <option name="push" value="applypatch/TestGZipModeImagePatch.old.gz -> /data/updater/applypatch" src="res"/>
+            <option name="push" value="applypatch/zip-patch-file -> /data/updater/applypatch" src="res"/>
+            <option name="push" value="applypatch/etc/fstab.ut.updater -> /data/updater/applypatch/etc" src="res"/>
+            <option name="push" value="applypatch/etc/partition.tab -> /data/updater/applypatch/etc" src="res"/>
+        </preparer>
+    </target>
     <target name="package_unittest">
         <preparer>
             <option name="push" value="package/test_package.zip -> /data/updater/package" src="res"/>
