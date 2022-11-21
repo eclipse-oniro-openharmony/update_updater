@@ -98,49 +98,49 @@ constexpr std::array VALID_COMINFOS {
 
 const std::vector<UxPageInfo> UpdaterUiPageManagerUnitTest::pageInfos_ = {
     {"page1",
-        "#000000ff",
-        {UxViewInfo{
-            UxViewCommonInfo{
-                300, 400, 600, 200, "label_id_0", "UILabel", true},
-            UxLabelInfo{
-                50, "this is page1", "center", "#ff0000ff", "#000000ff"}},
-         UxViewInfo{
-            UxViewCommonInfo{
-                300, 700, 400, 400, "image_view", "UIImageView", false},
-            UxImageInfo{
-                "/resources/img1", "empty", 100, 0 // just test page manger, image need not to exist
-            }}},
-        {UxSubPageInfo{"subpage1", "#000000ff", {"label_id_0", "image_view"}},
-         UxSubPageInfo{"subpage2", "#000000ff", {"image_view"}},
-         UxSubPageInfo{"subpage3", "#000000ff", {"label_id_0"}}}},
+     "#000000ff",
+     {UxViewInfo{
+          UxViewCommonInfo{
+              300, 400, 600, 200, "label_id_0", "UILabel", true},
+          UxLabelInfo{
+              50, "this is page1", "center", "#ff0000ff", "#000000ff"}},
+      UxViewInfo{
+          UxViewCommonInfo{
+              300, 700, 400, 400, "image_view", "UIImageView", false},
+          UxImageInfo{
+              "/resources/img1", "empty", 100, 0 // just test page manger, image need not to exist
+          }}},
+     {UxSubPageInfo{"subpage1", "#000000ff", {"label_id_0", "image_view"}},
+      UxSubPageInfo{"subpage2", "#000000ff", {"image_view"}},
+      UxSubPageInfo{"subpage3", "#000000ff", {"label_id_0"}}}},
     {"page2",
-        "#ffffffff",
-        {UxViewInfo{
-            UxViewCommonInfo{
-                300, 400, 600, 200, "label_id_0", "UILabel", true},
-            UxLabelInfo{
-                50, "this is page2", "center", "#00ff00ff", "#000000ff"}},
-         UxViewInfo{
-            UxViewCommonInfo{
-                300, 700, 400, 400, "image_view", "UIImageView", false},
-            UxImageInfo{
-                "/resources/img2", "empty", 100, 0 // just test page manger, image need not to exist
-            }}},
-        {UxSubPageInfo{"subpage1", "#000000ff", {"label_id_0"}},
-         UxSubPageInfo{"subpage2", "#000000ff", {"image_view"}}}},
+     "#ffffffff",
+     {UxViewInfo{
+          UxViewCommonInfo{
+              300, 400, 600, 200, "label_id_0", "UILabel", true},
+          UxLabelInfo{
+              50, "this is page2", "center", "#00ff00ff", "#000000ff"}},
+      UxViewInfo{
+          UxViewCommonInfo{
+              300, 700, 400, 400, "image_view", "UIImageView", false},
+          UxImageInfo{
+              "/resources/img2", "empty", 100, 0 // just test page manger, image need not to exist
+          }}},
+     {UxSubPageInfo{"subpage1", "#000000ff", {"label_id_0"}},
+      UxSubPageInfo{"subpage2", "#000000ff", {"image_view"}}}},
     {"page3",
-        "#000000ff",
-        {UxViewInfo{
-            UxViewCommonInfo{
-                300, 400, 600, 200, "label_id_0", "UILabel", true},
-            UxLabelInfo{
-                50, "this is page2", "center", "#0000ffff", "#000000ff"}},
-         UxViewInfo{
-            UxViewCommonInfo{
-                300, 700, 400, 400, "image_view", "UIImageView", false},
-            UxImageInfo{
-                "/resources/img2", "empty", 100, 0 // just test page manger, image need not to exist
-            }}}}};
+     "#000000ff",
+     {UxViewInfo{
+          UxViewCommonInfo{
+              300, 400, 600, 200, "label_id_0", "UILabel", true},
+          UxLabelInfo{
+              50, "this is page2", "center", "#0000ffff", "#000000ff"}},
+      UxViewInfo{
+          UxViewCommonInfo{
+              300, 700, 400, 400, "image_view", "UIImageView", false},
+          UxImageInfo{
+              "/resources/img2", "empty", 100, 0 // just test page manger, image need not to exist
+          }}}}};
 
 inline bool CheckResult(const std::vector<std::string> &expected, std::vector<std::string> &&checked)
 {

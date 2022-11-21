@@ -56,15 +56,15 @@ HWTEST_F(UpdaterUiViewApiTest, test_get_color_from_str, TestSize.Level0)
 
 HWTEST_F(UpdaterUiViewApiTest, test_translate_text, TestSize.Level0)
 {
-    constexpr auto LOCALE_FILE = "/data/updater/locale";
-    EXPECT_EQ(OHOS::SaveStringToFile(LOCALE_FILE, "en"), true);
+    constexpr auto localeFile = "/data/updater/locale";
+    EXPECT_EQ(OHOS::SaveStringToFile(localeFile, "en"), true);
     string jsonStr = R"({"locale":{
         "res" : [
             {
                 "path" : "/data/updater/ui/l0.json",
                 "level" : 0
             }
-        ], 
+        ],
         "localeFile" : "/data/updater/locale"}})";
     EXPECT_EQ(LanguageUI::GetInstance().LoadLangRes(JsonNode {jsonStr}), true);
     EXPECT_EQ(TranslateText("[]"), "[]");
@@ -72,7 +72,7 @@ HWTEST_F(UpdaterUiViewApiTest, test_translate_text, TestSize.Level0)
     EXPECT_EQ(TranslateText("[REBOOT_DEVICE}"), "[REBOOT_DEVICE}");
     EXPECT_EQ(TranslateText("[REBOOT_DEVICE]"), "reboot devices");
     EXPECT_EQ(TranslateText("reboot devices"), "reboot devices");
-    unlink(LOCALE_FILE);
+    unlink(localeFile);
 }
 
 HWTEST_F(UpdaterUiViewApiTest, test_get_align, TestSize.Level0)
