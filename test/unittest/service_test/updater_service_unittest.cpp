@@ -76,31 +76,4 @@ HWTEST_F(UpdaterUtilUnitTest, GetBootMode, TestSize.Level1)
     int ret = GetBootMode(mode);
     EXPECT_EQ(ret, 0);
 }
-
-HWTEST_F(UpdaterUtilUnitTest, UpdaterMain, TestSize.Level1)
-{
-    UpdateMessage boot {};
-    if (access("/data/updater/", 0)) {
-        int ret = mkdir("/data/updater/", S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
-        ASSERT_EQ(ret, 0);
-    }
-    const std::string commandFile = "/data/updater/command";
-    auto fp = std::unique_ptr<FILE, decltype(&fclose)>(fopen(commandFile.c_str(), "wb"), fclose);
-    EXPECT_NE(fp, nullptr);
-    const std::string commandMsg = "boot_updater";
-    const std::string updateMsg = "--update_package=/data/updater/updater/updater_full.zip";
-    EXPECT_EQ(strncpy_s(boot.command, sizeof(boot.command) - 1, commandMsg.c_str(), commandMsg.size()), 0);
-    EXPECT_EQ(strncpy_s(boot.update, sizeof(boot.update) - 1, updateMsg.c_str(), updateMsg.size()), 0);
-    bool bRet = WriteUpdaterMessage(commandFile, boot);
-    EXPECT_EQ(bRet, true);
-    char **argv = new char*[1];
-    argv[0] = new char[ARGV_MAX_SIZE];
-    EXPECT_EQ(strncpy_s(argv[0], ARGV_MAX_SIZE, "./UpdaterMain", ARGV_MAX_SIZE), 0);
-    int argc = 1;
-
-    int ret = UpdaterMain(argc, argv);
-    EXPECT_EQ(ret, 0);
-    delete argv[0];
-    delete []argv;
-}
 }
