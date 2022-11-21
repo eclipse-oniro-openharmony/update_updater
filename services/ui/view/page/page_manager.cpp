@@ -16,6 +16,7 @@
 #include "page_manager.h"
 #include "common/screen.h"
 #include "components/root_view.h"
+#include "scope_guard.h"
 #include "sub_page.h"
 
 namespace Updater {
@@ -26,67 +27,77 @@ PageManager &PageManager::GetInstance()
     return instance;
 }
 
-void PageManager::InitImpl(UxPageInfo &pageInfo, std::string_view entry)
+bool PageManager::InitImpl(UxPageInfo &pageInfo, std::string_view entry)
 {
     if (!BasePage::IsPageInfoValid(pageInfo)) {
-        return;
+        return false;
     }
     auto basePage = Page::Create<BasePage>(Screen::GetInstance().GetWidth(), Screen::GetInstance().GetHeight());
     if (basePage == nullptr || basePage->GetView() == nullptr) {
         LOG(ERROR) << "create base page failed";
-        return;
+        return false;
     }
     if (!basePage->BuildPage(pageInfo)) {
         LOG(ERROR) << "Build page failed";
-        return;
+        return false;
     }
-    BuildSubPages(basePage->GetPageId(), basePage, pageInfo.subpages, entry);
+    if (!BuildSubPages(basePage->GetPageId(), basePage, pageInfo.subpages, entry)) {
+        LOG(ERROR) << "Build sub page failed";
+        return false;
+    }
     basePage->SetVisible(false);
     OHOS::RootView::GetInstance()->Add(basePage->GetView());
     if (!pageMap_.emplace(pageInfo.id, basePage).second) {
         LOG(ERROR) << "base page id duplicated:" << pageInfo.id;
-        return;
+        return false;
     }
     pages_.push_back(basePage);
     if (pageInfo.id == entry) {
         mainPage_ = basePage;
     }
+    return true;
 }
 
 bool PageManager::Init(std::vector<UxPageInfo> &pageInfos, std::string_view entry)
 {
     Reset();
+    ON_SCOPE_EXIT(reset) {
+        Reset();
+    };
     for (auto &pageInfo : pageInfos) {
-        InitImpl(pageInfo, entry);
+        if (!InitImpl(pageInfo, entry)) {
+            return false;
+        }
     }
     if (!IsValidPage(mainPage_)) {
         LOG(ERROR) << "entry " << entry << " is invalid ";
         return false;
     }
+    CANCEL_SCOPE_EXIT_GUARD(reset);
     curPage_ = mainPage_;
     return true;
 }
 
-void PageManager::BuildSubPages(const std::string &pageId, const std::shared_ptr<Page> &basePage,
+bool PageManager::BuildSubPages(const std::string &pageId, const std::shared_ptr<Page> &basePage,
     std::vector<UxSubPageInfo> &subPageInfos, std::string_view entry)
 {
     for (auto &subPageInfo : subPageInfos) {
         if (!SubPage::IsPageInfoValid(subPageInfo)) {
-            continue;
+            return false;
         }
         const std::string &subPageId = pageId + ":" + subPageInfo.id;
         auto subPage = Page::Create<SubPage>(basePage, subPageId);
         if (subPage == nullptr) {
             LOG(ERROR) << "create sub page failed";
-            continue;
+            return false;
         }
         if (!subPage->BuildSubPage(subPageInfo)) {
             LOG(ERROR) << "build sub page failed";
-            continue;
+            return false;
         }
         if (!pageMap_.emplace(subPageId, subPage).second) {
             LOG(ERROR) << "sub page id duplicated:" << subPageId;
-            continue;
+            return false;
         }
         pages_.push_back(subPage);
         LOG(INFO) << subPageId << " builded";
@@ -94,6 +105,7 @@ void PageManager::BuildSubPages(const std::string &pageId, const std::shared_ptr
             mainPage_ = subPage;
         }
     }
+    return true;
 }
 
 bool PageManager::IsValidCom(const ComInfo &pageComId) const
@@ -105,7 +117,7 @@ bool PageManager::IsValidCom(const ComInfo &pageComId) const
         LOG(ERROR) << "page id " << pageId << "not valid";
         return false;
     }
-    const Page &page = *(it->second);
+    Page &page = *(it->second);
     return page.IsValidCom(comId);
 }
 
@@ -197,4 +209,18 @@ void PageManager::Reset()
     curPage_ = nullptr;
     mainPage_ = nullptr;
 }
+
+#ifdef UPDATER_UT
+std::vector<std::string> PageManager::Report()
+{
+    std::vector<std::string> result {};
+    for (auto &[id, pg] : pageMap_) {
+        if (pg->IsVisible()) {
+            result.push_back(id);
+        }
+    }
+    std::sort(result.begin(), result.end());
+    return result;
+}
+#endif
 } // namespace Updater
