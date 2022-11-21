@@ -289,7 +289,7 @@ static UpdaterStatus InstallUpdaterPackageSupport(UpdaterParams &upParams, const
     }
     if (allPkgSize <= 0) {
         LOG(ERROR) << "All pkg size is 0.";
-        return;
+        return UPDATE_ERROR;
     }
     for (; upParams.pkgLocation < upParams.updatePackage.size(); upParams.pkgLocation++) {
         upParams.currentPercentage =
