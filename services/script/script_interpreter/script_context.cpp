@@ -29,7 +29,10 @@ static uint32_t g_contextId = 0;
 int32_t UScriptInstructionContext::PushParam(int32_t value)
 {
     UScriptValuePtr valuePtr = std::make_shared<IntegerValue>(value);
-    USCRIPT_CHECK(valuePtr != nullptr, return USCRIPT_ERROR_CREATE_OBJ, "Failed to create value");
+    if (valuePtr == nullptr) {
+        USCRIPT_LOGE("Failed to create value");
+        return USCRIPT_ERROR_CREATE_OBJ;
+    }
     outParam_.push_back(valuePtr);
     return USCRIPT_SUCCESS;
 }
@@ -37,7 +40,10 @@ int32_t UScriptInstructionContext::PushParam(int32_t value)
 int32_t UScriptInstructionContext::PushParam(float value)
 {
     UScriptValuePtr valuePtr = std::make_shared<FloatValue>(value);
-    USCRIPT_CHECK(valuePtr != nullptr, return USCRIPT_ERROR_CREATE_OBJ, "Failed to create value");
+    if (valuePtr == nullptr) {
+        USCRIPT_LOGE("Failed to create value");
+        return USCRIPT_ERROR_CREATE_OBJ;
+    }
     outParam_.push_back(valuePtr);
     return USCRIPT_SUCCESS;
 }
@@ -45,7 +51,10 @@ int32_t UScriptInstructionContext::PushParam(float value)
 int32_t UScriptInstructionContext::PushParam(const std::string& value)
 {
     UScriptValuePtr valuePtr = std::make_shared<StringValue>(value);
-    USCRIPT_CHECK(valuePtr != nullptr, return USCRIPT_ERROR_CREATE_OBJ, "Failed to create value");
+    if (valuePtr == nullptr) {
+        USCRIPT_LOGE("Failed to create value");
+        return USCRIPT_ERROR_CREATE_OBJ;
+    }
     outParam_.push_back(valuePtr);
     return USCRIPT_SUCCESS;
 }
@@ -91,8 +100,10 @@ int32_t UScriptInstructionContext::GetParam(int32_t index, T &value)
 
 UScriptContext::ParamType UScriptInstructionContext::GetParamType(int32_t index)
 {
-    USCRIPT_CHECK(static_cast<size_t>(index) < this->innerParam_.size(),
-        return UScriptContext::PARAM_TYPE_INVALID, "Invalid index %d", index);
+    if (static_cast<size_t>(index) >= this->innerParam_.size()) {
+        USCRIPT_LOGE("Invalid index %d", index);
+        return UScriptContext::PARAM_TYPE_INVALID;
+    }
     UScriptValue::UScriptValueType type = innerParam_[index]->GetValueType();
     return (UScriptContext::ParamType)type;
 }
@@ -131,7 +142,10 @@ void UScriptInterpretContext::UpdateVariables(const ScriptInterpreter &inter,
     size_t &startIndex)
 {
     if (value->GetValueType() != UScriptValue::VALUE_TYPE_LIST) {
-        USCRIPT_CHECK(startIndex < ids.size(), return, "Invalid startIndex %d", startIndex);
+        if (startIndex >= ids.size()) {
+            USCRIPT_LOGE("Invalid startIndex %d", startIndex);
+            return;
+        }
         UpdateVariable(inter, ids[startIndex], value);
         startIndex++;
         return;
@@ -139,7 +153,10 @@ void UScriptInterpretContext::UpdateVariables(const ScriptInterpreter &inter,
 
     ReturnValue* values = (ReturnValue*)(value.get());
     for (auto out : values->GetValues()) {
-        USCRIPT_CHECK(startIndex < ids.size(), return, "Invalid startIndex %d", startIndex);
+        if (startIndex >= ids.size()) {
+            USCRIPT_LOGE("Invalid startIndex %d", startIndex);
+            return;
+        }
         UpdateVariable(inter, ids[startIndex], out);
         startIndex++;
     }
@@ -386,7 +403,10 @@ bool FloatValue::ComputerEqual(const UScriptValuePtr rightValue)
 {
     if (rightValue->GetValueType() == UScriptValue::VALUE_TYPE_INTEGER) {
         IntegerValue* value = (IntegerValue*)(rightValue.get());
-        USCRIPT_CHECK(value != nullptr, return 0, "Failed to cast ");
+        if (value == nullptr) {
+            USCRIPT_LOGE("Failed to cast ");
+            return 0;
+        }
         float v2 = value->GetValue();
         USCRIPT_LOGI("ComputerEqual %f   v2: %f", GetValue(), v2);
         float diff = GetValue() - v2;
@@ -394,7 +414,10 @@ bool FloatValue::ComputerEqual(const UScriptValuePtr rightValue)
         return diff < 0.0001f;
     } else if (rightValue->GetValueType() == UScriptValue::VALUE_TYPE_FLOAT) {
         FloatValue* value = (FloatValue*)(rightValue.get());
-        USCRIPT_CHECK(value != nullptr, return 0, "Failed to cast ");
+        if (value == nullptr) {
+            USCRIPT_LOGE("Failed to cast ");
+            return 0;
+        }
         float diff = GetValue() - value->GetValue();
         diff = abs(diff);
         USCRIPT_LOGI("ComputerEqual %f %f diff: %f", GetValue(), value->GetValue(), diff);
@@ -439,23 +462,35 @@ UScriptValuePtr StringValue::Computer(int32_t action, UScriptValuePtr value)
 {
     UScriptValuePtr rightValue = UScriptValue::GetRightCompluteValue(value);
     UScriptValuePtr defReturn = std::make_shared<ErrorValue>(USCRIPT_ERROR_INTERPRET);
-    USCRIPT_CHECK(rightValue != nullptr, return defReturn, "Check param error");
+    if (rightValue == nullptr) {
+        USCRIPT_LOGE("Check param error");
+        return defReturn;
+    }
 
     std::string str;
     if (action == UScriptExpression::ADD_OPERATOR) {
         if (rightValue->GetValueType() == UScriptValue::VALUE_TYPE_INTEGER) {
             IntegerValue* integerValue = (IntegerValue*)(rightValue.get());
-            USCRIPT_CHECK(integerValue != nullptr, return defReturn, "Failed to cast ");
+            if (integerValue == nullptr) {
+                USCRIPT_LOGE("Failed to cast ");
+                return defReturn;
+            }
             str.assign(this->GetValue());
             return make_shared<StringValue>(str + to_string(integerValue->GetValue()));
         } else if (rightValue->GetValueType() == UScriptValue::VALUE_TYPE_FLOAT) {
             FloatValue* floatValue = (FloatValue*)(rightValue.get());
-            USCRIPT_CHECK(floatValue != nullptr, return defReturn, "Failed to cast ");
+            if (floatValue == nullptr) {
+                USCRIPT_LOGE("Failed to cast ");
+                return defReturn;
+            }
             str.assign(this->GetValue());
             return make_shared<StringValue>(str + to_string(floatValue->GetValue()));
         } else {
             StringValue* stringValue = (StringValue*)(rightValue.get());
-            USCRIPT_CHECK(stringValue != nullptr, return defReturn, "Failed to cast ");
+            if (stringValue == nullptr) {
+                USCRIPT_LOGE("Failed to cast ");
+                return defReturn;
+            }
             str.assign(this->GetValue());
             return make_shared<StringValue>(str + stringValue->GetValue());
         }
@@ -470,7 +505,10 @@ UScriptValuePtr StringValue::Computer(int32_t action, UScriptValuePtr value)
 int32_t StringValue::ComputerLogic(UScriptValuePtr rightValue) const
 {
     StringValue* value = (StringValue*)(rightValue.get());
-    USCRIPT_CHECK(value != nullptr, return -1, "Failed to cast ");
+    if (value == nullptr) {
+        USCRIPT_LOGE("Failed to cast ");
+        return -1;
+    }
     std::string str;
     str.assign(this->GetValue());
     return str.compare(value->GetValue());

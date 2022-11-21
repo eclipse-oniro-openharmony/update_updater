@@ -120,9 +120,12 @@ int32_t ScriptInstructionHelper::RegisterUserInstruction(const std::string& libN
     if (instrLib_ == nullptr) {
         instrLib_ = dlopen(realLibName.c_str(), RTLD_LAZY | RTLD_LOCAL);
     }
-    USCRIPT_CHECK(instrLib_ != nullptr, return USCRIPT_INVALID_PARAM,
-        "Fail to dlopen %s ", libName.c_str());
-    auto pGetInstructionFactory = (Uscript::UScriptInstructionFactoryPtr(*)())dlsym(instrLib_, "GetInstructionFactory");
+    if (instrLib_ == nullptr) {
+        USCRIPT_LOGE("Fail to dlopen %s ", libName.c_str());
+        return USCRIPT_INVALID_PARAM;
+    }
+    auto pGetInstructionFactory =
+        (Uscript::UScriptInstructionFactoryPtr(*)())dlsym(instrLib_, "GetInstructionFactory");
     auto pReleaseInstructionFactory =
         (void(*)(Uscript::UScriptInstructionFactoryPtr))dlsym(instrLib_, "ReleaseInstructionFactory");
     if (pReleaseInstructionFactory == nullptr || pGetInstructionFactory == nullptr) {
@@ -130,8 +133,10 @@ int32_t ScriptInstructionHelper::RegisterUserInstruction(const std::string& libN
         return USCRIPT_INVALID_PARAM;
     }
     factory = pGetInstructionFactory();
-    USCRIPT_CHECK(factory != nullptr, return USCRIPT_INVALID_PARAM,
-        "Fail to create instruction factory for %s", instrName.c_str());
+    if (factory == nullptr) {
+        USCRIPT_LOGE("Fail to create instruction factory for %s", instrName.c_str());
+        return USCRIPT_INVALID_PARAM;
+    }
     ON_SCOPE_EXIT(freeFactory) {
         pReleaseInstructionFactory(factory);
     };

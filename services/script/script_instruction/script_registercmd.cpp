@@ -25,14 +25,23 @@ namespace BasicInstruction {
 int32_t ScriptRegisterCmd::Execute(UScriptEnv &env, UScriptContext &context)
 {
     ScriptInstructionHelper* helper = ScriptInstructionHelper::GetBasicInstructionHelper();
-    USCRIPT_CHECK(helper != nullptr, return USCRIPT_INVALID_PARAM, "Fail to get instruction helper");
+    if (helper == nullptr) {
+        USCRIPT_LOGE("Fail to get instruction helper");
+        return USCRIPT_INVALID_PARAM;
+    }
 
     std::string instrName;
     std::string libName;
     int32_t ret = context.GetParam(0, instrName);
-    USCRIPT_CHECK(ret == USCRIPT_SUCCESS, return ret, "Fail to get param");
+    if (ret != USCRIPT_SUCCESS) {
+        USCRIPT_LOGE("Fail to get param");
+        return ret;
+    }
     ret = context.GetParam(1, libName);
-    USCRIPT_CHECK(ret == USCRIPT_SUCCESS, return ret, "Fail to get param");
+    if (ret != USCRIPT_SUCCESS) {
+        USCRIPT_LOGE("Fail to get param");
+        return ret;
+    }
 
     // 动态加载对应的so，然后获取对应的指令
     return helper->RegisterUserInstruction(libName, instrName);

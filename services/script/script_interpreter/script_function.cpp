@@ -33,31 +33,39 @@ UScriptValuePtr ScriptFunction::Execute(ScriptInterpreter &inter,
 {
     INTERPRETER_LOGI(inter, context, "ScriptFunction execute %s", functionName_.c_str());
     UScriptContextPtr funcContext = std::make_shared<UScriptInterpretContext>();
-    USCRIPT_CHECK(funcContext != nullptr, return std::make_shared<ErrorValue>(USCRIPT_ERROR_CREATE_OBJ),
-        "[interpreter-%d] Fail to create context for function %s", inter.GetInstanceId(), functionName_.c_str());
+    if (funcContext == nullptr) {
+        USCRIPT_LOGE("[interpreter-%d] Fail to create context for function %s",
+            inter.GetInstanceId(), functionName_.c_str());
+        return std::make_shared<ErrorValue>(USCRIPT_ERROR_CREATE_OBJ);
+    }
 
     if (inputParams == nullptr || params_ == nullptr) {
-        USCRIPT_CHECK(!(params_ != nullptr || inputParams != nullptr),
-            return std::make_shared<ErrorValue>(USCRIPT_ERROR_INTERPRET),
-            "[interpreter-%d] ScriptFunction::Execute param not match %s",
-            inter.GetInstanceId(), functionName_.c_str());
+        if (params_ != nullptr || inputParams != nullptr) {
+            USCRIPT_LOGE("[interpreter-%d] ScriptFunction::Execute param not match %s",
+                inter.GetInstanceId(), functionName_.c_str());
+            return std::make_shared<ErrorValue>(USCRIPT_ERROR_INTERPRET);
+        }
     } else {
-        USCRIPT_CHECK(params_->GetParams().size() == params_->GetParams().size(),
-            return std::make_shared<ErrorValue>(USCRIPT_ERROR_INTERPRET),
-            "[interpreter-%d] ScriptFunction::Execute param not match %s",
-            inter.GetInstanceId(), functionName_.c_str());
+        if (params_->GetParams().size() != inputParams->GetParams().size()) {
+            USCRIPT_LOGE("[interpreter-%d] ScriptFunction::Execute param not match %s",
+                inter.GetInstanceId(), functionName_.c_str());
+            return std::make_shared<ErrorValue>(USCRIPT_ERROR_INTERPRET);
+        }
 
         size_t index = 0;
         std::vector<std::string> paramNames = GetParamNames(inter, context);
         for (auto expression : inputParams->GetParams()) {
             UScriptValuePtr var = expression->Execute(inter, context);
-            USCRIPT_CHECK(!(var == nullptr || var->GetValueType() == UScriptValue::VALUE_TYPE_ERROR),
-                return std::make_shared<ErrorValue>(USCRIPT_NOTEXIST_INSTRUCTION),
-                "[interpreter-%d] ScriptFunction::Execute fail to computer param %s",
-                inter.GetInstanceId(), functionName_.c_str());
-            USCRIPT_CHECK(index < paramNames.size(), return std::make_shared<ErrorValue>(USCRIPT_NOTEXIST_INSTRUCTION),
-                "[interpreter-%d] ScriptFunction::Execute invalid index %zu param %s",
-                inter.GetInstanceId(), index, functionName_.c_str());
+            if (var == nullptr || var->GetValueType() == UScriptValue::VALUE_TYPE_ERROR) {
+                USCRIPT_LOGE("[interpreter-%d] ScriptFunction::Execute fail to computer param %s",
+                    inter.GetInstanceId(), functionName_.c_str());
+                return std::make_shared<ErrorValue>(USCRIPT_NOTEXIST_INSTRUCTION);
+            }
+            if (index >= paramNames.size()) {
+                USCRIPT_LOGE("[interpreter-%d] ScriptFunction::Execute invalid index %zu param %s",
+                    inter.GetInstanceId(), index, functionName_.c_str());
+                return std::make_shared<ErrorValue>(USCRIPT_NOTEXIST_INSTRUCTION);
+            }
             funcContext->UpdateVariables(inter, var, paramNames, index);
         }
     }

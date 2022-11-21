@@ -33,11 +33,17 @@ constexpr const char *REGISTER_CMD_SCRIPT_NAME = "registerCmd.us";
 static ScriptManagerImpl* g_scriptManager = nullptr;
 ScriptManager* ScriptManager::GetScriptManager(UScriptEnv *env)
 {
-    USCRIPT_CHECK(env != nullptr, return nullptr, "Env null");
+    if (env == nullptr) {
+        USCRIPT_LOGE("Env null");
+        return nullptr;
+    }
 
     if (g_scriptManager == nullptr) {
         g_scriptManager = new(std::nothrow) ScriptManagerImpl(env);
-        USCRIPT_CHECK(g_scriptManager != nullptr, return nullptr, "Create g_scriptManager failed");
+        if (g_scriptManager == nullptr) {
+            USCRIPT_LOGE("Create g_scriptManager failed");
+            return nullptr;
+        }
         (void)g_scriptManager->Init();
     }
     return g_scriptManager;
@@ -72,21 +78,33 @@ ScriptManagerImpl::~ScriptManagerImpl()
 
 int32_t ScriptManagerImpl::Init()
 {
-    USCRIPT_CHECK(scriptEnv_ != nullptr, return USCRIPT_INVALID_PARAM, "Env null");
+    if (scriptEnv_ == nullptr) {
+        USCRIPT_LOGE("Env null");
+        return USCRIPT_INVALID_PARAM;
+    }
 
     threadPool_ = ThreadPool::CreateThreadPool(MAX_PRIORITY);
-    USCRIPT_CHECK(threadPool_ != nullptr, return USCRIPT_INVALID_PARAM, "Failed to create thread pool");
+    if (threadPool_ == nullptr) {
+        USCRIPT_LOGE("Failed to create thread pool");
+        return USCRIPT_INVALID_PARAM;
+    }
 
     // Register system reserved instructions
     ScriptInstructionHelper* helper = ScriptInstructionHelper::GetBasicInstructionHelper(this);
-    USCRIPT_CHECK(helper != nullptr, return USCRIPT_INVALID_PARAM, "Failed to get helper");
+    if (helper == nullptr) {
+        USCRIPT_LOGE("Failed to get helper");
+        return USCRIPT_INVALID_PARAM;
+    }
     helper->RegisterInstructions();
 
     // Register customized instructions
     RegisterInstruction(*helper);
 
     PkgManager::PkgManagerPtr manager = scriptEnv_->GetPkgManager();
-    USCRIPT_CHECK(manager != nullptr, return USCRIPT_INVALID_PARAM, "Failed to get pkg manager");
+    if (manager == nullptr) {
+        USCRIPT_LOGE("Failed to get pkg manager");
+        return USCRIPT_INVALID_PARAM;
+    }
 
     // Register other instructions from scripts
     int32_t ret = USCRIPT_SUCCESS;
@@ -94,26 +112,41 @@ int32_t ScriptManagerImpl::Init()
     if (info != nullptr) {
         ret = ExtractAndExecuteScript(manager, REGISTER_CMD_SCRIPT_NAME);
     }
-    USCRIPT_CHECK(ret == USCRIPT_SUCCESS, return ret, "Failed to extract and execute script ");
+    if (ret != USCRIPT_SUCCESS) {
+        USCRIPT_LOGE("Failed to extract and execute script ");
+        return ret;
+    }
 
     // Collect scripts
     ret = ExtractAndExecuteScript(manager, LOAD_SCRIPT_NAME);
-    USCRIPT_CHECK(ret == USCRIPT_SUCCESS, return ret, "Failed to extract and execute script ");
+    if (ret != USCRIPT_SUCCESS) {
+        USCRIPT_LOGE("Failed to extract and execute script ");
+        return ret;
+    }
     return USCRIPT_SUCCESS;
 }
 
 int32_t ScriptManagerImpl::RegisterInstruction(ScriptInstructionHelper &helper)
 {
     Uscript::UScriptInstructionFactoryPtr factory = scriptEnv_->GetInstructionFactory();
-    USCRIPT_CHECK(factory != nullptr, return USCRIPT_SUCCESS, "None factory");
+    if (factory == nullptr) {
+        USCRIPT_LOGE("None factory");
+        return USCRIPT_SUCCESS;
+    }
 
     for (auto instrName : scriptEnv_->GetInstructionNames()) {
         // Create instructions and register it.
         UScriptInstructionPtr instr = nullptr;
         int32_t ret = factory->CreateInstructionInstance(instr, instrName);
-        USCRIPT_CHECK(ret == USCRIPT_SUCCESS, return ret, "Failed to create instruction for %s", instrName.c_str());
+        if (ret != USCRIPT_SUCCESS) {
+            USCRIPT_LOGE("Failed to create instruction for %s", instrName.c_str());
+            return ret;
+        }
         helper.AddInstruction(instrName, instr);
-        USCRIPT_CHECK(ret == USCRIPT_SUCCESS, return ret, "Failed to add instruction for %s", instrName.c_str());
+        if (ret != USCRIPT_SUCCESS) {
+            USCRIPT_LOGE("Failed to add instruction for %s", instrName.c_str());
+            return ret;
+        }
     }
     return USCRIPT_SUCCESS;
 }
@@ -124,24 +157,38 @@ int32_t ScriptManagerImpl::ExtractAndExecuteScript(PkgManager::PkgManagerPtr man
     PkgManager::StreamPtr outStream = nullptr;
     const std::string path = Updater::Utils::IsUpdaterMode() ? "" : Updater::UPDATER_PATH;
     int32_t ret = manager->CreatePkgStream(outStream, path + "/" + scriptName, 0, PkgStream::PkgStreamType_Write);
-    USCRIPT_CHECK(ret == USCRIPT_SUCCESS, return ret, "Failed to create script stream %s", scriptName.c_str());
+    if (ret != USCRIPT_SUCCESS) {
+        USCRIPT_LOGE("Failed to create script stream %s", scriptName.c_str());
+        return ret;
+    }
     ret = manager->ExtractFile(scriptName, outStream);
-    USCRIPT_CHECK(ret == USCRIPT_SUCCESS, return ret, "Failed to extract script stream %s", scriptName.c_str());
+    if (ret != USCRIPT_SUCCESS) {
+        USCRIPT_LOGE("Failed to extract script stream %s", scriptName.c_str());
+        return ret;
+    }
 
     ret = ScriptInterpreter::ExecuteScript(this, outStream);
     manager->ClosePkgStream(outStream);
-    USCRIPT_CHECK(ret == USCRIPT_SUCCESS, return ret, "Failed to ExecuteScript %s", scriptName.c_str());
+    if (ret != USCRIPT_SUCCESS) {
+        USCRIPT_LOGE("Failed to ExecuteScript %s", scriptName.c_str());
+        return ret;
+    }
     return ret;
 }
 
 int32_t ScriptManagerImpl::ExecuteScript(int32_t priority)
 {
-    USCRIPT_CHECK(priority < MAX_PRIORITY && priority >= 0,
+    if (priority >= MAX_PRIORITY || priority < 0) {
+        USCRIPT_LOGE("ExecuteScript priority not support %d", priority);
         UPDATER_LAST_WORD(USCRIPT_INVALID_PRIORITY, priority);
-        return USCRIPT_INVALID_PRIORITY, "ExecuteScript priority not support %d", priority);
+        return USCRIPT_INVALID_PRIORITY;
+    }
     PkgManager::PkgManagerPtr manager = scriptEnv_->GetPkgManager();
-    USCRIPT_CHECK(manager != nullptr, UPDATER_LAST_WORD(USCRIPT_INVALID_PARAM);
-        return USCRIPT_INVALID_PARAM, "Failed to get pkg manager");
+    if (manager == nullptr) {
+        USCRIPT_LOGE("Failed to get pkg manager");
+        UPDATER_LAST_WORD(USCRIPT_INVALID_PARAM);
+        return USCRIPT_INVALID_PARAM;
+    }
     if (scriptFiles_[priority].size() == 0) {
         return USCRIPT_SUCCESS;
     }
@@ -182,11 +229,16 @@ int32_t ScriptManagerImpl::AddInstruction(const std::string &instrName, const US
 
 int32_t ScriptManagerImpl::AddScript(const std::string &scriptName, int32_t priority)
 {
-    USCRIPT_CHECK(priority >= 0 && priority < MAX_PRIORITY,
-        return USCRIPT_INVALID_PRIORITY, "Invalid priority %d", priority);
+    if (priority < 0 || priority >= MAX_PRIORITY) {
+        USCRIPT_LOGE("Invalid priority %d", priority);
+        return USCRIPT_INVALID_PRIORITY;
+    }
 
     PkgManager::PkgManagerPtr manager = scriptEnv_->GetPkgManager();
-    USCRIPT_CHECK(manager != nullptr, return USCRIPT_INVALID_PARAM, "Failed to get pkg manager");
+    if (manager == nullptr) {
+        USCRIPT_LOGE("Failed to get pkg manager");
+        return USCRIPT_INVALID_PARAM;
+    }
 
     if (manager->GetFileInfo(scriptName) == nullptr) {
         USCRIPT_LOGE("Failed to access script %s", scriptName.c_str());
