@@ -88,7 +88,7 @@ bool BasePage::BuildCom(const UxViewInfo &viewInfo, int &minY)
     }
     auto upView = std::make_unique<ViewProxy>(ComponentFactory::CreateUxComponent(viewInfo),
         std::string("component id:") + viewInfo.commonInfo.id + ", ");
-    auto &view = *upView.get();
+    auto &view = *upView;
     if (view->GetViewId() == nullptr) {
         LOG(ERROR) << "id is nullptr";
         return false;

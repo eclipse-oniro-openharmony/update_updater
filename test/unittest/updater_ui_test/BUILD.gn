@@ -34,6 +34,8 @@ ohos_unittest("ui_unittest") {
   sources = [
     "ui_language_unittest.cpp",
     "ui_layout_unittest.cpp",
+    "ui_page_manager_unittest.cpp",
+    "ui_view_api_unittest.cpp",
     "ui_view_proxy_unittest.cpp",
   ]
   sources += [
