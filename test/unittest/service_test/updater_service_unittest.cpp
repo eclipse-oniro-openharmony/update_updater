@@ -76,4 +76,44 @@ HWTEST_F(UpdaterUtilUnitTest, GetBootMode, TestSize.Level1)
     int ret = GetBootMode(mode);
     EXPECT_EQ(ret, 0);
 }
+
+HWTEST_F(UpdaterUtilUnitTest, ParseParams, TestSize.Level1)
+{
+    UpdateMessage boot {};
+    std::string commandMsg = "";
+    std::string updateMsg = "";
+    const std::string commandFile = "/data/updater/command";
+    auto fp = std::unique_ptr<FILE, decltype(&fclose)>(fopen(commandFile.c_str(), "wb"), fclose);
+    EXPECT_NE(fp, nullptr);
+    EXPECT_EQ(strncpy_s(boot.command, sizeof(boot.command) - 1, commandMsg.c_str(), commandMsg.size()), 0);
+    EXPECT_EQ(strncpy_s(boot.update, sizeof(boot.update) - 1, updateMsg.c_str(), updateMsg.size()), 0);
+    bool bRet = WriteUpdaterMessage(commandFile, boot);
+    EXPECT_EQ(bRet, true);
+    char **argv = new char*[1];
+    argv[0] = new char[MAX_ARG_SIZE];
+    EXPECT_EQ(strncpy_s(argv[0], MAX_ARG_SIZE, "./UpdaterMain", MAX_ARG_SIZE), 0);
+    argv[1] = new char[MAX_ARG_SIZE];
+    EXPECT_EQ(strncpy_s(argv[1], MAX_ARG_SIZE, "./test", MAX_ARG_SIZE), 0);
+    int argc = 2;
+    std::vector<std::string> args = ParseParams(argc, argv);
+    std::string res = "";
+    for (auto s : args) {
+        res += s;
+    }
+    EXPECT_EQ("./UpdaterMain./test", res);
+
+    commandMsg = "boot_updater";
+    updateMsg = "--update_package=updater_full.zip";
+    EXPECT_EQ(strncpy_s(boot.command, sizeof(boot.command) - 1, commandMsg.c_str(), commandMsg.size()), 0);
+    EXPECT_EQ(strncpy_s(boot.update, sizeof(boot.update) - 1, updateMsg.c_str(), updateMsg.size()), 0);
+    bRet = WriteUpdaterMessage(commandFile, boot);
+    EXPECT_EQ(bRet, true);
+
+    args = ParseParams(argc, argv);
+    res = "";
+    for (auto s : args) {
+        res += s;
+    }
+    EXPECT_EQ("./UpdaterMain./test--update_package=updater_full.zip", res);
+}
 }
