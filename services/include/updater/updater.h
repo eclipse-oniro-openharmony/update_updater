@@ -38,11 +38,23 @@ enum PackageUpdateMode {
     UNKNOWN_UPDATE,
 };
 
-UpdaterStatus DoInstallUpdaterPackage(Hpackage::PkgManager::PkgManagerPtr pkgManager,
-    const std::string &packagePath, int retryCount, PackageUpdateMode updateMode);
+struct UpdaterParams {
+    bool factoryWipeData {};
+    bool userWipeData {};
+    int retryCount {};
+    float initialProgress {};
+    float currentPercentage {};
+    int pkgLocation {};
+    std::vector<std::string> updatePackage {};
+};
 
-UpdaterStatus StartUpdaterProc(Hpackage::PkgManager::PkgManagerPtr pkgManager, const std::string &packagePath,
-    int retryCount, int &maxTemperature);
+void ProgressSmoothHandler(int progress);
+
+UpdaterStatus DoInstallUpdaterPackage(Hpackage::PkgManager::PkgManagerPtr pkgManager,
+    UpdaterParams &upParams, PackageUpdateMode updateMode);
+
+UpdaterStatus StartUpdaterProc(Hpackage::PkgManager::PkgManagerPtr pkgManager,
+    UpdaterParams &upParams, int &maxTemperature);
 
 int GetUpdatePackageInfo(Hpackage::PkgManager::PkgManagerPtr pkgManager, const std::string& path);
 
@@ -53,7 +65,7 @@ bool PtableProcess(Hpackage::PkgManager::PkgManagerPtr pkgManager, PackageUpdate
 
 int ExecUpdate(Hpackage::PkgManager::PkgManagerPtr pkgManager, int retry, PostMessageFunction postMessage);
 
-UpdaterStatus IsSpaceCapacitySufficient(const std::string &packagePath);
+UpdaterStatus IsSpaceCapacitySufficient(const std::vector<std::string> &packagePath);
 
 bool IsSDCardExist(const std::string &sdcard_path);
 
