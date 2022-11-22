@@ -24,7 +24,7 @@
 using namespace Updater;
 using Updater::Utils::SplitString;
 
-static bool WriteToMiscAndRebootToUpdater(const std::string &miscFile,
+static bool WriteToMiscAndRebootToUpdater([[maybe_unused]]const std::string &miscFile,
     const struct UpdateMessage &updateMsg)
 {
     // Write package name to misc, then trigger reboot.
@@ -45,16 +45,15 @@ static bool WriteToMiscAndRebootToUpdater(const std::string &miscFile,
 #endif
 }
 
-bool RebootAndInstallUpgradePackage(const std::string &miscFile, const std::string &packageName)
+bool RebootAndInstallUpgradePackage(const std::string &miscFile, const std::vector<std::string> packageName)
 {
-    if (packageName.empty() || miscFile.empty()) {
+    if (packageName.size() == 0 || miscFile.empty()) {
         std::cout << "updaterkits: invalid argument. one of arugments is empty\n";
         return false;
     }
 
     struct UpdateMessage updateMsg {};
-    std::vector<std::string> packageAllName = SplitString(packageName, "\n");
-    for (auto path : packageAllName) {
+    for (auto path : packageName) {
         if (access(path.c_str(), R_OK) < 0) {
             std::cout << "updaterkits: " << path << " is not readable\n";
             return false;

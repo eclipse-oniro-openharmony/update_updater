@@ -56,35 +56,49 @@ constexpr struct option OPTIONS[] = {
     { "retry_count", required_argument, nullptr, 0 },
     { "factory_wipe_data", no_argument, nullptr, 0 },
     { "user_wipe_data", no_argument, nullptr, 0 },
+    { "upgraded_pkg_num", required_argument, nullptr, 0 },
     { nullptr, 0, nullptr, 0 },
 };
 
-static void SetRetryCountToMisc(int retryCount, const std::vector<std::string> args)
+static void SetRetryCountOrPkgLocationToMisc(int retryCountOrPkgLocation,
+    const std::vector<std::string> args, bool isRetryCount)
 {
+    char headInfo[128]; // 128 : set headInfo size
+    if (isRetryCount) {
+        if (strncpy_s(headInfo, sizeof(headInfo), "retry_count", strlen("retry_count") + 1) != EOK) {
+            LOG(ERROR) << "SetRetryCountOrPkgLocationToMisc strncat_s headInfo failed";
+            return;
+        }
+    } else {
+        if (strncpy_s(headInfo, sizeof(headInfo), "upgraded_pkg_num", strlen("upgraded_pkg_num") + 1) != EOK) {
+            LOG(ERROR) << "SetRetryCountOrPkgLocationToMisc strncat_s headInfo failed";
+            return;
+        }
+    }
     struct UpdateMessage msg {};
-    char buffer[20];
+    char buffer[128]; // 128 : set headInfo size
     if (strncpy_s(msg.command, sizeof(msg.command), "boot_updater", strlen("boot_updater") + 1) != EOK) {
-        LOG(ERROR) << "SetRetryCountToMisc strncpy_s failed";
+        LOG(ERROR) << "SetRetryCountOrPkgLocationToMisc strncpy_s failed";
         return;
     }
     for (const auto& arg : args) {
-        if (arg.find("--retry_count") == std::string::npos) {
+        if (arg.find("headInfo") == std::string::npos) {
             if (strncat_s(msg.update, sizeof(msg.update), arg.c_str(), strlen(arg.c_str()) + 1) != EOK) {
-                LOG(ERROR) << "SetRetryCountToMisc strncat_s failed";
+                LOG(ERROR) << "SetRetryCountOrPkgLocationToMisc strncat_s failed";
                 return;
             }
             if (strncat_s(msg.update, sizeof(msg.update), "\n", strlen("\n") + 1) != EOK) {
-                LOG(ERROR) << "SetRetryCountToMisc strncat_s failed";
+                LOG(ERROR) << "SetRetryCountOrPkgLocationToMisc strncat_s failed";
                 return;
             }
         }
     }
-    if (snprintf_s(buffer, sizeof(buffer), sizeof(buffer) - 1, "--retry_count=%d", retryCount) == -1) {
-        LOG(ERROR) << "SetRetryCountToMisc snprintf_s failed";
+    if (snprintf_s(buffer, sizeof(buffer), sizeof(buffer) - 1, "--%s=%d", headInfo, retryCountOrPkgLocation) == -1) {
+        LOG(ERROR) << "SetRetryCountOrPkgLocationToMisc snprintf_s failed";
         return;
     }
     if (strncat_s(msg.update, sizeof(msg.update), buffer, strlen(buffer) + 1) != EOK) {
-        LOG(ERROR) << "SetRetryCountToMisc strncat_s failed";
+        LOG(ERROR) << "SetRetryCountOrPkgLocationToMisc strncat_s failed";
         return;
     }
     if (WriteUpdaterMiscMsg(msg) != true) {
@@ -217,63 +231,43 @@ bool IsBatteryCapacitySufficient()
     return capacity > lowLevel;
 }
 
-static UpdaterStatus InstallUpdaterPackage(UpdaterParams &upParams, const std::vector<std::string> &args,
-    PkgManager::PkgManagerPtr manager)
+static UpdaterStatus InstallUpdaterPackage(UpdaterParams &upParams, PkgManager::PkgManagerPtr manager)
 {
     UPDATER_INIT_RECORD;
     UpdaterStatus status = UPDATE_UNKNOWN;
-    if (IsBatteryCapacitySufficient() == false) {
-        UPDATER_UI_INSTANCE.ShowUpdInfo(TR(LOG_LOWPOWER));
+    STAGE(UPDATE_STAGE_BEGIN) << "Install package";
+    if (upParams.retryCount == 0) {
+        // First time enter updater, record retryCount in case of abnormal reset.
+        if (!PartitionRecord::GetInstance().ClearRecordPartitionOffset()) {
+            LOG(ERROR) << "ClearRecordPartitionOffset failed";
+            return UPDATE_ERROR;
+        }
+        std::vector<std::string> args = ParseParams(0, nullptr);
+        SetRetryCountOrPkgLocationToMisc(upParams.retryCount + 1, args, true);
+    }
+    status = DoInstallUpdaterPackage(manager, upParams, HOTA_UPDATE);
+    if (status != UPDATE_SUCCESS) {
         UPDATER_UI_INSTANCE.Sleep(UI_SHOW_DURATION);
-        UPDATER_LAST_WORD(UPDATE_ERROR);
-        LOG(ERROR) << "Battery is not sufficient for install package.";
-        status = UPDATE_SKIP;
+        UPDATER_UI_INSTANCE.ShowLog(TR(LOG_UPDFAIL));
+        STAGE(UPDATE_STAGE_FAIL) << "Install failed";
+        if (status == UPDATE_RETRY && upParams.retryCount < MAX_RETRY_COUNT) {
+            upParams.retryCount += 1;
+            UPDATER_UI_INSTANCE.ShowFailedPage();
+            std::vector<std::string> args = ParseParams(0, nullptr);
+            SetRetryCountToMisc(upParams.retryCount, args, true);
+            Utils::DoReboot("updater");
+        }
     } else {
-        STAGE(UPDATE_STAGE_BEGIN) << "Install package";
-        if (upParams.retryCount == 0) {
-            // First time enter updater, record retryCount in case of abnormal reset.
-            if (!PartitionRecord::GetInstance().ClearRecordPartitionOffset()) {
-                LOG(ERROR) << "ClearRecordPartitionOffset failed";
-                return UPDATE_ERROR;
-            }
-            SetRetryCountToMisc(upParams.retryCount + 1, args);
-        }
-        status = DoInstallUpdaterPackage(manager, upParams, HOTA_UPDATE);
-        if (status != UPDATE_SUCCESS) {
-            UPDATER_UI_INSTANCE.Sleep(UI_SHOW_DURATION);
-            UPDATER_UI_INSTANCE.ShowLog(TR(LOG_UPDFAIL));
-            STAGE(UPDATE_STAGE_FAIL) << "Install failed";
-            if (status == UPDATE_RETRY && upParams.retryCount < MAX_RETRY_COUNT) {
-                upParams.retryCount += 1;
-                UPDATER_UI_INSTANCE.ShowFailedPage();
-                SetRetryCountToMisc(upParams.retryCount, args);
-                Utils::DoReboot("updater");
-            }
-        } else {
-            LOG(INFO) << "Install package success.";
-            STAGE(UPDATE_STAGE_SUCCESS) << "Install package";
-            UPDATER_UI_INSTANCE.ShowSuccessPage();
-        }
+        LOG(INFO) << "Install package success.";
+        STAGE(UPDATE_STAGE_SUCCESS) << "Install package";
+        UPDATER_UI_INSTANCE.ShowSuccessPage();
     }
     return status;
 }
 
-static UpdaterStatus InstallUpdaterPackageSupport(UpdaterParams &upParams, const std::vector<std::string> &args,
-    PkgManager::PkgManagerPtr manager)
+static UpdaterStatus CalcProgress(const UpdaterParams &upParams, uint64_t &allPkgSize
+    uint64_t &nowPosition, std::vector<uint64_t> &everyPkgSize)
 {
-    UpdaterStatus status = UPDATE_UNKNOWN;
-    if (SetupPartitions() != 0) {
-        UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_SETPART_FAIL), true);
-        return UPDATE_ERROR;
-    }
-    // Only handle UPATE_ERROR and UPDATE_SUCCESS here.Let package verify handle others.
-    if (IsSpaceCapacitySufficient(upParams.updatePackage) == UPDATE_ERROR) {
-        return status;
-    }
-    UPDATER_UI_INSTANCE.ShowProgress(0);
-    uint64_t allPkgSize = 0;
-    uint64_t nowPosition = 0;
-    std::vector<uint64_t> everyPkgSize;
     for (const auto &path : upParams.updatePackage) {
         char realPath[PATH_MAX + 1] = {0};
         if (realpath(path.c_str(), realPath) == nullptr) {
@@ -287,20 +281,55 @@ static UpdaterStatus InstallUpdaterPackageSupport(UpdaterParams &upParams, const
             allPkgSize += fin.tellg();
         }
     }
+    for (int i = 0; i < upParams.pkgLocation; i++) {
+        nowPosition += everyPkgSize[i];
+    }
+    return UPDATE_SUCCESS;
+}
+
+static UpdaterStatus InstallUpdaterPackageSupport(UpdaterParams &upParams, PkgManager::PkgManagerPtr manager)
+{
+    UpdaterStatus status = UPDATE_UNKNOWN;
+    if (SetupPartitions() != 0) {
+        UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_SETPART_FAIL), true);
+        return UPDATE_ERROR;
+    }
+    // Only handle UPATE_ERROR and UPDATE_SUCCESS here.Let package verify handle others.
+    if (IsSpaceCapacitySufficient(upParams.updatePackage) == UPDATE_ERROR) {
+        return status;
+    }
+    if (IsBatteryCapacitySufficient() == false) {
+        UPDATER_UI_INSTANCE.ShowUpdInfo(TR(LOG_LOWPOWER));
+        UPDATER_UI_INSTANCE.Sleep(UI_SHOW_DURATION);
+        UPDATER_LAST_WORD(UPDATE_ERROR);
+        LOG(ERROR) << "Battery is not sufficient for install package.";
+        return UPDATE_SKIP;
+    }
+    UPDATER_UI_INSTANCE.ShowProgress(0);
+    uint64_t allPkgSize = 0;
+    uint64_t nowPosition = 0;
+    std::vector<uint64_t> everyPkgSize;
+    status = CalcProgress(upParams, allPkgSize, nowPosition, everyPkgSize);
+    if (status != UPDATE_SUCCESS) {
+        retrun status;
+    }
     if (allPkgSize <= 0) {
         LOG(ERROR) << "All pkg size is 0.";
         return UPDATE_ERROR;
     }
+    UPDATER_UI_INSTANCE.ShowProgress(static_cast<double>(nowPosition) /
+        static_cast<double>(allPkgSize) * FULL_PERCENT_PROGRESS);
     for (; upParams.pkgLocation < upParams.updatePackage.size(); upParams.pkgLocation++) {
         upParams.currentPercentage =
             static_cast<double>(everyPkgSize[upParams.pkgLocation]) / static_cast<double>(allPkgSize);
-        if (upParams.pkgLocation != 0) {
-            upParams.initialProgress += static_cast<double>(nowPosition +
-                everyPkgSize[upParams.pkgLocation - 1]) / static_cast<double>(allPkgSize);
-        }
-        status = InstallUpdaterPackage(upParams, args, manager);
-        ProgressSmoothHandler(static_cast<int>((upParams.initialProgress +
-            upParams.currentPercentage) * FULL_PERCENT_PROGRESS));
+        upParams.initialProgress = static_cast<double>(nowPosition) / static_cast<double>(allPkgSize);
+        nowPosition += everyPkgSize[upParams.pkgLocation];
+        status = InstallUpdaterPackage(upParams, manager);
+        std::vector<std::string> args = ParseParams(0, nullptr);
+        SetRetryCountOrPkgLocationToMisc(upParams.pkgLocation, args, false);
+        int progress = static_cast<int>((upParams.initialProgress +
+            upParams.currentPercentage) * FULL_PERCENT_PROGRESS);
+        ProgressSmoothHandler(progress, progress);
         if (status != UPDATE_SUCCESS) {
             LOG(ERROR) << "InstallUpdaterPackage failed! Pkg is " << upParams.updatePackage[upParams.pkgLocation];
             return status;
@@ -310,13 +339,12 @@ static UpdaterStatus InstallUpdaterPackageSupport(UpdaterParams &upParams, const
     return status;
 }
 
-static UpdaterStatus StartUpdaterEntry(PkgManager::PkgManagerPtr manager,
-    const std::vector<std::string> &args, UpdaterParams &upParams)
+static UpdaterStatus StartUpdaterEntry(PkgManager::PkgManagerPtr manager, UpdaterParams &upParams)
 {
     UpdaterStatus status = UPDATE_UNKNOWN;
     if (upParams.updatePackage.size() > 0) {
         UPDATER_UI_INSTANCE.ShowProgressPage();
-        status = InstallUpdaterPackageSupport(upParams, args, manager);
+        status = InstallUpdaterPackageSupport(upParams, manager);
         if (status != UPDATE_SUCCESS) {
             if (!CheckDumpResult()) {
                 UPDATER_LAST_WORD(status);
@@ -389,6 +417,8 @@ static UpdaterStatus StartUpdater(PkgManager::PkgManagerPtr manager, const std::
                 } else if (option == "user_wipe_data") {
                     (void)UPDATER_UI_INSTANCE.SetMode(UpdaterMode::REBOOTFACTORYRST);
                     upParams.userWipeData = true;
+                } else if (option == "upgraded_pkg_num") {
+                    upParams.pkgLocation = atoi(optarg) + 1;
                 }
                 break;
             }
@@ -406,7 +436,7 @@ static UpdaterStatus StartUpdater(PkgManager::PkgManagerPtr manager, const std::
         LOG(WARNING) << "Factory level reset and user level reset both set. use user level reset.";
         upParams.factoryWipeData = false;
     }
-    return StartUpdaterEntry(manager, args, upParams);
+    return StartUpdaterEntry(manager, upParams);
 }
 
 int UpdaterMain(int argc, char **argv)
