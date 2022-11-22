@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <thread>
 #include "gtest/gtest.h"
 #include "component/box_progress_adapter.h"
 #include "component/label_btn_adapter.h"
@@ -166,15 +167,16 @@ HWTEST_F(UpdaterUiComponentUnitTest, test_box_progress_with_ep, TestSize.Level0)
     OHOS::UIViewGroup parent {};
     ImgViewAdapter epView {};
     BoxProgressAdapter boxProgress {UxViewInfo {UxViewCommonInfo {10, 10, 1000, 1000, "id", "UIBoxProgress", false},
-        UxBoxProgressInfo {50, "#ffffffff", "#000000ff", epId, false}}};
+        UxBoxProgressInfo {50, "#ffffffff", "#000000ff", epId, true}}};
     epView.SetViewId(epId);
     parent.Add(&boxProgress);
     parent.Add(&epView);
+    EXPECT_TRUE(boxProgress.InitEp());
 
     boxProgress.SetVisible(true);
     EXPECT_TRUE(boxProgress.IsVisible());
     EXPECT_TRUE(epView.IsVisible());
-    
+
     boxProgress.SetVisible(false);
     EXPECT_FALSE(boxProgress.IsVisible());
     EXPECT_FALSE(epView.IsVisible());
@@ -182,11 +184,11 @@ HWTEST_F(UpdaterUiComponentUnitTest, test_box_progress_with_ep, TestSize.Level0)
     constexpr float testValue = 50;
     constexpr float halfDivisor = 2.0;
     boxProgress.SetValue(testValue);
-    float rate = static_cast<float>(boxProgress.GetValue()) / (boxProgress.GetRangeMax() - 1);
+    float rate = static_cast<float>(boxProgress.GetValue()) / boxProgress.GetRangeMax();
     EXPECT_EQ(epView.GetX(), static_cast<int16_t>(boxProgress.GetX() -
         epView.GetWidth() / halfDivisor + boxProgress.GetWidth() * rate));
     EXPECT_EQ(epView.GetY(), static_cast<int16_t>(boxProgress.GetY() -
-        epView.GetHeight() / halfDivisor + boxProgress.GetHeight() * rate));
+        epView.GetHeight() / halfDivisor + boxProgress.GetHeight() / halfDivisor));
 }
 
 HWTEST_F(UpdaterUiComponentUnitTest, test_img_view_adapter_constructor, TestSize.Level0)
@@ -199,7 +201,7 @@ HWTEST_F(UpdaterUiComponentUnitTest, test_img_view_adapter_constructor, TestSize
         UxViewCommonInfo commonInfo {10, 10, 1000, 1000, id, "UIImageView", false};
         ImgViewAdapter imgView {UxViewInfo {commonInfo, specInfo}};
         CheckCommInfo(imgView, commonInfo);
-        
+
         EXPECT_EQ(imgView.GetX(), commonInfo.x);
         EXPECT_EQ(imgView.GetY(), commonInfo.y);
         EXPECT_EQ(imgView.GetWidth(), commonInfo.w);
@@ -214,7 +216,7 @@ HWTEST_F(UpdaterUiComponentUnitTest, test_img_view_adapter_constructor, TestSize
         UxViewCommonInfo commonInfo {10, 10, 1000, 1000, id, "UIImageView", false};
         ImgViewAdapter imgView {UxViewInfo {commonInfo, specInfo}};
         CheckCommInfo(imgView, commonInfo);
-        
+
         ASSERT_NE(imgView.GetAnimatorCallback(), nullptr);
         ASSERT_NE(imgView.GetAnimator(), nullptr);
     }
@@ -231,7 +233,7 @@ HWTEST_F(UpdaterUiComponentUnitTest, test_img_view_adapter_is_valid, TestSize.Le
 
     // for animator
     EXPECT_FALSE(ImgViewAdapter::IsValid(UxImageInfo {"", "", 100, 10}));
-    EXPECT_FALSE(ImgViewAdapter::IsValid(UxImageInfo {"dir/", "filePrefix", 100, 10}));
+    EXPECT_FALSE(ImgViewAdapter::IsValid(UxImageInfo {"dir/", "", 100, 10}));
     EXPECT_FALSE(ImgViewAdapter::IsValid(UxImageInfo {"dir/", "filePrefix", maxImgCnt + 1, 10}));
     EXPECT_FALSE(ImgViewAdapter::IsValid(UxImageInfo {"dir/", "filePrefix", 0, 10}));
     EXPECT_FALSE(ImgViewAdapter::IsValid(UxImageInfo {"dir/", "filePrefix", 100, maxInterval + 1}));
@@ -253,26 +255,34 @@ HWTEST_F(UpdaterUiComponentUnitTest, test_img_view_adapter_start_stop, TestSize.
         EXPECT_FALSE(imgView.Stop());
     }
     {
+        using namespace std::literals::chrono_literals;
         ImgViewAdapter imgView {UxViewInfo {UxViewCommonInfo {10, 10, 1000, 1000, "id", "UIImageView", false},
             UxImageInfo {"", "fileprefix", 100, 10}}};
-        
+
         uint32_t currId = 0;
         EXPECT_FALSE(imgView.Stop()); // stop would fail when hasn't been started
         EXPECT_TRUE(imgView.Start()); // start success
         EXPECT_FALSE(imgView.Start()); // shouldn't start when it has been started
         EXPECT_TRUE(imgView.IsVisible());
-        OHOS::TaskManager::GetInstance()->TaskHandler();
+
+        OHOS::TaskManager::GetInstance()->SetTaskRun(true); // set task can run
+        OHOS::AnimatorManager::GetInstance()->Init(); // add animator task
+        OHOS::TaskManager::GetInstance()->TaskHandler(); // run one loop
         EXPECT_EQ(imgView.GetCurrId(), ++currId);
+        std::this_thread::sleep_for(0.1s);
         OHOS::TaskManager::GetInstance()->TaskHandler();
         EXPECT_EQ(imgView.GetCurrId(), ++currId);
 
         EXPECT_TRUE(imgView.Stop()); // stop success
         EXPECT_FALSE(imgView.Stop()); // stop success
         EXPECT_FALSE(imgView.IsVisible());
+
         OHOS::TaskManager::GetInstance()->TaskHandler();
         EXPECT_EQ(imgView.GetCurrId(), currId);
         OHOS::TaskManager::GetInstance()->TaskHandler();
         EXPECT_EQ(imgView.GetCurrId(), currId);
+        OHOS::TaskManager::GetInstance()->SetTaskRun(false);
+        OHOS::TaskManager::GetInstance()->Remove(OHOS::AnimatorManager::GetInstance());
     }
 }
 
@@ -308,6 +318,7 @@ HWTEST_F(UpdaterUiComponentUnitTest, test_label_btn_adapter_on_press, TestSize.L
     EXPECT_EQ(labelBtn2.GetLabelStyle(OHOS::STYLE_TEXT_COLOR), (OHOS::ColorType {{0, 0, 0, 0xff}}.full));
     EXPECT_EQ(labelBtn1.GetStyle(OHOS::STYLE_BACKGROUND_COLOR), (OHOS::ColorType {{0, 0, 0, 0xff}}.full));
     EXPECT_EQ(labelBtn2.GetStyle(OHOS::STYLE_BACKGROUND_COLOR), (OHOS::ColorType {{0xff, 0xff, 0xff, 0xff}}.full));
+    OHOS::FocusManager::GetInstance()->ClearFocus();
 }
 
 HWTEST_F(UpdaterUiComponentUnitTest, test_label_btn_adapter_is_valid, TestSize.Level0)
@@ -340,7 +351,7 @@ HWTEST_F(UpdaterUiComponentUnitTest, test_text_label_adapter_is_info_valid, Test
 {
     EXPECT_FALSE(TextLabelAdapter::IsValid(UxLabelInfo {255, "", "", "", ""}));
     EXPECT_FALSE(TextLabelAdapter::IsValid(UxLabelInfo {255, "", "", "#000000ff", ""}));
-    EXPECT_TRUE(TextLabelAdapter::IsValid(UxLabelInfo {255, "", "", "#000000ff", "#000000ff"}));
+    EXPECT_TRUE(TextLabelAdapter::IsValid(UxLabelInfo {100, "", "", "#000000ff", "#000000ff"}));
 }
 
 HWTEST_F(UpdaterUiComponentUnitTest, test_text_label_adapter_constructor, TestSize.Level0)

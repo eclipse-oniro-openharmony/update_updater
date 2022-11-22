@@ -82,7 +82,6 @@ HWTEST_F(UpdaterUiStrategyUnitTest, test_load_strategy_for_each_mode, TestSize.L
     sdCardCfg.labelLogResId = {"upd", "UpdateInfoDark_Label"};
     sdCardCfg.resPage = {"upd:updateSuccess", "upd:updateFailedNoButton"};
 
-    
     auto &factoryRstCfg = expected[UpdaterMode::FACTORYRST];
     factoryRstCfg = defaultCfg;
     factoryRstCfg.progressPage = ProgressPage {"upd:reset", "UpdBox_Progress", "bar", "OHOSIcon_Image", "img", ""};
@@ -95,7 +94,7 @@ HWTEST_F(UpdaterUiStrategyUnitTest, test_load_strategy_for_each_mode, TestSize.L
     rebootFactoryRstCfg.labelLogResId = {"upd", "RstInfo_Label"};
     rebootFactoryRstCfg.progressPage = {"upd:reset", "UpdBox_Progress", "bar", "OHOSIcon_Image", "img", ""};
     rebootFactoryRstCfg.resPage = {"upd:reset", "upd:FactoryRstFailed"};
- 
+
     auto &otaCfg = expected[UpdaterMode::OTA];
     otaCfg = defaultCfg;
     EXPECT_EQ(UiStrategy::GetStrategy(), (std::unordered_map<Updater::UpdaterMode, Updater::UiStrategyCfg> {
