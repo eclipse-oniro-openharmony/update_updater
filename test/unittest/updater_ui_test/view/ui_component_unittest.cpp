@@ -31,6 +31,9 @@ public:
     void TearDown() override {}
 };
 
+constexpr static int32_t MAX_PROGRESS_VALUE = 100;
+constexpr static int32_t MIN_PROGRESS_VALUE = 0;
+
 void CheckCommInfo(OHOS::UIView &view, const UxViewCommonInfo &common)
 {
     EXPECT_EQ(view.GetX(), common.x);
@@ -39,6 +42,23 @@ void CheckCommInfo(OHOS::UIView &view, const UxViewCommonInfo &common)
     EXPECT_EQ(view.GetHeight(), common.h);
     EXPECT_STREQ(view.GetViewId(), common.id.c_str());
     EXPECT_EQ(view.IsVisible(), common.visible);
+}
+
+HWTEST_F(UpdaterUiComponentUnitTest, test_box_progress_constructor, TestSize.Level0)
+{
+    UxBoxProgressInfo specInfo {50, "#ffffffff", "#000000ff", "", false};
+    UxViewCommonInfo commonInfo {10, 10, 1000, 1000, "id", "UIBoxProgress", false};
+    BoxProgressAdapter boxProgress {UxViewInfo {commonInfo, specInfo}};
+    CheckCommInfo(boxProgress, commonInfo);
+
+    auto fgColor = StrToColor(specInfo.fgColor);
+    auto bgColor = StrToColor(specInfo.bgColor);
+    EXPECT_EQ(boxProgress.GetBackgroundStyle(OHOS::STYLE_BACKGROUND_COLOR), bgColor.full);
+    EXPECT_EQ(boxProgress.GetBackgroundStyle(OHOS::STYLE_BACKGROUND_OPA), bgColor.alpha);
+    EXPECT_EQ(boxProgress.GetForegroundStyle(OHOS::STYLE_BACKGROUND_COLOR), fgColor.full);
+    EXPECT_EQ(boxProgress.GetForegroundStyle(OHOS::STYLE_BACKGROUND_OPA), fgColor.alpha);
+    EXPECT_EQ(boxProgress.GetValue(), specInfo.defaultValue);EXPECT_EQ(boxProgress.GetRangeMin(), 0);
+    EXPECT_EQ(boxProgress.GetRangeMax(), commonInfo.w - 1);
 }
 
 HWTEST_F(UpdaterUiComponentUnitTest, test_box_progress_is_valid, TestSize.Level0)
@@ -50,33 +70,118 @@ HWTEST_F(UpdaterUiComponentUnitTest, test_box_progress_is_valid, TestSize.Level0
     EXPECT_TRUE(BoxProgressAdapter::IsValid(UxBoxProgressInfo {50, "#000000ff", "#000000ff", "", false}));
 }
 
-HWTEST_F(UpdaterUiComponentUnitTest, test_box_progress_set_value, TestSize.Level0)
+HWTEST_F(UpdaterUiComponentUnitTest, test_box_progress_set_value_without_ep, TestSize.Level0)
 {
+    UxBoxProgressInfo specInfo {50, "#ffffffff", "#000000ff", "", false};
+    UxViewCommonInfo commonInfo {10, 10, 1000, 1000, "id", "UIBoxProgress", false};
+    {
+        BoxProgressAdapter boxProgress {UxViewInfo {commonInfo, specInfo}};
+        constexpr int32_t validValue = 50;
 
+        boxProgress.SetValue(-1);
+        EXPECT_EQ(boxProgress.GetValue(), 0);
+        boxProgress.SetValue(validValue);
+        EXPECT_EQ(boxProgress.GetValue(), validValue / MAX_PROGRESS_VALUE * (commonInfo.w - 1));
+        boxProgress.SetValue(MAX_PROGRESS_VALUE + 1);
+        EXPECT_EQ(boxProgress.GetValue(), commonInfo.w - 1);
+    }
+    {
+        specInfo.hasEp = true;
+        BoxProgressAdapter boxProgress {UxViewInfo {commonInfo, specInfo}};
+        constexpr int32_t validValue = 50;
+        boxProgress.SetValue(validValue);
+        EXPECT_EQ(boxProgress.GetValue(), validValue / MAX_PROGRESS_VALUE * (commonInfo.w - 1));
+    }
+}
+
+HWTEST_F(UpdaterUiComponentUnitTest, test_box_progress_set_visible_without_ep, TestSize.Level0)
+{
+    {
+        UxViewInfo info {{10, 10, 1000, 1000, "id", "UIBoxProgress", false},
+        UxBoxProgressInfo {50, "#ffffffff", "#000000ff", "", false}};
+        BoxProgressAdapter boxProgress {info};
+        boxProgress.SetVisible(true);
+        EXPECT_TRUE(boxProgress.IsVisible());
+    }
+    {
+        UxViewInfo info {{10, 10, 1000, 1000, "id", "UIBoxProgress", false},
+        UxBoxProgressInfo {50, "#ffffffff", "#000000ff", "", true}};
+        BoxProgressAdapter boxProgress {info};
+        boxProgress.SetVisible(true);
+        EXPECT_TRUE(boxProgress.IsVisible());
+    }
 }
 
 HWTEST_F(UpdaterUiComponentUnitTest, test_box_progress_init_endpoint, TestSize.Level0)
 {
-
+    UxBoxProgressInfo specInfo {50, "#ffffffff", "#000000ff", "", false};
+    UxViewCommonInfo commonInfo {10, 10, 1000, 1000, "id", "UIBoxProgress", false};
+    {
+        BoxProgressAdapter boxProgress {UxViewInfo {commonInfo, specInfo}};
+        EXPECT_TRUE(boxProgress.InitEp());
+    }
+    {
+        specInfo.hasEp = true;
+        BoxProgressAdapter boxProgress {UxViewInfo {commonInfo, specInfo}};
+        EXPECT_FALSE(boxProgress.InitEp());
+    }
+    {
+        OHOS::UIViewGroup parent {};
+        BoxProgressAdapter boxProgress {UxViewInfo {commonInfo, specInfo}};
+        parent.Add(&boxProgress);
+        EXPECT_FALSE(boxProgress.InitEp());
+    }
+    {
+        constexpr auto epId = "endpoint";
+        specInfo.endPoint = epId;
+        OHOS::UIViewGroup parent {};
+        BoxProgressAdapter boxProgress {UxViewInfo {commonInfo, specInfo}};
+        LabelBtnAdapter labelBtn {};
+        labelBtn.SetViewId(epId);
+        parent.Add(&boxProgress);
+        parent.Add(&labelBtn);
+        EXPECT_FALSE(boxProgress.InitEp());
+    }
+    {
+        constexpr auto epId = "endpoint";
+        specInfo.endPoint = epId;
+        OHOS::UIViewGroup parent {};
+        BoxProgressAdapter boxProgress {UxViewInfo {commonInfo, specInfo}};
+        ImgViewAdapter imgView {};
+        imgView.SetViewId(epId);
+        parent.Add(&boxProgress);
+        parent.Add(&imgView);
+        EXPECT_TRUE(boxProgress.InitEp());
+    }
 }
 
-HWTEST_F(UpdaterUiComponentUnitTest, test_box_progress_set_visible_with_ep, TestSize.Level0)
+HWTEST_F(UpdaterUiComponentUnitTest, test_box_progress_with_ep, TestSize.Level0)
 {
+    constexpr auto epId = "endpoint";
+    OHOS::UIViewGroup parent {};
+    ImgViewAdapter epView {};
+    BoxProgressAdapter boxProgress {UxViewInfo {UxViewCommonInfo {10, 10, 1000, 1000, "id", "UIBoxProgress", false},
+        UxBoxProgressInfo {50, "#ffffffff", "#000000ff", epId, false}}};
+    epView.SetViewId(epId);
+    parent.Add(&boxProgress);
+    parent.Add(&epView);
 
-}
+    boxProgress.SetVisible(true);
+    EXPECT_TRUE(boxProgress.IsVisible());
+    EXPECT_TRUE(epView.IsVisible());
+    
+    boxProgress.SetVisible(false);
+    EXPECT_FALSE(boxProgress.IsVisible());
+    EXPECT_FALSE(epView.IsVisible());
 
-HWTEST_F(UpdaterUiComponentUnitTest, test_box_progress_set_visible_without_ep, TestSize.Level0)
-{
-
-}
-
-HWTEST_F(UpdaterUiComponentUnitTest, test_box_progress_set_visible_without_ep, TestSize.Level0)
-{
-
-}
-
-HWTEST_F(UpdaterUiComponentUnitTest, test_box_progress_set_visible_without_ep, TestSize.Level0)
-{
+    constexpr float testValue = 50;
+    constexpr float halfDivisor = 2.0;
+    boxProgress.SetValue(testValue);
+    float rate = static_cast<float>(boxProgress.GetValue()) / (boxProgress.GetRangeMax() - 1);
+    EXPECT_EQ(epView.GetX(), static_cast<int16_t>(boxProgress.GetX() -
+        epView.GetWidth() / halfDivisor + boxProgress.GetWidth() * rate));
+    EXPECT_EQ(epView.GetY(), static_cast<int16_t>(boxProgress.GetY() -
+        epView.GetHeight() / halfDivisor + boxProgress.GetHeight() * rate));
 }
 
 HWTEST_F(UpdaterUiComponentUnitTest, test_label_btn_adapter_constructor, TestSize.Level0)
@@ -107,10 +212,10 @@ HWTEST_F(UpdaterUiComponentUnitTest, test_label_btn_adapter_on_press, TestSize.L
     OHOS::FocusManager::GetInstance()->RequestFocus(&labelBtn2);
     labelBtn1.OnPressEvent(OHOS::PressEvent {OHOS::Point {}});
     EXPECT_EQ(OHOS::FocusManager::GetInstance()->GetFocusedView(), &labelBtn1);
-    EXPECT_EQ(labelBtn1.GetLabelStyle(OHOS::STYLE_TEXT_COLOR), OHOS::ColorType(0, 0, 0, 0xff).full);
-    EXPECT_EQ(labelBtn2.GetLabelStyle(OHOS::STYLE_TEXT_COLOR), OHOS::ColorType(0xff, 0xff, 0xff, 0xff).full);
-    EXPECT_EQ(labelBtn1.GetStyle(OHOS::STYLE_BACKGROUND_COLOR), OHOS::ColorType(0xff, 0xff, 0xff, 0xff).full);
-    EXPECT_EQ(labelBtn2.GetStyle(OHOS::STYLE_BACKGROUND_COLOR), OHOS::ColorType(0, 0, 0, 0xff).full);
+    EXPECT_EQ(labelBtn1.GetLabelStyle(OHOS::STYLE_TEXT_COLOR), OHOS::ColorType(0xff, 0xff, 0xff, 0xff).full);
+    EXPECT_EQ(labelBtn2.GetLabelStyle(OHOS::STYLE_TEXT_COLOR), OHOS::ColorType(0, 0, 0, 0xff).full);
+    EXPECT_EQ(labelBtn1.GetStyle(OHOS::STYLE_BACKGROUND_COLOR), OHOS::ColorType(0, 0, 0, 0xff).full);
+    EXPECT_EQ(labelBtn2.GetStyle(OHOS::STYLE_BACKGROUND_COLOR), OHOS::ColorType(0xff, 0xff, 0xff, 0xff).full);
 }
 
 HWTEST_F(UpdaterUiComponentUnitTest, test_label_btn_adapter_is_valid, TestSize.Level0)
