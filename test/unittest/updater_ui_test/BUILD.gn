@@ -34,6 +34,7 @@ ohos_unittest("ui_unittest") {
   sources = [
     "lang/ui_language_unittest.cpp",
     "strategy/ui_strategy_unittest.cpp",
+    "view/ui_component_unittest.cpp",
     "view/ui_layout_unittest.cpp",
     "view/ui_page_manager_unittest.cpp",
     "view/ui_view_api_unittest.cpp",
@@ -87,6 +88,7 @@ ohos_unittest("ui_unittest") {
     "//foundation/graphic/ui/interfaces/innerkits",
     "//foundation/graphic/utils/interfaces/kits",
     "//foundation/graphic/utils/interfaces/innerkits",
+    "//base/update/updater/test/unittest/updater_ui_test",
   ]
   deps = [
     "//base/update/updater/interfaces/kits/packages:libpackageExt",

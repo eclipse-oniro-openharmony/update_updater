@@ -57,7 +57,7 @@ std::unordered_map<UpdaterMode, std::string> UiStrategy::modeStr_ = {
     {UpdaterMode::OTA, "ota"},
 };
 
-std::unordered_map<UpdaterMode, UiStrategyCfg> &UiStrategy::GetStrategy()
+const std::unordered_map<UpdaterMode, UiStrategyCfg> &UiStrategy::GetStrategy()
 {
     return strategies_;
 }

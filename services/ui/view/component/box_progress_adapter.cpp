@@ -21,24 +21,24 @@
 namespace Updater {
 BoxProgressAdapter::BoxProgressAdapter(const UxViewInfo &info)
 {
-    const UxViewCommonInfo *commonPtr = &info.commonInfo;
-    const UxBoxProgressInfo *specPtr = &std::get<UxBoxProgressInfo>(info.specificInfo);
-    viewId_ = commonPtr->id;
-    this->SetPosition(commonPtr->x, commonPtr->y, commonPtr->w, commonPtr->h);
-    this->SetVisible(commonPtr->visible);
+    const UxViewCommonInfo &common = info.commonInfo;
+    const UxBoxProgressInfo &spec = std::get<UxBoxProgressInfo>(info.specificInfo);
+    viewId_ = common.id;
+    this->SetPosition(common.x, common.y, common.w, common.h);
+    this->SetVisible(common.visible);
     this->SetViewId(viewId_.c_str());
-    this->SetValue(specPtr->defaultValue);
+    this->SetRange(progressWidth_ - 1, 0);
+    this->SetValue(spec.defaultValue);
 
-    auto bgColor = StrToColor(specPtr->bgColor);
+    auto bgColor = StrToColor(spec.bgColor);
     this->SetBackgroundStyle(OHOS::STYLE_BACKGROUND_COLOR, bgColor.full);
     this->SetBackgroundStyle(OHOS::STYLE_BACKGROUND_OPA, bgColor.alpha);
 
-    auto fgColor = StrToColor(specPtr->fgColor);
+    auto fgColor = StrToColor(spec.fgColor);
     this->SetForegroundStyle(OHOS::STYLE_BACKGROUND_COLOR, fgColor.full);
     this->SetForegroundStyle(OHOS::STYLE_BACKGROUND_OPA, fgColor.alpha);
-    this->SetRange(progressWidth_ - 1, 0);
-    hasEp_ = specPtr->hasEp;
-    epId_ = specPtr->endPoint;
+    hasEp_ = spec.hasEp;
+    epId_ = spec.endPoint;
 }
 
 bool BoxProgressAdapter::IsValid(const UxBoxProgressInfo &info)
@@ -103,7 +103,7 @@ OHOS::Point BoxProgressAdapter::GetPosOfEp()
     constexpr float halfDivisor = 2.0;
     return OHOS::Point {
         static_cast<int16_t>(GetX() - ep_->GetWidth() / halfDivisor + GetWidth() * rate),
-        static_cast<int16_t>(GetY() - ep_->GetHeight() / 2 + GetHeight() / 2)
+        static_cast<int16_t>(GetY() - ep_->GetHeight() / halfDivisor + GetHeight() / halfDivisor)
     };
 }
 
