@@ -45,7 +45,6 @@ constexpr const char *G_WORK_PATH = "/tmp/";
 constexpr const char *SDCARD_CARD_PATH = "/data/sdcard/updater";
 constexpr const char *SDCARD_CARD_PKG_PATH = "/data/updater/updater/updater.zip";
 constexpr const char *G_WORK_PATH = "/data/updater/src/";
-constexpr const char *UT_VERSION = "OpenHarmony 3.2.9.1";
 #endif
 constexpr int MAX_RETRY_COUNT = 4;
 constexpr int MINIMAL_ARGC_LIMIT = 2;
