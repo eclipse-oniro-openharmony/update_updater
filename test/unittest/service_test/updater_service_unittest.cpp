@@ -134,8 +134,8 @@ HWTEST_F(UpdaterUtilUnitTest, UpdaterMain, TestSize.Level1)
     bool bRet = WriteUpdaterMessage(commandFile, boot);
     EXPECT_EQ(bRet, true);
     char **argv = new char*[1];
-    argv[0] = new char[ARGV_MAX_SIZE];
-    EXPECT_EQ(strncpy_s(argv[0], ARGV_MAX_SIZE, "./UpdaterMain", ARGV_MAX_SIZE), 0);
+    argv[0] = new char[MAX_ARG_SIZE];
+    EXPECT_EQ(strncpy_s(argv[0], MAX_ARG_SIZE, "./UpdaterMain", MAX_ARG_SIZE), 0);
     int argc = 1;
 
     int ret = UpdaterMain(argc, argv);
