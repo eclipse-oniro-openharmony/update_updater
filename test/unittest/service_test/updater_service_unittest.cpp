@@ -91,16 +91,15 @@ HWTEST_F(UpdaterUtilUnitTest, ParseParams, TestSize.Level1)
     EXPECT_EQ(bRet, true);
     char **argv = new char*[1];
     argv[0] = new char[MAX_ARG_SIZE];
-    EXPECT_EQ(strncpy_s(argv[0], MAX_ARG_SIZE, "./UpdaterMain", MAX_ARG_SIZE), 0);
-    argv[1] = new char[MAX_ARG_SIZE];
-    EXPECT_EQ(strncpy_s(argv[1], MAX_ARG_SIZE, "./test", MAX_ARG_SIZE), 0);
-    int argc = 2;
+    std::string str = "./UpdaterMain";
+    EXPECT_EQ(strncpy_s(argv[0], MAX_ARG_SIZE, str.c_str(), str.size()), 0);
+    int argc = 1;
     std::vector<std::string> args = ParseParams(argc, argv);
     std::string res = "";
     for (auto s : args) {
         res += s;
     }
-    EXPECT_EQ("./UpdaterMain./test", res);
+    EXPECT_EQ("./UpdaterMain", res);
 
     commandMsg = "boot_updater";
     updateMsg = "--update_package=updater_full.zip";
@@ -114,6 +113,6 @@ HWTEST_F(UpdaterUtilUnitTest, ParseParams, TestSize.Level1)
     for (auto s : args) {
         res += s;
     }
-    EXPECT_EQ("./UpdaterMain./test--update_package=updater_full.zip", res);
+    EXPECT_EQ("./UpdaterMain--update_package=updater_full.zip", res);
 }
 }
