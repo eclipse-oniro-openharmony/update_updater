@@ -101,7 +101,7 @@ HWTEST_F(UtilsUnitTest, WriteFully, TestSize.Level0)
     auto fd = open(path.c_str(), O_RDWR | O_CREAT, 0777);
     EXPECT_EQ(fd != -1, true);
     EXPECT_EQ(Utils::WriteFully(fd, a, 1), true);
-    EXPECT_EQ(Utils::WriteFully(fd, a, 1), true);
+    close(fd);
     auto readFd = open(path.c_str(), O_RDONLY);
     EXPECT_EQ(readFd != -1, true);
     EXPECT_EQ(Utils::WriteFully(readFd, a, 1), false);
@@ -201,7 +201,7 @@ HWTEST_F(UtilsUnitTest, RemoveDirTest, TestSize.Level0)
 {
     string path = "";
     EXPECT_EQ(Utils::RemoveDir(path), false);
-    path = TEST_PATH_FROM + "../nonExistDir";
+    path = "/data/updater/nonExistDir";
     EXPECT_EQ(Utils::RemoveDir(path), false);
     path = "/data/updater/rmDir";
     int ret = mkdir(path.c_str(), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
@@ -230,7 +230,7 @@ HWTEST_F(UtilsUnitTest, DeleteFile, TestSize.Level0)
     filePath = "/data/updater/tmpFile";
     ofstream tmpFile;
     tmpFile.open(filePath.c_str());
-    EXPECT_EQ(tmpFile.is_open(), 1);
+    EXPECT_EQ(tmpFile.is_open(), true);
     tmpFile.close();
     EXPECT_EQ(Utils::DeleteFile(filePath), 0);
 }
