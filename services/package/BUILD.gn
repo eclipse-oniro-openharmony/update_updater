@@ -63,9 +63,8 @@ ohos_static_library("libupdaterpackage") {
 
   deps = [
     "//base/update/updater/services/log:libupdaterlog",
-    "//base/update/updater/utils:libutils",
     "//third_party/bounds_checking_function:libsec_static",
-    "//third_party/openssl:libcrypto_static",
+    "//third_party/openssl:libcrypto_static",`
   ]
 
   configs = [ ":package_config" ]
