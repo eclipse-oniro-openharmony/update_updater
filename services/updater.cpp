@@ -118,9 +118,7 @@ int UpdatePreProcess(PkgManager::PkgManagerPtr pkgManager, const std::string &pa
         return PKG_INVALID_VERSION;
     }
     PackagesInfoPtr pkginfomanager = PackagesInfo::GetPackagesInfoInstance();
-
     const char *verPtr = GetDisplayVersion();
-
     if ((pkginfomanager == nullptr) || (verPtr == nullptr)) {
         LOG(ERROR) << "Fail to GetPackageInstance";
         return PKG_INVALID_VERSION;
