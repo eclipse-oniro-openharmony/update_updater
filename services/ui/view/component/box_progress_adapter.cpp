@@ -54,6 +54,11 @@ bool BoxProgressAdapter::IsValid(const UxBoxProgressInfo &info)
         return false;
     }
 
+    if (info.hasEp && info.endPoint.empty()) {
+        LOG(ERROR) << "has end point but id is empty, please check your config file";
+        return false;
+    }
+
     return true;
 }
 
