@@ -19,8 +19,10 @@
 #include "init_reboot.h"
 #include "misc_info/misc_info.h"
 #include "securec.h"
+#include "utils.h"
 
 using namespace Updater;
+using Updater::Utils::SplitString;
 
 static bool WriteToMiscAndRebootToUpdater(const std::string &miscFile,
     const struct UpdateMessage &updateMsg)
@@ -50,17 +52,18 @@ bool RebootAndInstallUpgradePackage(const std::string &miscFile, const std::stri
         return false;
     }
 
-    // Check if package readalbe.
-    if (access(packageName.c_str(), R_OK) < 0) {
-        std::cout << "updaterkits: " << packageName << " is not readable\n";
-        return false;
-    }
-
     struct UpdateMessage updateMsg {};
-    if (snprintf_s(updateMsg.update, sizeof(updateMsg.update), sizeof(updateMsg.update) - 1, "--update_package=%s",
-        packageName.c_str()) < 0) {
-        std::cout << "updaterkits: copy updater message failed\n";
-        return false;
+    std::vector<std::string> packageAllName = SplitString(packageName, "\n");
+    for (auto path : packageAllName) {
+        if (access(path.c_str(), R_OK) < 0) {
+            std::cout << "updaterkits: " << path << " is not readable\n";
+            return false;
+        }
+        if (snprintf_s(updateMsg.update, sizeof(updateMsg.update), sizeof(updateMsg.update) - 1,
+            "--update_package=%s\n", path.c_str()) < 0) {
+            std::cout << "updaterkits: copy updater message failed\n";
+            return false;
+        }
     }
 
     WriteToMiscAndRebootToUpdater(miscFile, updateMsg);

@@ -139,17 +139,19 @@ UpdaterStatus UpdaterFromSdcard()
         UPDATER_UI_INSTANCE.ShowLog(TR(LOG_NOPKG), true);
         return UPDATE_ERROR;
     }
+
     PkgManager::PkgManagerPtr pkgManager = PkgManager::GetPackageInstance();
     if (pkgManager == nullptr) {
         LOG(ERROR) << "pkgManager is nullptr";
         return UPDATE_ERROR;
     }
-
+    UpdaterParams upParams {
+        false, false, 0, 0, 0, 0, {0, {SDCARD_CARD_PKG_PATH}}
+    };;
     STAGE(UPDATE_STAGE_BEGIN) << "UpdaterFromSdcard";
     LOG(INFO) << "UpdaterFromSdcard start, sdcard updaterPath : " << SDCARD_CARD_PKG_PATH;
-
     UPDATER_UI_INSTANCE.ShowLog(TR(LOG_SDCARD_NOTMOVE));
-    UpdaterStatus updateRet = DoInstallUpdaterPackage(pkgManager, SDCARD_CARD_PKG_PATH, 0, SDCARD_UPDATE);
+    UpdaterStatus updateRet = DoInstallUpdaterPackage(pkgManager, upParams, SDCARD_UPDATE);
     if (updateRet != UPDATE_SUCCESS) {
         UPDATER_UI_INSTANCE.Sleep(UI_SHOW_DURATION);
         UPDATER_UI_INSTANCE.ShowLog(TR(LOG_SDCARD_FAIL));
@@ -236,11 +238,7 @@ static UpdaterStatus InstallUpdaterPackage(UpdaterParams &upParams, const std::v
             }
             SetRetryCountToMisc(upParams.retryCount + 1, args);
         }
-        if (SetupPartitions() != 0) {
-            UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_SETPART_FAIL), true);
-            return UPDATE_ERROR;
-        }
-        status = DoInstallUpdaterPackage(manager, upParams.updatePackage, upParams.retryCount, HOTA_UPDATE);
+        status = DoInstallUpdaterPackage(manager, upParams, HOTA_UPDATE);
         if (status != UPDATE_SUCCESS) {
             UPDATER_UI_INSTANCE.Sleep(UI_SHOW_DURATION);
             UPDATER_UI_INSTANCE.ShowLog(TR(LOG_UPDFAIL));
@@ -260,13 +258,65 @@ static UpdaterStatus InstallUpdaterPackage(UpdaterParams &upParams, const std::v
     return status;
 }
 
+static UpdaterStatus InstallUpdaterPackageSupport(UpdaterParams &upParams, const std::vector<std::string> &args,
+    PkgManager::PkgManagerPtr manager)
+{
+    UpdaterStatus status = UPDATE_UNKNOWN;
+    if (SetupPartitions() != 0) {
+        UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_SETPART_FAIL), true);
+        return UPDATE_ERROR;
+    }
+    // Only handle UPATE_ERROR and UPDATE_SUCCESS here.Let package verify handle others.
+    if (IsSpaceCapacitySufficient(upParams.updatePackage) == UPDATE_ERROR) {
+        return status;
+    }
+    UPDATER_UI_INSTANCE.ShowProgress(0);
+    uint64_t allPkgSize = 0;
+    uint64_t nowPosition = 0;
+    std::vector<uint64_t> everyPkgSize;
+    for (const auto &path : upParams.updatePackage) {
+        char realPath[PATH_MAX + 1] = {0};
+        if (realpath(path.c_str(), realPath) == nullptr) {
+            LOG(ERROR) << "Can not find updatePackage : " << path;
+            return UPDATE_ERROR;
+        }
+        std::ifstream fin(realPath);
+        if (fin.is_open()) {
+            fin.seekg(0, std::ios::end);
+            everyPkgSize.push_back(fin.tellg());
+            allPkgSize += fin.tellg();
+        }
+    }
+    if (allPkgSize <= 0) {
+        LOG(ERROR) << "All pkg size is 0.";
+        return UPDATE_ERROR;
+    }
+    for (; upParams.pkgLocation < upParams.updatePackage.size(); upParams.pkgLocation++) {
+        upParams.currentPercentage =
+            static_cast<double>(everyPkgSize[upParams.pkgLocation]) / static_cast<double>(allPkgSize);
+        if (upParams.pkgLocation != 0) {
+            upParams.initialProgress += static_cast<double>(nowPosition +
+                everyPkgSize[upParams.pkgLocation - 1]) / static_cast<double>(allPkgSize);
+        }
+        status = InstallUpdaterPackage(upParams, args, manager);
+        ProgressSmoothHandler(static_cast<int>((upParams.initialProgress +
+            upParams.currentPercentage) * FULL_PERCENT_PROGRESS));
+        if (status != UPDATE_SUCCESS) {
+            LOG(ERROR) << "InstallUpdaterPackage failed! Pkg is " << upParams.updatePackage[upParams.pkgLocation];
+            return status;
+        }
+    }
+    UPDATER_UI_INSTANCE.ShowProgress(FULL_PERCENT_PROGRESS);
+    return status;
+}
+
 static UpdaterStatus StartUpdaterEntry(PkgManager::PkgManagerPtr manager,
     const std::vector<std::string> &args, UpdaterParams &upParams)
 {
     UpdaterStatus status = UPDATE_UNKNOWN;
-    if (upParams.updatePackage != "") {
+    if (upParams.updatePackage.size() > 0) {
         UPDATER_UI_INSTANCE.ShowProgressPage();
-        status = InstallUpdaterPackage(upParams, args, manager);
+        status = InstallUpdaterPackageSupport(upParams, args, manager);
         if (status != UPDATE_SUCCESS) {
             if (!CheckDumpResult()) {
                 UPDATER_LAST_WORD(status);
@@ -314,7 +364,7 @@ static UpdaterStatus StartUpdater(PkgManager::PkgManagerPtr manager, const std::
     char **argv, PackageUpdateMode &mode)
 {
     UpdaterParams upParams {
-        false, false, 0, ""
+        false, false, 0, 0, 0, 0
     };
     std::vector<char *> extractedArgs;
     int rc;
@@ -330,7 +380,7 @@ static UpdaterStatus StartUpdater(PkgManager::PkgManagerPtr manager, const std::
             case 0: {
                 std::string option = OPTIONS[optionIndex].name;
                 if (option == "update_package") {
-                    upParams.updatePackage = optarg;
+                    upParams.updatePackage.push_back(optarg);
                     (void)UPDATER_UI_INSTANCE.SetMode(UpdaterMode::OTA);
                     mode = HOTA_UPDATE;
                 } else if (option == "retry_count") {
