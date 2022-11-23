@@ -63,7 +63,7 @@ constexpr struct option OPTIONS[] = {
 static void SetRetryCountOrPkgLocationToMisc(int retryCountOrPkgLocation,
     const std::vector<std::string> args, bool isRetryCount)
 {
-    char headInfo[128]; // 128 : set headInfo size
+    char headInfo[128] {}; // 128 : set headInfo size
     if (isRetryCount) {
         if (strncpy_s(headInfo, sizeof(headInfo), "retry_count", strlen("retry_count") + 1) != EOK) {
             LOG(ERROR) << "SetRetryCountOrPkgLocationToMisc strncat_s headInfo failed";
@@ -76,7 +76,7 @@ static void SetRetryCountOrPkgLocationToMisc(int retryCountOrPkgLocation,
         }
     }
     struct UpdateMessage msg {};
-    char buffer[128]; // 128 : set headInfo size
+    char buffer[128] {}; // 128 : set headInfo size
     if (strncpy_s(msg.command, sizeof(msg.command), "boot_updater", strlen("boot_updater") + 1) != EOK) {
         LOG(ERROR) << "SetRetryCountOrPkgLocationToMisc strncpy_s failed";
         return;
@@ -298,13 +298,6 @@ static UpdaterStatus InstallUpdaterPackageSupport(UpdaterParams &upParams, PkgMa
     if (IsSpaceCapacitySufficient(upParams.updatePackage) == UPDATE_ERROR) {
         return status;
     }
-    if (IsBatteryCapacitySufficient() == false) {
-        UPDATER_UI_INSTANCE.ShowUpdInfo(TR(LOG_LOWPOWER));
-        UPDATER_UI_INSTANCE.Sleep(UI_SHOW_DURATION);
-        UPDATER_LAST_WORD(UPDATE_ERROR);
-        LOG(ERROR) << "Battery is not sufficient for install package.";
-        return UPDATE_SKIP;
-    }
     UPDATER_UI_INSTANCE.ShowProgress(0);
     uint64_t allPkgSize = 0;
     uint64_t nowPosition = 0;
@@ -316,6 +309,13 @@ static UpdaterStatus InstallUpdaterPackageSupport(UpdaterParams &upParams, PkgMa
     if (allPkgSize <= 0) {
         LOG(ERROR) << "All pkg size is 0.";
         return UPDATE_ERROR;
+    }
+    if (nowPosition == 0 && !IsBatteryCapacitySufficient()) {
+        UPDATER_UI_INSTANCE.ShowUpdInfo(TR(LOG_LOWPOWER));
+        UPDATER_UI_INSTANCE.Sleep(UI_SHOW_DURATION);
+        UPDATER_LAST_WORD(UPDATE_ERROR);
+        LOG(ERROR) << "Battery is not sufficient for install package.";
+        return UPDATE_SKIP;
     }
     UPDATER_UI_INSTANCE.ShowProgress(static_cast<double>(nowPosition) /
         static_cast<double>(allPkgSize) * FULL_PERCENT_PROGRESS);

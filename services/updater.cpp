@@ -268,10 +268,8 @@ UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, Upda
         UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_SETPART_FAIL), true);
         UPDATER_LAST_WORD(UPDATE_ERROR);
         return UPDATE_ERROR);
-
     LOG(INFO) << "Verify package...";
     UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_VERIFYPKG));
-
     int32_t verifyret = OtaUpdatePreCheck(pkgManager, upParams.updatePackage[upParams.pkgLocation]);
     UPDATER_ERROR_CHECK(verifyret == PKG_SUCCESS, "package verify failed",
         UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_VERIFYPKGFAIL), true);
@@ -283,12 +281,11 @@ UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, Upda
     } else {
         pkgManager = PkgManager::GetPackageInstance();
     }
-
     verifyret = GetUpdatePackageInfo(pkgManager, upParams.updatePackage[upParams.pkgLocation]);
     g_tmpProgressValue = 0;
-    // 0.05 : verify progress persent
     ProgressSmoothHandler(static_cast<int>(upParams.initialProgress * FULL_PERCENT_PROGRESS),
-        static_cast<int>((upParams.initialProgress + upParams.currentPercentage * 0.05) * FULL_PERCENT_PROGRESS));
+        static_cast<int>((upParams.initialProgress +
+        upParams.currentPercentage * 0.05) * FULL_PERCENT_PROGRESS)); // 0.05 : verify progress persent
     UPDATER_ERROR_CHECK(verifyret == PKG_SUCCESS, "Verify package Fail...",
         UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_VERIFYFAIL), true);
         return UPDATE_CORRUPT);
