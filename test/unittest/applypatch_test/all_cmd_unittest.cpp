@@ -125,7 +125,7 @@ HWTEST_F(AllCmdUnitTest, allCmd_test_001, TestSize.Level1)
     std::string storePath = "/data/updater/update_tmp";
     Store::CreateNewSpace(storePath, false);
     rc = tm->CommandsParser(fd, transferLines);
-    EXPECT_FALSE(rc);
+    EXPECT_TRUE(rc);
 }
 
 int AllCmdUnitTest::AllCmdUnitTestMove(int &fd, std::vector<std::string> &allCmd, TransferManager &tm)
