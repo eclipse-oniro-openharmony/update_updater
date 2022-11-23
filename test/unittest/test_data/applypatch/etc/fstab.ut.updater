@@ -16,4 +16,5 @@
 /tmp/vendortest /vendortest none nosuid,nodev,noatime wait
 /tmp/vendortest1 /vendortest1 none nosuid,nodev,noatime wait
 /dev/block/mmcblk0p7 /vendor ext4 ro,barrier=1 wait
+/tmp/misc /misc none nosuid,nodev,noatime wait
 
