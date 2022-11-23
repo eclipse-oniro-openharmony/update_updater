@@ -417,7 +417,7 @@ UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, UpdaterPara
         std::string fullPath = GetWorkPath() + std::string(UPDATER_BINARY);
         if (ExtractUpdaterBinary(pkgManager, UPDATER_BINARY) != 0) {
             LOG(INFO) << "There is no updater_binary in package, use updater_binary in device";
-            fullPath = "/bin/updater_binary"
+            fullPath = "/bin/updater_binary";
         }
 #ifdef UPDATER_UT
         if (upParams.updatePackage[upParams.pkgLocation].find("updater_binary_abnormal") != std::string::npos) {

@@ -254,7 +254,7 @@ static UpdaterStatus InstallUpdaterPackage(UpdaterParams &upParams, PkgManager::
             upParams.retryCount += 1;
             UPDATER_UI_INSTANCE.ShowFailedPage();
             std::vector<std::string> args = ParseParams(0, nullptr);
-            SetRetryCountToMisc(upParams.retryCount, args, true);
+            SetRetryCountOrPkgLocationToMisc(upParams.retryCount, args, true);
             Utils::DoReboot("updater");
         }
     } else {
@@ -265,7 +265,7 @@ static UpdaterStatus InstallUpdaterPackage(UpdaterParams &upParams, PkgManager::
     return status;
 }
 
-static UpdaterStatus CalcProgress(const UpdaterParams &upParams, uint64_t &allPkgSize
+static UpdaterStatus CalcProgress(const UpdaterParams &upParams, uint64_t &allPkgSize,
     uint64_t &nowPosition, std::vector<uint64_t> &everyPkgSize)
 {
     for (const auto &path : upParams.updatePackage) {
@@ -311,7 +311,7 @@ static UpdaterStatus InstallUpdaterPackageSupport(UpdaterParams &upParams, PkgMa
     std::vector<uint64_t> everyPkgSize;
     status = CalcProgress(upParams, allPkgSize, nowPosition, everyPkgSize);
     if (status != UPDATE_SUCCESS) {
-        retrun status;
+        return status;
     }
     if (allPkgSize <= 0) {
         LOG(ERROR) << "All pkg size is 0.";
