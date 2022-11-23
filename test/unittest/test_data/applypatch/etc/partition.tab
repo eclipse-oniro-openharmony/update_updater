@@ -10,4 +10,4 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-/dev/block/platform/soc/10100000.himci.eMMC/by-name/misc /misc none none wait
+/data/updater/applypatch/misc_test /misc none none wait
