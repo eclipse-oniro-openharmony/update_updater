@@ -34,7 +34,7 @@ class LanguageUI final {
     DISALLOW_COPY_MOVE(LanguageUI);
 public:
     static LanguageUI &GetInstance();
-    [[nodiscard]] bool Init(const Language language);
+    [[nodiscard]] bool Init(Language language);
     // msgId used here to specify validation of msgId
     const std::string &Translate(const std::string &key,
         [[maybe_unused]] UpdaterUiMsgID msgId = UpdaterUiMsgID::DEFAULT_STRING) const;
