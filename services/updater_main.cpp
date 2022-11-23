@@ -60,45 +60,36 @@ constexpr struct option OPTIONS[] = {
     { nullptr, 0, nullptr, 0 },
 };
 
-static void SetRetryCountOrPkgLocationToMisc(int retryCountOrPkgLocation,
-    const std::vector<std::string> args, bool isRetryCount)
+static void SetMessageToMisc(const int message, const std::string headInfo)
 {
-    char headInfo[128] {}; // 128 : set headInfo size
-    if (isRetryCount) {
-        if (strncpy_s(headInfo, sizeof(headInfo), "retry_count", strlen("retry_count") + 1) != EOK) {
-            LOG(ERROR) << "SetRetryCountOrPkgLocationToMisc strncat_s headInfo failed";
-            return;
-        }
-    } else {
-        if (strncpy_s(headInfo, sizeof(headInfo), "upgraded_pkg_num", strlen("upgraded_pkg_num") + 1) != EOK) {
-            LOG(ERROR) << "SetRetryCountOrPkgLocationToMisc strncat_s headInfo failed";
-            return;
-        }
+    if (headInfo.empty()) {
+        return;
     }
+    std::vector<std::string> args = ParseParams(0, nullptr);
     struct UpdateMessage msg {};
-    char buffer[128] {}; // 128 : set headInfo size
     if (strncpy_s(msg.command, sizeof(msg.command), "boot_updater", strlen("boot_updater") + 1) != EOK) {
-        LOG(ERROR) << "SetRetryCountOrPkgLocationToMisc strncpy_s failed";
+        LOG(ERROR) << "SetMessageToMisc strncpy_s failed";
         return;
     }
     for (const auto& arg : args) {
-        if (arg.find("headInfo") == std::string::npos) {
+        if (arg.find(headInfo) == std::string::npos) {
             if (strncat_s(msg.update, sizeof(msg.update), arg.c_str(), strlen(arg.c_str()) + 1) != EOK) {
-                LOG(ERROR) << "SetRetryCountOrPkgLocationToMisc strncat_s failed";
+                LOG(ERROR) << "SetMessageToMisc strncat_s failed";
                 return;
             }
             if (strncat_s(msg.update, sizeof(msg.update), "\n", strlen("\n") + 1) != EOK) {
-                LOG(ERROR) << "SetRetryCountOrPkgLocationToMisc strncat_s failed";
+                LOG(ERROR) << "SetMessageToMisc strncat_s failed";
                 return;
             }
         }
     }
-    if (snprintf_s(buffer, sizeof(buffer), sizeof(buffer) - 1, "--%s=%d", headInfo, retryCountOrPkgLocation) == -1) {
-        LOG(ERROR) << "SetRetryCountOrPkgLocationToMisc snprintf_s failed";
+    char buffer[128] {}; // 128 : set headInfo size
+    if (snprintf_s(buffer, sizeof(buffer), sizeof(buffer) - 1, "--%s=%d", headInfo.c_str(), message) == -1) {
+        LOG(ERROR) << "SetMessageToMisc snprintf_s failed";
         return;
     }
     if (strncat_s(msg.update, sizeof(msg.update), buffer, strlen(buffer) + 1) != EOK) {
-        LOG(ERROR) << "SetRetryCountOrPkgLocationToMisc strncat_s failed";
+        LOG(ERROR) << "SetMessageToMisc strncat_s failed";
         return;
     }
     if (WriteUpdaterMiscMsg(msg) != true) {
@@ -242,8 +233,7 @@ static UpdaterStatus InstallUpdaterPackage(UpdaterParams &upParams, PkgManager::
             LOG(ERROR) << "ClearRecordPartitionOffset failed";
             return UPDATE_ERROR;
         }
-        std::vector<std::string> args = ParseParams(0, nullptr);
-        SetRetryCountOrPkgLocationToMisc(upParams.retryCount + 1, args, true);
+        SetMessageToMisc(upParams.retryCount + 1, "retry_count");
     }
     status = DoInstallUpdaterPackage(manager, upParams, HOTA_UPDATE);
     if (status != UPDATE_SUCCESS) {
@@ -253,8 +243,7 @@ static UpdaterStatus InstallUpdaterPackage(UpdaterParams &upParams, PkgManager::
         if (status == UPDATE_RETRY && upParams.retryCount < MAX_RETRY_COUNT) {
             upParams.retryCount += 1;
             UPDATER_UI_INSTANCE.ShowFailedPage();
-            std::vector<std::string> args = ParseParams(0, nullptr);
-            SetRetryCountOrPkgLocationToMisc(upParams.retryCount, args, true);
+            SetMessageToMisc(upParams.retryCount, "retry_count");
             Utils::DoReboot("updater");
         }
     } else {
@@ -265,24 +254,35 @@ static UpdaterStatus InstallUpdaterPackage(UpdaterParams &upParams, PkgManager::
     return status;
 }
 
-static UpdaterStatus CalcProgress(const UpdaterParams &upParams, uint64_t &allPkgSize,
-    uint64_t &nowPosition, std::vector<uint64_t> &everyPkgSize)
+static UpdaterStatus CalcProgress(const UpdaterParams &upParams,
+    std::vector<double> &pkgStartPosition, double &updateStartPosition)
 {
+    uint64_t allPkgSize = 0;
+    std::vector<uint64_t> everyPkgSize;
     for (const auto &path : upParams.updatePackage) {
         char realPath[PATH_MAX + 1] = {0};
         if (realpath(path.c_str(), realPath) == nullptr) {
             LOG(ERROR) << "Can not find updatePackage : " << path;
             return UPDATE_ERROR;
         }
-        std::ifstream fin(realPath);
-        if (fin.is_open()) {
-            fin.seekg(0, std::ios::end);
-            everyPkgSize.push_back(fin.tellg());
-            allPkgSize += fin.tellg();
+        struct stat st ;
+        if (stat(path.c_str(), &st)) {
+            everyPkgSize.push_back(st.st_size);
+            allPkgSize += st.st_size;
         }
     }
+    pkgStartPosition.push_back(0);
+    if (allPkgSize == 0) {
+        LOG(ERROR) << "All packages's size is 0.";
+        return UPDATE_ERROR;
+    }
+    uint64_t startSize = 0;
+    for (auto size : everyPkgSize) {
+        startSize += size;
+        pkgStartPosition.push_back(static_cast<double>(startSize) / static_cast<double>(allPkgSize));
+    }
     for (int i = 0; i < upParams.pkgLocation; i++) {
-        nowPosition += everyPkgSize[i];
+        updateStartPosition += static_cast<double>(everyPkgSize[i]) / static_cast<double>(allPkgSize);
     }
     return UPDATE_SUCCESS;
 }
@@ -299,37 +299,29 @@ static UpdaterStatus InstallUpdaterPackageSupport(UpdaterParams &upParams, PkgMa
         return status;
     }
     UPDATER_UI_INSTANCE.ShowProgress(0);
-    uint64_t allPkgSize = 0;
-    uint64_t nowPosition = 0;
-    std::vector<uint64_t> everyPkgSize;
-    status = CalcProgress(upParams, allPkgSize, nowPosition, everyPkgSize);
+    std::vector<double> pkgStartPosition {};
+    double updateStartPosition;
+    status = CalcProgress(upParams, pkgStartPosition, updateStartPosition);
     if (status != UPDATE_SUCCESS) {
         return status;
     }
-    if (allPkgSize <= 0) {
-        LOG(ERROR) << "All pkg size is 0.";
-        return UPDATE_ERROR;
-    }
-    if (nowPosition == 0 && !IsBatteryCapacitySufficient()) {
+    if (upParams.retryCount == 0 && !IsBatteryCapacitySufficient()) {
         UPDATER_UI_INSTANCE.ShowUpdInfo(TR(LOG_LOWPOWER));
         UPDATER_UI_INSTANCE.Sleep(UI_SHOW_DURATION);
         UPDATER_LAST_WORD(UPDATE_ERROR);
         LOG(ERROR) << "Battery is not sufficient for install package.";
         return UPDATE_SKIP;
     }
-    UPDATER_UI_INSTANCE.ShowProgress(static_cast<double>(nowPosition) /
-        static_cast<double>(allPkgSize) * FULL_PERCENT_PROGRESS);
+    UPDATER_UI_INSTANCE.ShowProgress(updateStartPosition * FULL_PERCENT_PROGRESS);
     for (; upParams.pkgLocation < upParams.updatePackage.size(); upParams.pkgLocation++) {
-        upParams.currentPercentage =
-            static_cast<double>(everyPkgSize[upParams.pkgLocation]) / static_cast<double>(allPkgSize);
-        upParams.initialProgress = static_cast<double>(nowPosition) / static_cast<double>(allPkgSize);
-        nowPosition += everyPkgSize[upParams.pkgLocation];
+        upParams.currentPercentage = pkgStartPosition[upParams.pkgLocation + 1] -
+            pkgStartPosition[upParams.pkgLocation];
+        upParams.initialProgress = pkgStartPosition[upParams.pkgLocation];
         status = InstallUpdaterPackage(upParams, manager);
-        std::vector<std::string> args = ParseParams(0, nullptr);
-        SetRetryCountOrPkgLocationToMisc(upParams.pkgLocation, args, false);
-        int progress = static_cast<int>((upParams.initialProgress +
-            upParams.currentPercentage) * FULL_PERCENT_PROGRESS);
-        ProgressSmoothHandler(progress, progress);
+        SetMessageToMisc(upParams.pkgLocation + 1, "upgraded_pkg_num");
+        ProgressSmoothHandler(
+            static_cast<int>((upParams.initialProgress + upParams.currentPercentage)) * GetTmpProgressValue(),
+            static_cast<int>((upParams.initialProgress + upParams.currentPercentage)) * FULL_PERCENT_PROGRESS);
         if (status != UPDATE_SUCCESS) {
             LOG(ERROR) << "InstallUpdaterPackage failed! Pkg is " << upParams.updatePackage[upParams.pkgLocation];
             return status;
@@ -418,7 +410,7 @@ static UpdaterStatus StartUpdater(PkgManager::PkgManagerPtr manager, const std::
                     (void)UPDATER_UI_INSTANCE.SetMode(UpdaterMode::REBOOTFACTORYRST);
                     upParams.userWipeData = true;
                 } else if (option == "upgraded_pkg_num") {
-                    upParams.pkgLocation = atoi(optarg) + 1;
+                    upParams.pkgLocation = atoi(optarg);
                 }
                 break;
             }

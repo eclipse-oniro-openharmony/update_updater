@@ -208,23 +208,24 @@ UpdaterStatus IsSpaceCapacitySufficient(const std::vector<std::string> &packageP
     return UPDATE_SUCCESS;
 }
 
+int GetTmpProgressValue()
+{
+    return g_tmpProgressValue;
+}
+
 void ProgressSmoothHandler(int beginProgress, int endProgress)
 {
 #ifdef UPDATER_UI_SUPPORT
-    if (endProgress < 0) {
+    if (endProgress < 0 || beginProgress < 0) {
         return;
     }
-    int progress = beginProgress * (g_tmpProgressValue / FULL_PERCENT_PROGRESS);
-    if (g_tmpProgressValue == 0) {
-        progress = beginProgress;
-    }
-    while (progress < endProgress) {
-        int increase = (endProgress - progress) / PROGRESS_VALUE_CONST;
-        progress += increase;
-        if (progress >= endProgress || increase == 0) {
+    while (beginProgress < endProgress) {
+        int increase = (endProgress - beginProgress) / PROGRESS_VALUE_CONST;
+        beginProgress += increase;
+        if (beginProgress >= endProgress || increase == 0) {
             break;
         } else {
-            UPDATER_UI_INSTANCE.ShowProgress(progress);
+            UPDATER_UI_INSTANCE.ShowProgress(beginProgress);
             UPDATER_UI_INSTANCE.Sleep(SHOW_FULL_PROGRESS_TIME);
         }
     }

@@ -24,8 +24,7 @@
 using namespace Updater;
 using Updater::Utils::SplitString;
 
-static bool WriteToMiscAndRebootToUpdater([[maybe_unused]]const std::string &miscFile,
-    const struct UpdateMessage &updateMsg)
+static bool WriteToMiscAndRebootToUpdater(const struct UpdateMessage &updateMsg)
 {
     // Write package name to misc, then trigger reboot.
     const char *bootCmd = "boot_updater";
@@ -45,7 +44,7 @@ static bool WriteToMiscAndRebootToUpdater([[maybe_unused]]const std::string &mis
 #endif
 }
 
-bool RebootAndInstallUpgradePackage(const std::string &miscFile, const std::vector<std::string> packageName)
+bool RebootAndInstallUpgradePackage(const std::string &miscFile, const std::vector<std::string> &packageName)
 {
     if (packageName.size() == 0 || miscFile.empty()) {
         std::cout << "updaterkits: invalid argument. one of arugments is empty\n";
@@ -65,7 +64,7 @@ bool RebootAndInstallUpgradePackage(const std::string &miscFile, const std::vect
         }
     }
 
-    WriteToMiscAndRebootToUpdater(miscFile, updateMsg);
+    WriteToMiscAndRebootToUpdater(updateMsg);
 
     // Never get here.
     return true;
@@ -85,7 +84,7 @@ bool RebootAndCleanUserData(const std::string &miscFile, const std::string &cmd)
         return false;
     }
 
-    WriteToMiscAndRebootToUpdater(miscFile, updateMsg);
+    WriteToMiscAndRebootToUpdater(updateMsg);
 
     // Never get here.
     return true;
