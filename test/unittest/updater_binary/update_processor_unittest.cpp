@@ -23,11 +23,13 @@
 #include "store.h"
 #include "unittest_comm.h"
 #include "update_processor.h"
+#include "script_manager.h"
 
 using namespace Updater;
 using namespace std;
 using namespace Hpackage;
 using namespace testing::ext;
+using namespace Uscript;
 
 namespace UpdaterUt {
 constexpr const char *UT_MISC_PARTITION_NAME = "/misc";
@@ -62,7 +64,7 @@ void UpdateProcessorUnitTest::SetUpTestCase(void) {}
 // do something at the each function end
 void UpdateProcessorUnitTest::TearDownTestCase(void) {}
 
-/* ota update,zip has 2k size misc.img */
+/* ota update, zip has 2k size misc.img */
 HWTEST_F(UpdateProcessorUnitTest, UpdateProcessor_001, TestSize.Level1)
 {
     const string packagePath = "/data/updater/updater/updater_write_misc_img.zip";
@@ -70,7 +72,7 @@ HWTEST_F(UpdateProcessorUnitTest, UpdateProcessor_001, TestSize.Level1)
     EXPECT_EQ(ret, 0);
 }
 
-/* diff update,zip has 2k size misc.img, base is zero, dst is urandom */
+/* diff update, zip has 2k size misc.img, base is zero, dst is urandom */
 HWTEST_F(UpdateProcessorUnitTest, UpdateProcessor_002, TestSize.Level1)
 {
     vector<uint8_t> buffer(UT_MISC_BUFFER_SIZE, 0);
@@ -81,5 +83,18 @@ HWTEST_F(UpdateProcessorUnitTest, UpdateProcessor_002, TestSize.Level1)
     const string packagePath = "/data/updater/updater/updater_write_diff_misc_img.zip";
     ret = ProcessUpdater(false, STDOUT_FILENO, packagePath, GetTestCertName());
     EXPECT_EQ(ret, 0);
+}
+
+/* diff update, zip has 2k size misc.img, base is zero, dst is urandom, hash check fail */
+HWTEST_F(UpdateProcessorUnitTest, UpdateProcessor_003, TestSize.Level1)
+{
+    vector<uint8_t> buffer(UT_MISC_BUFFER_SIZE, 1);
+    int32_t ret = Store::WriteDataToStore("/", GetBlockDeviceByMountPoint(UT_MISC_PARTITION_NAME),
+        buffer, UT_MISC_BUFFER_SIZE);
+    EXPECT_EQ(ret, 0);
+
+    const string packagePath = "/data/updater/updater/updater_write_diff_misc_img.zip";
+    ret = ProcessUpdater(false, STDOUT_FILENO, packagePath, GetTestCertName());
+    EXPECT_EQ(ret, USCRIPT_INVALID_PARAM);
 }
 } // namespace updater_ut
