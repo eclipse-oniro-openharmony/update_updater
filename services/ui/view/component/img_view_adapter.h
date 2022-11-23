@@ -17,8 +17,10 @@
 
 #include <string>
 #include <thread>
+#include "animator/animator_manager.h"
 #include "components/ui_image_view.h"
 #include "view_api.h"
+
 namespace Updater {
 class ImgViewAdapter : public OHOS::UIImageView {
     DISALLOW_COPY_MOVE(ImgViewAdapter);
@@ -32,13 +34,19 @@ public:
     ImgViewAdapter();
     explicit ImgViewAdapter(const UxViewInfo &info);
     ~ImgViewAdapter();
-    void Start();
-    void Stop();
-    void ShowNextImage();
+    bool Start();
+    bool Stop();
+#ifdef UPDATER_UT
+    const ImgAnimatorCallback *GetAnimatorCallback() const;
+    const OHOS::Animator *GetAnimator() const;
+    uint32_t GetCurrId() const;
+#endif
     static bool IsValid(const UxImageInfo &info);
 private:
-    bool IsOverImgCnt() const;
+    void ShowNextImage();
     void ThreadCb();
+    static bool IsValidForAnimator(const UxImageInfo &info);
+    static bool IsValidForStaticImg(const UxImageInfo &info);
     bool animatorStop_ { true };
     bool valid_ { false };
     uint32_t currId_ { 0 };

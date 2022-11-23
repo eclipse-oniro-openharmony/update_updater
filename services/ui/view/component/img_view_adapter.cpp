@@ -15,7 +15,6 @@
 #include "img_view_adapter.h"
 #include <sstream>
 #include <unistd.h>
-#include "animator/animator_manager.h"
 #include "core/render_manager.h"
 #include "log/log.h"
 #include "page/view_proxy.h"
@@ -76,20 +75,20 @@ ImgViewAdapter::ImgViewAdapter() = default;
 
 ImgViewAdapter::ImgViewAdapter(const UxViewInfo &info)
 {
-    const UxViewCommonInfo *commonPtr = &info.commonInfo;
-    const UxImageInfo *specPtr = &std::get<UxImageInfo>(info.specificInfo);
-    dir_ = specPtr->resPath;
-    imgCnt_ = specPtr->imgCnt;
-    interval_ = specPtr->updInterval;
-    filePrefix_ = specPtr->filePrefix;
+    const UxViewCommonInfo &common = info.commonInfo;
+    const UxImageInfo &spec = std::get<UxImageInfo>(info.specificInfo);
+    dir_ = spec.resPath;
+    imgCnt_ = spec.imgCnt;
+    interval_ = spec.updInterval;
+    filePrefix_ = spec.filePrefix;
     currId_ = 0;
     valid_ = true;
-    viewId_ = commonPtr->id;
+    viewId_ = common.id;
     this->SetAutoEnable(false);
-    this->SetPosition(commonPtr->x, commonPtr->y);
-    this->SetWidth(commonPtr->w);
-    this->SetHeight(commonPtr->h);
-    this->SetVisible(commonPtr->visible);
+    this->SetPosition(common.x, common.y);
+    this->SetWidth(common.w);
+    this->SetHeight(common.h);
+    this->SetVisible(common.visible);
     this->SetViewId(viewId_.c_str());
     LOG(INFO) << "dir:" << dir_ << ", imgCnt:" << imgCnt_ << ", interval:" << interval_;
     if (interval_ == 0) {
@@ -103,8 +102,25 @@ ImgViewAdapter::ImgViewAdapter(const UxViewInfo &info)
 
 bool ImgViewAdapter::IsValid(const UxImageInfo &info)
 {
+    if (info.updInterval == 0) {
+        return IsValidForStaticImg(info);
+    }
+    return IsValidForAnimator(info);
+}
+
+bool ImgViewAdapter::IsValidForStaticImg(const UxImageInfo &info)
+{
     if (info.resPath.empty()) {
-        LOG(ERROR) << "img viewinfo check failed, resPath: " << info.resPath;
+        LOG(ERROR) << "img viewinfo check failed, resPath is empty when this is a static image";
+        return false;
+    }
+    return true;
+}
+
+bool ImgViewAdapter::IsValidForAnimator(const UxImageInfo &info)
+{
+    if (info.filePrefix.empty() || info.resPath.empty()) {
+        LOG(ERROR) << "img viewinfo check failed, filePrefix is empty when this is a animator";
         return false;
     }
 
@@ -121,37 +137,34 @@ bool ImgViewAdapter::IsValid(const UxImageInfo &info)
     return true;
 }
 
-bool ImgViewAdapter::IsOverImgCnt() const
-{
-    return currId_ >= imgCnt_;
-}
-
-void ImgViewAdapter::Start()
+bool ImgViewAdapter::Start()
 {
     if (!valid_ || !animatorStop_) {
-        return;
+        return false;
     }
     if (cb_ == nullptr) {
         LOG(ERROR) << "cb_ is null";
-        return;
+        return false;
     }
     cb_->Start();
     cb_->GetAnimator()->Start();
     animatorStop_ = false;
+    return true;
 }
 
-void ImgViewAdapter::Stop()
+bool ImgViewAdapter::Stop()
 {
     if (!valid_ || animatorStop_) {
-        return;
+        return false;
     }
     if (cb_ == nullptr) {
         LOG(ERROR) << "cb_ is null";
-        return;
+        return false;
     }
     cb_->GetAnimator()->Stop();
     cb_->Stop();
     animatorStop_ = true;
+    return true;
 }
 
 void ImgViewAdapter::ShowNextImage()
@@ -168,4 +181,25 @@ void ImgViewAdapter::ShowNextImage()
     currId_ = (currId_ + 1) % imgCnt_;
     Utils::UsSleep(interval_ * USECOND_TO_MSECOND);
 }
+
+#ifdef UPDATER_UT
+const ImgViewAdapter::ImgAnimatorCallback *ImgViewAdapter::GetAnimatorCallback() const
+{
+    return cb_.get();
+}
+
+const OHOS::Animator *ImgViewAdapter::GetAnimator() const
+{
+    if (!cb_) {
+        return nullptr;
+    }
+    return cb_->GetAnimator();
+}
+
+
+uint32_t ImgViewAdapter::GetCurrId() const
+{
+    return currId_;
+}
+#endif
 } // namespace Updater
