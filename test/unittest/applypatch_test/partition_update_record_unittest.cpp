@@ -56,7 +56,7 @@ void PartitionUpdateRecordUnitTest::TearDown()
 HWTEST_F(PartitionUpdateRecordUnitTest, partition_record_test_001, TestSize.Level1)
 {
     mode_t dirMode = S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH;
-    const uint8_t bufferLen = 4096;
+    const int bufferLen = 4096;
     std::vector<uint8_t> buffer(bufferLen);
     const std::string miscDir = "/data/updater/applypatch";
     Updater::Utils::MkdirRecursive(miscDir, dirMode);
