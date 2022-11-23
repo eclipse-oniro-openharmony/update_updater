@@ -24,6 +24,7 @@
 #include "misc_info/misc_info.h"
 #include "package/pkg_manager.h"
 #include "updater/updater.h"
+#include "utils.h"
 
 using namespace testing::ext;
 using namespace Updater;
@@ -54,7 +55,21 @@ void PartitionUpdateRecordUnitTest::TearDown()
 
 HWTEST_F(PartitionUpdateRecordUnitTest, partition_record_test_001, TestSize.Level1)
 {
+    mode_t dirMode = S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH;
+    const int bufferLen = 4096;
+    std::vector<uint8_t> buffer(bufferLen);
+    const std::string miscDir = "/data/updater/applypatch";
+    Updater::Utils::MkdirRecursive(miscDir, dirMode);
+    std::string filePath = "/data/updater/applypatch/misc_test";
+    int fd = open(filePath.c_str(), O_RDWR | O_CREAT, dirMode);
+    if (fd < 0) {
+        printf("Open file failed");
+        return;
+    }
     const std::string partitionName = "ut_partition";
+    std::fill(buffer.begin(), buffer.end(), 0);
+    write(fd, buffer.data(), bufferLen);
+    close(fd);
     bool ret = PartitionRecord::GetInstance().RecordPartitionUpdateStatus(partitionName, true);
     EXPECT_EQ(ret, true);
 
