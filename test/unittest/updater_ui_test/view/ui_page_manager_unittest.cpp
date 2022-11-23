@@ -15,6 +15,7 @@
 
 #include <utility>
 #include "gtest/gtest.h"
+#include "ui_test_graphic_engine.h"
 #include "view/component/img_view_adapter.h"
 #include "view/component/text_label_adapter.h"
 #include "view/page/page_manager.h"
@@ -24,36 +25,6 @@ using namespace std;
 using namespace testing::ext;
 
 namespace {
-class TestGraphicEngine : public OHOS::BaseGfxEngine {
-    DISALLOW_COPY_MOVE(TestGraphicEngine);
-public:
-    TestGraphicEngine() = default;
-    virtual ~TestGraphicEngine() = default;
-    static TestGraphicEngine &GetInstance()
-    {
-        static TestGraphicEngine instance;
-        static bool isRegister = false;
-        if (!isRegister) {
-            OHOS::BaseGfxEngine::InitGfxEngine(&instance);
-            isRegister = true;
-        }
-        return instance;
-    }
-    void Flush(const OHOS::Rect& flushRect) override {}
-    OHOS::BufferInfo *GetFBBufferInfo() override
-    {
-        return nullptr;
-    }
-    uint16_t GetScreenWidth() override
-    {
-        return 1000u;
-    }
-    uint16_t GetScreenHeight() override
-    {
-        return 1000u;
-    }
-};
-
 std::string ToString(const std::vector<std::string> &vec)
 {
     if (vec.empty()) {

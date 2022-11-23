@@ -22,7 +22,7 @@ namespace Updater {
 class LabelBtnAdapter : public OHOS::UILabelButton {
     DISALLOW_COPY_MOVE(LabelBtnAdapter);
     struct LabelBtnOnFocusListener;
-    static constexpr uint32_t MAX_FONT_SIZE = 255;
+    static constexpr uint32_t MAX_FONT_SIZE = 200;
 public:
     using SpecificInfoType = UxLabelBtnInfo;
     LabelBtnAdapter();
