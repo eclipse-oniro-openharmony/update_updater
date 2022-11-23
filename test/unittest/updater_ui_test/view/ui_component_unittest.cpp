@@ -274,7 +274,7 @@ HWTEST_F(UpdaterUiComponentUnitTest, test_img_view_adapter_start_stop, TestSize.
         EXPECT_EQ(imgView.GetCurrId(), ++currId);
 
         EXPECT_TRUE(imgView.Stop()); // stop success
-        EXPECT_FALSE(imgView.Stop()); // stop success
+        EXPECT_FALSE(imgView.Stop()); // consecutive stop would fail
         EXPECT_FALSE(imgView.IsVisible());
 
         OHOS::TaskManager::GetInstance()->TaskHandler();
