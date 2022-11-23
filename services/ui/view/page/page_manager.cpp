@@ -117,7 +117,7 @@ bool PageManager::IsValidCom(const ComInfo &pageComId) const
         LOG(ERROR) << "page id " << pageId << "not valid";
         return false;
     }
-    Page &page = *(it->second);
+    const Page &page = *(it->second);
     return page.IsValidCom(comId);
 }
 
