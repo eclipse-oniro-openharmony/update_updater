@@ -70,26 +70,26 @@ LabelBtnAdapter::~LabelBtnAdapter() = default;
 
 LabelBtnAdapter::LabelBtnAdapter(const UxViewInfo &info)
 {
-    const UxViewCommonInfo *commonPtr = &info.commonInfo;
-    const UxLabelBtnInfo *specPtr = &std::get<UxLabelBtnInfo>(info.specificInfo);
-    viewId_ = commonPtr->id;
-    this->SetPosition(commonPtr->x, commonPtr->y);
-    this->SetWidth(commonPtr->w);
-    this->SetHeight(commonPtr->h);
-    this->SetVisible(commonPtr->visible);
+    const UxViewCommonInfo &common = info.commonInfo;
+    const UxLabelBtnInfo &spec = std::get<UxLabelBtnInfo>(info.specificInfo);
+    viewId_ = common.id;
+    this->SetPosition(common.x, common.y);
+    this->SetWidth(common.w);
+    this->SetHeight(common.h);
+    this->SetVisible(common.visible);
     this->SetViewId(viewId_.c_str());
-    this->SetText(TranslateText(specPtr->text).c_str());
-    this->SetFont(DEFAULT_FONT_FILENAME, specPtr->fontSize);
-    auto txtColor = StrToColor(specPtr->txtColor);
+    this->SetText(TranslateText(spec.text).c_str());
+    this->SetFont(DEFAULT_FONT_FILENAME, spec.fontSize);
+    auto txtColor = StrToColor(spec.txtColor);
     this->SetLabelStyle(OHOS::STYLE_TEXT_COLOR, txtColor.full);
     this->SetLabelStyle(OHOS::STYLE_TEXT_OPA, txtColor.alpha);
-    auto bgColor = StrToColor(specPtr->bgColor);
+    auto bgColor = StrToColor(spec.bgColor);
     this->SetStyle(OHOS::STYLE_BACKGROUND_COLOR, bgColor.full);
     this->SetStyle(OHOS::STYLE_BACKGROUND_OPA, bgColor.alpha);
-    if (specPtr->focusable) {
+    if (spec.focusable) {
         LOG(INFO) << "init focus listener for " << viewId_;
-        InitFocus(txtColor, bgColor, StrToColor(specPtr->focusedTxtColor),
-            StrToColor(specPtr->focusedBgColor));
+        InitFocus(txtColor, bgColor, StrToColor(spec.focusedTxtColor),
+            StrToColor(spec.focusedBgColor));
     }
 }
 
