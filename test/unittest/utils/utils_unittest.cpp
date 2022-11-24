@@ -105,4 +105,17 @@ HWTEST_F(UtilsUnitTest, IsUpdaterMode, TestSize.Level0)
 {
     EXPECT_EQ(Utils::IsUpdaterMode(), false);
 }
+
+HWTEST_F(UtilsUnitTest, IsFileExist, TestSize.Level0)
+{
+    EXPECT_EQ(Utils::IsFileExist("/bin/test_updater"), false);
+    EXPECT_EQ(Utils::IsFileExist("/bin/updater"), true);
+}
+
+HWTEST_F(UtilsUnitTest, IsDirExist, TestSize.Level0)
+{
+    EXPECT_EQ(Utils::IsDirExist("/bin/test_updater"), false);
+    EXPECT_EQ(Utils::IsDirExist("/bin"), true);
+    EXPECT_EQ(Utils::IsDirExist("/bin/"), true);
+}
 } // updater_ut
