@@ -77,6 +77,17 @@ HWTEST_F(UpdaterUtilUnitTest, GetBootMode, TestSize.Level1)
     EXPECT_EQ(ret, 0);
 }
 
+HWTEST_F(UpdaterUtilUnitTest, PostUpdater, TestSize.Level1)
+{
+    PostUpdater(true);
+    LoadSpecificFstab("/data/updater/updater/etc/fstab.ut.updater");
+    int ret = access(TMP_LOG, 0);
+    EXPECT_EQ(ret, 0);
+    PostUpdater(true);
+    ret = access(UPDATER_LOG, 0);
+    EXPECT_EQ(ret, 0);
+}
+
 HWTEST_F(UpdaterUtilUnitTest, ParseParams, TestSize.Level1)
 {
     UpdateMessage boot {};
