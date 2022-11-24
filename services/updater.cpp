@@ -405,18 +405,17 @@ UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, UpdaterPara
         return UPDATE_CORRUPT);
     int pipeRead = pfd[0];
     int pipeWrite = pfd[1];
-
+    std::string fullPath = GetWorkPath() + std::string(UPDATER_BINARY);
+    if (ExtractUpdaterBinary(pkgManager, UPDATER_BINARY) != 0) {
+        LOG(INFO) << "There is no updater_binary in package, use updater_binary in device";
+        fullPath = "/bin/updater_binary";
+    }
     pid_t pid = fork();
     UPDATER_CHECK_ONLY_RETURN(pid >= 0, ERROR_CODE(CODE_FORK_FAIL);
         UPDATER_LAST_WORD(UPDATE_ERROR);
         return UPDATE_ERROR);
     if (pid == 0) { // child
         close(pipeRead);   // close read endpoint
-        std::string fullPath = GetWorkPath() + std::string(UPDATER_BINARY);
-        if (ExtractUpdaterBinary(pkgManager, UPDATER_BINARY) != 0) {
-            LOG(INFO) << "There is no updater_binary in package, use updater_binary in device";
-            fullPath = "/bin/updater_binary";
-        }
 #ifdef UPDATER_UT
         if (upParams.updatePackage[upParams.pkgLocation].find("updater_binary_abnormal") != std::string::npos) {
             fullPath = "/system/bin/updater_binary_abnormal";
