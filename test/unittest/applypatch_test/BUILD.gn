@@ -24,6 +24,7 @@ ohos_unittest("applypatch_unittest") {
   module_out_path = MODULE_OUTPUT_PATH
   sources = [
     "all_cmd_unittest.cpp",
+    "applypatch_unittest.cpp",
     "blockset_unittest.cpp",
     "commands_unittest.cpp",
     "commandsfunction_unittest.cpp",
