@@ -187,7 +187,33 @@ public:
         PackagesInfo::ReleasePackagesInfoInstance(pkginfomanager);
         return 0;
     }
+
+    int TestUpdaterPreProcess()
+    {
+        PkgManager::PkgManagerPtr pkgManager = PkgManager::GetPackageInstance();
+        std::string packagePath = "/data/updater/package/test_package.zip";
+        std::vector<std::string> components;
+        int32_t ret = pkgManager->LoadPackage(packagePath, Utils::GetCertName(), components);
+        EXPECT_EQ(ret, PKG_SUCCESS);
+
+        PackagesInfoPtr pkginfomanager = PackagesInfo::GetPackagesInfoInstance();
+        std::vector<std::string> result;
+        std::vector<std::string> targetVersions = pkginfomanager->GetOTAVersion(
+            pkgManager, "/version_list", "/data/updater/package/");
+        EXPECT_NE(targetVersions, result);
+
+        std::vector<std::string> boardIdList = pkginfomanager->GetBoardID(pkgManager, "/board_list", "");
+        EXPECT_NE(boardIdList, result);
+        PackagesInfo::ReleasePackagesInfoInstance(pkginfomanager);
+        return 0;
+    }
 };
+
+HWTEST_F(PkgPackageTest, TestUpdaterPreProcess, TestSize.Level1)
+{
+    PkgPackageTest test;
+    EXPECT_EQ(0, test.TestUpdaterPreProcess());
+}
 
 HWTEST_F(PkgPackageTest, TestPackageInfoFail, TestSize.Level1)
 {
