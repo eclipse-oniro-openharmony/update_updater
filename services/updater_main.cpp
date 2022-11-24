@@ -320,8 +320,9 @@ static UpdaterStatus InstallUpdaterPackageSupport(UpdaterParams &upParams, PkgMa
         status = InstallUpdaterPackage(upParams, manager);
         SetMessageToMisc(upParams.pkgLocation + 1, "upgraded_pkg_num");
         ProgressSmoothHandler(
-            static_cast<int>((upParams.initialProgress + upParams.currentPercentage)) * GetTmpProgressValue(),
-            static_cast<int>((upParams.initialProgress + upParams.currentPercentage)) * FULL_PERCENT_PROGRESS);
+            static_cast<int>(upParams.initialProgress * FULL_PERCENT_PROGRESS +
+            upParams.currentPercentage * GetTmpProgressValue()),
+            static_cast<int>(pkgStartPosition[upParams.pkgLocation + 1] * FULL_PERCENT_PROGRESS));
         if (status != UPDATE_SUCCESS) {
             LOG(ERROR) << "InstallUpdaterPackage failed! Pkg is " << upParams.updatePackage[upParams.pkgLocation];
             return status;
