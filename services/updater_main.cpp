@@ -336,7 +336,7 @@ static UpdaterStatus DoUpdatePackages(UpdaterParams &upParams, PkgManager::PkgMa
     return status;
 }
 
-static UpdaterStatus InstallUpdaterPackageSupport(UpdaterParams &upParams, PkgManager::PkgManagerPtr manager)
+static UpdaterStatus InstallUpdaterPackages(UpdaterParams &upParams, PkgManager::PkgManagerPtr manager)
 {
     UpdaterStatus status = PreUpdatePackages(upParams);
     if (status != UPDATE_SUCCESS) {
@@ -351,7 +351,7 @@ static UpdaterStatus StartUpdaterEntry(PkgManager::PkgManagerPtr manager, Update
     UpdaterStatus status = UPDATE_UNKNOWN;
     if (upParams.updatePackage.size() > 0) {
         UPDATER_UI_INSTANCE.ShowProgressPage();
-        status = InstallUpdaterPackageSupport(upParams, manager);
+        status = InstallUpdaterPackages(upParams, manager);
         if (status != UPDATE_SUCCESS) {
             if (!CheckDumpResult()) {
                 UPDATER_LAST_WORD(status);
