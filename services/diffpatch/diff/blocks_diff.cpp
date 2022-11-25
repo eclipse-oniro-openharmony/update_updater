@@ -235,6 +235,10 @@ int32_t BlocksStreamDiff::WritePatchHeader(int64_t controlSize,
     int64_t diffDataSize, int64_t newSize, size_t &headerLen)
 {
     PATCH_DEBUG("WritePatchHeader %zu", static_cast<size_t>(stream_.tellp()));
+    if (offset_ < 0) {
+        PATCH_LOGE("offset_ error");
+        return -1;
+    }
     stream_.seekp(offset_, std::ios::beg);
     stream_.write(BSDIFF_MAGIC, std::char_traits<char>::length(BSDIFF_MAGIC));
     PkgBuffer buffer(sizeof(int64_t));
