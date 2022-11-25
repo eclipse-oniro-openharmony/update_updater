@@ -559,5 +559,23 @@ bool RemoveDir(const std::string &path)
     }
     return rmdir(strPath.c_str()) == 0 ? true : false;
 }
+
+bool IsFileExist(const std::string &path)
+{
+    struct stat st {};
+    if (stat(path.c_str(), &st) == 0 && S_ISREG(st.st_mode)) {
+        return true;
+    }
+    return false;
+}
+
+bool IsDirExist(const std::string &path)
+{
+    struct stat st {};
+    if (stat(path.c_str(), &st) == 0 && S_ISDIR(st.st_mode)) {
+        return true;
+    }
+    return false;
+}
 } // Utils
 } // namespace Updater

@@ -68,6 +68,8 @@ bool PathToRealPath(const std::string &path, std::string &realPath);
 void UsSleep(int usec);
 bool IsUpdaterMode();
 bool RemoveDir(const std::string &path);
+bool IsFileExist(const std::string &path);
+bool IsDirExist(const std::string &path);
 } // Utils
 } // Updater
 #endif // UPDATER_UTILS_H
