@@ -216,7 +216,7 @@ int GetTmpProgressValue()
 void ProgressSmoothHandler(int beginProgress, int endProgress)
 {
 #ifdef UPDATER_UI_SUPPORT
-    if (endProgress < 0 || endProgress > 100 || beginProgress < 0) {
+    if (endProgress < 0 || endProgress > FULL_PERCENT_PROGRESS || beginProgress < 0) {
         return;
     }
     while (beginProgress < endProgress) {
