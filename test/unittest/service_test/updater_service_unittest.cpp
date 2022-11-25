@@ -35,7 +35,7 @@ class UpdaterUtilUnitTest : public testing::Test {
 public:
     UpdaterUtilUnitTest()
     {
-        std::cout<<"UpdaterUtilUnitTest()";
+        InitUpdaterLogger("UPDATER", TMP_LOG, TMP_STAGE_LOG, TMP_ERROR_CODE_PATH);
     }
     ~UpdaterUtilUnitTest() {}
 
