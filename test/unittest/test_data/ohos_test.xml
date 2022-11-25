@@ -205,6 +205,7 @@
         <preparer>
             <option name="push" value="updater/updater_full.zip -> /data/updater/updater" src="res"/>
             <option name="push" value="src/signing_cert.crt -> /data/updater/src" src="res"/>
+            <option name="push" value="updater/etc/fstab.ut.updater -> /data/updater/updater/etc" src="res"/>
         </preparer>
     </target>
     <target name="binary_unittest">
