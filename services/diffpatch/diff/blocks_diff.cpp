@@ -235,7 +235,7 @@ int32_t BlocksStreamDiff::WritePatchHeader(int64_t controlSize,
     int64_t diffDataSize, int64_t newSize, size_t &headerLen)
 {
     PATCH_DEBUG("WritePatchHeader %zu", static_cast<size_t>(stream_.tellp()));
-    if (offset_ > numeric_limits<long>::max()) {
+    if (offset_ > numeric_limits<std::fstream::pos_type>::max()) {
         PATCH_LOGE("offset_ error");
         return -1;
     }
