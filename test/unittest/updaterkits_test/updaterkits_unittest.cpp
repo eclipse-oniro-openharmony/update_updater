@@ -38,11 +38,11 @@ void UpdaterKitsUnitTest::TearDownTestCase(void)
 
 HWTEST_F(UpdaterKitsUnitTest, updater_kits_test01, TestSize.Level1)
 {
-    const std::string packageName1 = "";
+    const std::vector<std::string> packageName1 = {""};
     bool ret = RebootAndInstallUpgradePackage(MISC_FILE, packageName1);
     EXPECT_EQ(ret, false);
 
-    const std::string packageName2 = "/data/updater/updater/updater_without_updater_binary.zip";
+    const std::vector<std::string> packageName2 = {"/data/updater/updater/updater_without_updater_binary.zip"};
     auto fp = std::unique_ptr<FILE, decltype(&fclose)>(fopen(MISC_FILE.c_str(), "wb+"), fclose);
     EXPECT_NE(fp, nullptr);
     ret = RebootAndInstallUpgradePackage(MISC_FILE, packageName2);

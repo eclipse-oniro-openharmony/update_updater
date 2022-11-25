@@ -48,7 +48,9 @@ struct UpdaterParams {
     std::vector<std::string> updatePackage {};
 };
 
-void ProgressSmoothHandler(int progress);
+int GetTmpProgressValue();
+
+void ProgressSmoothHandler(int beginProgress, int endProgress);
 
 UpdaterStatus DoInstallUpdaterPackage(Hpackage::PkgManager::PkgManagerPtr pkgManager,
     UpdaterParams &upParams, PackageUpdateMode updateMode);

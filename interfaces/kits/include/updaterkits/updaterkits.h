@@ -19,7 +19,7 @@
 // Reboot system to updater mode and trigger installing update package.
 // @param packageName update package file name.
 // @return returns true if trigger update package installing success, else returns false.
-extern bool RebootAndInstallUpgradePackage(const std::string &miscFile, const std::string &packageName);
+extern bool RebootAndInstallUpgradePackage(const std::string &miscFile, const std::vector<std::string> &packageName);
 
 // Reboot system to updater mode and trigger userdata clean up.
 // @return returns true if trigger userdata cleanup success, else returns false.
