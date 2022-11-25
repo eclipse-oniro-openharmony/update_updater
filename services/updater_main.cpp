@@ -287,7 +287,7 @@ static UpdaterStatus CalcProgress(const UpdaterParams &upParams,
     return UPDATE_SUCCESS;
 }
 
-static UpdaterStatus InstallUpdaterPackageSupport(UpdaterParams &upParams, PkgManager::PkgManagerPtr manager)
+static UpdaterStatus PreUpdatePackages(UpdaterParams &upParams)
 {
     UpdaterStatus status = UPDATE_UNKNOWN;
     if (SetupPartitions() != 0) {
@@ -298,19 +298,24 @@ static UpdaterStatus InstallUpdaterPackageSupport(UpdaterParams &upParams, PkgMa
     if (IsSpaceCapacitySufficient(upParams.updatePackage) == UPDATE_ERROR) {
         return status;
     }
-    UPDATER_UI_INSTANCE.ShowProgress(0);
-    std::vector<double> pkgStartPosition {};
-    double updateStartPosition;
-    status = CalcProgress(upParams, pkgStartPosition, updateStartPosition);
-    if (status != UPDATE_SUCCESS) {
-        return status;
-    }
     if (upParams.retryCount == 0 && !IsBatteryCapacitySufficient()) {
         UPDATER_UI_INSTANCE.ShowUpdInfo(TR(LOG_LOWPOWER));
         UPDATER_UI_INSTANCE.Sleep(UI_SHOW_DURATION);
         UPDATER_LAST_WORD(UPDATE_ERROR);
         LOG(ERROR) << "Battery is not sufficient for install package.";
         return UPDATE_SKIP;
+    }
+    return UPDATE_SUCCESS;
+}
+
+static UpdaterStatus DoUpdatePackages(UpdaterParams &upParams, PkgManager::PkgManagerPtr manager)
+{
+    UpdaterStatus status = UPDATE_UNKNOWN;
+    std::vector<double> pkgStartPosition {};
+    double updateStartPosition;
+    status = CalcProgress(upParams, pkgStartPosition, updateStartPosition);
+    if (status != UPDATE_SUCCESS) {
+        return status;
     }
     UPDATER_UI_INSTANCE.ShowProgress(updateStartPosition * FULL_PERCENT_PROGRESS);
     for (; upParams.pkgLocation < upParams.updatePackage.size(); upParams.pkgLocation++) {
@@ -328,8 +333,17 @@ static UpdaterStatus InstallUpdaterPackageSupport(UpdaterParams &upParams, PkgMa
             return status;
         }
     }
-    UPDATER_UI_INSTANCE.ShowProgress(FULL_PERCENT_PROGRESS);
     return status;
+}
+
+static UpdaterStatus InstallUpdaterPackageSupport(UpdaterParams &upParams, PkgManager::PkgManagerPtr manager)
+{
+    UpdaterStatus status = PreUpdatePackages(upParams);
+    if (status != UPDATE_SUCCESS) {
+        LOG(ERROR) << "PreUpdatePackages failed";
+        return status;
+    }
+    return DoUpdatePackages(upParams, manager);
 }
 
 static UpdaterStatus StartUpdaterEntry(PkgManager::PkgManagerPtr manager, UpdaterParams &upParams)
