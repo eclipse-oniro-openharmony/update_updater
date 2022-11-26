@@ -122,7 +122,11 @@ int UpdatePreProcess(PkgManager::PkgManagerPtr pkgManager, const std::string &pa
         return PKG_INVALID_VERSION;
     }
     PackagesInfoPtr pkginfomanager = PackagesInfo::GetPackagesInfoInstance();
+#ifndef UPDATER_UT
     const char *verPtr = GetDisplayVersion();
+#else
+    const char *verPtr = UT_VERSION;
+#endif
     if ((pkginfomanager == nullptr) || (verPtr == nullptr)) {
         LOG(ERROR) << "Fail to GetPackageInstance";
         return PKG_INVALID_VERSION;
@@ -417,11 +421,7 @@ UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, UpdaterPara
     if (pid == 0) { // child
         close(pipeRead);   // close read endpoint
 #ifdef UPDATER_UT
-        if (upParams.updatePackage[upParams.pkgLocation].find("updater_binary_abnormal") != std::string::npos) {
-            fullPath = "/system/bin/updater_binary_abnormal";
-        } else {
-            fullPath = "/system/bin/test_update_binary";
-        }
+        fullPath = "/data/updater/updater_binary";
 #endif
         UPDATER_ERROR_CHECK_NOT_RETURN(chmod(fullPath.c_str(), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) == 0,
             "Failed to change mode");

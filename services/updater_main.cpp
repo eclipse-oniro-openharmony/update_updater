@@ -363,7 +363,9 @@ static UpdaterStatus StartUpdaterEntry(PkgManager::PkgManagerPtr manager, Update
         UPDATER_UI_INSTANCE.ShowProgressPage();
         LOG(INFO) << "Factory level FactoryReset begin";
         status = UPDATE_SUCCESS;
+#ifndef UPDATER_UT
         DoProgress();
+#endif
         if (FactoryReset(FACTORY_WIPE_DATA, "/data") != 0) {
             LOG(ERROR) << "FactoryReset factory level failed";
             status = UPDATE_ERROR;
@@ -374,7 +376,9 @@ static UpdaterStatus StartUpdaterEntry(PkgManager::PkgManagerPtr manager, Update
         UPDATER_UI_INSTANCE.ShowProgressPage();
         LOG(INFO) << "User level FactoryReset begin";
         status = UPDATE_SUCCESS;
+#ifndef UPDATER_UT
         DoProgress();
+#endif
         if (FactoryReset(USER_WIPE_DATA, "/data") != 0) {
             LOG(ERROR) << "FactoryReset user level failed";
             status = UPDATE_ERROR;
