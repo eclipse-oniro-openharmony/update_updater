@@ -57,7 +57,7 @@ public:
         std::string packagePath = TEST_PATH_TO + testPackageName;
         pkgInfoExt.pkgType = pkgType;
         ret = CreatePackage(&pkgInfoExt, &compInfo, packagePath.c_str(), GetTestPrivateKeyName(0).c_str());
-        EXPECT_EQ(ret, PKG_INVALID_PARAM);   
+        EXPECT_EQ(ret, PKG_INVALID_PARAM);
 
         pkgType = PkgPackType::PKG_PACK_TYPE_ZIP;
         pkgInfoExt.pkgType = pkgType;
