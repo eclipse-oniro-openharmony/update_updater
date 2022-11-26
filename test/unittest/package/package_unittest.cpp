@@ -41,7 +41,7 @@ public:
     int TestInvalidCreatePackage()
     {
         ComponentInfoExt compInfo;
-        uint8_t pkgType = 1;
+        uint8_t pkgType = PkgPackType::PKG_PACK_TYPE_UPGRADE;
         int ret = CreatePackage(nullptr, &compInfo, nullptr, GetTestPrivateKeyName(0).c_str());
         EXPECT_EQ(ret, PKG_INVALID_PARAM);
 
@@ -59,22 +59,22 @@ public:
         ret = CreatePackage(&pkgInfoExt, &compInfo, packagePath.c_str(), GetTestPrivateKeyName(0).c_str());
         EXPECT_EQ(ret, PKG_INVALID_PARAM);   
 
-        pkgType = 2;
+        pkgType = PkgPackType::PKG_PACK_TYPE_ZIP;
         pkgInfoExt.pkgType = pkgType;
         ret = CreatePackage(&pkgInfoExt, &compInfo, packagePath.c_str(), GetTestPrivateKeyName(0).c_str());
         EXPECT_EQ(ret, PKG_INVALID_PARAM);
 
-        pkgType = 3;
+        pkgType = PkgPackType::PKG_PACK_TYPE_LZ4;
         pkgInfoExt.pkgType = pkgType;
         ret = CreatePackage(&pkgInfoExt, &compInfo, packagePath.c_str(), GetTestPrivateKeyName(0).c_str());
         EXPECT_EQ(ret, PKG_INVALID_PARAM);
 
-        pkgType = 4;
+        pkgType = PkgPackType::PKG_PACK_TYPE_GZIP;
         pkgInfoExt.pkgType = pkgType;
         ret = CreatePackage(&pkgInfoExt, &compInfo, packagePath.c_str(), GetTestPrivateKeyName(0).c_str());
         EXPECT_EQ(ret, PKG_INVALID_PARAM);
 
-        pkgType = 5;
+        pkgType = PkgPackType::PKG_PACK_TYPE_NONE;
         pkgInfoExt.pkgType = pkgType;
         ret = CreatePackage(&pkgInfoExt, &compInfo, packagePath.c_str(), GetTestPrivateKeyName(0).c_str());
         EXPECT_EQ(ret, PKG_INVALID_PARAM);
