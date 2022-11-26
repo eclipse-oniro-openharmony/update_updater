@@ -1,0 +1,88 @@
+{
+    "strategy" : {
+        "default" : {
+            "confirmPageId" : "confirm",
+            "labelLogId" : {
+                "pageId" : "",
+                "comId" : ""
+            },
+            "labelLogResId" : {
+                "pageId" : "",
+                "comId" : ""
+            },
+            "labelUpdId" : {
+                "pageId" : "",
+                "comId" : ""
+            },
+            "progressPage" : {
+                "progressPageId" : "upd:update",
+                "progressComId" : "ProgressUpdBoxDark_Progress",
+                "progressType" : "bar",
+                "logoComId" : "OHOSIconDark_Image",
+                "logoType" : "img",
+                "warningComId" : "PowerLongPressWarning_Image"
+            },
+            "resPage" : {
+                "successPageId" : "upd:updateSuccess",
+                "failPageId" : "upd:normalUpdateFailed"
+            }
+        },
+        "sdcard" : {
+            "progressPage" : {
+                "progressPageId" : "upd:sdUpdate",
+                "progressComId" : "UpdBox_Progress",
+                "progressType" : "bar",
+                "logoComId" : "OHOSIcon_Image",
+                "logoType" : "img"
+            },
+            "labelLogResId" : {
+                "pageId" : "upd",
+                "comId" : "UpdateInfoDark_Label"
+            },
+            "resPage" : {
+                "successPageId" : "upd:updateSuccess",
+                "failPageId" : "upd:updateFailedNoButton"
+            }
+        },
+        "factoryRst" : {
+            "labelLogResId" : {
+                "pageId" : "upd",
+                "comId" : "UpdateInfoDark_Label"
+            },
+            "labelUpdId" : {
+                "pageId" : "upd",
+                "comId" : "RstInfo_Label"
+            },
+            "progressPage" : {
+                "progressPageId" : "upd:reset",
+                "progressComId" : "UpdBox_Progress",
+                "progressType" : "bar",
+                "logoComId" : "OHOSIcon_Image",
+                "logoType" : "img",
+                "warningComId" : ""
+            },
+            "resPage" : {
+                "successPageId" : "menu:normal",
+                "failPageId" : "upd:FactoryRstFailed"
+            }
+        },
+        "rebootFactoryRst" : {
+            "labelLogResId" : {
+                "pageId" : "upd",
+                "comId" : "RstInfo_Label"
+            },
+            "progressPage" : {
+                "progressPageId" : "upd:reset",
+                "progressComId" : "UpdBox_Progress",
+                "progressType" : "bar",
+                "logoComId" : "OHOSIcon_Image",
+                "logoType" : "img",
+                "warningComId" : ""
+            },
+            "resPage" : {
+                "successPageId" : "upd:reset",
+                "failPageId" : "upd:FactoryRstFailed"
+            }
+        }
+    }
+}

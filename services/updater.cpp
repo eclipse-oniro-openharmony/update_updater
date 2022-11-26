@@ -212,19 +212,24 @@ UpdaterStatus IsSpaceCapacitySufficient(const std::vector<std::string> &packageP
     return UPDATE_SUCCESS;
 }
 
-void ProgressSmoothHandler(int progress)
+int GetTmpProgressValue()
+{
+    return g_tmpProgressValue;
+}
+
+void ProgressSmoothHandler(int beginProgress, int endProgress)
 {
 #ifdef UPDATER_UI_SUPPORT
-    if (progress < 0) {
+    if (endProgress < 0 || endProgress > FULL_PERCENT_PROGRESS || beginProgress < 0) {
         return;
     }
-    while (g_tmpProgressValue < progress) {
-        int increase = (progress - g_tmpProgressValue) / PROGRESS_VALUE_CONST;
-        g_tmpProgressValue += increase;
-        if (g_tmpProgressValue >= progress || increase == 0) {
+    while (beginProgress < endProgress) {
+        int increase = (endProgress - beginProgress) / PROGRESS_VALUE_CONST;
+        beginProgress += increase;
+        if (beginProgress >= endProgress || increase == 0) {
             break;
         } else {
-            UPDATER_UI_INSTANCE.ShowProgress(g_tmpProgressValue);
+            UPDATER_UI_INSTANCE.ShowProgress(beginProgress);
             UPDATER_UI_INSTANCE.Sleep(SHOW_FULL_PROGRESS_TIME);
         }
     }
@@ -268,15 +273,8 @@ UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, Upda
         UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_SETPART_FAIL), true);
         UPDATER_LAST_WORD(UPDATE_ERROR);
         return UPDATE_ERROR);
-
     LOG(INFO) << "Verify package...";
     UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_VERIFYPKG));
-
-    UPDATER_ERROR_CHECK(access(upParams.updatePackage[upParams.pkgLocation].c_str(), 0) == 0, "package is not exist",
-        UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_NOPKG), true);
-        UPDATER_LAST_WORD(UPDATE_ERROR);
-        return UPDATE_ERROR);
-
     int32_t verifyret = OtaUpdatePreCheck(pkgManager, upParams.updatePackage[upParams.pkgLocation]);
     UPDATER_ERROR_CHECK(verifyret == PKG_SUCCESS, "package verify failed",
         UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_VERIFYPKGFAIL), true);
@@ -288,9 +286,11 @@ UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, Upda
     } else {
         pkgManager = PkgManager::GetPackageInstance();
     }
-
     verifyret = GetUpdatePackageInfo(pkgManager, upParams.updatePackage[upParams.pkgLocation]);
-    ProgressSmoothHandler(static_cast<int>(upParams.initialProgress * FULL_PERCENT_PROGRESS + 5)); // 5 : verify
+    g_tmpProgressValue = 0;
+    ProgressSmoothHandler(static_cast<int>(upParams.initialProgress * FULL_PERCENT_PROGRESS),
+        static_cast<int>((upParams.initialProgress +
+        upParams.currentPercentage * 0.05) * FULL_PERCENT_PROGRESS)); // 0.05 : verify progress persent
     UPDATER_ERROR_CHECK(verifyret == PKG_SUCCESS, "Verify package Fail...",
         UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_VERIFYFAIL), true);
         return UPDATE_CORRUPT);
@@ -409,18 +409,17 @@ UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, UpdaterPara
         return UPDATE_CORRUPT);
     int pipeRead = pfd[0];
     int pipeWrite = pfd[1];
-
-    UPDATER_ERROR_CHECK(ExtractUpdaterBinary(pkgManager, UPDATER_BINARY) == 0,
-        "Updater: cannot extract updater binary from update package.", UPDATER_LAST_WORD(UPDATE_CORRUPT);
-        return UPDATE_CORRUPT);
-    g_tmpProgressValue = 0;
+    std::string fullPath = GetWorkPath() + std::string(UPDATER_BINARY);
+    if (ExtractUpdaterBinary(pkgManager, UPDATER_BINARY) != 0) {
+        LOG(INFO) << "There is no updater_binary in package, use updater_binary in device";
+        fullPath = "/bin/updater_binary";
+    }
     pid_t pid = fork();
     UPDATER_CHECK_ONLY_RETURN(pid >= 0, ERROR_CODE(CODE_FORK_FAIL);
         UPDATER_LAST_WORD(UPDATE_ERROR);
         return UPDATE_ERROR);
     if (pid == 0) { // child
         close(pipeRead);   // close read endpoint
-        std::string fullPath = GetWorkPath() + std::string(UPDATER_BINARY);
 #ifdef UPDATER_UT
         fullPath = "/data/updater/updater_binary";
 #endif

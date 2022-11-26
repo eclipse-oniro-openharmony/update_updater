@@ -20,19 +20,19 @@
 namespace Updater {
 TextLabelAdapter::TextLabelAdapter(const UxViewInfo &info)
 {
-    const UxViewCommonInfo *commonPtr = &info.commonInfo;
-    const UxLabelInfo *specPtr = &std::get<UxLabelInfo>(info.specificInfo);
-    viewId_ = commonPtr->id;
-    this->SetPosition(commonPtr->x, commonPtr->y, commonPtr->w, commonPtr->h);
-    this->SetVisible(commonPtr->visible);
+    const UxViewCommonInfo &common = info.commonInfo;
+    const UxLabelInfo &spec = std::get<UxLabelInfo>(info.specificInfo);
+    viewId_ = common.id;
+    this->SetPosition(common.x, common.y, common.w, common.h);
+    this->SetVisible(common.visible);
     this->SetViewId(viewId_.c_str());
-    this->SetAlign(GetAlign(specPtr->align), OHOS::TEXT_ALIGNMENT_CENTER);
-    this->SetText(TranslateText(specPtr->text).c_str());
-    this->SetFont(DEFAULT_FONT_FILENAME, specPtr->fontSize);
-    auto fontColor = StrToColor(specPtr->fontColor);
+    this->SetAlign(GetAlign(spec.align), OHOS::TEXT_ALIGNMENT_CENTER);
+    this->SetText(TranslateText(spec.text).c_str());
+    this->SetFont(DEFAULT_FONT_FILENAME, spec.fontSize);
+    auto fontColor = StrToColor(spec.fontColor);
     this->SetStyle(OHOS::STYLE_TEXT_COLOR, fontColor.full);
     this->SetStyle(OHOS::STYLE_TEXT_OPA, fontColor.alpha);
-    auto bgColor = StrToColor(specPtr->bgColor);
+    auto bgColor = StrToColor(spec.bgColor);
     this->SetStyle(OHOS::STYLE_BACKGROUND_COLOR, bgColor.full);
     this->SetStyle(OHOS::STYLE_BACKGROUND_OPA, bgColor.alpha);
 }

@@ -70,7 +70,8 @@ HWTEST_F(ApplyPatchUnitTest, updater_RawWriter, TestSize.Level1)
     uint8_t buf[BUFFER_LEN + 1] = {0};
 
     std::string partitionName = "/rawwriter";
-    std::unique_ptr<DataWriter> writer = DataWriter::CreateDataWriter(mode, partitionName);
+    std::string filePath = "/data/updater/ut/datawriter/rawwrite";
+    std::unique_ptr<DataWriter> writer = DataWriter::CreateDataWriter(mode, filePath);
     EXPECT_NE(writer, nullptr);
     bool ret = writer->Write(addr, 0, nullptr);
     EXPECT_FALSE(ret);

@@ -21,7 +21,7 @@
 namespace Updater {
 class TextLabelAdapter : public OHOS::UILabel {
     DISALLOW_COPY_MOVE(TextLabelAdapter);
-    static constexpr uint32_t MAX_FONT_SIZE = 255;
+    static constexpr uint32_t MAX_FONT_SIZE = 200;
 public:
     using SpecificInfoType = UxLabelInfo;
     TextLabelAdapter() = default;

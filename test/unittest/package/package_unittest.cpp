@@ -230,6 +230,8 @@ public:
 
     int TestLz4PkgCompress()
     {
+        int ret = TestPackagePack();
+        EXPECT_EQ(ret, PKG_SUCCESS);
         pkgManager_ = static_cast<PkgManagerImpl*>(PkgManager::GetPackageInstance());
         EXPECT_NE(pkgManager_, nullptr);
         std::vector<std::pair<std::string, Lz4FileInfo>> files;

@@ -24,8 +24,7 @@
 using namespace Updater;
 using Updater::Utils::SplitString;
 
-static bool WriteToMiscAndRebootToUpdater(const std::string &miscFile,
-    const struct UpdateMessage &updateMsg)
+static bool WriteToMiscAndRebootToUpdater(const struct UpdateMessage &updateMsg)
 {
     // Write package name to misc, then trigger reboot.
     const char *bootCmd = "boot_updater";
@@ -45,16 +44,15 @@ static bool WriteToMiscAndRebootToUpdater(const std::string &miscFile,
 #endif
 }
 
-bool RebootAndInstallUpgradePackage(const std::string &miscFile, const std::string &packageName)
+bool RebootAndInstallUpgradePackage(const std::string &miscFile, const std::vector<std::string> &packageName)
 {
-    if (packageName.empty() || miscFile.empty()) {
+    if (packageName.size() == 0 || miscFile.empty()) {
         std::cout << "updaterkits: invalid argument. one of arugments is empty\n";
         return false;
     }
 
     struct UpdateMessage updateMsg {};
-    std::vector<std::string> packageAllName = SplitString(packageName, "\n");
-    for (auto path : packageAllName) {
+    for (auto path : packageName) {
         if (access(path.c_str(), R_OK) < 0) {
             std::cout << "updaterkits: " << path << " is not readable\n";
             return false;
@@ -66,7 +64,7 @@ bool RebootAndInstallUpgradePackage(const std::string &miscFile, const std::stri
         }
     }
 
-    WriteToMiscAndRebootToUpdater(miscFile, updateMsg);
+    WriteToMiscAndRebootToUpdater(updateMsg);
 
     // Never get here.
     return true;
@@ -86,7 +84,7 @@ bool RebootAndCleanUserData(const std::string &miscFile, const std::string &cmd)
         return false;
     }
 
-    WriteToMiscAndRebootToUpdater(miscFile, updateMsg);
+    WriteToMiscAndRebootToUpdater(updateMsg);
 
     // Never get here.
     return true;
