@@ -21,6 +21,8 @@
 #include <iterator>
 #include <unistd.h>
 #include <vector>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include "dump.h"
 #include "pkg_gzipfile.h"
 #include "pkg_lz4file.h"
@@ -30,6 +32,7 @@
 #include "pkg_zipfile.h"
 #include "securec.h"
 #include "zip_pkg_parse.h"
+#include "updater/updater_const.h"
 
 using namespace std;
 
@@ -337,11 +340,14 @@ int32_t PkgManagerImpl::ExtraAndLoadPackage(const std::string &path, const std::
     }
 
     PkgStreamPtr stream = nullptr;
+    struct stat st {};
+    const string tempPath = stat("/bin/updater", &st) == 0 && S_ISREG(st.st_mode) ?\
+                                path : string(Updater::UPDATER_PATH) + "/";
     // Extract package to file or memory
     if (unzipToFile_) {
-        ret = CreatePkgStream(stream, path + name + ".tmp", info->unpackedSize, PkgStream::PkgStreamType_Write);
+        ret = CreatePkgStream(stream, tempPath + name + ".tmp", info->unpackedSize, PkgStream::PkgStreamType_Write);
     } else {
-        ret = CreatePkgStream(stream, path + name + ".tmp", info->unpackedSize, PkgStream::PkgStreamType_MemoryMap);
+        ret = CreatePkgStream(stream, tempPath + name + ".tmp", info->unpackedSize, PkgStream::PkgStreamType_MemoryMap);
     }
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("Create middle stream fail %s", name.c_str());

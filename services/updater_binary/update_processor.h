@@ -62,5 +62,12 @@ private:
     static size_t totalSize_;
     static size_t readSize_;
 };
+
+class UScriptInstructionPkgExtract : public Uscript::UScriptInstruction {
+public:
+    UScriptInstructionPkgExtract() {}
+    virtual ~UScriptInstructionPkgExtract() {}
+    int32_t Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context) override;
+};
 } // Updater
 #endif /* UPDATE_PROCESSOR_H */

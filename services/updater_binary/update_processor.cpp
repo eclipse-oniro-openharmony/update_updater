@@ -70,7 +70,7 @@ const std::vector<std::string> UpdaterEnv::GetInstructionNames() const
     static std::vector<std::string> updaterCmds = {
         "sha_check", "first_block_check", "block_update",
         "raw_image_write", "update_partitions", "image_patch",
-        "image_sha_check"
+        "image_sha_check", "pkg_extract"
     };
     return updaterCmds;
 }
@@ -90,8 +90,10 @@ int32_t UpdaterInstructionFactory::CreateInstructionInstance(UScriptInstructionP
         instr = new UpdatePartitions();
     } else if (name == "image_patch") {
         instr = new USInstrImagePatch();
-    }  else if (name == "image_sha_check") {
+    } else if (name == "image_sha_check") {
         instr = new USInstrImageShaCheck();
+    } else if (name == "pkg_extract") {
+        instr = new UScriptInstructionPkgExtract();
     }
     return USCRIPT_SUCCESS;
 }
@@ -184,6 +186,56 @@ int32_t UScriptInstructionRawImageWrite::Execute(Uscript::UScriptEnv &env, Uscri
     totalSize_ = 0;
     readSize_ = 0;
     LOG(INFO)<<"UScriptInstructionRawImageWrite  finish";
+    return ret;
+}
+
+
+int32_t UScriptInstructionPkgExtract::Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context)
+{
+    std::string pkgFileName;
+    int32_t ret = context.GetParam(0, pkgFileName);
+    if (ret != USCRIPT_SUCCESS) {
+        LOG(ERROR) << "Error to get pkgFileName";
+        return ret;
+    }
+
+    std::string destPath;
+    ret = context.GetParam(1, destPath);
+    if (ret != USCRIPT_SUCCESS) {
+        LOG(ERROR) << "Error to get destPath";
+        return ret;
+    }
+
+    LOG(INFO) << "UScriptInstructionPkgExtract::Execute " << pkgFileName;
+    PkgManager::PkgManagerPtr manager = env.GetPkgManager();
+    if (manager == nullptr) {
+        LOG(ERROR) << "Error to get pkg manager";
+        return USCRIPT_INVALID_PARAM;
+    }
+
+    const FileInfo *info = manager->GetFileInfo(pkgFileName);
+    if (info == nullptr) {
+        LOG(ERROR) << "Error to get file info";
+        return USCRIPT_INVALID_PARAM;
+    }
+
+    Hpackage::PkgManager::StreamPtr outStream = nullptr;
+    ret = manager->CreatePkgStream(outStream, destPath + "/" + pkgFileName, info->unpackedSize,
+        PkgStream::PkgStreamType_Write);
+    if (ret != USCRIPT_SUCCESS) {
+        LOG(ERROR) << "Error to create output stream";
+        return USCRIPT_ERROR_EXECUTE;
+    }
+
+    ret = manager->ExtractFile(pkgFileName, outStream);
+    if (ret != USCRIPT_SUCCESS) {
+        LOG(ERROR) << "Error to extract file";
+        manager->ClosePkgStream(outStream);
+        return USCRIPT_ERROR_EXECUTE;
+    }
+
+    manager->ClosePkgStream(outStream);
+    LOG(INFO)<<"UScriptInstructionPkgExtract finish";
     return ret;
 }
 
