@@ -236,7 +236,7 @@ int32_t BlocksStreamDiff::WritePatchHeader(int64_t controlSize,
 {
     PATCH_DEBUG("WritePatchHeader %zu", static_cast<size_t>(stream_.tellp()));
 #ifdef __aarch64__
-    if (offset_ > numeric_limits<std::fstream::pos_type>::max()) {
+    if (offset_ > numeric_limits<std::fstream::off_type>::max()) {
         PATCH_LOGE("offset_ error");
         return -1;
     }
