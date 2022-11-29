@@ -16,10 +16,10 @@
 #ifndef UI_TEST_COMMON_H
 #define UI_TEST_COMMON_H
 
-#include "engines/gfx/gfx_engine_manager.h"
+#include "engines/gfx/soft_engine.h"
 #include "macros.h"
 
-class TestGraphicEngine : public OHOS::BaseGfxEngine {
+class TestGraphicEngine : public OHOS::SoftEngine {
     DISALLOW_COPY_MOVE(TestGraphicEngine);
 public:
     TestGraphicEngine() = default;
@@ -29,7 +29,7 @@ public:
         static TestGraphicEngine instance;
         static bool isRegister = false;
         if (!isRegister) {
-            OHOS::BaseGfxEngine::InitGfxEngine(&instance);
+            OHOS::SoftEngine::InitGfxEngine(&instance);
             isRegister = true;
         }
         return instance;
