@@ -94,7 +94,7 @@ ohos_executable("diff") {
       "-Wl,--no-whole-archive",
     ]
   }
-
+  install_enable = false
   subsystem_name = "developtools"
   part_name = "updater"
 }
