@@ -28,6 +28,7 @@ ohos_unittest("updater_service_unittest") {
   sources = [
     "//base/update/updater/services/updater.cpp",
     "//base/update/updater/services/updater_main.cpp",
+    "//base/update/updater/services/updater_preprocess.cpp",
     "//base/update/updater/services/updater_utils.cpp",
     "//base/update/updater/utils/utils.cpp",
     "updater_service_unittest.cpp",
