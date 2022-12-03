@@ -39,6 +39,7 @@
 #ifdef UPDATER_USE_PTABLE
 #include "ptable_parse/ptable_manager.h"
 #endif
+#include "updater/updater_preprocess.h"
 #include "updater/updater_const.h"
 #include "updater_main.h"
 #include "updater_ui_stub.h"
@@ -109,50 +110,6 @@ int OtaUpdatePreCheck(PkgManager::PkgManagerPtr pkgManager, const std::string &p
     }
 
     return PKG_SUCCESS;
-}
-
-int UpdatePreProcess(PkgManager::PkgManagerPtr pkgManager, const std::string &path)
-{
-    int ret = -1;
-    if (pkgManager == nullptr) {
-        return PKG_INVALID_VERSION;
-    }
-    PackagesInfoPtr pkginfomanager = PackagesInfo::GetPackagesInfoInstance();
-    const char *verPtr = GetDisplayVersion();
-    if ((pkginfomanager == nullptr) || (verPtr == nullptr)) {
-        LOG(ERROR) << "Fail to GetPackageInstance";
-        return PKG_INVALID_VERSION;
-    }
-    std::string verStr(verPtr);
-    LOG(INFO) << "current version:" << verStr;
-    std::vector<std::string> targetVersions = pkginfomanager->GetOTAVersion(pkgManager, "/version_list", GetWorkPath());
-    for (size_t i = 0; i < targetVersions.size(); i++) {
-        ret = verStr.compare(targetVersions[i]);
-        if (ret == 0) {
-            break;
-        }
-    }
-    // check broad info
-    if (ret != 0) {
-        PackagesInfo::ReleasePackagesInfoInstance(pkginfomanager);
-        return ret;
-    }
-    LOG(WARNING) << "Check version success ";
-    std::string localBoardId = Utils::GetLocalBoardId();
-    if (localBoardId.empty()) {
-        PackagesInfo::ReleasePackagesInfoInstance(pkginfomanager);
-        return 0;
-    }
-    std::vector<std::string> boardIdList = pkginfomanager->GetBoardID(pkgManager, "/board_list", "");
-    for (size_t i = 0; i < boardIdList.size(); i++) {
-        ret = localBoardId.compare(boardIdList[i]);
-        if (ret == 0) {
-            LOG(WARNING) << "Check board list success ";
-            break;
-        }
-    }
-    PackagesInfo::ReleasePackagesInfoInstance(pkginfomanager);
-    return ret;
 }
 
 UpdaterStatus IsSpaceCapacitySufficient(const std::string &packagePath)
@@ -292,7 +249,7 @@ UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, cons
         UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_VERIFYFAIL), true);
         return UPDATE_CORRUPT);
     LOG(INFO) << "Package verified. start to install package...";
-    int32_t versionRet = UpdatePreProcess(pkgManager, packagePath);
+    int32_t versionRet = PreProcess::GetInstance().DoUpdatePreProcess(pkgManager);
     UPDATER_ERROR_CHECK(versionRet == PKG_SUCCESS, "Version Check Fail...", return UPDATE_CORRUPT);
 
 #ifdef UPDATER_USE_PTABLE

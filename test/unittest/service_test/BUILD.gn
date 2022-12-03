@@ -26,6 +26,7 @@ ohos_unittest("updater_service_unittest") {
       "//base/update/updater/test/unittest/test_data/ohos_test.xml"
   module_out_path = MODULE_OUTPUT_PATH
   sources = [
+    "//base/update/updater/services/updater_preprocess.cpp",
     "//base/update/updater/services/updater_utils.cpp",
     "updater_service_unittest.cpp",
   ]
