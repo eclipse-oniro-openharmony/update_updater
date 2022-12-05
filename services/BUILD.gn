@@ -60,6 +60,7 @@ ohos_executable("updater") {
     "main.cpp",
     "updater.cpp",
     "updater_main.cpp",
+    "updater_preprocess.cpp",
     "updater_utils.cpp",
   ]
 
@@ -109,6 +110,7 @@ ohos_static_library("libupdater") {
   defines = [ "BUILD_OHOS" ]
   sources = [
     "updater.cpp",
+    "updater_preprocess.cpp",
     "updater_utils.cpp",
   ]
 
