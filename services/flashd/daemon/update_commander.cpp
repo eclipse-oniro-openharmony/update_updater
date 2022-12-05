@@ -115,7 +115,9 @@ bool UpdateCommander::DoUpdate(const uint8_t *payload, int payloadSize)
 bool UpdateCommander::ExecUpdate() const
 {
     const std::string miscFile = "/dev/block/by-name/misc";
-    return RebootAndInstallUpgradePackage(miscFile, filePath_);
+    std::vector<std::string> filePath;
+    filePath.push_back(filePath_);
+    return RebootAndInstallUpgradePackage(miscFile, filePath);
 }
 
 void UpdateCommander::PostCommand()

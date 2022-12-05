@@ -76,13 +76,6 @@ enum FactoryResetMode {
     FACTORY_WIPE_DATA,
 };
 
-struct UpdaterParams {
-    bool factoryWipeData;
-    bool userWipeData;
-    int retryCount;
-    std::string updatePackage;
-};
-
 int UpdaterMain(int argc, char **argv);
 
 int FactoryReset(FactoryResetMode mode, const std::string &path);

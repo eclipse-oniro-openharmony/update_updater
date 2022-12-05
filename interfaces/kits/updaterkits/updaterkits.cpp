@@ -19,11 +19,11 @@
 #include "init_reboot.h"
 #include "misc_info/misc_info.h"
 #include "securec.h"
+#include "utils.h"
 
 using namespace Updater;
 
-static bool WriteToMiscAndRebootToUpdater(const std::string &miscFile,
-    const struct UpdateMessage &updateMsg)
+static bool WriteToMiscAndRebootToUpdater(const struct UpdateMessage &updateMsg)
 {
     // Write package name to misc, then trigger reboot.
     const char *bootCmd = "boot_updater";
@@ -43,27 +43,34 @@ static bool WriteToMiscAndRebootToUpdater(const std::string &miscFile,
 #endif
 }
 
-bool RebootAndInstallUpgradePackage(const std::string &miscFile, const std::string &packageName)
+bool RebootAndInstallUpgradePackage(const std::string &miscFile, const std::vector<std::string> &packageName)
 {
-    if (packageName.empty() || miscFile.empty()) {
+    if (packageName.size() == 0) {
         std::cout << "updaterkits: invalid argument. one of arugments is empty\n";
         return false;
     }
 
-    // Check if package readalbe.
-    if (access(packageName.c_str(), R_OK) < 0) {
-        std::cout << "updaterkits: " << packageName << " is not readable\n";
-        return false;
-    }
-
     struct UpdateMessage updateMsg {};
-    if (snprintf_s(updateMsg.update, sizeof(updateMsg.update), sizeof(updateMsg.update) - 1, "--update_package=%s",
-        packageName.c_str()) < 0) {
-        std::cout << "updaterkits: copy updater message failed\n";
-        return false;
+    size_t updateOffset = 0;
+    for (auto path : packageName) {
+        if (access(path.c_str(), R_OK) < 0) {
+            std::cout << "updaterkits: " << path << " is not readable\n";
+            return false;
+        }
+        if (updateOffset > sizeof(updateMsg.update)) {
+            std::cout << "updaterkits: updateOffset > updateMsg.update, return false\n";
+            return false;
+        }
+        int ret = snprintf_s(updateMsg.update + updateOffset, sizeof(updateMsg.update) - updateOffset,
+            sizeof(updateMsg.update) - 1 - updateOffset, "--update_package=%s\n", path.c_str())
+        if (ret < 0) {
+            std::cout << "updaterkits: copy updater message failed\n";
+            return false;
+        }
+        updateOffset += static_cast<size_t>(ret);
     }
 
-    WriteToMiscAndRebootToUpdater(miscFile, updateMsg);
+    WriteToMiscAndRebootToUpdater(updateMsg);
 
     // Never get here.
     return true;
@@ -83,7 +90,7 @@ bool RebootAndCleanUserData(const std::string &miscFile, const std::string &cmd)
         return false;
     }
 
-    WriteToMiscAndRebootToUpdater(miscFile, updateMsg);
+    WriteToMiscAndRebootToUpdater(updateMsg);
 
     // Never get here.
     return true;
