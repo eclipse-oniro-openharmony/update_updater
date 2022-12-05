@@ -244,6 +244,7 @@ UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, Upda
     ProgressSmoothHandler(static_cast<int>(upParams.initialProgress * FULL_PERCENT_PROGRESS),
         static_cast<int>((upParams.initialProgress +
         upParams.currentPercentage * 0.05) * FULL_PERCENT_PROGRESS)); // 0.05 : verify progress persent
+    upParams.initialProgress = upParams.initialProgress + upParams.currentPercentage * 0.05;
     UPDATER_ERROR_CHECK(verifyret == PKG_SUCCESS, "Verify package Fail...",
         UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_VERIFYFAIL), true);
         return UPDATE_CORRUPT);
@@ -363,6 +364,7 @@ UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, UpdaterPara
     int pipeRead = pfd[0];
     int pipeWrite = pfd[1];
     std::string fullPath = GetWorkPath() + std::string(UPDATER_BINARY);
+    (void)Utils::DeleteFile(fullPath);
     if (ExtractUpdaterBinary(pkgManager, UPDATER_BINARY) != 0) {
         LOG(INFO) << "There is no updater_binary in package, use updater_binary in device";
         fullPath = "/bin/updater_binary";
@@ -399,11 +401,9 @@ UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, UpdaterPara
         }
         if (upParams.retryCount > 0) {
             execl(fullPath.c_str(), upParams.updatePackage[upParams.pkgLocation].c_str(),
-               
                 std::to_string(pipeWrite).c_str(), "retry", nullptr);
         } else {
             execl(fullPath.c_str(), upParams.updatePackage[upParams.pkgLocation].c_str(),
-               
                 std::to_string(pipeWrite).c_str(), nullptr);
         }
         LOG(INFO) << "Execute updater binary failed";
