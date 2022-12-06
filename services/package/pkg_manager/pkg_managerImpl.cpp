@@ -85,6 +85,7 @@ void PkgManagerImpl::ClearPkgFile()
         file = nullptr;
         iter = pkgFiles_.erase(iter);
     }
+    std::lock_guard<std::mutex> lock(mapLock_);
     auto iter1 = pkgStreams_.begin();
     while (iter1 != pkgStreams_.end()) {
         PkgStreamPtr stream = (*iter1).second;
@@ -504,6 +505,7 @@ int32_t PkgManagerImpl::CreatePkgStream(PkgStreamPtr &stream, const std::string 
             PKG_LOGE("Fail to check file %s ", fileName.c_str());
             return PKG_INVALID_FILE;
         }
+        std::lock_guard<std::mutex> lock(mapLock_);
         if (pkgStreams_.find(fileName) != pkgStreams_.end()) {
             PkgStreamPtr mapStream = pkgStreams_[fileName];
             mapStream->AddRef();
@@ -536,6 +538,7 @@ int32_t PkgManagerImpl::CreatePkgStream(PkgStreamPtr &stream, const std::string 
         UPDATER_LAST_WORD(-1);
         return -1;
     }
+    std::lock_guard<std::mutex> lock(mapLock_);
     pkgStreams_[fileName] = stream;
     return PKG_SUCCESS;
 }
@@ -558,6 +561,7 @@ void PkgManagerImpl::ClosePkgStream(PkgStreamPtr &stream)
         return;
     }
 
+    std::lock_guard<std::mutex> lock(mapLock_);
     auto iter = pkgStreams_.find(mapStream->GetFileName());
     if (iter != pkgStreams_.end()) {
         mapStream->DelRef();
