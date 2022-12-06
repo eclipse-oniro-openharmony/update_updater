@@ -63,7 +63,7 @@ bool RebootAndInstallUpgradePackage(const std::string &miscFile, const std::vect
             return false;
         }
         int ret = snprintf_s(updateMsg.update + updateOffset, sizeof(updateMsg.update) - updateOffset,
-            sizeof(updateMsg.update) - 1 - updateOffset, "--update_package=%s\n", path.c_str())
+            sizeof(updateMsg.update) - 1 - updateOffset, "--update_package=%s\n", path.c_str());
         if (ret < 0) {
             std::cout << "updaterkits: copy updater message failed\n";
             return false;
