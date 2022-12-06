@@ -18,6 +18,7 @@
 #include <functional>
 #include <map>
 #include <memory>
+#include <mutex>
 #include "pkg_lz4file.h"
 #include "pkg_manager.h"
 #include "pkg_pkgfile.h"
@@ -120,6 +121,7 @@ private:
 private:
     bool unzipToFile_ {true};
     std::vector<PkgFilePtr> pkgFiles_ {};
+    std::mutex mapLock_ {};
     std::map<std::string, PkgStreamPtr> pkgStreams_ {};
     std::string signVerifyKeyName_ {};
     PkgDecodeProgress decodeProgress_ { nullptr };
