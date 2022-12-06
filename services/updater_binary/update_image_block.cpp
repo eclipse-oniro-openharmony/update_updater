@@ -336,16 +336,12 @@ static int32_t ExecuteUpdateBlock(Uscript::UScriptEnv &env, Uscript::UScriptCont
     globalParams->env = &env;
     std::vector<std::string> lines =
         Updater::Utils::SplitString(std::string(reinterpret_cast<const char*>(transferListBuffer)), "\n");
-    LOG(INFO) << "Ready to start a thread to handle new data processing";
-
-    UPDATER_ERROR_CHECK (InitThread(infos, env, context) == 0, "Failed to create pthread",
-        env.GetPkgManager()->ClosePkgStream(outStream); return USCRIPT_ERROR_EXECUTE);
-    LOG(DEBUG) << "Start unpack new data thread done. Get patch data: " << infos.patchDataName;
-    info = env.GetPkgManager()->GetFileInfo(infos.patchDataName);
     // Close stream opened before.
     env.GetPkgManager()->ClosePkgStream(outStream);
-    UPDATER_ERROR_CHECK(info != nullptr, "GetFileInfo fail", return USCRIPT_ERROR_EXECUTE);
 
+    info = env.GetPkgManager()->GetFileInfo(infos.patchDataName);
+    UPDATER_ERROR_CHECK(info != nullptr, "GetFileInfo fail", return USCRIPT_ERROR_EXECUTE);
+    LOG(INFO) << "Start unpack new data thread done. Get patch data: " << infos.patchDataName;
     ret = env.GetPkgManager()->CreatePkgStream(outStream,
         infos.patchDataName, info->unpackedSize, PkgStream::PkgStreamType_MemoryMap);
     UPDATER_ERROR_CHECK(outStream != nullptr, "Error to create output stream", return USCRIPT_ERROR_EXECUTE);
@@ -354,6 +350,10 @@ static int32_t ExecuteUpdateBlock(Uscript::UScriptEnv &env, Uscript::UScriptCont
         env.GetPkgManager()->ClosePkgStream(outStream); return USCRIPT_ERROR_EXECUTE);
     outStream->GetBuffer(globalParams->patchDataBuffer, globalParams->patchDataSize);
     LOG(DEBUG) << "Patch data size is: " << globalParams->patchDataSize;
+
+    LOG(INFO) << "Ready to start a thread to handle new data processing";
+    UPDATER_ERROR_CHECK (InitThread(infos, env, context) == 0, "Failed to create pthread",
+        env.GetPkgManager()->ClosePkgStream(outStream); return USCRIPT_ERROR_EXECUTE);
     ret = DoExecuteUpdateBlock(infos, env, outStream, lines, context);
     TransferManager::ReleaseTransferManagerInstance(tm);
     return ret;
