@@ -339,9 +339,9 @@ static int32_t ExecuteUpdateBlock(Uscript::UScriptEnv &env, Uscript::UScriptCont
     // Close stream opened before.
     env.GetPkgManager()->ClosePkgStream(outStream);
 
+    LOG(INFO) << "Start unpack new data thread done. Get patch data: " << infos.patchDataName;
     info = env.GetPkgManager()->GetFileInfo(infos.patchDataName);
     UPDATER_ERROR_CHECK(info != nullptr, "GetFileInfo fail", return USCRIPT_ERROR_EXECUTE);
-    LOG(INFO) << "Start unpack new data thread done. Get patch data: " << infos.patchDataName;
     ret = env.GetPkgManager()->CreatePkgStream(outStream,
         infos.patchDataName, info->unpackedSize, PkgStream::PkgStreamType_MemoryMap);
     UPDATER_ERROR_CHECK(outStream != nullptr, "Error to create output stream", return USCRIPT_ERROR_EXECUTE);
