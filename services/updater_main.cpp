@@ -249,7 +249,6 @@ static UpdaterStatus InstallUpdaterPackage(UpdaterParams &upParams, PkgManager::
     } else {
         LOG(INFO) << "Install package success.";
         STAGE(UPDATE_STAGE_SUCCESS) << "Install package";
-        UPDATER_UI_INSTANCE.ShowSuccessPage();
     }
     return status;
 }
@@ -266,7 +265,7 @@ static UpdaterStatus CalcProgress(const UpdaterParams &upParams,
             return UPDATE_ERROR;
         }
         struct stat st ;
-        if (stat(path.c_str(), &st)) {
+        if (stat(path.c_str(), &st) == 0) {
             everyPkgSize.push_back(st.st_size);
             allPkgSize += st.st_size;
         }
@@ -308,7 +307,7 @@ static UpdaterStatus PreUpdatePackages(UpdaterParams &upParams)
     return UPDATE_SUCCESS;
 }
 
-static UpdaterStatus DoUpdatePackages(UpdaterParams &upParams, PkgManager::PkgManagerPtr manager)
+static UpdaterStatus DoUpdatePackages(UpdaterParams &upParams)
 {
     UpdaterStatus status = UPDATE_UNKNOWN;
     std::vector<double> pkgStartPosition {};
@@ -319,6 +318,8 @@ static UpdaterStatus DoUpdatePackages(UpdaterParams &upParams, PkgManager::PkgMa
     }
     UPDATER_UI_INSTANCE.ShowProgress(updateStartPosition * FULL_PERCENT_PROGRESS);
     for (; upParams.pkgLocation < upParams.updatePackage.size(); upParams.pkgLocation++) {
+        PkgManager::PkgManagerPtr manager = PkgManager::GetPackageInstance();
+        LOG(INFO) << "InstallUpdaterPackage pkg is " << upParams.updatePackage[upParams.pkgLocation];
         upParams.currentPercentage = pkgStartPosition[upParams.pkgLocation + 1] -
             pkgStartPosition[upParams.pkgLocation];
         upParams.initialProgress = pkgStartPosition[upParams.pkgLocation];
@@ -332,26 +333,28 @@ static UpdaterStatus DoUpdatePackages(UpdaterParams &upParams, PkgManager::PkgMa
             LOG(ERROR) << "InstallUpdaterPackage failed! Pkg is " << upParams.updatePackage[upParams.pkgLocation];
             return status;
         }
+        PkgManager::ReleasePackageInstance(manager);
     }
+    UPDATER_UI_INSTANCE.ShowSuccessPage();
     return status;
 }
 
-static UpdaterStatus InstallUpdaterPackages(UpdaterParams &upParams, PkgManager::PkgManagerPtr manager)
+static UpdaterStatus InstallUpdaterPackages(UpdaterParams &upParams)
 {
     UpdaterStatus status = PreUpdatePackages(upParams);
     if (status != UPDATE_SUCCESS) {
         LOG(ERROR) << "PreUpdatePackages failed";
         return status;
     }
-    return DoUpdatePackages(upParams, manager);
+    return DoUpdatePackages(upParams);
 }
 
-static UpdaterStatus StartUpdaterEntry(PkgManager::PkgManagerPtr manager, UpdaterParams &upParams)
+static UpdaterStatus StartUpdaterEntry(UpdaterParams &upParams)
 {
     UpdaterStatus status = UPDATE_UNKNOWN;
     if (upParams.updatePackage.size() > 0) {
         UPDATER_UI_INSTANCE.ShowProgressPage();
-        status = InstallUpdaterPackages(upParams, manager);
+        status = InstallUpdaterPackages(upParams);
         if (status != UPDATE_SUCCESS) {
             if (!CheckDumpResult()) {
                 UPDATER_LAST_WORD(status);
@@ -395,7 +398,7 @@ static UpdaterStatus StartUpdaterEntry(PkgManager::PkgManagerPtr manager, Update
     return status;
 }
 
-static UpdaterStatus StartUpdater(PkgManager::PkgManagerPtr manager, const std::vector<std::string> &args,
+static UpdaterStatus StartUpdater(const std::vector<std::string> &args,
     char **argv, PackageUpdateMode &mode)
 {
     UpdaterParams upParams {
@@ -447,13 +450,12 @@ static UpdaterStatus StartUpdater(PkgManager::PkgManagerPtr manager, const std::
         LOG(WARNING) << "Factory level reset and user level reset both set. use user level reset.";
         upParams.factoryWipeData = false;
     }
-    return StartUpdaterEntry(manager, upParams);
+    return StartUpdaterEntry(upParams);
 }
 
 int UpdaterMain(int argc, char **argv)
 {
     [[maybe_unused]] UpdaterStatus status = UPDATE_UNKNOWN;
-    PkgManager::PkgManagerPtr manager = PkgManager::GetPackageInstance();
     UpdaterInit::GetInstance().InvokeEvent(UPDATER_PRE_INIT_EVENT);
     std::vector<std::string> args = ParseParams(argc, argv);
 
@@ -463,7 +465,7 @@ int UpdaterMain(int argc, char **argv)
 #endif
     UpdaterInit::GetInstance().InvokeEvent(UPDATER_INIT_EVENT);
     PackageUpdateMode mode = UNKNOWN_UPDATE;
-    status = StartUpdater(manager, args, argv, mode);
+    status = StartUpdater(args, argv, mode);
 #if !defined(UPDATER_UT) && defined(UPDATER_UI_SUPPORT)
     UPDATER_UI_INSTANCE.Sleep(UI_SHOW_DURATION);
     if (status != UPDATE_SUCCESS && status != UPDATE_SKIP) {

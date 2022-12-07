@@ -46,22 +46,29 @@ static bool WriteToMiscAndRebootToUpdater(const struct UpdateMessage &updateMsg)
 
 bool RebootAndInstallUpgradePackage(const std::string &miscFile, const std::vector<std::string> &packageName)
 {
-    if (packageName.size() == 0 || miscFile.empty()) {
+    if (packageName.size() == 0) {
         std::cout << "updaterkits: invalid argument. one of arugments is empty\n";
         return false;
     }
 
     struct UpdateMessage updateMsg {};
+    size_t updateOffset = 0;
     for (auto path : packageName) {
         if (access(path.c_str(), R_OK) < 0) {
             std::cout << "updaterkits: " << path << " is not readable\n";
             return false;
         }
-        if (snprintf_s(updateMsg.update, sizeof(updateMsg.update), sizeof(updateMsg.update) - 1,
-            "--update_package=%s\n", path.c_str()) < 0) {
+        if (updateOffset > sizeof(updateMsg.update)) {
+            std::cout << "updaterkits: updateOffset > updateMsg.update, return false\n";
+            return false;
+        }
+        int ret = snprintf_s(updateMsg.update + updateOffset, sizeof(updateMsg.update) - updateOffset,
+            sizeof(updateMsg.update) - 1 - updateOffset, "--update_package=%s\n", path.c_str());
+        if (ret < 0) {
             std::cout << "updaterkits: copy updater message failed\n";
             return false;
         }
+        updateOffset += static_cast<size_t>(ret);
     }
 
     WriteToMiscAndRebootToUpdater(updateMsg);
