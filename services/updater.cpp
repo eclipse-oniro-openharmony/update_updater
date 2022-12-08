@@ -370,6 +370,7 @@ UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, UpdaterPara
         fullPath = "/bin/updater_binary";
     }
     pid_t pid = fork();
+    sleep(1);
     UPDATER_CHECK_ONLY_RETURN(pid >= 0, ERROR_CODE(CODE_FORK_FAIL);
         UPDATER_LAST_WORD(UPDATE_ERROR);
         return UPDATE_ERROR);
