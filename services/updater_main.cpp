@@ -304,6 +304,27 @@ static UpdaterStatus PreUpdatePackages(UpdaterParams &upParams)
         LOG(ERROR) << "Battery is not sufficient for install package.";
         return UPDATE_SKIP;
     }
+
+    std::string resultPath = std::string(UPDATER_PATH) + "/" + std::string(UPDATER_RESULT_FILE);
+    Utils::DeleteFile(resultPath);
+    std::string allPkgPath {};
+    for (size_t i = 0; i < upParams.updatePackage.size(); i++) {
+        if (i < upParams.pkgLocation) {
+            allPkgPath += upParams.updatePackage[i] + " : pass\n";
+            continue;
+        }
+        allPkgPath += upParams.updatePackage[i] + "\n";
+    }
+    if (allPkgPath != "") {
+        allPkgPath.pop_back;
+    }
+    LOG(INFO) << "start allPkgPath is " << allPkgPath;
+    std::ofstream fout {resultPath};
+    if (!fout.is_open()) {
+        LOG(ERROR) << "open file error" << resultPath;
+        return UPDATE_ERROR;
+    }
+    fout << allPkgPath;
     return UPDATE_SUCCESS;
 }
 
@@ -318,6 +339,7 @@ static UpdaterStatus DoUpdatePackages(UpdaterParams &upParams)
     }
     UPDATER_UI_INSTANCE.ShowProgress(updateStartPosition * FULL_PERCENT_PROGRESS);
     for (; upParams.pkgLocation < upParams.updatePackage.size(); upParams.pkgLocation++) {
+        DumpHelper::SetPackage(upParams.updatePackage[upParams.pkgLocation]);
         PkgManager::PkgManagerPtr manager = PkgManager::GetPackageInstance();
         LOG(INFO) << "InstallUpdaterPackage pkg is " << upParams.updatePackage[upParams.pkgLocation];
         upParams.currentPercentage = pkgStartPosition[upParams.pkgLocation + 1] -
@@ -331,8 +353,10 @@ static UpdaterStatus DoUpdatePackages(UpdaterParams &upParams)
             static_cast<int>(pkgStartPosition[upParams.pkgLocation + 1] * FULL_PERCENT_PROGRESS));
         if (status != UPDATE_SUCCESS) {
             LOG(ERROR) << "InstallUpdaterPackage failed! Pkg is " << upParams.updatePackage[upParams.pkgLocation];
+            UPDATER_LAST_WORD(status);
             return status;
         }
+        UPDATER_LAST_WORD("pass");
         PkgManager::ReleasePackageInstance(manager);
     }
     UPDATER_UI_INSTANCE.ShowSuccessPage();
@@ -355,13 +379,6 @@ static UpdaterStatus StartUpdaterEntry(UpdaterParams &upParams)
     if (upParams.updatePackage.size() > 0) {
         UPDATER_UI_INSTANCE.ShowProgressPage();
         status = InstallUpdaterPackages(upParams);
-        if (status != UPDATE_SUCCESS) {
-            if (!CheckDumpResult()) {
-                UPDATER_LAST_WORD(status);
-            }
-            return status;
-        }
-        WriteDumpResult("pass");
     } else if (upParams.factoryWipeData) {
         UPDATER_UI_INSTANCE.ShowProgressPage();
         LOG(INFO) << "Factory level FactoryReset begin";
