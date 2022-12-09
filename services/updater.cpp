@@ -436,10 +436,10 @@ UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, UpdaterPara
     if (!WIFEXITED(status) || WEXITSTATUS(status) != 0) {
         if (WIFEXITED(status)) {
             LOG(ERROR) << "exited, status= " << WEXITSTATUS(status);
-        } else if (WIFSIGNALED(wstatus)) {
-            LOG(ERROR) << "killed by signal " << WTERMSIG(wstatus);
-        } else if (WIFSTOPPED(wstatus)) {
-            LOG(ERROR) << "stopped by signal " << WSTOPSIG(wstatus);
+        } else if (WIFSIGNALED(status)) {
+            LOG(ERROR) << "killed by signal " << WTERMSIG(status);
+        } else if (WIFSTOPPED(status)) {
+            LOG(ERROR) << "stopped by signal " << WSTOPSIG(status);
         }
         return UPDATE_ERROR;
     }
