@@ -369,8 +369,7 @@ UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, UpdaterPara
         LOG(INFO) << "There is no updater_binary in package, use updater_binary in device";
         fullPath = "/bin/updater_binary";
     }
-    pid_t pid = fork();
-    sleep(1);
+    pid_t pid = fork(); //don't use LOG() after fork();
     UPDATER_CHECK_ONLY_RETURN(pid >= 0, ERROR_CODE(CODE_FORK_FAIL);
         UPDATER_LAST_WORD(UPDATE_ERROR);
         return UPDATE_ERROR);
@@ -430,7 +429,6 @@ UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, UpdaterPara
     pid_t w = waitpid(pid, &status, 0);
     if (w == -1) {
         LOG(ERROR) << "waitpid error";
-        perror("waitpid");
         return UPDATE_ERROR;
     }
     UPDATER_CHECK_ONLY_RETURN(!retryUpdate, return UPDATE_RETRY);
