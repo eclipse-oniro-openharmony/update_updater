@@ -91,15 +91,6 @@ void SetLogLevel(int level)
 
 std::ostream& UpdaterLogger::OutputUpdaterLog(const std::string &path, int line)
 {
-    logLevelMap_ = {
-        { VERBOSE, "VERBOSE" },
-        { DEBUG, "DEBUG" },
-        { INFO, "INFO" },
-        { WARNING, "WARNING" },
-        { ERROR, "ERROR" },
-        { FATAL, "FATAL" }
-    };
-
     auto sysTime = std::chrono::system_clock::now();
     auto currentTime = std::chrono::system_clock::to_time_t(sysTime);
     struct tm *localTime = std::localtime(&currentTime);

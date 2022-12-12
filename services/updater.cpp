@@ -434,10 +434,22 @@ UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, const std::
     fclose(fromChild);
 
     int status;
-    waitpid(pid, &status, 0);
+    pid_t w = waitpid(pid, &status, 0);
+    if (w == -1) {
+        LOG(ERROR) << "waitpid error";
+        return UPDATE_ERROR;
+    }
     UPDATER_CHECK_ONLY_RETURN(!retryUpdate, return UPDATE_RETRY);
-    UPDATER_ERROR_CHECK(!(!WIFEXITED(status) || WEXITSTATUS(status) != 0),
-        "Updater process exit with status: " << WEXITSTATUS(status), return UPDATE_ERROR);
+    if (!WIFEXITED(status) || WEXITSTATUS(status) != 0) {
+        if (WIFEXITED(status)) {
+            LOG(ERROR) << "exited, status= " << WEXITSTATUS(status);
+        } else if (WIFSIGNALED(status)) {
+            LOG(ERROR) << "killed by signal " << WTERMSIG(status);
+        } else if (WIFSTOPPED(status)) {
+            LOG(ERROR) << "stopped by signal " << WSTOPSIG(status);
+        }
+        return UPDATE_ERROR;
+    }
     LOG(DEBUG) << "Updater process finished.";
     return UPDATE_SUCCESS;
 }
