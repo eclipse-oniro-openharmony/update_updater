@@ -316,7 +316,7 @@ static UpdaterStatus PreUpdatePackages(UpdaterParams &upParams)
         allPkgPath += upParams.updatePackage[i] + "\n";
     }
     if (allPkgPath != "") {
-        allPkgPath.pop_back;
+        allPkgPath.pop_back();
     }
     LOG(INFO) << "start allPkgPath is " << allPkgPath;
     std::ofstream fout {resultPath};
