@@ -471,7 +471,7 @@ void WriteDumpResult(const std::string &result, const std::string &pkgPath)
         return;
     }
     std::string buf;
-    while (std::getLine(fin, buf)) {
+    while (std::getline(fin, buf)) {
         if (buf.find(pkgPath) == std::string::npos) {
             writeBuffer += buf + "\n";
             continue;
