@@ -28,7 +28,7 @@ GraphicEngine &GraphicEngine::GetInstance()
     static GraphicEngine instance;
     static bool isRegister = false;
     if (!isRegister) {
-        OHOS::BaseGfxEngine::InitGfxEngine(&instance);
+        OHOS::SoftEngine::InitGfxEngine(&instance);
         isRegister = true;
     }
 

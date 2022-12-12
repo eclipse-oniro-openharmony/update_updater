@@ -18,12 +18,12 @@
 
 #include <memory>
 #include <thread>
-#include "engines/gfx/gfx_engine_manager.h"
+#include "engines/gfx/soft_engine.h"
 #include "macros.h"
 #include "surface_dev.h"
 
 namespace Updater {
-class GraphicEngine : public OHOS::BaseGfxEngine {
+class GraphicEngine : public OHOS::SoftEngine {
     static constexpr uint32_t THREAD_USLEEP_TIME = 10000;
     DISALLOW_COPY_MOVE(GraphicEngine);
 public:
