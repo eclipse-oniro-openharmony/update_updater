@@ -44,6 +44,9 @@ public:
 
     static void ReleaseBasicInstructionHelper();
 private:
+    int32_t RegisterAddInstruction(const Uscript::UScriptInstructionFactoryPtr factory,
+    	const std::string &instrName);
+
     void* instrLib_ = nullptr;
     std::string userInstrLibName_ {};
     ScriptManagerImpl* scriptManager_ {};

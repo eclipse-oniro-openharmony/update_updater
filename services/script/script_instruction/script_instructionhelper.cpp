@@ -102,12 +102,37 @@ int32_t ScriptInstructionHelper::AddInstruction(const std::string &instrName, co
     return scriptManager_->AddInstruction(instrName, instr);
 }
 
+int32_t ScriptInstructionHelper::RegisterAddInstruction(const Uscript::UScriptInstructionFactoryPtr factory,
+    const std::string &instrName)
+{
+    // Create instruction and register it
+    UScriptInstructionPtr instr = nullptr;
+    int32_t ret = factory->CreateInstructionInstance(instr, instrName);
+    if (ret != USCRIPT_SUCCESS || instr == nullptr) {
+        USCRIPT_LOGE("Fail to create instruction for %s", instrName.c_str());
+        return ret == USCRIPT_SUCCESS ? USCRIPT_ERROR_CREATE_OBJ : USCRIPT_NOTEXIST_INSTRUCTION;
+    }
+
+    ret = AddInstruction(instrName, instr);
+    if (ret != USCRIPT_SUCCESS) {
+        USCRIPT_LOGE("Fail to add instruction for %s", instrName.c_str());
+        // ret is USCRIPT_ERROR_REVERED, instr register failed, can be deleted
+        delete instr;
+        instr = nullptr;
+    }
+    // ScriptManagerImpl::AddInstruction has saved instr, don't delete it here!!!
+    return ret;
+}
+
 int32_t ScriptInstructionHelper::RegisterUserInstruction(const std::string& libName,
     const std::string &instrName)
 {
     // first get realpath of libName, then compare with realLibName
     char *realPath = realpath(libName.c_str(), nullptr);
-    USCRIPT_CHECK(realPath != nullptr, return USCRIPT_INVALID_PARAM, "realPath is NULL %s", libName.c_str());
+    if (realPath == nullptr) {
+        USCRIPT_LOGE("realPath is NULL %s", libName.c_str());
+        return USCRIPT_INVALID_PARAM;
+    }
     std::string realLibName = realPath;
     free(realPath);
     if (!userInstrLibName_.empty() && userInstrLibName_.compare(realLibName) != 0) {
@@ -140,23 +165,8 @@ int32_t ScriptInstructionHelper::RegisterUserInstruction(const std::string& libN
     ON_SCOPE_EXIT(freeFactory) {
         pReleaseInstructionFactory(factory);
     };
-    // Create instruction and register it
-    UScriptInstructionPtr instr = nullptr;
-    int32_t ret = factory->CreateInstructionInstance(instr, instrName);
-    if (ret != USCRIPT_SUCCESS || instr == nullptr) {
-        USCRIPT_LOGE("Fail to create instruction for %s", instrName.c_str());
-        return ret == USCRIPT_SUCCESS ? USCRIPT_ERROR_CREATE_OBJ : USCRIPT_NOTEXIST_INSTRUCTION;
-    }
 
-    ret = AddInstruction(instrName, instr);
-    if (ret != USCRIPT_SUCCESS) {
-        USCRIPT_LOGE("Fail to add instruction for %s", instrName.c_str());
-        // ret is USCRIPT_ERROR_REVERED, instr register failed, can be deleted
-        delete instr;
-        instr = nullptr;
-    }
-    // ScriptManagerImpl::AddInstruction has saved instr, don't delete it here!!!
-    return ret;
+    return RegisterAddInstruction(factory, instrName);
 }
 
 int32_t ScriptInstructionHelper::RegisterUserInstruction(const std::string &instrName,
