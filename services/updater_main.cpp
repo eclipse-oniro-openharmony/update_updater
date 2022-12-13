@@ -151,10 +151,10 @@ UpdaterStatus UpdaterFromSdcard()
         return UPDATE_ERROR;
     }
     UpdaterParams upParams {
-        false, false, 0, 0, 0, 0, {0, {SDCARD_CARD_PKG_PATH}}
+        false, false, 0, 0, 1, 0, {SDCARD_CARD_PKG_PATH}
     };
     STAGE(UPDATE_STAGE_BEGIN) << "UpdaterFromSdcard";
-    LOG(INFO) << "UpdaterFromSdcard start, sdcard updaterPath : " << SDCARD_CARD_PKG_PATH;
+    LOG(INFO) << "UpdaterFromSdcard start, sdcard updaterPath : " << upParams.updatePackage[upParams.pkgLocation];
     UPDATER_UI_INSTANCE.ShowLog(TR(LOG_SDCARD_NOTMOVE));
     UpdaterStatus updateRet = DoInstallUpdaterPackage(pkgManager, upParams, SDCARD_UPDATE);
     if (updateRet != UPDATE_SUCCESS) {

@@ -127,7 +127,14 @@ private:
     int level_;
     std::stringstream oss_;
     char realTime_[MAX_TIME_SIZE] = {0};
-    std::unordered_map<int, std::string> logLevelMap_;
+    static inline std::unordered_map<int, std::string> logLevelMap_ = {
+        { VERBOSE, "VERBOSE" },
+        { DEBUG, "DEBUG" },
+        { INFO, "INFO" },
+        { WARNING, "WARNING" },
+        { ERROR, "ERROR" },
+        { FATAL, "FATAL" }
+    };
 };
 
 class StageLogger {
