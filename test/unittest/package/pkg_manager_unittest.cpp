@@ -555,12 +555,18 @@ public:
             [&](Hpackage::PkgManager::StreamPtr stream) {
             pkgManager_->ClosePkgStream(stream);
         });
-        PKG_CHECK(outStream != nullptr, return -1, "Can not create stream ");
+        if (outStream == nullptr) {
+            PKG_LOGE("Can not create stream ");
+            return -1;
+        }
         Hpackage::PkgBuffer buffer(uncompressedData.data(), info.unpackedSize);
         int32_t ret = pkgManager_->CompressBuffer(&info, buffer, outStream.get());
         PKG_LOGE("GetGZipUncompressedData packedSize:%zu unpackedSize:%zu",
             info.packedSize, info.unpackedSize);
-        PKG_CHECK(ret == 0, return -1, "Fail to CompressBuffer");
+        if (ret != 0) {
+            PKG_LOGE("Fail to CompressBuffer");
+            return -1;
+        }
         std::vector<uint8_t> localDigest(DEFAULT_LOCAK_DIGEST);
         SHA256_Final(localDigest.data(), &sha256Ctx);
         ret = memcmp(localDigest.data(), digest.data(), localDigest.size());

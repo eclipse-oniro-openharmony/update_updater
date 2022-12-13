@@ -47,43 +47,58 @@ static inline std::string GetTestPrivateKeyName()
 }
 
 static int32_t BuildFileDigest(uint8_t &digest, size_t size, const std::string &packagePath)
-    {
-        PkgManager::StreamPtr stream = nullptr;
-        PkgManager::PkgManagerPtr packageManager = PkgManager::GetPackageInstance();
+{
+    PkgManager::StreamPtr stream = nullptr;
+    PkgManager::PkgManagerPtr packageManager = PkgManager::GetPackageInstance();
 
-        int32_t ret = packageManager->CreatePkgStream(stream, packagePath, 0, PkgStream::PkgStreamType_Read);
-        PKG_CHECK(ret == PKG_SUCCESS, packageManager->ClosePkgStream(stream);
-            return ret, "Create input stream fail %s", packagePath.c_str());
-        size_t fileLen = stream->GetFileLength();
-        PKG_CHECK(fileLen > 0, packageManager->ClosePkgStream(stream); return PKG_INVALID_FILE, "invalid file to load");
-        PKG_CHECK(fileLen <= SIZE_MAX, packageManager->ClosePkgStream(stream); return PKG_INVALID_FILE,
-            "Invalid file len %zu to load %s", fileLen, stream->GetFileName().c_str());
-
-        size_t buffSize = 4096;
-        PkgBuffer buff(buffSize);
-        // 整包检查
-        DigestAlgorithm::DigestAlgorithmPtr algorithm = PkgAlgorithmFactory::GetDigestAlgorithm(PKG_DIGEST_TYPE_SHA256);
-        PKG_CHECK(algorithm != nullptr, packageManager->ClosePkgStream(stream); return PKG_NOT_EXIST_ALGORITHM,
-            "Invalid file %s", stream->GetFileName().c_str());
-        algorithm->Init();
-
-        size_t offset = 0;
-        size_t readLen = 0;
-        while (offset < fileLen) {
-            ret = stream->Read(buff, offset, buffSize, readLen);
-            PKG_CHECK(ret == PKG_SUCCESS,
-                packageManager->ClosePkgStream(stream); return ret,
-                "read buffer fail %s", stream->GetFileName().c_str());
-            algorithm->Update(buff, readLen);
-
-            offset += readLen;
-            readLen = 0;
-        }
-        PkgBuffer signBuffer(&digest, size);
-        algorithm->Final(signBuffer);
+    int32_t ret = packageManager->CreatePkgStream(stream, packagePath, 0, PkgStream::PkgStreamType_Read);
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("Create input stream fail %s", packagePath.c_str());
         packageManager->ClosePkgStream(stream);
-        return PKG_SUCCESS;
+        return ret;
     }
+    size_t fileLen = stream->GetFileLength();
+    if (fileLen <= 0) {
+        PKG_LOGE("invalid file to load");
+        packageManager->ClosePkgStream(stream);
+        return PKG_INVALID_FILE;
+    }
+    if (fileLen > SIZE_MAX) {
+        PKG_LOGE("Invalid file len %zu to load %s", fileLen, stream->GetFileName().c_str());
+        packageManager->ClosePkgStream(stream);
+        return PKG_INVALID_FILE;
+    }
+
+    size_t buffSize = 4096;
+    PkgBuffer buff(buffSize);
+    // 整包检查
+    DigestAlgorithm::DigestAlgorithmPtr algorithm = PkgAlgorithmFactory::GetDigestAlgorithm(PKG_DIGEST_TYPE_SHA256);
+    if (algorithm == nullptr) {
+        PKG_LOGE("Invalid file %s", stream->GetFileName().c_str());
+        packageManager->ClosePkgStream(stream);
+        return PKG_NOT_EXIST_ALGORITHM;
+    }
+    algorithm->Init();
+
+    size_t offset = 0;
+    size_t readLen = 0;
+    while (offset < fileLen) {
+        ret = stream->Read(buff, offset, buffSize, readLen);
+        if (ret != PKG_SUCCESS) {
+            PKG_LOGE("read buffer fail %s", stream->GetFileName().c_str());
+            packageManager->ClosePkgStream(stream);
+            return ret;
+        }
+        algorithm->Update(buff, readLen);
+
+        offset += readLen;
+        readLen = 0;
+    }
+    PkgBuffer signBuffer(&digest, size);
+    algorithm->Final(signBuffer);
+    packageManager->ClosePkgStream(stream);
+    return PKG_SUCCESS;
+}
 
 static int CreatePackageZip(const std::vector<std::string> &fstabFile)
 {

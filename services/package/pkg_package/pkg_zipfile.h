@@ -148,6 +148,9 @@ public:
 
     int32_t EncodeCentralDirEntry(const PkgStreamPtr stream, size_t startOffset, size_t &encodeLen);
 
+    int32_t DoDecodeCentralDirEntry(PkgBuffer &buffer, size_t &decodeLen,
+        size_t &readLen, uint16_t &nameSize, uint16_t &extraSize)
+
     int32_t DecodeCentralDirEntry(PkgStreamPtr inStream, PkgBuffer &buffer, size_t currentPos,
         size_t &decodeLen);
 
