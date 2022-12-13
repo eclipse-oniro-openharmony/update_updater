@@ -18,6 +18,7 @@
 #include <memory>
 #include <sys/stat.h>
 #include <unordered_map>
+#include <unistd.h>
 #include <vector>
 #include "log/log.h"
 #include "securec.h"
@@ -47,7 +48,7 @@ void DumpHelper::WriteDumpResult(const std::string &result)
 {
     std::string updaterPath = "/data/updater";
     if (access(updaterPath, 0) != 0) {
-        if (MkdirRecursive(updaterPath, 0755) != 0) { // 0755: -rwxr-xr-x
+        if (Utils::mkdirRecursive(updaterPath, 0755) != 0) { // 0755: -rwxr-xr-x
             LOG(ERROR) << "MkdirRecursive error!";
             return;
         }

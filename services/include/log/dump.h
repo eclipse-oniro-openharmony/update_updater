@@ -23,6 +23,7 @@
 #include <sstream>
 #include <stack>
 #include <string>
+#include <sys/types.h>
 #include <vector>
 #include "log.h"
 #include "macros.h"
