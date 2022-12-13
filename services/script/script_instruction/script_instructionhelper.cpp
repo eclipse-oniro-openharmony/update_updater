@@ -146,7 +146,7 @@ int32_t ScriptInstructionHelper::RegisterUserInstruction(const std::string& libN
         instrLib_ = dlopen(realLibName.c_str(), RTLD_LAZY | RTLD_LOCAL);
     }
     if (instrLib_ == nullptr) {
-        USCRIPT_LOGE("Fail to dlopen %s ", libName.c_str());
+        USCRIPT_LOGE("Fail to dlopen %s , dlerror: %s", libName.c_str(), dlerror());
         return USCRIPT_INVALID_PARAM;
     }
     auto pGetInstructionFactory =
