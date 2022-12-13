@@ -23,6 +23,7 @@
 
 namespace Updater {
 thread_local std::stack<std::string> g_stageStack;
+std::string DumpHelper::pkgPath_;
 
 extern "C" __attribute__((constructor)) void RegisterDump(void)
 {
