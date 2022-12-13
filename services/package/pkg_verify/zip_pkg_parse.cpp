@@ -48,7 +48,7 @@ const uint8_t ZIP_EOCD_SIGNATURE_BIG_ENDIAN[4] = {0x50, 0x4b, 0x05, 0x06};
  *     = .ZIP file comment length   2 bytes
  */
 
-static int32_t DoParseZipPkg(PkgStreamPtr pkgStream, size_t &signatureStart,
+int32_t ZipPkgParse::DoParseZipPkg(PkgStreamPtr pkgStream, size_t &signatureStart,
     size_t &signatureSize, size_t &readLen, uint16_t &signCommentTotalLen)
 {
     size_t fileLen = pkgStream->GetFileLength();
@@ -61,7 +61,7 @@ static int32_t DoParseZipPkg(PkgStreamPtr pkgStream, size_t &signatureStart,
 
     size_t zipEocdStart = fileLen - eocdTotalLen;
     PkgBuffer zipEocd(eocdTotalLen);
-    ret = pkgStream->Read(zipEocd, zipEocdStart, eocdTotalLen, readLen);
+    int32_t ret = pkgStream->Read(zipEocd, zipEocdStart, eocdTotalLen, readLen);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("read zip eocd failed %s", pkgStream->GetFileName().c_str());
         UPDATER_LAST_WORD(PKG_INVALID_PKG_FORMAT);
@@ -117,7 +117,7 @@ int32_t ZipPkgParse::ParseZipPkg(PkgStreamPtr pkgStream, size_t &signatureStart,
         UPDATER_LAST_WORD(ret);
         return ret;
     }
-    return DoParseZipPkg(pkgStream, signatureStart, signatureSize, readLen, signCommentTotalLen)
+    return DoParseZipPkg(pkgStream, signatureStart, signatureSize, readLen, signCommentTotalLen);
 }
 
 int32_t ZipPkgParse::ParsePkgFooter(const uint8_t *footer, size_t length,

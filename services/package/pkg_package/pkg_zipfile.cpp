@@ -397,19 +397,8 @@ int32_t ZipFileEntry::EncodeDataDescriptor(const PkgStreamPtr stream, size_t sta
 }
 
 int32_t ZipFileEntry::DoDecodeCentralDirEntry(PkgBuffer &buffer, size_t &decodeLen,
-    size_t &readLen, uint16_t &nameSize, uint16_t &extraSize)
+    size_t &currLen, uint16_t &nameSize, uint16_t &extraSize)
 {
-    size_t fileNameLength = nameSize;
-    if (nameSize >= MAX_FILE_NAME) {
-        PKG_LOGE("file name size too longer %d", nameSize);
-        fileNameLength = MAX_FILE_NAME - 1
-    }
-    if (readLen < sizeof(CentralDirEntry) + fileNameLength) {
-        PKG_LOGE("data not not enough %zu", readLen);
-        return PKG_INVALID_PKG_FORMAT;
-    }
-    fileInfo_.fileInfo.identity.assign(reinterpret_cast<char*>(buffer.buffer + sizeof(CentralDirEntry)),
-                                       fileNameLength);
     fileInfo_.method = static_cast<int32_t>(ReadLE16(buffer.buffer + offsetof(CentralDirEntry, compressionMethod)));
     uint16_t modifiedTime = ReadLE16(buffer.buffer + offsetof(CentralDirEntry, modifiedTime));
     uint16_t modifiedDate = ReadLE16(buffer.buffer + offsetof(CentralDirEntry, modifiedDate));
@@ -478,7 +467,18 @@ int32_t ZipFileEntry::DecodeCentralDirEntry(PkgStreamPtr inStream, PkgBuffer &bu
         PKG_LOGE("check centralDir len failed");
         return PKG_INVALID_PKG_FORMAT;
     }
-    return DoDecodeCentralDirEntry(buffer, decodeLen, readLen, nameSize, extraSize);
+    size_t fileNameLength = nameSize;
+    if (nameSize >= MAX_FILE_NAME) {
+        PKG_LOGE("file name size too longer %d", nameSize);
+        fileNameLength = MAX_FILE_NAME - 1;
+    }
+    if (readLen < sizeof(CentralDirEntry) + fileNameLength) {
+        PKG_LOGE("data not not enough %zu", readLen);
+        return PKG_INVALID_PKG_FORMAT;
+    }
+    fileInfo_.fileInfo.identity.assign(reinterpret_cast<char*>(buffer.buffer + sizeof(CentralDirEntry)),
+                                       fileNameLength);
+    return DoDecodeCentralDirEntry(buffer, decodeLen, currLen, nameSize, extraSize);
 }
 
 int32_t ZipFileEntry::DecodeLocalFileHeaderCheck(PkgStreamPtr inStream, const PkgBuffer &data,
