@@ -28,6 +28,7 @@ ohos_unittest("binary_unittest") {
   ]
 
   sources += [
+    "//base/update/updater/services/applypatch/block_set.cpp",
     "//base/update/updater/services/updater_binary/update_image_block.cpp",
     "//base/update/updater/services/updater_binary/update_image_patch.cpp",
     "//base/update/updater/services/updater_binary/update_partitions.cpp",

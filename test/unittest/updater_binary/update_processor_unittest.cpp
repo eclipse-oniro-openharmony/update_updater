@@ -45,7 +45,7 @@ void UpdateProcessorUnitTest::SetUp(void)
     string devPath = GetBlockDeviceByMountPoint(UT_MISC_PARTITION_NAME);
     vector<uint8_t> buffer(UT_MISC_BUFFER_SIZE, 0);
     auto ret = Store::WriteDataToStore("/", devPath, buffer, UT_MISC_BUFFER_SIZE);
-    printf("WriteDataToStore ret: %d\n", ret);
+    cout << "WriteDataToStore ret: " << ret << endl;
 }
 
 void UpdateProcessorUnitTest::TearDown(void)
@@ -55,7 +55,7 @@ void UpdateProcessorUnitTest::TearDown(void)
     /* delete 2k size test file */
     string devPath = GetBlockDeviceByMountPoint(UT_MISC_PARTITION_NAME);
     auto ret = Store::FreeStore("/", devPath);
-    printf("FreeStore ret: %d\n", ret);
+    cout << "FreeStore ret: " << ret << endl;
 }
 
 // do something at the each function begining
@@ -72,7 +72,7 @@ HWTEST_F(UpdateProcessorUnitTest, UpdateProcessor_001, TestSize.Level1)
     EXPECT_EQ(ret, 0);
 }
 
-/* diff update, zip has 2k size misc.img, base is zero, dst is urandom */
+/* image diff update, zip has 2k size misc.img, base is zero, dst is urandom */
 HWTEST_F(UpdateProcessorUnitTest, UpdateProcessor_002, TestSize.Level1)
 {
     vector<uint8_t> buffer(UT_MISC_BUFFER_SIZE, 0);
@@ -85,7 +85,7 @@ HWTEST_F(UpdateProcessorUnitTest, UpdateProcessor_002, TestSize.Level1)
     EXPECT_EQ(ret, 0);
 }
 
-/* diff update, zip has 2k size misc.img, base is zero, dst is urandom, hash check fail */
+/* image diff update, zip has 2k size misc.img, base is zero, dst is urandom, hash check fail */
 HWTEST_F(UpdateProcessorUnitTest, UpdateProcessor_003, TestSize.Level1)
 {
     vector<uint8_t> buffer(UT_MISC_BUFFER_SIZE, 1);
