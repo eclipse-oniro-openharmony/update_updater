@@ -16,6 +16,7 @@
 #include "log/dump.h"
 #include <chrono>
 #include <memory>
+#include <sys/stat.h>
 #include <unordered_map>
 #include <vector>
 #include "log/log.h"
@@ -42,16 +43,17 @@ DumpStageHelper::~DumpStageHelper()
     }
 }
 
-void DumpStageHelper::WriteDumpResult(const std::string &result)
+void DumpHelper::WriteDumpResult(const std::string &result)
 {
-    if (access(UPDATER_PATH, 0) != 0) {
-        if (MkdirRecursive(UPDATER_PATH, 0755) != 0) { // 0755: -rwxr-xr-x
+    std::string updaterPath = "/data/updater";
+    if (access(updaterPath, 0) != 0) {
+        if (MkdirRecursive(updaterPath, 0755) != 0) { // 0755: -rwxr-xr-x
             LOG(ERROR) << "MkdirRecursive error!";
             return;
         }
     }
     LOG(INFO) << "WriteDumpResult: " << result;
-    const std::string resultPath = std::string(UPDATER_PATH) + "/" + std::string(UPDATER_RESULT_FILE);
+    const std::string resultPath = updaterPath + "/updater_result";
     std::string writeBuffer {};
     std::ifstream fin {resultPath};
     if (!fin.is_open()) {
@@ -59,7 +61,7 @@ void DumpStageHelper::WriteDumpResult(const std::string &result)
         return;
     }
     std::string buf;
-    while (std::getLine(fin, buf)) {
+    while (std::getline(fin, buf)) {
         if (buf.find(GetPackage()) == std::string::npos) {
             writeBuffer += buf + "\n";
             continue;
@@ -76,7 +78,7 @@ void DumpStageHelper::WriteDumpResult(const std::string &result)
     }
     fout << writeBuffer;
 
-    (void)chown(resultPath.c_str(), USER_ROOT_AUTHORITY, GROUP_UPDATE_AUTHORITY);
+    (void)chown(resultPath.c_str(), 0, 6666); // 6666: GROUP_UPDATE_AUTHORITY
     (void)chmod(resultPath.c_str(), 0640); // 0640: -rw-r-----
 }
 
