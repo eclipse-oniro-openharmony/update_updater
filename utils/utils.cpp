@@ -454,44 +454,6 @@ bool CheckDumpResult()
     return false;
 }
 
-void WriteDumpResult(const std::string &result, const std::string &pkgPath)
-{
-    if (access(UPDATER_PATH, 0) != 0) {
-        if (MkdirRecursive(UPDATER_PATH, 0755) != 0) { // 0755: -rwxr-xr-x
-            LOG(ERROR) << "MkdirRecursive error!";
-            return;
-        }
-    }
-    LOG(INFO) << "WriteDumpResult: " << result;
-    const std::string resultPath = std::string(UPDATER_PATH) + "/" + std::string(UPDATER_RESULT_FILE);
-    std::string writeBuffer {};
-    std::ifstream fin {resultPath};
-    if (!fin.is_open()) {
-        LOG(ERROR) << "open file error" << resultPath;
-        return;
-    }
-    std::string buf;
-    while (std::getline(fin, buf)) {
-        if (buf.find(pkgPath) == std::string::npos) {
-            writeBuffer += buf + "\n";
-            continue;
-        }
-        writeBuffer += buf + " : " + result + "\n";
-    }
-    if (writeBuffer != "") {
-        writeBuffer.pop_back();
-    }
-    std::ofstream fout {resultPath};
-    if (fout.is_open()) {
-        LOG(ERROR) << "open file error" << resultPath;
-        return;
-    }
-    fout << writeBuffer;
-
-    (void)chown(resultPath.c_str(), USER_ROOT_AUTHORITY, GROUP_UPDATE_AUTHORITY);
-    (void)chmod(resultPath.c_str(), 0640); // 0640: -rw-r-----
-}
-
 void UsSleep(int usec)
 {
     auto seconds = usec / USECONDS_PER_SECONDS;

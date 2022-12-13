@@ -153,6 +153,12 @@ UpdaterStatus UpdaterFromSdcard()
     UpdaterParams upParams {
         false, false, 0, 0, 0, 0, {0, {SDCARD_CARD_PKG_PATH}}
     };;
+    DumpHelper::SetPackage(upParams.updatePackage[upParams.pkgLocation]);
+    std::ofstream fout {std::string(UPDATER_PATH) + "/" + std::string(UPDATER_RESULT_FILE)};
+    if (!fout.is_open()) {
+        LOG(ERROR) << "open file error" << resultPath;
+    }
+    fout << allPkgPath;
     STAGE(UPDATE_STAGE_BEGIN) << "UpdaterFromSdcard";
     LOG(INFO) << "UpdaterFromSdcard start, sdcard updaterPath : " << SDCARD_CARD_PKG_PATH;
     UPDATER_UI_INSTANCE.ShowLog(TR(LOG_SDCARD_NOTMOVE));
@@ -286,6 +292,32 @@ static UpdaterStatus CalcProgress(const UpdaterParams &upParams,
     return UPDATE_SUCCESS;
 }
 
+static UpdaterStatus PreWriteResultFile(UpdaterParams &upParams)
+{
+    std::string resultPath = std::string(UPDATER_PATH) + "/" + std::string(UPDATER_RESULT_FILE);
+    Utils::DeleteFile(resultPath);
+    std::string allPkgPath {};
+    for (size_t i = 0; i < upParams.updatePackage.size(); i++) {
+        if (i < upParams.pkgLocation) {
+            // Power-down treatment.
+            allPkgPath += upParams.updatePackage[i] + " : pass\n";
+            continue;
+        }
+        allPkgPath += upParams.updatePackage[i] + "\n";
+    }
+    if (allPkgPath != "") {
+        allPkgPath.pop_back();
+    }
+    LOG(INFO) << "start allPkgPath is " << allPkgPath;
+    std::ofstream fout {resultPath};
+    if (!fout.is_open()) {
+        LOG(ERROR) << "open file error" << resultPath;
+        return UPDATE_ERROR;
+    }
+    fout << allPkgPath;
+    return UPDATE_SUCCESS;
+}
+
 static UpdaterStatus PreUpdatePackages(UpdaterParams &upParams)
 {
     UpdaterStatus status = UPDATE_UNKNOWN;
@@ -304,28 +336,7 @@ static UpdaterStatus PreUpdatePackages(UpdaterParams &upParams)
         LOG(ERROR) << "Battery is not sufficient for install package.";
         return UPDATE_SKIP;
     }
-
-    std::string resultPath = std::string(UPDATER_PATH) + "/" + std::string(UPDATER_RESULT_FILE);
-    Utils::DeleteFile(resultPath);
-    std::string allPkgPath {};
-    for (size_t i = 0; i < upParams.updatePackage.size(); i++) {
-        if (i < upParams.pkgLocation) {
-            allPkgPath += upParams.updatePackage[i] + " : pass\n";
-            continue;
-        }
-        allPkgPath += upParams.updatePackage[i] + "\n";
-    }
-    if (allPkgPath != "") {
-        allPkgPath.pop_back();
-    }
-    LOG(INFO) << "start allPkgPath is " << allPkgPath;
-    std::ofstream fout {resultPath};
-    if (!fout.is_open()) {
-        LOG(ERROR) << "open file error" << resultPath;
-        return UPDATE_ERROR;
-    }
-    fout << allPkgPath;
-    return UPDATE_SUCCESS;
+    return PreWriteResultFile(upParams);
 }
 
 static UpdaterStatus DoUpdatePackages(UpdaterParams &upParams)
@@ -353,7 +364,9 @@ static UpdaterStatus DoUpdatePackages(UpdaterParams &upParams)
             static_cast<int>(pkgStartPosition[upParams.pkgLocation + 1] * FULL_PERCENT_PROGRESS));
         if (status != UPDATE_SUCCESS) {
             LOG(ERROR) << "InstallUpdaterPackage failed! Pkg is " << upParams.updatePackage[upParams.pkgLocation];
-            UPDATER_LAST_WORD(status);
+            if (!CheckDumpResult()) {
+                UPDATER_LAST_WORD(status);
+            }
             return status;
         }
         UPDATER_LAST_WORD("pass");
