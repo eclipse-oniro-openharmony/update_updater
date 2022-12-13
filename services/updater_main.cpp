@@ -152,13 +152,7 @@ UpdaterStatus UpdaterFromSdcard()
     }
     UpdaterParams upParams {
         false, false, 0, 0, 0, 0, {0, {SDCARD_CARD_PKG_PATH}}
-    };;
-    DumpHelper::SetPackage(upParams.updatePackage[upParams.pkgLocation]);
-    std::ofstream fout {std::string(UPDATER_PATH) + "/" + std::string(UPDATER_RESULT_FILE)};
-    if (!fout.is_open()) {
-        LOG(ERROR) << "open file error" << resultPath;
-    }
-    fout << allPkgPath;
+    };
     STAGE(UPDATE_STAGE_BEGIN) << "UpdaterFromSdcard";
     LOG(INFO) << "UpdaterFromSdcard start, sdcard updaterPath : " << SDCARD_CARD_PKG_PATH;
     UPDATER_UI_INSTANCE.ShowLog(TR(LOG_SDCARD_NOTMOVE));

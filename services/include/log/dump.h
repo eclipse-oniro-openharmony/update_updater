@@ -23,7 +23,6 @@
 #include <sstream>
 #include <stack>
 #include <string>
-#include <sys/types.h>
 #include <vector>
 #include "log.h"
 #include "macros.h"
@@ -36,7 +35,6 @@ class DumpHelper {
 public:
     virtual void RecordDump(const std::string &str) = 0;
     virtual ~DumpHelper() {}
-    void WriteDumpResult(const std::string &result);
 
     static void SetPackage(const std::string &path)
     {
