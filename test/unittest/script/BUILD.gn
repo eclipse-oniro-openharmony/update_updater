@@ -84,6 +84,8 @@ ohos_unittest("script_unittest") {
     "//third_party/openssl:libcrypto_shared",
     "//third_party/openssl:ssl_source",
     "//third_party/zlib:libz",
+    ":user_instruction",
+    ":user_instruction_invalid",
   ]
   configs = [ "$UPDATER_TEST_ROOT:utest_config" ]
   external_deps = [
