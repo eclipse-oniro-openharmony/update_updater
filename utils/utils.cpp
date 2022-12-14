@@ -180,18 +180,19 @@ void DoReboot(const std::string& rebootTarget, const std::string &extData)
     LOG(INFO) << ", rebootTarget: " << rebootTarget;
     static const int32_t maxCommandSize = 16;
     LoadFstab();
-    struct UpdateMessage msg;
+    struct UpdateMessage msg = {{0}};
     if (rebootTarget.empty()) {
-        UPDATER_ERROR_CHECK(!memset_s(msg.command, MAX_COMMAND_SIZE, 0, MAX_COMMAND_SIZE), "Memset_s failed", return);
         if (WriteUpdaterMiscMsg(msg) != true) {
             LOG(INFO) << "DoReboot: WriteUpdaterMessage empty error";
             return;
         }
         sync();
     } else {
+        if (!ReadUpdaterMiscMsg(msg)) {
+            LOG(ERROR) << "DoReboot read misc failed";
+            return;
+        }
         int result = 0;
-        bool ret = ReadUpdaterMiscMsg(msg);
-        UPDATER_ERROR_CHECK(ret == true, "DoReboot read misc failed", return);
         if (rebootTarget == "updater" && strcmp(msg.command, "boot_updater") != 0) {
             result = strcpy_s(msg.command, maxCommandSize, "boot_updater");
             msg.command[maxCommandSize] = 0;
@@ -202,13 +203,17 @@ void DoReboot(const std::string& rebootTarget, const std::string &extData)
             result = strcpy_s(msg.command, maxCommandSize, "boot_loader");
             msg.command[maxCommandSize] = 0;
         }
-        UPDATER_ERROR_CHECK(result == 0, "strcpy failed", return);
+        if (result != EOK) {
+            LOG(ERROR) << "strcpy failed";
+            return;
+        }
+        (void)memset_s(msg.update, MAX_UPDATE_SIZE, 0, MAX_UPDATE_SIZE);
         if (!extData.empty()) {
-            result = strcpy_s(msg.update, MAX_UPDATE_SIZE - 1, extData.c_str());
-            UPDATER_ERROR_CHECK(result == 0, "Failed to copy update", return);
+            if (strcpy_s(msg.update, MAX_UPDATE_SIZE - 1, extData.c_str()) != EOK) {
+                LOG(ERROR) << "Failed to copy update";
+                return;
+            }
             msg.update[MAX_UPDATE_SIZE - 1] = 0;
-        } else {
-            UPDATER_ERROR_CHECK(!memset_s(msg.update, MAX_UPDATE_SIZE, 0, MAX_UPDATE_SIZE), "Memset_s failed", return);
         }
         if (!WriteUpdaterMiscMsg(msg)) {
             LOG(INFO) << "DoReboot: WriteUpdaterMiscMsg empty error";
@@ -391,21 +396,33 @@ void CompressLogs(const std::string &name)
     (void)DeleteFile(name);
 }
 
+bool InitLogDir(void)
+{
+    if (MountForPath(UPDATER_LOG_DIR) != 0) {
+        LOG(WARNING) << "MountForPath /data/log failed!";
+        return false;
+    }
+    if (access(UPDATER_LOG_DIR, 0) == 0) {
+        return true;
+    }
+    LOG(INFO) << "make log dir recursive.";
+    if (MkdirRecursive(UPDATER_LOG_DIR, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) != 0) {
+        LOG(ERROR) << "MkdirRecursive error!";
+        return false;
+    }
+    if (chown(UPDATER_PATH, USER_ROOT_AUTHORITY, GROUP_SYS_AUTHORITY) != EOK &&
+        chmod(UPDATER_PATH, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != EOK) {
+            LOG(ERROR) << "Chmod failed!";
+            return false;
+    }
+    return true;
+}
+
 bool CopyUpdaterLogs(const std::string &sLog, const std::string &dLog)
 {
-    UPDATER_WARING_CHECK(MountForPath(UPDATER_LOG_DIR) == 0, "MountForPath /data/log failed!", return false);
-    if (access(UPDATER_LOG_DIR, 0) != 0) {
-        if (MkdirRecursive(UPDATER_LOG_DIR, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) != 0) {
-            LOG(ERROR) << "MkdirRecursive error!";
-            return false;
-        }
-        if (chown(UPDATER_PATH, USER_ROOT_AUTHORITY, GROUP_SYS_AUTHORITY) != EOK &&
-            chmod(UPDATER_PATH, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != EOK) {
-                LOG(ERROR) << "Chmod failed!";
-                return false;
-        }
+    if (!InitLogDir()) {
+        return false;
     }
-
     FILE* dFp = fopen(dLog.c_str(), "ab+");
     if (dFp == nullptr) {
         LOG(ERROR) << "open log failed";
@@ -434,7 +451,10 @@ bool CopyUpdaterLogs(const std::string &sLog, const std::string &dLog)
         fclose(dFp);
         return false;
     }
-    UPDATER_INFO_CHECK(ftell(dFp) < MAX_LOG_SIZE, "log size greater than 5M!", CompressLogs(dLog));
+    if (ftell(dFp) >= MAX_LOG_SIZE) {
+        LOG(INFO) << "log size greater than 5M!";
+        CompressLogs(dLog);
+    }
     sync();
     fclose(sFp);
     fclose(dFp);
