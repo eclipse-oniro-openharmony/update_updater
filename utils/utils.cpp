@@ -191,8 +191,8 @@ bool SetRebootMisc(const std::string& rebootTarget, const std::string &extData, 
         return false;
     }
     msg.command[maxCommandSize] = 0;
-    (void)memset_s(msg.update, MAX_UPDATE_SIZE, 0, MAX_UPDATE_SIZE);
     if (extData.empty()) {
+        (void)memset_s(msg.update, MAX_UPDATE_SIZE, 0, MAX_UPDATE_SIZE);
         return true;
     }
     if (strcpy_s(msg.update, MAX_UPDATE_SIZE - 1, extData.c_str()) != EOK) {
