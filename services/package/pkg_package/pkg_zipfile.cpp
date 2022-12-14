@@ -541,7 +541,7 @@ int32_t ZipFileEntry::DecodeLocalFileHeader(PkgStreamPtr inStream, const PkgBuff
         return PKG_INVALID_PKG_FORMAT;
     }
     uint32_t signature = ReadLE32(data.buffer + offsetof(LocalFileHeader, signature));
-    if (ReadLE32(data.buffer + offsetof(LocalFileHeader, signature)) != LOCAL_HEADER_SIGNATURE) {
+    if (signature != LOCAL_HEADER_SIGNATURE) {
         PKG_LOGE("check localHeader signature failed");
         return PKG_INVALID_PKG_FORMAT;
     }
