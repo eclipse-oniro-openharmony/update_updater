@@ -192,14 +192,14 @@ bool SetRebootMisc(const std::string& rebootTarget, const std::string &extData, 
     }
     msg.command[maxCommandSize] = 0;
     if (extData.empty()) {
-        (void)memset_s(msg.update, MAX_UPDATE_SIZE, 0, MAX_UPDATE_SIZE);
+        (void)memset_s(msg.update, sizeof(msg.update), 0, sizeof(msg.update));
         return true;
     }
-    if (strcpy_s(msg.update, MAX_UPDATE_SIZE - 1, extData.c_str()) != EOK) {
+    if (strcpy_s(msg.update, sizeof(msg.update) - 1, extData.c_str()) != EOK) {
         LOG(ERROR) << "failed to copy update";
         return false;
     }
-    msg.update[MAX_UPDATE_SIZE - 1] = 0;
+    msg.update[sizeof(msg.update) - 1] = 0;
     return true;
 }
 
@@ -207,9 +207,8 @@ void DoReboot(const std::string& rebootTarget, const std::string &extData)
 {
     LOG(INFO) << ", rebootTarget: " << rebootTarget;
     LoadFstab();
-    struct UpdateMessage msg;
+    struct UpdateMessage msg = {{0}};
     if (rebootTarget.empty()) {
-        (void)memset_s(msg.command, MAX_COMMAND_SIZE, 0, MAX_COMMAND_SIZE);
         if (WriteUpdaterMiscMsg(msg) != true) {
             LOG(INFO) << "DoReboot: WriteUpdaterMessage empty error";
             return;
@@ -224,7 +223,7 @@ void DoReboot(const std::string& rebootTarget, const std::string &extData)
             return;
         }
         if (!WriteUpdaterMiscMsg(msg)) {
-            LOG(INFO) << "DoReboot: WriteUpdaterMiscMsg empty error";
+            LOG(INFO) << "DoReboot: WriteUpdaterMiscMsg error";
             return;
         }
     }
@@ -404,68 +403,43 @@ void CompressLogs(const std::string &name)
     (void)DeleteFile(name);
 }
 
-bool InitLogDir(void)
+int GetFileSize(const std::string &dLog)
+{
+    int ret = 0;
+    std::ifstream ifs(dLog, std::ios::binary | std::ios::in);
+    if (ifs.is_open()) {
+        ifs.seekg(0, std::ios::end);
+        ret = ifs.tellg();
+    }
+    return ret;
+}
+
+bool CopyUpdaterLogs(const std::string &sLog, const std::string &dLog)
 {
     if (MountForPath(UPDATER_LOG_DIR) != 0) {
         LOG(WARNING) << "MountForPath /data/log failed!";
         return false;
     }
-    if (access(UPDATER_LOG_DIR, 0) == 0) {
-        return true;
-    }
-    LOG(INFO) << "make log dir recursive.";
-    if (MkdirRecursive(UPDATER_LOG_DIR, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) != 0) {
-        LOG(ERROR) << "MkdirRecursive error!";
-        return false;
-    }
-    if (chown(UPDATER_PATH, USER_ROOT_AUTHORITY, GROUP_SYS_AUTHORITY) != EOK &&
-        chmod(UPDATER_PATH, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != EOK) {
-            LOG(ERROR) << "Chmod failed!";
-            return false;
-    }
-    return true;
-}
-
-bool CopyUpdaterLogs(const std::string &sLog, const std::string &dLog)
-{
-    if (!InitLogDir()) {
-        return false;
-    }
-    FILE* dFp = fopen(dLog.c_str(), "ab+");
-    if (dFp == nullptr) {
-        LOG(ERROR) << "open log failed";
-        return false;
-    }
-    FILE* sFp = fopen(sLog.c_str(), "r");
-    if (sFp == nullptr) {
-        LOG(ERROR) << "open log failed";
-        fclose(dFp);
-        return false;
-    }
-
-    char buf[MAX_LOG_BUF_SIZE];
-    size_t bytes;
-    while ((bytes = fread(buf, 1, sizeof(buf), sFp)) != 0) {
-        if (fwrite(buf, 1, bytes, dFp) <= 0) {
-            LOG(ERROR) << "fwrite failed";
-            fclose(sFp);
-            fclose(dFp);
+    if (access(UPDATER_LOG_DIR, 0) != 0) {
+        if (MkdirRecursive(UPDATER_LOG_DIR, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) != 0) {
+            LOG(ERROR) << "MkdirRecursive error!";
             return false;
         }
+        if (chown(UPDATER_PATH, USER_ROOT_AUTHORITY, GROUP_SYS_AUTHORITY) != EOK &&
+            chmod(UPDATER_PATH, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != EOK) {
+                LOG(ERROR) << "Chmod failed!";
+                return false;
+        }
     }
-    if (fseek(dFp, 0, SEEK_END) != 0) {
-        LOG(ERROR) << "fseek failed";
-        fclose(sFp);
-        fclose(dFp);
+
+    if (!CopyFile(sLog, dLog)) {
+        LOG(ERROR) << "copy log file failed.";
         return false;
     }
-    if (ftell(dFp) >= MAX_LOG_SIZE) {
+    if (GetFileSize(dLog) >= MAX_LOG_SIZE) {
         LOG(INFO) << "log size greater than 5M!";
         CompressLogs(dLog);
     }
-    sync();
-    fclose(sFp);
-    fclose(dFp);
     return true;
 }
 
