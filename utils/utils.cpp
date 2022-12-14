@@ -175,52 +175,60 @@ std::string ConvertSha256Hex(const uint8_t* shaDigest, size_t length)
     return haxSha256;
 }
 
+bool SetRebootMisc(const std::string& rebootTarget, const std::string &extData, struct UpdateMessage &msg)
+{
+    static const int32_t maxCommandSize = 16;
+    int result = 0;
+    if (rebootTarget == "updater" && strcmp(msg.command, "boot_updater") != 0) {
+        result = strcpy_s(msg.command, maxCommandSize, "boot_updater");
+    } else if (rebootTarget == "flashd" && strcmp(msg.command, "flashd") != 0) {
+        result = strcpy_s(msg.command, maxCommandSize, "boot_flash");
+    } else if (rebootTarget == "bootloader" && strcmp(msg.command, "boot_loader") != 0) {
+        result = strcpy_s(msg.command, maxCommandSize, "boot_loader");
+    }
+    if (result != EOK) {
+        LOG(ERROR) << "reboot set misc strcpy failed";
+        return false;
+    }
+    msg.command[maxCommandSize] = 0;
+    (void)memset_s(msg.update, MAX_UPDATE_SIZE, 0, MAX_UPDATE_SIZE);
+    if (extData.empty()) {
+        return true;
+    }
+    if (strcpy_s(msg.update, MAX_UPDATE_SIZE - 1, extData.c_str()) != EOK) {
+        LOG(ERROR) << "failed to copy update";
+        return false;
+    }
+    msg.update[MAX_UPDATE_SIZE - 1] = 0;
+    return true;
+}
+
 void DoReboot(const std::string& rebootTarget, const std::string &extData)
 {
     LOG(INFO) << ", rebootTarget: " << rebootTarget;
-    static const int32_t maxCommandSize = 16;
     LoadFstab();
-    struct UpdateMessage msg = {{0}};
+    struct UpdateMessage msg;
     if (rebootTarget.empty()) {
+        (void)memset_s(msg.command, MAX_COMMAND_SIZE, 0, MAX_COMMAND_SIZE);
         if (WriteUpdaterMiscMsg(msg) != true) {
             LOG(INFO) << "DoReboot: WriteUpdaterMessage empty error";
             return;
         }
-        sync();
     } else {
         if (!ReadUpdaterMiscMsg(msg)) {
             LOG(ERROR) << "DoReboot read misc failed";
             return;
         }
-        int result = 0;
-        if (rebootTarget == "updater" && strcmp(msg.command, "boot_updater") != 0) {
-            result = strcpy_s(msg.command, maxCommandSize, "boot_updater");
-            msg.command[maxCommandSize] = 0;
-        } else if (rebootTarget == "flashd" && strcmp(msg.command, "flashd") != 0) {
-            result = strcpy_s(msg.command, maxCommandSize, "boot_flash");
-            msg.command[maxCommandSize] = 0;
-        } else if (rebootTarget == "bootloader" && strcmp(msg.command, "boot_loader") != 0) {
-            result = strcpy_s(msg.command, maxCommandSize, "boot_loader");
-            msg.command[maxCommandSize] = 0;
-        }
-        if (result != EOK) {
-            LOG(ERROR) << "strcpy failed";
+        if (!SetRebootMisc(rebootTarget, extData, msg)) {
+            LOG(ERROR) << "DoReboot set misc failed";
             return;
-        }
-        (void)memset_s(msg.update, MAX_UPDATE_SIZE, 0, MAX_UPDATE_SIZE);
-        if (!extData.empty()) {
-            if (strcpy_s(msg.update, MAX_UPDATE_SIZE - 1, extData.c_str()) != EOK) {
-                LOG(ERROR) << "Failed to copy update";
-                return;
-            }
-            msg.update[MAX_UPDATE_SIZE - 1] = 0;
         }
         if (!WriteUpdaterMiscMsg(msg)) {
             LOG(INFO) << "DoReboot: WriteUpdaterMiscMsg empty error";
             return;
         }
-        sync();
     }
+    sync();
 #ifndef UPDATER_UT
     syscall(__NR_reboot, LINUX_REBOOT_MAGIC1, LINUX_REBOOT_MAGIC2, LINUX_REBOOT_CMD_RESTART2, rebootTarget.c_str());
     while (true) {
