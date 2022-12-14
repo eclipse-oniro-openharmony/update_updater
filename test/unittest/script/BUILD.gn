@@ -71,6 +71,8 @@ ohos_unittest("script_unittest") {
   ]
 
   deps = [
+    ":user_instruction",
+    ":user_instruction_invalid",
     "//base/update/updater/interfaces/kits/packages:libpackageExt",
     "//base/update/updater/services/log:libupdaterlog",
     "//base/update/updater/services/package:libupdaterpackage",
@@ -84,8 +86,6 @@ ohos_unittest("script_unittest") {
     "//third_party/openssl:libcrypto_shared",
     "//third_party/openssl:ssl_source",
     "//third_party/zlib:libz",
-    ":user_instruction",
-    ":user_instruction_invalid",
   ]
   configs = [ "$UPDATER_TEST_ROOT:utest_config" ]
   external_deps = [
