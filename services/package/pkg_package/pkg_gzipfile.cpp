@@ -61,13 +61,8 @@ constexpr int32_t BLOCK_SIZE = 8;
      | CRC16 |
      +---+---+
  */
-int32_t GZipFileEntry::EncodeHeader(PkgStreamPtr inStream, size_t startOffset, size_t &encodeLen)
+void GZipFileEntry::CheckParam(size_t &offset, PkgBuffer &buffer)
 {
-    PkgStreamPtr outStream = pkgFile_->GetPkgStream();
-    PKG_CHECK(outStream != nullptr, return PKG_INVALID_PARAM,
-        "Check outstream fail %s", fileInfo_.fileInfo.identity.c_str());
-    size_t offset = 0;
-    PkgBuffer buffer(BUFFER_SIZE);
     GZipHeader *header = (GZipHeader *)buffer.buffer;
     header->magic = GZIP_MAGIC;
     header->method = Z_DEFLATED;
@@ -101,10 +96,28 @@ int32_t GZipFileEntry::EncodeHeader(PkgStreamPtr inStream, size_t startOffset, s
         offset += 1;
     }
 #endif
+    return ;
+}
+int32_t GZipFileEntry::EncodeHeader(PkgStreamPtr inStream, size_t startOffset, size_t &encodeLen)
+{
+    PkgStreamPtr outStream = pkgFile_->GetPkgStream();
+    if (outStream == nullptr) {
+        PKG_LOGE("Check outstream fail %s", fileInfo_.fileInfo.identity.c_str());
+        return PKG_INVALID_PARAM;
+    }
+    size_t offset = 0;
+    PkgBuffer buffer(BUFFER_SIZE);
+
+    CheckParam(offset, buffer);
+
     fileInfo_.fileInfo.headerOffset = startOffset;
     fileInfo_.fileInfo.dataOffset = startOffset + offset;
     int32_t ret = outStream->Write(buffer, offset, startOffset);
-    PKG_CHECK(ret == PKG_SUCCESS, return ret, "Fail write header for %s", fileInfo_.fileInfo.identity.c_str());
+
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("Fail write header for %s", fileInfo_.fileInfo.identity.c_str());
+        return ret;
+    }
     encodeLen = offset;
     return PKG_SUCCESS;
 }
@@ -154,37 +167,64 @@ int32_t GZipFileEntry::Pack(PkgStreamPtr inStream, size_t startOffset, size_t &e
     return PKG_SUCCESS;
 }
 
+int32_t GZipFileEntry::DoUnpack(PkgAlgorithmContext context, PkgStreamPtr inStream)
+{
+    size_t readLen = 0;
+    fileInfo_.fileInfo.packedSize = context.packedSize;
+    PkgBuffer buffer(BLOCK_SIZE); // Read last 8 bytes at the end of package
+    int32_t ret = inStream->Read(buffer, context.packedSize + fileInfo_.fileInfo.dataOffset, BLOCK_SIZE, readLen);
+    // PKG_CHECK(ret == PKG_SUCCESS, return ret, "Fail to read file %s", inStream->GetFileName().c_str());
+    crc32_ = ReadLE32(buffer.buffer);
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("Fail to read file %s", inStream->GetFileName().c_str());
+        return ret;
+    }
+
+    fileInfo_.fileInfo.unpackedSize = ReadLE32(buffer.buffer + sizeof(uint32_t));
+    if (crc32_ != context.crc) {
+        PKG_LOGE("Crc error %u %u", crc32_, context.crc);
+        return ret;
+    }
+
+    if (fileInfo_.fileInfo.unpackedSize != context.unpackedSize) {
+        PKG_LOGE("Crc error %u %u", crc32_, context.crc);
+        return ret;
+    }
+    return PKG_SUCCESS;
+}
+
 int32_t GZipFileEntry::Unpack(PkgStreamPtr outStream)
 {
     PkgAlgorithm::PkgAlgorithmPtr algorithm = PkgAlgorithmFactory::GetAlgorithm(&fileInfo_.fileInfo);
-    PKG_CHECK(algorithm != nullptr, return PKG_INVALID_PARAM, "can not algorithm for %s",
-        fileInfo_.fileInfo.identity.c_str());
+    if (algorithm == nullptr) {
+        PKG_LOGE("can not algorithm for %s", fileInfo_.fileInfo.identity.c_str());
+        return PKG_INVALID_PARAM;
+    }
 
     PKG_LOGI("packedSize: %zu unpackedSize: %zu  offset header: %zu data: %zu", fileInfo_.fileInfo.packedSize,
         fileInfo_.fileInfo.unpackedSize, fileInfo_.fileInfo.headerOffset, fileInfo_.fileInfo.dataOffset);
 
     PkgStreamPtr inStream = pkgFile_->GetPkgStream();
-    PKG_CHECK(outStream != nullptr && inStream != nullptr, return PKG_INVALID_PARAM,
-        "outStream or inStream null for %s", fileInfo_.fileInfo.identity.c_str());
+    if (outStream == nullptr || inStream == nullptr) {
+        PKG_LOGE("outStream or inStream null for %s", fileInfo_.fileInfo.identity.c_str());
+        return PKG_INVALID_PARAM;
+    }
+
     PkgAlgorithmContext context = {
         {fileInfo_.fileInfo.dataOffset, 0},
         {fileInfo_.fileInfo.packedSize, fileInfo_.fileInfo.unpackedSize},
         0, fileInfo_.fileInfo.digestMethod
     };
     int32_t ret = algorithm->Unpack(inStream, outStream, context);
-    PKG_CHECK(ret == PKG_SUCCESS, return ret, "Fail Decompress for %s", fileInfo_.fileInfo.identity.c_str());
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("Fail Decompress for %s", fileInfo_.fileInfo.identity.c_str());
+        return ret;
+    }
 
-    // Get uncompressed size
-    size_t readLen = 0;
-    fileInfo_.fileInfo.packedSize = context.packedSize;
-    PkgBuffer buffer(BLOCK_SIZE); // Read last 8 bytes at the end of package
-    ret = inStream->Read(buffer, context.packedSize + fileInfo_.fileInfo.dataOffset, BLOCK_SIZE, readLen);
-    PKG_CHECK(ret == PKG_SUCCESS, return ret, "Fail to read file %s", inStream->GetFileName().c_str());
-    crc32_ = ReadLE32(buffer.buffer);
-    fileInfo_.fileInfo.unpackedSize = ReadLE32(buffer.buffer + sizeof(uint32_t));
-    PKG_CHECK(crc32_ == context.crc, return ret, "Crc error %u %u", crc32_, context.crc);
-    PKG_CHECK(fileInfo_.fileInfo.unpackedSize == context.unpackedSize,
-        return ret, "Crc error %u %u", crc32_, context.crc);
+    ret = DoUnpack(context, inStream);
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("unpack failed ret is %d", ret);
+    }
 
     PKG_LOGI("packedSize: %zu unpackedSize: %zu  offset header: %zu data: %zu", fileInfo_.fileInfo.packedSize,
         fileInfo_.fileInfo.unpackedSize, fileInfo_.fileInfo.headerOffset, fileInfo_.fileInfo.dataOffset);

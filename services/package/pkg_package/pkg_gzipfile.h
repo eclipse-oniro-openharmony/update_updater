@@ -41,11 +41,11 @@ public:
     GZipFileEntry(PkgFilePtr pkgFile, uint32_t nodeId) : ZipFileEntry(pkgFile, nodeId) {}
 
     ~GZipFileEntry() override {}
-
+    void CheckParam(size_t &offset, PkgBuffer &buffer);
     int32_t EncodeHeader(PkgStreamPtr inStream, size_t startOffset, size_t &encodeLen) override;
 
     int32_t Pack(PkgStreamPtr inStream, size_t startOffset, size_t &encodeLen) override;
-
+    int32_t DoUnpack(PkgAlgorithmContext context, PkgStreamPtr inStream);
     int32_t Unpack(PkgStreamPtr outStream) override;
 
     int32_t DecodeHeader(const PkgBuffer &buffer, size_t, size_t, size_t &decodeLen) override;
