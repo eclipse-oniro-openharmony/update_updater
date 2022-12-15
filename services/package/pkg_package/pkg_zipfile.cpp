@@ -397,7 +397,7 @@ int32_t ZipFileEntry::EncodeDataDescriptor(const PkgStreamPtr stream, size_t sta
 }
 
 int32_t ZipFileEntry::DoDecodeCentralDirEntry(PkgBuffer &buffer, size_t &decodeLen,
-    size_t &currLen, uint16_t &nameSize, uint16_t &extraSize)
+    size_t currLen, uint16_t nameSize, uint16_t extraSize)
 {
     fileInfo_.method = static_cast<int32_t>(ReadLE16(buffer.buffer + offsetof(CentralDirEntry, compressionMethod)));
     uint16_t modifiedTime = ReadLE16(buffer.buffer + offsetof(CentralDirEntry, modifiedTime));
