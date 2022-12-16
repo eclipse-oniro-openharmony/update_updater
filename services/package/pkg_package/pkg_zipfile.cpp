@@ -396,40 +396,9 @@ int32_t ZipFileEntry::EncodeDataDescriptor(const PkgStreamPtr stream, size_t sta
     return ret;
 }
 
-/*
-    0x0001     2 bytes    Tag for this "extra" block type
-    Size       2 bytes    Size of this "extra" block
-        Original
-    Size       8 bytes    Original uncompressed file size
-    Compressed
-    Size       8 bytes    Size of compressed data
-    Relative Header
-    Offset     8 bytes    Offset of local header record
-    Disk Start
-    Number     4 bytes    Number of the disk on which
-    this file starts
-*/
-int32_t ZipFileEntry::DecodeCentralDirEntry(PkgStreamPtr inStream, PkgBuffer &buffer, size_t currentPos,
-    size_t &decodeLen)
+int32_t ZipFileEntry::DoDecodeCentralDirEntry(PkgBuffer &buffer, size_t &decodeLen,
+    size_t currLen, uint16_t nameSize, uint16_t extraSize)
 {
-    size_t readLen = buffer.length;
-    PKG_CHECK(readLen >= sizeof(CentralDirEntry), return PKG_INVALID_PKG_FORMAT, "data not not enough %zu", readLen);
-    uint32_t signature = ReadLE32(buffer.buffer + offsetof(CentralDirEntry, signature));
-    PKG_CHECK(signature == CENTRAL_SIGNATURE, return PKG_INVALID_PKG_FORMAT,
-        "Check centralDir signature failed 0x%x", signature);
-    uint16_t nameSize = ReadLE16(buffer.buffer + offsetof(CentralDirEntry, nameSize));
-    uint16_t extraSize = ReadLE16(buffer.buffer + offsetof(CentralDirEntry, extraSize));
-    uint16_t commentSize = ReadLE16(buffer.buffer + offsetof(CentralDirEntry, commentSize));
-    size_t currLen = sizeof(CentralDirEntry) + nameSize + extraSize + commentSize;
-    PKG_CHECK(currentPos < (std::numeric_limits<size_t>::max() - currLen),
-        return PKG_INVALID_PKG_FORMAT, "check centralDir len failed");
-
-    size_t fileNameLength = nameSize;
-    PKG_CHECK(nameSize < MAX_FILE_NAME, fileNameLength = MAX_FILE_NAME - 1, "file name size too longer %d", nameSize);
-    PKG_CHECK(readLen >= sizeof(CentralDirEntry) + fileNameLength, return PKG_INVALID_PKG_FORMAT,
-        "data not not enough %zu", readLen);
-    fileInfo_.fileInfo.identity.assign(reinterpret_cast<char*>(buffer.buffer + sizeof(CentralDirEntry)),
-                                       fileNameLength);
     fileInfo_.method = static_cast<int32_t>(ReadLE16(buffer.buffer + offsetof(CentralDirEntry, compressionMethod)));
     uint16_t modifiedTime = ReadLE16(buffer.buffer + offsetof(CentralDirEntry, modifiedTime));
     uint16_t modifiedDate = ReadLE16(buffer.buffer + offsetof(CentralDirEntry, modifiedDate));
@@ -462,6 +431,54 @@ int32_t ZipFileEntry::DecodeCentralDirEntry(PkgStreamPtr inStream, PkgBuffer &bu
     }
 
     return PKG_SUCCESS;
+}
+
+/*
+    0x0001     2 bytes    Tag for this "extra" block type
+    Size       2 bytes    Size of this "extra" block
+        Original
+    Size       8 bytes    Original uncompressed file size
+    Compressed
+    Size       8 bytes    Size of compressed data
+    Relative Header
+    Offset     8 bytes    Offset of local header record
+    Disk Start
+    Number     4 bytes    Number of the disk on which
+    this file starts
+*/
+int32_t ZipFileEntry::DecodeCentralDirEntry(PkgStreamPtr inStream, PkgBuffer &buffer, size_t currentPos,
+    size_t &decodeLen)
+{
+    size_t readLen = buffer.length;
+    if (readLen < sizeof(CentralDirEntry)) {
+        PKG_LOGE("data not not enough %zu", readLen);
+        return PKG_INVALID_PKG_FORMAT;
+    }
+    uint32_t signature = ReadLE32(buffer.buffer + offsetof(CentralDirEntry, signature));
+    if (signature != CENTRAL_SIGNATURE) {
+        PKG_LOGE("Check centralDir signature failed 0x%x", signature);
+        return PKG_INVALID_PKG_FORMAT;
+    }
+    uint16_t nameSize = ReadLE16(buffer.buffer + offsetof(CentralDirEntry, nameSize));
+    uint16_t extraSize = ReadLE16(buffer.buffer + offsetof(CentralDirEntry, extraSize));
+    uint16_t commentSize = ReadLE16(buffer.buffer + offsetof(CentralDirEntry, commentSize));
+    size_t currLen = sizeof(CentralDirEntry) + nameSize + extraSize + commentSize;
+    if (currentPos >= (std::numeric_limits<size_t>::max() - currLen)) {
+        PKG_LOGE("check centralDir len failed");
+        return PKG_INVALID_PKG_FORMAT;
+    }
+    size_t fileNameLength = nameSize;
+    if (nameSize >= MAX_FILE_NAME) {
+        PKG_LOGE("file name size too longer %d", nameSize);
+        fileNameLength = MAX_FILE_NAME - 1;
+    }
+    if (readLen < sizeof(CentralDirEntry) + fileNameLength) {
+        PKG_LOGE("data not not enough %zu", readLen);
+        return PKG_INVALID_PKG_FORMAT;
+    }
+    fileInfo_.fileInfo.identity.assign(reinterpret_cast<char*>(buffer.buffer + sizeof(CentralDirEntry)),
+                                       fileNameLength);
+    return DoDecodeCentralDirEntry(buffer, decodeLen, currLen, nameSize, extraSize);
 }
 
 int32_t ZipFileEntry::DecodeLocalFileHeaderCheck(PkgStreamPtr inStream, const PkgBuffer &data,
@@ -515,21 +532,32 @@ int32_t ZipFileEntry::DecodeLocalFileHeader(PkgStreamPtr inStream, const PkgBuff
 {
     size_t readLen = 0;
     int32_t ret = inStream->Read(data, currentPos, data.length, readLen);
-    PKG_CHECK(ret == PKG_SUCCESS, return ret, "parse entry read centralDir failed");
-    PKG_CHECK(readLen >= sizeof(LocalFileHeader), return PKG_INVALID_PKG_FORMAT, "data not not enough %zu", readLen);
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("parse entry read centralDir failed");
+        return ret;
+    }
+    if (readLen < sizeof(LocalFileHeader)) {
+        PKG_LOGE("data not not enough %zu", readLen);
+        return PKG_INVALID_PKG_FORMAT;
+    }
     uint32_t signature = ReadLE32(data.buffer + offsetof(LocalFileHeader, signature));
-    PKG_CHECK(signature == LOCAL_HEADER_SIGNATURE,
-        return PKG_INVALID_PKG_FORMAT, "check localHeader signature failed");
+    if (signature != LOCAL_HEADER_SIGNATURE) {
+        PKG_LOGE("check localHeader signature failed");
+        return PKG_INVALID_PKG_FORMAT;
+    }
 
     uint16_t nameSize = ReadLE16(data.buffer + offsetof(LocalFileHeader, nameSize));
     uint16_t extraSize = ReadLE16(data.buffer + offsetof(LocalFileHeader, extraSize));
     size_t currLen = sizeof(LocalFileHeader) + nameSize + extraSize;
-    PKG_CHECK(currentPos < (std::numeric_limits<size_t>::max() - currLen),
-        return PKG_INVALID_PKG_FORMAT, "check centralDir len failed");
-    size_t fileNameLength = nameSize;
-    PKG_CHECK(nameSize < MAX_FILE_NAME, fileNameLength = MAX_FILE_NAME - 1, "file name size too longer %d", nameSize);
-    PKG_CHECK(readLen >= sizeof(LocalFileHeader) + fileNameLength,
-        return PKG_INVALID_PKG_FORMAT, "data not not enough %zu", readLen);
+    if (currentPos >= (std::numeric_limits<size_t>::max() - currLen)) {
+        PKG_LOGE("check centralDir len failed");
+        return PKG_INVALID_PKG_FORMAT;
+    }
+    size_t fileNameLength = (nameSize >= MAX_FILE_NAME) ? MAX_FILE_NAME - 1 : nameSize;
+    if (readLen < sizeof(LocalFileHeader) + fileNameLength) {
+        PKG_LOGE("data not not enough %zu", readLen);
+        return PKG_INVALID_PKG_FORMAT;
+    }
     std::string fileName(reinterpret_cast<char*>(data.buffer + sizeof(LocalFileHeader)), fileNameLength);
     uint16_t compressionMethod = ReadLE16(data.buffer + offsetof(LocalFileHeader, compressionMethod));
     fileInfo_.method = static_cast<int32_t>(compressionMethod);
@@ -538,8 +566,10 @@ int32_t ZipFileEntry::DecodeLocalFileHeader(PkgStreamPtr inStream, const PkgBuff
     fileInfo_.windowBits = -MAX_WBITS;
     fileInfo_.memLevel = DEF_MEM_LEVEL;
     fileInfo_.strategy = Z_DEFAULT_STRATEGY;
-    PKG_CHECK(!fileInfo_.fileInfo.identity.compare(fileName), return PKG_INVALID_PKG_FORMAT,
-        "check file name %s %s failed", fileInfo_.fileInfo.identity.c_str(), fileName.c_str());
+    if (fileInfo_.fileInfo.identity.compare(fileName)) {
+        PKG_LOGE("check file name %s %s failed", fileInfo_.fileInfo.identity.c_str(), fileName.c_str());
+        return PKG_INVALID_PKG_FORMAT;
+    }
     fileName_.assign(fileInfo_.fileInfo.identity);
     decodeLen = currLen;
 
