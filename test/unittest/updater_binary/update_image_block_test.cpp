@@ -47,82 +47,37 @@ using namespace Hpackage;
 namespace UpdaterUt {
 void UpdateImageBlockTest::SetUp()
 {
-    unsigned long mountFlag = MS_REMOUNT;
-    std::string tmpPath = "/tmp";
-    // mount rootfs to read-write.
-    std::string rootSource = "/dev/root";
-    if (mount(rootSource.c_str(), "/", "ext4", mountFlag, nullptr) != 0) {
-        std::cout << "Cannot re-mount rootfs\n";
-    }
-    auto ret = mkdir(tmpPath.c_str(), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
-    if (ret != 0) {
-        std::cout << "Cannot create \"/tmp\" directory: " << errno << "\n";
-    }
+    cout << "Updater Unit UpdateBlockUnitTest Begin!" << endl;
 
-    // Load specific fstab for testing.
     LoadSpecificFstab("/data/updater/applypatch/etc/fstab.ut.updater");
-    cout << "SetUpTestCase" << endl;
 }
 
 void UpdateImageBlockTest::TearDown()
 {
-    cout << "TearDownTestCase" << endl;
+    cout << "Updater Unit UpdateBlockUnitTest End!" << endl;
 }
 
+/* ota update, upd to base */
 HWTEST_F(UpdateImageBlockTest, update_image_block_test_001, TestSize.Level1)
 {
-    LoadSpecificFstab("/data/updater/applypatch/etc/fstab.ut.updater");
-    string devPath = GetBlockDeviceByMountPoint("/vendortest1");
-    size_t bufferSize = 4096;
-    std::vector<uint8_t> buffer(bufferSize, 0);
-    auto ret = Store::WriteDataToStore("/", devPath, buffer, bufferSize);
-    string packagePath = "/data/updater/updater/updater_diff_1.zip";
-    PkgManager::PkgManagerPtr pkgManager = PkgManager::GetPackageInstance();
-    std::vector<std::string> components;
-    ret = pkgManager->LoadPackage(packagePath, GetTestCertName(), components);
-    printf("load package's ret : %d\n", ret);
-    UpdaterEnv* env = new UpdaterEnv(pkgManager, nullptr, false); // retry
-    ScriptManager* scriptManager = ScriptManager::GetScriptManager(env);
-    for (int32_t i = 0; i < ScriptManager::MAX_PRIORITY; i++) {
-        ret = scriptManager->ExecuteScript(i);
-        printf(" execute ret : %d\n", ret);
-    }
-    delete env;
-    ScriptManager::ReleaseScriptManager();
-    PkgManager::ReleasePackageInstance(pkgManager);
+    const string packagePath = "/data/updater/updater/updater_write_miscblock_img.zip";
+    int32_t ret = ProcessUpdater(false, STDOUT_FILENO, packagePath, GetTestCertName());
+    EXPECT_EQ(ret, 0);
 }
 
+/* block diff update, hash check ok */
 HWTEST_F(UpdateImageBlockTest, update_image_block_test_002, TestSize.Level1)
 {
-    LoadSpecificFstab("/data/updater/applypatch/etc/fstab.ut.updater");
-    string devPath = GetBlockDeviceByMountPoint("/vendortest");
-    size_t bufferSize = 4096;
-    printf("dev path is %s\n", devPath.c_str());
-    std::vector<uint8_t> buffer(bufferSize, 0);
-    auto ret = Store::WriteDataToStore("/", devPath, buffer, bufferSize);
-    printf("WriteDataToStore's ret: %d\n", ret);
+    const string packagePath = "/data/updater/updater/updater_write_diff_miscblock_img.zip";
+    int32_t ret = ProcessUpdater(false, STDOUT_FILENO, packagePath, GetTestCertName());
+    EXPECT_EQ(ret, 0);
+}
 
-    string oldName = "/data/updater/updater/retry_flag";
-    string newName = "/data/updater/update_tmp/retry_flag";
-    string newDir = "/data/updater/update_tmp";
-    ret = Store::CreateNewSpace(newDir, false);
-    printf("CreateNewSpace's ret: %d\n", ret);
-    ret = rename(oldName.c_str(), newName.c_str());
-    printf("rename's ret : %d\n", ret);
-
-    string packagePath = "/data/updater/updater/updater_diff_2.zip";
-    PkgManager::PkgManagerPtr pkgManager = PkgManager::GetPackageInstance();
-    std::vector<std::string> components;
-    ret = pkgManager->LoadPackage(packagePath, GetTestCertName(), components);
-    printf("load package's ret : %d\n", ret);
-    UpdaterEnv* env = new UpdaterEnv(pkgManager, nullptr, true);
-    ScriptManager* scriptManager = ScriptManager::GetScriptManager(env);
-    for (int32_t i = 0; i < ScriptManager::MAX_PRIORITY; i++) {
-        ret = scriptManager->ExecuteScript(i);
-        printf(" execute ret : %d\n", ret);
-    }
-    delete env;
-    ScriptManager::ReleaseScriptManager();
-    PkgManager::ReleasePackageInstance(pkgManager);
+/* block diff update, hash check fail */
+HWTEST_F(UpdateImageBlockTest, update_image_block_test_003, TestSize.Level1)
+{
+    const string packagePath = "/data/updater/updater/updater_write_diff_miscblock_img.zip";
+    int32_t ret = ProcessUpdater(false, STDOUT_FILENO, packagePath, GetTestCertName());
+    EXPECT_EQ(ret, USCRIPT_INVALID_PARAM);
 }
 }

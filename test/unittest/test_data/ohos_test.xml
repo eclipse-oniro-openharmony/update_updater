@@ -214,11 +214,11 @@
     <target name="binary_unittest">
         <preparer>
             <option name="push" value="applypatch/etc/fstab.ut.updater -> /data/updater/applypatch/etc" src="res"/>
-            <option name="push" value="updater/retry_flag -> /data/updater/updater" src="res"/>
-            <option name="push" value="updater/updater_diff_1.zip -> /data/updater/updater" src="res"/>
-            <option name="push" value="updater/updater_diff_2.zip -> /data/updater/updater" src="res"/>
-            <option name="push" value="updater/updater_write_misc_img.zip -> /data/updater/updater" src="res"/>
-            <option name="push" value="updater/updater_write_diff_misc_img.zip -> /data/updater/updater" src="res"/>
+            <option name="push" value="binary/updater_write_misc_img.zip -> /data/updater/updater" src="res"/>
+            <option name="push" value="binary/updater_write_diff_misc_img.zip -> /data/updater/updater" src="res"/>
+            <option name="push" value="binary/updater_write_miscblock_img.zip -> /data/updater/updater" src="res"/>
+            <option name="push" value="binary/updater_write_diff_miscblock_img.zip -> /data/updater/updater" src="res"/>
+            <option name="push" value="binary/misc_block -> /data/updater/updater" src="res"/>
             <option name="push" value="src/signing_cert.crt -> /data/updater/src" src="res"/>
         </preparer>
     </target>
