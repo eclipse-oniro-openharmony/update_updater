@@ -382,7 +382,7 @@ public:
     }
 
     int CheckDataIntegrityLz4(Hpackage::Lz4FileInfo &lz4Info, size_t fileSize,
-        PkgManager::StreamPtr &stream, void *mappedData, std::vector<uint8_t> &digest)
+        PkgManager::StreamPtr stream, void *mappedData, std::vector<uint8_t> &digest)
     {
         size_t addrOffset = 4;
         TestDecompressLz4plus(lz4Info);
@@ -492,7 +492,7 @@ public:
     }
 
     int CheckDataIntegrityGzip(Hpackage::ZipFileInfo &zipInfo, size_t fileSize,
-        PkgManager::StreamPtr &stream, void *mappedData, std::vector<uint8_t> &digest)
+        PkgManager::StreamPtr stream, void *mappedData, std::vector<uint8_t> &digest)
     {
         pkgManager_ = static_cast<PkgManagerImpl*>(PkgManager::GetPackageInstance());
         EXPECT_NE(pkgManager_, nullptr);
@@ -515,6 +515,7 @@ public:
             zipInfo.fileInfo.packedSize, zipInfo.fileInfo.unpackedSize);
         return 0;
     }
+
     int TestDecompressGzip(Hpackage::ZipFileInfo &zipInfo, std::vector<uint8_t> &uncompressedData,
         std::vector<uint8_t> &digest)
     {
