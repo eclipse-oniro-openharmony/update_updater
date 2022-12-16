@@ -24,6 +24,19 @@ ohos_unittest("flashd_unittest") {
       "//base/update/updater/test/unittest/test_data/ohos_test.xml"
   module_out_path = MODULE_OUTPUT_PATH
   sources = [
+    "${HDC_PATH}/common/async_cmd.cpp",
+    "${HDC_PATH}/common/auth.cpp",
+    "${HDC_PATH}/common/base.cpp",
+    "${HDC_PATH}/common/channel.cpp",
+    "${HDC_PATH}/common/debug.cpp",
+    "${HDC_PATH}/common/file.cpp",
+    "${HDC_PATH}/common/file_descriptor.cpp",
+    "${HDC_PATH}/common/forward.cpp",
+    "${HDC_PATH}/common/session.cpp",
+    "${HDC_PATH}/common/task.cpp",
+    "${HDC_PATH}/common/tcp.cpp",
+    "${HDC_PATH}/common/transfer.cpp",
+    "${HDC_PATH}/common/usb.cpp",
     "//base/update/updater/services/flashd/daemon/commander.cpp",
     "//base/update/updater/services/flashd/daemon/commander_factory.cpp",
     "//base/update/updater/services/flashd/daemon/daemon_updater.cpp",
