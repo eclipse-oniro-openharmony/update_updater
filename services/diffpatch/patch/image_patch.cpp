@@ -198,7 +198,7 @@ int32_t ZipImagePatch::ReadHeader(const PatchParam &param, PatchHeader &header, 
 
 std::unique_ptr<Hpackage::FileInfo> ZipImagePatch::GetFileInfo() const
 {
-    Hpackage::ZipFileInfo *fileInfo = new ZipFileInfo;
+    Hpackage::ZipFileInfo *fileInfo = new(std::nothrow) ZipFileInfo;
     if (fileInfo == nullptr) {
         PATCH_LOGE("Failed to new file info");
         return nullptr;
@@ -252,7 +252,7 @@ int32_t Lz4ImagePatch::ReadHeader(const PatchParam &param, PatchHeader &header, 
 
 std::unique_ptr<Hpackage::FileInfo> Lz4ImagePatch::GetFileInfo() const
 {
-    Hpackage::Lz4FileInfo *fileInfo = new Lz4FileInfo;
+    Hpackage::Lz4FileInfo *fileInfo = new(std::nothrow) Lz4FileInfo;
     if (fileInfo == nullptr) {
         PATCH_LOGE("Failed to new file info");
         return nullptr;
