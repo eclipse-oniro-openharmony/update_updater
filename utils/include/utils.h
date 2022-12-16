@@ -63,7 +63,7 @@ std::string GetLocalBoardId();
 bool CopyUpdaterLogs(const std::string &sLog, const std::string &dLog);
 void CompressLogs(const std::string &name);
 bool CheckDumpResult();
-void WriteDumpResult(const std::string &result, const std::string &pkgPath);
+void WriteDumpResult(const std::string &result);
 bool PathToRealPath(const std::string &path, std::string &realPath);
 void UsSleep(int usec);
 bool IsUpdaterMode();
