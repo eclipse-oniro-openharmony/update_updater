@@ -454,7 +454,7 @@ bool CheckDumpResult()
     return false;
 }
 
-void WriteDumpResult(const std::string &result, const std::string &pkgPath)
+void WriteDumpResult(const std::string &result)
 {
     if (access(UPDATER_PATH, 0) != 0) {
         if (MkdirRecursive(UPDATER_PATH, 0755) != 0) { // 0755: -rwxr-xr-x
@@ -464,29 +464,21 @@ void WriteDumpResult(const std::string &result, const std::string &pkgPath)
     }
     LOG(INFO) << "WriteDumpResult: " << result;
     const std::string resultPath = std::string(UPDATER_PATH) + "/" + std::string(UPDATER_RESULT_FILE);
-    std::string writeBuffer {};
-    std::ifstream fin {resultPath};
-    if (!fin.is_open()) {
-        LOG(ERROR) << "open file error" << resultPath;
+    FILE *fp = fopen(resultPath.c_str(), "w+");
+    if (fp == nullptr) {
+        LOG(ERROR) << "open result file failed";
         return;
     }
-    std::string buf;
-    while (std::getline(fin, buf)) {
-        if (buf.find(pkgPath) == std::string::npos) {
-            writeBuffer += buf + "\n";
-            continue;
-        }
-        writeBuffer += buf + " : " + result + "\n";
+    char buf[MAX_RESULT_BUFF_SIZE] = "Pass\n";
+    if (sprintf_s(buf, MAX_RESULT_BUFF_SIZE - 1, "%s\n", result.c_str()) < 0) {
+        LOG(WARNING) << "sprintf status fialed";
     }
-    if (writeBuffer != "") {
-        writeBuffer.pop_back();
+    if (fwrite(buf, 1, strlen(buf) + 1, fp) <= 0) {
+        LOG(WARNING) << "write result file failed, err:" << errno;
     }
-    std::ofstream fout {resultPath};
-    if (fout.is_open()) {
-        LOG(ERROR) << "open file error" << resultPath;
-        return;
+    if (fclose(fp) != 0) {
+        LOG(WARNING) << "close result file failed";
     }
-    fout << writeBuffer;
 
     (void)chown(resultPath.c_str(), USER_ROOT_AUTHORITY, GROUP_UPDATE_AUTHORITY);
     (void)chmod(resultPath.c_str(), 0640); // 0640: -rw-r-----

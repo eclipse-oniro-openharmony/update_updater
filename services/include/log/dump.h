@@ -35,18 +35,6 @@ class DumpHelper {
 public:
     virtual void RecordDump(const std::string &str) = 0;
     virtual ~DumpHelper() {}
-
-    static void SetPackage(const std::string &path)
-    {
-        pkgPath_ = path;
-    }
-
-    static std::string GetPackage()
-    {
-        return pkgPath_;
-    }
-private:
-    static std::string pkgPath_;
 };
 
 class DumpHelperLog : public DumpHelper {
