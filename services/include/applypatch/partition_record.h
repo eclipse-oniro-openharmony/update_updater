@@ -60,6 +60,8 @@ public:
     bool ClearRecordPartitionOffset();
 
 private:
+    bool RecordPartitionSetOffset(int fd);
+    bool RecordPartitionSetInfo(const std::string &partitionName, bool updated, int fd);
     PartitionRecord()
     {
         offset_ = 0;

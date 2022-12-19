@@ -17,7 +17,6 @@
 #include <cstdio>
 #include <sstream>
 #include <string>
-#include "cJSON.h"
 #include "log/log.h"
 #include "updater/updater_const.h"
 #include "utils.h"
@@ -29,49 +28,82 @@ using namespace Updater;
 constexpr int MIN_PARTITIONS_NUM = 2;
 constexpr int MAX_PARTITIONS_NUM = 20;
 namespace Updater {
+bool UpdatePartitions::SetPartitionInfo(const cJSON* partitions, int idx, struct Partition* myPartition) const
+{
+    cJSON* thisPartition = cJSON_GetArrayItem(partitions, idx);
+    if (thisPartition == nullptr) {
+        LOG(ERROR) << "Error get thisPartion: " << idx;
+        return false;
+    }
+    cJSON* item = cJSON_GetObjectItem(thisPartition, "start");
+    if (item == nullptr) {
+        LOG(ERROR) << "Error get start";
+        return false;
+    }
+    myPartition->start = static_cast<size_t>(item->valueint);
+
+    item = cJSON_GetObjectItem(thisPartition, "length");
+    if (item == nullptr) {
+        LOG(ERROR) << "Error get length";
+        return false;
+    }
+    myPartition->length = static_cast<size_t>(item->valueint);
+    myPartition->partNum = 0;
+    myPartition->devName = "mmcblk0px";
+
+    item = cJSON_GetObjectItem(thisPartition, "partName");
+    if (item == nullptr) {
+        LOG(ERROR) << "Error get partName";
+        return false;
+    }
+    myPartition->partName = (item->valuestring);
+
+    item = cJSON_GetObjectItem(thisPartition, "fsType");
+    if (item == nullptr) {
+        LOG(ERROR) << "Error get fsType";
+        return false;
+    }
+    myPartition->fsType = (item->valuestring);
+
+    LOG(INFO) << "<start> <length> <devname> <partname> <fstype>";
+    LOG(INFO) << myPartition->start << " " << myPartition->length << " " << myPartition->devName << " " <<
+        myPartition->partName << " " << myPartition->fsType;
+    return true;
+}
+
 int UpdatePartitions::ParsePartitionInfo(const std::string &partitionInfo, PartitonList &newPartList) const
 {
     cJSON* root = cJSON_Parse(partitionInfo.c_str());
-    UPDATER_ERROR_CHECK(root != nullptr, "Error get root", return -1);
+    if (root == nullptr) {
+        LOG(ERROR) << "Error get root";
+        return -1;
+    }
     cJSON* partitions = cJSON_GetObjectItem(root, "Partition");
-    UPDATER_ERROR_CHECK(partitions != nullptr, "Error get Partitions", cJSON_Delete(root); return -1);
+    if (partitions == nullptr) {
+        LOG(ERROR) << "Error get Partitions";
+        cJSON_Delete(root);
+        return -1;
+    }
     int number = cJSON_GetArraySize(partitions);
-    UPDATER_ERROR_CHECK(number > MIN_PARTITIONS_NUM, "Error partitions number < 3", cJSON_Delete(root); return -1);
-    UPDATER_ERROR_CHECK(number < MAX_PARTITIONS_NUM, "Error partitions number > 20", cJSON_Delete(root); return -1);
+    if (number <= MIN_PARTITIONS_NUM || number >= MAX_PARTITIONS_NUM) {
+        LOG(ERROR) << "Error partitions number: " << number;
+        cJSON_Delete(root);
+        return -1;
+    }
     LOG(INFO) << "Partitions numbers " << number;
-    int i = 0;
-    for (i = 0; i < number; i++) {
+
+    for (int i = 0; i < number; i++) {
         struct Partition* myPartition = static_cast<struct Partition*>(calloc(1, sizeof(struct Partition)));
         if (!myPartition) {
             LOG(ERROR) << "Allocate memory for partition failed: " << errno;
             cJSON_Delete(root);
             return 0;
         }
-        cJSON* thisPartition = cJSON_GetArrayItem(partitions, i);
-        UPDATER_ERROR_CHECK(thisPartition != nullptr, "Error get thisPartion", free(myPartition);
-            myPartition = nullptr; break);
-
-        cJSON* item = cJSON_GetObjectItem(thisPartition, "start");
-        UPDATER_ERROR_CHECK(item != nullptr, "Error get start", free(myPartition); myPartition = nullptr; break);
-        myPartition->start = static_cast<size_t>(item->valueint);
-
-        item = cJSON_GetObjectItem(thisPartition, "length");
-        UPDATER_ERROR_CHECK(item != nullptr, "Error get length", free(myPartition); myPartition = nullptr; break);
-        myPartition->length = static_cast<size_t>(item->valueint);
-        myPartition->partNum = 0;
-        myPartition->devName = "mmcblk0px";
-
-        item = cJSON_GetObjectItem(thisPartition, "partName");
-        UPDATER_ERROR_CHECK(item != nullptr, "Error get partName", free(myPartition); myPartition = nullptr; break);
-        myPartition->partName = (item->valuestring);
-
-        item = cJSON_GetObjectItem(thisPartition, "fsType");
-        UPDATER_ERROR_CHECK(item != nullptr, "Error get fsType", free(myPartition); myPartition = nullptr; break);
-        myPartition->fsType = (item->valuestring);
-
-        LOG(INFO) << "<start> <length> <devname> <partname> <fstype>";
-        LOG(INFO) << myPartition->start << " " << myPartition->length << " " << myPartition->devName << " " <<
-            myPartition->partName << " " << myPartition->fsType;
+        if (!SetPartitionInfo(partitions, i, myPartition)) {
+            free(myPartition);
+            myPartition = nullptr;
+            break;
+        }
         newPartList.push_back(myPartition);
     }
     cJSON_Delete(root);
@@ -95,39 +127,30 @@ int UpdatePartitions::DoNewPartitions(PartitonList &newPartList)
     return ret;
 }
 
-int32_t UpdatePartitions::Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context)
+int UpdatePartitions::SetNewPartition(const std::string &filePath, const FileInfo *info, Uscript::UScriptEnv &env)
 {
-    LOG(INFO) << "enter UpdatePartitions::Execute ";
-    if (context.GetParamCount() != 1) {
-        LOG(ERROR) << "Invalid UpdatePartitions::Execute param";
-        return USCRIPT_INVALID_PARAM;
-    }
-    std::string filePath;
-    int32_t ret = context.GetParam(0, filePath);
-    if (ret != USCRIPT_SUCCESS) {
-        LOG(ERROR) << "Fail to get filePath";
-        return USCRIPT_INVALID_PARAM;
-    } else {
-        LOG(INFO) << "UpdatePartitions::Execute filePath " << filePath;
+    std::string tmpPath = "/data/updater" + filePath;
+    char realPath[PATH_MAX + 1] = {};
+    if (realpath(tmpPath.c_str(), realPath) == nullptr) {
+        LOG(ERROR) << "Error to create: " << tmpPath;
+        return USCRIPT_ERROR_EXECUTE;
     }
     Hpackage::PkgManager::StreamPtr outStream = nullptr;
-    const FileInfo *info = env.GetPkgManager()->GetFileInfo(filePath);
-    UPDATER_ERROR_CHECK(info != nullptr, "Error to get file info", return USCRIPT_ERROR_EXECUTE);
-    std::string tmpPath = "/data/updater";
-    std::string tmpPath1 = tmpPath + filePath;
-    char realPath[PATH_MAX + 1] = {};
-    UPDATER_ERROR_CHECK(realpath(tmpPath1.c_str(), realPath) != nullptr,
-        "Error to create tmpPath1", return USCRIPT_ERROR_EXECUTE);
-    ret = env.GetPkgManager()->CreatePkgStream(outStream,
-        tmpPath1, info->unpackedSize, PkgStream::PkgStreamType_Write);
-    UPDATER_ERROR_CHECK(ret == USCRIPT_SUCCESS && outStream != nullptr, "Error to create output stream",
-        return USCRIPT_ERROR_EXECUTE);
+    int ret = env.GetPkgManager()->CreatePkgStream(outStream,
+        tmpPath, info->unpackedSize, PkgStream::PkgStreamType_Write);
+    if (ret != USCRIPT_SUCCESS || outStream == nullptr) {
+        LOG(ERROR) << "Error to create output stream";
+        return USCRIPT_ERROR_EXECUTE;
+    }
     ret = env.GetPkgManager()->ExtractFile(filePath, outStream);
-    UPDATER_ERROR_CHECK(ret == USCRIPT_SUCCESS, "Error to extract file",
-        env.GetPkgManager()->ClosePkgStream(outStream); return USCRIPT_ERROR_EXECUTE);
+    if (ret != USCRIPT_SUCCESS) {
+        LOG(ERROR) << "Error to extract file";
+        env.GetPkgManager()->ClosePkgStream(outStream);
+        return USCRIPT_ERROR_EXECUTE;
+    }
     FILE *fp = fopen(realPath, "rb");
     if (!fp) {
-        LOG(ERROR) << "Open " << tmpPath1 << " failed: " << errno;
+        LOG(ERROR) << "Open " << tmpPath << " failed: " << errno;
         env.GetPkgManager()->ClosePkgStream(outStream);
         return USCRIPT_ERROR_EXECUTE;
     }
@@ -152,5 +175,28 @@ int32_t UpdatePartitions::Execute(Uscript::UScriptEnv &env, Uscript::UScriptCont
     DoNewPartitions(newPartList);
     env.GetPkgManager()->ClosePkgStream(outStream);
     return USCRIPT_SUCCESS;
+}
+
+int32_t UpdatePartitions::Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context)
+{
+    LOG(INFO) << "enter UpdatePartitions::Execute ";
+    if (context.GetParamCount() != 1) {
+        LOG(ERROR) << "Invalid UpdatePartitions::Execute param";
+        return USCRIPT_INVALID_PARAM;
+    }
+    std::string filePath;
+    int32_t ret = context.GetParam(0, filePath);
+    if (ret != USCRIPT_SUCCESS) {
+        LOG(ERROR) << "Fail to get filePath";
+        return USCRIPT_INVALID_PARAM;
+    } else {
+        LOG(INFO) << "UpdatePartitions::Execute filePath " << filePath;
+    }
+    const FileInfo *info = env.GetPkgManager()->GetFileInfo(filePath);
+    if (info == nullptr) {
+        LOG(ERROR) << "Error to get file info";
+        return USCRIPT_ERROR_EXECUTE;
+    }
+    return SetNewPartition(filePath, info, env);
 }
 } // namespace Updater

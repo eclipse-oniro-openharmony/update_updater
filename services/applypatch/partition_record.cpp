@@ -69,6 +69,49 @@ bool PartitionRecord::IsPartitionUpdated(const std::string &partitionName)
     return false;
 }
 
+bool PartitionRecord::RecordPartitionSetOffset(int fd)
+{
+    off_t newOffset = 0;
+    if (lseek(fd, PARTITION_RECORD_OFFSET, 0) < 0) {
+        LOG(ERROR) << "PartitionRecord: Seek misc to record offset failed" << " : " << strerror(errno);
+        return false;
+    }
+    if (read(fd, &newOffset, sizeof(off_t)) != static_cast<ssize_t>(sizeof(off_t))) {
+        LOG(ERROR) << "PartitionRecord: Read offset failed" << " : " << strerror(errno);
+        return false;
+    }
+    offset_ = newOffset;
+    if (lseek(fd, PARTITION_RECORD_START + offset_, 0) < 0) {
+        LOG(ERROR) << "PartitionRecord: Seek misc to specific offset failed" << " : " << strerror(errno);
+        return false;
+    }
+    return true;
+}
+
+bool PartitionRecord::RecordPartitionSetInfo(const std::string &partitionName, bool updated, int fd)
+{
+    (void)memset_s(&info_, sizeof(info_), 0, sizeof(info_));
+    if (strncpy_s(info_.partitionName, PARTITION_NAME_LEN - 1, partitionName.c_str(), PARTITION_NAME_LEN - 1) != EOK) {
+        LOG(ERROR) << "PartitionRecord: strncpy_s failed" << " : " << strerror(errno);
+        return false;
+    }
+    info_.updated = updated;
+    if (write(fd, &info_, sizeof(PartitionRecordInfo)) != static_cast<ssize_t>(sizeof(PartitionRecordInfo))) {
+        LOG(ERROR) << "PartitionRecord: write failed" << " : " << strerror(errno);
+        return false;
+    }
+    offset_ += static_cast<off_t>(sizeof(PartitionRecordInfo));
+    if (lseek(fd, PARTITION_RECORD_OFFSET, 0) < 0) {
+        LOG(ERROR) << "PartitionRecord: Seek misc to record offset failed" << " : " << strerror(errno);
+        return false;
+    }
+    if (write(fd, &offset_, sizeof(off_t)) != static_cast<ssize_t>(sizeof(off_t))) {
+        LOG(ERROR) << "PartitionRecord: write  misc to record offset failed" << " : " << strerror(errno);
+        return false;
+    }
+    return true;
+}
+
 bool PartitionRecord::RecordPartitionUpdateStatus(const std::string &partitionName, bool updated)
 {
     auto miscBlockDevice = GetMiscPartitionPath();
@@ -84,28 +127,15 @@ bool PartitionRecord::RecordPartitionUpdateStatus(const std::string &partitionNa
             LOG(ERROR) << "PartitionRecord: Open misc to recording partition failed" << " : " << strerror(errno);
             return false;
         }
-        off_t newOffset = 0;
-        UPDATER_CHECK_FILE_OP(lseek(fd, PARTITION_RECORD_OFFSET, SEEK_SET) >= 0,
-                "PartitionRecord: Seek misc to record offset failed", fd, return false);
-        UPDATER_CHECK_FILE_OP(read(fd, &newOffset, sizeof(off_t)) == static_cast<ssize_t>(sizeof(off_t)),
-            "PartitionRecord: Read offset failed", fd, return false);
-
-        offset_ = newOffset;
-        UPDATER_CHECK_FILE_OP(lseek(fd, PARTITION_RECORD_START + offset_, SEEK_SET) >= 0,
-            "PartitionRecord: Seek misc to specific offset failed", fd, return false);
+        if (!RecordPartitionSetOffset(fd)) {
+            close(fd);
+            return false;
+        }
         if (offset_ + static_cast<off_t>(sizeof(PartitionRecordInfo)) < PARTITION_UPDATER_RECORD_SIZE) {
-            UPDATER_CHECK_FILE_OP(memset_s(&info_, sizeof(info_), 0, sizeof(info_)) == 0,
-                "PartitionRecord: clear partition info failed", fd, return false);
-            UPDATER_CHECK_FILE_OP(!strncpy_s(info_.partitionName, PARTITION_NAME_LEN, partitionName.c_str(),
-                PARTITION_NAME_LEN - 1), "PartitionRecord: strncpy_s failed", fd, return false);
-            info_.updated = updated;
-            UPDATER_CHECK_FILE_OP(write(fd, &info_, sizeof(PartitionRecordInfo)) ==
-                static_cast<ssize_t>(sizeof(PartitionRecordInfo)), "PartitionRecord: write failed", fd, return false);
-            offset_ += static_cast<off_t>(sizeof(PartitionRecordInfo));
-            UPDATER_CHECK_FILE_OP(lseek(fd, PARTITION_RECORD_OFFSET, SEEK_SET) >= 0,
-                "PartitionRecord: Seek misc to record offset failed", fd, return false);
-            UPDATER_CHECK_FILE_OP(write(fd, &offset_, sizeof(off_t)) == static_cast<ssize_t>(sizeof(off_t)),
-                "PartitionRecord: write  misc to record offset failed", fd, return false);
+            if (!RecordPartitionSetInfo(partitionName, updated, fd)) {
+                close(fd);
+                return false;
+            }
             LOG(DEBUG) << "PartitionRecord: offset is " << offset_;
         } else {
             LOG(WARNING) << "PartitionRecord: partition record overflow, offset = " << offset_;
