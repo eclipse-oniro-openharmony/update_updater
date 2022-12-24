@@ -152,7 +152,7 @@ UpdaterStatus UpdaterFromSdcard()
     }
     UpdaterParams upParams {
         false, false, 0, 0, 1, 0, {SDCARD_CARD_PKG_PATH}
-    };;
+    };
     STAGE(UPDATE_STAGE_BEGIN) << "UpdaterFromSdcard";
     LOG(INFO) << "UpdaterFromSdcard start, sdcard updaterPath : " << upParams.updatePackage[upParams.pkgLocation];
     UPDATER_UI_INSTANCE.ShowLog(TR(LOG_SDCARD_NOTMOVE));
@@ -331,12 +331,45 @@ static UpdaterStatus DoUpdatePackages(UpdaterParams &upParams)
             static_cast<int>(pkgStartPosition[upParams.pkgLocation + 1] * FULL_PERCENT_PROGRESS));
         if (status != UPDATE_SUCCESS) {
             LOG(ERROR) << "InstallUpdaterPackage failed! Pkg is " << upParams.updatePackage[upParams.pkgLocation];
+            if (!CheckDumpResult()) {
+                UPDATER_LAST_WORD(status);
+            }
             return status;
         }
         PkgManager::ReleasePackageInstance(manager);
     }
     UPDATER_UI_INSTANCE.ShowSuccessPage();
     return status;
+}
+
+static void PostUpdatePackages(UpdaterParams &upParams, bool updateResult)
+{
+    std::string writeBuffer;
+    std::string buf;
+    if (!updateResult) {
+        const std::string resultPath = std::string(UPDATER_PATH) + "/" + std::string(UPDATER_RESULT_FILE);
+        std::ifstream fin {resultPath};
+        if (!fin.is_open() || !std::getline(fin, buf)) {
+            LOG(ERROR) << "read result file error " << resultPath;
+            buf = "fail";
+        }
+    } else {
+        buf = "pass";
+        upParams.pkgLocation = upParams.pkgLocation == 0 ? upParams.pkgLocation : upParams.pkgLocation--;
+    }
+
+    for (int i = 0; i < upParams.pkgLocation; i++) {
+        writeBuffer += upParams.updatePackage[i] + "|pass\n";
+    }
+    writeBuffer += upParams.updatePackage[upParams.pkgLocation] + "|" + buf + "\n";
+    for (i = upParams.pkgLocation + 1; i < upParams.updatePackage.size(); i++) {
+        writeBuffer += upParams.updatePackage[i] + "\n";
+    }
+    if (writeBuffer != "") {
+        writeBuffer.pop_back();
+    }
+    LOG(INFO) << "post over, writeBuffer = " << writeBuffer;
+    WriteDumpResult(writeBuffer);
 }
 
 static UpdaterStatus InstallUpdaterPackages(UpdaterParams &upParams)
@@ -346,7 +379,9 @@ static UpdaterStatus InstallUpdaterPackages(UpdaterParams &upParams)
         LOG(ERROR) << "PreUpdatePackages failed";
         return status;
     }
-    return DoUpdatePackages(upParams);
+    status = DoUpdatePackages(upParams);
+    PostUpdatePackages(upParams, status == UPDATE_SUCCESS);
+    return status;
 }
 
 static UpdaterStatus StartUpdaterEntry(UpdaterParams &upParams)
@@ -355,13 +390,6 @@ static UpdaterStatus StartUpdaterEntry(UpdaterParams &upParams)
     if (upParams.updatePackage.size() > 0) {
         UPDATER_UI_INSTANCE.ShowProgressPage();
         status = InstallUpdaterPackages(upParams);
-        if (status != UPDATE_SUCCESS) {
-            if (!CheckDumpResult()) {
-                UPDATER_LAST_WORD(status);
-            }
-            return status;
-        }
-        WriteDumpResult("pass");
     } else if (upParams.factoryWipeData) {
         UPDATER_UI_INSTANCE.ShowProgressPage();
         LOG(INFO) << "Factory level FactoryReset begin";
