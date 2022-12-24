@@ -362,7 +362,7 @@ static void PostUpdatePackages(UpdaterParams &upParams, bool updateResult)
         writeBuffer += upParams.updatePackage[i] + "|pass\n";
     }
     writeBuffer += upParams.updatePackage[upParams.pkgLocation] + "|" + buf + "\n";
-    for (i = upParams.pkgLocation + 1; i < upParams.updatePackage.size(); i++) {
+    for (int i = upParams.pkgLocation + 1; i < upParams.updatePackage.size(); i++) {
         writeBuffer += upParams.updatePackage[i] + "\n";
     }
     if (writeBuffer != "") {
