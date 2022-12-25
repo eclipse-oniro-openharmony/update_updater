@@ -103,7 +103,7 @@ ohos_static_library("libui") {
     "//drivers/peripheral/input/hal:hdi_input",
     "//foundation/graphic/ui/ext/updater:libupdater_layout",
     "//third_party/bounds_checking_function:libsec_static",
-    "//third_party/cJSON:cjson_static",
+    "//third_party/cJSON:cjson",
     "//third_party/libdrm:libdrm",
     "//third_party/libpng:libpng",
   ]

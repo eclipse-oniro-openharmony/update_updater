@@ -48,7 +48,7 @@ updater_common_deps = [
   "//third_party/bounds_checking_function:libsec_shared",
   "//third_party/bounds_checking_function:libsec_static",
   "//third_party/bzip2:libbz2",
-  "//third_party/cJSON:cjson_static",
+  "//third_party/cJSON:cjson",
   "//third_party/openssl:libcrypto_static",
   "//third_party/openssl:ssl_source",
   "//third_party/zlib:libz",

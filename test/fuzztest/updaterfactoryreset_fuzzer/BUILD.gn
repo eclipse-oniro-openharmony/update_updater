@@ -62,7 +62,7 @@ ohos_fuzztest("UpdaterFactoryResetFuzzTest") {
     "//base/update/updater/utils:libutils",
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/bzip2:libbz2",
-    "//third_party/cJSON:cjson_static",
+    "//third_party/cJSON:cjson",
     "//third_party/libdrm:libdrm",
     "//third_party/lz4:liblz4_static",
     "//third_party/openssl:libcrypto_static",

@@ -62,7 +62,7 @@ ohos_unittest("binary_unittest") {
     "//base/update/updater/services/package:libupdaterpackage",
     "//base/update/updater/services/script:libupdaterscript",
     "//third_party/bzip2:libbz2",
-    "//third_party/cJSON:cjson_static",
+    "//third_party/cJSON:cjson",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
     "//third_party/lz4:liblz4_static",
