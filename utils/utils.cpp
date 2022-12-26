@@ -207,7 +207,7 @@ void DoReboot(const std::string& rebootTarget, const std::string &extData)
 {
     LOG(INFO) << ", rebootTarget: " << rebootTarget;
     LoadFstab();
-    struct UpdateMessage msg = {{0}};
+    struct UpdateMessage msg = {};
     if (rebootTarget.empty()) {
         if (WriteUpdaterMiscMsg(msg) != true) {
             LOG(INFO) << "DoReboot: WriteUpdaterMessage empty error";
