@@ -175,47 +175,59 @@ std::string ConvertSha256Hex(const uint8_t* shaDigest, size_t length)
     return haxSha256;
 }
 
+bool SetRebootMisc(const std::string& rebootTarget, const std::string &extData, struct UpdateMessage &msg)
+{
+    static const int32_t maxCommandSize = 16;
+    int result = 0;
+    if (rebootTarget == "updater" && strcmp(msg.command, "boot_updater") != 0) {
+        result = strcpy_s(msg.command, maxCommandSize, "boot_updater");
+    } else if (rebootTarget == "flashd" && strcmp(msg.command, "flashd") != 0) {
+        result = strcpy_s(msg.command, maxCommandSize, "boot_flash");
+    } else if (rebootTarget == "bootloader" && strcmp(msg.command, "boot_loader") != 0) {
+        result = strcpy_s(msg.command, maxCommandSize, "boot_loader");
+    }
+    if (result != EOK) {
+        LOG(ERROR) << "reboot set misc strcpy failed";
+        return false;
+    }
+    msg.command[maxCommandSize] = 0;
+    if (extData.empty()) {
+        (void)memset_s(msg.update, sizeof(msg.update), 0, sizeof(msg.update));
+        return true;
+    }
+    if (strcpy_s(msg.update, sizeof(msg.update) - 1, extData.c_str()) != EOK) {
+        LOG(ERROR) << "failed to copy update";
+        return false;
+    }
+    msg.update[sizeof(msg.update) - 1] = 0;
+    return true;
+}
+
 void DoReboot(const std::string& rebootTarget, const std::string &extData)
 {
     LOG(INFO) << ", rebootTarget: " << rebootTarget;
-    static const int32_t maxCommandSize = 16;
     LoadFstab();
-    struct UpdateMessage msg;
+    struct UpdateMessage msg = {};
     if (rebootTarget.empty()) {
-        UPDATER_ERROR_CHECK(!memset_s(msg.command, MAX_COMMAND_SIZE, 0, MAX_COMMAND_SIZE), "Memset_s failed", return);
         if (WriteUpdaterMiscMsg(msg) != true) {
             LOG(INFO) << "DoReboot: WriteUpdaterMessage empty error";
             return;
         }
-        sync();
     } else {
-        int result = 0;
-        bool ret = ReadUpdaterMiscMsg(msg);
-        UPDATER_ERROR_CHECK(ret == true, "DoReboot read misc failed", return);
-        if (rebootTarget == "updater" && strcmp(msg.command, "boot_updater") != 0) {
-            result = strcpy_s(msg.command, maxCommandSize, "boot_updater");
-            msg.command[maxCommandSize] = 0;
-        } else if (rebootTarget == "flashd" && strcmp(msg.command, "flashd") != 0) {
-            result = strcpy_s(msg.command, maxCommandSize, "boot_flash");
-            msg.command[maxCommandSize] = 0;
-        } else if (rebootTarget == "bootloader" && strcmp(msg.command, "boot_loader") != 0) {
-            result = strcpy_s(msg.command, maxCommandSize, "boot_loader");
-            msg.command[maxCommandSize] = 0;
-        }
-        UPDATER_ERROR_CHECK(result == 0, "strcpy failed", return);
-        if (!extData.empty()) {
-            result = strcpy_s(msg.update, MAX_UPDATE_SIZE - 1, extData.c_str());
-            UPDATER_ERROR_CHECK(result == 0, "Failed to copy update", return);
-            msg.update[MAX_UPDATE_SIZE - 1] = 0;
-        } else {
-            UPDATER_ERROR_CHECK(!memset_s(msg.update, MAX_UPDATE_SIZE, 0, MAX_UPDATE_SIZE), "Memset_s failed", return);
-        }
-        if (!WriteUpdaterMiscMsg(msg)) {
-            LOG(INFO) << "DoReboot: WriteUpdaterMiscMsg empty error";
+        if (!ReadUpdaterMiscMsg(msg)) {
+            LOG(ERROR) << "DoReboot read misc failed";
             return;
         }
-        sync();
+        if (!SetRebootMisc(rebootTarget, extData, msg)) {
+            LOG(ERROR) << "DoReboot set misc failed";
+            return;
+        }
+        if (!WriteUpdaterMiscMsg(msg)) {
+            LOG(INFO) << "DoReboot: WriteUpdaterMiscMsg error";
+            return;
+        }
     }
+    sync();
 #ifndef UPDATER_UT
     syscall(__NR_reboot, LINUX_REBOOT_MAGIC1, LINUX_REBOOT_MAGIC2, LINUX_REBOOT_CMD_RESTART2, rebootTarget.c_str());
     while (true) {
@@ -391,9 +403,23 @@ void CompressLogs(const std::string &name)
     (void)DeleteFile(name);
 }
 
+int GetFileSize(const std::string &dLog)
+{
+    int ret = 0;
+    std::ifstream ifs(dLog, std::ios::binary | std::ios::in);
+    if (ifs.is_open()) {
+        ifs.seekg(0, std::ios::end);
+        ret = ifs.tellg();
+    }
+    return ret;
+}
+
 bool CopyUpdaterLogs(const std::string &sLog, const std::string &dLog)
 {
-    UPDATER_WARING_CHECK(MountForPath(UPDATER_LOG_DIR) == 0, "MountForPath /data/log failed!", return false);
+    if (MountForPath(UPDATER_LOG_DIR) != 0) {
+        LOG(WARNING) << "MountForPath /data/log failed!";
+        return false;
+    }
     if (access(UPDATER_LOG_DIR, 0) != 0) {
         if (MkdirRecursive(UPDATER_LOG_DIR, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) != 0) {
             LOG(ERROR) << "MkdirRecursive error!";
@@ -406,38 +432,14 @@ bool CopyUpdaterLogs(const std::string &sLog, const std::string &dLog)
         }
     }
 
-    FILE* dFp = fopen(dLog.c_str(), "ab+");
-    if (dFp == nullptr) {
-        LOG(ERROR) << "open log failed";
+    if (!CopyFile(sLog, dLog)) {
+        LOG(ERROR) << "copy log file failed.";
         return false;
     }
-    FILE* sFp = fopen(sLog.c_str(), "r");
-    if (sFp == nullptr) {
-        LOG(ERROR) << "open log failed";
-        fclose(dFp);
-        return false;
+    if (GetFileSize(dLog) >= MAX_LOG_SIZE) {
+        LOG(INFO) << "log size greater than 5M!";
+        CompressLogs(dLog);
     }
-
-    char buf[MAX_LOG_BUF_SIZE];
-    size_t bytes;
-    while ((bytes = fread(buf, 1, sizeof(buf), sFp)) != 0) {
-        if (fwrite(buf, 1, bytes, dFp) <= 0) {
-            LOG(ERROR) << "fwrite failed";
-            fclose(sFp);
-            fclose(dFp);
-            return false;
-        }
-    }
-    if (fseek(dFp, 0, SEEK_END) != 0) {
-        LOG(ERROR) << "fseek failed";
-        fclose(sFp);
-        fclose(dFp);
-        return false;
-    }
-    UPDATER_INFO_CHECK(ftell(dFp) < MAX_LOG_SIZE, "log size greater than 5M!", CompressLogs(dLog));
-    sync();
-    fclose(sFp);
-    fclose(dFp);
     return true;
 }
 
