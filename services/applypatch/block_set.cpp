@@ -147,7 +147,7 @@ std::vector<BlockPair>::const_reverse_iterator BlockSet::CrEnd() const
     return blocks_.crend();
 }
 
-size_t BlockSet::ReadDataFromBlock(int fd, std::vector<uint8_t> &buffer)
+int32_t BlockSet::ReadDataFromBlock(int fd, std::vector<uint8_t> &buffer)
 {
     size_t pos = 0;
     std::vector<BlockPair>::iterator it = blocks_.begin();
@@ -165,10 +165,10 @@ size_t BlockSet::ReadDataFromBlock(int fd, std::vector<uint8_t> &buffer)
         }
         pos += size;
     }
-    return pos;
+    return 0;
 }
 
-size_t BlockSet::WriteDataToBlock(int fd, std::vector<uint8_t> &buffer)
+int32_t BlockSet::WriteDataToBlock(int fd, std::vector<uint8_t> &buffer)
 {
     size_t pos = 0;
     std::vector<BlockPair>::iterator it = blocks_.begin();
@@ -199,7 +199,7 @@ size_t BlockSet::WriteDataToBlock(int fd, std::vector<uint8_t> &buffer)
         LOG(ERROR) << "Failed to fsync";
         return -1;
     }
-    return pos;
+    return 0;
 }
 
 size_t BlockSet::CountOfRanges() const
@@ -269,7 +269,7 @@ int32_t BlockSet::LoadSourceBuffer(const Command &cmd, size_t &pos, std::vector<
         isOverlap = IsTwoBlocksOverlap(srcBlk, *this);
         // read source data
         LOG(INFO) << "new start to read source block ...";
-        if (srcBlk.ReadDataFromBlock(cmd.GetFileDescriptor(), sourceBuffer) <= 0) {
+        if (srcBlk.ReadDataFromBlock(cmd.GetFileDescriptor(), sourceBuffer) != 0) {
             return -1;
         }
         std::string nextArgv = cmd.GetArgumentByPos(pos++);

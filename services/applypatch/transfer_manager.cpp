@@ -50,10 +50,33 @@ TransferManager::~TransferManager()
     }
 }
 
+bool TransferManager::CommandsExecute(int fd, Command &cmd)
+{
+    cmd.SetFileDescriptor(fd);
+    std::unique_ptr<CommandFunction> cf = CommandFunctionFactory::GetCommandFunction(cmd.GetCommandType());
+    if (cf == nullptr) {
+        LOG(ERROR) << "Failed to get cmd exec";
+        return false;
+    }
+    CommandResult ret = cf->Execute(cmd);
+    CommandFunctionFactory::ReleaseCommandFunction(cf);
+    if (!CheckResult(ret, cmd.GetCommandLine(), cmd.GetCommandType())) {
+        return false;
+    }
+    return true;
+}
+
 bool TransferManager::CommandsParser(int fd, const std::vector<std::string> &context)
 {
-    UPDATER_ERROR_CHECK(context.size() >= 1, "too small context in transfer file", return false);
-    UPDATER_ERROR_CHECK(globalParams != nullptr, "globalParams is nullptr", return false);
+    if (context.size() < 1) {
+        LOG(ERROR) << "too small context in transfer file";
+        return false;
+    }
+    if (globalParams == nullptr) {
+        LOG(ERROR) << "globalParams is nullptr";
+        return false;
+    }
+
     std::vector<std::string>::const_iterator ct = context.begin();
     globalParams->version = Utils::String2Int<size_t>(*ct++, Utils::N_DEC);
     globalParams->blockCount = Utils::String2Int<size_t>(*ct++, Utils::N_DEC);
@@ -64,11 +87,13 @@ bool TransferManager::CommandsParser(int fd, const std::vector<std::string> &con
     if (globalParams->env != nullptr && globalParams->env->IsRetry()) {
         retryCmd = ReloadForRetry();
     }
-    std::unique_ptr<Command> cmd;
     size_t initBlock = 0;
     for (; ct != context.end(); ct++) {
-        cmd = std::make_unique<Command>();
-        UPDATER_ERROR_CHECK(cmd != nullptr, "Failed to parse command line.", return false);
+        std::unique_ptr<Command> cmd = std::make_unique<Command>();
+        if (cmd == nullptr) {
+            LOG(ERROR) << "Failed to parse command line.";
+            return false;
+        }
         if (!cmd->Init(*ct) || cmd->GetCommandType() == CommandType::LAST || globalParams->env == nullptr) {
             continue;
         }
@@ -81,12 +106,7 @@ bool TransferManager::CommandsParser(int fd, const std::vector<std::string> &con
                 continue;
             }
         }
-        cmd->SetFileDescriptor(fd);
-        std::unique_ptr<CommandFunction> cf = CommandFunctionFactory::GetCommandFunction(cmd->GetCommandType());
-        UPDATER_ERROR_CHECK(cf != nullptr, "Failed to get cmd exec", return false);
-        CommandResult ret = cf->Execute(const_cast<Command &>(*cmd.get()));
-        CommandFunctionFactory::ReleaseCommandFunction(cf);
-        if (CheckResult(ret, cmd->GetCommandLine(), cmd->GetCommandType()) == false) {
+        if (!CommandsExecute(fd, *cmd)) {
             return false;
         }
         if (initBlock == 0) {

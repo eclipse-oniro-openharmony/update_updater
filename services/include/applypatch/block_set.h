@@ -93,10 +93,10 @@ public:
         bool isImgDiff = true);
 
     // Read data from block
-    size_t ReadDataFromBlock(int fd, std::vector<uint8_t> &buffer);
+    int32_t ReadDataFromBlock(int fd, std::vector<uint8_t> &buffer);
 
     // write data to block
-    size_t WriteDataToBlock(int fd, std::vector<uint8_t> &buffer);
+    int32_t WriteDataToBlock(int fd, std::vector<uint8_t> &buffer);
 
 protected:
     size_t blockSize_;
