@@ -355,7 +355,7 @@ static void PostUpdatePackages(UpdaterParams &upParams, bool updateResult)
         }
     } else {
         buf = "pass";
-        upParams.pkgLocation = upParams.pkgLocation == 0 ? upParams.pkgLocation : upParams.pkgLocation--;
+        upParams.pkgLocation = upParams.pkgLocation == 0 ? upParams.pkgLocation : (upParams.pkgLocation - 1);
     }
 
     for (int i = 0; i < upParams.pkgLocation; i++) {
