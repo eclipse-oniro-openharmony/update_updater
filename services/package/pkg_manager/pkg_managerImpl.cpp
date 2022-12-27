@@ -345,7 +345,7 @@ int32_t PkgManagerImpl::ExtraAndLoadPackage(const std::string &path, const std::
     struct stat st {};
     const std::string tempPath = string(Updater::UPDATER_PATH) + "/";
     if (stat(tempPath.c_str(), &st) != 0) {
-        (void)mkdir(tempPath.c_str(), 0775);
+        (void)mkdir(tempPath.c_str(), 0775); // 0775 : rwxrwxr-x
         (void)chown(tempPath.c_str(), Updater::Utils::USER_UPDATE_AUTHORITY, Updater::Utils::GROUP_UPDATE_AUTHORITY);
     }
 
