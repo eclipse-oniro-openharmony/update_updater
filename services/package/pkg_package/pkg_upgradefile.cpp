@@ -250,37 +250,18 @@ int32_t UpgradePkgFile::SavePackage(size_t &signOffset)
     return PKG_SUCCESS;
 }
 
-int32_t UpgradePkgFile::LoadPackage(std::vector<std::string> &fileNames, VerifyFunction verifier)
+int32_t UpgradePkgFile::DoLoadPackage(PkgBuffer &buffer, std::vector<uint8_t> &signData, size_t &parsedLen)
 {
-    PKG_CHECK(verifier != nullptr, return PKG_INVALID_SIGNATURE, "Check verifier nullptr");
-    PKG_CHECK(CheckState({PKG_FILE_STATE_IDLE}, PKG_FILE_STATE_WORKING),
-        return PKG_INVALID_STATE, "error state curr %d ", state_);
-    PKG_LOGI("LoadPackage %s ", pkgStream_->GetFileName().c_str());
-    size_t fileLen = pkgStream_->GetFileLength();
-    // Allocate buffer with smallest package size
-    size_t buffSize = UPGRADE_FILE_HEADER_LEN + sizeof(UpgradeCompInfo) +
-        GetUpgradeSignatureLen() + UPGRADE_RESERVE_LEN;
-    PKG_CHECK(fileLen > 0 && fileLen >= buffSize,
-        return PKG_INVALID_FILE, "Invalid file %s fileLen:%zu ", pkgStream_->GetFileName().c_str(), fileLen);
-
-    DigestAlgorithm::DigestAlgorithmPtr algorithm = nullptr;
-    // Parse header
-    PkgBuffer buffer(buffSize);
-    size_t parsedLen = 0;
-    int32_t ret = ReadUpgradePkgHeader(buffer, parsedLen, algorithm);
-    PKG_CHECK(ret == PKG_SUCCESS, return ret, "Decode header fail %d", ret);
-
-    ret = ReadComponents(buffer, parsedLen, algorithm, fileNames);
-    PKG_CHECK(ret == PKG_SUCCESS, return ret, "Decode components fail %d", ret);
-    PKG_CHECK(parsedLen + UPGRADE_RESERVE_LEN + GetUpgradeSignatureLen() < fileLen,
-        return ret, "Decode components fail %d", ret);
-
-    // Read signature information
     size_t readBytes = 0;
-    ret = pkgStream_->Read(buffer, parsedLen, GetUpgradeSignatureLen() + UPGRADE_RESERVE_LEN, readBytes);
-    PKG_CHECK(ret == PKG_SUCCESS, return ret, "read sign data fail");
+    size_t ret = pkgStream_->Read(buffer, parsedLen, GetUpgradeSignatureLen() + UPGRADE_RESERVE_LEN, readBytes);
+    // PKG_CHECK(ret == PKG_SUCCESS, return ret, "read sign data fail");
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("read sign data fail");
+        return ret;
+    }
+
     PkgFile::ConvertBufferToString(pkgInfo_.descriptPackageId, {buffer.buffer, UPGRADE_RESERVE_LEN});
-    std::vector<uint8_t> signData;
+
     if (pkgInfo_.pkgInfo.digestMethod == PKG_DIGEST_TYPE_SHA384) {
         signData.resize(SIGN_SHA384_LEN);
         ret = memcpy_s(signData.data(), signData.size(),
@@ -289,14 +270,83 @@ int32_t UpgradePkgFile::LoadPackage(std::vector<std::string> &fileNames, VerifyF
         signData.resize(SIGN_SHA256_LEN);
         ret = memcpy_s(signData.data(), signData.size(), buffer.buffer + UPGRADE_RESERVE_LEN, SIGN_SHA256_LEN);
     }
-    PKG_CHECK(ret == PKG_SUCCESS, return ret, "memcpy sign data fail");
+    // PKG_CHECK(ret == PKG_SUCCESS, return ret, "memcpy sign data fail");
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("memcpy sign data fail");
+        return ret;
+    }
+
     ret = memset_s(buffer.buffer + UPGRADE_RESERVE_LEN, buffer.length, 0, GetUpgradeSignatureLen());
-    PKG_CHECK(ret == 0, return ret, "memset buff fail");
+    // PKG_CHECK(ret == 0, return ret, "memset buff fail");
+    if (ret != 0) {
+        PKG_LOGE("memset buff fail");
+        return ret;
+    }
+
+    return PKG_SUCCESS;
+}
+
+int32_t UpgradePkgFile::LoadPackage(std::vector<std::string> &fileNames, VerifyFunction verifier)
+{
+    // PKG_CHECK(verifier != nullptr, return PKG_INVALID_SIGNATURE, "Check verifier nullptr");
+    if (verifier == nullptr) {
+        PKG_LOGE("Check verifier nullptr");
+        return PKG_INVALID_SIGNATURE;
+    }
+    // PKG_CHECK(CheckState({PKG_FILE_STATE_IDLE}, PKG_FILE_STATE_WORKING),
+    //     return PKG_INVALID_STATE, "error state curr %d ", state_);
+    if (!CheckState({PKG_FILE_STATE_IDLE}, PKG_FILE_STATE_WORKING)) {
+        PKG_LOGE("error state curr %d ", state_);
+        return PKG_INVALID_STATE;
+    }
+    PKG_LOGI("LoadPackage %s ", pkgStream_->GetFileName().c_str());
+    size_t fileLen = pkgStream_->GetFileLength();
+    // Allocate buffer with smallest package size
+    size_t buffSize = UPGRADE_FILE_HEADER_LEN + sizeof(UpgradeCompInfo) +
+        GetUpgradeSignatureLen() + UPGRADE_RESERVE_LEN;
+    // PKG_CHECK(fileLen > 0 && fileLen >= buffSize,
+    //     return PKG_INVALID_FILE, "Invalid file %s fileLen:%zu ", pkgStream_->GetFileName().c_str(), fileLen);
+    if (fileLen <= 0 || fileLen < buffSize) {
+        PKG_LOGE("Invalid file %s fileLen:%zu ", pkgStream_->GetFileName().c_str(), fileLen);
+        return PKG_INVALID_FILE;
+    }
+
+    std::vector<uint8_t> signData;
+    DigestAlgorithm::DigestAlgorithmPtr algorithm = nullptr;
+    // Parse header
+    PkgBuffer buffer(buffSize);
+    size_t parsedLen = 0;
+    int32_t ret = ReadUpgradePkgHeader(buffer, parsedLen, algorithm);
+    // PKG_CHECK(ret == PKG_SUCCESS, return ret, "Decode header fail %d", ret);
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("Decode header fail %d", ret);
+        return ret;
+    }
+
+    ret = ReadComponents(buffer, parsedLen, algorithm, fileNames);
+    // PKG_CHECK(ret == PKG_SUCCESS, return ret, "Decode components fail %d", ret);
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("Decode components fail %d", ret);
+        return ret;
+    }
+    // PKG_CHECK(parsedLen + UPGRADE_RESERVE_LEN + GetUpgradeSignatureLen() < fileLen,
+    //     return ret, "Decode components fail %d", ret);
+
+    if (parsedLen + UPGRADE_RESERVE_LEN + GetUpgradeSignatureLen() >= fileLen) {
+        PKG_LOGE("Decode components fail %d", ret);
+        return ret;
+    }
+    // Read signature information
+    ret = DoLoadPackage(buffer, signData, parsedLen);
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("DoLoadPackage fail %d", ret);
+        return ret;
+    }
     algorithm->Update(buffer, UPGRADE_RESERVE_LEN + GetUpgradeSignatureLen());
     parsedLen += UPGRADE_RESERVE_LEN + GetUpgradeSignatureLen();
 
+    return Verify(parsedLen, algorithm, verifier, signData);;
     // Calculate digest and verify
-    return Verify(parsedLen, algorithm, verifier, signData);
 }
 
 int32_t UpgradePkgFile::Verify(size_t start, DigestAlgorithm::DigestAlgorithmPtr algorithm,

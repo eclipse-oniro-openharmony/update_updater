@@ -97,6 +97,7 @@ public:
     int32_t DoSavePackage(std::vector<uint8_t> buffer, size_t offset);
     int32_t SavePackage(size_t &signOffset) override;
 
+    int32_t DoLoadPackage(PkgBuffer &buffer, std::vector<uint8_t> &signData, size_t &parsedLen);
     int32_t LoadPackage(std::vector<std::string> &fileNames, VerifyFunction verify = nullptr) override;
 
     size_t GetUpgradeSignatureLen() const;
