@@ -91,8 +91,10 @@ public:
 
     ~UpgradePkgFile() override {}
 
+    int32_t DoAddEntry(size_t &dataOffset, const PkgManager::FileInfoPtr file);
     int32_t AddEntry(const PkgManager::FileInfoPtr file, const PkgStreamPtr inStream) override;
 
+    int32_t DoSavePackage(std::vector<uint8_t> buffer, size_t offset);
     int32_t SavePackage(size_t &signOffset) override;
 
     int32_t LoadPackage(std::vector<std::string> &fileNames, VerifyFunction verify = nullptr) override;
