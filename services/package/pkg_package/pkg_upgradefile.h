@@ -114,6 +114,7 @@ private:
     int32_t ReadComponents(const PkgBuffer &buffer, size_t &parsedLen,
         DigestAlgorithm::DigestAlgorithmPtr algorithm, std::vector<std::string> &fileNames);
 
+    int32_t DoReadUpgradePkgHeader(const PkgBuffer &buffer, size_t currLen, PkgTlv &tlv);
     int32_t ReadUpgradePkgHeader(const PkgBuffer &buffer, size_t &realLen,
         DigestAlgorithm::DigestAlgorithmPtr &algorithm);
 
