@@ -158,8 +158,6 @@ CommandResult DiffAndMoveCommandFn::Execute(const Command &params)
         return result;
     }
 
-
-
     int32_t ret = -1;
     size_t tgtBlockSize = buffer.size();
     if (type != CommandType::MOVE) {

@@ -81,7 +81,7 @@ protected:
             return ret;
         }
         size_t fileLen = stream->GetFileLength();
-        if (fileLen <= 0 || > fileLen > SIZE_MAX) {
+        if (fileLen <= 0 || fileLen > SIZE_MAX) {
             LOG(ERROR) << "invalid file to load " << stream->GetFileName();
             pkgManager->ClosePkgStream(stream);
             return PKG_INVALID_FILE;

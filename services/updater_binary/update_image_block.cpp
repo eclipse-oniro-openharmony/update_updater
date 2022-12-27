@@ -367,22 +367,22 @@ static int32_t ExecuteUpdateBlock(Uscript::UScriptEnv &env, Uscript::UScriptCont
 
     std::vector<std::string> lines =
         Updater::Utils::SplitString(std::string(reinterpret_cast<const char*>(transferListBuffer)), "\n");
-    LOG(INFO) << "Ready to start a thread to handle new data processing";
+    // Close stream opened before.
+    env.GetPkgManager()->ClosePkgStream(outStream);
 
+    LOG(INFO) << "Start unpack new data thread done. Get patch data: " << infos.patchDataName;
+    if (ExtractFileByName(env, infos.patchDataName, outStream,
+        globalParams->patchDataBuffer, globalParams->patchDataSize) != USCRIPT_SUCCESS) {
+        return USCRIPT_ERROR_EXECUTE;
+    }
+
+    LOG(INFO) << "Ready to start a thread to handle new data processing";
     if (InitThread(infos, env, context) != 0) {
         LOG(ERROR) << "Failed to create pthread";
         env.GetPkgManager()->ClosePkgStream(outStream);
         return USCRIPT_ERROR_EXECUTE;
     }
-    LOG(DEBUG) << "Start unpack new data thread done. Get patch data: " << infos.patchDataName;
-    // Close stream opened before.
-    env.GetPkgManager()->ClosePkgStream(outStream);
 
-    if (ExtractFileByName(env, infos.patchDataName, outStream,
-        globalParams->patchDataBuffer, globalParams->patchDataSize) != USCRIPT_SUCCESS) {
-        return USCRIPT_ERROR_EXECUTE;
-    }
-    
     int32_t ret = DoExecuteUpdateBlock(infos, env, outStream, lines, context);
     TransferManager::ReleaseTransferManagerInstance(tm);
     return ret;

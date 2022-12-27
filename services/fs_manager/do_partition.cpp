@@ -253,13 +253,13 @@ static bool WriteDiskPartitionToMisc(PartitonList &nlist)
         }
         if (p->partName == "userdata") {
             if (snprintf_s(tmp, sizeof(tmp), sizeof(tmp) - 1, "-(%s),",
-                p->partName.c_str()) != EOK) {
+                p->partName.c_str()) == -1) {
                     return false;
                 }
         } else {
             size = static_cast<size_t>(p->length * SECTOR_SIZE_DEFAULT / DEFAULT_SIZE_1MB);
             if (snprintf_s(tmp, sizeof(tmp), sizeof(tmp) - 1, "%luM(%s),",
-                size, p->partName.c_str()) != EOK) {
+                size, p->partName.c_str()) == -1) {
                     return false;
                 }
         }
