@@ -102,7 +102,6 @@ int32_t UpgradePkgFile::DoAddEntry(size_t &dataOffset, const PkgManager::FileInf
 
 int32_t UpgradePkgFile::AddEntry(const PkgManager::FileInfoPtr file, const PkgStreamPtr inStream)
 {
-    // PKG_CHECK(file != nullptr && inStream != nullptr, return PKG_INVALID_PARAM, "Fail to check input param");
     if (file == nullptr || inStream == nullptr) {
         PKG_LOGE("Fail to check input param");
         return PKG_INVALID_PARAM;
@@ -116,13 +115,11 @@ int32_t UpgradePkgFile::AddEntry(const PkgManager::FileInfoPtr file, const PkgSt
     }
 
     UpgradeFileEntry *entry = static_cast<UpgradeFileEntry *>(AddPkgEntry(file->identity));
-    // PKG_CHECK(entry != nullptr, return PKG_NONE_MEMORY, "Fail create pkg node for %s", file->identity.c_str());
     if (entry == nullptr) {
         PKG_LOGE("Fail create pkg node for %s", file->identity.c_str());
         return PKG_NONE_MEMORY;
     }
     ret = entry->Init(file, inStream);
-    // PKG_CHECK(ret == PKG_SUCCESS, return ret, "Fail init entry for %s", file->identity.c_str());
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("Fail init entry for %s", file->identity.c_str());
         return ret;
@@ -130,7 +127,6 @@ int32_t UpgradePkgFile::AddEntry(const PkgManager::FileInfoPtr file, const PkgSt
 
     size_t encodeLen = 0;
     ret = entry->Pack(inStream, dataOffset, encodeLen);
-    // PKG_CHECK(ret == PKG_SUCCESS, return ret, "Fail Pack for %s", file->identity.c_str());
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("Fail Pack for %s", file->identity.c_str());
         return ret;
@@ -139,7 +135,6 @@ int32_t UpgradePkgFile::AddEntry(const PkgManager::FileInfoPtr file, const PkgSt
 
     size_t offset = UPGRADE_FILE_HEADER_LEN + (pkgEntryMapId_.size() - 1) * sizeof(UpgradeCompInfo);
     ret = entry->EncodeHeader(inStream, offset, encodeLen);
-    // PKG_CHECK(ret == PKG_SUCCESS, return ret, "Fail encode header for %s", file->identity.c_str());
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("Fail encode header for %s", file->identity.c_str());
         return ret;
@@ -168,14 +163,13 @@ int32_t UpgradePkgFile::DoSavePackage(std::vector<uint8_t> buffer, size_t offset
     WriteLE32(reinterpret_cast<uint8_t *>(&header->updateFileVersion), pkgInfo_.updateFileVersion);
     int32_t ret = memcpy_s(header->softwareVersion, sizeof(header->softwareVersion), pkgInfo_.softwareVersion.data(),
         pkgInfo_.softwareVersion.size());
-    // PKG_CHECK(ret == EOK, return ret, "Fail to memcpy_s %s ret: %d", pkgStream_->GetFileName().c_str(), ret);
     if (ret != EOK) {
         PKG_LOGE("Fail to memcpy_s %s ret: %d", pkgStream_->GetFileName().c_str(), ret);
         return ret;
     }
     ret = memcpy_s(header->productUpdateId, sizeof(header->productUpdateId), pkgInfo_.productUpdateId.data(),
         pkgInfo_.productUpdateId.size());
-    // PKG_CHECK(ret == EOK, return ret, "Fail to memcpy_s %s ret: %d", pkgStream_->GetFileName().c_str(), ret);
+
     if (ret != EOK) {
         PKG_LOGE("Fail to memcpy_s %s ret: %d", pkgStream_->GetFileName().c_str(), ret);
         return ret;
@@ -203,13 +197,11 @@ int32_t UpgradePkgFile::SavePackage(size_t &signOffset)
 
     UpgradePkgTime *time = reinterpret_cast<UpgradePkgTime *>(buffer.data() + offset);
     size_t ret = memcpy_s(time->date, sizeof(time->date), pkgInfo_.date.data(), pkgInfo_.date.size());
-    // PKG_CHECK(ret == EOK, return ret, "Fail to memcpy_s %s ret: %d", pkgStream_->GetFileName().c_str(), ret);
     if (ret != EOK) {
         PKG_LOGE("Fail to memcpy_s %s ret: %d", pkgStream_->GetFileName().c_str(), ret);
         return ret;
     }
     ret = memcpy_s(time->time, sizeof(time->time), pkgInfo_.time.data(), pkgInfo_.time.size());
-    // PKG_CHECK(ret == EOK, return ret, "Fail to memcpy_s %s ret: %d", pkgStream_->GetFileName().c_str(), ret);
     if (ret != EOK) {
         PKG_LOGE("Fail to memcpy_s %s ret: %d", pkgStream_->GetFileName().c_str(), ret);
         return ret;
@@ -220,8 +212,6 @@ int32_t UpgradePkgFile::SavePackage(size_t &signOffset)
     WriteLE16(buffer.data() + offset + sizeof(uint16_t), pkgInfo_.pkgInfo.entryCount * sizeof(UpgradeCompInfo));
     offset += sizeof(PkgTlv);
     ret = pkgStream_->Write(buffer, UPGRADE_FILE_HEADER_LEN, 0);
-    // PKG_CHECK(ret == PKG_SUCCESS, return ret, "Fail write upgrade file header for %s ret: %d",
-    //     pkgStream_->GetFileName().c_str(), ret);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("Fail write upgrade file header for %s ret: %d", pkgStream_->GetFileName().c_str(), ret);
         return ret;
@@ -234,13 +224,11 @@ int32_t UpgradePkgFile::SavePackage(size_t &signOffset)
     buffer.assign(buffer.capacity(), 0);
     size_t nameLen = 0;
     ret = PkgFile::ConvertStringToBuffer(pkgInfo_.descriptPackageId, {buffer.data(), UPGRADE_RESERVE_LEN}, nameLen);
-    // PKG_CHECK(ret == PKG_SUCCESS, return ret, "Fail write descriptPackageId");
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("Fail write descriptPackageId");
         return ret;
     }
     ret = pkgStream_->Write(buffer, GetUpgradeSignatureLen() + UPGRADE_RESERVE_LEN, offset);
-    // PKG_CHECK(ret == PKG_SUCCESS, return ret, "Fail write sign for %s", pkgStream_->GetFileName().c_str());
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("Fail write sign for %s", pkgStream_->GetFileName().c_str());
         return ret;
@@ -254,7 +242,6 @@ int32_t UpgradePkgFile::DoLoadPackage(PkgBuffer &buffer, std::vector<uint8_t> &s
 {
     size_t readBytes = 0;
     size_t ret = pkgStream_->Read(buffer, parsedLen, GetUpgradeSignatureLen() + UPGRADE_RESERVE_LEN, readBytes);
-    // PKG_CHECK(ret == PKG_SUCCESS, return ret, "read sign data fail");
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("read sign data fail");
         return ret;
@@ -270,14 +257,12 @@ int32_t UpgradePkgFile::DoLoadPackage(PkgBuffer &buffer, std::vector<uint8_t> &s
         signData.resize(SIGN_SHA256_LEN);
         ret = memcpy_s(signData.data(), signData.size(), buffer.buffer + UPGRADE_RESERVE_LEN, SIGN_SHA256_LEN);
     }
-    // PKG_CHECK(ret == PKG_SUCCESS, return ret, "memcpy sign data fail");
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("memcpy sign data fail");
         return ret;
     }
 
     ret = memset_s(buffer.buffer + UPGRADE_RESERVE_LEN, buffer.length, 0, GetUpgradeSignatureLen());
-    // PKG_CHECK(ret == 0, return ret, "memset buff fail");
     if (ret != 0) {
         PKG_LOGE("memset buff fail");
         return ret;
@@ -288,13 +273,10 @@ int32_t UpgradePkgFile::DoLoadPackage(PkgBuffer &buffer, std::vector<uint8_t> &s
 
 int32_t UpgradePkgFile::LoadPackage(std::vector<std::string> &fileNames, VerifyFunction verifier)
 {
-    // PKG_CHECK(verifier != nullptr, return PKG_INVALID_SIGNATURE, "Check verifier nullptr");
     if (verifier == nullptr) {
         PKG_LOGE("Check verifier nullptr");
         return PKG_INVALID_SIGNATURE;
     }
-    // PKG_CHECK(CheckState({PKG_FILE_STATE_IDLE}, PKG_FILE_STATE_WORKING),
-    //     return PKG_INVALID_STATE, "error state curr %d ", state_);
     if (!CheckState({PKG_FILE_STATE_IDLE}, PKG_FILE_STATE_WORKING)) {
         PKG_LOGE("error state curr %d ", state_);
         return PKG_INVALID_STATE;
@@ -304,8 +286,7 @@ int32_t UpgradePkgFile::LoadPackage(std::vector<std::string> &fileNames, VerifyF
     // Allocate buffer with smallest package size
     size_t buffSize = UPGRADE_FILE_HEADER_LEN + sizeof(UpgradeCompInfo) +
         GetUpgradeSignatureLen() + UPGRADE_RESERVE_LEN;
-    // PKG_CHECK(fileLen > 0 && fileLen >= buffSize,
-    //     return PKG_INVALID_FILE, "Invalid file %s fileLen:%zu ", pkgStream_->GetFileName().c_str(), fileLen);
+
     if (fileLen <= 0 || fileLen < buffSize) {
         PKG_LOGE("Invalid file %s fileLen:%zu ", pkgStream_->GetFileName().c_str(), fileLen);
         return PKG_INVALID_FILE;
@@ -317,20 +298,16 @@ int32_t UpgradePkgFile::LoadPackage(std::vector<std::string> &fileNames, VerifyF
     PkgBuffer buffer(buffSize);
     size_t parsedLen = 0;
     int32_t ret = ReadUpgradePkgHeader(buffer, parsedLen, algorithm);
-    // PKG_CHECK(ret == PKG_SUCCESS, return ret, "Decode header fail %d", ret);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("Decode header fail %d", ret);
         return ret;
     }
 
     ret = ReadComponents(buffer, parsedLen, algorithm, fileNames);
-    // PKG_CHECK(ret == PKG_SUCCESS, return ret, "Decode components fail %d", ret);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("Decode components fail %d", ret);
         return ret;
     }
-    // PKG_CHECK(parsedLen + UPGRADE_RESERVE_LEN + GetUpgradeSignatureLen() < fileLen,
-    //     return ret, "Decode components fail %d", ret);
 
     if (parsedLen + UPGRADE_RESERVE_LEN + GetUpgradeSignatureLen() >= fileLen) {
         PKG_LOGE("Decode components fail %d", ret);
@@ -458,8 +435,6 @@ int32_t UpgradePkgFile::DoReadUpgradePkgHeader(const PkgBuffer &buffer, size_t c
     PkgFile::ConvertBufferToString(pkgInfo_.productUpdateId, {header->productUpdateId,
         sizeof(header->productUpdateId)});
     algorithm = PkgAlgorithmFactory::GetDigestAlgorithm(pkgInfo_.pkgInfo.digestMethod);
-    // PKG_CHECK(algorithm != nullptr, return PKG_NOT_EXIST_ALGORITHM,
-    //     "Invalid file %s", pkgStream_->GetFileName().c_str());
     if (algorithm == nullptr) {
         PKG_LOGE("Invalid file %s", pkgStream_->GetFileName().c_str());
         return PKG_NOT_EXIST_ALGORITHM;
@@ -476,7 +451,6 @@ int32_t UpgradePkgFile::ReadUpgradePkgHeader(const PkgBuffer &buffer, size_t &re
     size_t currLen = 0;
     PkgTlv tlv;
     int32_t ret = pkgStream_->Read(buffer, 0, buffer.length, readLen);
-    // PKG_CHECK(ret == PKG_SUCCESS, return ret, "Fail to read header");
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("Fail to read header");
         return ret;
@@ -492,7 +466,6 @@ int32_t UpgradePkgFile::ReadUpgradePkgHeader(const PkgBuffer &buffer, size_t &re
         realLen = currLen + tlv.length;
         algorithm->Update(buffer, realLen);
         ret = pkgStream_->Read(buffer, realLen, buffer.length, readLen);
-        // PKG_CHECK(ret == PKG_SUCCESS, return ret, "Fail to read header");
         if (ret != PKG_SUCCESS) {
             PKG_LOGE("Fail to read header");
             return ret;
