@@ -29,6 +29,7 @@ constexpr int N_HEX = 16;
 constexpr int O_USER_GROUP_ID = 1000;
 constexpr int ARGC_TWO_NUMS = 2;
 constexpr int USER_ROOT_AUTHORITY = 0;
+constexpr int USER_UPDATE_AUTHORITY = 6666;
 constexpr int GROUP_SYS_AUTHORITY = 1000;
 constexpr int GROUP_UPDATE_AUTHORITY = 6666;
 template<class T>
