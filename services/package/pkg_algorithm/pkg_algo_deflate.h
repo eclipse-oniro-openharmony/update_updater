@@ -21,6 +21,12 @@
 #include "zlib.h"
 
 namespace Hpackage {
+struct ZstreamMessage {
+    z_stream zstream;
+    PkgBuffer inBuffer;
+    PkgBuffer outBuffer;
+};
+
 class PkgAlgoDeflate : public PkgAlgorithm {
 public:
     explicit PkgAlgoDeflate(const ZipFileInfo &info)
@@ -41,6 +47,9 @@ public:
         const PkgStreamPtr outStream, PkgAlgorithmContext &context) override;
 
 private:
+    int32_t PackCalculate(PkgAlgorithmContext &context, const PkgStreamPtr inStream,
+        const PkgStreamPtr outStream, DigestAlgorithm::DigestAlgorithmPtr algorithm);
+
     int32_t UnpackCalculate(PkgAlgorithmContext &context, const PkgStreamPtr inStream,
         const PkgStreamPtr outStream, DigestAlgorithm::DigestAlgorithmPtr algorithm);
 

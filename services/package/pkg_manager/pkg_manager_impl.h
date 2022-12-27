@@ -104,12 +104,17 @@ private:
 
     int32_t Verify(uint8_t digestMethod, const std::vector<uint8_t> &digest, const std::vector<uint8_t> &signature);
 
+    int32_t DoGenerateFileDigest(PkgStreamPtr stream, uint8_t flags, const size_t fileLen, PkgBuffer &buff,
+        std::pair<DigestAlgorithm::DigestAlgorithmPtr, DigestAlgorithm::DigestAlgorithmPtr> &algorithm);
+
     int32_t GenerateFileDigest(PkgStreamPtr stream,
         uint8_t digestMethod, uint8_t flags, std::vector<std::vector<uint8_t>> &digestInfos, size_t hashBufferLen = 0);
 
     void ClearPkgFile();
 
     int32_t SetSignVerifyKeyName(const std::string &keyName);
+
+    int32_t DoCreatePkgStream(PkgStreamPtr &stream, const std::string &fileName, int32_t type);
 
     int32_t CreatePkgStream(PkgStreamPtr &stream, const std::string &fileName, size_t size, int32_t type);
 

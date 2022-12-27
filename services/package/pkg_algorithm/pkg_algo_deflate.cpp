@@ -52,18 +52,17 @@ int32_t PkgAlgoDeflate::DeflateData(const PkgStreamPtr outStream, z_stream &zstr
     return PKG_SUCCESS;
 }
 
-int32_t PkgAlgoDeflate::Pack(const PkgStreamPtr inStream, const PkgStreamPtr outStream,
-    PkgAlgorithmContext &context)
+int32_t PkgAlgoDeflate::PackCalculate(PkgAlgorithmContext &context, const PkgStreamPtr inStream,
+    const PkgStreamPtr outStream, DigestAlgorithm::DigestAlgorithmPtr algorithm)
 {
-    DigestAlgorithm::DigestAlgorithmPtr algorithm = PkgAlgorithmFactory::GetDigestAlgorithm(context.digestMethod);
-    PKG_CHECK(algorithm != nullptr, return PKG_NOT_EXIST_ALGORITHM, "Can not get digest algor");
-    PKG_CHECK(inStream != nullptr && outStream != nullptr, return PKG_INVALID_PARAM, "Param context null!");
-
     PkgBuffer inBuffer = {};
     PkgBuffer outBuffer = {};
     z_stream zstream;
     int32_t ret = InitStream(zstream, true, inBuffer, outBuffer);
-    PKG_CHECK(ret == PKG_SUCCESS, return ret, "fail InitStream ");
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("fail InitStream");
+        return ret;
+    }
     size_t remainSize = context.unpackedSize;
     uint32_t crc = 0;
     size_t srcOffset = context.srcOffset;
@@ -74,7 +73,10 @@ int32_t PkgAlgoDeflate::Pack(const PkgStreamPtr inStream, const PkgStreamPtr out
         size_t readLen = 0;
         if (zstream.avail_in == 0) {
             ret = ReadData(inStream, srcOffset, inBuffer, remainSize, readLen);
-            PKG_CHECK(ret == PKG_SUCCESS, break, "Read data fail!");
+            if (ret != PKG_SUCCESS) {
+                PKG_LOGE("Read data fail!");
+                break;
+            }
             zstream.next_in = reinterpret_cast<unsigned char *>(inBuffer.buffer);
             zstream.avail_in = readLen;
             srcOffset += readLen;
@@ -82,15 +84,38 @@ int32_t PkgAlgoDeflate::Pack(const PkgStreamPtr inStream, const PkgStreamPtr out
             algorithm->Calculate(crcResult, inBuffer, readLen);
         }
         ret = DeflateData(outStream, zstream, ((remainSize == 0) ? Z_FINISH : Z_NO_FLUSH), outBuffer, destOffset);
-        PKG_CHECK(ret == PKG_SUCCESS, break, "error write data deflateLen: %zu", destOffset);
+        if (ret != PKG_SUCCESS) {
+            PKG_LOGE("error write data deflateLen: %zu", destOffset);
+            break;
+        }
     }
     ReleaseStream(zstream, true);
-    PKG_CHECK(ret == PKG_SUCCESS, return ret, "error write data");
-    PKG_CHECK(srcOffset == context.unpackedSize, return PKG_INVALID_PKG_FORMAT,
-        "original size error %zu %zu", srcOffset, context.unpackedSize);
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("error write data");
+        return ret;
+    }
+    if (srcOffset != context.unpackedSize) {
+        PKG_LOGE("original size error %zu %zu", srcOffset, context.unpackedSize);
+        return PKG_INVALID_PKG_FORMAT;
+    }
     context.crc = crc;
     context.packedSize = destOffset - context.destOffset;
     return ret;
+}
+
+int32_t PkgAlgoDeflate::Pack(const PkgStreamPtr inStream, const PkgStreamPtr outStream,
+    PkgAlgorithmContext &context)
+{
+    if (inStream == nullptr || outStream == nullptr) {
+        PKG_LOGE("Param context null!");
+        return PKG_INVALID_PARAM;
+    }
+    DigestAlgorithm::DigestAlgorithmPtr algorithm = PkgAlgorithmFactory::GetDigestAlgorithm(context.digestMethod);
+    if (algorithm == nullptr) {
+        PKG_LOGE("Can not get digest algor");
+        return PKG_NOT_EXIST_ALGORITHM;
+    }
+    return PackCalculate(context, inStream, outStream, algorithm);
 }
 
 int32_t PkgAlgoDeflate::UnpackCalculate(PkgAlgorithmContext &context, const PkgStreamPtr inStream,

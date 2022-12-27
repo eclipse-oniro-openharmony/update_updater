@@ -23,6 +23,14 @@
 #include "pkg_utils.h"
 
 namespace Hpackage {
+struct PkgBufferMessage {
+    PkgAlgorithmContext context;
+    PkgBuffer inBuffer;
+    PkgBuffer outBuffer;
+    size_t inBuffSize;
+    size_t outBuffSize;
+};
+
 class PkgAlgorithmLz4 : public PkgAlgorithm {
 public:
     static const uint32_t LZ4S_MAGIC_NUMBER = 0x184D2204;
@@ -36,8 +44,14 @@ public:
 
     ~PkgAlgorithmLz4() override {}
 
+    int32_t PackCalculate(const PkgStreamPtr inStream, const PkgStreamPtr outStream,
+        PkgBufferMessage &msg, size_t &dataLen, LZ4F_compressionContext_t &ctx);
+
     int32_t Pack(const PkgStreamPtr inStream, const PkgStreamPtr outStream,
         PkgAlgorithmContext &context) override;
+
+    int32_t UnpackDecode(const PkgStreamPtr inStream, const PkgStreamPtr outStream,
+        PkgBufferMessage &msg, size_t &nextToRead, LZ4F_decompressionContext_t &ctx);
 
     int32_t Unpack(const PkgStreamPtr inStream,
         const PkgStreamPtr outStream, PkgAlgorithmContext &context) override;
@@ -74,10 +88,16 @@ public:
     ~PkgAlgorithmBlockLz4() override {}
 
     int32_t Pack(const PkgStreamPtr inStream,
-        const PkgStreamPtr outStream, PkgAlgorithmContext &) override;
+        const PkgStreamPtr outStream, PkgAlgorithmContext &context) override;
+
+    int32_t PackCalculate(const PkgStreamPtr inStream, const PkgStreamPtr outStream,
+        PkgAlgorithmContext &context, PkgBuffer &inBuffer, PkgBuffer &outBuffer);
 
     int32_t Unpack(const PkgStreamPtr inStream, const PkgStreamPtr outStream,
-        PkgAlgorithmContext &) override;
+        PkgAlgorithmContext &context) override;
+
+    int32_t UnpackCalculate(const PkgStreamPtr inStream, const PkgStreamPtr outStream,
+        PkgAlgorithmContext &context, int &inBuffSize);
 };
 } // namespace Hpackage
 #endif
