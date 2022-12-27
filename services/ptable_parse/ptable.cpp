@@ -76,7 +76,7 @@ bool Ptable::ParsePtableDataNode(const JsonNode &ptableDataNode)
             return false;
         }
         *(dataVar.second) = *dataValue;
-        LOG(ERROR) << "set " << dataVar.first << " : " << *dataValue;
+        LOG(INFO) << "set " << dataVar.first << " : " << *dataValue;
     }
     return true;
 }
