@@ -128,7 +128,7 @@ int32_t BlocksDiff::MakePatch(const BlockBuffer &newInfo,
     return ret;
 }
 
-int32_t BlocksDiff::WriteCtrlData(const std::vector<ControlData> &controlDatas, size_t &patchSize,
+int32_t BlocksDiff::WriteCtrlDatas(const std::vector<ControlData> &controlDatas, size_t &patchSize,
     size_t &controlSize, size_t &diffDataSize, size_t &extraDataSize)
 {
     size_t offSet = patchSize;
@@ -186,7 +186,7 @@ int32_t BlocksDiff::MakePatch(const BlockBuffer &newInfo, const BlockBuffer &old
     size_t controlSize = 0;
     size_t diffDataSize = 0;
     size_t extraDataSize = 0;
-    ret = writeCtrlData(controlDatas, patchSize, controlSize, diffDataSize, extraDataSize);
+    ret = WriteCtrlDatas(controlDatas, patchSize, controlSize, diffDataSize, extraDataSize);
     if (ret != 0) {
         PATCH_LOGE("Failed to write ctrl data");
         return ret;

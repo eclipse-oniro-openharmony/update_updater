@@ -119,12 +119,10 @@ int32_t BlocksPatch::ReadHeader(int64_t &controlDataSize, int64_t &diffDataSize,
     PATCH_LOGI("Restore patch hash %zu %s",
         patchInfo_.length - patchInfo_.start, GeneraterBufferHash(patchData).c_str());
     uint8_t *header = patchInfo_.buffer + patchInfo_.start;
-    // Compare header
     if (memcmp(header, BSDIFF_MAGIC, std::char_traits<char>::length(BSDIFF_MAGIC)) != 0) {
         PATCH_LOGE("Corrupt patch, patch head != BSDIFF40");
         return -1;
     }
-
     /* Read lengths from header */
     size_t offset = std::char_traits<char>::length(BSDIFF_MAGIC);
     controlDataSize = ReadLE64(header + offset);
@@ -133,7 +131,6 @@ int32_t BlocksPatch::ReadHeader(int64_t &controlDataSize, int64_t &diffDataSize,
     offset += sizeof(int64_t);
     newSize = ReadLE64(header + offset);
     offset += sizeof(int64_t);
-
     if (controlDataSize < 0) {
         PATCH_LOGE("Invalid control data size");
         return -1;
@@ -142,9 +139,10 @@ int32_t BlocksPatch::ReadHeader(int64_t &controlDataSize, int64_t &diffDataSize,
         PATCH_LOGE("Invalid new data size");
         return -1;
     }
-    PATCH_CHECK(diffDataSize >= 0 && (diffDataSize + controlDataSize) <= static_cast<int64_t>(patchInfo_.length),
-        return -1, "Invalid patch data size");
-
+    if (diffDataSize < 0 || (diffDataSize + controlDataSize) > static_cast<int64_t>(patchInfo_.length)) {
+        PATCH_LOGE("Invalid patch data size");
+        return -1;
+    }
     BlockBuffer patchBuffer = {header, patchInfo_.length - patchInfo_.start};
     controlDataReader_.reset(new BZip2BufferReadAdapter(offset, static_cast<size_t>(controlDataSize), patchBuffer));
     offset += static_cast<size_t>(controlDataSize);
@@ -152,8 +150,10 @@ int32_t BlocksPatch::ReadHeader(int64_t &controlDataSize, int64_t &diffDataSize,
     offset += static_cast<size_t>(diffDataSize);
     extraDataReader_.reset(new BZip2BufferReadAdapter(offset,
         patchInfo_.length - patchInfo_.start - offset, patchBuffer));
-    PATCH_CHECK(controlDataReader_ != nullptr && diffDataReader_ != nullptr && extraDataReader_ != nullptr,
-        return -1, "Failed to create reader");
+    if (controlDataReader_ == nullptr || diffDataReader_ == nullptr || extraDataReader_ == nullptr) {
+        PATCH_LOGE("Failed to create reader");
+        return -1;
+    } 
     controlDataReader_->Open();
     diffDataReader_->Open();
     extraDataReader_->Open();
