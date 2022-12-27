@@ -70,7 +70,7 @@ UpdaterStatus IsSpaceCapacitySufficient(const std::vector<std::string> &packageP
 
 bool IsSDCardExist(const std::string &sdcard_path);
 
-void SaveLogs()
+void SaveLogs();
 
 void PostUpdater(bool clearMisc);
 
