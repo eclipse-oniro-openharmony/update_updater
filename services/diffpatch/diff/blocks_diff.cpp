@@ -128,6 +128,36 @@ int32_t BlocksDiff::MakePatch(const BlockBuffer &newInfo,
     return ret;
 }
 
+int32_t BlocksDiff::WriteCtrlData(const std::vector<ControlData> &controlDatas, size_t &patchSize,
+    size_t &controlSize, size_t &diffDataSize, size_t &extraDataSize)
+{
+    size_t offSet = patchSize;
+    ret = WriteControlData(controlDatas, patchSize);
+    if (ret != BZ_OK) {
+        PATCH_LOGE("Failed to write control data");
+        return ret;
+    }
+    controlSize = patchSize - offSet;
+
+    // 写diff数据
+    offSet = patchSize;
+    ret = WriteDiffData(controlDatas, patchSize);
+    if (ret != BZ_OK) {
+        PATCH_LOGE("Failed to write diff data");
+        return ret;
+    }
+    diffDataSize = patchSize - offSet;
+
+    offSet = patchSize;
+    ret = WriteExtraData(controlDatas, patchSize);
+    if (ret != BZ_OK) {
+        PATCH_LOGE("Failed to write extra data");
+        return ret;
+    }
+    extraDataSize = patchSize - offSet;
+    return 0;
+}
+
 int32_t BlocksDiff::MakePatch(const BlockBuffer &newInfo, const BlockBuffer &oldInfo, size_t &patchSize)
 {
     if (suffixArray_ == nullptr) {
@@ -145,6 +175,7 @@ int32_t BlocksDiff::MakePatch(const BlockBuffer &newInfo, const BlockBuffer &old
         PATCH_LOGE("Failed to get control data");
         return ret;
     }
+
     patchSize = 0;
     ret = WritePatchHeader(0, 0, 0, patchSize);
     if (ret != 0) {
@@ -152,22 +183,14 @@ int32_t BlocksDiff::MakePatch(const BlockBuffer &newInfo, const BlockBuffer &old
         return ret;
     }
 
-    size_t controlSize = patchSize;
-    ret = WriteControlData(controlDatas, patchSize);
-    PATCH_CHECK(ret == BZ_OK, return ret, "Failed to write diff data");
-    controlSize = patchSize - controlSize;
-
-    // 写diff数据
-    size_t diffDataSize = patchSize;
-    ret = WriteDiffData(controlDatas, patchSize);
-    PATCH_CHECK(ret == BZ_OK, return ret, "Failed to write diff data");
-    diffDataSize = patchSize - diffDataSize;
-
-    size_t extraDataSize = patchSize;
-    ret = WriteExtraData(controlDatas, patchSize);
-    PATCH_CHECK(ret == BZ_OK, return ret, "Failed to write extra data");
-    extraDataSize = patchSize - extraDataSize;
-
+    size_t controlSize = 0;
+    size_t diffDataSize = 0;
+    size_t extraDataSize = 0;
+    ret = writeCtrlData(controlDatas, patchSize, controlSize, diffDataSize, extraDataSize);
+    if (ret != 0) {
+        PATCH_LOGE("Failed to write ctrl data");
+        return ret;
+    }
     // write real data
     size_t headerLen = 0;
     ret = WritePatchHeader(controlSize, diffDataSize, newInfo.length, headerLen);

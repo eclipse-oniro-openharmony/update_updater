@@ -65,6 +65,8 @@ private:
 
     int32_t GetCtrlDatas(const BlockBuffer &newInfo,
         const BlockBuffer &oldInfo, std::vector<ControlData> &controlDatas);
+    int32_t WriteCtrlDatas(const std::vector<ControlData> &controlDatas, size_t &patchSize,
+        size_t &controlSize, size_t &diffDataSize, size_t &extraDataSize);
     int32_t WriteControlData(const std::vector<ControlData> controlDatas, size_t &patchSize);
     int32_t WriteDiffData(const std::vector<ControlData> controlDatas, size_t &patchSize);
     int32_t WriteExtraData(const std::vector<ControlData> controlDatas, size_t &patchSize);
