@@ -327,7 +327,7 @@ static UpdaterStatus CalcProgress(const UpdaterParams &upParams,
             LOG(ERROR) << "Can not find updatePackage : " << path;
             return UPDATE_ERROR;
         }
-        struct stat st ;
+        struct stat st {};
         if (stat(realPath, &st) == 0) {
             everyPkgSize.push_back(st.st_size);
             allPkgSize += st.st_size;
