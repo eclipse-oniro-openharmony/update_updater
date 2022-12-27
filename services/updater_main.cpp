@@ -150,7 +150,7 @@ static int OtaUpdatePreCheck(PkgManager::PkgManagerPtr pkgManager, const std::st
     return PKG_SUCCESS;
 }
 
-static UpdaterStatus VerifyPackages(UpdaterParams &upParams)
+static UpdaterStatus VerifyPackages(const UpdaterParams &upParams)
 {
     LOG(INFO) << "Verify packages start...";
     UPDATER_UI_INSTANCE.ShowProgressPage();
