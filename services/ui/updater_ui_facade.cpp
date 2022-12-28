@@ -97,7 +97,7 @@ void UpdaterUiFacade::ShowProgress(float value) const
         return;
     }
     static float lastValue = 0.0;
-    if (value != lastValue) {
+    if ((value - lastValue) > 0.01) {
         LOG(INFO) << "current progress " << value;
         lastValue = value;
     }
