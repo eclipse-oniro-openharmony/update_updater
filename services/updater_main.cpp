@@ -59,6 +59,7 @@ constexpr struct option OPTIONS[] = {
     { "upgraded_pkg_num", required_argument, nullptr, 0 },
     { nullptr, 0, nullptr, 0 },
 };
+constexpr float VERIFY_PERCENT = 0.05;
 
 static void SetMessageToMisc(const int message, const std::string headInfo)
 {
@@ -119,6 +120,61 @@ int FactoryReset(FactoryResetMode mode, const std::string &path)
     return DoFactoryReset(mode, path);
 }
 
+static int OtaUpdatePreCheck(PkgManager::PkgManagerPtr pkgManager, const std::string &packagePath)
+{
+    UPDATER_INIT_RECORD;
+    if (pkgManager == nullptr) {
+        LOG(ERROR) << "Fail to GetPackageInstance";
+        UPDATER_LAST_WORD(PKG_INVALID_FILE);
+        return UPDATE_CORRUPT;
+    }
+    char realPath[PATH_MAX + 1] = {0};
+    if (realpath(packagePath.c_str(), realPath) == nullptr) {
+        LOG(ERROR) << "realpath error";
+        UPDATER_LAST_WORD(PKG_INVALID_FILE);
+        return PKG_INVALID_FILE;
+    }
+    if (access(realPath, F_OK) != 0) {
+        LOG(ERROR) << "package does not exist!";
+        UPDATER_LAST_WORD(PKG_INVALID_FILE);
+        return PKG_INVALID_FILE;
+    }
+
+    int32_t ret = pkgManager->VerifyOtaPackage(packagePath);
+    if (ret != PKG_SUCCESS) {
+        LOG(INFO) << "VerifyOtaPackage fail ret :"<< ret;
+        UPDATER_LAST_WORD(ret);
+        return ret;
+    }
+
+    return PKG_SUCCESS;
+}
+
+static UpdaterStatus VerifyPackages(const UpdaterParams &upParams)
+{
+    LOG(INFO) << "Verify packages start...";
+    UPDATER_UI_INSTANCE.ShowProgressPage();
+    UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_VERIFYPKG));
+
+    UPDATER_UI_INSTANCE.ShowProgress(0.0);
+    for (unsigned int i = upParams.pkgLocation; i < upParams.updatePackage.size(); i++) {
+        LOG(INFO) << "Verify package:" << upParams.updatePackage[i];
+        PkgManager::PkgManagerPtr manager = PkgManager::GetPackageInstance();
+        int32_t verifyret = OtaUpdatePreCheck(manager, upParams.updatePackage[i]);
+        PkgManager::ReleasePackageInstance(manager);
+
+        if (verifyret != PKG_SUCCESS) {
+            UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_VERIFYPKGFAIL), true);
+            UPDATER_LAST_WORD(UPDATE_CORRUPT);
+            return UPDATE_CORRUPT;
+        }
+    }
+
+    ProgressSmoothHandler(0, static_cast<int>(VERIFY_PERCENT * FULL_PERCENT_PROGRESS));
+    LOG(INFO) << "Verify packages successfull...";
+    return UPDATE_SUCCESS;
+}
+
 UpdaterStatus UpdaterFromSdcard()
 {
 #ifndef UPDATER_UT
@@ -153,6 +209,13 @@ UpdaterStatus UpdaterFromSdcard()
     UpdaterParams upParams {
         false, false, 0, 0, 1, 0, {SDCARD_CARD_PKG_PATH}
     };
+    // verify packages first
+    if (VerifyPackages(upParams) != UPDATE_SUCCESS) {
+        PkgManager::ReleasePackageInstance(pkgManager);
+        return UPDATE_ERROR;
+    }
+    upParams.initialProgress += VERIFY_PERCENT;
+
     STAGE(UPDATE_STAGE_BEGIN) << "UpdaterFromSdcard";
     LOG(INFO) << "UpdaterFromSdcard start, sdcard updaterPath : " << upParams.updatePackage[upParams.pkgLocation];
     UPDATER_UI_INSTANCE.ShowLog(TR(LOG_SDCARD_NOTMOVE));
@@ -264,13 +327,14 @@ static UpdaterStatus CalcProgress(const UpdaterParams &upParams,
             LOG(ERROR) << "Can not find updatePackage : " << path;
             return UPDATE_ERROR;
         }
-        struct stat st ;
-        if (stat(path.c_str(), &st) == 0) {
+        struct stat st {};
+        if (stat(realPath, &st) == 0) {
             everyPkgSize.push_back(st.st_size);
             allPkgSize += st.st_size;
+            LOG(INFO) << "pkg " << path << " size is:" << st.st_size;
         }
     }
-    pkgStartPosition.push_back(0);
+    pkgStartPosition.push_back(VERIFY_PERCENT);
     if (allPkgSize == 0) {
         LOG(ERROR) << "All packages's size is 0.";
         return UPDATE_ERROR;
@@ -278,21 +342,35 @@ static UpdaterStatus CalcProgress(const UpdaterParams &upParams,
     uint64_t startSize = 0;
     for (auto size : everyPkgSize) {
         startSize += size;
-        pkgStartPosition.push_back(static_cast<double>(startSize) / static_cast<double>(allPkgSize));
+        float percent = static_cast<double>(startSize) / static_cast<double>(allPkgSize) + VERIFY_PERCENT;
+        percent = (percent > 1.0) ? 1.0 : percent; // 1.0 : 100%
+        LOG(INFO) << "percent is:" << percent;
+        pkgStartPosition.push_back(percent);
     }
-    for (int i = 0; i < upParams.pkgLocation; i++) {
-        updateStartPosition += static_cast<double>(everyPkgSize[i]) / static_cast<double>(allPkgSize);
-    }
+
+    updateStartPosition = pkgStartPosition[upParams.pkgLocation];
     return UPDATE_SUCCESS;
 }
 
 static UpdaterStatus PreUpdatePackages(UpdaterParams &upParams)
 {
+    LOG(INFO) << "start to update packages, start index:" << upParams.pkgLocation;
+    for (unsigned int i = 0; i < upParams.updatePackage.size(); i++) {
+        LOG(INFO) << "package " << i << ":" << upParams.updatePackage[i] <<
+            " precent:" << upParams.currentPercentage;
+    }
+
     UpdaterStatus status = UPDATE_UNKNOWN;
     if (SetupPartitions() != 0) {
         UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_SETPART_FAIL), true);
         return UPDATE_ERROR;
     }
+
+    // verify packages first
+    if (VerifyPackages(upParams) != UPDATE_SUCCESS) {
+        return UPDATE_ERROR;
+    }
+
     // Only handle UPATE_ERROR and UPDATE_SUCCESS here.Let package verify handle others.
     if (IsSpaceCapacitySufficient(upParams.updatePackage) == UPDATE_ERROR) {
         return status;
@@ -319,10 +397,12 @@ static UpdaterStatus DoUpdatePackages(UpdaterParams &upParams)
     UPDATER_UI_INSTANCE.ShowProgress(updateStartPosition * FULL_PERCENT_PROGRESS);
     for (; upParams.pkgLocation < upParams.updatePackage.size(); upParams.pkgLocation++) {
         PkgManager::PkgManagerPtr manager = PkgManager::GetPackageInstance();
-        LOG(INFO) << "InstallUpdaterPackage pkg is " << upParams.updatePackage[upParams.pkgLocation];
         upParams.currentPercentage = pkgStartPosition[upParams.pkgLocation + 1] -
             pkgStartPosition[upParams.pkgLocation];
         upParams.initialProgress = pkgStartPosition[upParams.pkgLocation];
+        LOG(INFO) << "InstallUpdaterPackage pkg is " << upParams.updatePackage[upParams.pkgLocation] <<
+            " percent:" << upParams.initialProgress << "~" << pkgStartPosition[upParams.pkgLocation + 1];
+
         status = InstallUpdaterPackage(upParams, manager);
         SetMessageToMisc(upParams.pkgLocation + 1, "upgraded_pkg_num");
         ProgressSmoothHandler(
@@ -358,11 +438,11 @@ static void PostUpdatePackages(UpdaterParams &upParams, bool updateResult)
         upParams.pkgLocation = upParams.pkgLocation == 0 ? upParams.pkgLocation : (upParams.pkgLocation - 1);
     }
 
-    for (int i = 0; i < upParams.pkgLocation; i++) {
+    for (unsigned int i = 0; i < upParams.pkgLocation; i++) {
         writeBuffer += upParams.updatePackage[i] + "|pass\n";
     }
     writeBuffer += upParams.updatePackage[upParams.pkgLocation] + "|" + buf + "\n";
-    for (int i = upParams.pkgLocation + 1; i < upParams.updatePackage.size(); i++) {
+    for (unsigned int i = upParams.pkgLocation + 1; i < upParams.updatePackage.size(); i++) {
         writeBuffer += upParams.updatePackage[i] + "\n";
     }
     if (writeBuffer != "") {
@@ -375,11 +455,11 @@ static void PostUpdatePackages(UpdaterParams &upParams, bool updateResult)
 static UpdaterStatus InstallUpdaterPackages(UpdaterParams &upParams)
 {
     UpdaterStatus status = PreUpdatePackages(upParams);
-    if (status != UPDATE_SUCCESS) {
-        LOG(ERROR) << "PreUpdatePackages failed";
-        return status;
+
+    if (status == UPDATE_SUCCESS) {
+        status = DoUpdatePackages(upParams);
     }
-    status = DoUpdatePackages(upParams);
+
     PostUpdatePackages(upParams, status == UPDATE_SUCCESS);
     return status;
 }

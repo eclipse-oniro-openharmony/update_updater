@@ -44,7 +44,7 @@ struct UpdaterParams {
     int retryCount {};
     float initialProgress {};
     float currentPercentage {};
-    int pkgLocation {};
+    unsigned int pkgLocation {};
     std::vector<std::string> updatePackage {};
 };
 
@@ -79,8 +79,6 @@ std::vector<std::string> ParseParams(int argc, char **argv);
 bool ClearMisc();
 
 int GetBootMode(int &mode);
-
-int OtaUpdatePreCheck(Hpackage::PkgManager::PkgManagerPtr pkgManager, const std::string &packagePath);
 
 std::string GetWorkPath();
 } // Updater
