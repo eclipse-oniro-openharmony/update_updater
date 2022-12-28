@@ -59,6 +59,8 @@ public:
 
     int32_t Init(const PkgManager::FileInfoPtr fileInfo, PkgStreamPtr inStream) override;
 
+    int32_t DoEncodeHeader(UpgradeCompInfo &comp);
+
     int32_t EncodeHeader(PkgStreamPtr inStream, size_t startOffset, size_t &encodeLen) override;
 
     int32_t Pack(PkgStreamPtr inStream, size_t startOffset, size_t &encodeLen) override;
