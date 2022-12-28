@@ -163,19 +163,14 @@ int32_t ZipPkgFile::DoLoadPackage(size_t &fileLen)
     }
     // 先从文件尾部获取 EndCentralDir
     fileLen = pkgStream_->GetFileLength();
-    // PKG_CHECK(fileLen > 0, return PKG_INVALID_FILE, "invalid file to load");
     if (fileLen <= 0) {
         PKG_LOGE("invalid file to load");
         return PKG_INVALID_STATE;
     }
-    // PKG_CHECK(fileLen <= SIZE_MAX, return PKG_INVALID_FILE,
-    //     "Invalid file len %zu to load %s", fileLen, pkgStream_->GetFileName().c_str());
     if (fileLen > SIZE_MAX) {
         PKG_LOGE("Invalid file len %zu to load %s", fileLen, pkgStream_->GetFileName().c_str());
         return PKG_INVALID_FILE;
     }
-    // PKG_CHECK(fileLen >= static_cast<size_t>(sizeof(EndCentralDir)), return PKG_INVALID_FILE,
-    //     "Too small to be zip %s", pkgStream_->GetFileName().c_str());
     if (fileLen < static_cast<size_t>(sizeof(EndCentralDir))) {
         PKG_LOGE("Too small to be zip %s", pkgStream_->GetFileName().c_str());
         return PKG_INVALID_FILE;

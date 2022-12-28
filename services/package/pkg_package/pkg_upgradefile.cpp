@@ -485,25 +485,48 @@ int32_t UpgradePkgFile::ReadUpgradePkgHeader(const PkgBuffer &buffer, size_t &re
     return PKG_SUCCESS;
 }
 
-int32_t UpgradeFileEntry::EncodeHeader(PkgStreamPtr inStream, size_t startOffset, size_t &encodeLen)
+int32_t UpgradeFileEntry::DoEncodeHeader(UpgradeCompInfo &comp)
 {
-    PkgStreamPtr outStream = pkgFile_->GetPkgStream();
-    PKG_CHECK(outStream != nullptr && inStream != nullptr, return PKG_INVALID_PARAM,
-        "outStream or inStream null for %s", fileName_.c_str());
-
-    UpgradeCompInfo comp;
-    PKG_CHECK(!memset_s(&comp, sizeof(comp), 0, sizeof(comp)),
-        return PKG_NONE_MEMORY, "UpgradeFileEntry memset_s failed");
-
+    if (memset_s(&comp, sizeof(comp), 0, sizeof(comp))) {
+        PKG_LOGE("UpgradeFileEntry memset_s failed");
+        return PKG_NONE_MEMORY;
+    }
     size_t len = 0;
     int32_t ret = PkgFile::ConvertStringToBuffer(
         fileInfo_.fileInfo.identity, {comp.address, sizeof(comp.address)}, len);
-    PKG_CHECK(ret == PKG_SUCCESS, return PKG_INVALID_PARAM, "outStream or inStream null for %s", fileName_.c_str());
-    ret = PkgFile::ConvertStringToBuffer(fileInfo_.version, {comp.version, sizeof(comp.version)}, len);
-    PKG_CHECK(ret == PKG_SUCCESS, return PKG_INVALID_PARAM, "outStream or inStream null for %s", fileName_.c_str());
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("outStream or inStream null for %s", fileName_.c_str());
+        return PKG_INVALID_PARAM;
+    }
 
+    ret = PkgFile::ConvertStringToBuffer(fileInfo_.version, {comp.version, sizeof(comp.version)}, len);
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("outStream or inStream null for %s", fileName_.c_str());
+        return PKG_INVALID_PARAM;
+    }
     ret = memcpy_s(comp.digest, sizeof(comp.digest), fileInfo_.digest, sizeof(fileInfo_.digest));
-    PKG_CHECK(ret == EOK, return ret, "Fail to memcpy_s ret: %d", ret);
+    if (ret != EOK) {
+        PKG_LOGE("Fail to memcpy_s ret: %d", ret);
+        return ret;
+    }
+    return PKG_SUCCESS;
+}
+
+int32_t UpgradeFileEntry::EncodeHeader(PkgStreamPtr inStream, size_t startOffset, size_t &encodeLen)
+{
+    PkgStreamPtr outStream = pkgFile_->GetPkgStream();
+    if (outStream == nullptr || inStream == nullptr) {
+        PKG_LOGE("outStream or inStream null for %s", fileName_.c_str());
+        return PKG_INVALID_PARAM;
+    }
+
+    UpgradeCompInfo comp;
+    int ret = DoEncodeHeader(comp);
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("DoEncodeHeader failed");
+        return ret;
+    }
+
     WriteLE32(reinterpret_cast<uint8_t *>(&comp.size), fileInfo_.fileInfo.unpackedSize);
     WriteLE16(reinterpret_cast<uint8_t *>(&comp.id), fileInfo_.id);
     WriteLE32(reinterpret_cast<uint8_t *>(&comp.originalSize), fileInfo_.originalSize);
@@ -514,7 +537,10 @@ int32_t UpgradeFileEntry::EncodeHeader(PkgStreamPtr inStream, size_t startOffset
     headerOffset_ = startOffset;
     PkgBuffer buffer(reinterpret_cast<uint8_t *>(&comp), sizeof(comp));
     ret = outStream->Write(buffer, sizeof(comp), startOffset);
-    PKG_CHECK(ret == PKG_SUCCESS, return ret, "Fail write header for %s", fileName_.c_str());
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("Fail write header for %s", fileName_.c_str());
+        return ret;
+    }
     encodeLen = sizeof(UpgradeCompInfo);
 
     PKG_LOGI("EncodeHeader startOffset: %zu %zu packedSize:%zu %zu ", headerOffset_, dataOffset_,
