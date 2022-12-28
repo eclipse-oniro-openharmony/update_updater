@@ -21,6 +21,8 @@
 #include <iterator>
 #include <unistd.h>
 #include <vector>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include "dump.h"
 #include "pkg_gzipfile.h"
 #include "pkg_lz4file.h"
