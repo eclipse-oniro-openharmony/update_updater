@@ -24,6 +24,7 @@ config("package_config") {
   include_dirs = [
     "//base/update/updater/interfaces/kits/include",
     "//base/update/updater/utils/include",
+    "//base/update/updater/services/include",
     "//third_party/zlib",
     "//third_party/openssl/include",
     "//third_party/lz4/lib",
