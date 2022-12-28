@@ -414,7 +414,7 @@ int32_t UpgradePkgFile::ReadComponents(const PkgBuffer &buffer, size_t &parsedLe
     return PKG_SUCCESS;
 }
 
-int32_t UpgradePkgFile::DoReadUpgradePkgHeader(const PkgBuffer &buffer, size_t currLen, PkgTlv &tlv)
+void UpgradePkgFile::DoReadUpgradePkgHeader(const PkgBuffer &buffer, size_t &currLen, PkgTlv &tlv)
 {
     pkgInfo_.pkgInfo.pkgType = PkgFile::PKG_TYPE_UPGRADE;
     pkgInfo_.pkgInfo.signMethod = PKG_SIGN_METHOD_RSA;
@@ -434,13 +434,6 @@ int32_t UpgradePkgFile::DoReadUpgradePkgHeader(const PkgBuffer &buffer, size_t c
         sizeof(header->softwareVersion)});
     PkgFile::ConvertBufferToString(pkgInfo_.productUpdateId, {header->productUpdateId,
         sizeof(header->productUpdateId)});
-    algorithm = PkgAlgorithmFactory::GetDigestAlgorithm(pkgInfo_.pkgInfo.digestMethod);
-    if (algorithm == nullptr) {
-        PKG_LOGE("Invalid file %s", pkgStream_->GetFileName().c_str());
-        return PKG_NOT_EXIST_ALGORITHM;
-    }
-    algorithm->Init();
-    return PKG_SUCCESS;
 }
 
 int32_t UpgradePkgFile::ReadUpgradePkgHeader(const PkgBuffer &buffer, size_t &realLen,
@@ -455,12 +448,13 @@ int32_t UpgradePkgFile::ReadUpgradePkgHeader(const PkgBuffer &buffer, size_t &re
         PKG_LOGE("Fail to read header");
         return ret;
     }
-    ret = DoReadUpgradePkgHeader(buffer, currLen, tlv);
-    if (ret != PKG_SUCCESS) {
-        PKG_LOGE("Fail to DoReadUpgradePkgHeader");
-        return ret;
+    DoReadUpgradePkgHeader(buffer, currLen, tlv);
+    algorithm = PkgAlgorithmFactory::GetDigestAlgorithm(pkgInfo_.pkgInfo.digestMethod);
+    if (algorithm == nullptr) {
+        PKG_LOGE("Invalid file %s", pkgStream_->GetFileName().c_str());
+        return PKG_NOT_EXIST_ALGORITHM;
     }
-
+    algorithm->Init();
 
     if (currLen + tlv.length >= readLen) { // Extra TLV information, read it.
         realLen = currLen + tlv.length;
