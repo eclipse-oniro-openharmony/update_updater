@@ -381,13 +381,38 @@ public:
         lz4Info.blockIndependence = 0;
     }
 
+    int CheckDataIntegrityLz4(Hpackage::Lz4FileInfo &lz4Info, size_t fileSize,
+        PkgManager::StreamPtr stream, void *mappedData, std::vector<uint8_t> &digest)
+    {
+        size_t addrOffset = 4;
+        TestDecompressLz4plus(lz4Info);
+        Hpackage::PkgBuffer buffer(static_cast<uint8_t*>(mappedData) + addrOffset, fileSize);
+        int32_t ret = pkgManager_->DecompressBuffer(&lz4Info.fileInfo, buffer, stream);
+
+        // 生成摘要，检查数据完整
+        SHA256_CTX sha256Ctx = {};
+        SHA256_Init(&sha256Ctx);
+        SHA256_Update(&sha256Ctx, static_cast<const uint8_t*>(mappedData), lz4Info.fileInfo.packedSize + 4);
+        SHA256_Final(digest.data(), &sha256Ctx);
+        if (ret != 0) {
+            PKG_LOGE("Can not decompress buff ");
+            return -1;
+        }
+        PKG_LOGI("GetLz4UncompressedData packedSize:%zu unpackedSize:%zu fileSize: %zu",
+            lz4Info.fileInfo.packedSize, lz4Info.fileInfo.unpackedSize, fileSize);
+        return 0;
+    }
+
     int TestDecompressLz4(Hpackage::Lz4FileInfo &lz4Info,
         std::vector<uint8_t> &uncompressedData, std::vector<uint8_t> &digest)
     {
         std::string testFileName = TEST_PATH_FROM + "../diffpatch/PatchLz4test_new.lz4";
         size_t fileSize = GetFileSize(testFileName);
         int32_t fd = open(testFileName.c_str(), O_RDWR);
-        PKG_CHECK(fd > 0, return -1, "Can not open file ");
+        if (fd <= 0) {
+            PKG_LOGE("Can not open file ");
+            return -1;
+        }
 
         size_t uncompressedDataSize = 1024;
         uncompressedData.resize(uncompressedDataSize);
@@ -411,28 +436,22 @@ public:
             [&](Hpackage::PkgManager::StreamPtr stream) {
             pkgManager_->ClosePkgStream(stream);
         });
-        PKG_CHECK(outStream != nullptr, close(fd); return -1, "Can not create stream ");
+        if (outStream == nullptr) {
+            PKG_LOGE("Can not create stream ");
+            close(fd);
+            return -1;
+        }
 
         void* mappedData = mmap(nullptr, fileSize, PROT_READ, MAP_SHARED, fd, 0);
-        PKG_CHECK(mappedData != MAP_FAILED, close(fd); return -2, "Can not mmap ");
-
-        size_t addrOffset = 4;
-        TestDecompressLz4plus(lz4Info);
-        Hpackage::PkgBuffer buffer(static_cast<uint8_t*>(mappedData) + addrOffset, fileSize);
-        int32_t ret = pkgManager_->DecompressBuffer(&lz4Info.fileInfo, buffer, outStream.get());
-
-        // 生成摘要，检查数据完整
-        SHA256_CTX sha256Ctx = {};
-        SHA256_Init(&sha256Ctx);
-        SHA256_Update(&sha256Ctx, static_cast<const uint8_t*>(mappedData), lz4Info.fileInfo.packedSize + 4);
-        SHA256_Final(digest.data(), &sha256Ctx);
-
+        if (mappedData == MAP_FAILED) {
+            PKG_LOGE("Can not mmap ");
+            close(fd);
+            return -2;
+        }
+        int ret = CheckDataIntegrityLz4(lz4Info, fileSize, outStream.get(), mappedData, digest);
         munmap(mappedData, fileSize);
         close(fd);
-        PKG_CHECK(ret == 0, return -1, "Can not decompress buff ");
-        PKG_LOGE("GetLz4UncompressedData packedSize:%zu unpackedSize:%zu fileSize: %zu",
-            lz4Info.fileInfo.packedSize, lz4Info.fileInfo.unpackedSize, fileSize);
-        return 0;
+        return ret;
     }
 
     void TestDecompressGzipInitFile(Hpackage::ZipFileInfo &zipInfo, size_t &offset,
@@ -472,6 +491,31 @@ public:
         return;
     }
 
+    int CheckDataIntegrityGzip(Hpackage::ZipFileInfo &zipInfo, size_t fileSize,
+        PkgManager::StreamPtr stream, void *mappedData, std::vector<uint8_t> &digest)
+    {
+        pkgManager_ = static_cast<PkgManagerImpl*>(PkgManager::GetPackageInstance());
+        EXPECT_NE(pkgManager_, nullptr);
+        size_t offset = 10;
+        TestDecompressGzipInitFile(zipInfo, offset, fileSize, mappedData);
+
+        Hpackage::PkgBuffer data(reinterpret_cast<uint8_t*>(mappedData) + offset, fileSize);
+        int32_t ret = pkgManager_->DecompressBuffer(&zipInfo.fileInfo, data, stream);
+
+        // 生成摘要，检查数据完整
+        SHA256_CTX sha256Ctx = {};
+        SHA256_Init(&sha256Ctx);
+        SHA256_Update(&sha256Ctx, reinterpret_cast<const uint8_t*>(mappedData) + offset, zipInfo.fileInfo.packedSize);
+        SHA256_Final(digest.data(), &sha256Ctx);
+        if (ret != 0) {
+            PKG_LOGE("Can not decompress buff ");
+            return -1;
+        }
+        PKG_LOGI("GetGZipUncompressedData packedSize:%zu unpackedSize:%zu",
+            zipInfo.fileInfo.packedSize, zipInfo.fileInfo.unpackedSize);
+        return 0;
+    }
+
     int TestDecompressGzip(Hpackage::ZipFileInfo &zipInfo, std::vector<uint8_t> &uncompressedData,
         std::vector<uint8_t> &digest)
     {
@@ -503,32 +547,22 @@ public:
             [&](Hpackage::PkgManager::StreamPtr stream) {
             pkgManager_->ClosePkgStream(stream);
         });
-        PKG_CHECK(outStream != nullptr, close(fd); return -1, "Can not create stream ");
+        if (outStream == nullptr) {
+            PKG_LOGE("Can not create stream ");
+            close(fd);
+            return -1;
+        }
 
         void* mappedData = mmap(nullptr, fileSize, PROT_READ, MAP_SHARED, fd, 0);
-        PKG_CHECK(mappedData != MAP_FAILED, close(fd); return -2, "Can not mmap ");
-
-        pkgManager_ = static_cast<PkgManagerImpl*>(PkgManager::GetPackageInstance());
-        EXPECT_NE(pkgManager_, nullptr);
-        size_t offset = 10;
-        TestDecompressGzipInitFile(zipInfo, offset, fileSize, mappedData);
-
-        Hpackage::PkgBuffer data(reinterpret_cast<uint8_t*>(mappedData) + offset, fileSize);
-        int32_t ret = pkgManager_->DecompressBuffer(&zipInfo.fileInfo, data, outStream.get());
-
-        // 生成摘要，检查数据完整
-        SHA256_CTX sha256Ctx = {};
-        SHA256_Init(&sha256Ctx);
-        SHA256_Update(&sha256Ctx, reinterpret_cast<const uint8_t*>(mappedData) + offset, zipInfo.fileInfo.packedSize);
-        SHA256_Final(digest.data(), &sha256Ctx);
-
+        if (mappedData == MAP_FAILED) {
+            PKG_LOGE("Can not mmap ");
+            close(fd);
+            return -2;
+        }
+        int ret = CheckDataIntegrityGzip(zipInfo, fileSize, outStream.get(), mappedData, digest);
         munmap(mappedData, fileSize);
         close(fd);
-        PKG_CHECK(ret == 0, return -1, "Can not decompress buff ");
-        PKG_LOGE("GetGZipUncompressedData packedSize:%zu unpackedSize:%zu",
-            zipInfo.fileInfo.packedSize, zipInfo.fileInfo.unpackedSize);
-
-        return 0;
+        return ret;
     }
 
     int TestCompressBuffer(Hpackage::FileInfo &info, std::vector<uint8_t> uncompressedData,

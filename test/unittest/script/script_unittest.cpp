@@ -81,7 +81,10 @@ public:
             return PKG_INVALID_FILE;
         }
         file = fopen(realPath, "rb");
-        PKG_CHECK(file != nullptr, return PKG_INVALID_FILE, "Fail to open file %s ", fileNameReal.c_str());
+        if (file == nullptr) {
+            PKG_LOGE("Fail to open file %s ", fileNameReal.c_str());
+            return PKG_INVALID_FILE;
+        }
         stream = new FileStream(this, fileNameReal, file, PkgStream::PkgStreamType_Read);
         return USCRIPT_SUCCESS;
     }

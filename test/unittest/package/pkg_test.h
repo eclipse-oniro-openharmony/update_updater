@@ -72,27 +72,38 @@ protected:
     {
         PkgManager::StreamPtr stream = nullptr;
         int32_t ret = pkgManager_->CreatePkgStream(stream, packagePath, 0, PkgStream::PkgStreamType_Read);
-        PKG_CHECK(ret == 0, return ret, "Create input stream fail %s", packagePath.c_str());
+        if (ret != 0) {
+            PKG_LOGE("Create input stream fail %s", packagePath.c_str());
+            return ret;
+        }
         size_t fileLen = stream->GetFileLength();
-        PKG_CHECK(fileLen > 0, pkgManager_->ClosePkgStream(stream); return -1, "invalid file to load");
-        PKG_CHECK(fileLen <= SIZE_MAX, pkgManager_->ClosePkgStream(stream); return -1,
-            "Invalid file len %zu to load %s", fileLen, stream->GetFileName().c_str());
+        if (fileLen <= 0 || fileLen > SIZE_MAX) {
+            PKG_LOGE("Invalid file len %zu to load %s", fileLen, stream->GetFileName().c_str());
+            pkgManager_->ClosePkgStream(stream);
+            return -1;
+        }
 
         size_t buffSize = 4096;
         Hpackage::PkgBuffer buff(buffSize);
         // 整包检查
-        DigestAlgorithm::DigestAlgorithmPtr algorithm = PkgAlgorithmFactory::GetDigestAlgorithm(PKG_DIGEST_TYPE_SHA256);
-        PKG_CHECK(algorithm != nullptr, pkgManager_->ClosePkgStream(stream); return -1,
-            "Invalid file %s", stream->GetFileName().c_str());
+        DigestAlgorithm::DigestAlgorithmPtr algorithm =
+            PkgAlgorithmFactory::GetDigestAlgorithm(PKG_DIGEST_TYPE_SHA256);
+        if (algorithm == nullptr) {
+            PKG_LOGE("Invalid file %s", stream->GetFileName().c_str());
+            pkgManager_->ClosePkgStream(stream);
+            return -1;
+        }
         algorithm->Init();
 
         size_t offset = 0;
         size_t readLen = 0;
         while (offset < fileLen) {
             ret = stream->Read(buff, offset, buffSize, readLen);
-            PKG_CHECK(ret == 0,
-                pkgManager_->ClosePkgStream(stream); return ret,
-                "read buffer fail %s", stream->GetFileName().c_str());
+            if (ret != 0) {
+                PKG_LOGE("read buffer fail %s", stream->GetFileName().c_str());
+                pkgManager_->ClosePkgStream(stream);
+                return ret;
+            }
             algorithm->Update(buff, readLen);
 
             offset += readLen;
