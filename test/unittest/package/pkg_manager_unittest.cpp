@@ -398,7 +398,7 @@ public:
             PKG_LOGE("Can not decompress buff ");
             return -1;
         }
-        PKG_LOGE("GetLz4UncompressedData packedSize:%zu unpackedSize:%zu fileSize: %zu",
+        PKG_LOGI("GetLz4UncompressedData packedSize:%zu unpackedSize:%zu fileSize: %zu",
             lz4Info.fileInfo.packedSize, lz4Info.fileInfo.unpackedSize, fileSize);
         return 0;
     }
@@ -409,7 +409,7 @@ public:
         std::string testFileName = TEST_PATH_FROM + "../diffpatch/PatchLz4test_new.lz4";
         size_t fileSize = GetFileSize(testFileName);
         int32_t fd = open(testFileName.c_str(), O_RDWR);
-        if(fd <= 0) {
+        if (fd <= 0) {
             PKG_LOGE("Can not open file ");
             return -1;
         }
@@ -511,7 +511,7 @@ public:
             PKG_LOGE("Can not decompress buff ");
             return -1;
         }
-        PKG_LOGE("GetGZipUncompressedData packedSize:%zu unpackedSize:%zu",
+        PKG_LOGI("GetGZipUncompressedData packedSize:%zu unpackedSize:%zu",
             zipInfo.fileInfo.packedSize, zipInfo.fileInfo.unpackedSize);
         return 0;
     }
