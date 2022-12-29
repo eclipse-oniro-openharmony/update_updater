@@ -51,6 +51,13 @@ struct __attribute__((packed)) UpgradeCompInfo {
     uint8_t digest[DIGEST_MAX_LEN];
 };
 
+struct __attribute__((packed))  UpgradeParam {
+    size_t readLen;
+    size_t dataOffset;
+    size_t srcOffset;
+    size_t currLen;
+};
+
 class UpgradeFileEntry : public PkgEntry {
 public:
     UpgradeFileEntry(PkgFilePtr pkgFile, uint32_t nodeId) : PkgEntry(pkgFile, nodeId) {}
@@ -113,6 +120,8 @@ public:
 
 private:
     int16_t GetPackageTlvType();
+    int32_t SaveEntry(const PkgBuffer &buffer, size_t &parsedLen, UpgradeParam &info,
+        DigestAlgorithm::DigestAlgorithmPtr algorithm, std::vector<std::string> &fileNames);
     int32_t ReadComponents(const PkgBuffer &buffer, size_t &parsedLen,
         DigestAlgorithm::DigestAlgorithmPtr algorithm, std::vector<std::string> &fileNames);
 

@@ -359,13 +359,60 @@ int32_t UpgradePkgFile::Verify(size_t start, DigestAlgorithm::DigestAlgorithmPtr
     return 0;
 }
 
+int32_t UpgradePkgFile::SaveEntry(const PkgBuffer &buffer, size_t &parsedLen, UpgradeParam &info,
+    DigestAlgorithm::DigestAlgorithmPtr algorithm, std::vector<std::string> &fileNames)
+{
+    UpgradeFileEntry *entry = new UpgradeFileEntry(this, nodeId_++);
+    if (entry == nullptr) {
+        PKG_LOGE("Fail create upgrade node for %s", pkgStream_->GetFileName().c_str());
+        return PKG_NONE_MEMORY;
+    }
+
+    // Extract header information from file
+    size_t decodeLen = 0;
+    PkgBuffer headerBuff(buffer.buffer + info.currLen, info.readLen - info.currLen);
+    size_t ret = entry->DecodeHeader(headerBuff, parsedLen + info.srcOffset, info.dataOffset, decodeLen);
+    if (ret != PKG_SUCCESS) {
+        delete entry;
+        PKG_LOGE("Fail to decode header");
+        return ret;
+    }
+    // Save entry
+    pkgEntryMapId_.insert(pair<uint32_t, PkgEntryPtr>(entry->GetNodeId(), entry));
+    pkgEntryMapFileName_.insert(std::pair<std::string, PkgEntryPtr>(entry->GetFileName(), entry));
+    fileNames.push_back(entry->GetFileName());
+
+    PkgBuffer signBuffer(buffer.buffer + info.currLen, decodeLen);
+    algorithm->Update(signBuffer, decodeLen); // Generate digest for components
+
+    info.currLen += decodeLen;
+    info.srcOffset += decodeLen;
+    // PKG_CHECK(entry->GetFileInfo() != nullptr, delete entry; return PKG_INVALID_FILE, "Failed to get file info");
+    if (entry->GetFileInfo() == nullptr) {
+        delete entry;
+        PKG_LOGE("Failed to get file info");
+        return PKG_INVALID_FILE;
+    }
+    
+    info.dataOffset += entry->GetFileInfo()->packedSize;
+    pkgInfo_.pkgInfo.entryCount++;
+    PKG_LOGI("Component packedSize %zu unpackedSize %zu %s", entry->GetFileInfo()->packedSize,
+        entry->GetFileInfo()->unpackedSize, entry->GetFileInfo()->identity.c_str());
+    return PKG_SUCCESS;
+}
+
 int32_t UpgradePkgFile::ReadComponents(const PkgBuffer &buffer, size_t &parsedLen,
     DigestAlgorithm::DigestAlgorithmPtr algorithm, std::vector<std::string> &fileNames)
 {
+    UpgradeParam info;
     size_t fileLen = pkgStream_->GetFileLength();
-    size_t readLen = 0;
-    int32_t ret = pkgStream_->Read(buffer, parsedLen, buffer.length, readLen);
-    PKG_CHECK(ret == PKG_SUCCESS, return ret, "Read component fail");
+    info.readLen = 0;
+    int32_t ret = pkgStream_->Read(buffer, parsedLen, buffer.length, info.readLen);
+    // PKG_CHECK(ret == PKG_SUCCESS, return ret, "Read component fail");
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("Read component fail");
+        return ret;
+    }
     PkgTlv tlv;
     tlv.type = ReadLE16(buffer.buffer);
     tlv.length = ReadLE16(buffer.buffer + sizeof(uint16_t));
@@ -373,44 +420,29 @@ int32_t UpgradePkgFile::ReadComponents(const PkgBuffer &buffer, size_t &parsedLe
     algorithm->Update(buffer, sizeof(PkgTlv)); // tlv generate digest
 
     parsedLen += sizeof(PkgTlv);
-    size_t dataOffset = parsedLen + tlv.length + GetUpgradeSignatureLen() + UPGRADE_RESERVE_LEN;
-    size_t srcOffset = 0;
-    size_t currLen = sizeof(PkgTlv);
-    while (srcOffset < tlv.length) {
-        if (currLen + sizeof(UpgradeCompInfo) > readLen) {
-            readLen = 0;
-            ret = pkgStream_->Read(buffer, parsedLen + srcOffset, buffer.length, readLen);
-            PKG_CHECK(ret == PKG_SUCCESS, return ret, "Fail to read data");
-            currLen = 0;
+
+    info.dataOffset = parsedLen + tlv.length + GetUpgradeSignatureLen() + UPGRADE_RESERVE_LEN;
+    info.srcOffset = 0;
+    info.currLen = sizeof(PkgTlv);
+    while (info.srcOffset < tlv.length) {
+        if (info.currLen + sizeof(UpgradeCompInfo) > info.readLen) {
+            info.readLen = 0;
+            ret = pkgStream_->Read(buffer, parsedLen + info.srcOffset, buffer.length, info.readLen);
+            // PKG_CHECK(ret == PKG_SUCCESS, return ret, "Fail to read data");
+            if (ret != PKG_SUCCESS) {
+                PKG_LOGE("Fail to read data");
+                return ret;
+            }
+            info.currLen = 0;
+        }
+        size_t ret = SaveEntry(buffer, parsedLen, info, algorithm, fileNames);
+        if (ret != PKG_SUCCESS) {
+            PKG_LOGE("SaveEntry");
+            return ret;
         }
 
-        UpgradeFileEntry *entry = new UpgradeFileEntry(this, nodeId_++);
-        PKG_CHECK(entry != nullptr, return PKG_NONE_MEMORY, "Fail create upgrade node for %s",
-            pkgStream_->GetFileName().c_str());
-
-        // Extract header information from file
-        size_t decodeLen = 0;
-        PkgBuffer headerBuff(buffer.buffer + currLen, readLen - currLen);
-        ret = entry->DecodeHeader(headerBuff, parsedLen + srcOffset, dataOffset, decodeLen);
-        PKG_CHECK(ret == PKG_SUCCESS, delete entry; return ret, "Fail to decode header");
-
-        // Save entry
-        pkgEntryMapId_.insert(pair<uint32_t, PkgEntryPtr>(entry->GetNodeId(), entry));
-        pkgEntryMapFileName_.insert(std::pair<std::string, PkgEntryPtr>(entry->GetFileName(), entry));
-        fileNames.push_back(entry->GetFileName());
-
-        PkgBuffer signBuffer(buffer.buffer + currLen, decodeLen);
-        algorithm->Update(signBuffer, decodeLen); // Generate digest for components
-
-        currLen += decodeLen;
-        srcOffset += decodeLen;
-        PKG_CHECK(entry->GetFileInfo() != nullptr, delete entry; return PKG_INVALID_FILE, "Failed to get file info");
-        dataOffset += entry->GetFileInfo()->packedSize;
-        pkgInfo_.pkgInfo.entryCount++;
-        PKG_LOGI("Component packedSize %zu unpackedSize %zu %s", entry->GetFileInfo()->packedSize,
-            entry->GetFileInfo()->unpackedSize, entry->GetFileInfo()->identity.c_str());
     }
-    parsedLen += srcOffset;
+    parsedLen += info.srcOffset;
     return PKG_SUCCESS;
 }
 
