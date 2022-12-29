@@ -28,14 +28,14 @@ using namespace Updater;
 constexpr int MIN_PARTITIONS_NUM = 2;
 constexpr int MAX_PARTITIONS_NUM = 20;
 namespace Updater {
-bool UpdatePartitions::SetPartitionInfo(const cJSON* partitions, int idx, struct Partition* myPartition) const
+bool UpdatePartitions::SetPartitionInfo(const cJSON *partitions, int idx, struct Partition *myPartition) const
 {
-    cJSON* thisPartition = cJSON_GetArrayItem(partitions, idx);
+    cJSON *thisPartition = cJSON_GetArrayItem(partitions, idx);
     if (thisPartition == nullptr) {
         LOG(ERROR) << "Error get thisPartion: " << idx;
         return false;
     }
-    cJSON* item = cJSON_GetObjectItem(thisPartition, "start");
+    cJSON *item = cJSON_GetObjectItem(thisPartition, "start");
     if (item == nullptr) {
         LOG(ERROR) << "Error get start";
         return false;

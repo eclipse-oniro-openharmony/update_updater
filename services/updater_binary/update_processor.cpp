@@ -181,7 +181,7 @@ int32_t UScriptInstructionRawImageWrite::Execute(Uscript::UScriptEnv &env, Uscri
     }
     LOG(INFO) << "UScriptInstructionRawImageWrite::Execute " << partitionName;
     if (env.GetPkgManager() == nullptr) {
-        LOG(INFO) << "Error to get pkg manager";
+        LOG(ERROR) << "Error to get pkg manager";
         return USCRIPT_ERROR_EXECUTE;
     }
 
