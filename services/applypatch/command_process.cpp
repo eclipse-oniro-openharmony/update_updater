@@ -117,7 +117,7 @@ bool CheckNeedWrite(const Command &params, size_t &pos, std::vector<uint8_t> &bu
     tgtBlockSize = targetBlock.TotalBlockSize() * H_BLOCK_SIZE;
     buffer.resize(tgtBlockSize);
     LOG(INFO) << targetBlock.TotalBlockSize() << " blocks' data need to read";
-    if (targetBlock.ReadDataFromBlock(params.GetFileDescriptor(), buffer) != 0) {
+    if (targetBlock.ReadDataFromBlock(params.GetFileDescriptor(), buffer) == 0) {
         LOG(ERROR) << "Read data from block error";
         result = FAILED;
         return false;
@@ -165,7 +165,7 @@ CommandResult DiffAndMoveCommandFn::Execute(const Command &params)
         ret = targetBlock.WriteDiffToBlock(const_cast<const Command &>(params), buffer, tgtBlockSize, isImgDiff);
     } else {
         LOG(INFO) << "Moving " << tgtBlockSize << " blocks to target position";
-        ret = targetBlock.WriteDataToBlock(params.GetFileDescriptor(), buffer);
+        ret = targetBlock.WriteDataToBlock(params.GetFileDescriptor(), buffer) == 0 ? -1 : 0;
     }
     if (ret != 0) {
         if (errno == EIO) {
@@ -205,7 +205,7 @@ CommandResult StashCommandFn::Execute(const Command &params)
         return SUCCESS;
     }
     LOG(INFO) << "Read block data to buffer";
-    if (srcBlk.ReadDataFromBlock(params.GetFileDescriptor(), buffer) != 0) {
+    if (srcBlk.ReadDataFromBlock(params.GetFileDescriptor(), buffer) == 0) {
         LOG(ERROR) << "Error to load block data";
         return FAILED;
     }
