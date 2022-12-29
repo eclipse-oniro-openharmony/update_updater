@@ -305,7 +305,7 @@ int32_t CompressedImageDiff::MakePatch(const std::string &patchName)
 }
 
 int32_t CompressedImageDiff::ExtractFile(BlockBuffer &orgBuffer, std::vector<uint8_t> &buffer,
-    Hpackage::FileInfo*& fileInfo, UpdateDiff::ImageParserPtr parser, const std::string &fileName)
+    const Hpackage::FileInfo*& fileInfo, UpdateDiff::ImageParserPtr parser, const std::string &fileName)
 {
     int32_t ret = parser->GetPkgBuffer(orgBuffer);
     if (ret != 0) {
