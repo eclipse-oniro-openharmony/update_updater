@@ -342,8 +342,8 @@ int32_t CompressedImageDiff::DiffFile(const std::string &fileName, size_t &oldOf
     BlockBuffer orgOldBuffer;
     std::vector<uint8_t> newBuffer;
     std::vector<uint8_t> oldBuffer;
-    FileInfo *newFileInfo = nullptr;
-    FileInfo *oldFileInfo = nullptr;
+    const FileInfo *newFileInfo = nullptr;
+    const FileInfo *oldFileInfo = nullptr;
 
     if (ExtractFile(orgNewBuffer, newBuffer, newFileInfo, newParser_, fileName) != 0) {
         return -1;
