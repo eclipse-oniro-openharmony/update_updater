@@ -87,35 +87,6 @@ int GetUpdatePackageInfo(PkgManager::PkgManagerPtr pkgManager, const std::string
     return PKG_SUCCESS;
 }
 
-int OtaUpdatePreCheck(PkgManager::PkgManagerPtr pkgManager, const std::string &packagePath)
-{
-    UPDATER_INIT_RECORD;
-    if (pkgManager == nullptr) {
-        LOG(ERROR) << "Fail to GetPackageInstance";
-        UPDATER_LAST_WORD(PKG_INVALID_FILE);
-        return UPDATE_CORRUPT;
-    }
-    char realPath[PATH_MAX + 1] = {0};
-    if (realpath(packagePath.c_str(), realPath) == nullptr) {
-        UPDATER_LAST_WORD(PKG_INVALID_FILE);
-        return PKG_INVALID_FILE;
-    }
-    if (access(realPath, F_OK) != 0) {
-        LOG(ERROR) << "package does not exist!";
-        UPDATER_LAST_WORD(PKG_INVALID_FILE);
-        return PKG_INVALID_FILE;
-    }
-
-    int32_t ret = pkgManager->VerifyOtaPackage(packagePath);
-    if (ret != PKG_SUCCESS) {
-        LOG(INFO) << "VerifyOtaPackage fail ret :"<< ret;
-        UPDATER_LAST_WORD(ret);
-        return ret;
-    }
-
-    return PKG_SUCCESS;
-}
-
 UpdaterStatus IsSpaceCapacitySufficient(const std::vector<std::string> &packagePath)
 {
     uint64_t totalPkgSize = 0;
@@ -226,29 +197,18 @@ UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, Upda
         UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_SETPART_FAIL), true);
         UPDATER_LAST_WORD(UPDATE_ERROR);
         return UPDATE_ERROR);
-    LOG(INFO) << "Verify package...";
-    UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_VERIFYPKG));
-    int32_t verifyret = OtaUpdatePreCheck(pkgManager, upParams.updatePackage[upParams.pkgLocation]);
-    UPDATER_ERROR_CHECK(verifyret == PKG_SUCCESS, "package verify failed",
-        UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_VERIFYPKGFAIL), true);
-        UPDATER_LAST_WORD(UPDATE_CORRUPT);
-        return UPDATE_CORRUPT);
 
     if (upParams.retryCount > 0) {
         LOG(INFO) << "Retry for " << upParams.retryCount << " time(s)";
     } else {
         pkgManager = PkgManager::GetPackageInstance();
     }
-    verifyret = GetUpdatePackageInfo(pkgManager, upParams.updatePackage[upParams.pkgLocation]);
+    int32_t verifyret = GetUpdatePackageInfo(pkgManager, upParams.updatePackage[upParams.pkgLocation]);
     g_tmpProgressValue = 0;
-    ProgressSmoothHandler(static_cast<int>(upParams.initialProgress * FULL_PERCENT_PROGRESS),
-        static_cast<int>((upParams.initialProgress +
-        upParams.currentPercentage * 0.05) * FULL_PERCENT_PROGRESS)); // 0.05 : verify progress persent
-    upParams.initialProgress = upParams.initialProgress + upParams.currentPercentage * 0.05;
-    UPDATER_ERROR_CHECK(verifyret == PKG_SUCCESS, "Verify package Fail...",
+    UPDATER_ERROR_CHECK(verifyret == PKG_SUCCESS, "Verify package bin file Fail...",
         UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_VERIFYFAIL), true);
         return UPDATE_CORRUPT);
-    LOG(INFO) << "Package verified. start to install package...";
+    LOG(INFO) << "Package bin file verified. start to install package...";
     int32_t versionRet = PreProcess::GetInstance().DoUpdatePreProcess(pkgManager);
     UPDATER_ERROR_CHECK(versionRet == PKG_SUCCESS, "Version Check Fail...", return UPDATE_CORRUPT);
 

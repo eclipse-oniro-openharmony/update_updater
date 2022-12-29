@@ -96,6 +96,11 @@ void UpdaterUiFacade::ShowProgress(float value) const
     if (!CheckMode().first) {
         return;
     }
+    static float lastValue = 0.0;
+    if (abs(value - lastValue) > 0.01) {
+        LOG(INFO) << "current progress " << value;
+        lastValue = value;
+    }
     if (auto it = progressMap_.find(mode_); it->second != nullptr) {
         it->second->ShowProgress(value);
         return;

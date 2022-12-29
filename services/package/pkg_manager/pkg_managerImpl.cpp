@@ -21,6 +21,8 @@
 #include <iterator>
 #include <unistd.h>
 #include <vector>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include "dump.h"
 #include "pkg_gzipfile.h"
 #include "pkg_lz4file.h"
@@ -29,6 +31,8 @@
 #include "pkg_verify_util.h"
 #include "pkg_zipfile.h"
 #include "securec.h"
+#include "updater/updater_const.h"
+#include "utils.h"
 #include "zip_pkg_parse.h"
 
 using namespace std;
@@ -338,11 +342,21 @@ int32_t PkgManagerImpl::ExtraAndLoadPackage(const std::string &path, const std::
     }
 
     PkgStreamPtr stream = nullptr;
+    struct stat st {};
+    const std::string tempPath = path.find(Updater::SDCARD_CARD_PATH) != string::npos ?
+        path : (string(Updater::UPDATER_PATH) + "/");
+    if (stat(tempPath.c_str(), &st) != 0) {
+#ifndef __WIN32
+        (void)mkdir(tempPath.c_str(), 0775); // 0775 : rwxrwxr-x
+        (void)chown(tempPath.c_str(), Updater::Utils::USER_UPDATE_AUTHORITY, Updater::Utils::GROUP_UPDATE_AUTHORITY);
+#endif
+    }
+
     // Extract package to file or memory
     if (unzipToFile_) {
-        ret = CreatePkgStream(stream, path + name + ".tmp", info->unpackedSize, PkgStream::PkgStreamType_Write);
+        ret = CreatePkgStream(stream, tempPath + name + ".tmp", info->unpackedSize, PkgStream::PkgStreamType_Write);
     } else {
-        ret = CreatePkgStream(stream, path + name + ".tmp", info->unpackedSize, PkgStream::PkgStreamType_MemoryMap);
+        ret = CreatePkgStream(stream, tempPath + name + ".tmp", info->unpackedSize, PkgStream::PkgStreamType_MemoryMap);
     }
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("Create middle stream fail %s", name.c_str());
