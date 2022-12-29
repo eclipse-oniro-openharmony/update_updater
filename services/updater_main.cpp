@@ -319,8 +319,8 @@ static UpdaterStatus InstallUpdaterPackage(UpdaterParams &upParams, PkgManager::
 static UpdaterStatus CalcProgress(const UpdaterParams &upParams,
     std::vector<double> &pkgStartPosition, double &updateStartPosition)
 {
-    uint64_t allPkgSize = 0;
-    std::vector<uint64_t> everyPkgSize;
+    int64_t allPkgSize = 0;
+    std::vector<int64_t> everyPkgSize;
     for (const auto &path : upParams.updatePackage) {
         char realPath[PATH_MAX + 1] = {0};
         if (realpath(path.c_str(), realPath) == nullptr) {
@@ -339,7 +339,7 @@ static UpdaterStatus CalcProgress(const UpdaterParams &upParams,
         LOG(ERROR) << "All packages's size is 0.";
         return UPDATE_ERROR;
     }
-    uint64_t startSize = 0;
+    int64_t startSize = 0;
     for (auto size : everyPkgSize) {
         startSize += size;
         float percent = static_cast<double>(startSize) / static_cast<double>(allPkgSize) + VERIFY_PERCENT;
