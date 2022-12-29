@@ -136,7 +136,6 @@ public:
     {
         return &fileInfo_.fileInfo;
     };
-    int32_t DoLoadPackage();
 
     int32_t EncodeHeader(PkgStreamPtr inStream, size_t startOffset, size_t &encodeLen) override;
 

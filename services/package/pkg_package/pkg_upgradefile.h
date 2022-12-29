@@ -97,12 +97,11 @@ public:
     }
 
     ~UpgradePkgFile() override {}
-    int32_t DoAddEntry(size_t &dataOffset, const PkgManager::FileInfoPtr file);
+
     int32_t AddEntry(const PkgManager::FileInfoPtr file, const PkgStreamPtr inStream) override;
 
     int32_t SavePackage(size_t &signOffset) override;
 
-    int32_t DoLoadPackage(PkgBuffer &buffer, std::vector<uint8_t> &signData, size_t &parsedLen);
     int32_t LoadPackage(std::vector<std::string> &fileNames, VerifyFunction verify = nullptr) override;
 
     size_t GetUpgradeSignatureLen() const;
@@ -129,6 +128,8 @@ private:
         VerifyFunction verifier, const std::vector<uint8_t> &signData);
     int32_t ClearBuffer(std::vector<uint8_t> &buffer, size_t &offset, size_t &signOffset);
     int32_t DoSavePackage(std::vector<uint8_t> &buffer, size_t &offset);
+    int32_t DoAddEntry(size_t &dataOffset, const PkgManager::FileInfoPtr file);
+    int32_t DoLoadPackage(PkgBuffer &buffer, std::vector<uint8_t> &signData, size_t &parsedLen);
 
 private:
     UpgradePkgInfo pkgInfo_ {};

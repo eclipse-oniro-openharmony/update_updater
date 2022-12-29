@@ -54,7 +54,7 @@ private:
     void DecodeHeaderCalOffset(uint8_t flags, const PkgBuffer &buffer, size_t &offset,
         std::string &fileName) const;
     int32_t DoUnpack(PkgAlgorithmContext context, PkgStreamPtr inStream);
-    void CheckParam(size_t &offset, PkgBuffer &buffer);
+    void DoEncodeHeader(size_t &offset, PkgBuffer &buffer);
 };
 
 class GZipPkgFile : public PkgFile {
