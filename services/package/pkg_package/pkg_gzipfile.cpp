@@ -173,13 +173,12 @@ int32_t GZipFileEntry::DoUnpack(PkgAlgorithmContext context, PkgStreamPtr inStre
     fileInfo_.fileInfo.packedSize = context.packedSize;
     PkgBuffer buffer(BLOCK_SIZE); // Read last 8 bytes at the end of package
     int32_t ret = inStream->Read(buffer, context.packedSize + fileInfo_.fileInfo.dataOffset, BLOCK_SIZE, readLen);
-    // PKG_CHECK(ret == PKG_SUCCESS, return ret, "Fail to read file %s", inStream->GetFileName().c_str());
-    crc32_ = ReadLE32(buffer.buffer);
+
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("Fail to read file %s", inStream->GetFileName().c_str());
         return ret;
     }
-
+    crc32_ = ReadLE32(buffer.buffer);
     fileInfo_.fileInfo.unpackedSize = ReadLE32(buffer.buffer + sizeof(uint32_t));
     if (crc32_ != context.crc) {
         PKG_LOGE("Crc error %u %u", crc32_, context.crc);
@@ -224,6 +223,7 @@ int32_t GZipFileEntry::Unpack(PkgStreamPtr outStream)
     ret = DoUnpack(context, inStream);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("unpack failed ret is %d", ret);
+        return ret;
     }
 
     PKG_LOGI("packedSize: %zu unpackedSize: %zu  offset header: %zu data: %zu", fileInfo_.fileInfo.packedSize,

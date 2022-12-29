@@ -57,7 +57,6 @@ struct __attribute__((packed))  UpgradeParam {
     size_t srcOffset;
     size_t currLen;
 };
-
 class UpgradeFileEntry : public PkgEntry {
 public:
     UpgradeFileEntry(PkgFilePtr pkgFile, uint32_t nodeId) : PkgEntry(pkgFile, nodeId) {}
@@ -65,8 +64,6 @@ public:
     ~UpgradeFileEntry() override {}
 
     int32_t Init(const PkgManager::FileInfoPtr fileInfo, PkgStreamPtr inStream) override;
-
-    int32_t DoEncodeHeader(UpgradeCompInfo &comp);
 
     int32_t EncodeHeader(PkgStreamPtr inStream, size_t startOffset, size_t &encodeLen) override;
 
@@ -84,6 +81,7 @@ public:
 
 private:
     ComponentInfo fileInfo_ {};
+    int32_t DoEncodeHeader(UpgradeCompInfo &comp);
 };
 
 class UpgradePkgFile : public PkgFile {
@@ -99,11 +97,9 @@ public:
     }
 
     ~UpgradePkgFile() override {}
-
     int32_t DoAddEntry(size_t &dataOffset, const PkgManager::FileInfoPtr file);
     int32_t AddEntry(const PkgManager::FileInfoPtr file, const PkgStreamPtr inStream) override;
 
-    int32_t DoSavePackage(std::vector<uint8_t> buffer, size_t offset);
     int32_t SavePackage(size_t &signOffset) override;
 
     int32_t DoLoadPackage(PkgBuffer &buffer, std::vector<uint8_t> &signData, size_t &parsedLen);
@@ -131,6 +127,8 @@ private:
 
     int32_t Verify(size_t start, DigestAlgorithm::DigestAlgorithmPtr algorithm,
         VerifyFunction verifier, const std::vector<uint8_t> &signData);
+    int32_t ClearBuffer(std::vector<uint8_t> &buffer, size_t &offset, size_t &signOffset);
+    int32_t DoSavePackage(std::vector<uint8_t> &buffer, size_t &offset);
 
 private:
     UpgradePkgInfo pkgInfo_ {};
