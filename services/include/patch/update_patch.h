@@ -56,7 +56,7 @@ public:
         ImageProcessor writer, const std::string& expected);
     static int32_t ApplyImagePatch(const PatchParam &param,
         UpdatePatchWriterPtr writer, const std::vector<uint8_t> &bonusData);
-
+    static bool PreCheck(const PatchParam &param, UpdatePatchWriterPtr writer);
     static int32_t ApplyBlockPatch(const PatchBuffer &patchInfo,
         const BlockBuffer &oldInfo, UpdatePatchWriterPtr writer);
     static int32_t ApplyBlockPatch(const PatchBuffer &patchInfo,

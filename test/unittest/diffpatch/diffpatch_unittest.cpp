@@ -84,9 +84,15 @@ public:
         UpdatePatch::MemMapInfo patchData {};
         UpdatePatch::MemMapInfo oldData {};
         int32_t ret = PatchMapFile(patchName, patchData);
-        PATCH_CHECK(ret == 0, return -1, "Failed to read patch file");
+        if (ret != 0) {
+            PATCH_LOGE("Failed to read patch file");
+            return -1;
+        }
         ret = PatchMapFile(oldName, oldData);
-        PATCH_CHECK(ret == 0, return -1, "Failed to read old file");
+        if (ret != 0) {
+            PATCH_LOGE("Failed to read old file");
+            return -1;
+        }
 
         PATCH_LOGI("UpdateApplyPatch::ApplyPatch patchData %zu oldData %zu ", patchData.length, oldData.length);
         // check if image patch
@@ -98,7 +104,10 @@ public:
             param.oldBuff = oldData.memory;
             param.oldSize = oldData.length;
             ret = UpdatePatch::UpdateApplyPatch::ApplyImagePatch(param, empty, writer, expected);
-            PATCH_CHECK(ret == 0, return -1, "Failed to apply image patch file");
+            if (ret != 0) {
+                PATCH_LOGE("Failed to apply image patch file");
+                return -1;
+            }
         }
         return 0;
     }
@@ -113,7 +122,10 @@ public:
         std::string expected = GeneraterHash(TEST_PATH_FROM + newFile);
         std::unique_ptr<UpdatePatch::FilePatchWriter> writer =
             std::make_unique<UpdatePatch::FilePatchWriter>(TEST_PATH_FROM + restoreFile);
-        PATCH_CHECK(writer != nullptr, return -1, "Failed to create writer");
+        if (writer == nullptr) {
+            PATCH_LOGE("Failed to create writer");
+            return -1;
+        }
         writer->Init();
 
         ret = TestApplyPatch(TEST_PATH_FROM + patchFile, TEST_PATH_FROM + oldFile, expected,
@@ -135,9 +147,15 @@ public:
         UpdatePatch::MemMapInfo patchData {};
         UpdatePatch::MemMapInfo oldData {};
         int32_t ret = PatchMapFile(patchName, patchData);
-        PATCH_CHECK(ret == 0, return -1, "Failed to read patch file");
+        if (ret != 0) {
+            PATCH_LOGE("Failed to read patch file");
+            return -1;
+        }
         ret = PatchMapFile(oldName, oldData);
-        PATCH_CHECK(ret == 0, return -1, "Failed to read old file");
+        if (ret != 0) {
+            PATCH_LOGE("Failed to read old file");
+            return -1;
+        }
 
         PATCH_LOGI("TestApplyBlockPatch patchData %zu oldData %zu ", patchData.length, oldData.length);
         UpdatePatch::PatchBuffer patchInfo = {patchData.memory, 0, patchData.length};
@@ -145,14 +163,23 @@ public:
         if (isBuffer) {
             std::vector<uint8_t> newData;
             ret = UpdatePatch::UpdateApplyPatch::ApplyBlockPatch(patchInfo, oldInfo, newData);
-            PATCH_CHECK(ret == 0, return -1, "Failed to apply block patch file");
+            if (ret != 0) {
+                PATCH_LOGE("Failed to apply block patch file");
+                return -1;
+            }
             std::ofstream stream(newName, std::ios::out | std::ios::binary);
-            PATCH_CHECK(!stream.fail(), return -1, "Failed to open %s", newName.c_str());
+            if (stream.fail()) {
+                PATCH_LOGE("Failed to open %s", newName.c_str());
+                return -1;
+            }
             stream.write(reinterpret_cast<const char*>(newData.data()), newData.size());
         } else {
             std::unique_ptr<UpdatePatch::FilePatchWriter> writer =
                 std::make_unique<UpdatePatch::FilePatchWriter>(newName);
-            PATCH_CHECK(writer != nullptr, return -1, "Failed to create writer");
+            if (writer == nullptr) {
+                PATCH_LOGE("Failed to create writer");
+                return -1;
+            }
             writer->Init();
 
             ret = UpdatePatch::UpdateApplyPatch::ApplyBlockPatch(patchInfo, oldInfo, writer.get());

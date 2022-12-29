@@ -49,14 +49,29 @@ int32_t UpdateApplyPatch::ApplyImagePatch(const PatchParam &param, const std::ve
     return patchWriter->Finish();
 }
 
+bool UpdateApplyPatch::PreCheck(const PatchParam &param, UpdatePatchWriterPtr writer)
+{
+    if (writer == nullptr) {
+        PATCH_LOGE("check param fail ");
+        return false;
+    }
+    if (param.patchSize < (std::char_traits<char>::length(PKGDIFF_MAGIC) + sizeof(int32_t))) {
+        PATCH_LOGE("patch too short to contain header ");
+        return false;
+    }
+    if (memcmp(param.patch, PKGDIFF_MAGIC, std::char_traits<char>::length(PKGDIFF_MAGIC)) != 0) {
+        PATCH_LOGE("corrupt patch file header (magic number) ");
+        return false;
+    }
+    return true;
+}
+
 int32_t UpdateApplyPatch::ApplyImagePatch(const PatchParam &param,
     UpdatePatchWriterPtr writer, const std::vector<uint8_t> &bonusData)
 {
-    PATCH_CHECK(writer != nullptr, return -1, "check param fail ");
-    PATCH_CHECK(param.patchSize >= (std::char_traits<char>::length(PKGDIFF_MAGIC) + sizeof(int32_t)),
-        return -1, "patch too short to contain header ");
-    PATCH_CHECK(memcmp(param.patch, PKGDIFF_MAGIC, std::char_traits<char>::length(PKGDIFF_MAGIC)) == 0,
-        return -1, "corrupt patch file header (magic number) ");
+    if (!PreCheck(param, writer)) {
+        return -1;
+    }
     size_t offset = std::char_traits<char>::length(PKGDIFF_MAGIC);
     int32_t numChunks = ImagePatch::ReadLE<int32_t>(param.patch + offset);
     offset += sizeof(int32_t);
@@ -64,7 +79,10 @@ int32_t UpdateApplyPatch::ApplyImagePatch(const PatchParam &param,
     std::vector<uint8_t> empty;
     for (int i = 0; i < numChunks; ++i) {
         // each chunk's header record starts with 4 bytes.
-        PATCH_CHECK((offset + sizeof(int32_t)) <= param.patchSize, return -1, "Failed to read chunk record ");
+        if ((offset + sizeof(int32_t)) > param.patchSize) {
+            PATCH_LOGE("Failed to read chunk record ");
+            return -1;
+        }
         int32_t type = ImagePatch::ReadLE<int32_t>(param.patch + offset);
         PATCH_LOGI("ApplyImagePatch numChunks[%d] type %d offset %d", i, type, offset);
         offset += sizeof(int32_t);
@@ -85,9 +103,15 @@ int32_t UpdateApplyPatch::ApplyImagePatch(const PatchParam &param,
             default:
                 break;
         }
-        PATCH_CHECK(imagePatch != nullptr, return -1, "Failed to  creareimg patch ");
+        if (imagePatch == nullptr) {
+            PATCH_LOGE("Failed to  creareimg patch ");
+            return -1;
+        }
         int32_t ret = imagePatch->ApplyImagePatch(param, offset);
-        PATCH_CHECK(ret == 0, return -1, "Apply image patch fail ");
+        if (ret != 0) {
+            PATCH_LOGE("Apply image patch fail ");
+            return -1;
+        }
     }
     return 0;
 }
