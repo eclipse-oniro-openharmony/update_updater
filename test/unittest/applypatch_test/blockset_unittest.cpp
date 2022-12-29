@@ -144,13 +144,13 @@ HWTEST_F(BlockSetUnitTest, blockset_test_006, TestSize.Level1)
     std::vector<uint8_t> buffer;
     buffer.resize(H_BLOCK_SIZE);
     BlockSet myBlock;
-    int ret = myBlock.ReadDataFromBlock(fd, buffer);
+    size_t ret = myBlock.ReadDataFromBlock(fd, buffer);
     EXPECT_EQ(ret, 0);
     BlockSet myBlock2({std::vector<BlockPair>{}});
     BlockSet myBlock3({std::vector<BlockPair>{BlockPair{0, 1}}});
     BlockSet myBlock4({std::vector<BlockPair>{BlockPair{-1, 0}}});
     ret = myBlock3.ReadDataFromBlock(fd, buffer);
-    EXPECT_EQ(ret, -1);
+    EXPECT_EQ(ret, 0);
     ret = myBlock3.WriteDataToBlock(fd, buffer);
     EXPECT_EQ(ret, 4096);
     ret = myBlock4.ReadDataFromBlock(fd, buffer);
