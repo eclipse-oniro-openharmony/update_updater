@@ -85,7 +85,7 @@ int32_t RowImagePatch::ApplyImagePatch(const PatchParam &param, size_t &startOff
     return 0;
 }
 
-int32_t CompressedImagePatch::StartReadHeader(const PatchParam &param, PatchHeader &header, size_t &offset);
+int32_t CompressedImagePatch::StartReadHeader(const PatchParam &param, PatchHeader &header, size_t &offset)
 {
     int32_t ret = ReadHeader(param, header, offset);
     if (ret != 0) {

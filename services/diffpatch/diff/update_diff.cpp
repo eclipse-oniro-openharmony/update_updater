@@ -147,8 +147,6 @@ int32_t UpdateDiff::MakePatch(const std::string &oldFileName,
         return -1;
     }
 
-    int32_t ret = newParser_->Parse(newFileName);
-    int32_t ret1 = oldParser_->Parse(oldFileName);
     if (newParser_->Parse(newFileName) != 0 || oldParser_->Parse(oldFileName) != 0) {
         PATCH_LOGE("Failed to parse image");
         return -1;

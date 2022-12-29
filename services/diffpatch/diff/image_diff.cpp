@@ -305,7 +305,7 @@ int32_t CompressedImageDiff::MakePatch(const std::string &patchName)
 }
 
 int32_t CompressedImageDiff::ExtractFile(BlockBuffer &orgBuffer, std::vector<uint8_t> &buffer,
-    FileInfo*& fileInfo, ImageParserPtr parser, const std::string &fileName)
+    Hpackage::FileInfo*& fileInfo, UpdateDiff::ImageParserPtr parser, const std::string &fileName)
 {
     int32_t ret = parser->GetPkgBuffer(orgBuffer);
     if (ret != 0) {
@@ -313,28 +313,23 @@ int32_t CompressedImageDiff::ExtractFile(BlockBuffer &orgBuffer, std::vector<uin
         return -1;
     }
     ret = parser->Extract(fileName, buffer);
-    fileInfo = parser_->GetFileInfo(fileName);
     if (parser == newParser_) {
+        fileInfo = parser->GetFileInfo(fileName);
         if (ret != 0 || fileInfo == nullptr) {
             PATCH_LOGE("Failed to get new data");
             return -1;
         }
-        if (limit_ != 0 && newFileInfo->unpackedSize >= limit_) {
+        if (limit_ != 0 && fileInfo->unpackedSize >= limit_) {
             PATCH_LOGE("Exceed limit, so make patch by original file");
             return PATCH_EXCEED_LIMIT;
         }
     } else if (parser == oldParser_) {
         if (ret != 0) {
-            ImageBlock block = {
-                BLOCK_RAW,
-                { orgNewBuffer.buffer, newFileInfo->headerOffset, GET_REAL_DATA_LEN(newFileInfo) },
-                { orgOldBuffer.buffer, 0, orgOldBuffer.length },
-            };
-            updateBlocks_.push_back(std::move(block));
-            return -2;
+            return 1;
         }
+        fileInfo = parser->GetFileInfo(fileName);
         if (fileInfo == nullptr) {
-            PATCH_LOGE("Failed to get old data");
+            PATCH_LOGE("Failed to get old file info");
             return -1;
         }
     }
@@ -350,18 +345,19 @@ int32_t CompressedImageDiff::DiffFile(const std::string &fileName, size_t &oldOf
     FileInfo *newFileInfo = nullptr;
     FileInfo *oldFileInfo = nullptr;
 
-    int32_t ret = ExtractFile(orgNewBuffer, newBuffer, newFileInfo, newParser_, fileName);
-    if (ret != 0) {
-        return ret;
+    if (ExtractFile(orgNewBuffer, newBuffer, newFileInfo, newParser_, fileName) != 0) {
+        return -1;
     }
     newOffset += GET_REAL_DATA_LEN(newFileInfo);
-
-    ret = ExtractFile(orgOldBuffer, oldBuffer, oldFileInfo, oldParser_, fileName);
-    if (ret == -2) {
+    int32_t ret = ExtractFile(orgOldBuffer, oldBuffer, oldFileInfo, oldParser_, fileName);
+    if (ret == 1) {
+        ImageBlock block = {
+            BLOCK_RAW,
+            { orgNewBuffer.buffer, newFileInfo->headerOffset, GET_REAL_DATA_LEN(newFileInfo) },
+            { orgOldBuffer.buffer, 0, orgOldBuffer.length },
+        };
+        updateBlocks_.push_back(std::move(block));
         return 0;
-    }
-    if (ret != 0) {
-        return ret;
     }
     oldOffset += GET_REAL_DATA_LEN(oldFileInfo);
 
@@ -369,7 +365,7 @@ int32_t CompressedImageDiff::DiffFile(const std::string &fileName, size_t &oldOf
     ret = TestAndSetConfig(newData, fileName);
     if (ret != 0) {
         PATCH_LOGE("Failed to test zip config");
-        return -1
+        return -1;
     }
     if (type_ != BLOCK_LZ4 && newFileInfo->dataOffset > newFileInfo->headerOffset) {
         ImageBlock block = {
@@ -379,7 +375,6 @@ int32_t CompressedImageDiff::DiffFile(const std::string &fileName, size_t &oldOf
         };
         updateBlocks_.push_back(std::move(block));
     }
-
     ImageBlock block = {
         type_,
         { orgNewBuffer.buffer, newFileInfo->dataOffset, newFileInfo->packedSize },
@@ -547,8 +542,8 @@ int32_t Lz4ImageDiff::TestAndSetConfig(const BlockBuffer &buffer, const std::str
         PATCH_LOGE("Failed to get pkgbuffer");
         return -1;
     }
-    Lz4FileInfo lz4Info {{}, info->compressionLevel, info->blockIndependence, info->blockIndependence,
-        info->contentChecksumFlag, info->contentChecksumFlag, info->blockSizeID, info->autoFlush};
+    Lz4FileInfo lz4Info {{}, info->compressionLevel, info->blockIndependence, info->contentChecksumFlag,
+        info->blockSizeID, info->autoFlush};
     lz4Info.fileInfo.packMethod = info->fileInfo.packMethod;
 
     PATCH_DEBUG("TestAndSetConfig level_:%d method_:%d blockIndependence_:%d contentChecksumFlag_:%d blockSizeID_:%d",

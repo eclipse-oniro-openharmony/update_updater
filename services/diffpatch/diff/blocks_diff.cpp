@@ -132,7 +132,7 @@ int32_t BlocksDiff::WriteCtrlDatas(const std::vector<ControlData> &controlDatas,
     size_t &controlSize, size_t &diffDataSize, size_t &extraDataSize)
 {
     size_t offSet = patchSize;
-    ret = WriteControlData(controlDatas, patchSize);
+    int32_t ret = WriteControlData(controlDatas, patchSize);
     if (ret != BZ_OK) {
         PATCH_LOGE("Failed to write control data");
         return ret;

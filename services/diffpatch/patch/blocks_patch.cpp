@@ -153,7 +153,7 @@ int32_t BlocksPatch::ReadHeader(int64_t &controlDataSize, int64_t &diffDataSize,
     if (controlDataReader_ == nullptr || diffDataReader_ == nullptr || extraDataReader_ == nullptr) {
         PATCH_LOGE("Failed to create reader");
         return -1;
-    } 
+    }
     controlDataReader_->Open();
     diffDataReader_->Open();
     extraDataReader_->Open();
