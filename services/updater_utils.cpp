@@ -169,7 +169,7 @@ void PostUpdater(bool clearMisc)
     if (access(SDCARD_CARD_PATH, 0) == 0 && !DeleteUpdaterPath(SDCARD_CARD_PATH)) {
         LOG(ERROR) << "Delete sdcard path failed";
     }
-    if (access(Flashd::FLASHD_FILE_PATH, 0) == 0 !DeleteUpdaterPath(Flashd::FLASHD_FILE_PATH)) {
+    if (access(Flashd::FLASHD_FILE_PATH, 0) == 0 && !DeleteUpdaterPath(Flashd::FLASHD_FILE_PATH)) {
         LOG(ERROR) << "DeleteUpdaterPath failed";
     }
 
