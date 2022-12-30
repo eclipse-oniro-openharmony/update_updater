@@ -509,6 +509,7 @@ int32_t PkgManagerImpl::DoCreatePkgStream(PkgStreamPtr &stream, const std::strin
         PKG_LOGE("Fail to check file %s ", fileName.c_str());
         return PKG_INVALID_FILE;
     }
+    std::lock_guard<std::mutex> lock(mapLock_);
     if (pkgStreams_.find(fileName) != pkgStreams_.end()) {
         PkgStreamPtr mapStream = pkgStreams_[fileName];
         mapStream->AddRef();
@@ -562,6 +563,7 @@ int32_t PkgManagerImpl::CreatePkgStream(PkgStreamPtr &stream, const std::string 
         UPDATER_LAST_WORD(-1);
         return -1;
     }
+    std::lock_guard<std::mutex> lock(mapLock_);
     pkgStreams_[fileName] = stream;
     return PKG_SUCCESS;
 }

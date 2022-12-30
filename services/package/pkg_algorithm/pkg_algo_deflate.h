@@ -21,12 +21,6 @@
 #include "zlib.h"
 
 namespace Hpackage {
-struct ZstreamMessage {
-    z_stream zstream;
-    PkgBuffer inBuffer;
-    PkgBuffer outBuffer;
-};
-
 class PkgAlgoDeflate : public PkgAlgorithm {
 public:
     explicit PkgAlgoDeflate(const ZipFileInfo &info)

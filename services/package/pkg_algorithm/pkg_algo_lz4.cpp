@@ -321,10 +321,14 @@ int32_t PkgAlgorithmLz4::Pack(const PkgStreamPtr inStream, const PkgStreamPtr ou
     struct PkgBufferMessage msg { packText, inBuffer, outBuffer, inLength, outLength};
     size_t dataLen = LZ4F_compressBegin(ctx, outBuffer.buffer, outBuffer.length, &preferences);
     if (LZ4F_isError(dataLen)) {
+        (void)LZ4F_freeCompressionContext(ctx);
         PKG_LOGE("Fail to generate header %s", LZ4F_getErrorName(dataLen));
         return PKG_NONE_MEMORY;
     }
     int32_t ret = PackCalculate(inStream, outStream, msg, dataLen, ctx);
+    if (ret != PKG_SUCCESS) {
+        return ret;
+    }
     (void)LZ4F_freeCompressionContext(ctx);
     if (packText.srcOffset - context.srcOffset != context.unpackedSize) {
         PKG_LOGE("original size error %zu %zu", packText.srcOffset, context.unpackedSize);
@@ -339,12 +343,6 @@ int32_t PkgAlgorithmLz4::GetUnpackParam(LZ4F_decompressionContext_t &ctx, const 
 {
     LZ4F_errorCode_t errorCode = 0;
     LZ4F_frameInfo_t frameInfo;
-
-    errorCode = LZ4F_createDecompressionContext(&ctx, LZ4F_VERSION);
-    if (LZ4F_isError(errorCode)) {
-        PKG_LOGE("Fail to create compress context %s", LZ4F_getErrorName(errorCode));
-        return PKG_INVALID_PARAM;
-    }
 
     PkgBuffer pkgHeader(LZ4S_HEADER_LEN);
     WriteLE32(pkgHeader.buffer, LZ4S_MAGIC_NUMBER);
@@ -452,9 +450,14 @@ int32_t PkgAlgorithmLz4::Unpack(const PkgStreamPtr inStream, const PkgStreamPtr 
     LZ4F_errorCode_t errorCode = 0;
     size_t nextToRead = 0;
     PkgAlgorithmContext unpackText = context;
+    errorCode = LZ4F_createDecompressionContext(&ctx, LZ4F_VERSION);
+    if (LZ4F_isError(errorCode)) {
+        PKG_LOGE("Fail to create compress context %s", LZ4F_getErrorName(errorCode));
+        return PKG_INVALID_LZ4;
+    }
     int32_t ret = GetUnpackParam(ctx, inStream, nextToRead, unpackText.srcOffset);
     if (ret != PKG_SUCCESS) {
-        errorCode = LZ4F_freeDecompressionContext(ctx);
+        (void)LZ4F_freeDecompressionContext(ctx);
         PKG_LOGE("Fail to get param ");
         return PKG_INVALID_LZ4;
     }
@@ -463,6 +466,7 @@ int32_t PkgAlgorithmLz4::Unpack(const PkgStreamPtr inStream, const PkgStreamPtr 
     PKG_LOGI("Block size ID %d outBuffSize:%d", blockSizeID_, outBuffSize);
     int32_t inBuffSize = outBuffSize + static_cast<int32_t>(sizeof(uint32_t));
     if (inBuffSize <= 0 || outBuffSize <= 0) {
+        (void)LZ4F_freeDecompressionContext(ctx);
         PKG_LOGE("Buffer size must > 0");
         return PKG_NONE_MEMORY;
     }
@@ -471,6 +475,7 @@ int32_t PkgAlgorithmLz4::Unpack(const PkgStreamPtr inStream, const PkgStreamPtr 
     PkgBuffer inBuffer(inLength);
     PkgBuffer outBuffer(outLength);
     if (inBuffer.buffer == nullptr || outBuffer.buffer == nullptr) {
+        (void)LZ4F_freeDecompressionContext(ctx);
         PKG_LOGE("Fail to alloc buffer ");
         return PKG_NONE_MEMORY;
     }
