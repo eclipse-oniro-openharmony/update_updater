@@ -166,7 +166,7 @@ int32_t GZipFileEntry::Pack(PkgStreamPtr inStream, size_t startOffset, size_t &e
     return PKG_SUCCESS;
 }
 
-int32_t GZipFileEntry::GetFileInfo(PkgAlgorithmContext context, PkgStreamPtr inStream)
+int32_t GZipFileEntry::CheckFileInfo(PkgAlgorithmContext context, PkgStreamPtr inStream)
 {
     size_t readLen = 0;
     fileInfo_.fileInfo.packedSize = context.packedSize;
@@ -218,7 +218,7 @@ int32_t GZipFileEntry::Unpack(PkgStreamPtr outStream)
         return ret;
     }
 
-    ret = GetFileInfo(context, inStream);
+    ret = CheckFileInfo(context, inStream);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("unpack failed ret is %d", ret);
         return ret;
