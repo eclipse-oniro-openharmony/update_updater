@@ -155,22 +155,22 @@ void PostUpdater(bool clearMisc)
 
     (void)SetupPartitions();
     // clear update misc partition.
-    if (clearMisc) {
-        UPDATER_ERROR_CHECK_NOT_RETURN(ClearMisc() == true, "PostUpdater clear misc failed");
+    if (clearMisc && !ClearMisc()) {
+        LOG(ERROR) << "PostUpdater clear misc failed";
     }
-    if (!access(COMMAND_FILE, 0)) {
-        UPDATER_ERROR_CHECK_NOT_RETURN(unlink(COMMAND_FILE) == 0, "Delete command failed");
+    if (!access(COMMAND_FILE, 0) && unlink(COMMAND_FILE) != 0) {
+        LOG(ERROR) << "Delete command failed";
     }
 
     // delete updater tmp files
-    if (access(UPDATER_PATH, 0) == 0 && access(SDCARD_CARD_PATH, 0) != 0) {
-        UPDATER_ERROR_CHECK_NOT_RETURN(DeleteUpdaterPath(UPDATER_PATH), "DeleteUpdaterPath failed");
+    if (access(UPDATER_PATH, 0) == 0 && access(SDCARD_CARD_PATH, 0) != 0 && !DeleteUpdaterPath(UPDATER_PATH)) {
+        LOG(ERROR) << "DeleteUpdaterPath failed";
     }
-    if (!access(SDCARD_CARD_PATH, 0)) {
-        UPDATER_ERROR_CHECK_NOT_RETURN(DeleteUpdaterPath(SDCARD_CARD_PATH), "Delete sdcard path failed");
+    if (access(SDCARD_CARD_PATH, 0) == 0 && !DeleteUpdaterPath(SDCARD_CARD_PATH)) {
+        LOG(ERROR) << "Delete sdcard path failed";
     }
-    if (access(Flashd::FLASHD_FILE_PATH, 0) == 0) {
-        UPDATER_ERROR_CHECK_NOT_RETURN(DeleteUpdaterPath(Flashd::FLASHD_FILE_PATH), "DeleteUpdaterPath failed");
+    if (access(Flashd::FLASHD_FILE_PATH, 0) == 0 !DeleteUpdaterPath(Flashd::FLASHD_FILE_PATH)) {
+        LOG(ERROR) << "DeleteUpdaterPath failed";
     }
 
     SaveLogs();

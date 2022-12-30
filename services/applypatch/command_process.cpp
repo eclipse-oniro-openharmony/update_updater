@@ -99,7 +99,7 @@ CommandResult ZeroAndEraseCommandFn::Execute(const Command &params)
     return ret;
 }
 
-bool CheckNeedWrite(const Command &params, size_t &pos, std::vector<uint8_t> &buffer,
+bool LoadTarget(const Command &params, size_t &pos, std::vector<uint8_t> &buffer,
                     BlockSet &targetBlock, CommandResult &result)
 {
     CommandType type = params.GetCommandType();
@@ -154,7 +154,7 @@ CommandResult DiffAndMoveCommandFn::Execute(const Command &params)
     BlockSet targetBlock;
     std::vector<uint8_t> buffer;
     CommandResult result = FAILED;
-    if (!CheckNeedWrite(params, pos, buffer, targetBlock, result)) {
+    if (!LoadTarget(params, pos, buffer, targetBlock, result)) {
         return result;
     }
 
@@ -168,10 +168,7 @@ CommandResult DiffAndMoveCommandFn::Execute(const Command &params)
         ret = targetBlock.WriteDataToBlock(params.GetFileDescriptor(), buffer) == 0 ? -1 : 0;
     }
     if (ret != 0) {
-        if (errno == EIO) {
-            return NEED_RETRY;
-        }
-        return FAILED;
+        return errno == EIO ? NEED_RETRY : FAILED;
     }
     TransferManager::GetTransferManagerInstance()->GetGlobalParams()->written += targetBlock.TotalBlockSize();
     return SUCCESS;
