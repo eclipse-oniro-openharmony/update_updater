@@ -183,6 +183,9 @@ static std::string ReadPartitionFromSys(const std::string &devname, const std::s
         if (type == "uevent") {
             if (strstr(buf, table.c_str()) != nullptr) {
                 partString = std::string(buf + table.size(), sizeof(buf) - table.size());
+                if (!partString.empty()) {
+                    partString.pop_back();
+                }
                 return partString;
             }
         } else if (type == "start" || type == "size") {
