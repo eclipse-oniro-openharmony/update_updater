@@ -144,7 +144,7 @@ int32_t UpgradePkgFile::AddEntry(const PkgManager::FileInfoPtr file, const PkgSt
     return PKG_SUCCESS;
 }
 
-int32_t UpgradePkgFile::DoSavePackage(std::vector<uint8_t> &buffer, size_t &offset)
+int32_t UpgradePkgFile::CheckPackageHeader(std::vector<uint8_t> &buffer, size_t &offset)
 {
     if (!CheckState({PKG_FILE_STATE_WORKING}, PKG_FILE_STATE_CLOSE)) {
         PKG_LOGE("error state curr %d ", state_);
@@ -215,9 +215,9 @@ int32_t UpgradePkgFile::SavePackage(size_t &signOffset)
 
     size_t offset = 0;
     // Package header information
-    size_t ret = DoSavePackage(buffer, offset);
+    size_t ret = CheckPackageHeader(buffer, offset);
     if (ret != PKG_SUCCESS) {
-        PKG_LOGE("Fail to DoSavePackage");
+        PKG_LOGE("Fail to CheckPackageHeader");
         return PKG_NONE_MEMORY;
     }
 

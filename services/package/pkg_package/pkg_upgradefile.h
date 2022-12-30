@@ -127,7 +127,7 @@ private:
     int32_t Verify(size_t start, DigestAlgorithm::DigestAlgorithmPtr algorithm,
         VerifyFunction verifier, const std::vector<uint8_t> &signData);
     int32_t WriteBuffer(std::vector<uint8_t> &buffer, size_t &offset, size_t &signOffset);
-    int32_t DoSavePackage(std::vector<uint8_t> &buffer, size_t &offset);
+    int32_t CheckPackageHeader(std::vector<uint8_t> &buffer, size_t &offset);
     int32_t GetEntryOffset(size_t &dataOffset, const PkgManager::FileInfoPtr file);
     int32_t ReadPackageInfo(PkgBuffer &buffer, std::vector<uint8_t> &signData, size_t &parsedLen);
 
