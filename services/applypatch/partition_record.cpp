@@ -106,7 +106,7 @@ bool PartitionRecord::RecordPartitionSetInfo(const std::string &partitionName, b
         return false;
     }
     if (write(fd, &offset_, sizeof(off_t)) != static_cast<ssize_t>(sizeof(off_t))) {
-        LOG(ERROR) << "PartitionRecord: write  misc to record offset failed: " << strerror(errno);
+        LOG(ERROR) << "PartitionRecord: write misc to record offset failed: " << strerror(errno);
         return false;
     }
     return true;
