@@ -61,7 +61,7 @@ constexpr int32_t BLOCK_SIZE = 8;
      | CRC16 |
      +---+---+
  */
-void GZipFileEntry::DoEncodeHeader(size_t &offset, PkgBuffer &buffer)
+void GZipFileEntry::GetUpGraseCompInfo(size_t &offset, PkgBuffer &buffer)
 {
     GZipHeader *header = (GZipHeader *)buffer.buffer;
     header->magic = GZIP_MAGIC;
@@ -108,7 +108,7 @@ int32_t GZipFileEntry::EncodeHeader(PkgStreamPtr inStream, size_t startOffset, s
     size_t offset = 0;
     PkgBuffer buffer(BUFFER_SIZE);
 
-    DoEncodeHeader(offset, buffer);
+    GetUpGraseCompInfo(offset, buffer);
 
     fileInfo_.fileInfo.headerOffset = startOffset;
     fileInfo_.fileInfo.dataOffset = startOffset + offset;
@@ -182,12 +182,12 @@ int32_t GZipFileEntry::DoUnpack(PkgAlgorithmContext context, PkgStreamPtr inStre
     fileInfo_.fileInfo.unpackedSize = ReadLE32(buffer.buffer + sizeof(uint32_t));
     if (crc32_ != context.crc) {
         PKG_LOGE("Crc error %u %u", crc32_, context.crc);
-        return ret;
+        return PKG_VERIFY_FAIL;
     }
 
     if (fileInfo_.fileInfo.unpackedSize != context.unpackedSize) {
         PKG_LOGE("Crc error %u %u", crc32_, context.crc);
-        return ret;
+        return PKG_VERIFY_FAIL;
     }
     return PKG_SUCCESS;
 }

@@ -181,7 +181,7 @@ public:
     int32_t AddEntry(const PkgManager::FileInfoPtr file, const PkgStreamPtr inStream) override;
 
     int32_t SavePackage(size_t &signOffset) override;
-    int32_t DoLoadPackage(size_t &fileLen);
+    int32_t GetFileLength(size_t &fileLen);
     int32_t LoadPackage(std::vector<std::string> &fileNames, VerifyFunction verifier = nullptr) override;
 
 private:

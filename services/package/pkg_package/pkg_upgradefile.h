@@ -52,10 +52,10 @@ struct __attribute__((packed)) UpgradeCompInfo {
 };
 
 struct __attribute__((packed))  UpgradeParam {
-    size_t readLen;
-    size_t dataOffset;
-    size_t srcOffset;
-    size_t currLen;
+    size_t readLen {};
+    size_t dataOffset {};
+    size_t srcOffset {};
+    size_t currLen {};
 };
 class UpgradeFileEntry : public PkgEntry {
 public:
@@ -81,7 +81,7 @@ public:
 
 private:
     ComponentInfo fileInfo_ {};
-    int32_t DoEncodeHeader(UpgradeCompInfo &comp);
+    int32_t GetUpGraseCompInfo(UpgradeCompInfo &comp);
 };
 
 class UpgradePkgFile : public PkgFile {
@@ -120,16 +120,16 @@ private:
     int32_t ReadComponents(const PkgBuffer &buffer, size_t &parsedLen,
         DigestAlgorithm::DigestAlgorithmPtr algorithm, std::vector<std::string> &fileNames);
 
-    void DoReadUpgradePkgHeader(const PkgBuffer &buffer, size_t &currLen, PkgTlv &tlv);
+    void ParsePkgHeaderToTlv(const PkgBuffer &buffer, size_t &currLen, PkgTlv &tlv);
     int32_t ReadUpgradePkgHeader(const PkgBuffer &buffer, size_t &realLen,
         DigestAlgorithm::DigestAlgorithmPtr &algorithm);
 
     int32_t Verify(size_t start, DigestAlgorithm::DigestAlgorithmPtr algorithm,
         VerifyFunction verifier, const std::vector<uint8_t> &signData);
-    int32_t ClearBuffer(std::vector<uint8_t> &buffer, size_t &offset, size_t &signOffset);
+    int32_t WriteBuffer(std::vector<uint8_t> &buffer, size_t &offset, size_t &signOffset);
     int32_t DoSavePackage(std::vector<uint8_t> &buffer, size_t &offset);
     int32_t DoAddEntry(size_t &dataOffset, const PkgManager::FileInfoPtr file);
-    int32_t DoLoadPackage(PkgBuffer &buffer, std::vector<uint8_t> &signData, size_t &parsedLen);
+    int32_t ReadPackageInfo(PkgBuffer &buffer, std::vector<uint8_t> &signData, size_t &parsedLen);
 
 private:
     UpgradePkgInfo pkgInfo_ {};

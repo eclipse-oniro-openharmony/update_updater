@@ -155,7 +155,7 @@ int32_t ZipPkgFile::LoadPackage(std::vector<std::string> &fileNames, const PkgBu
     return ParseFileEntries(fileNames, endDir, currentPos, fileLen);
 }
 
-int32_t ZipPkgFile::DoLoadPackage(size_t &fileLen)
+int32_t ZipPkgFile::GetFileLength(size_t &fileLen)
 {
     if (!CheckState({PKG_FILE_STATE_IDLE}, PKG_FILE_STATE_WORKING)) {
         PKG_LOGE("Error state curr %d ", state_);
@@ -185,9 +185,9 @@ int32_t ZipPkgFile::LoadPackage(std::vector<std::string>& fileNames, VerifyFunct
 
     // 检查最后面是签名信息还是EndCentralDir
     size_t fileLen = 0;
-    int32_t ret = DoLoadPackage(fileLen);
+    int32_t ret = GetFileLength(fileLen);
     if (ret != PKG_SUCCESS) {
-        PKG_LOGE("DoLoadPackage FAIL");
+        PKG_LOGE("GetFileLength FAIL");
         return ret;
     }
     size_t buffSize = sizeof(EndCentralDir);
