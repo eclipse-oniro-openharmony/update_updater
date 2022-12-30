@@ -310,7 +310,7 @@ int32_t CompressedImageDiff::DiffFile(const std::string &fileName, size_t &oldOf
     BlockBuffer orgOldBuffer;
     int32_t ret = newParser_->GetPkgBuffer(orgNewBuffer);
     int32_t ret1 = oldParser_->GetPkgBuffer(orgOldBuffer);
-    if (ret != 0 || ret1 ! = 0) {
+    if (ret != 0 || ret1 != 0) {
         PATCH_LOGE("Failed to get pkgbuffer");
         return -1;
     }
@@ -349,15 +349,15 @@ int32_t CompressedImageDiff::DiffFile(const std::string &fileName, size_t &oldOf
     ret = TestAndSetConfig(newData, fileName);
     if (ret != 0) {
         PATCH_LOGE("Failed to test zip config");
-        return -1;        
+        return -1;     
     }
     std::pair<std::vector<uint8_t>, std::vector<uint8_t>> buffer(std::move(oldBuffer), std::move(newBuffer));
     UpdateBlocks(orgNewBuffer, newFileInfo, orgOldBuffer, oldFileInfo, buffer);
     return 0;
 }
 
-void CompressedImageDiff::UpdateBlocks(const BlockBuffer &orgNewBuffer, const FileInfo *newFileInfo,
-    const BlockBuffer &orgOldBuffer, const FileInfo *oldFileInfo,
+void CompressedImageDiff::UpdateBlocks(const BlockBuffer &orgNewBuffer, const Hpackage::FileInfo *newFileInfo,
+    const BlockBuffer &orgOldBuffer, const Hpackage::FileInfo *oldFileInfo,
     std::pair<std::vector<uint8_t>, std::vector<uint8_t>> &buffer)
 {
     if (type_ != BLOCK_LZ4 && newFileInfo->dataOffset > newFileInfo->headerOffset) {
