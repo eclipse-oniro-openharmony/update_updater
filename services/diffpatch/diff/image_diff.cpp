@@ -349,7 +349,7 @@ int32_t CompressedImageDiff::DiffFile(const std::string &fileName, size_t &oldOf
     ret = TestAndSetConfig(newData, fileName);
     if (ret != 0) {
         PATCH_LOGE("Failed to test zip config");
-        return -1;     
+        return -1;
     }
     std::pair<std::vector<uint8_t>, std::vector<uint8_t>> buffer(std::move(oldBuffer), std::move(newBuffer));
     UpdateBlocks(orgNewBuffer, newFileInfo, orgOldBuffer, oldFileInfo, buffer);
