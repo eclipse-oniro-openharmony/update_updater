@@ -53,7 +53,7 @@ public:
 private:
     void DecodeHeaderCalOffset(uint8_t flags, const PkgBuffer &buffer, size_t &offset,
         std::string &fileName) const;
-    int32_t DoUnpack(PkgAlgorithmContext context, PkgStreamPtr inStream);
+    int32_t GetFileInfo(PkgAlgorithmContext context, PkgStreamPtr inStream);
     void GetUpGraseCompInfo(size_t &offset, PkgBuffer &buffer);
 };
 

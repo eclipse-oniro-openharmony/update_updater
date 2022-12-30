@@ -78,7 +78,7 @@ size_t UpgradePkgFile::GetDigestLen() const
     return DigestAlgorithm::GetDigestLen(pkgInfo_.pkgInfo.digestMethod);
 }
 
-int32_t UpgradePkgFile::DoAddEntry(size_t &dataOffset, const PkgManager::FileInfoPtr file)
+int32_t UpgradePkgFile::GetEntryOffset(size_t &dataOffset, const PkgManager::FileInfoPtr file)
 {
     if (!CheckState({PKG_FILE_STATE_IDLE, PKG_FILE_STATE_WORKING}, PKG_FILE_STATE_WORKING)) {
         PKG_LOGE("error state curr %d ", state_);
@@ -108,9 +108,9 @@ int32_t UpgradePkgFile::AddEntry(const PkgManager::FileInfoPtr file, const PkgSt
     }
     size_t dataOffset = 0;
 
-    int32_t ret = DoAddEntry(dataOffset, file);
+    int32_t ret = GetEntryOffset(dataOffset, file);
     if (ret != PKG_SUCCESS) {
-        PKG_LOGE("Fail to DoAddEntry");
+        PKG_LOGE("Fail to GetEntryOffset");
         return ret;
     }
 
