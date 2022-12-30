@@ -163,14 +163,12 @@ int32_t UpgradePkgFile::DoSavePackage(std::vector<uint8_t> &buffer, size_t &offs
     WriteLE32(reinterpret_cast<uint8_t *>(&header->updateFileVersion), pkgInfo_.updateFileVersion);
     int32_t ret = memcpy_s(header->softwareVersion, sizeof(header->softwareVersion), pkgInfo_.softwareVersion.data(),
         pkgInfo_.softwareVersion.size());
-    // PKG_CHECK(ret == EOK, return ret, "Fail to memcpy_s %s ret: %d", pkgStream_->GetFileName().c_str(), ret);
     if (ret != EOK) {
         PKG_LOGE("Fail to memcpy_s %s ret: %d", pkgStream_->GetFileName().c_str(), ret);
         return ret;
     }
     ret = memcpy_s(header->productUpdateId, sizeof(header->productUpdateId), pkgInfo_.productUpdateId.data(),
         pkgInfo_.productUpdateId.size());
-    // PKG_CHECK(ret == EOK, return ret, "Fail to memcpy_s %s ret: %d", pkgStream_->GetFileName().c_str(), ret);
     if (ret != EOK) {
         PKG_LOGE("Fail to memcpy_s %s ret: %d", pkgStream_->GetFileName().c_str(), ret);
         return ret;
@@ -190,7 +188,8 @@ int32_t UpgradePkgFile::WriteBuffer(std::vector<uint8_t> &buffer, size_t &offset
 
     buffer.assign(buffer.capacity(), 0);
     size_t nameLen = 0;
-    size_t ret = PkgFile::ConvertStringToBuffer(pkgInfo_.descriptPackageId, {buffer.data(), UPGRADE_RESERVE_LEN}, nameLen);
+    size_t ret = PkgFile::ConvertStringToBuffer(
+        pkgInfo_.descriptPackageId, {buffer.data(), UPGRADE_RESERVE_LEN}, nameLen);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("Fail write descriptPackageId");
         return ret;
@@ -298,7 +297,6 @@ int32_t UpgradePkgFile::LoadPackage(std::vector<std::string> &fileNames, VerifyF
     // Allocate buffer with smallest package size
     size_t buffSize = UPGRADE_FILE_HEADER_LEN + sizeof(UpgradeCompInfo) +
         GetUpgradeSignatureLen() + UPGRADE_RESERVE_LEN;
-
     if (fileLen <= 0 || fileLen < buffSize) {
         PKG_LOGE("Invalid file %s fileLen:%zu ", pkgStream_->GetFileName().c_str(), fileLen);
         return PKG_INVALID_FILE;
@@ -450,7 +448,6 @@ int32_t UpgradePkgFile::ReadComponents(const PkgBuffer &buffer, size_t &parsedLe
             PKG_LOGE("SaveEntry");
             return ret;
         }
-
     }
     parsedLen += info.srcOffset;
     return PKG_SUCCESS;

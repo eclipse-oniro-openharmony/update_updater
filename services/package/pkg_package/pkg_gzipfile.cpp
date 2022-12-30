@@ -113,7 +113,6 @@ int32_t GZipFileEntry::EncodeHeader(PkgStreamPtr inStream, size_t startOffset, s
     fileInfo_.fileInfo.headerOffset = startOffset;
     fileInfo_.fileInfo.dataOffset = startOffset + offset;
     int32_t ret = outStream->Write(buffer, offset, startOffset);
-
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("Fail write header for %s", fileInfo_.fileInfo.identity.c_str());
         return ret;
@@ -173,7 +172,6 @@ int32_t GZipFileEntry::DoUnpack(PkgAlgorithmContext context, PkgStreamPtr inStre
     fileInfo_.fileInfo.packedSize = context.packedSize;
     PkgBuffer buffer(BLOCK_SIZE); // Read last 8 bytes at the end of package
     int32_t ret = inStream->Read(buffer, context.packedSize + fileInfo_.fileInfo.dataOffset, BLOCK_SIZE, readLen);
-
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("Fail to read file %s", inStream->GetFileName().c_str());
         return ret;
