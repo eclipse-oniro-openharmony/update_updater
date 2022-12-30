@@ -137,7 +137,7 @@ int UpdatePartitions::SetNewPartition(const std::string &filePath, const FileInf
     }
     Hpackage::PkgManager::StreamPtr outStream = nullptr;
     int ret = env.GetPkgManager()->CreatePkgStream(outStream,
-        tmpPath, info->unpackedSize, PkgStream::PkgStreamType_Write);
+        std::string(realPath), info->unpackedSize, PkgStream::PkgStreamType_Write);
     if (ret != USCRIPT_SUCCESS || outStream == nullptr) {
         LOG(ERROR) << "Error to create output stream";
         return USCRIPT_ERROR_EXECUTE;
