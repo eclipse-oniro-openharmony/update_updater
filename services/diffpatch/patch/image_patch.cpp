@@ -113,7 +113,7 @@ int32_t CompressedImagePatch::ApplyImagePatch(const PatchParam &param, size_t &s
     // decompress old data
     Hpackage::PkgManager::StreamPtr stream = nullptr;
     BlockBuffer oldData = { param.oldBuff + header.srcStart, header.srcLength };
-    ret = DecompressData(oldData, stream, true, header.expandedLen);\
+    ret = DecompressData(oldData, stream, true, header.expandedLen);
     if (ret != 0) {
         PATCH_LOGE("Failed to decompress data");
         return -1;

@@ -72,9 +72,9 @@ public:
 
 protected:
     virtual int32_t TestAndSetConfig(const BlockBuffer &buffer, const std::string &fileName) = 0;
-    int32_t ExtractFile(BlockBuffer &orgBuffer, std::vector<uint8_t> &buffer,
-        const Hpackage::FileInfo*& fileInfo, UpdateDiff::ImageParserPtr parser, const std::string &fileName);
     int32_t DiffFile(const std::string &fileName, size_t &oldOffset, size_t &newOffset);
+    void UpdateBlocks(const BlockBuffer &orgNewBuffer, const FileInfo *newFileInfo, const BlockBuffer &orgOldBuffer,
+        const FileInfo *oldFileInfo, std::pair<std::vector<uint8_t>, std::vector<uint8_t>> &buffer);
     int32_t CompressData(Hpackage::PkgManager::FileInfoPtr info,
         const BlockBuffer &buffer, std::vector<uint8_t> &outData, size_t &outSize) const;
     int32_t type_;

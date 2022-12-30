@@ -304,53 +304,32 @@ int32_t CompressedImageDiff::MakePatch(const std::string &patchName)
     return DiffImage(patchName);
 }
 
-int32_t CompressedImageDiff::ExtractFile(BlockBuffer &orgBuffer, std::vector<uint8_t> &buffer,
-    const Hpackage::FileInfo*& fileInfo, UpdateDiff::ImageParserPtr parser, const std::string &fileName)
-{
-    int32_t ret = parser->GetPkgBuffer(orgBuffer);
-    if (ret != 0) {
-        PATCH_LOGE("Failed to get pkgbuffer");
-        return -1;
-    }
-    ret = parser->Extract(fileName, buffer);
-    if (parser == newParser_) {
-        fileInfo = parser->GetFileInfo(fileName);
-        if (ret != 0 || fileInfo == nullptr) {
-            PATCH_LOGE("Failed to get new data");
-            return -1;
-        }
-        if (limit_ != 0 && fileInfo->unpackedSize >= limit_) {
-            PATCH_LOGE("Exceed limit, so make patch by original file");
-            return PATCH_EXCEED_LIMIT;
-        }
-    } else if (parser == oldParser_) {
-        if (ret != 0) {
-            return 1;
-        }
-        fileInfo = parser->GetFileInfo(fileName);
-        if (fileInfo == nullptr) {
-            PATCH_LOGE("Failed to get old file info");
-            return -1;
-        }
-    }
-    return 0;
-}
-
 int32_t CompressedImageDiff::DiffFile(const std::string &fileName, size_t &oldOffset, size_t &newOffset)
 {
     BlockBuffer orgNewBuffer;
     BlockBuffer orgOldBuffer;
+    int32_t ret = newParser_->GetPkgBuffer(orgNewBuffer);
+    int32_t ret1 = oldParser_->GetPkgBuffer(orgOldBuffer);
+    if (ret != 0 || ret1 ! = 0) {
+        PATCH_LOGE("Failed to get pkgbuffer");
+        return -1;
+    }
     std::vector<uint8_t> newBuffer;
     std::vector<uint8_t> oldBuffer;
-    const FileInfo *newFileInfo = nullptr;
-    const FileInfo *oldFileInfo = nullptr;
-
-    if (ExtractFile(orgNewBuffer, newBuffer, newFileInfo, newParser_, fileName) != 0) {
+    ret = newParser_->Extract(fileName, newBuffer);
+    const FileInfo *newFileInfo = newParser_->GetFileInfo(fileName);
+    if (ret != 0 || newFileInfo == nullptr) {
+        PATCH_LOGE("Failed to get new data");
         return -1;
     }
     newOffset += GET_REAL_DATA_LEN(newFileInfo);
-    int32_t ret = ExtractFile(orgOldBuffer, oldBuffer, oldFileInfo, oldParser_, fileName);
-    if (ret == 1) {
+    if (limit_ != 0 && newFileInfo->unpackedSize >= limit_) {
+        PATCH_LOGE("Exceed limit, so make patch by original file");
+        return PATCH_EXCEED_LIMIT;
+    }
+
+    ret = oldParser_->Extract(fileName, oldBuffer);
+    if (ret != 0) {
         ImageBlock block = {
             BLOCK_RAW,
             { orgNewBuffer.buffer, newFileInfo->headerOffset, GET_REAL_DATA_LEN(newFileInfo) },
@@ -359,14 +338,28 @@ int32_t CompressedImageDiff::DiffFile(const std::string &fileName, size_t &oldOf
         updateBlocks_.push_back(std::move(block));
         return 0;
     }
+    const FileInfo *oldFileInfo = oldParser_->GetFileInfo(fileName);
+    if (oldFileInfo == nullptr) {
+        PATCH_LOGE("Failed to get file info");
+        return -1;
+    }
     oldOffset += GET_REAL_DATA_LEN(oldFileInfo);
 
     BlockBuffer newData = {newBuffer.data(), newFileInfo->unpackedSize};
     ret = TestAndSetConfig(newData, fileName);
     if (ret != 0) {
         PATCH_LOGE("Failed to test zip config");
-        return -1;
+        return -1;        
     }
+    std::pair<std::vector<uint8_t>, std::vector<uint8_t>> buffer(std::move(oldBuffer), std::move(newBuffer));
+    UpdateBlocks(orgNewBuffer, newFileInfo, orgOldBuffer, oldFileInfo, buffer);
+    return 0;
+}
+
+void CompressedImageDiff::UpdateBlocks(const BlockBuffer &orgNewBuffer, const FileInfo *newFileInfo,
+    const BlockBuffer &orgOldBuffer, const FileInfo *oldFileInfo,
+    std::pair<std::vector<uint8_t>, std::vector<uint8_t>> &buffer)
+{
     if (type_ != BLOCK_LZ4 && newFileInfo->dataOffset > newFileInfo->headerOffset) {
         ImageBlock block = {
             BLOCK_RAW,
@@ -375,17 +368,17 @@ int32_t CompressedImageDiff::DiffFile(const std::string &fileName, size_t &oldOf
         };
         updateBlocks_.push_back(std::move(block));
     }
+
     ImageBlock block = {
         type_,
         { orgNewBuffer.buffer, newFileInfo->dataOffset, newFileInfo->packedSize },
         { orgOldBuffer.buffer, oldFileInfo->dataOffset, oldFileInfo->packedSize },
     };
-    block.srcOriginalData = std::move(oldBuffer);
-    block.destOriginalData = std::move(newBuffer);
+    block.srcOriginalData = std::move(buffer.first);
+    block.destOriginalData = std::move(buffer.second);
     block.srcOriginalLength = oldFileInfo->unpackedSize;
     block.destOriginalLength = newFileInfo->unpackedSize;
     updateBlocks_.push_back(std::move(block));
-    return 0;
 }
 
 int32_t ZipImageDiff::WriteHeader(std::ofstream &patchFile,
