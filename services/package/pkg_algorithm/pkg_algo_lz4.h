@@ -25,10 +25,10 @@
 namespace Hpackage {
 struct PkgBufferMessage {
     PkgAlgorithmContext context {{0, 0}, {0, 0}, 0, 0};
-    PkgBuffer inBuffer;
-    PkgBuffer outBuffer;
-    size_t inBuffSize;
-    size_t outBuffSize;
+    PkgBuffer inBuffer {};
+    PkgBuffer outBuffer {};
+    size_t inBuffSize {};
+    size_t outBuffSize {};
 };
 
 class PkgAlgorithmLz4 : public PkgAlgorithm {
