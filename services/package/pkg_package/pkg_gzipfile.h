@@ -41,7 +41,7 @@ public:
     GZipFileEntry(PkgFilePtr pkgFile, uint32_t nodeId) : ZipFileEntry(pkgFile, nodeId) {}
 
     ~GZipFileEntry() override {}
-    
+
     int32_t EncodeHeader(PkgStreamPtr inStream, size_t startOffset, size_t &encodeLen) override;
 
     int32_t Pack(PkgStreamPtr inStream, size_t startOffset, size_t &encodeLen) override;
@@ -54,7 +54,7 @@ private:
     void DecodeHeaderCalOffset(uint8_t flags, const PkgBuffer &buffer, size_t &offset,
         std::string &fileName) const;
     int32_t CheckFileInfo(PkgAlgorithmContext context, PkgStreamPtr inStream);
-    void GetUpGraseCompInfo(size_t &offset, PkgBuffer &buffer);
+    void GetUpGradeCompInfo(size_t &offset, PkgBuffer &buffer);
 };
 
 class GZipPkgFile : public PkgFile {

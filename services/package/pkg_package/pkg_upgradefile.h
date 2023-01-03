@@ -81,7 +81,7 @@ public:
 
 private:
     ComponentInfo fileInfo_ {};
-    int32_t GetUpGraseCompInfo(UpgradeCompInfo &comp);
+    int32_t GetUpGradeCompInfo(UpgradeCompInfo &comp);
 };
 
 class UpgradePkgFile : public PkgFile {

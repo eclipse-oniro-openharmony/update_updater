@@ -297,7 +297,7 @@ int32_t UpgradePkgFile::LoadPackage(std::vector<std::string> &fileNames, VerifyF
     // Allocate buffer with smallest package size
     size_t buffSize = UPGRADE_FILE_HEADER_LEN + sizeof(UpgradeCompInfo) +
         GetUpgradeSignatureLen() + UPGRADE_RESERVE_LEN;
-    if (fileLen <= 0 || fileLen < buffSize) {
+    if (fileLen < buffSize) {
         PKG_LOGE("Invalid file %s fileLen:%zu ", pkgStream_->GetFileName().c_str(), fileLen);
         return PKG_INVALID_FILE;
     }
@@ -524,7 +524,7 @@ int32_t UpgradePkgFile::ReadUpgradePkgHeader(const PkgBuffer &buffer, size_t &re
     return PKG_SUCCESS;
 }
 
-int32_t UpgradeFileEntry::GetUpGraseCompInfo(UpgradeCompInfo &comp)
+int32_t UpgradeFileEntry::GetUpGradeCompInfo(UpgradeCompInfo &comp)
 {
     if (memset_s(&comp, sizeof(comp), 0, sizeof(comp)) != EOK) {
         PKG_LOGE("UpgradeFileEntry memset_s failed");
@@ -560,9 +560,9 @@ int32_t UpgradeFileEntry::EncodeHeader(PkgStreamPtr inStream, size_t startOffset
     }
 
     UpgradeCompInfo comp;
-    int ret = GetUpGraseCompInfo(comp);
+    int ret = GetUpGradeCompInfo(comp);
     if (ret != PKG_SUCCESS) {
-        PKG_LOGE("GetUpGraseCompInfo failed");
+        PKG_LOGE("GetUpGradeCompInfo failed");
         return ret;
     }
 

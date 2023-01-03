@@ -163,7 +163,7 @@ int32_t ZipPkgFile::GetFileLength(size_t &fileLen)
     }
     // 先从文件尾部获取 EndCentralDir
     fileLen = pkgStream_->GetFileLength();
-    if (fileLen <= 0) {
+    if (fileLen == 0) {
         PKG_LOGE("invalid file to load");
         return PKG_INVALID_STATE;
     }
