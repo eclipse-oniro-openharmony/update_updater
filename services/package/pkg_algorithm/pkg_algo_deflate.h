@@ -44,6 +44,12 @@ private:
     int32_t PackCalculate(PkgAlgorithmContext &context, const PkgStreamPtr inStream,
         const PkgStreamPtr outStream, const DigestAlgorithm::DigestAlgorithmPtr algorithm);
 
+    int32_t ReadUnpackData(const PkgStreamPtr inStream, PkgBuffer &inBuffer,
+        z_stream &zstream, PkgAlgorithmContext &context, size_t &readLen);
+
+    int32_t CalculateUnpackData(z_stream &zstream, uint32_t &crc, int32_t &ret,
+        PkgAlgorithmContext &context, PkgAlgorithmContext &unpackContext);
+
     int32_t UnpackCalculate(PkgAlgorithmContext &context, const PkgStreamPtr inStream,
         const PkgStreamPtr outStream, DigestAlgorithm::DigestAlgorithmPtr algorithm);
 
