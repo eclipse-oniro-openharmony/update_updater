@@ -290,7 +290,7 @@ int32_t PkgAlgorithmLz4::PackCalculate(const PkgStreamPtr inStream, const PkgStr
         }
         msg.context.destOffset += headerSize;
     }
-    return ret;
+    return PKG_SUCCESS;
 }
 
 /* 打包数据时，会自动生成magic字 */
@@ -327,12 +327,13 @@ int32_t PkgAlgorithmLz4::Pack(const PkgStreamPtr inStream, const PkgStreamPtr ou
     }
     int32_t ret = PackCalculate(inStream, outStream, msg, dataLen, ctx);
     if (ret != PKG_SUCCESS) {
+        (void)LZ4F_freeCompressionContext(ctx);
         return ret;
     }
     (void)LZ4F_freeCompressionContext(ctx);
     if (packText.srcOffset - context.srcOffset != context.unpackedSize) {
         PKG_LOGE("original size error %zu %zu", packText.srcOffset, context.unpackedSize);
-        return ret;
+        return PKG_INVALID_LZ4;
     }
     context.packedSize = packText.destOffset - context.destOffset;
     return PKG_SUCCESS;

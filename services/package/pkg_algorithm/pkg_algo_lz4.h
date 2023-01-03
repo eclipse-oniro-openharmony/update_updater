@@ -24,7 +24,7 @@
 
 namespace Hpackage {
 struct PkgBufferMessage {
-    PkgAlgorithmContext context;
+    PkgAlgorithmContext context {{0, 0}, {0, 0}, 0, 0};
     PkgBuffer inBuffer;
     PkgBuffer outBuffer;
     size_t inBuffSize;

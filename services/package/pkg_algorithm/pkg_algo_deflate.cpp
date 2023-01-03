@@ -53,7 +53,7 @@ int32_t PkgAlgoDeflate::DeflateData(const PkgStreamPtr outStream, z_stream &zstr
 }
 
 int32_t PkgAlgoDeflate::PackCalculate(PkgAlgorithmContext &context, const PkgStreamPtr inStream,
-    const PkgStreamPtr outStream, DigestAlgorithm::DigestAlgorithmPtr algorithm)
+    const PkgStreamPtr outStream, const DigestAlgorithm::DigestAlgorithmPtr algorithm)
 {
     PkgBuffer inBuffer = {};
     PkgBuffer outBuffer = {};

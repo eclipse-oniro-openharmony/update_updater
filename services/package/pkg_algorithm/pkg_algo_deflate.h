@@ -42,7 +42,7 @@ public:
 
 private:
     int32_t PackCalculate(PkgAlgorithmContext &context, const PkgStreamPtr inStream,
-        const PkgStreamPtr outStream, DigestAlgorithm::DigestAlgorithmPtr algorithm);
+        const PkgStreamPtr outStream, const DigestAlgorithm::DigestAlgorithmPtr algorithm);
 
     int32_t UnpackCalculate(PkgAlgorithmContext &context, const PkgStreamPtr inStream,
         const PkgStreamPtr outStream, DigestAlgorithm::DigestAlgorithmPtr algorithm);
