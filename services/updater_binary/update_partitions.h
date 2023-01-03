@@ -15,6 +15,7 @@
 #ifndef UPDATER_UPDATE_PARTITIONS_H
 #define UPDATER_UPDATE_PARTITIONS_H
 
+#include "cJSON.h"
 #include "fs_manager/partitions.h"
 #include "pkg_manager.h"
 #include "script_instruction.h"
@@ -29,6 +30,8 @@ public:
 private:
     int ParsePartitionInfo(const std::string &partitionInfo, PartitonList &newPartList) const;
     int DoNewPartitions(PartitonList &newPartList);
+    bool SetPartitionInfo(const cJSON* partitions, int idx, struct Partition* myPartition) const;
+    int SetNewPartition(const std::string &filePath, const Hpackage::FileInfo *info, Uscript::UScriptEnv &env);
 };
 }
 #endif // UPDATER_UPDATE_PARTITIONS_H
