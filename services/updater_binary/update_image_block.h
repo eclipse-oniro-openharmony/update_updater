@@ -32,6 +32,9 @@ public:
     UScriptInstructionBlockCheck() {}
     virtual ~UScriptInstructionBlockCheck() {}
     int32_t Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context) override;
+private:
+    bool ExecReadBlockInfo(const std::string &devPath, Uscript::UScriptContext &context,
+        time_t &mountTime, uint16_t &mountCount);
 };
 
 class UScriptInstructionShaCheck : public Uscript::UScriptInstruction {
@@ -39,6 +42,9 @@ public:
     UScriptInstructionShaCheck() {}
     virtual ~UScriptInstructionShaCheck() {}
     int32_t Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context) override;
+private:
+    int ExecReadShaInfo(const std::string &devPath, const std::string &blockPairs,
+        const std::string &contrastSha, Uscript::UScriptContext &context);
 };
 }
 

@@ -76,6 +76,16 @@ static int ExtractNewData(const PkgBuffer &buffer, size_t size, size_t start, bo
     return Hpackage::PKG_SUCCESS;
 }
 
+static inline void CondBroadcast(WriterThreadInfo *info)
+{
+    pthread_mutex_lock(&info->mutex);
+    info->readyToWrite = false;
+    if (info->writer != nullptr) {
+        pthread_cond_broadcast(&info->cond);
+    }
+    pthread_mutex_unlock(&info->mutex);
+}
+
 void* UnpackNewData(void *arg)
 {
     WriterThreadInfo *info = static_cast<WriterThreadInfo *>(arg);
@@ -83,12 +93,7 @@ void* UnpackNewData(void *arg)
     TransferManagerPtr tm = TransferManager::GetTransferManagerInstance();
     if (info->newPatch.empty()) {
         LOG(ERROR) << "new patch file name is empty. thread quit.";
-        pthread_mutex_lock(&info->mutex);
-        info->readyToWrite = false;
-        if (info->writer != nullptr) {
-            pthread_cond_broadcast(&info->cond);
-        }
-        pthread_mutex_unlock(&info->mutex);
+        CondBroadcast(info);
         return nullptr;
     }
     LOG(DEBUG) << "new patch file name: " << info->newPatch;
@@ -96,12 +101,7 @@ void* UnpackNewData(void *arg)
     const FileInfo *file = env->GetPkgManager()->GetFileInfo(info->newPatch);
     if (file == nullptr) {
         LOG(ERROR) << "Cannot get file info of :" << info->newPatch;
-        pthread_mutex_lock(&info->mutex);
-        info->readyToWrite = false;
-        if (info->writer != nullptr) {
-            pthread_cond_broadcast(&info->cond);
-        }
-        pthread_mutex_unlock(&info->mutex);
+        CondBroadcast(info);
         return nullptr;
     }
     LOG(DEBUG) << info->newPatch << " info: size " << file->packedSize << " unpacked size " <<
@@ -109,23 +109,15 @@ void* UnpackNewData(void *arg)
     int32_t ret = env->GetPkgManager()->CreatePkgStream(stream, info->newPatch, ExtractNewData, info);
     if (ret != Hpackage::PKG_SUCCESS || stream == nullptr) {
         LOG(ERROR) << "Cannot extract " << info->newPatch << " from package.";
-        pthread_mutex_lock(&info->mutex);
-        info->readyToWrite = false;
-        if (info->writer != nullptr) {
-            pthread_cond_broadcast(&info->cond);
-        }
-        pthread_mutex_unlock(&info->mutex);
+        CondBroadcast(info);
         return nullptr;
     }
     ret = env->GetPkgManager()->ExtractFile(info->newPatch, stream);
     env->GetPkgManager()->ClosePkgStream(stream);
-    pthread_mutex_lock(&info->mutex);
     LOG(DEBUG) << "new data writer ending...";
     // extract new data done.
     // tell command.
-    info->readyToWrite = false;
-    UPDATER_WARING_CHECK (info->writer == nullptr, "writer is null", pthread_cond_broadcast(&info->cond));
-    pthread_mutex_unlock(&info->mutex);
+    CondBroadcast(info);
     return nullptr;
 }
 
@@ -366,24 +358,14 @@ int32_t UScriptInstructionBlockUpdate::Execute(Uscript::UScriptEnv &env, Uscript
     return result;
 }
 
-int32_t UScriptInstructionBlockCheck::Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context)
+bool UScriptInstructionBlockCheck::ExecReadBlockInfo(const std::string &devPath, Uscript::UScriptContext &context,
+    time_t &mountTime, uint16_t &mountCount)
 {
-    UPDATER_ERROR_CHECK(context.GetParamCount() == 1, "Invalid param",
-        return ReturnAndPushParam(USCRIPT_INVALID_PARAM, context));
-    if (env.IsRetry()) {
-        return ReturnAndPushParam(USCRIPT_SUCCESS, context);
-    }
-    std::string partitionName;
-    int32_t ret = context.GetParam(0, partitionName);
-    UPDATER_ERROR_CHECK(ret == USCRIPT_SUCCESS, "Failed to get param",
-        return ReturnAndPushParam(USCRIPT_ERROR_EXECUTE, context));
-    auto devPath = GetBlockDeviceByMountPoint(partitionName);
-    LOG(INFO) << "UScriptInstructionBlockCheck::dev path : " << devPath;
-    UPDATER_ERROR_CHECK(!devPath.empty(), "cannot get block device of partition",
-        return ReturnAndPushParam(USCRIPT_ERROR_EXECUTE, context));
     int fd = open(devPath.c_str(), O_RDWR | O_LARGEFILE);
-    UPDATER_ERROR_CHECK(fd != -1, "Failed to open file",
-        return ReturnAndPushParam(USCRIPT_ERROR_EXECUTE, context));
+    if (fd == -1) {
+        LOG(ERROR) << "Failed to open file";
+        return false;
+    }
     std::vector<uint8_t> block_buff(H_BLOCK_SIZE);
     BlockSet blk0(std::vector<BlockPair> {BlockPair{0, 1}});
 
@@ -391,18 +373,49 @@ int32_t UScriptInstructionBlockCheck::Execute(Uscript::UScriptEnv &env, Uscript:
     std::vector<BlockPair>::iterator it = blk0.Begin();
     for (; it != blk0.End(); ++it) {
         LOG(INFO) << "BlockSet::ReadDataFromBlock lseek64";
-        ret = lseek64(fd, static_cast<off64_t>(it->first * H_BLOCK_SIZE), SEEK_SET);
-        UPDATER_ERROR_CHECK(ret != -1, "Failed to seek",
-            close(fd); return ReturnAndPushParam(USCRIPT_ERROR_EXECUTE, context));
+        if (lseek64(fd, static_cast<off64_t>(it->first * H_BLOCK_SIZE), SEEK_SET) == -1) {
+            LOG(ERROR) << "Failed to seek";
+            close(fd);
+            return false;
+        }
         size_t size = (it->second - it->first) * H_BLOCK_SIZE;
         LOG(INFO) << "BlockSet::ReadDataFromBlock Read " << size << " from block";
-        UPDATER_ERROR_CHECK(Utils::ReadFully(fd, block_buff.data() + pos, size), "Failed to read",
-            close(fd); return ReturnAndPushParam(USCRIPT_ERROR_EXECUTE, context));
+        if (!Utils::ReadFully(fd, block_buff.data() + pos, size)) {
+            LOG(ERROR) << "Failed to read";
+            close(fd);
+            return false;
+        }
         pos += size;
     }
+    close(fd);
+    mountTime = *reinterpret_cast<uint32_t *>(&block_buff[0x400 + 0x2C]);
+    mountCount = *reinterpret_cast<uint16_t *>(&block_buff[0x400 + 0x34]);
+    return true;
+}
 
-    time_t mountTime = *reinterpret_cast<uint32_t *>(&block_buff[0x400 + 0x2C]);
-    uint16_t mountCount = *reinterpret_cast<uint16_t *>(&block_buff[0x400 + 0x34]);
+int32_t UScriptInstructionBlockCheck::Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context)
+{
+    if (context.GetParamCount() != 1) {
+        LOG(ERROR) << "Invalid param";
+        return ReturnAndPushParam(USCRIPT_INVALID_PARAM, context);
+    }
+    if (env.IsRetry()) {
+        return ReturnAndPushParam(USCRIPT_SUCCESS, context);
+    }
+    std::string partitionName;
+    int32_t ret = context.GetParam(0, partitionName);
+    if (ret != USCRIPT_SUCCESS) {
+        LOG(ERROR) << "Failed to get param";
+        return ReturnAndPushParam(USCRIPT_ERROR_EXECUTE, context);
+    }
+    auto devPath = GetBlockDeviceByMountPoint(partitionName);
+    LOG(INFO) << "UScriptInstructionBlockCheck::dev path : " << devPath;
+    time_t mountTime = 0;
+    uint16_t mountCount = 0;
+    if (devPath.empty() || (!ExecReadBlockInfo(devPath, context, mountTime, mountCount))) {
+        LOG(ERROR) << "cannot get block device of partition";
+        return ReturnAndPushParam(USCRIPT_ERROR_EXECUTE, context);
+    }
 
     if (mountCount > 0) {
         std::ostringstream ostr;
@@ -413,63 +426,85 @@ int32_t UScriptInstructionBlockCheck::Execute(Uscript::UScriptEnv &env, Uscript:
     }
     LOG(INFO) << "UScriptInstructionBlockCheck::Execute Success";
     context.PushParam(USCRIPT_SUCCESS);
+    return USCRIPT_SUCCESS;
+}
+
+int UScriptInstructionShaCheck::ExecReadShaInfo(const std::string &devPath, const std::string &blockPairs,
+    const std::string &contrastSha, Uscript::UScriptContext &context)
+{
+    int fd = open(devPath.c_str(), O_RDWR | O_LARGEFILE);
+    if (fd == -1) {
+        LOG(ERROR) << "Failed to open file";
+        return ReturnAndPushParam(USCRIPT_ERROR_EXECUTE, context);
+    }
+
+    BlockSet blk;
+    blk.ParserAndInsert(blockPairs);
+    std::vector<uint8_t> block_buff(H_BLOCK_SIZE);
+    SHA256_CTX ctx;
+    SHA256_Init(&ctx);
+    std::vector<BlockPair>::iterator it = blk.Begin();
+    for (; it != blk.End(); ++it) {
+        if (lseek64(fd, static_cast<off64_t>(it->first * H_BLOCK_SIZE), SEEK_SET) == -1) {
+            LOG(ERROR) << "Failed to seek";
+            close(fd);
+            return ReturnAndPushParam(USCRIPT_ERROR_EXECUTE, context);
+        }
+        for (size_t i = it->first; i < it->second; ++i) {
+            if (!Utils::ReadFully(fd, block_buff.data(), H_BLOCK_SIZE)) {
+                LOG(ERROR) << "Failed to read";
+                close(fd);
+                return ReturnAndPushParam(USCRIPT_ERROR_EXECUTE, context);
+            }
+            SHA256_Update(&ctx, block_buff.data(), H_BLOCK_SIZE);
+        }
+    }
     close(fd);
+
+    uint8_t digest[SHA256_DIGEST_LENGTH];
+    SHA256_Final(digest, &ctx);
+    std::string resultSha = Utils::ConvertSha256Hex(digest, SHA256_DIGEST_LENGTH);
+    if (resultSha != contrastSha) {
+        LOG(ERROR) << "Different sha256, cannot continue";
+        return ReturnAndPushParam(USCRIPT_ERROR_EXECUTE, context);
+    }
+    LOG(INFO) << "UScriptInstructionShaCheck::Execute Success";
+    context.PushParam(USCRIPT_SUCCESS);
     return USCRIPT_SUCCESS;
 }
 
 int32_t UScriptInstructionShaCheck::Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context)
 {
-    UPDATER_ERROR_CHECK(context.GetParamCount() == SHA_CHECK_PARAMS, "Invalid param",
-                        return ReturnAndPushParam(USCRIPT_INVALID_PARAM, context));
+    if (context.GetParamCount() != SHA_CHECK_PARAMS) {
+        LOG(ERROR) << "Invalid param";
+        return ReturnAndPushParam(USCRIPT_INVALID_PARAM, context);
+    }
     UPDATER_CHECK_ONLY_RETURN(!env.IsRetry(), return ReturnAndPushParam(USCRIPT_SUCCESS, context));
 
     std::string partitionName;
     int32_t ret = context.GetParam(0, partitionName);
-    UPDATER_ERROR_CHECK(ret == USCRIPT_SUCCESS, "Failed to get param",
-                        return ReturnAndPushParam(USCRIPT_ERROR_EXECUTE, context));
+    if (ret != USCRIPT_SUCCESS) {
+        LOG(ERROR) << "Failed to get param";
+        return ReturnAndPushParam(USCRIPT_ERROR_EXECUTE, context);
+    }
     std::string blockPairs;
     ret = context.GetParam(1, blockPairs);
-    UPDATER_ERROR_CHECK(ret == USCRIPT_SUCCESS, "Failed to get param",
-                        return ReturnAndPushParam(USCRIPT_ERROR_EXECUTE, context));
+    if (ret != USCRIPT_SUCCESS) {
+        LOG(ERROR) << "Failed to get param";
+        return ReturnAndPushParam(USCRIPT_ERROR_EXECUTE, context);
+    }
     std::string contrastSha;
     ret = context.GetParam(SHA_CHECK_SECOND, contrastSha);
-    UPDATER_ERROR_CHECK(ret == USCRIPT_SUCCESS, "Failed to get param",
-                        return ReturnAndPushParam(USCRIPT_ERROR_EXECUTE, context));
+    if (ret != USCRIPT_SUCCESS) {
+        LOG(ERROR) << "Failed to get param";
+        return ReturnAndPushParam(USCRIPT_ERROR_EXECUTE, context);
+    }
     auto devPath = GetBlockDeviceByMountPoint(partitionName);
     LOG(INFO) << "UScriptInstructionShaCheck::dev path : " << devPath;
-    UPDATER_ERROR_CHECK(!devPath.empty(), "cannot get block device of partition",
-                        return ReturnAndPushParam(USCRIPT_ERROR_EXECUTE, context));
-    int fd = open(devPath.c_str(), O_RDWR | O_LARGEFILE);
-    UPDATER_ERROR_CHECK(fd != -1, "Failed to open file",
-                        return ReturnAndPushParam(USCRIPT_ERROR_EXECUTE, context));
-
-    BlockSet blk;
-    blk.ParserAndInsert(blockPairs);
-    std::vector<uint8_t> block_buff(H_BLOCK_SIZE);
-
-    SHA256_CTX ctx;
-    SHA256_Init(&ctx);
-
-    std::vector<BlockPair>::iterator it = blk.Begin();
-    for (; it != blk.End(); ++it) {
-        ret = lseek64(fd, static_cast<off64_t>(it->first * H_BLOCK_SIZE), SEEK_SET);
-        UPDATER_ERROR_CHECK(ret != -1, "Failed to seek",
-            close(fd); return ReturnAndPushParam(USCRIPT_ERROR_EXECUTE, context));
-
-        for (size_t i = it->first; i < it->second; ++i) {
-            UPDATER_ERROR_CHECK(Utils::ReadFully(fd, block_buff.data(), H_BLOCK_SIZE), "Failed to read",
-                close(fd); return ReturnAndPushParam(USCRIPT_ERROR_EXECUTE, context));
-            SHA256_Update(&ctx, block_buff.data(), H_BLOCK_SIZE);
-        }
+    if (devPath.empty()) {
+        LOG(ERROR) << "cannot get block device of partition";
+        return ReturnAndPushParam(USCRIPT_ERROR_EXECUTE, context);
     }
-    uint8_t digest[SHA256_DIGEST_LENGTH];
-    SHA256_Final(digest, &ctx);
-    std::string resultSha = Utils::ConvertSha256Hex(digest, SHA256_DIGEST_LENGTH);
-    UPDATER_ERROR_CHECK(resultSha == contrastSha, "Different sha256, cannot continue",
-        close(fd); return ReturnAndPushParam(USCRIPT_ERROR_EXECUTE, context));
-    LOG(INFO) << "UScriptInstructionShaCheck::Execute Success";
-    context.PushParam(USCRIPT_SUCCESS);
-    close(fd);
-    return USCRIPT_SUCCESS;
+    return ExecReadShaInfo(devPath, blockPairs, contrastSha, context);
 }
 }

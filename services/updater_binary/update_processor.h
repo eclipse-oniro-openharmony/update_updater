@@ -59,6 +59,8 @@ private:
         const void* context);
     int GetWritePathAndOffset(const std::string &partitionName, std::string &writePath, uint64_t &offset,
         uint64_t &partitionSize);
+    bool WriteRawImage(const std::string &partitionName, const std::unique_ptr<DataWriter> &writer,
+        uint64_t partitionSize, Uscript::UScriptEnv &env);
     static size_t totalSize_;
     static size_t readSize_;
 };
