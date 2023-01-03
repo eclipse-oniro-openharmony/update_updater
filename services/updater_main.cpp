@@ -455,11 +455,9 @@ static void PostUpdatePackages(UpdaterParams &upParams, bool updateResult)
 static UpdaterStatus InstallUpdaterPackages(UpdaterParams &upParams)
 {
     UpdaterStatus status = PreUpdatePackages(upParams);
-
     if (status == UPDATE_SUCCESS) {
         status = DoUpdatePackages(upParams);
     }
-
     PostUpdatePackages(upParams, status == UPDATE_SUCCESS);
     return status;
 }
@@ -540,7 +538,7 @@ static UpdaterStatus StartUpdater(const std::vector<std::string> &args,
                     (void)UPDATER_UI_INSTANCE.SetMode(UpdaterMode::REBOOTFACTORYRST);
                     upParams.userWipeData = true;
                 } else if (option == "upgraded_pkg_num") {
-                    upParams.pkgLocation = atoi(optarg);
+                    upParams.pkgLocation = static_cast<unsigned int>(atoi(optarg));
                 }
                 break;
             }
