@@ -216,7 +216,7 @@ public:
         }
 
         MemMapInfo memInfo {};
-        if (PatchMapFile(TEST_PATH_FROM + fileName, memInfo); != 0) {
+        if (PatchMapFile(TEST_PATH_FROM + fileName, memInfo) != 0) {
             PATCH_LOGE("Failed to map file");
             return -1;
         }
