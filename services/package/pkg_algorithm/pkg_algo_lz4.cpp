@@ -336,7 +336,7 @@ int32_t PkgAlgorithmLz4::Pack(const PkgStreamPtr inStream, const PkgStreamPtr ou
         return PKG_INVALID_LZ4;
     }
     context.packedSize = packText.destOffset - context.destOffset;
-    return PKG_SUCCESS;
+    return ret;
 }
 
 int32_t PkgAlgorithmLz4::GetUnpackParam(LZ4F_decompressionContext_t &ctx, const PkgStreamPtr inStream,
