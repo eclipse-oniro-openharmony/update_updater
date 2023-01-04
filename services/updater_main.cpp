@@ -354,6 +354,10 @@ static UpdaterStatus CalcProgress(const UpdaterParams &upParams,
 
 static UpdaterStatus PreUpdatePackages(UpdaterParams &upParams)
 {
+    const std::string resultPath = std::string(UPDATER_PATH) + "/" + std::string(UPDATER_RESULT_FILE);
+    if (access(resultPath, F_OK) != -1) {
+        (void)DeleteFile(resultPath);
+    }
     LOG(INFO) << "start to update packages, start index:" << upParams.pkgLocation;
     for (unsigned int i = 0; i < upParams.updatePackage.size(); i++) {
         LOG(INFO) << "package " << i << ":" << upParams.updatePackage[i] <<
