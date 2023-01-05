@@ -128,33 +128,50 @@ int32_t BlocksDiff::MakePatch(const BlockBuffer &newInfo,
     return ret;
 }
 
-int32_t BlocksDiff::WriteCtrlDatas(const std::vector<ControlData> &controlDatas, size_t &patchSize,
-    size_t &controlSize, size_t &diffDataSize, size_t &extraDataSize)
+int32_t BlocksDiff::WritePatchData(const std::vector<ControlData> &controlDatas,
+    const BlockBuffer &newInfo, size_t &patchSize)
 {
-    size_t offSet = patchSize;
-    int32_t ret = WriteControlData(controlDatas, patchSize);
+    patchSize = 0;
+    int32_t ret = WritePatchHeader(0, 0, 0, patchSize);
+    if (ret != 0) {
+        PATCH_LOGE("Failed to write patch header");
+        return ret;
+    }
+
+    size_t controlSize = patchSize;
+    ret = WriteControlData(controlDatas, patchSize);
     if (ret != BZ_OK) {
         PATCH_LOGE("Failed to write control data");
         return ret;
     }
-    controlSize = patchSize - offSet;
+    controlSize = patchSize - controlSize;
 
     // 写diff数据
-    offSet = patchSize;
+    size_t diffDataSize = patchSize;
     ret = WriteDiffData(controlDatas, patchSize);
     if (ret != BZ_OK) {
         PATCH_LOGE("Failed to write diff data");
         return ret;
     }
-    diffDataSize = patchSize - offSet;
+    diffDataSize = patchSize - diffDataSize;
 
-    offSet = patchSize;
+    size_t extraDataSize = patchSize;
     ret = WriteExtraData(controlDatas, patchSize);
     if (ret != BZ_OK) {
         PATCH_LOGE("Failed to write extra data");
         return ret;
     }
-    extraDataSize = patchSize - offSet;
+    extraDataSize = patchSize - extraDataSize;
+
+    // write real data
+    size_t headerLen = 0;
+    ret = WritePatchHeader(controlSize, diffDataSize, newInfo.length, headerLen);
+    if (ret != 0) {
+        PATCH_LOGE("Failed to write patch header");
+        return ret;
+    }
+    PATCH_DEBUG("MakePatch success patchSize:%zu controlSize:%zu diffDataSize:%zu, extraDataSize:%zu",
+        patchSize, controlSize, diffDataSize, extraDataSize);
     return 0;
 }
 
@@ -176,31 +193,7 @@ int32_t BlocksDiff::MakePatch(const BlockBuffer &newInfo, const BlockBuffer &old
         return ret;
     }
 
-    patchSize = 0;
-    ret = WritePatchHeader(0, 0, 0, patchSize);
-    if (ret != 0) {
-        PATCH_LOGE("Failed to write patch header");
-        return ret;
-    }
-
-    size_t controlSize = 0;
-    size_t diffDataSize = 0;
-    size_t extraDataSize = 0;
-    ret = WriteCtrlDatas(controlDatas, patchSize, controlSize, diffDataSize, extraDataSize);
-    if (ret != 0) {
-        PATCH_LOGE("Failed to write ctrl data");
-        return ret;
-    }
-    // write real data
-    size_t headerLen = 0;
-    ret = WritePatchHeader(controlSize, diffDataSize, newInfo.length, headerLen);
-    if (ret != 0) {
-        PATCH_LOGE("Failed to write patch header");
-        return ret;
-    }
-    PATCH_DEBUG("MakePatch success patchSize:%zu controlSize:%zu diffDataSize:%zu, extraDataSize:%zu",
-        patchSize, controlSize, diffDataSize, extraDataSize);
-    return 0;
+    return WritePatchData(controlDatas, newInfo, patchSize);
 }
 
 std::unique_ptr<DeflateAdapter> BlocksBufferDiff::CreateBZip2Adapter(size_t patchOffset)
