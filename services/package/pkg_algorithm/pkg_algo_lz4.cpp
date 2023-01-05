@@ -319,7 +319,7 @@ int32_t PkgAlgorithmLz4::Pack(const PkgStreamPtr inStream, const PkgStreamPtr ou
     }
     PkgAlgorithmContext packText = context;
     struct PkgBufferMessage msg { packText, inBuffer, outBuffer, inLength, outLength};
-    size_t dataLen = LZ4F_compressBegin(ctx, outBuffer.buffer, outBuffer.length, &preferences);
+    size_t dataLen = LZ4F_compressBegin(ctx, msg.outBuffer.buffer, msg.outBuffer.length, &preferences);
     if (LZ4F_isError(dataLen)) {
         (void)LZ4F_freeCompressionContext(ctx);
         PKG_LOGE("Fail to generate header %s", LZ4F_getErrorName(dataLen));
@@ -331,11 +331,11 @@ int32_t PkgAlgorithmLz4::Pack(const PkgStreamPtr inStream, const PkgStreamPtr ou
         return ret;
     }
     (void)LZ4F_freeCompressionContext(ctx);
-    if (packText.srcOffset - context.srcOffset != context.unpackedSize) {
-        PKG_LOGE("original size error %zu %zu", packText.srcOffset, context.unpackedSize);
+    if (msg.context.srcOffset - context.srcOffset != context.unpackedSize) {
+        PKG_LOGE("original size error %zu %zu", msg.context.srcOffset, context.unpackedSize);
         return PKG_INVALID_LZ4;
     }
-    context.packedSize = packText.destOffset - context.destOffset;
+    context.packedSize = msg.context.destOffset - context.destOffset;
     return PKG_SUCCESS;
 }
 
@@ -488,8 +488,8 @@ int32_t PkgAlgorithmLz4::Unpack(const PkgStreamPtr inStream, const PkgStreamPtr 
         PKG_LOGE("Fail to free compress context %s", LZ4F_getErrorName(errorCode));
         return PKG_NONE_MEMORY;
     }
-    context.packedSize = unpackText.srcOffset - context.srcOffset;
-    context.unpackedSize = unpackText.destOffset - context.destOffset;
+    context.packedSize = msg.context.srcOffset - context.srcOffset;
+    context.unpackedSize = msg.context.destOffset - context.destOffset;
     return ret;
 }
 
