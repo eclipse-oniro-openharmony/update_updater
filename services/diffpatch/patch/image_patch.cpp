@@ -131,7 +131,7 @@ int32_t CompressedImagePatch::DecompressData(PkgBuffer buffer,
 {
     if (expandedLen == 0) {
         PATCH_LOGE("Decompress data is null");
-        return -1;
+        return 0;
     }
     PkgManager* pkgManager = Hpackage::PkgManager::GetPackageInstance();
     std::unique_ptr<Hpackage::FileInfo> info = GetFileInfo();
