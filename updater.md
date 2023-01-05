@@ -7,7 +7,8 @@
 
 ## 镜像编译
 镜像编译流程：
-![633e0d1650dac6f27ebbd6b47e3def67_474x1127.png@900-0-90-f.png](http://image.huawei.com/tiny-lts/v1/images/633e0d1650dac6f27ebbd6b47e3def67_474x1127.png@900-0-90-f.png)
+**图 1**  updater.img编译流程
+![](figures\updater适配_编译流程.png)
 ### 使能updater子系统构建
 修改编译配置文件，使能updater.img编译选项
 以RK3568为例，在build/subsystem_config.json文件添加配置如下配置。当前默认参与构建。
@@ -19,16 +20,14 @@
       },
 ```
 
-
-2.产品配置中添加组件编译
+2.产品配置中添加updater组件编译
 以RK3568为例，在productdefine/common/products/ohos-arm64.json中添加
 
 ```
        "updater:update_service":{},
 ```
 
-
-### 组件编译与镜像构建
+### 组件构建
 OpenHarmony使用BUILD.gn和ninja等工具构建编译框架。编译的二进制文件和动态库需要修改BUILG.gn文件将其复制到updater目录。在对应的BUILD.gn文件中添加如下配置：
 
 ```
@@ -46,7 +45,9 @@ OpenHarmony使用BUILD.gn和ninja等工具构建编译框架。编译的二进�
 
 ## 镜像启动
 完整的启动流程如下：
-![8968ed778dd047051664db3b43f73a7b_427x1175.png@900-0-90-f.png](http://image.huawei.com/tiny-lts/v1/images/8968ed778dd047051664db3b43f73a7b_427x1175.png@900-0-90-f.png)
+
+**图 2**  updater.img启动流程
+![](figures\updater适配_启动流程.png)
 ### 配置MISC分区
 OpenHarmony使用MISC分区保存启动时的指令，默认的MISC分区的结构体为：
 
@@ -64,7 +65,7 @@ updater模式启动与正常模式启动流程一致。当正常模式调通后�
 updater.img镜像是ramdisk格式且没有内核，需要uboot先拉起内核，然后加载updater.img到内存，作为根文件系统挂载到内核。如果芯片不支持ramdisk格式，需要进一步适配。
 
 ### init服务启动
-根文件系统挂载完成，会启动init服务，参考[输启动子系统](https://gitee.com/openharmony/startup_init_lite)。启动服务根据根文件系统是否存在updater程序判断当前模式，仅updater模式下存在updater程序，如果是updater模式不会挂在其他分区，跳过挂在分区表这一流程。具体参考InUpdaterMode函数。
+根文件系统挂载完成，会启动init服务，参考[启动子系统](https://gitee.com/openharmony/startup_init_lite)。启动服务根据根文件系统是否存在updater程序判断当前模式，仅updater模式下存在updater程序，如果是updater模式不会挂在其他分区，跳过挂在分区表这一流程。具体参考InUpdaterMode函数。
 init启动引导组件对应的进程为init进程，是内核完成初始化后启动的第一个用户态进程。init进程启动之后，读取init.cfg配置文件，依次启动各关键系统服务进程。updater模式下的init组件功能与正常模式一致，但是updater模式会根据自身业务对配置文件进行精简，只保留必须的命令。
 启动配置文件由以下配置文件组成：
 - 与产品相关的配置文件
@@ -87,13 +88,9 @@ hilogd.cfg：hilogd配置文件，用于打印OpenHarmony所有组件的日志�
         }
 ```
 
-
-
-
-
 ### 升级服务启动
 完成配置文件的适配，单板运行时会根据配置文件顺序依次执行配置中的命令。最终拉起升级子系统核心服务updater进程。updater服务启动以后，屏幕会显示UI界面，进行安装包升级，恢厂，重启等功能。升级服务功能如下所示：
-![7145f655e8b3afb1c6dfbfe1de939452_1138x868.png@900-0-90-f.png](http://image.huawei.com/tiny-lts/v1/images/7145f655e8b3afb1c6dfbfe1de939452_1138x868.png@900-0-90-f.png)
+![](figures/Openharmony-updater-升级子系统架构图.png)
 
 初次适配会出现进程功能缺失等情况，参考如下方法进行调试
 - 使用ps -A命令查询updater，hdcd等关键进程是否启动。
@@ -125,5 +122,3 @@ flashd模式调试具体参考：。
 
 ## 驱动适配
 updater模式屏幕，触控等参考：
-
-
