@@ -128,6 +128,27 @@ int32_t BlocksDiff::MakePatch(const BlockBuffer &newInfo,
     return ret;
 }
 
+int32_t BlocksDiff::MakePatch(const BlockBuffer &newInfo, const BlockBuffer &oldInfo, size_t &patchSize)
+{
+    if (suffixArray_ == nullptr) {
+        suffixArray_.reset(new SuffixArray<int32_t>());
+        if (suffixArray_ == nullptr) {
+            PATCH_LOGE("Failed to create SuffixArray");
+            return -1;
+        }
+        suffixArray_->Init(oldInfo);
+    }
+
+    std::vector<ControlData> controlDatas;
+    int32_t ret = GetCtrlDatas(newInfo, oldInfo, controlDatas);
+    if (ret != 0) {
+        PATCH_LOGE("Failed to get control data");
+        return ret;
+    }
+
+    return WritePatchData(controlDatas, newInfo, patchSize);
+}
+
 int32_t BlocksDiff::WritePatchData(const std::vector<ControlData> &controlDatas,
     const BlockBuffer &newInfo, size_t &patchSize)
 {
@@ -173,27 +194,6 @@ int32_t BlocksDiff::WritePatchData(const std::vector<ControlData> &controlDatas,
     PATCH_DEBUG("MakePatch success patchSize:%zu controlSize:%zu diffDataSize:%zu, extraDataSize:%zu",
         patchSize, controlSize, diffDataSize, extraDataSize);
     return 0;
-}
-
-int32_t BlocksDiff::MakePatch(const BlockBuffer &newInfo, const BlockBuffer &oldInfo, size_t &patchSize)
-{
-    if (suffixArray_ == nullptr) {
-        suffixArray_.reset(new SuffixArray<int32_t>());
-        if (suffixArray_ == nullptr) {
-            PATCH_LOGE("Failed to create SuffixArray");
-            return -1;
-        }
-        suffixArray_->Init(oldInfo);
-    }
-
-    std::vector<ControlData> controlDatas;
-    int32_t ret = GetCtrlDatas(newInfo, oldInfo, controlDatas);
-    if (ret != 0) {
-        PATCH_LOGE("Failed to get control data");
-        return ret;
-    }
-
-    return WritePatchData(controlDatas, newInfo, patchSize);
 }
 
 std::unique_ptr<DeflateAdapter> BlocksBufferDiff::CreateBZip2Adapter(size_t patchOffset)
