@@ -181,7 +181,10 @@ public:
         const BlockBuffer &buffer, std::vector<uint8_t> &outData, size_t &bufferSize)
     {
         Hpackage::PkgManager *pkgManager = Hpackage::PkgManager::GetPackageInstance();
-        PATCH_CHECK(pkgManager != nullptr, return -1, "Can not get manager ");
+        if (pkgManager == nullptr) {
+            PATCH_LOGE("Can not get manager ");
+            return -1;
+        }
         Hpackage::PkgManager::StreamPtr stream1 = nullptr;
         pkgManager->CreatePkgStream(stream1, "gzip", [&outData, &bufferSize](const PkgBuffer &data,
             size_t size, size_t start, bool isFinish, const void *context) ->int {
@@ -194,8 +197,10 @@ public:
                 }
                 return memcpy_s(outData.data() + start, outData.size(), data.buffer, size);
             }, nullptr);
-        int32_t ret = pkgManager->CompressBuffer(info, {buffer.buffer, buffer.length}, stream1);
-        PATCH_CHECK(ret == 0, return -1, "Can not Compress buff ");
+        if (pkgManager->CompressBuffer(info, {buffer.buffer, buffer.length}, stream1) != 0) {
+            PATCH_LOGE("Can not Compress buff ");
+            return -1;
+        }
         PATCH_DEBUG("UpdateDiff::MakePatch totalSize: %zu", bufferSize);
         return 0;
     }
@@ -205,17 +210,23 @@ public:
         std::vector<uint8_t> outData;
         size_t dataSize = 0;
         std::unique_ptr<TestPatchWriter> testPatchWriter(new TestPatchWriter(outData));
-        PATCH_CHECK(testPatchWriter != nullptr, return -1, "Failed to create data writer");
+        if (testPatchWriter == nullptr) {
+            PATCH_LOGE("Failed to create data writer");
+            return -1;
+        }
 
         MemMapInfo memInfo {};
-        int32_t ret = PatchMapFile(TEST_PATH_FROM + fileName, memInfo);
-        PATCH_CHECK(ret == 0, return -1, "Failed to map file");
+        if (PatchMapFile(TEST_PATH_FROM + fileName, memInfo) != 0) {
+            PATCH_LOGE("Failed to map file");
+            return -1;
+        }
 
-        //
         std::vector<uint8_t> outData1;
         size_t dataSize1 = 0;
-        ret = CompressData(info, {memInfo.memory, memInfo.length}, outData1, dataSize1);
-        PATCH_CHECK(ret == 0, return -1, "Failed to compress file");
+        if (CompressData(info, {memInfo.memory, memInfo.length}, outData1, dataSize1) != 0) {
+            PATCH_LOGE("Failed to compress file");
+            return -1;
+        }
 
         info->unpackedSize = memInfo.length;
 
@@ -227,7 +238,10 @@ public:
         } else if (info->packMethod == PKG_COMPRESS_METHOD_LZ4_BLOCK) {
             deflateAdapter.reset(new Lz4BlockAdapter(testPatchWriter.get(), 0, info));
         }
-        PATCH_CHECK(deflateAdapter != nullptr, return -1, "Failed to create deflate adapter");
+        if (deflateAdapter == nullptr) {
+            PATCH_LOGE("Failed to create deflate adapter");
+            return -1;
+        }
         deflateAdapter->Open();
 
         size_t offset = 0;
@@ -235,13 +249,13 @@ public:
             size_t writeSize = (memInfo.length > (offset + DeflateAdapter::BUFFER_SIZE)) ?
                 DeflateAdapter::BUFFER_SIZE : (memInfo.length - offset);
             BlockBuffer data = {memInfo.memory + offset, writeSize};
-            ret = deflateAdapter->WriteData(data);
-            PATCH_CHECK(ret == 0, return -1, "Failed to compress data");
+            if (deflateAdapter->WriteData(data) != 0) {
+                PATCH_LOGE("Failed to compress data");
+                return -1;
+            }
             offset += writeSize;
         }
         deflateAdapter->FlushData(dataSize);
-
-        PATCH_LOGI("data size %zu %zu", dataSize, dataSize1);
 
         // compare
         if (dataSize == dataSize1 && memcmp(outData.data(), outData1.data(), dataSize1) == 0) {

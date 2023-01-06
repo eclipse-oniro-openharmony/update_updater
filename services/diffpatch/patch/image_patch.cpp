@@ -129,34 +129,50 @@ int32_t CompressedImagePatch::ApplyImagePatch(const PatchParam &param, size_t &s
 int32_t CompressedImagePatch::DecompressData(PkgBuffer buffer,
     Hpackage::PkgManager::StreamPtr &stream, bool memory, size_t expandedLen) const
 {
-    PATCH_CHECK(expandedLen > 0, return 0, "Decompress data is null");
-    int32_t ret = 0;
+    if (expandedLen == 0) {
+        PATCH_LOGE("Decompress data is null");
+        return 0;
+    }
     PkgManager* pkgManager = Hpackage::PkgManager::GetPackageInstance();
-    PATCH_CHECK(pkgManager != nullptr, return -1, "Failed to get pkg manager");
-
     std::unique_ptr<Hpackage::FileInfo> info = GetFileInfo();
-    PATCH_CHECK(info != nullptr, return -1, "Failed to get file info");
+    if (pkgManager == nullptr || info == nullptr) {
+        PATCH_LOGE("Failed to get pkg manager or file info");
+        return -1;
+    }
 
     info->packedSize = buffer.length;
     info->unpackedSize = expandedLen;
     info->identity = std::to_string(g_tmpFileId++);
 
     // 申请内存stream，用于解压老文件
-    ret = pkgManager->CreatePkgStream(stream, info->identity,
+    int32_t ret = pkgManager->CreatePkgStream(stream, info->identity,
         expandedLen, memory ? PkgStream::PkgStreamType_MemoryMap : PkgStream::PkgStreamType_Write);
-    PATCH_CHECK(stream != nullptr, return -1, "Failed to create stream");
+    if (stream == nullptr) {
+        PATCH_LOGE("Failed to create stream");
+        return -1;
+    }
 
     ret = pkgManager->DecompressBuffer(info.get(), buffer, stream);
-    PATCH_CHECK(ret == 0, pkgManager->ClosePkgStream(stream); return -1, "Can not decompress buff");
+    if (ret != 0) {
+        pkgManager->ClosePkgStream(stream);
+        PATCH_LOGE("Can not decompress buff");
+        return -1;
+    }
 
     if (bonusData_.size() == 0) {
         return 0;
     }
-    PATCH_CHECK(info->unpackedSize <= (expandedLen - bonusData_.size()), return -1, "Source inflation short");
+    if (info->unpackedSize > (expandedLen - bonusData_.size())) {
+        PATCH_LOGE("Source inflation short");
+        return -1;
+    }
     if (memory) { // not support for none memory
         PkgBuffer memBuffer;
-        ret = stream->GetBuffer(memBuffer);
-        PATCH_CHECK(ret == 0, pkgManager->ClosePkgStream(stream); return -1, "Can not get memory buff");
+        if (stream->GetBuffer(memBuffer) != 0) {
+            pkgManager->ClosePkgStream(stream);
+            PATCH_LOGE("Can not get memory buff");
+            return -1;
+        }
         ret = memcpy_s(memBuffer.buffer + info->unpackedSize,
             expandedLen - info->unpackedSize, bonusData_.data(), bonusData_.size());
     }
