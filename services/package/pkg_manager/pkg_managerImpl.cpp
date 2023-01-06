@@ -284,7 +284,7 @@ int32_t PkgManagerImpl::LoadPackage(const std::string &packagePath, const std::s
         return PKG_INVALID_FILE;
     }
     if (SetSignVerifyKeyName(keyPath) != PKG_SUCCESS) {
-        UPDATER_LAST_WORD(PKG_INVALI D_FILE);
+        UPDATER_LAST_WORD(PKG_INVALID_FILE);
         PKG_LOGE("Invalid keyname");
         return PKG_INVALID_FILE;
     }
