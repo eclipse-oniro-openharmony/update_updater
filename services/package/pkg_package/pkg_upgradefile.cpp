@@ -188,7 +188,7 @@ int32_t UpgradePkgFile::WriteBuffer(std::vector<uint8_t> &buffer, size_t &offset
 
     buffer.assign(buffer.capacity(), 0);
     size_t nameLen = 0;
-    size_t ret = PkgFile::ConvertStringToBuffer(
+    int32_t ret = PkgFile::ConvertStringToBuffer(
         pkgInfo_.descriptPackageId, {buffer.data(), UPGRADE_RESERVE_LEN}, nameLen);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("Fail write descriptPackageId");
@@ -372,7 +372,7 @@ int32_t UpgradePkgFile::Verify(size_t start, DigestAlgorithm::DigestAlgorithmPtr
 int32_t UpgradePkgFile::SaveEntry(const PkgBuffer &buffer, size_t &parsedLen, UpgradeParam &info,
     DigestAlgorithm::DigestAlgorithmPtr algorithm, std::vector<std::string> &fileNames)
 {
-    UpgradeFileEntry *entry = new UpgradeFileEntry(this, nodeId_++);
+    UpgradeFileEntry *entry = new (std::nothrow) UpgradeFileEntry(this, nodeId_++);
     if (entry == nullptr) {
         PKG_LOGE("Fail create upgrade node for %s", pkgStream_->GetFileName().c_str());
         return PKG_NONE_MEMORY;
