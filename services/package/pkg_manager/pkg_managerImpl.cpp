@@ -284,13 +284,13 @@ int32_t PkgManagerImpl::LoadPackage(const std::string &packagePath, const std::s
         return PKG_INVALID_FILE;
     }
     if (SetSignVerifyKeyName(keyPath) != PKG_SUCCESS) {
+        UPDATER_LAST_WORD(PKG_INVALI D_FILE);
         PKG_LOGE("Invalid keyname");
         return PKG_INVALID_FILE;
     }
     // Check if package already loaded
     for (auto iter : pkgFiles_) {
-        PkgFilePtr pkgFile = iter;
-        if (pkgFile != nullptr && pkgFile->GetPkgStream()->GetFileName().compare(packagePath) == 0) {
+        if (iter != nullptr && iter->GetPkgStream()->GetFileName().compare(packagePath) == 0) {
             return PKG_SUCCESS;
         }
     }
@@ -300,6 +300,7 @@ int32_t PkgManagerImpl::LoadPackage(const std::string &packagePath, const std::s
         int32_t ret = LoadPackage(packagePath, fileIds, pkgType);
         if (ret != PKG_SUCCESS) {
             ClearPkgFile();
+            UPDATER_LAST_WORD(ret);
             PKG_LOGE("Parse %s fail ", packagePath.c_str());
             return ret;
         }
@@ -311,14 +312,13 @@ int32_t PkgManagerImpl::LoadPackage(const std::string &packagePath, const std::s
             PKG_LOGE("Unzip %s fail ", packagePath.c_str());
             return ret;
         }
-        std::string path = GetFilePath(packagePath);
         for (auto name : innerFileNames) {
             pkgType = GetPkgTypeByName(name);
             if (pkgType == PkgFile::PKG_TYPE_NONE) {
                 fileIds.push_back(name);
                 continue;
             }
-            ret = ExtraAndLoadPackage(path, name, pkgType, fileIds);
+            ret = ExtraAndLoadPackage(GetFilePath(packagePath), name, pkgType, fileIds);
             if (ret != PKG_SUCCESS) {
                 ClearPkgFile();
                 UPDATER_LAST_WORD(ret);
@@ -546,7 +546,6 @@ int32_t PkgManagerImpl::CreatePkgStream(PkgStreamPtr &stream, const std::string 
         }
         size_t fileSize = (size == 0) ? GetFileSize(fileName) : size;
         if (fileSize <= 0) {
-            ClearPkgFile();
             UPDATER_LAST_WORD(PKG_INVALID_FILE);
             PKG_LOGE("Fail to check file size %s ", fileName.c_str());
             return PKG_INVALID_FILE;
