@@ -284,24 +284,21 @@ int32_t PkgManagerImpl::LoadPackage(const std::string &packagePath, const std::s
         UPDATER_LAST_WORD(PKG_INVALID_FILE);
         return PKG_INVALID_FILE;
     }
-    int32_t ret = SetSignVerifyKeyName(keyPath);
-    if (ret != PKG_SUCCESS) {
-        UPDATER_LAST_WORD(ret);
+    if (SetSignVerifyKeyName(keyPath) != PKG_SUCCESS) {
+        UPDATER_LAST_WORD(PKG_INVALID_FILE);
         PKG_LOGE("Invalid keyname");
-        return ret;
+        return PKG_INVALID_FILE;
     }
     // Check if package already loaded
     for (auto iter : pkgFiles_) {
-        PkgFilePtr pkgFile = iter;
-        if (pkgFile != nullptr && pkgFile->GetPkgStream()->GetFileName().compare(packagePath) == 0) {
+        if (iter != nullptr && iter->GetPkgStream()->GetFileName().compare(packagePath) == 0) {
             return PKG_SUCCESS;
         }
     }
     PkgFile::PkgType pkgType = GetPkgTypeByName(packagePath);
-    ret = PKG_INVALID_FILE;
     unzipToFile_ = ((pkgType == PkgFile::PKG_TYPE_GZIP) ? true : unzipToFile_);
     if (pkgType == PkgFile::PKG_TYPE_UPGRADE) {
-        ret = LoadPackage(packagePath, fileIds, pkgType);
+        int32_t ret = LoadPackage(packagePath, fileIds, pkgType);
         if (ret != PKG_SUCCESS) {
             ClearPkgFile();
             UPDATER_LAST_WORD(ret);
@@ -310,22 +307,25 @@ int32_t PkgManagerImpl::LoadPackage(const std::string &packagePath, const std::s
         }
     } else if (pkgType != PkgFile::PKG_TYPE_NONE) {
         std::vector<std::string> innerFileNames;
-        ret = LoadPackage(packagePath, innerFileNames, pkgType);
+        int32_t ret = LoadPackage(packagePath, innerFileNames, pkgType);
         if (ret != PKG_SUCCESS) {
             ClearPkgFile();
             PKG_LOGE("Unzip %s fail ", packagePath.c_str());
             return ret;
         }
-        std::string path = GetFilePath(packagePath);
         for (auto name : innerFileNames) {
             pkgType = GetPkgTypeByName(name);
             if (pkgType == PkgFile::PKG_TYPE_NONE) {
                 fileIds.push_back(name);
                 continue;
             }
-            ret = ExtraAndLoadPackage(path, name, pkgType, fileIds);
-            PKG_CHECK(ret == PKG_SUCCESS, ClearPkgFile(); UPDATER_LAST_WORD(ret);
-                return ret, "unpack %s fail in package %s ", name.c_str(), packagePath.c_str());
+            ret = ExtraAndLoadPackage(GetFilePath(packagePath), name, pkgType, fileIds);
+            if (ret != PKG_SUCCESS) {
+                ClearPkgFile();
+                UPDATER_LAST_WORD(ret);
+                PKG_LOGE("unpack %s fail in package %s ", name.c_str(), packagePath.c_str());
+                return ret;
+            }
         }
     }
     return PKG_SUCCESS;
@@ -500,52 +500,70 @@ void PkgManagerImpl::ClosePkgStream(StreamPtr &stream)
     stream = nullptr;
 }
 
+int32_t PkgManagerImpl::DoCreatePkgStream(PkgStreamPtr &stream, const std::string &fileName, int32_t type)
+{
+    static char const *modeFlags[] = { "rb", "wb+" };
+    char realPath[PATH_MAX + 1] = {};
+#ifdef _WIN32
+    if (type == PkgStream::PkgStreamType_Read && _fullpath(realPath, fileName.c_str(), PATH_MAX) == nullptr) {
+#else
+    if (type == PkgStream::PkgStreamType_Read && realpath(fileName.c_str(), realPath) == nullptr) {
+#endif
+        UPDATER_LAST_WORD(PKG_INVALID_FILE);
+        return PKG_INVALID_FILE;
+    }
+    if (CheckFile(fileName) != PKG_SUCCESS) {
+        UPDATER_LAST_WORD(PKG_INVALID_FILE);
+        PKG_LOGE("Fail to check file %s ", fileName.c_str());
+        return PKG_INVALID_FILE;
+    }
+    std::lock_guard<std::mutex> lock(mapLock_);
+    if (pkgStreams_.find(fileName) != pkgStreams_.end()) {
+        PkgStreamPtr mapStream = pkgStreams_[fileName];
+        mapStream->AddRef();
+        stream = mapStream;
+        return PKG_SUCCESS;
+    }
+    FILE *file = nullptr;
+    if (type == PkgStream::PkgStreamType_Read) {
+        file = fopen(realPath, modeFlags[type]);
+    } else {
+        file = fopen(fileName.c_str(), modeFlags[type]);
+    }
+    if (file == nullptr) {
+        UPDATER_LAST_WORD(PKG_INVALID_FILE);
+        PKG_LOGE("Fail to open file %s ", fileName.c_str());
+        return PKG_INVALID_FILE;
+    }
+    stream = new FileStream(this, fileName, file, type);
+    return PKG_SUCCESS;
+}
+
 int32_t PkgManagerImpl::CreatePkgStream(PkgStreamPtr &stream, const std::string &fileName, size_t size, int32_t type)
 {
     stream = nullptr;
     if (type == PkgStream::PkgStreamType_Write || type == PkgStream::PkgStreamType_Read) {
-        static char const *modeFlags[] = { "rb", "wb+" };
-        char realPath[PATH_MAX + 1] = {};
-#ifdef _WIN32
-        if (type == PkgStream::PkgStreamType_Read && _fullpath(realPath, fileName.c_str(), PATH_MAX) == nullptr) {
-#else
-        if (type == PkgStream::PkgStreamType_Read && realpath(fileName.c_str(), realPath) == nullptr) {
-#endif
-            UPDATER_LAST_WORD(PKG_INVALID_FILE);
-            return PKG_INVALID_FILE;
+        int32_t ret = DoCreatePkgStream(stream, fileName, type);
+        if (ret != PKG_SUCCESS) {
+            return ret;
         }
-        if (CheckFile(fileName) != PKG_SUCCESS) {
-            UPDATER_LAST_WORD(PKG_INVALID_FILE);
-            PKG_LOGE("Fail to check file %s ", fileName.c_str());
-            return PKG_INVALID_FILE;
-        }
-        std::lock_guard<std::mutex> lock(mapLock_);
-        if (pkgStreams_.find(fileName) != pkgStreams_.end()) {
-            PkgStreamPtr mapStream = pkgStreams_[fileName];
-            mapStream->AddRef();
-            stream = mapStream;
-            return PKG_SUCCESS;
-        }
-        FILE *file = nullptr;
-        if (type == PkgStream::PkgStreamType_Read) {
-            file = fopen(realPath, modeFlags[type]);
-        } else {
-            file = fopen(fileName.c_str(), modeFlags[type]);
-        }
-        PKG_CHECK(file != nullptr, UPDATER_LAST_WORD(PKG_INVALID_FILE);
-            return PKG_INVALID_FILE, "Fail to open file %s ", fileName.c_str());
-        stream = new FileStream(this, fileName, file, type);
     } else if (type == PkgStream::PkgStreamType_MemoryMap) {
         if ((size == 0) && (access(fileName.c_str(), 0) != 0)) {
             UPDATER_LAST_WORD(PKG_INVALID_FILE);
             return PKG_INVALID_FILE;
         }
         size_t fileSize = (size == 0) ? GetFileSize(fileName) : size;
-        PKG_CHECK(fileSize > 0, UPDATER_LAST_WORD(PKG_INVALID_FILE);
-            return PKG_INVALID_FILE, "Fail to check file size %s ", fileName.c_str());
+        if (fileSize <= 0) {
+            UPDATER_LAST_WORD(PKG_INVALID_FILE);
+            PKG_LOGE("Fail to check file size %s ", fileName.c_str());
+            return PKG_INVALID_FILE;
+        }
         uint8_t *memoryMap = MapMemory(fileName, fileSize);
-        PKG_CHECK(memoryMap != nullptr, UPDATER_LAST_WORD(PKG_INVALID_FILE);
-            return PKG_INVALID_FILE, "Fail to map memory %s ", fileName.c_str());
+        if (memoryMap == nullptr) {
+            UPDATER_LAST_WORD(PKG_INVALID_FILE);
+            PKG_LOGE("Fail to map memory %s ", fileName.c_str());
+            return PKG_INVALID_FILE;
+        }
         PkgBuffer buffer(memoryMap, fileSize);
         stream = new MemoryMapStream(this, fileName, buffer);
     } else {
@@ -641,37 +659,34 @@ int32_t PkgManagerImpl::VerifyPackage(const std::string &packagePath, const std:
     return ret;
 }
 
-int32_t PkgManagerImpl::GenerateFileDigest(PkgStreamPtr stream,
-    uint8_t digestMethod, uint8_t flags, std::vector<std::vector<uint8_t>> &digestInfos, size_t hashBufferLen)
+int32_t PkgManagerImpl::DoGenerateFileDigest(PkgStreamPtr stream, uint8_t flags, const size_t fileLen,
+    PkgBuffer &buff, std::pair<DigestAlgorithm::DigestAlgorithmPtr, DigestAlgorithm::DigestAlgorithmPtr> &algorithm)
 {
-    size_t fileLen = (hashBufferLen == 0) ? stream->GetFileLength() : hashBufferLen;
-    size_t digestLen = DigestAlgorithm::GetDigestLen(digestMethod);
-    size_t signatureLen = DigestAlgorithm::GetSignatureLen(digestMethod);
-    // Check entire package
-    DigestAlgorithm::DigestAlgorithmPtr algorithm = PkgAlgorithmFactory::GetDigestAlgorithm(digestMethod);
-    PKG_CHECK(algorithm != nullptr, return PKG_NOT_EXIST_ALGORITHM, "Invalid file %s", stream->GetFileName().c_str());
-    algorithm->Init();
-
-    // Get verify algorithm
-    DigestAlgorithm::DigestAlgorithmPtr algorithmInner = PkgAlgorithmFactory::GetDigestAlgorithm(digestMethod);
-    PKG_CHECK(algorithm != nullptr, return PKG_NOT_EXIST_ALGORITHM, "Invalid file %s", stream->GetFileName().c_str());
-    algorithmInner->Init();
-
     size_t offset = 0;
     size_t readLen = 0;
     size_t needReadLen = fileLen;
     size_t buffSize = BUFFER_SIZE;
-    PkgBuffer buff(buffSize);
     if (flags & DIGEST_FLAGS_SIGNATURE) {
-        PKG_ONLY_CHECK(SIGN_TOTAL_LEN < fileLen, return PKG_INVALID_SIGNATURE);
+        if (SIGN_TOTAL_LEN >= fileLen) {
+            return PKG_INVALID_SIGNATURE;
+        }
         needReadLen = fileLen - SIGN_TOTAL_LEN;
     }
     while (offset < needReadLen) {
-        PKG_ONLY_CHECK((needReadLen - offset) >= buffSize, buffSize = needReadLen - offset);
+        if ((needReadLen - offset) < buffSize) {
+            buffSize = needReadLen - offset;
+        }
         int32_t ret = stream->Read(buff, offset, buffSize, readLen);
-        PKG_CHECK(ret == PKG_SUCCESS, return ret, "read buffer fail %s", stream->GetFileName().c_str());
-        PKG_IS_TRUE_DONE(flags & DIGEST_FLAGS_HAS_SIGN, algorithm->Update(buff, readLen));
-        PKG_IS_TRUE_DONE(flags & DIGEST_FLAGS_NO_SIGN, algorithmInner->Update(buff, readLen));
+        if (ret != PKG_SUCCESS) {
+            PKG_LOGE("read buffer fail %s", stream->GetFileName().c_str());
+            return ret;
+        }
+        if (flags & DIGEST_FLAGS_HAS_SIGN) {
+            algorithm.first->Update(buff, readLen);
+        }
+        if (flags & DIGEST_FLAGS_NO_SIGN) {
+            algorithm.second->Update(buff, readLen);
+        }
         offset += readLen;
         PostDecodeProgress(POST_TYPE_VERIFY_PKG, readLen, nullptr);
         readLen = 0;
@@ -681,22 +696,65 @@ int32_t PkgManagerImpl::GenerateFileDigest(PkgStreamPtr stream,
     if (flags & DIGEST_FLAGS_SIGNATURE) {
         readLen = 0;
         int32_t ret = stream->Read(buff, offset, SIGN_TOTAL_LEN, readLen);
-        PKG_CHECK(ret == PKG_SUCCESS, return ret, "read buffer failed %s", stream->GetFileName().c_str());
-        PKG_IS_TRUE_DONE(flags & DIGEST_FLAGS_HAS_SIGN, algorithm->Update(buff, readLen));
+        if (ret != PKG_SUCCESS) {
+            PKG_LOGE("read buffer failed %s", stream->GetFileName().c_str());
+            return ret;
+        }
+        if (flags & DIGEST_FLAGS_HAS_SIGN) {
+            algorithm.first->Update(buff, readLen);
+        }
         PkgBuffer data(SIGN_TOTAL_LEN);
-        PKG_IS_TRUE_DONE(flags & DIGEST_FLAGS_NO_SIGN, algorithmInner->Update(data, SIGN_TOTAL_LEN));
+        if (flags & DIGEST_FLAGS_NO_SIGN) {
+            algorithm.second->Update(data, SIGN_TOTAL_LEN);
+        }
     }
-    PKG_IS_TRUE_DONE(flags & DIGEST_FLAGS_HAS_SIGN,
-        PkgBuffer result(digestInfos[DIGEST_INFO_HAS_SIGN].data(), digestLen); algorithm->Final(result));
-    PKG_IS_TRUE_DONE(flags & DIGEST_FLAGS_NO_SIGN,
-        PkgBuffer result(digestInfos[DIGEST_INFO_NO_SIGN].data(), digestLen); algorithmInner->Final(result));
+    return PKG_SUCCESS;
+}
+
+int32_t PkgManagerImpl::GenerateFileDigest(PkgStreamPtr stream,
+    uint8_t digestMethod, uint8_t flags, std::vector<std::vector<uint8_t>> &digestInfos, size_t hashBufferLen)
+{
+    size_t fileLen = (hashBufferLen == 0) ? stream->GetFileLength() : hashBufferLen;
+    size_t digestLen = DigestAlgorithm::GetDigestLen(digestMethod);
+    size_t signatureLen = DigestAlgorithm::GetSignatureLen(digestMethod);
+    // Check entire package
+    DigestAlgorithm::DigestAlgorithmPtr algorithm = PkgAlgorithmFactory::GetDigestAlgorithm(digestMethod);
+    if (algorithm == nullptr) {
+        PKG_LOGE("Invalid file %s", stream->GetFileName().c_str());
+        return PKG_NOT_EXIST_ALGORITHM;
+    }
+    algorithm->Init();
+    // Get verify algorithm
+    DigestAlgorithm::DigestAlgorithmPtr algorithmInner = PkgAlgorithmFactory::GetDigestAlgorithm(digestMethod);
+    if (algorithmInner == nullptr) {
+        PKG_LOGE("Invalid file %s", stream->GetFileName().c_str());
+        return PKG_NOT_EXIST_ALGORITHM;
+    }
+    algorithmInner->Init();
+    PkgBuffer buff(BUFFER_SIZE);
+    std::pair<DigestAlgorithm::DigestAlgorithmPtr, DigestAlgorithm::DigestAlgorithmPtr> digestAlgorithm(
+        algorithm, algorithmInner);
+    int32_t ret = DoGenerateFileDigest(stream, flags, fileLen, buff, digestAlgorithm);
+    if (ret != PKG_SUCCESS) {
+        return ret;
+    }
+    if (flags & DIGEST_FLAGS_HAS_SIGN) {
+        PkgBuffer result(digestInfos[DIGEST_INFO_HAS_SIGN].data(), digestLen);
+        algorithm->Final(result);
+    }
+    if (flags & DIGEST_FLAGS_NO_SIGN) {
+        PkgBuffer result(digestInfos[DIGEST_INFO_NO_SIGN].data(), digestLen);
+        algorithmInner->Final(result);
+    }
+
     if (flags & DIGEST_FLAGS_SIGNATURE) {
-        if (digestMethod == PKG_DIGEST_TYPE_SHA256) {
-            PKG_CHECK(!memcpy_s(digestInfos[DIGEST_INFO_SIGNATURE].data(), signatureLen, buff.buffer, signatureLen),
-                return PKG_NONE_MEMORY, "GenerateFileDigest memcpy failed");
-        } else {
-            PKG_CHECK(!memcpy_s(digestInfos[DIGEST_INFO_SIGNATURE].data(), signatureLen, buff.buffer + SIGN_SHA256_LEN,
-                signatureLen), return PKG_NONE_MEMORY, "GenerateFileDigest memcpy failed");
+        uint8_t *buffer = buff.buffer;
+        if (digestMethod != PKG_DIGEST_TYPE_SHA256) {
+            buffer = buff.buffer + SIGN_SHA256_LEN;
+        }
+        if (memcpy_s(digestInfos[DIGEST_INFO_SIGNATURE].data(), signatureLen, buffer, signatureLen) != EOK) {
+            PKG_LOGE("GenerateFileDigest memcpy failed");
+            return PKG_NONE_MEMORY;
         }
     }
     return PKG_SUCCESS;
