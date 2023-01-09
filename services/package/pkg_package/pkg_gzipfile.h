@@ -53,6 +53,8 @@ public:
 private:
     void DecodeHeaderCalOffset(uint8_t flags, const PkgBuffer &buffer, size_t &offset,
         std::string &fileName) const;
+    int32_t CheckFileInfo(PkgAlgorithmContext context, PkgStreamPtr inStream);
+    void GetUpGradeCompInfo(size_t &offset, PkgBuffer &buffer);
 };
 
 class GZipPkgFile : public PkgFile {

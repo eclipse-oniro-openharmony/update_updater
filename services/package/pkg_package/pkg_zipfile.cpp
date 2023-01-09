@@ -155,43 +155,73 @@ int32_t ZipPkgFile::LoadPackage(std::vector<std::string> &fileNames, const PkgBu
     return ParseFileEntries(fileNames, endDir, currentPos, fileLen);
 }
 
+int32_t ZipPkgFile::GetFileLength(size_t &fileLen)
+{
+    if (!CheckState({PKG_FILE_STATE_IDLE}, PKG_FILE_STATE_WORKING)) {
+        PKG_LOGE("Error state curr %d ", state_);
+        return PKG_INVALID_STATE;
+    }
+    // 先从文件尾部获取 EndCentralDir
+    fileLen = pkgStream_->GetFileLength();
+    if (fileLen == 0) {
+        PKG_LOGE("invalid file to load");
+        return PKG_INVALID_STATE;
+    }
+    if (fileLen > SIZE_MAX) {
+        PKG_LOGE("Invalid file len %zu to load %s", fileLen, pkgStream_->GetFileName().c_str());
+        return PKG_INVALID_FILE;
+    }
+    if (fileLen < static_cast<size_t>(sizeof(EndCentralDir))) {
+        PKG_LOGE("Too small to be zip %s", pkgStream_->GetFileName().c_str());
+        return PKG_INVALID_FILE;
+    }
+    return PKG_SUCCESS;
+}
+
 int32_t ZipPkgFile::LoadPackage(std::vector<std::string>& fileNames, VerifyFunction verifier)
 {
     UNUSED(verifier);
     PKG_LOGI("LoadPackage %s :%zu", pkgStream_->GetFileName().c_str(), pkgStream_->GetFileLength());
-    PKG_CHECK(CheckState({PKG_FILE_STATE_IDLE}, PKG_FILE_STATE_WORKING),
-        return PKG_INVALID_STATE, "Error state curr %d ", state_);
-    // 先从文件尾部获取 EndCentralDir
-    size_t fileLen = pkgStream_->GetFileLength();
-    PKG_CHECK(fileLen > 0, return PKG_INVALID_FILE, "invalid file to load");
-    PKG_CHECK(fileLen <= SIZE_MAX, return PKG_INVALID_FILE,
-        "Invalid file len %zu to load %s", fileLen, pkgStream_->GetFileName().c_str());
-    PKG_CHECK(fileLen >= static_cast<size_t>(sizeof(EndCentralDir)), return PKG_INVALID_FILE,
-        "Too small to be zip %s", pkgStream_->GetFileName().c_str());
 
     // 检查最后面是签名信息还是EndCentralDir
+    size_t fileLen = 0;
+    int32_t ret = GetFileLength(fileLen);
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("GetFileLength FAIL");
+        return ret;
+    }
     size_t buffSize = sizeof(EndCentralDir);
     if (buffSize < sizeof(Zip64EndCentralDirRecord)) {
         buffSize = sizeof(Zip64EndCentralDirRecord);
     }
+
     size_t signatureLen = 0;
     uint32_t magic = 0;
     uint32_t endDirLen = sizeof(EndCentralDir);
     size_t endDirPos = fileLen - endDirLen;
     size_t readLen = 0;
     PkgBuffer buffer(buffSize);
-    int32_t ret = pkgStream_->Read(buffer, endDirPos, sizeof(EndCentralDir), readLen);
-    PKG_CHECK(ret == PKG_SUCCESS, return ret, "read EOCD struct failed %s", pkgStream_->GetFileName().c_str());
+    ret = pkgStream_->Read(buffer, endDirPos, sizeof(EndCentralDir), readLen);
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("read EOCD struct failed %s", pkgStream_->GetFileName().c_str());
+        return ret;
+    }
     magic = ReadLE32(buffer.buffer);
     if (magic != END_CENTRAL_SIGNATURE) { // 按签名处理
         size_t signatureStart = 0;
         ZipPkgParse zipParse;
         ret = zipParse.ParseZipPkg(pkgStream_, signatureStart, signatureLen);
-        PKG_CHECK(ret == PKG_SUCCESS, return ret, "Parse zip package signature failed");
+        if (ret != PKG_SUCCESS) {
+            PKG_LOGE("Parse zip package signature failed");
+            return ret;
+        }
 
         endDirPos -= signatureLen;
         ret = pkgStream_->Read(buffer, endDirPos, sizeof(EndCentralDir), readLen);
-        PKG_CHECK(ret == PKG_SUCCESS, return ret, "read EOCD struct failed %s", pkgStream_->GetFileName().c_str());
+        if (ret != PKG_SUCCESS) {
+            PKG_LOGE("read EOCD struct failed %s", pkgStream_->GetFileName().c_str());
+            return ret;
+        }
     }
 
     return LoadPackage(fileNames, buffer, endDirLen, endDirPos, readLen);

@@ -51,6 +51,12 @@ struct __attribute__((packed)) UpgradeCompInfo {
     uint8_t digest[DIGEST_MAX_LEN];
 };
 
+struct __attribute__((packed))  UpgradeParam {
+    size_t readLen {};
+    size_t dataOffset {};
+    size_t srcOffset {};
+    size_t currLen {};
+};
 class UpgradeFileEntry : public PkgEntry {
 public:
     UpgradeFileEntry(PkgFilePtr pkgFile, uint32_t nodeId) : PkgEntry(pkgFile, nodeId) {}
@@ -75,6 +81,7 @@ public:
 
 private:
     ComponentInfo fileInfo_ {};
+    int32_t GetUpGradeCompInfo(UpgradeCompInfo &comp);
 };
 
 class UpgradePkgFile : public PkgFile {
@@ -108,14 +115,21 @@ public:
 
 private:
     int16_t GetPackageTlvType();
+    int32_t SaveEntry(const PkgBuffer &buffer, size_t &parsedLen, UpgradeParam &info,
+        DigestAlgorithm::DigestAlgorithmPtr algorithm, std::vector<std::string> &fileNames);
     int32_t ReadComponents(const PkgBuffer &buffer, size_t &parsedLen,
         DigestAlgorithm::DigestAlgorithmPtr algorithm, std::vector<std::string> &fileNames);
 
+    void ParsePkgHeaderToTlv(const PkgBuffer &buffer, size_t &currLen, PkgTlv &tlv);
     int32_t ReadUpgradePkgHeader(const PkgBuffer &buffer, size_t &realLen,
         DigestAlgorithm::DigestAlgorithmPtr &algorithm);
 
     int32_t Verify(size_t start, DigestAlgorithm::DigestAlgorithmPtr algorithm,
         VerifyFunction verifier, const std::vector<uint8_t> &signData);
+    int32_t WriteBuffer(std::vector<uint8_t> &buffer, size_t &offset, size_t &signOffset);
+    int32_t CheckPackageHeader(std::vector<uint8_t> &buffer, size_t &offset);
+    int32_t GetEntryOffset(size_t &dataOffset, const PkgManager::FileInfoPtr file);
+    int32_t ReadPackageInfo(PkgBuffer &buffer, std::vector<uint8_t> &signData, size_t &parsedLen);
 
 private:
     UpgradePkgInfo pkgInfo_ {};
