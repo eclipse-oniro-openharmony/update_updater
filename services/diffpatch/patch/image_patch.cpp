@@ -85,43 +85,68 @@ int32_t RowImagePatch::ApplyImagePatch(const PatchParam &param, size_t &startOff
     return 0;
 }
 
+int32_t CompressedImagePatch::StartReadHeader(const PatchParam &param, PatchHeader &header, size_t &offset)
+{
+    int32_t ret = ReadHeader(param, header, offset);
+    if (ret != 0) {
+        PATCH_LOGE("Failed to read header");
+        return -1;
+    }
+    PATCH_LOGI("ApplyImagePatch srcStart %zu srcLen %zu patchOffset: %zu expandedLen:%zu %zu",
+        header.srcStart, header.srcLength, header.patchOffset, header.expandedLen, header.targetSize);
+    if (header.srcStart + header.srcLength > param.oldSize) {
+        PATCH_LOGE("Failed to check patch");
+        return -1;
+    }
+    return 0;
+}
+
 int32_t CompressedImagePatch::ApplyImagePatch(const PatchParam &param, size_t &startOffset)
 {
     size_t offset = startOffset;
     // read header
     PatchHeader header {};
-    int32_t ret = ReadHeader(param, header, offset);
-    PATCH_CHECK(ret == 0, return -1, "failed to read header");
-    PATCH_LOGI("ApplyImagePatch srcStart %zu srcLen %zu patchOffset: %zu expandedLen:%zu %zu",
-        header.srcStart, header.srcLength, header.patchOffset, header.expandedLen, header.targetSize);
-    PATCH_CHECK(header.srcStart + header.srcLength <= param.oldSize, return -1, "Failed to check patch");
-
+    int32_t ret = StartReadHeader(param, header, offset);
+    if (ret != 0) {
+        return -1;
+    }
     // decompress old data
     Hpackage::PkgManager::StreamPtr stream = nullptr;
     BlockBuffer oldData = { param.oldBuff + header.srcStart, header.srcLength };
     ret = DecompressData(oldData, stream, true, header.expandedLen);
-    PATCH_CHECK(ret == 0, return -1, "Failed to decompress data");
-
+    if (ret != 0) {
+        PATCH_LOGE("Failed to decompress data");
+        return -1;
+    }
     // prepare new data
     std::unique_ptr<Hpackage::FileInfo> info = GetFileInfo();
-    PATCH_CHECK(info != nullptr, return -1, "Failed to get file info");
+    if (info == nullptr) {
+        PATCH_LOGE("Failed to get file info");
+        return -1;
+    }
     info->packedSize = header.targetSize;
     info->unpackedSize = header.expandedLen;
     std::unique_ptr<CompressedFileRestore> zipWriter = std::make_unique<CompressedFileRestore>(info.get(), writer_);
-    PATCH_CHECK(zipWriter != nullptr, return -1, "Failed to create zip writer");
-    PATCH_CHECK(zipWriter->Init() == 0, return -1, "Failed to create zip writer");
-
+    if (zipWriter == nullptr || zipWriter->Init() != 0) {
+        PATCH_LOGE("Failed to create zip writer");
+        return -1;
+    }
     // apply patch
     PatchBuffer patchInfo = {param.patch, header.patchOffset, param.patchSize};
     ret = UpdateApplyPatch::ApplyBlockPatch(patchInfo, stream, zipWriter.get());
-    PATCH_CHECK(ret == 0, return -1, "Failed to apply bsdiff patch");
-
+    if (ret != 0) {
+        PATCH_LOGE("Failed to apply bsdiff patch");
+        return -1;
+    }
     // compress new data
     size_t originalSize = 0;
     size_t compressSize = 0;
     zipWriter->CompressData(originalSize, compressSize);
     PATCH_LOGI("ApplyImagePatch unpackedSize %zu %zu", originalSize, compressSize);
-    PATCH_CHECK(originalSize == header.targetSize, return -1, "Failed to apply bsdiff patch");
+    if (originalSize != header.targetSize) {
+        PATCH_LOGE("Failed to apply bsdiff patch");
+        return -1;
+    }
     startOffset = offset;
     return 0;
 }

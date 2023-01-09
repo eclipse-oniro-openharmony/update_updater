@@ -142,26 +142,23 @@ int32_t UpdateDiff::MakePatch(const std::string &oldFileName,
 
     newParser_.reset(new ImageParser());
     oldParser_.reset(new ImageParser());
-    if (newParser_ == nullptr) {
-        PATCH_LOGE("Failed to create new parser");
-        return -1;
-    }
-    if (oldParser_ == nullptr) {
-        PATCH_LOGE("Failed to create old parser");
-        return -1;
-    }
-    int32_t ret = newParser_->Parse(newFileName);
-    int32_t ret1 = oldParser_->Parse(oldFileName);
-    if (ret != 0 || ret1 != 0) {
-        PATCH_LOGE("Failed to parse image");
+    if (newParser_ == nullptr || oldParser_ == nullptr) {
+        PATCH_LOGE("Failed to create parser");
         return -1;
     }
 
+    if (newParser_->Parse(newFileName) != 0 || oldParser_->Parse(oldFileName) != 0) {
+        PATCH_LOGE("Failed to parse image");
+        return -1;
+    }
     std::unique_ptr<ImageDiff> imageDiff = nullptr;
     PATCH_DEBUG("UpdateDiff::MakePatch type: %d %d", newParser_->GetType(), oldParser_->GetType());
     if (newParser_->GetType() != oldParser_->GetType()) {
         imageDiff.reset(new ImageDiff(limit_, newParser_.get(), oldParser_.get()));
-        PATCH_CHECK(imageDiff != nullptr, return -1, "Failed to diff file");
+        if (imageDiff == nullptr) {
+            PATCH_LOGE("Failed to diff file");
+            return -1;
+        }
         return imageDiff->MakePatch(patchFileName);
     }
 
@@ -179,7 +176,10 @@ int32_t UpdateDiff::MakePatch(const std::string &oldFileName,
             imageDiff.reset(new ImageDiff(limit_, newParser_.get(), oldParser_.get()));
             break;
     }
-    PATCH_CHECK(imageDiff != nullptr, return -1, "Failed to diff file");
+    if (imageDiff == nullptr) {
+        PATCH_LOGE("Failed to diff file");
+        return -1;
+    }
     return imageDiff->MakePatch(patchFileName);
 }
 

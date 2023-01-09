@@ -49,7 +49,10 @@ public:
 
     int TestThreadPoolCreate(const int32_t taskNumber)
     {
-        USCRIPT_CHECK(threadPool_ != nullptr, return USCRIPT_INVALID_PARAM, "Fail to create thread pool");
+        if (threadPool_ == nullptr) {
+            USCRIPT_LOGE("Fail to create thread pool");
+            return USCRIPT_INVALID_PARAM;
+        }
         Task task;
         int32_t ret = USCRIPT_SUCCESS;
         size_t taskNumberRound = 20;

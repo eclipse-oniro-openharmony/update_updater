@@ -63,7 +63,6 @@ int32_t Lz4FrameAdapter::Open()
     preferences.frameInfo.blockSizeID = (LZ4F_blockSizeID_t)blockSizeID_;
     preferences.frameInfo.contentChecksumFlag =
         ((contentChecksumFlag_ == 0) ? LZ4F_noContentChecksum : LZ4F_contentChecksumEnabled);
-
     size_t blockSize = LZ4_BLOCK_SIZE(blockSizeID_);
     blockSize = (blockSize > LZ4B_BLOCK_SIZE) ? LZ4B_BLOCK_SIZE : blockSize;
     inData_.resize(blockSize);
@@ -73,7 +72,6 @@ int32_t Lz4FrameAdapter::Open()
         return -1;
     }
     buffer_.resize(outBuffSize);
-
     PATCH_LOGI("frameInfo blockSizeID %d compressionLevel_: %d blockIndependence_:%d %d %d blockSize %zu %zu %zu",
         static_cast<int32_t>(blockSizeID_), static_cast<int32_t>(compressionLevel_),
         static_cast<int32_t>(blockIndependence_), static_cast<int32_t>(contentChecksumFlag_), autoFlush_,
@@ -86,7 +84,10 @@ int32_t Lz4FrameAdapter::Open()
         return -1;
     }
     int32_t ret = outStream_->Write(offset_, {buffer_.data(), dataSize}, dataSize);
-    PATCH_CHECK(ret == 0, return -1, "Failed to deflate data");
+    if (ret != 0) {
+        PATCH_LOGE("Failed to deflate data");
+        return -1;
+    }
     offset_ += dataSize;
     init_ = true;
     return ret;

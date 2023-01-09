@@ -310,16 +310,23 @@ int32_t CompressedImageDiff::DiffFile(const std::string &fileName, size_t &oldOf
     BlockBuffer orgOldBuffer;
     int32_t ret = newParser_->GetPkgBuffer(orgNewBuffer);
     int32_t ret1 = oldParser_->GetPkgBuffer(orgOldBuffer);
-    PATCH_CHECK((ret == 0 && ret1 == 0), return -1, "Failed to get pkgbuffer");
-
+    if (ret != 0 || ret1 != 0) {
+        PATCH_LOGE("Failed to get pkgbuffer");
+        return -1;
+    }
     std::vector<uint8_t> newBuffer;
     std::vector<uint8_t> oldBuffer;
     ret = newParser_->Extract(fileName, newBuffer);
     const FileInfo *newFileInfo = newParser_->GetFileInfo(fileName);
-    PATCH_CHECK(ret == 0 && newFileInfo != nullptr, return -1, "Failed to get new data");
+    if (ret != 0 || newFileInfo == nullptr) {
+        PATCH_LOGE("Failed to get new data");
+        return -1;
+    }
     newOffset += GET_REAL_DATA_LEN(newFileInfo);
-    PATCH_CHECK(limit_ == 0 || newFileInfo->unpackedSize < limit_, return PATCH_EXCEED_LIMIT,
-        "Exceed limit, so make patch by original file");
+    if (limit_ != 0 && newFileInfo->unpackedSize >= limit_) {
+        PATCH_LOGE("Exceed limit, so make patch by original file");
+        return PATCH_EXCEED_LIMIT;
+    }
 
     ret = oldParser_->Extract(fileName, oldBuffer);
     if (ret != 0) {
@@ -332,13 +339,27 @@ int32_t CompressedImageDiff::DiffFile(const std::string &fileName, size_t &oldOf
         return 0;
     }
     const FileInfo *oldFileInfo = oldParser_->GetFileInfo(fileName);
-    PATCH_CHECK(oldFileInfo != nullptr, return -1, "Failed to get file info");
+    if (oldFileInfo == nullptr) {
+        PATCH_LOGE("Failed to get file info");
+        return -1;
+    }
     oldOffset += GET_REAL_DATA_LEN(oldFileInfo);
 
     BlockBuffer newData = {newBuffer.data(), newFileInfo->unpackedSize};
     ret = TestAndSetConfig(newData, fileName);
-    PATCH_CHECK(ret == 0, return -1, "Failed to test zip config");
+    if (ret != 0) {
+        PATCH_LOGE("Failed to test zip config");
+        return -1;
+    }
+    std::pair<std::vector<uint8_t>, std::vector<uint8_t>> buffer(std::move(oldBuffer), std::move(newBuffer));
+    UpdateBlocks(orgNewBuffer, newFileInfo, orgOldBuffer, oldFileInfo, buffer);
+    return 0;
+}
 
+void CompressedImageDiff::UpdateBlocks(const BlockBuffer &orgNewBuffer, const Hpackage::FileInfo *newFileInfo,
+    const BlockBuffer &orgOldBuffer, const Hpackage::FileInfo *oldFileInfo,
+    std::pair<std::vector<uint8_t>, std::vector<uint8_t>> &buffer)
+{
     if (type_ != BLOCK_LZ4 && newFileInfo->dataOffset > newFileInfo->headerOffset) {
         ImageBlock block = {
             BLOCK_RAW,
@@ -353,12 +374,11 @@ int32_t CompressedImageDiff::DiffFile(const std::string &fileName, size_t &oldOf
         { orgNewBuffer.buffer, newFileInfo->dataOffset, newFileInfo->packedSize },
         { orgOldBuffer.buffer, oldFileInfo->dataOffset, oldFileInfo->packedSize },
     };
-    block.srcOriginalData = std::move(oldBuffer);
-    block.destOriginalData = std::move(newBuffer);
+    block.srcOriginalData = std::move(buffer.first);
+    block.destOriginalData = std::move(buffer.second);
     block.srcOriginalLength = oldFileInfo->unpackedSize;
     block.destOriginalLength = newFileInfo->unpackedSize;
     updateBlocks_.push_back(std::move(block));
-    return 0;
 }
 
 int32_t ZipImageDiff::WriteHeader(std::ofstream &patchFile,
@@ -434,14 +454,15 @@ int32_t ZipImageDiff::TestAndSetConfig(const BlockBuffer &buffer, const std::str
         level_, method_, windowBits_, memLevel_, strategy_);
     BlockBuffer orgData = {orgNewBuffer.buffer + fileInfo->dataOffset, fileInfo->packedSize};
     PATCH_DEBUG("DiffFile new orignial hash %zu %s", fileInfo->packedSize, GeneraterBufferHash(orgData).c_str());
-
     std::vector<uint8_t> data;
     for (int32_t i = ZIP_MAX_LEVEL; i >= 0; i--) {
         zipInfo.level = i;
         size_t bufferSize = 0;
         ret = CompressData(&zipInfo.fileInfo, buffer, data, bufferSize);
-        PATCH_CHECK(ret == 0, return -1, "Can not Compress buff ");
-
+        if (ret != 0) {
+            PATCH_LOGE("Can not Compress buff");
+            return -1;
+        }
         if ((bufferSize == fileInfo->packedSize) &&
             memcmp(data.data(), orgNewBuffer.buffer + fileInfo->dataOffset, bufferSize) == 0) {
             level_ = i;
@@ -496,7 +517,10 @@ int32_t Lz4ImageDiff::WriteHeader(std::ofstream &patchFile,
 int32_t Lz4ImageDiff::TestAndSetConfig(const BlockBuffer &buffer, const std::string &fileName)
 {
     const FileInfo *fileInfo = newParser_->GetFileInfo(fileName);
-    PATCH_CHECK(fileInfo != nullptr, return -1, "Failed to get file info");
+    if (fileInfo == nullptr) {
+        PATCH_LOGE("Failed to get file info");
+        return -1;
+    }
     Lz4FileInfo *info = (Lz4FileInfo *)fileInfo;
     method_ = static_cast<int32_t>(info->fileInfo.packMethod);
     compressionLevel_ = info->compressionLevel;
@@ -507,14 +531,13 @@ int32_t Lz4ImageDiff::TestAndSetConfig(const BlockBuffer &buffer, const std::str
 
     BlockBuffer orgNewBuffer;
     int32_t ret = newParser_->GetPkgBuffer(orgNewBuffer);
-    PATCH_CHECK(ret == 0, return -1, "Failed to get pkgbuffer");
-    Lz4FileInfo lz4Info {};
+    if (ret != 0) {
+        PATCH_LOGE("Failed to get pkgbuffer");
+        return -1;
+    }
+    Lz4FileInfo lz4Info {{}, info->compressionLevel, info->blockIndependence, info->contentChecksumFlag,
+        info->blockSizeID, info->autoFlush};
     lz4Info.fileInfo.packMethod = info->fileInfo.packMethod;
-    lz4Info.compressionLevel = info->compressionLevel;
-    lz4Info.blockIndependence = info->blockIndependence;
-    lz4Info.contentChecksumFlag = info->contentChecksumFlag;
-    lz4Info.blockSizeID = info->blockSizeID;
-    lz4Info.autoFlush = info->autoFlush;
 
     PATCH_DEBUG("TestAndSetConfig level_:%d method_:%d blockIndependence_:%d contentChecksumFlag_:%d blockSizeID_:%d",
         compressionLevel_, method_, blockIndependence_, contentChecksumFlag_, blockSizeID_);
@@ -529,8 +552,10 @@ int32_t Lz4ImageDiff::TestAndSetConfig(const BlockBuffer &buffer, const std::str
         lz4Info.blockSizeID = i;
         size_t bufferSize = 0;
         ret = CompressData(&lz4Info.fileInfo, buffer, data, bufferSize);
-        PATCH_CHECK(ret == 0, return -1, "Can not Compress buff ");
-
+        if (ret != 0) {
+            PATCH_LOGE("Can not Compress buff");
+            return -1;
+        }
         if ((bufferSize == fileInfo->packedSize + sizeof(uint32_t)) &&
             memcmp(data.data(), orgNewBuffer.buffer + fileInfo->headerOffset, bufferSize) == 0) {
             blockSizeID_ = i;

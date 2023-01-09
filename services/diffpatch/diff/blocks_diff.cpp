@@ -145,8 +145,15 @@ int32_t BlocksDiff::MakePatch(const BlockBuffer &newInfo, const BlockBuffer &old
         PATCH_LOGE("Failed to get control data");
         return ret;
     }
+
+    return WritePatchData(controlDatas, newInfo, patchSize);
+}
+
+int32_t BlocksDiff::WritePatchData(const std::vector<ControlData> &controlDatas,
+    const BlockBuffer &newInfo, size_t &patchSize)
+{
     patchSize = 0;
-    ret = WritePatchHeader(0, 0, 0, patchSize);
+    int32_t ret = WritePatchHeader(0, 0, 0, patchSize);
     if (ret != 0) {
         PATCH_LOGE("Failed to write patch header");
         return ret;
@@ -154,18 +161,27 @@ int32_t BlocksDiff::MakePatch(const BlockBuffer &newInfo, const BlockBuffer &old
 
     size_t controlSize = patchSize;
     ret = WriteControlData(controlDatas, patchSize);
-    PATCH_CHECK(ret == BZ_OK, return ret, "Failed to write diff data");
+    if (ret != BZ_OK) {
+        PATCH_LOGE("Failed to write control data");
+        return ret;
+    }
     controlSize = patchSize - controlSize;
 
     // 写diff数据
     size_t diffDataSize = patchSize;
     ret = WriteDiffData(controlDatas, patchSize);
-    PATCH_CHECK(ret == BZ_OK, return ret, "Failed to write diff data");
+    if (ret != BZ_OK) {
+        PATCH_LOGE("Failed to write diff data");
+        return ret;
+    }
     diffDataSize = patchSize - diffDataSize;
 
     size_t extraDataSize = patchSize;
     ret = WriteExtraData(controlDatas, patchSize);
-    PATCH_CHECK(ret == BZ_OK, return ret, "Failed to write extra data");
+    if (ret != BZ_OK) {
+        PATCH_LOGE("Failed to write extra data");
+        return ret;
+    }
     extraDataSize = patchSize - extraDataSize;
 
     // write real data
