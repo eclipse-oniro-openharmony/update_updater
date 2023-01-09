@@ -71,8 +71,6 @@ ohos_unittest("script_unittest") {
   ]
 
   deps = [
-    ":user_instruction",
-    ":user_instruction_invalid",
     "//base/update/updater/interfaces/kits/packages:libpackageExt",
     "//base/update/updater/services/log:libupdaterlog",
     "//base/update/updater/services/package:libupdaterpackage",
