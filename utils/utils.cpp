@@ -481,7 +481,7 @@ void WriteDumpResult(const std::string &result)
     }
 
     (void)chown(resultPath.c_str(), USER_ROOT_AUTHORITY, GROUP_UPDATE_AUTHORITY);
-    (void)chmod(resultPath.c_str(), 0660); // 0640: -rw-rw----
+    (void)chmod(resultPath.c_str(), 0660); // 0660: -rw-rw----
 }
 
 void UsSleep(int usec)
