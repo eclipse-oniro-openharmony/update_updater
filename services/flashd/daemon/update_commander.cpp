@@ -144,5 +144,6 @@ void UpdateCommander::SaveLog() const
         }
         chmod((iter.second).c_str(), mode);
     }
+    sync();
 }
 } // namespace Flashd

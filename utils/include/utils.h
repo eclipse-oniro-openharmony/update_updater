@@ -58,7 +58,7 @@ std::string GetCertName();
 bool WriteFully(int fd, const uint8_t *data, size_t size);
 bool ReadFully(int fd, void* data, size_t size);
 bool ReadFileToString(int fd, std::string &content);
-bool CopyFile(const std::string &src, const std::string &dest);
+bool CopyFile(const std::string &src, const std::string &dest, bool isAppend = false);
 bool WriteStringToFile(int fd, const std::string& content);
 std::string GetLocalBoardId();
 bool CopyUpdaterLogs(const std::string &sLog, const std::string &dLog);
