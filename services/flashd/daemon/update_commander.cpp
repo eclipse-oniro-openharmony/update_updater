@@ -106,6 +106,7 @@ bool UpdateCommander::DoUpdate(const uint8_t *payload, int payloadSize)
         auto useSec = static_cast<double>(OHOS::GetMicroTickCount() - startTime_) / OHOS::SEC_TO_MICROSEC;
         FLASHD_LOGI("update write file success, size = %u bytes, %.3lf s", fileSize_, useSec);
         NotifySuccess(CmdType::UPDATE);
+        sync();
         return true;
     }
     UpdateProgress(CmdType::UPDATE);
@@ -144,6 +145,5 @@ void UpdateCommander::SaveLog() const
         }
         chmod((iter.second).c_str(), mode);
     }
-    sync();
 }
 } // namespace Flashd
