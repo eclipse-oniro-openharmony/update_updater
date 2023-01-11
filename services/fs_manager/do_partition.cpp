@@ -337,17 +337,8 @@ static bool RemovePartitions(const Disk &disk, int &partitionRemovedCounter)
     return true;
 }
 
-int DoPartitions(PartitonList &nlist)
+int CheckDevicePartitions(const std::string &path)
 {
-    LOG(INFO) << "do_partitions start";
-    if (nlist.empty()) {
-        LOG(ERROR) << "newpartitionlist is empty ";
-        return 0;
-    }
-    const std::string path = MMC_PATH;
-    int partitionChangedCounter = 1;
-    PartitonList ulist;
-    ulist.clear();
     if (DiskAlloc(path) == 0) {
         LOG(ERROR) << "path not exist" << path;
         return 0;
@@ -356,6 +347,48 @@ int DoPartitions(PartitonList &nlist)
         LOG(ERROR) << "partition sum  is zero!";
         return 0;
     }
+    return 1;
+}
+
+int AdjustPartitions(Disk *disk, int &partitionChangedCounter)
+{
+    PartitonList ulist;
+    ulist.clear();
+
+    if (disk == nullptr || BlockDiskOpen(*disk) < 0) {
+        return 0;
+    }
+
+    if (GetRegisterUpdaterPartitionList(ulist) == 0) {
+        LOG(ERROR) << "get updater list fail!";
+        return 0;
+    }
+
+    if (!RemovePartitions(*disk, partitionChangedCounter)) {
+        return 0;
+    }
+
+    BlockSync(*disk);
+    if (!AddPartitions(*disk, ulist, partitionChangedCounter)) {
+        return 0;
+    }
+    BlockSync(*disk);
+    return 1;
+}
+
+int DoPartitions(PartitonList &nlist)
+{
+    LOG(INFO) << "do_partitions start";
+    if (nlist.empty()) {
+        LOG(ERROR) << "newpartitionlist is empty ";
+        return 0;
+    }
+
+    const std::string path = MMC_PATH;
+    if (CheckDevicePartitions(path) == 0) {
+        return 0;
+    }
+
     Disk *disk = GetRegisterBlockDisk(path);
     if (disk == nullptr) {
         LOG(ERROR) << "getRegisterdisk fail! ";
@@ -374,24 +407,10 @@ int DoPartitions(PartitonList &nlist)
         free(disk);
     };
 
-    if (BlockDiskOpen(*disk) < 0) {
+    int partitionChangedCounter = 1;
+    if (AdjustPartitions(disk, partitionChangedCounter) == 0) {
         return 0;
     }
-
-    if (GetRegisterUpdaterPartitionList(ulist) == 0) {
-        LOG(ERROR) << "get updater list fail!";
-        return 0;
-    }
-
-    if (!RemovePartitions(*disk, partitionChangedCounter)) {
-        return 0;
-    }
-
-    BlockSync (*disk);
-    if (!AddPartitions(*disk, ulist, partitionChangedCounter)) {
-        return 0;
-    }
-    BlockSync (*disk);
 
     (void)WriteDiskPartitionToMisc(nlist);
     return partitionChangedCounter;
