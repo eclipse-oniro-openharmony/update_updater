@@ -37,6 +37,7 @@ ohos_unittest("flashd_unittest") {
     "${HDC_PATH}/common/tcp.cpp",
     "${HDC_PATH}/common/transfer.cpp",
     "${HDC_PATH}/common/usb.cpp",
+    "../../../services/hdi/server/update_hdi_impl.cpp",
     "//base/update/updater/services/flashd/daemon/commander.cpp",
     "//base/update/updater/services/flashd/daemon/commander_factory.cpp",
     "//base/update/updater/services/flashd/daemon/daemon_updater.cpp",
