@@ -325,11 +325,7 @@ void HandleChildOutput(const std::string &buffer, int32_t bufferLen, bool &retry
 void ExcuteSubProc(UpdaterParams &upParams, const std::string &fullPath, const int pipeWrite)
 {
 #ifdef UPDATER_UT
-    if (packagePath.find("updater_binary_abnormal") != std::string::npos) {
-        fullPath = "/system/bin/updater_binary_abnormal";
-    } else {
-        fullPath = "/system/bin/test_update_binary";
-    }
+    fullPath = "/data/updater/updater_binary";
 #endif
     if (chmod(fullPath.c_str(), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) != 0) {
         LOG(ERROR) << "Failed to change mode";
@@ -394,11 +390,7 @@ UpdaterStatus CheckProcStatus(const pid_t pid, bool &retryUpdate)
     if (retryUpdate) {
         return UPDATE_RETRY;
     }
-    if (CheckProcStatus(status) != UPDATE_SUCCESS) {
-        return UPDATE_ERROR;
-    }
 
-    LOG(DEBUG) << "Updater process finished.";
     if (!WIFEXITED(status) || WEXITSTATUS(status) != 0) {
         if (WIFEXITED(status)) {
             LOG(ERROR) << "exited, status= " << WEXITSTATUS(status);
@@ -409,6 +401,7 @@ UpdaterStatus CheckProcStatus(const pid_t pid, bool &retryUpdate)
         }
         return UPDATE_ERROR;
     }
+    LOG(DEBUG) << "Updater process finished.";
     return UPDATE_SUCCESS;
 }
 
