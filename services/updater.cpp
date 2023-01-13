@@ -322,19 +322,8 @@ void HandleChildOutput(const std::string &buffer, int32_t bufferLen, bool &retry
 }
 }
 
-void ExcuteSubProc(UpdaterParams &upParams, const std::string &fullPath, const int pipeWrite)
+void ExcuteSubProc(UpdaterParams &upParams, const std::string &fullPath, int pipeWrite)
 {
-#ifdef UPDATER_UT
-    fullPath = "/data/updater/updater_binary";
-#endif
-    if (chmod(fullPath.c_str(), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) != 0) {
-        LOG(ERROR) << "Failed to change mode";
-    }
-
-#ifdef WITH_SELINUX
-    Restorecon(fullPath.c_str());
-#endif // WITH_SELINUX
-
     // Set process scheduler to normal if current scheduler is
     // SCHED_FIFO, which may cause bad performance.
     int policy = syscall(SYS_sched_getscheduler, getpid());
@@ -361,7 +350,7 @@ void ExcuteSubProc(UpdaterParams &upParams, const std::string &fullPath, const i
     exit(-1);
 }
 
-UpdaterStatus HandlePipeMsg(UpdaterParams &upParams, const int pipeRead, bool &retryUpdate)
+UpdaterStatus HandlePipeMsg(UpdaterParams &upParams, int pipeRead, bool &retryUpdate)
 {
     char buffer[MAX_BUFFER_SIZE] = {0};
     FILE* fromChild = fdopen(pipeRead, "r");
@@ -380,7 +369,7 @@ UpdaterStatus HandlePipeMsg(UpdaterParams &upParams, const int pipeRead, bool &r
     return UPDATE_SUCCESS;
 }
 
-UpdaterStatus CheckProcStatus(const pid_t pid, bool &retryUpdate)
+UpdaterStatus CheckProcStatus(pid_t pid, bool retryUpdate)
 {
     int status;
     if (waitpid(pid, &status, 0) == -1) {
@@ -428,6 +417,19 @@ UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, UpdaterPara
         LOG(INFO) << "There is no updater_binary in package, use updater_binary in device";
         fullPath = "/bin/updater_binary";
     }
+
+#ifdef UPDATER_UT
+    fullPath = "/data/updater/updater_binary";
+#endif
+
+    if (chmod(fullPath.c_str(), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) != 0) {
+        LOG(ERROR) << "Failed to change mode";
+    }
+
+#ifdef WITH_SELINUX
+    Restorecon(fullPath.c_str());
+#endif // WITH_SELINUX
+
     pid_t pid = fork();
     if (pid < 0) {
         ERROR_CODE(CODE_FORK_FAIL);
