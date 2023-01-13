@@ -216,7 +216,6 @@ UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, Upda
         return UPDATE_CORRUPT;
     }
     LOG(INFO) << "Package bin file verified. start to install package...";
-    int32_t versionRet = PreProcess::GetInstance().DoUpdatePreProcess(pkgManager);
     if (PreProcess::GetInstance().DoUpdatePreProcess(pkgManager) != PKG_SUCCESS) {
         LOG(ERROR) << "Version Check Fail...";
         return UPDATE_CORRUPT;
