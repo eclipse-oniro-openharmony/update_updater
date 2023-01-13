@@ -24,16 +24,16 @@ hdc_root_cfg = "//developtools_hdc/src/daemon/etc/hdcd.root.cfg"
 hdc_para_dac = "//developtools_hdc/src/daemon/etc/hdc.para.dac"
 
 ohos_prebuilt_etc("hdcd.cfg") {
-  source = "${hdc_cfg}"
+  source = "//developtools_hdc/src/daemon/etc/hdcd.cfg"
   if (build_variant == "user") {
-    source = "${hdc_root_cfg}"
+    source = "//developtools_hdc/src/daemon/etc/hdcd.root.cfg"
   }
   install_images = [ "updater" ]
   part_name = "updater"
 }
 
 ohos_prebuilt_etc("hdcd.param.dac") {
-  source = "${hdc_para_dac}"
+  source = "//developtools_hdc/src/daemon/etc/hdc.para.dac"
   install_images = [ "updater" ]
   part_name = "updater"
 }
