@@ -19,7 +19,7 @@
 #include <unordered_map>
 #include <vector>
 #ifndef DIFF_PATCH_SDK
-#include "hilog/log.h"
+#include "hilog_base/log_base.h"
 #endif
 #include "securec.h"
 
@@ -30,16 +30,14 @@ static std::ofstream g_errorCode;
 static std::string g_logTag;
 static int g_logLevel = INFO;
 #ifndef DIFF_PATCH_SDK
-static OHOS::HiviewDFX::HiLogLabel g_logLabel = {LOG_CORE, 0XD002E01, "UPDATER"};
+static const unsigned int g_domain = 0XD002E01;
 #endif
+
 
 void InitUpdaterLogger(const std::string &tag, const std::string &logFile, const std::string &stageFile,
     const std::string &errorCodeFile)
 {
     g_logTag = tag;
-#ifndef DIFF_PATCH_SDK
-    g_logLabel.tag = g_logTag.c_str();
-#endif
     g_updaterLog.open(logFile.c_str(), std::ios::app | std::ios::out);
     g_updaterStage.open(stageFile.c_str(), std::ios::app | std::ios::out);
     g_errorCode.open(errorCodeFile.c_str(), std::ios::app | std::ios::out);
@@ -53,22 +51,8 @@ UpdaterLogger::~UpdaterLogger()
         return;
     }
 #ifndef DIFF_PATCH_SDK
-    switch (level_) {
-        case static_cast<int>(INFO):
-            OHOS::HiviewDFX::HiLog::Info(g_logLabel, "%{public}s", str.c_str());
-            break;
-        case static_cast<int>(ERROR):
-            OHOS::HiviewDFX::HiLog::Error(g_logLabel, "%{public}s", str.c_str());
-            break;
-        case static_cast<int>(DEBUG):
-            OHOS::HiviewDFX::HiLog::Debug(g_logLabel, "%{public}s", str.c_str());
-            break;
-        case static_cast<int>(WARNING):
-            OHOS::HiviewDFX::HiLog::Warn(g_logLabel, "%{public}s", str.c_str());
-            break;
-        default:
-            break;
-    }
+    static const LogLevel LOG_LEVEL[] = { LOG_DEBUG, LOG_INFO, LOG_WARN, LOG_ERROR, LOG_FATAL };
+    HiLogBasePrint(LOG_CORE, LOG_LEVEL[level_], g_domain, g_logTag, "%{public}s", str.c_str());
 #endif
     oss_.str("");
     oss_ << std::endl << std::flush;

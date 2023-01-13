@@ -94,7 +94,6 @@ constexpr int MAX_TIME_SIZE = 20;
     }
 
 enum {
-    VERBOSE,
     DEBUG,
     INFO,
     WARNING,
