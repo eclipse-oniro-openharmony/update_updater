@@ -19,9 +19,6 @@ updater_init_usb_configfs_path_cfg =
 updater_faultloggerd_cfg =
     "//base/hiviewdfx/faultloggerd/services/config/faultloggerd.cfg"
 updater_hilog_cfg = "//base/hiviewdfx/hilog/services/hilogd/etc/hilogd.cfg"
-hdc_cfg = "//developtools_hdc/src/daemon/etc/hdcd.cfg"
-hdc_root_cfg = "//developtools_hdc/src/daemon/etc/hdcd.root.cfg"
-hdc_para_dac = "//developtools_hdc/src/daemon/etc/hdc.para.dac"
 
 ohos_prebuilt_etc("hdcd.cfg") {
   source = "//developtools_hdc/src/daemon/etc/hdcd.cfg"
