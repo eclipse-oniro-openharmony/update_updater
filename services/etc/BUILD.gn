@@ -70,8 +70,8 @@ ohos_prebuilt_etc("updater_init_usb_configfs.cfg") {
 
 group("updater_files") {
   deps = [
-    "hdcd.cfg",
-    "hdcd.param.dac",
+    ":hdcd.cfg",
+    ":hdcd.param.dac",
     ":updater_common.cfg",
     ":updater_faultloggerd.cfg",
     ":updater_hilog.cfg",
