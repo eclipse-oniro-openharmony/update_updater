@@ -329,7 +329,7 @@ bool WriteStringToFile(int fd, const std::string& content)
     return true;
 }
 
-bool CopyFile(const std::string &src, const std::string &dest)
+bool CopyFile(const std::string &src, const std::string &dest, bool isAppend)
 {
     char realPath[PATH_MAX + 1] = {0};
     if (realpath(src.c_str(), realPath) == nullptr) {
@@ -337,8 +337,9 @@ bool CopyFile(const std::string &src, const std::string &dest)
         return false;
     }
 
+    std::ios_base::openmode mode = isAppend ? std::ios::app | std::ios::out : std::ios_base::out;
     std::ifstream fin(realPath);
-    std::ofstream fout(dest);
+    std::ofstream fout(dest, mode);
     if (!fin.is_open() || !fout.is_open()) {
         return false;
     }
@@ -432,7 +433,7 @@ bool CopyUpdaterLogs(const std::string &sLog, const std::string &dLog)
         }
     }
 
-    if (!CopyFile(sLog, dLog)) {
+    if (!CopyFile(sLog, dLog, true)) {
         LOG(ERROR) << "copy log file failed.";
         return false;
     }
@@ -440,6 +441,7 @@ bool CopyUpdaterLogs(const std::string &sLog, const std::string &dLog)
         LOG(INFO) << "log size greater than 5M!";
         CompressLogs(dLog);
     }
+    sync();
     return true;
 }
 

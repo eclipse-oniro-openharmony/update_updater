@@ -102,6 +102,7 @@ bool UpdateCommander::DoUpdate(const uint8_t *payload, int payloadSize)
 
     currentSize_ += writeSize;
     if (currentSize_ >= fileSize_) {
+        fsync(fd_);
         SafeCloseFile(fd_);
         auto useSec = static_cast<double>(OHOS::GetMicroTickCount() - startTime_) / OHOS::SEC_TO_MICROSEC;
         FLASHD_LOGI("update write file success, size = %u bytes, %.3lf s", fileSize_, useSec);
