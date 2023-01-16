@@ -94,11 +94,11 @@ constexpr int MAX_TIME_SIZE = 20;
     }
 
 enum {
-    DEBUG,
-    INFO,
-    WARNING,
-    ERROR,
-    FATAL,
+    DEBUG = 3,
+    INFO = 4,
+    WARNING = 5,
+    ERROR = 6,
+    FATAL = 7,
 };
 
 enum {
