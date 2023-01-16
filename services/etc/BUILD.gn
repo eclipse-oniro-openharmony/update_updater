@@ -20,21 +20,6 @@ updater_faultloggerd_cfg =
     "//base/hiviewdfx/faultloggerd/services/config/faultloggerd.cfg"
 updater_hilog_cfg = "//base/hiviewdfx/hilog/services/hilogd/etc/hilogd.cfg"
 
-ohos_prebuilt_etc("hdcd.cfg") {
-  source = "//developtools_hdc/src/daemon/etc/hdcd.cfg"
-  if (build_variant == "user") {
-    source = "//developtools_hdc/src/daemon/etc/hdcd.root.cfg"
-  }
-  install_images = [ "updater" ]
-  part_name = "updater"
-}
-
-ohos_prebuilt_etc("hdcd.param.dac") {
-  source = "//developtools_hdc/src/daemon/etc/hdc.para.dac"
-  install_images = [ "updater" ]
-  part_name = "updater"
-}
-
 ohos_prebuilt_etc("updater_hilog.cfg") {
   source = "${updater_hilog_cfg}"
   install_images = [ "updater" ]
@@ -67,8 +52,6 @@ ohos_prebuilt_etc("updater_init_usb_configfs.cfg") {
 
 group("updater_files") {
   deps = [
-    ":hdcd.cfg",
-    ":hdcd.param.dac",
     ":updater_common.cfg",
     ":updater_faultloggerd.cfg",
     ":updater_hilog.cfg",
