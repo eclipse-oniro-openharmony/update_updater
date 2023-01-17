@@ -191,12 +191,17 @@ UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, Upda
     UPDATER_INIT_RECORD;
     UPDATER_UI_INSTANCE.ShowProgressPage();
     UPDATER_UI_INSTANCE.ShowProgress(upParams.initialProgress * FULL_PERCENT_PROGRESS);
-    UPDATER_ERROR_CHECK(pkgManager != nullptr, "Fail to GetPackageInstance", UPDATER_LAST_WORD(UPDATE_CORRUPT);
-        return UPDATE_CORRUPT);
-    UPDATER_CHECK_ONLY_RETURN(SetupPartitions(updateMode) == 0,
+    if (pkgManager == nullptr) {
+        LOG(ERROR) << "Fail to GetPackageInstance";
+        UPDATER_LAST_WORD(UPDATE_CORRUPT);
+        return UPDATE_CORRUPT;
+    }
+
+    if (SetupPartitions(updateMode) != 0) {
         UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_SETPART_FAIL), true);
         UPDATER_LAST_WORD(UPDATE_ERROR);
-        return UPDATE_ERROR);
+        return UPDATE_ERROR;
+    }
 
     if (upParams.retryCount > 0) {
         LOG(INFO) << "Retry for " << upParams.retryCount << " time(s)";
@@ -205,12 +210,16 @@ UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, Upda
     }
     int32_t verifyret = GetUpdatePackageInfo(pkgManager, upParams.updatePackage[upParams.pkgLocation]);
     g_tmpProgressValue = 0;
-    UPDATER_ERROR_CHECK(verifyret == PKG_SUCCESS, "Verify package bin file Fail...",
+    if (verifyret != PKG_SUCCESS) {
+        LOG(ERROR) << "Verify package bin file Fail...";
         UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_VERIFYFAIL), true);
-        return UPDATE_CORRUPT);
+        return UPDATE_CORRUPT;
+    }
     LOG(INFO) << "Package bin file verified. start to install package...";
-    int32_t versionRet = PreProcess::GetInstance().DoUpdatePreProcess(pkgManager);
-    UPDATER_ERROR_CHECK(versionRet == PKG_SUCCESS, "Version Check Fail...", return UPDATE_CORRUPT);
+    if (PreProcess::GetInstance().DoUpdatePreProcess(pkgManager) != PKG_SUCCESS) {
+        LOG(ERROR) << "Version Check Fail...";
+        return UPDATE_CORRUPT;
+    }
 
 #ifdef UPDATER_USE_PTABLE
     if (!PtableProcess(pkgManager, updateMode)) {
@@ -313,69 +322,42 @@ void HandleChildOutput(const std::string &buffer, int32_t bufferLen, bool &retry
 }
 }
 
-UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, UpdaterParams &upParams, int &maxTemperature)
+void ExcuteSubProc(const UpdaterParams &upParams, const std::string &fullPath, int pipeWrite)
 {
-    UPDATER_INIT_RECORD;
-    int pfd[DEFAULT_PIPE_NUM]; /* communication between parent and child */
-    UPDATER_FILE_CHECK(pipe(pfd) >= 0, "Create pipe failed: ", UPDATER_LAST_WORD(UPDATE_ERROR);
-        return UPDATE_ERROR);
-    UPDATER_ERROR_CHECK(pkgManager != nullptr, "Fail to GetPackageInstance", UPDATER_LAST_WORD(UPDATE_CORRUPT);
-        return UPDATE_CORRUPT);
-    int pipeRead = pfd[0];
-    int pipeWrite = pfd[1];
-    std::string fullPath = GetWorkPath() + std::string(UPDATER_BINARY);
-    (void)Utils::DeleteFile(fullPath);
-    if (ExtractUpdaterBinary(pkgManager, UPDATER_BINARY) != 0) {
-        LOG(INFO) << "There is no updater_binary in package, use updater_binary in device";
-        fullPath = "/bin/updater_binary";
-    }
-    pid_t pid = fork(); //don't use LOG() after fork();
-    UPDATER_CHECK_ONLY_RETURN(pid >= 0, ERROR_CODE(CODE_FORK_FAIL);
-        UPDATER_LAST_WORD(UPDATE_ERROR);
-        return UPDATE_ERROR);
-    if (pid == 0) { // child
-        close(pipeRead);   // close read endpoint
-#ifdef UPDATER_UT
-        fullPath = "/data/updater/updater_binary";
-#endif
-        UPDATER_ERROR_CHECK_NOT_RETURN(chmod(fullPath.c_str(), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) == 0,
-            "Failed to change mode");
-
-#ifdef WITH_SELINUX
-        Restorecon(fullPath.c_str());
-#endif // WITH_SELINUX
-
-        // Set process scheduler to normal if current scheduler is
-        // SCHED_FIFO, which may cause bad performance.
-        int policy = syscall(SYS_sched_getscheduler, getpid());
-        if (policy == -1) {
-            LOG(INFO) << "Cannnot get current process scheduler";
-        } else if (policy == SCHED_FIFO) {
-            LOG(DEBUG) << "Current process with scheduler SCHED_FIFO";
-            struct sched_param sp = {
-                .sched_priority = 0,
-            };
-            if (syscall(SYS_sched_setscheduler, getpid(), SCHED_OTHER, &sp) < 0) {
-                LOG(WARNING) << "Cannot set current process schedule with SCHED_OTHER";
-            }
+    // Set process scheduler to normal if current scheduler is
+    // SCHED_FIFO, which may cause bad performance.
+    int policy = syscall(SYS_sched_getscheduler, getpid());
+    if (policy == -1) {
+        LOG(INFO) << "Cannnot get current process scheduler";
+    } else if (policy == SCHED_FIFO) {
+        LOG(DEBUG) << "Current process with scheduler SCHED_FIFO";
+        struct sched_param sp = {
+            .sched_priority = 0,
+        };
+        if (syscall(SYS_sched_setscheduler, getpid(), SCHED_OTHER, &sp) < 0) {
+            LOG(WARNING) << "Cannot set current process schedule with SCHED_OTHER";
         }
-        if (upParams.retryCount > 0) {
-            execl(fullPath.c_str(), upParams.updatePackage[upParams.pkgLocation].c_str(),
-                std::to_string(pipeWrite).c_str(), "retry", nullptr);
-        } else {
-            execl(fullPath.c_str(), upParams.updatePackage[upParams.pkgLocation].c_str(),
-                std::to_string(pipeWrite).c_str(), nullptr);
-        }
-        LOG(ERROR) << "Execute updater binary failed";
-        UPDATER_LAST_WORD(UPDATE_ERROR);
-        exit(-1);
     }
+    if (upParams.retryCount > 0) {
+        execl(fullPath.c_str(), upParams.updatePackage[upParams.pkgLocation].c_str(),
+            std::to_string(pipeWrite).c_str(), "retry", nullptr);
+    } else {
+        execl(fullPath.c_str(), upParams.updatePackage[upParams.pkgLocation].c_str(),
+            std::to_string(pipeWrite).c_str(), nullptr);
+    }
+    LOG(ERROR) << "Execute updater binary failed";
+    UPDATER_LAST_WORD(UPDATE_ERROR);
+    exit(-1);
+}
 
-    close(pipeWrite); // close write endpoint
+UpdaterStatus HandlePipeMsg(UpdaterParams &upParams, int pipeRead, bool &retryUpdate)
+{
     char buffer[MAX_BUFFER_SIZE] = {0};
-    bool retryUpdate = false;
     FILE* fromChild = fdopen(pipeRead, "r");
-    UPDATER_ERROR_CHECK(fromChild != nullptr, "fdopen pipeRead failed", return UPDATE_ERROR);
+    if (fromChild == nullptr) {
+        LOG(ERROR) << "fdopen pipeRead failed";
+        return UPDATE_ERROR;
+    }
     while (fgets(buffer, MAX_BUFFER_SIZE - 1, fromChild) != nullptr) {
         char *pch = strrchr(buffer, '\n');
         if (pch != nullptr) {
@@ -384,15 +366,20 @@ UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, UpdaterPara
         HandleChildOutput(buffer, MAX_BUFFER_SIZE, retryUpdate, upParams);
     }
     fclose(fromChild);
+    return UPDATE_SUCCESS;
+}
 
+UpdaterStatus CheckProcStatus(pid_t pid, bool retryUpdate)
+{
     int status;
-    pid_t w = waitpid(pid, &status, 0);
-    if (w == -1) {
+    if (waitpid(pid, &status, 0) == -1) {
         LOG(ERROR) << "waitpid error";
         return UPDATE_ERROR;
     }
-    UPDATER_CHECK_ONLY_RETURN(!retryUpdate, return UPDATE_RETRY);
-    
+    if (retryUpdate) {
+        return UPDATE_RETRY;
+    }
+
     if (!WIFEXITED(status) || WEXITSTATUS(status) != 0) {
         if (WIFEXITED(status)) {
             LOG(ERROR) << "exited, status= " << WEXITSTATUS(status);
@@ -403,9 +390,65 @@ UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, UpdaterPara
         }
         return UPDATE_ERROR;
     }
-
     LOG(DEBUG) << "Updater process finished.";
     return UPDATE_SUCCESS;
+}
+
+UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, UpdaterParams &upParams, int &maxTemperature)
+{
+    UPDATER_INIT_RECORD;
+    int pfd[DEFAULT_PIPE_NUM]; /* communication between parent and child */
+    if (pipe(pfd) < 0) {
+        LOG(ERROR) << "Create pipe failed: ";
+        UPDATER_LAST_WORD(UPDATE_ERROR);
+        return UPDATE_ERROR;
+    }
+    if (pkgManager == nullptr) {
+        LOG(ERROR) << "Fail to GetPackageInstance";
+        UPDATER_LAST_WORD(UPDATE_CORRUPT);
+        return UPDATE_CORRUPT;
+    }
+
+    int pipeRead = pfd[0];
+    int pipeWrite = pfd[1];
+    std::string fullPath = GetWorkPath() + std::string(UPDATER_BINARY);
+    (void)Utils::DeleteFile(fullPath);
+    if (ExtractUpdaterBinary(pkgManager, UPDATER_BINARY) != 0) {
+        LOG(INFO) << "There is no updater_binary in package, use updater_binary in device";
+        fullPath = "/bin/updater_binary";
+    }
+
+#ifdef UPDATER_UT
+    fullPath = "/data/updater/updater_binary";
+#endif
+
+    if (chmod(fullPath.c_str(), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) != 0) {
+        LOG(ERROR) << "Failed to change mode";
+    }
+
+#ifdef WITH_SELINUX
+    Restorecon(fullPath.c_str());
+#endif // WITH_SELINUX
+
+    pid_t pid = fork();
+    if (pid < 0) {
+        ERROR_CODE(CODE_FORK_FAIL);
+        UPDATER_LAST_WORD(UPDATE_ERROR);
+        return UPDATE_ERROR;
+    }
+
+    if (pid == 0) { // child
+        close(pipeRead);   // close read endpoint
+        ExcuteSubProc(upParams, fullPath, pipeWrite);
+    }
+
+    close(pipeWrite); // close write endpoint
+    bool retryUpdate = false;
+    if (HandlePipeMsg(upParams, pipeRead, retryUpdate) != UPDATE_SUCCESS) {
+        return UPDATE_ERROR;
+    }
+
+    return CheckProcStatus(pid, retryUpdate);
 }
 
 std::string GetWorkPath()
