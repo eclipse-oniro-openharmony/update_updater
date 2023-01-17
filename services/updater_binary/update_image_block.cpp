@@ -295,58 +295,87 @@ static int32_t DoExecuteUpdateBlock(const UpdateBlockInfo &infos, Uscript::UScri
     return ret;
 }
 
+static int32_t ExtractFileByName(Uscript::UScriptEnv &env, const std::string &fileName,
+                                     Hpackage::PkgManager::StreamPtr &outStream, uint8_t *&outBuf, size_t &buffSize)
+{
+    if (env.GetPkgManager() == nullptr) {
+        LOG(ERROR) << "Error to get pkg manager";
+        return USCRIPT_ERROR_EXECUTE;
+    }
+
+    const FileInfo *info = env.GetPkgManager()->GetFileInfo(fileName);
+    if (info == nullptr) {
+        LOG(ERROR) << "GetFileInfo fail";
+        return USCRIPT_ERROR_EXECUTE;
+    }
+    auto ret = env.GetPkgManager()->CreatePkgStream(outStream,
+        fileName, info->unpackedSize, PkgStream::PkgStreamType_MemoryMap);
+    if (ret != USCRIPT_SUCCESS || outStream == nullptr) {
+        LOG(ERROR) << "Error to create output stream";
+        return USCRIPT_ERROR_EXECUTE;
+    }
+    ret = env.GetPkgManager()->ExtractFile(fileName, outStream);
+    if (ret != USCRIPT_SUCCESS) {
+        LOG(ERROR) << "Error to extract file";
+        env.GetPkgManager()->ClosePkgStream(outStream);
+        return USCRIPT_ERROR_EXECUTE;
+    }
+    ret = outStream->GetBuffer(outBuf, buffSize);
+    LOG(DEBUG) << "outBuf data size is: " << buffSize;
+
+    return USCRIPT_SUCCESS;
+}
+
 static int32_t ExecuteUpdateBlock(Uscript::UScriptEnv &env, Uscript::UScriptContext &context)
 {
     UpdateBlockInfo infos {};
-    UPDATER_CHECK_ONLY_RETURN(!GetUpdateBlockInfo(infos, env, context), return USCRIPT_ERROR_EXECUTE);
-    UPDATER_ERROR_CHECK(env.GetPkgManager() != nullptr, "Error to get pkg manager", return USCRIPT_ERROR_EXECUTE);
+    if (GetUpdateBlockInfo(infos, env, context) != USCRIPT_SUCCESS) {
+        return USCRIPT_ERROR_EXECUTE;
+    }
 
     if (env.IsRetry()) {
         LOG(DEBUG) << "Retry updater, check if current partition updatered already during last time";
-        bool isUpdated = PartitionRecord::GetInstance().IsPartitionUpdated(infos.partitionName);
-        if (isUpdated) {
+        if (PartitionRecord::GetInstance().IsPartitionUpdated(infos.partitionName)) {
             LOG(INFO) << infos.partitionName << " already updated, skip";
             return USCRIPT_SUCCESS;
         }
     }
 
-    int32_t ret = ExtractDiffPackageAndLoad(infos, env, context);
-    UPDATER_CHECK_ONLY_RETURN(ret == USCRIPT_SUCCESS, return USCRIPT_ERROR_EXECUTE);
+    if (ExtractDiffPackageAndLoad(infos, env, context) != USCRIPT_SUCCESS) {
+        return USCRIPT_ERROR_EXECUTE;
+    }
 
-    const FileInfo *info = env.GetPkgManager()->GetFileInfo(infos.transferName);
-    UPDATER_ERROR_CHECK(info != nullptr, "GetFileInfo fail", return USCRIPT_ERROR_EXECUTE);
-    Hpackage::PkgManager::StreamPtr outStream = nullptr;
-    ret = env.GetPkgManager()->CreatePkgStream(outStream,
-        infos.transferName, info->unpackedSize, PkgStream::PkgStreamType_MemoryMap);
-    ret = env.GetPkgManager()->ExtractFile(infos.transferName, outStream);
     uint8_t *transferListBuffer = nullptr;
     size_t transferListSize = 0;
-    ret = outStream->GetBuffer(transferListBuffer, transferListSize);
+    Hpackage::PkgManager::StreamPtr outStream = nullptr;
+    if (ExtractFileByName(env, infos.transferName, outStream, transferListBuffer, transferListSize) != USCRIPT_SUCCESS) {
+        return USCRIPT_ERROR_EXECUTE;
+    }
+
     TransferManagerPtr tm = TransferManager::GetTransferManagerInstance();
     auto globalParams = tm->GetGlobalParams();
     /* Save Script Env to transfer manager */
     globalParams->env = &env;
+
     std::vector<std::string> lines =
         Updater::Utils::SplitString(std::string(reinterpret_cast<const char*>(transferListBuffer)), "\n");
     // Close stream opened before.
     env.GetPkgManager()->ClosePkgStream(outStream);
 
     LOG(INFO) << "Start unpack new data thread done. Get patch data: " << infos.patchDataName;
-    info = env.GetPkgManager()->GetFileInfo(infos.patchDataName);
-    UPDATER_ERROR_CHECK(info != nullptr, "GetFileInfo fail", return USCRIPT_ERROR_EXECUTE);
-    ret = env.GetPkgManager()->CreatePkgStream(outStream,
-        infos.patchDataName, info->unpackedSize, PkgStream::PkgStreamType_MemoryMap);
-    UPDATER_ERROR_CHECK(outStream != nullptr, "Error to create output stream", return USCRIPT_ERROR_EXECUTE);
-    ret = env.GetPkgManager()->ExtractFile(infos.patchDataName, outStream);
-    UPDATER_ERROR_CHECK(ret == USCRIPT_SUCCESS, "Error to extract file",
-        env.GetPkgManager()->ClosePkgStream(outStream); return USCRIPT_ERROR_EXECUTE);
-    outStream->GetBuffer(globalParams->patchDataBuffer, globalParams->patchDataSize);
-    LOG(DEBUG) << "Patch data size is: " << globalParams->patchDataSize;
+    if (ExtractFileByName(env, infos.patchDataName, outStream,
+        globalParams->patchDataBuffer, globalParams->patchDataSize) != USCRIPT_SUCCESS) {
+        return USCRIPT_ERROR_EXECUTE;
+    }
 
     LOG(INFO) << "Ready to start a thread to handle new data processing";
-    UPDATER_ERROR_CHECK (InitThread(infos, env, context) == 0, "Failed to create pthread",
-        env.GetPkgManager()->ClosePkgStream(outStream); return USCRIPT_ERROR_EXECUTE);
-    ret = DoExecuteUpdateBlock(infos, env, outStream, lines, context);
+    if (InitThread(infos, env, context) != 0) {
+        LOG(ERROR) << "Failed to create pthread";
+        env.GetPkgManager()->ClosePkgStream(outStream);
+        return USCRIPT_ERROR_EXECUTE;
+    }
+
+    int32_t ret = DoExecuteUpdateBlock(infos, env, outStream, lines, context);
     TransferManager::ReleaseTransferManagerInstance(tm);
     return ret;
 }

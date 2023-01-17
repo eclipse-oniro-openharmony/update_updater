@@ -27,6 +27,7 @@
 #include "log/log.h"
 #include "misc_info/misc_info.h"
 #include "partition_const.h"
+#include "scope_guard.h"
 #include "securec.h"
 
 namespace Updater {
@@ -201,9 +202,45 @@ static void DestroyDiskDevices(const Disk &disk)
     }
 }
 
+static bool WriteMiscMsgWithOffset(const std::string &msg, int32_t offset)
+{
+    const std::string miscDevPath = GetBlockDeviceByMountPoint("/misc");
+    char *realPath = realpath(miscDevPath.c_str(), NULL);
+    if (realPath == nullptr) {
+        LOG(ERROR) << "realPath is NULL";
+        return false;
+    }
+    FILE *fp = fopen(realPath, "rb+");
+    free(realPath);
+    if (fp == nullptr) {
+        LOG(ERROR) << "fopen error " << errno;
+        return false;
+    }
+
+    ON_SCOPE_EXIT(flosefp) {
+        fclose(fp);
+    };
+
+    if (fseek(fp, offset, SEEK_SET) != 0) {
+        LOG(ERROR) << "fseek error";
+        return false;
+    }
+
+    if (fwrite(msg.c_str(), msg.length() + 1, 1, fp) < 0) {
+        LOG(ERROR) << "fwrite error " << errno;
+        return false;
+    }
+
+    int fd = fileno(fp);
+    fsync(fd);
+    return true;
+}
+
 static bool WriteDiskPartitionToMisc(PartitonList &nlist)
 {
-    UPDATER_CHECK_ONLY_RETURN(nlist.empty() == 0, return false);
+    if (nlist.empty()) {
+        return false;
+    }
     char blkdevparts[MISC_RECORD_UPDATE_PARTITIONS_SIZE] = "mmcblk0:";
     std::sort(nlist.begin(), nlist.end(), [](const struct Partition *a, const struct Partition *b) {
             return (a->start < b->start);
@@ -211,41 +248,31 @@ static bool WriteDiskPartitionToMisc(PartitonList &nlist)
     char tmp[SMALL_BUFFER_SIZE] = {0};
     size_t size = 0;
     for (auto& p : nlist) {
-        UPDATER_CHECK_ONLY_RETURN(memset_s(tmp, sizeof(tmp), 0, sizeof(tmp)) == 0, return false);
+        if (memset_s(tmp, sizeof(tmp), 0, sizeof(tmp)) != EOK) {
+            return false;
+        }
         if (p->partName == "userdata") {
-            UPDATER_CHECK_ONLY_RETURN(snprintf_s(tmp, sizeof(tmp), sizeof(tmp) - 1, "-(%s),",
-                p->partName.c_str()) != -1, return false);
+            if (snprintf_s(tmp, sizeof(tmp), sizeof(tmp) - 1, "-(%s),",
+                p->partName.c_str()) == -1) {
+                    return false;
+                }
         } else {
             size = static_cast<size_t>(p->length * SECTOR_SIZE_DEFAULT / DEFAULT_SIZE_1MB);
-            UPDATER_CHECK_ONLY_RETURN(snprintf_s(tmp, sizeof(tmp), sizeof(tmp) - 1, "%luM(%s),",
-                size, p->partName.c_str()) != -1, return false);
+            if (snprintf_s(tmp, sizeof(tmp), sizeof(tmp) - 1, "%luM(%s),",
+                size, p->partName.c_str()) == -1) {
+                    return false;
+                }
         }
-        int ncatRet = strncat_s(blkdevparts, MISC_RECORD_UPDATE_PARTITIONS_SIZE - 1, tmp, strlen(tmp));
-        UPDATER_ERROR_CHECK(ncatRet == EOK, "Block device name overflow", return false);
+        if (strncat_s(blkdevparts, MISC_RECORD_UPDATE_PARTITIONS_SIZE - 1, tmp, strlen(tmp)) != EOK) {
+            LOG(ERROR) << "Block device name overflow";
+            return false;
+        }
     }
 
     blkdevparts[strlen(blkdevparts) - 1] = '\0';
     LOG(INFO) << "blkdevparts is " << blkdevparts;
 
-    const std::string miscDevPath = GetBlockDeviceByMountPoint("/misc");
-    char *realPath = realpath(miscDevPath.c_str(), NULL);
-    UPDATER_ERROR_CHECK(realPath != nullptr, "realPath is NULL", return false);
-    FILE *fp = fopen(realPath, "rb+");
-    free(realPath);
-    UPDATER_ERROR_CHECK(fp, "fopen error " << errno, return false);
-
-    if (fseek(fp, MISC_RECORD_UPDATE_PARTITIONS_OFFSET, SEEK_SET) != 0) {
-        LOG(ERROR) << "fseek error";
-        fclose(fp);
-        return false;
-    }
-    size_t ret = fwrite(blkdevparts, sizeof(blkdevparts), 1, fp);
-    UPDATER_ERROR_CHECK(ret >= 0, "fwrite error " << errno, fclose(fp); return false);
-
-    int fd = fileno(fp);
-    fsync(fd);
-    fclose(fp);
-    return true;
+    return WriteMiscMsgWithOffset(std::string(blkdevparts), MISC_RECORD_UPDATE_PARTITIONS_OFFSET);
 }
 
 static bool AddPartitions(const Disk &disk, const PartitonList &ulist, int &partitionAddedCounter)
@@ -310,54 +337,83 @@ static bool RemovePartitions(const Disk &disk, int &partitionRemovedCounter)
     return true;
 }
 
-int DoPartitions(PartitonList &nlist)
+int CheckDevicePartitions(const std::string &path)
 {
-    LOG(INFO) << "do_partitions start ";
-    UPDATER_ERROR_CHECK(!nlist.empty(), "newpartitionlist is empty ", return 0);
-    const std::string path = MMC_PATH;
-    int get = 0;
-    int fd = -1;
-    int partitionChangedCounter = 1;
+    if (DiskAlloc(path) == 0) {
+        LOG(ERROR) << "path not exist" << path;
+        return 0;
+    }
+    if (ProbeAllPartitions() == 0) {
+        LOG(ERROR) << "partition sum  is zero!";
+        return 0;
+    }
+    return 1;
+}
+
+int AdjustPartitions(Disk *disk, int &partitionChangedCounter)
+{
     PartitonList ulist;
     ulist.clear();
-    int ret = DiskAlloc(path);
-    UPDATER_ERROR_CHECK(ret, "path not exist " << path, return 0);
-    int sum = ProbeAllPartitions();
-    UPDATER_ERROR_CHECK(sum, "partition sum  is zero! ", return 0);
-    Disk *disk = GetRegisterBlockDisk(MMC_PATH);
+
+    if (disk == nullptr || BlockDiskOpen(*disk) < 0) {
+        return 0;
+    }
+
+    if (GetRegisterUpdaterPartitionList(ulist) == 0) {
+        LOG(ERROR) << "get updater list fail!";
+        return 0;
+    }
+
+    if (!RemovePartitions(*disk, partitionChangedCounter)) {
+        return 0;
+    }
+
+    BlockSync(*disk);
+    if (!AddPartitions(*disk, ulist, partitionChangedCounter)) {
+        return 0;
+    }
+    BlockSync(*disk);
+    return 1;
+}
+
+int DoPartitions(PartitonList &nlist)
+{
+    LOG(INFO) << "do_partitions start";
+    if (nlist.empty()) {
+        LOG(ERROR) << "newpartitionlist is empty ";
+        return 0;
+    }
+
+    const std::string path = MMC_PATH;
+    if (CheckDevicePartitions(path) == 0) {
+        return 0;
+    }
+
+    Disk *disk = GetRegisterBlockDisk(path);
     if (disk == nullptr) {
         LOG(ERROR) << "getRegisterdisk fail! ";
         return 0;
     }
-    int reg = RegisterUpdaterPartitionList(nlist, disk->partList);
-    UPDATER_ERROR_CHECK(reg, "register updater list fail! ", free(disk); return 0);
-    get = GetRegisterUpdaterPartitionList(ulist);
-    UPDATER_ERROR_CHECK(get, "get updater list fail! ", goto error);
+    if (RegisterUpdaterPartitionList(nlist, disk->partList) == 0) {
+        LOG(ERROR) << "register updater list fail!";
+        free(disk);
+        return 0;
+    }
 
-    fd = BlockDiskOpen(*disk);
-    if (fd < 0) {
-        goto error;
+    ON_SCOPE_EXIT(clearresource) {
+        BlockDiskClose(*disk);
+        DestroyDiskPartitions(*disk);
+        DestroyDiskDevices(*disk);
+        free(disk);
+    };
+
+    int partitionChangedCounter = 1;
+    if (AdjustPartitions(disk, partitionChangedCounter) == 0) {
+        return 0;
     }
-    if (!RemovePartitions(*disk, partitionChangedCounter)) {
-        goto error;
-    }
-    BlockSync (*disk);
-    if (!AddPartitions(*disk, ulist, partitionChangedCounter)) {
-        goto error;
-    }
-    BlockSync (*disk);
-    WriteDiskPartitionToMisc(nlist);
-    BlockDiskClose(*disk);
-    DestroyDiskPartitions(*disk);
-    DestroyDiskDevices(*disk);
-    free(disk);
+
+    (void)WriteDiskPartitionToMisc(nlist);
     return partitionChangedCounter;
-error:
-    BlockDiskClose(*disk);
-    DestroyDiskPartitions(*disk);
-    DestroyDiskDevices(*disk);
-    free(disk);
-    return 0;
 }
 } // Updater
 

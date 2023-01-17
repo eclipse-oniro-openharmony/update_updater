@@ -77,6 +77,7 @@ public:
 
 private:
     bool RegisterForRetry(const std::string &cmd);
+    bool CommandsExecute(int fd, Command &cmd);
     std::unique_ptr<GlobalParams> globalParams;
 };
 } // namespace Updater

@@ -116,32 +116,11 @@ bool IsSDCardExist(const std::string &sdcardPath)
     }
 }
 
-void PostUpdater(bool clearMisc)
+void SaveLogs()
 {
-    STAGE(UPDATE_STAGE_BEGIN) << "PostUpdater";
     std::string updaterLogPath = UPDATER_LOG;
     std::string stageLogPath = UPDATER_STAGE_LOG;
     std::string errorCodePath = ERROR_CODE_PATH;
-
-    (void)SetupPartitions();
-    // clear update misc partition.
-    if (clearMisc) {
-        UPDATER_ERROR_CHECK_NOT_RETURN(ClearMisc() == true, "PostUpdater clear misc failed");
-    }
-    if (!access(COMMAND_FILE, 0)) {
-        UPDATER_ERROR_CHECK_NOT_RETURN(unlink(COMMAND_FILE) == 0, "Delete command failed");
-    }
-
-    // delete updater tmp files
-    if (access(UPDATER_PATH, 0) == 0 && access(SDCARD_CARD_PATH, 0) != 0) {
-        UPDATER_ERROR_CHECK_NOT_RETURN(DeleteUpdaterPath(UPDATER_PATH), "DeleteUpdaterPath failed");
-    }
-    if (!access(SDCARD_CARD_PATH, 0)) {
-        UPDATER_ERROR_CHECK_NOT_RETURN(DeleteUpdaterPath(SDCARD_CARD_PATH), "Delete sdcard path failed");
-    }
-    if (access(Flashd::FLASHD_FILE_PATH, 0) == 0) {
-        UPDATER_ERROR_CHECK_NOT_RETURN(DeleteUpdaterPath(Flashd::FLASHD_FILE_PATH), "DeleteUpdaterPath failed");
-    }
 
     // save logs
     bool ret = CopyUpdaterLogs(TMP_LOG, updaterLogPath);
@@ -159,14 +138,42 @@ void PostUpdater(bool clearMisc)
 
     mode_t mode = 0640;
     chmod(updaterLogPath.c_str(), mode);
-    chmod(UPDATER_HDC_LOG, mode);
     chmod(errorCodePath.c_str(), mode);
+    chmod(UPDATER_HDC_LOG, mode);
+
     STAGE(UPDATE_STAGE_SUCCESS) << "PostUpdater";
     ret = CopyUpdaterLogs(TMP_STAGE_LOG, stageLogPath);
     chmod(stageLogPath.c_str(), mode);
     if (!ret) {
         LOG(ERROR) << "Copy stage log failed!";
     }
+}
+
+void PostUpdater(bool clearMisc)
+{
+    STAGE(UPDATE_STAGE_BEGIN) << "PostUpdater";
+
+    (void)SetupPartitions();
+    // clear update misc partition.
+    if (clearMisc && !ClearMisc()) {
+        LOG(ERROR) << "PostUpdater clear misc failed";
+    }
+    if (!access(COMMAND_FILE, 0) && unlink(COMMAND_FILE) != 0) {
+        LOG(ERROR) << "Delete command failed";
+    }
+
+    // delete updater tmp files
+    if (access(UPDATER_PATH, 0) == 0 && access(SDCARD_CARD_PATH, 0) != 0 && !DeleteUpdaterPath(UPDATER_PATH)) {
+        LOG(ERROR) << "DeleteUpdaterPath failed";
+    }
+    if (access(SDCARD_CARD_PATH, 0) == 0 && !DeleteUpdaterPath(SDCARD_CARD_PATH)) {
+        LOG(ERROR) << "Delete sdcard path failed";
+    }
+    if (access(Flashd::FLASHD_FILE_PATH, 0) == 0 && !DeleteUpdaterPath(Flashd::FLASHD_FILE_PATH)) {
+        LOG(ERROR) << "DeleteUpdaterPath failed";
+    }
+
+    SaveLogs();
 }
 
 std::vector<std::string> ParseParams(int argc, char **argv)

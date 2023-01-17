@@ -156,12 +156,12 @@ size_t BlockSet::ReadDataFromBlock(int fd, std::vector<uint8_t> &buffer)
         ret = lseek64(fd, static_cast<off64_t>(it->first * H_BLOCK_SIZE), SEEK_SET);
         if (ret == -1) {
             LOG(ERROR) << "Fail to seek";
-            return -1;
+            return 0;
         }
         size_t size = (it->second - it->first) * H_BLOCK_SIZE;
         if (!Utils::ReadFully(fd, buffer.data() + pos, size)) {
             LOG(ERROR) << "Fail to read";
-            return -1;
+            return 0;
         }
         pos += size;
     }
@@ -181,23 +181,23 @@ size_t BlockSet::WriteDataToBlock(int fd, std::vector<uint8_t> &buffer)
         ret = ioctl(fd, BLKDISCARD, &arguments);
         if (ret == -1 && errno != EOPNOTSUPP) {
             LOG(ERROR) << "Error to write block set to memory";
-            return -1;
+            return 0;
         }
 #endif
         ret = lseek64(fd, offset, SEEK_SET);
         if (ret == -1) {
             LOG(ERROR) << "BlockSet::WriteDataToBlock Fail to seek";
-            return -1;
+            return 0;
         }
         if (Utils::WriteFully(fd, buffer.data() + pos, writeSize) == false) {
             LOG(ERROR) << "Write data to block error, errno : " << errno;
-            return -1;
+            return 0;
         }
         pos += writeSize;
     }
     if (fsync(fd) == -1) {
         LOG(ERROR) << "Failed to fsync";
-        return -1;
+        return 0;
     }
     return pos;
 }
@@ -269,7 +269,7 @@ int32_t BlockSet::LoadSourceBuffer(const Command &cmd, size_t &pos, std::vector<
         isOverlap = IsTwoBlocksOverlap(srcBlk, *this);
         // read source data
         LOG(INFO) << "new start to read source block ...";
-        if (srcBlk.ReadDataFromBlock(cmd.GetFileDescriptor(), sourceBuffer) <= 0) {
+        if (srcBlk.ReadDataFromBlock(cmd.GetFileDescriptor(), sourceBuffer) == 0) {
             return -1;
         }
         std::string nextArgv = cmd.GetArgumentByPos(pos++);

@@ -99,11 +99,50 @@ CommandResult ZeroAndEraseCommandFn::Execute(const Command &params)
     return ret;
 }
 
+bool LoadTarget(const Command &params, size_t &pos, std::vector<uint8_t> &buffer,
+                    BlockSet &targetBlock, CommandResult &result)
+{
+    CommandType type = params.GetCommandType();
+    // Read sha256 of source and target
+    std::string srcHash = params.GetArgumentByPos(pos++);
+    std::string tgtHash = srcHash;
+    if (type != CommandType::MOVE) {
+        tgtHash = params.GetArgumentByPos(pos++);
+    }
+
+    // Read the target's buffer to determine whether it needs to be written
+    size_t tgtBlockSize;
+    std::string cmdTmp = params.GetArgumentByPos(pos++);
+    targetBlock.ParserAndInsert(cmdTmp);
+    tgtBlockSize = targetBlock.TotalBlockSize() * H_BLOCK_SIZE;
+    buffer.resize(tgtBlockSize);
+    LOG(INFO) << targetBlock.TotalBlockSize() << " blocks' data need to read";
+    if (targetBlock.ReadDataFromBlock(params.GetFileDescriptor(), buffer) == 0) {
+        LOG(ERROR) << "Read data from block error";
+        result = FAILED;
+        return false;
+    }
+    if (targetBlock.VerifySha256(buffer, targetBlock.TotalBlockSize(), tgtHash) == 0) {
+        LOG(ERROR) << "Will write same sha256 blocks to target, no need to write";
+        result = SUCCESS;
+        return false;
+    }
+
+    if (targetBlock.LoadTargetBuffer(params, buffer, tgtBlockSize, pos, srcHash) != 0) {
+        LOG(ERROR) << "Failed to load blocks";
+        result = FAILED;
+        return false;
+    }
+    return true;
+}
+
 CommandResult DiffAndMoveCommandFn::Execute(const Command &params)
 {
     CommandType type = params.GetCommandType();
-    UPDATER_ERROR_CHECK(type == CommandType::MOVE || type == CommandType::BSDIFF || type == CommandType::IMGDIFF,
-        "Invalid command type", return FAILED);
+    if (type != CommandType::MOVE && type != CommandType::BSDIFF && type != CommandType::IMGDIFF) {
+        LOG(ERROR) << "Invalid command type";
+        return FAILED;
+    }
     size_t pos = H_DIFF_CMD_ARGS_START;
     bool isImgDiff = false;
     if (type == CommandType::MOVE) {
@@ -111,41 +150,25 @@ CommandResult DiffAndMoveCommandFn::Execute(const Command &params)
     } else if (type == CommandType::IMGDIFF) {
         isImgDiff = true;
     }
-    // Read sha256 of source and target
-    std::string cmdTmp = params.GetArgumentByPos(pos++);
-    std::string srcHash = cmdTmp;
-    std::string tgtHash = srcHash;
-    if (type != CommandType::MOVE) {
-        tgtHash = params.GetArgumentByPos(pos++);
-    }
-    // Read the target's buffer to determine whether it needs to be written
+
     BlockSet targetBlock;
-    size_t tgtBlockSize;
-    cmdTmp = params.GetArgumentByPos(pos++);
-    targetBlock.ParserAndInsert(cmdTmp);
-    tgtBlockSize = targetBlock.TotalBlockSize() * H_BLOCK_SIZE;
-    std::vector<uint8_t> buffer(tgtBlockSize);
-    LOG(INFO) << targetBlock.TotalBlockSize() << " blocks' data need to read";
-    UPDATER_ERROR_CHECK(targetBlock.ReadDataFromBlock(params.GetFileDescriptor(), buffer) > 0,
-        "Read data from block error", return FAILED);
-    UPDATER_ERROR_CHECK(targetBlock.VerifySha256(buffer, targetBlock.TotalBlockSize(), tgtHash) != 0,
-        "Will write same sha256 blocks to target, no need to write", return SUCCESS);
-    auto ret = targetBlock.LoadTargetBuffer(params, buffer, tgtBlockSize, pos, srcHash);
-    UPDATER_ERROR_CHECK(ret == 0, "Failed to load blocks", return FAILED);
+    std::vector<uint8_t> buffer;
+    CommandResult result = FAILED;
+    if (!LoadTarget(params, pos, buffer, targetBlock, result)) {
+        return result;
+    }
+
+    int32_t ret = -1;
+    size_t tgtBlockSize = buffer.size() ;
     if (type != CommandType::MOVE) {
         LOG(INFO) << "Create " << tgtBlockSize << " diff blocks to target position";
         ret = targetBlock.WriteDiffToBlock(const_cast<const Command &>(params), buffer, tgtBlockSize, isImgDiff);
-        if (ret != 0) {
-            UPDATER_CHECK_ONLY_RETURN(errno != EIO, return NEED_RETRY);
-            return FAILED;
-            UPDATER_INFO_CHECK_NOT_RETURN(ret == 0, "Skipping patching");
-        }
     } else {
         LOG(INFO) << "Moving " << tgtBlockSize << " blocks to target position";
-        if (targetBlock.WriteDataToBlock(params.GetFileDescriptor(), buffer) <= 0) {
-            UPDATER_CHECK_ONLY_RETURN(errno != EIO, return NEED_RETRY);
-            return FAILED;
-        }
+        ret = targetBlock.WriteDataToBlock(params.GetFileDescriptor(), buffer) == 0 ? -1 : 0;
+    }
+    if (ret != 0) {
+        return errno == EIO ? NEED_RETRY : FAILED;
     }
     TransferManager::GetTransferManagerInstance()->GetGlobalParams()->written += targetBlock.TotalBlockSize();
     return SUCCESS;
@@ -179,7 +202,7 @@ CommandResult StashCommandFn::Execute(const Command &params)
         return SUCCESS;
     }
     LOG(INFO) << "Read block data to buffer";
-    if (srcBlk.ReadDataFromBlock(params.GetFileDescriptor(), buffer) <= 0) {
+    if (srcBlk.ReadDataFromBlock(params.GetFileDescriptor(), buffer) == 0) {
         LOG(ERROR) << "Error to load block data";
         return FAILED;
     }

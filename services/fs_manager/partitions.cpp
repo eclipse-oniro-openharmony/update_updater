@@ -20,6 +20,7 @@
 #include <unistd.h>
 #include "log/log.h"
 #include "partition_const.h"
+#include "scope_guard.h"
 #include "securec.h"
 
 namespace Updater {
@@ -149,57 +150,54 @@ static int BlockDeviceClose(const BlockDevice &dev)
     }
     return 1;
 }
+
 static std::string ReadPartitionFromSys(const std::string &devname, const std::string &partn,
     const std::string &type, const std::string &table)
 {
     FILE *f = nullptr;
-    char nameBuf[DEVPATH_SIZE] = {0};
     char buf[BUFFER_SIZE] = {0};
-    char *str = nullptr;
+    std::string devPath;
     std::string partString = "";
-    char *partInf = (char *)calloc(BUFFER_SIZE, sizeof(char));
-    UPDATER_ERROR_CHECK(partInf, "Allocate memory for partInf failed.", return partString);
+    devPath = "/sys/block/" + devname + "/" + partn + "/" + type;
     if (partn.empty()) {
-        UPDATER_CHECK_ONLY_RETURN(snprintf_s(nameBuf, DEVPATH_SIZE, DEVPATH_SIZE - 1, "/sys/block/%s/%s",
-            devname.c_str(), type.c_str()) != -1, free(partInf); return partString);
-    } else {
-        UPDATER_CHECK_ONLY_RETURN(snprintf_s(nameBuf, DEVPATH_SIZE, DEVPATH_SIZE - 1, "/sys/block/%s/%s/%s",
-            devname.c_str(), partn.c_str(), type.c_str()) != -1, free(partInf); return partString);
+        devPath = "/sys/block/" + devname + "/" + type;
     }
-    if ((f = fopen(nameBuf, "r")) == nullptr) {
-        free(partInf);
+
+    if (devPath.length() >= DEVPATH_SIZE) {
+        LOG(ERROR) << "devPath is invalid";
         return partString;
     }
-    while (!feof(f)) {
-        UPDATER_CHECK_ONLY_RETURN(fgets(buf, BUFFER_SIZE, f) != nullptr, fclose(f); free(partInf); return partString);
-        if (type == "uevent") {
-            str = strstr(buf, table.c_str());
-            if (str != nullptr) {
-                UPDATER_CHECK_ONLY_RETURN(memcpy_s(partInf, BUFFER_SIZE, buf + table.size(),
-                sizeof(buf) - table.size()) == 0, fclose(f); free(partInf); return partString);
-                partInf[strlen(partInf) - 1] = '\0';
-                partString = partInf;
-                goto end;
-            }
-        } else if (type == "start") {
-            UPDATER_CHECK_ONLY_RETURN(memcpy_s(partInf, BUFFER_SIZE, buf, sizeof(buf) - 1) == 0,
-                                      fclose(f); free(partInf); return partString);
-            LOG(INFO) << "start partInf: " << partInf;
-            partString = partInf;
-            goto end;
-        } else if (type == "size") {
-            UPDATER_CHECK_ONLY_RETURN(memcpy_s(partInf, BUFFER_SIZE, buf, sizeof(buf) - 1) == 0,
-            fclose(f); free(partInf); return partString);
-            LOG(INFO) << "size partInf: " << partInf;
-            partString = partInf;
-            goto end;
-        }
-        UPDATER_CHECK_ONLY_RETURN(memset_s(buf, sizeof(buf), 0, sizeof(buf)) == 0, fclose(f);
-            free(partInf); return partString);
+
+    if ((f = fopen(devPath.c_str(), "r")) == nullptr) {
+        return partString;
     }
-    end:
-    free(partInf);
-    fclose(f);
+
+    ON_SCOPE_EXIT(fclosef) {
+        fclose(f);
+    };
+
+    while (!feof(f)) {
+        if (fgets(buf, BUFFER_SIZE, f) == nullptr) {
+            return partString;
+        }
+        if (type == "uevent") {
+            if (strstr(buf, table.c_str()) != nullptr) {
+                partString = std::string(buf + table.size(), sizeof(buf) - table.size());
+                if (!partString.empty()) {
+                    partString.pop_back();
+                }
+                return partString;
+            }
+        } else if (type == "start" || type == "size") {
+            partString = std::string(buf, sizeof(buf) - 1);
+            LOG(INFO) << type << " partInf: " << std::string(buf, sizeof(buf) - 1);
+            return partString;
+        }
+        if (memset_s(buf, sizeof(buf), 0, sizeof(buf)) != EOK) {
+            return partString;
+        }
+    }
+
     return partString;
 }
 
