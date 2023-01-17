@@ -16,7 +16,7 @@
 #include "slot_info/slot_info.h"
 
 #include "log/log.h"
-#ifndef UPDATER_AB_SUPPORT
+#ifdef UPDATER_AB_SUPPORT
 #include "partitionslot_manager.h"
 #endif
 
