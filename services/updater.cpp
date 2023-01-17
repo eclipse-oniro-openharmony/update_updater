@@ -322,7 +322,7 @@ void HandleChildOutput(const std::string &buffer, int32_t bufferLen, bool &retry
 }
 }
 
-void ExcuteSubProc(UpdaterParams &upParams, const std::string &fullPath, int pipeWrite)
+void ExcuteSubProc(const UpdaterParams &upParams, const std::string &fullPath, int pipeWrite)
 {
     // Set process scheduler to normal if current scheduler is
     // SCHED_FIFO, which may cause bad performance.
@@ -345,7 +345,7 @@ void ExcuteSubProc(UpdaterParams &upParams, const std::string &fullPath, int pip
         execl(fullPath.c_str(), upParams.updatePackage[upParams.pkgLocation].c_str(),
             std::to_string(pipeWrite).c_str(), nullptr);
     }
-    LOG(INFO) << "Execute updater binary failed";
+    LOG(ERROR) << "Execute updater binary failed";
     UPDATER_LAST_WORD(UPDATE_ERROR);
     exit(-1);
 }
