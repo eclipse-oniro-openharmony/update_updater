@@ -275,7 +275,7 @@ int32_t ZipFileEntry::EncodeHeader(PkgStreamPtr inStream, size_t startOffset, si
 }
 
 int32_t ZipFileEntry::PackStream(PkgStreamPtr inStream, size_t startOffset, size_t &encodeLen,
-    PkgAlgorithm::PkgAlgorithmPtr &algorithm, PkgStreamPtr &outStream)
+    const PkgAlgorithm::PkgAlgorithmPtr algorithm, const PkgStreamPtr outStream)
 {
     // 为header申请一个buff，先处理到内存，后面在写入文件
     std::vector<uint8_t> buff(MAX_FILE_NAME + sizeof(LocalFileHeader) + ZIP_PKG_ALIGNMENT_DEF);
