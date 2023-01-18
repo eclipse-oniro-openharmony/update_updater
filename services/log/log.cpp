@@ -51,7 +51,7 @@ UpdaterLogger::~UpdaterLogger()
         return;
     }
 #ifndef DIFF_PATCH_SDK
-    HiLogBasePrint(LOG_CORE, level_, g_domain, g_logTag.c_str(), "%{public}s", str.c_str());
+    HiLogBasePrint(LOG_CORE, (LogLevel)level_, g_domain, g_logTag.c_str(), "%{public}s", str.c_str());
 #endif
     oss_.str("");
     oss_ << std::endl << std::flush;
