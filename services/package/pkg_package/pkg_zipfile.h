@@ -139,6 +139,9 @@ public:
 
     int32_t EncodeHeader(PkgStreamPtr inStream, size_t startOffset, size_t &encodeLen) override;
 
+    int32_t PackStream(PkgStreamPtr inStream, size_t startOffset, size_t &encodeLen,
+        PkgAlgorithm::PkgAlgorithmPtr &algorithm, PkgStreamPtr &outStream)
+
     int32_t Pack(PkgStreamPtr inStream, size_t startOffset, size_t &encodeLen) override;
 
     int32_t Unpack(PkgStreamPtr outStream) override;
