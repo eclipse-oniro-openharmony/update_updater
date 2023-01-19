@@ -53,7 +53,10 @@ ohos_source_set("flashd_deamon") {
 
   sources += common_sources
 
-  defines = [ "HARMONY_PROJECT" ]
+  defines = [
+    "HARMONY_PROJECT",
+    "OPENSSL_SUPPRESS_DEPRECATED",
+  ]
 
   configs = [ ":flashd_hdc_config" ]
 
@@ -61,7 +64,7 @@ ohos_source_set("flashd_deamon") {
   deps = [
     "//third_party/libuv:uv",
     "//third_party/lz4:liblz4_static",
-    "//third_party/openssl:libcrypto_static",
+    "//third_party/openssl:libcrypto_shared",
   ]
 
   deps += [ "//developtools/hdc:hdc_hash_gen" ]
@@ -88,7 +91,6 @@ ohos_source_set("flashd_deamon") {
     "//base/startup/init/services/include/param",
     "//third_party/bounds_checking_function/include",
     "//third_party/lz4/lib",
-    "//third_party/openssl/include",
     "//third_party/libuv",
   ]
 
@@ -122,7 +124,10 @@ ohos_static_library("libflashd") {
     "//base/update/updater/services/updater_binary/update_processor.cpp",
   ]
 
-  defines = [ "HARMONY_PROJECT" ]
+  defines = [
+    "HARMONY_PROJECT",
+    "OPENSSL_SUPPRESS_DEPRECATED",
+  ]
 
   deps = [
     ":flashd_deamon",
@@ -142,7 +147,7 @@ ohos_static_library("libflashd") {
     "//third_party/cJSON:cjson",
     "//third_party/libuv:uv",
     "//third_party/lz4:liblz4_static",
-    "//third_party/openssl:libcrypto_static",
+    "//third_party/openssl:libcrypto_shared",
     "//third_party/zlib:libz",
   ]
 
@@ -170,7 +175,6 @@ ohos_static_library("libflashd") {
     "//drivers/peripheral/partitionslot/hal/include",
     "//third_party/bounds_checking_function/include",
     "//third_party/cJSON",
-    "//third_party/openssl/include",
     "//third_party/lz4/lib",
     "//third_party/libuv",
   ]
