@@ -35,6 +35,64 @@ constexpr int MAX_TIME_SIZE = 20;
 #define STAGE(stage) StageLogger(stage).OutputUpdaterStage()
 #define ERROR_CODE(code) ErrorCode(code).OutputErrorCode((__FILE_NAME__), (__LINE__), (code))
 
+#define UPDATER_ERROR_CHECK(ret, log, statement)  \
+    if (!(ret)) {                                 \
+        LOG(ERROR) << log;                        \
+        statement;                                \
+    }
+
+#define UPDATER_WARING_CHECK(ret, log, statement)  \
+    if (!(ret)) {                                  \
+        LOG(WARNING) << log;                       \
+        statement;                                 \
+    }
+
+#define UPDATER_INFO_CHECK(ret, log, statement)  \
+    if (!(ret)) {                                  \
+        LOG(INFO) << log;                       \
+        statement;                                 \
+    }
+
+#define UPDATER_ERROR_CHECK_NOT_RETURN(ret, log)   \
+    if (!(ret)) {                                  \
+        LOG(ERROR) << log;                         \
+    }
+
+#define UPDATER_INFO_CHECK_NOT_RETURN(ret, log)   \
+    if (!(ret)) {                                  \
+        LOG(INFO) << log;                         \
+    }
+
+#define UPDATER_WARNING_CHECK_NOT_RETURN(ret, log)   \
+    if (!(ret)) {                                  \
+        LOG(WARNING) << log;                         \
+    }
+
+#define UPDATER_FILE_CHECK(ret, log, statement)         \
+    if (!(ret)) {                                       \
+        LOG(ERROR) << log << " : " << strerror(errno);  \
+        statement;                                      \
+    }
+
+#define UPDATER_CHECK_FILE_OP(ret, log, fd, statement)  \
+    if (!(ret)) {                                       \
+        LOG(ERROR) << log << " : " << strerror(errno);  \
+        close(fd);                                      \
+        statement;                                      \
+    }
+
+#define UPDATER_POST_STAGE_ERROR_CHECK(ret, log, statement)  \
+    if (!(ret)) {                                            \
+        LOG(ERROR) << log;                                   \
+        STAGE(UPDATE_STAGE_FAIL) << "PostUpdater";           \
+        statement;                                           \
+    }
+
+#define UPDATER_CHECK_ONLY_RETURN(ret, statement)         \
+    if (!(ret)) {                                       \
+        statement;                                      \
+    }
+
 enum {
     VERBOSE,
     DEBUG,

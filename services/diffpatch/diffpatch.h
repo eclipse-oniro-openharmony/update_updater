@@ -37,6 +37,22 @@ namespace UpdatePatch {
 #define PATCH_LOGI(format, ...) Logger(Updater::INFO, (__FILE_NAME__), (__LINE__), format, ##__VA_ARGS__)
 #define PATCH_LOGW(format, ...) Logger(Updater::WARNING, (__FILE_NAME__), (__LINE__), format, ##__VA_ARGS__)
 
+#define PATCH_CHECK(retCode, exper, ...) \
+    if (!(retCode)) { \
+        PATCH_LOGE(__VA_ARGS__); \
+        exper; \
+    }
+
+#define PATCH_ONLY_CHECK(retCode, exper) \
+    if (!(retCode)) {                  \
+        exper;                         \
+    }
+
+#define PATCH_IS_TRUE_DONE(retCode, exper) \
+    if ((retCode)) {                  \
+        exper;                         \
+    }
+
 enum {
     PATCH_SUCCESS = 0,
 	PATCH_INVALID_PARAM,

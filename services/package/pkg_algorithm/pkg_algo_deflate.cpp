@@ -167,14 +167,12 @@ int32_t PkgAlgoDeflate::UnpackCalculate(PkgAlgorithmContext &context, const PkgS
     PkgAlgorithmContext unpackContext = context;
     size_t readLen = 0;
     while ((unpackContext.packedSize > 0) || (zstream.avail_in > 0)) {
-        if (ReadUnpackData(inStream, inBuffer, zstream, unpackContext, readLen) != PKG_SUCCESS) {
+        ret = ReadUnpackData(inStream, inBuffer, zstream, unpackContext, readLen);
+        if (ret != PKG_SUCCESS) {
             break;
         }
         ret = inflate(&zstream, Z_SYNC_FLUSH);
-        if (ret < Z_OK) {
-            PKG_LOGE("fail inflate ret:%d", ret);
-            break;
-        }
+        PKG_CHECK(ret >= Z_OK, break, "fail inflate ret:%d", ret);
         inflateLen = outBuffer.length - zstream.avail_out;
         errorTimes++;
         if (inflateLen > 0) {

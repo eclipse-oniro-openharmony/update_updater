@@ -52,6 +52,22 @@ uint64_t ReadLE64(const uint8_t *buff);
 #define PKG_LOGI(format, ...) Logger(Updater::INFO, (__FILE_NAME__), (__LINE__), format, ##__VA_ARGS__)
 #define PKG_LOGW(format, ...) Logger(Updater::WARNING, (__FILE_NAME__), (__LINE__), format, ##__VA_ARGS__)
 
+#define PKG_CHECK(retCode, exper, ...) \
+    if (!(retCode)) {                  \
+        PKG_LOGE(__VA_ARGS__);         \
+        exper;                         \
+    }
+
+#define PKG_ONLY_CHECK(retCode, exper) \
+    if (!(retCode)) {                  \
+        exper;                         \
+    }
+
+#define PKG_IS_TRUE_DONE(retCode, exper) \
+    if ((retCode)) {                  \
+        exper;                         \
+    }
+
 enum {
     PKG_INFO_BASE = PKG_ERROR_BASE + 100,
     PKG_NOT_EXIST_ALGORITHM,

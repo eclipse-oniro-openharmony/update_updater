@@ -169,9 +169,6 @@ private:
     int32_t EncodeDataDescriptor(const PkgStreamPtr stream, size_t startOffset, uint32_t &encodeLen) const;
 
     void CombineTimeAndDate(time_t &time, uint16_t modifiedTime, uint16_t modifiedDate) const;
-
-    int32_t PackStream(PkgStreamPtr inStream, size_t startOffset, size_t &encodeLen,
-        const PkgAlgorithm::PkgAlgorithmPtr algorithm, const PkgStreamPtr outStream);
 };
 
 class ZipPkgFile : public PkgFile {

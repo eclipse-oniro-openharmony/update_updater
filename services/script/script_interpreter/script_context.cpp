@@ -352,23 +352,24 @@ UScriptValuePtr FloatValue::Computer(int32_t action, UScriptValuePtr value)
 {
     UScriptValuePtr rightValue = UScriptValue::GetRightCompluteValue(value);
     UScriptValuePtr retValue = std::make_shared<ErrorValue>(USCRIPT_ERROR_INTERPRET);
-    if (rightValue == nullptr) {
-        USCRIPT_LOGE("Check param error");
-        return retValue;
-    }
+    USCRIPT_CHECK(rightValue != nullptr, return retValue, "Check param error");
     switch (action) {
-        case UScriptExpression::ADD_OPERATOR:
+        case UScriptExpression::ADD_OPERATOR: {
             FLOAT_MATH_COMPUTER(+, rightValue);
             break;
-        case UScriptExpression::SUB_OPERATOR:
+        }
+        case UScriptExpression::SUB_OPERATOR: {
             FLOAT_MATH_COMPUTER(-, rightValue);
             break;
-        case UScriptExpression::MUL_OPERATOR:
+        }
+        case UScriptExpression::MUL_OPERATOR: {
             FLOAT_MATH_COMPUTER(*, rightValue);
             break;
-        case UScriptExpression::DIV_OPERATOR:
+        }
+        case UScriptExpression::DIV_OPERATOR: {
             FLOAT_MATH_COMPUTER_DIV(rightValue);
             break;
+        }
         case UScriptExpression::GT_OPERATOR:
             FLOAT_LOGIC_COMPUTER(>, rightValue);
             break;

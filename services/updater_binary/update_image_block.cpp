@@ -508,9 +508,7 @@ int32_t UScriptInstructionShaCheck::Execute(Uscript::UScriptEnv &env, Uscript::U
         LOG(ERROR) << "Invalid param";
         return ReturnAndPushParam(USCRIPT_INVALID_PARAM, context);
     }
-    if (env.IsRetry()) {
-        return ReturnAndPushParam(USCRIPT_SUCCESS, context);
-    }
+    UPDATER_CHECK_ONLY_RETURN(!env.IsRetry(), return ReturnAndPushParam(USCRIPT_SUCCESS, context));
 
     std::string partitionName;
     int32_t ret = context.GetParam(0, partitionName);

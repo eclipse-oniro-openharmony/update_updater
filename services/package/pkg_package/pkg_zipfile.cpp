@@ -274,9 +274,15 @@ int32_t ZipFileEntry::EncodeHeader(PkgStreamPtr inStream, size_t startOffset, si
     return PKG_SUCCESS;
 }
 
-int32_t ZipFileEntry::PackStream(PkgStreamPtr inStream, size_t startOffset, size_t &encodeLen,
-    const PkgAlgorithm::PkgAlgorithmPtr algorithm, const PkgStreamPtr outStream)
+int32_t ZipFileEntry::Pack(PkgStreamPtr inStream, size_t startOffset, size_t &encodeLen)
 {
+    PkgAlgorithm::PkgAlgorithmPtr algorithm = PkgAlgorithmFactory::GetAlgorithm(&fileInfo_.fileInfo);
+    PkgStreamPtr outStream = pkgFile_->GetPkgStream();
+    PKG_CHECK(fileInfo_.fileInfo.headerOffset == startOffset, return PKG_INVALID_PARAM,
+        "Offset error %zu %zu %s", fileInfo_.fileInfo.headerOffset, startOffset, fileInfo_.fileInfo.identity.c_str());
+    PKG_CHECK(algorithm != nullptr && outStream != nullptr && inStream != nullptr, return PKG_INVALID_PARAM,
+        "outStream or inStream null for %s", fileInfo_.fileInfo.identity.c_str());
+
     // 为header申请一个buff，先处理到内存，后面在写入文件
     std::vector<uint8_t> buff(MAX_FILE_NAME + sizeof(LocalFileHeader) + ZIP_PKG_ALIGNMENT_DEF);
     size_t nameLen = 0;
@@ -299,57 +305,31 @@ int32_t ZipFileEntry::PackStream(PkgStreamPtr inStream, size_t startOffset, size
         0, fileInfo_.fileInfo.digestMethod
     };
     int32_t ret = algorithm->Pack(inStream, outStream, context);
-    if (ret != PKG_SUCCESS) {
-        PKG_LOGE("Failed to compress for %s", fileInfo_.fileInfo.identity.c_str());
-        return ret;
-    }
+    PKG_CHECK(ret == PKG_SUCCESS, return ret, "Failed to compress for %s", fileInfo_.fileInfo.identity.c_str());
     // 填充file信息，压缩后的长度和crc
     fileInfo_.fileInfo.packedSize = context.packedSize;
     crc32_ = context.crc;
 
     // 构建文件头信息，从startOffset开始
     ret = EncodeLocalFileHeader(buff.data(), sizeof(LocalFileHeader), hasDataDesc, nameLen);
-    if (ret != PKG_SUCCESS) {
-        PKG_LOGE("Failed to encodeFileHeader for %s", fileInfo_.fileInfo.identity.c_str());
-        return ret;
-    }
+    PKG_CHECK(ret == PKG_SUCCESS, return ret, "Failed to encodeFileHeader for %s", fileInfo_.fileInfo.identity.c_str());
     PkgBuffer buffer(buff);
     ret = outStream->Write(buffer, headerLen, startOffset);
-    if (ret != PKG_SUCCESS) {
-        PKG_LOGE("Failed to write header for %s", fileInfo_.fileInfo.identity.c_str());
-        return ret;
-    }
+    PKG_CHECK(ret == PKG_SUCCESS, return ret, "Failed to write header for %s", fileInfo_.fileInfo.identity.c_str());
 
     if (hasDataDesc) { //  数据描述部分
         uint32_t encodeDataDescLen = 0;
         ret = EncodeDataDescriptor(outStream,
             startOffset + headerLen + fileInfo_.fileInfo.packedSize, encodeDataDescLen);
-        if (ret != PKG_SUCCESS) {
-            PKG_LOGE("Failed to encodeDataDescriptor for %s", fileInfo_.fileInfo.identity.c_str());
-            return ret;
-        }
+        PKG_CHECK(ret == PKG_SUCCESS, return ret,
+            "Failed to encodeDataDescriptor for %s", fileInfo_.fileInfo.identity.c_str());
         headerLen += encodeDataDescLen;
     }
     encodeLen = headerLen + fileInfo_.fileInfo.packedSize;
-    PKG_LOGI("Pack packedSize:%zu unpackedSize: %zu offset: %zu %zu", fileInfo_.fileInfo.packedSize,
-        fileInfo_.fileInfo.unpackedSize, fileInfo_.fileInfo.headerOffset, fileInfo_.fileInfo.dataOffset);
+    PKG_LOGI("Pack packedSize:%zu unpackedSize: %zu offset: %zu %zu",
+        fileInfo_.fileInfo.packedSize, fileInfo_.fileInfo.unpackedSize,
+        fileInfo_.fileInfo.headerOffset, fileInfo_.fileInfo.dataOffset);
     return PKG_SUCCESS;
-}
-
-int32_t ZipFileEntry::Pack(PkgStreamPtr inStream, size_t startOffset, size_t &encodeLen)
-{
-    PkgAlgorithm::PkgAlgorithmPtr algorithm = PkgAlgorithmFactory::GetAlgorithm(&fileInfo_.fileInfo);
-    PkgStreamPtr outStream = pkgFile_->GetPkgStream();
-    if (fileInfo_.fileInfo.headerOffset != startOffset) {
-        PKG_LOGE("Offset error %zu %zu %s", fileInfo_.fileInfo.headerOffset,
-            startOffset, fileInfo_.fileInfo.identity.c_str());
-        return PKG_INVALID_PARAM;
-    }
-    if (algorithm == nullptr || outStream == nullptr || inStream == nullptr) {
-        PKG_LOGE("outStream or inStream null for %s", fileInfo_.fileInfo.identity.c_str());
-        return PKG_INVALID_PARAM;
-    }
-    return PackStream(inStream, startOffset, encodeLen, algorithm, outStream);
 }
 
 int32_t ZipFileEntry::EncodeCentralDirEntry(const PkgStreamPtr stream, size_t startOffset, size_t &encodeLen)

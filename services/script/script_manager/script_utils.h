@@ -28,5 +28,11 @@ enum {
 #define USCRIPT_LOGE(format, ...) Logger(Updater::ERROR, (__FILE_NAME__), (__LINE__), format, ##__VA_ARGS__)
 #define USCRIPT_LOGI(format, ...) Logger(Updater::INFO, (__FILE_NAME__), (__LINE__), format, ##__VA_ARGS__)
 #define USCRIPT_LOGW(format, ...) Logger(Updater::WARNING, (__FILE_NAME__), (__LINE__), format, ##__VA_ARGS__)
+
+#define USCRIPT_CHECK(ret, statement, ...) \
+    if (!(ret)) {                          \
+        USCRIPT_LOGE(__VA_ARGS__);         \
+        statement;                         \
+    }
 } // namespace Uscript
 #endif /* USCRIPT_UTILES_H */
