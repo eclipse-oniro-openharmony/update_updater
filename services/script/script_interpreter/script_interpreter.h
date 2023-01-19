@@ -29,12 +29,6 @@
     Logger(Updater::INFO, (__FILE_NAME__), (__LINE__), \
     "[INTERPRETER %d-%d]"#format, (inter).GetInstanceId(), (context)->GetContextId(), ##__VA_ARGS__)
 
-#define INTERPRETER_CHECK(inter, context, ret, statement, ...) \
-    if (!(ret)) {                                              \
-        INTERPRETER_LOGE(inter, context, __VA_ARGS__);         \
-        statement;                                             \
-    }
-
 namespace Uscript {
 class Parser;
 class Scanner;
