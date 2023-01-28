@@ -7,8 +7,10 @@
 
 ## 镜像编译
 镜像编译流程：
-**图 1**  updater.img编译流程
-![](figures/updater适配_编译流程.png)
+
+![](figures/updater适配_编译流程.png#pic_center)
+
+<center>图1 updater.img编译流程</center>
 ### 使能updater子系统构建
 修改编译配置文件，使能updater.img编译选项
 以RK3568为例，在build/subsystem_config.json文件添加配置如下配置。当前默认参与构建。
@@ -46,8 +48,8 @@ OpenHarmony使用BUILD.gn和ninja等工具构建编译框架。编译的二进�
 ## 镜像启动
 完整的启动流程如下：
 
-**图 2**  updater.img启动流程
-![](figures/updater适配_启动流程.png)
+![](figures/updater适配_启动流程.png#pic_center)
+<center>图2 updater.img启动流程</center>
 ### 配置MISC分区
 OpenHarmony使用MISC分区保存启动时的指令，默认的MISC分区的结构体为：
 
@@ -90,7 +92,8 @@ hilogd.cfg：hilogd配置文件，用于打印OpenHarmony所有组件的日志�
 
 ### 升级服务启动
 完成配置文件的适配，单板运行时会根据配置文件顺序依次执行配置中的命令。最终拉起升级子系统核心服务updater进程。updater服务启动以后，屏幕会显示UI界面，进行安装包升级，恢厂，重启等功能。升级服务功能如下所示：
-![](figures/Openharmony-updater-升级子系统架构图.png)
+![](figures/Openharmony-updater-升级子系统架构图.png#pic_center)
+<center>图3 升级服务功能</center>
 
 初次适配会出现进程功能缺失等情况，参考如下方法进行调试
 - 使用ps -A命令查询updater，hdcd等关键进程是否启动。
