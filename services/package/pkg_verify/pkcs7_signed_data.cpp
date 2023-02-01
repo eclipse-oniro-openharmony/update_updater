@@ -334,6 +334,8 @@ int32_t Pkcs7SignedData::VerifyDigest(X509 *cert, const Pkcs7SignerInfo &signer)
         return -1;
     }
 
-    return VerifyDigestByPubKey(pubKey, signer.digestNid, digest_, signer.digestEncryptData);
+    auto ret = VerifyDigestByPubKey(pubKey, signer.digestNid, digest_, signer.digestEncryptData);
+    EVP_PKEY_free(pubKey);
+    return ret;
 }
 } // namespace Hpackage

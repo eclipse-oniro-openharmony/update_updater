@@ -62,6 +62,10 @@ void LoadFstab()
             fstabFile = "/etc/fstab.updater";
         }
     }
+    if (g_fstab != nullptr) {
+       ReleaseFstab(g_fstab);
+       g_fstab = nullptr;
+    }
     // Clear fstab before read fstab file.
     if ((g_fstab = ReadFstabFromFile(fstabFile.c_str(), false)) == nullptr) {
         LOG(WARNING) << "Read " << fstabFile << " failed";

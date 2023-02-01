@@ -141,10 +141,12 @@ int32_t SignAlgorithm::VerifyDigest(const std::vector<uint8_t> &digest, const st
     int nid = EVP_MD_type(EVP_sha256());
     int ret = VerifyDigestByPubKey(pubKey, nid, digest, signature);
     if (ret != 0) {
+        EVP_PKEY_free(pubKey);
         X509_free(rcert);
         PKG_LOGE("Failed to verify digest by pubKey");
         return PKG_INVALID_SIGNATURE;
     }
+    EVP_PKEY_free(pubKey);
     X509_free(rcert);
     return 0;
 }

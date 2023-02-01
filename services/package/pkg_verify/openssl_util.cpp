@@ -144,7 +144,9 @@ bool VerifyX509CertByIssuerCert(X509 *cert, X509 *issuerCert)
         return false;
     }
 
-    return (X509_verify(cert, pubKey) == 1);
+    bool ret = (X509_verify(cert, pubKey) == 1);
+    EVP_PKEY_free(pubKey);
+    return ret;
 }
 
 int32_t VerifyDigestByPubKey(EVP_PKEY *pubKey, const int nid, const std::vector<uint8_t> &digestData,

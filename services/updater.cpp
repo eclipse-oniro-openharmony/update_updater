@@ -110,8 +110,8 @@ UpdaterStatus IsSpaceCapacitySufficient(const std::vector<std::string> &packageP
             PkgManager::ReleasePackageInstance(pkgManager);
             return UPDATE_CORRUPT;
         }
-        PkgManager::ReleasePackageInstance(pkgManager);
         totalPkgSize += static_cast<uint64_t>(info->unpackedSize + MAX_LOG_SPACE);
+        PkgManager::ReleasePackageInstance(pkgManager);
     }
 
     struct statvfs64 updaterVfs;
