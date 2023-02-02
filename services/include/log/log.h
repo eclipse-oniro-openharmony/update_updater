@@ -36,12 +36,11 @@ constexpr int MAX_TIME_SIZE = 20;
 #define ERROR_CODE(code) ErrorCode(code).OutputErrorCode((__FILE_NAME__), (__LINE__), (code))
 
 enum {
-    VERBOSE,
-    DEBUG,
-    INFO,
-    WARNING,
-    ERROR,
-    FATAL,
+    DEBUG = 3,
+    INFO = 4,
+    WARNING = 5,
+    ERROR = 6,
+    FATAL = 7,
 };
 
 enum {
@@ -70,7 +69,6 @@ private:
     std::stringstream oss_;
     char realTime_[MAX_TIME_SIZE] = {0};
     static inline std::unordered_map<int, std::string> logLevelMap_ = {
-        { VERBOSE, "VERBOSE" },
         { DEBUG, "DEBUG" },
         { INFO, "INFO" },
         { WARNING, "WARNING" },
