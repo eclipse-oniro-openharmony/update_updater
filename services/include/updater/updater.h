@@ -42,8 +42,8 @@ struct UpdaterParams {
     bool factoryWipeData {};
     bool userWipeData {};
     int retryCount {};
-    float initialProgress {};
-    float currentPercentage {};
+    float initialProgress {}; /* The upgrade starts at the progress bar location */
+    float currentPercentage {}; /* The proportion of progress bars occupied by the upgrade process */
     unsigned int pkgLocation {};
     std::vector<std::string> updatePackage {};
 };
