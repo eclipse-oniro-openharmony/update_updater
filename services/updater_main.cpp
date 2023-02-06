@@ -201,20 +201,20 @@ UpdaterStatus UpdaterFromSdcard()
         return UPDATE_ERROR;
     }
 
-    PkgManager::PkgManagerPtr pkgManager = PkgManager::GetPackageInstance();
-    if (pkgManager == nullptr) {
-        LOG(ERROR) << "pkgManager is nullptr";
-        return UPDATE_ERROR;
-    }
     UpdaterParams upParams {
         false, false, 0, 0, 1, 0, {SDCARD_CARD_PKG_PATH}
     };
     // verify packages first
     if (VerifyPackages(upParams) != UPDATE_SUCCESS) {
-        PkgManager::ReleasePackageInstance(pkgManager);
         return UPDATE_ERROR;
     }
     upParams.initialProgress += VERIFY_PERCENT;
+    upParams.currentPercentage -= VERIFY_PERCENT;
+    PkgManager::PkgManagerPtr pkgManager = PkgManager::GetPackageInstance();
+    if (pkgManager == nullptr) {
+        LOG(ERROR) << "pkgManager is nullptr";
+        return UPDATE_ERROR;
+    }
 
     STAGE(UPDATE_STAGE_BEGIN) << "UpdaterFromSdcard";
     LOG(INFO) << "UpdaterFromSdcard start, sdcard updaterPath : " << upParams.updatePackage[upParams.pkgLocation];
