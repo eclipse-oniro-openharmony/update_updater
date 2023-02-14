@@ -58,9 +58,7 @@ ohos_fuzztest("UpdaterStartUpdaterProcFuzzTest") {
     "//third_party/zlib:libz",
   ]
 
-  external_deps = [
-    "init:libbegetutil",
-  ]
+  external_deps = [ "init:libbegetutil" ]
 
   cflags = [
     "-g",
