@@ -59,7 +59,6 @@ ohos_fuzztest("UpdaterStartUpdaterProcFuzzTest") {
   ]
 
   external_deps = [
-    "drivers_interface_input:hdi_input",
     "init:libbegetutil",
   ]
 
