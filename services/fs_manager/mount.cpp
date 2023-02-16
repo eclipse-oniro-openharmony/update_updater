@@ -171,13 +171,13 @@ static int MountNtfsWithRetry(std::string source, std::string target)
     return -1;
 }
 
-int MountSdcard(std::string &mountPoint, std::string &path)
+int MountSdcard(std::string &path, std::string &mountPoint)
 {
     if (path == "" || mountPoint == "") {
         LOG(ERROR) << "path or mountPoint is null, mount fail";
         return -1;
     }
-    MountStatus rc = GetMountStatusForMountPoint(item->mountPoint);
+    MountStatus rc = GetMountStatusForMountPoint(path.c_str());
     if (rc == MountStatus::MOUNT_ERROR) {
         return -1;
     } else if (rc == MountStatus::MOUNT_MOUNTED) {
@@ -185,14 +185,14 @@ int MountSdcard(std::string &mountPoint, std::string &path)
         return 0;
     } else {
         struct stat st = {};
-        if (stat(mountPoint.c_str(), &st) != 0 && errno != ENOENT) {
+        if (stat(path.c_str(), &st) != 0 && errno != ENOENT) {
             LOG(ERROR) << "cannot get stat";
             return -1;
         }
         if ((st.st_mode & S_IFMT) == S_IFLINK) {
-            unlink(mountPoint.c_str());
+            unlink(path.c_str());
         }
-        if (mkdir(mountPoint.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) < 0) {
+        if (mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) < 0) {
             if (errno != EEXIST) {
                 LOG(ERROR) << "failed to creat dir";
                 return -1;
@@ -202,7 +202,7 @@ int MountSdcard(std::string &mountPoint, std::string &path)
         int ret = 0;
         const std::vector<char *> fileSystemType = {"ext4", "vfat"};
         for (auto type : fileSystemType) {
-            if ((ret = mount(path.c_str(), mountPoint.c_str(), type, 0, nullptr)) == 0) {
+            if ((ret = mount(path.c_str(), path.c_str(), type, 0, nullptr)) == 0) {
                 LOG(INFO) << "mount success, sdcard type is " << type;
                 mountFlag = true;
                 return 0;

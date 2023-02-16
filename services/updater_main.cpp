@@ -398,11 +398,7 @@ static UpdaterStatus DoUpdatePackages(UpdaterParams &upParams)
         LOG(INFO) << "InstallUpdaterPackage pkg is " << upParams.updatePackage[upParams.pkgLocation] <<
             " percent:" << upParams.initialProgress << "~" << pkgStartPosition[upParams.pkgLocation + 1];
 
-        if (upParams.sdcardUpdate) {
-            status = DoInstallUpdaterPackage(manager, upParams, SDCARD_UPDATE);
-        } else {
-            status = InstallUpdaterPackage(upParams, manager);
-        }
+        status = InstallUpdaterPackage(upParams, manager);
         SetMessageToMisc(upParams.pkgLocation + 1, "upgraded_pkg_num");
         ProgressSmoothHandler(
             static_cast<int>(upParams.initialProgress * FULL_PERCENT_PROGRESS +

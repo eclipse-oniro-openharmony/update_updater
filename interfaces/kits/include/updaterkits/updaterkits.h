@@ -23,7 +23,7 @@ extern bool RebootAndInstallUpgradePackage(const std::string &miscFile, const st
 
 // Reboot system to sdcard update mode and trigger installing update package.
 // @return returns true if trigger update package installing success, else returns false.
-extern boolRebootAndInstallSdcardPackage();
+extern bool RebootAndInstallSdcardPackage();
 
 // Reboot system to updater mode and trigger userdata clean up.
 // @return returns true if trigger userdata cleanup success, else returns false.

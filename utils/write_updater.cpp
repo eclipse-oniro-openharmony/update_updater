@@ -63,7 +63,7 @@ int main(int argc, char **argv)
         }
     } else if (strcmp(argv[1], "clear") == 0) {
         cout << "clear misc" << endl;
-    } else if (strcmp(argv[1], "clear") == 0) {
+    } else if (strcmp(argv[1], "sdcard_update") == 0) {
         if (strncpy_s(boot.update, sizeof(boot.update), "--sdcard_update", sizeof(boot.update) - 1) != 0) {
             cout << "strncpy_s failed!" << endl;
             return -1;
