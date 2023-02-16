@@ -41,6 +41,7 @@ enum PackageUpdateMode {
 struct UpdaterParams {
     bool factoryWipeData {};
     bool userWipeData {};
+    bool sdcardUpdate {};
     int retryCount {};
     float initialProgress {}; /* The upgrade starts at the progress bar location */
     float currentPercentage {}; /* The proportion of progress bars occupied by the upgrade process */
@@ -74,7 +75,7 @@ void SaveLogs();
 
 void PostUpdater(bool clearMisc);
 
-bool DeleteUpdaterPath(const std::string &path);
+bool DeleteUpdaterPath(const std::string &path, const bool sdcardTmp);
 
 std::vector<std::string> ParseParams(int argc, char **argv);
 

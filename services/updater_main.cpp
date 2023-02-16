@@ -56,6 +56,7 @@ constexpr struct option OPTIONS[] = {
     { "retry_count", required_argument, nullptr, 0 },
     { "factory_wipe_data", no_argument, nullptr, 0 },
     { "user_wipe_data", no_argument, nullptr, 0 },
+    { "sdcard_update", no_argument, nullptr, 0 },
     { "upgraded_pkg_num", required_argument, nullptr, 0 },
     { nullptr, 0, nullptr, 0 },
 };
@@ -85,9 +86,16 @@ static void SetMessageToMisc(const int message, const std::string headInfo)
         }
     }
     char buffer[128] {}; // 128 : set headInfo size
-    if (snprintf_s(buffer, sizeof(buffer), sizeof(buffer) - 1, "--%s=%d", headInfo.c_str(), message) == -1) {
-        LOG(ERROR) << "SetMessageToMisc snprintf_s failed";
-        return;
+    if (headInfo == "sdcard_update") {
+        if (snprintf_s(buffer, sizeof(buffer), sizeof(buffer) - 1, "--%s", headInfo.c_str()) == -1) {
+            LOG(ERROR) << "SetMessageToMisc snprintf_s failed";
+            return;
+        }
+    } else {
+        if (snprintf_s(buffer, sizeof(buffer), sizeof(buffer) - 1, "--%s=%d", headInfo.c_str(), message) == -1) {
+            LOG(ERROR) << "SetMessageToMisc snprintf_s failed";
+            return;
+        }
     }
     if (strncat_s(msg.update, sizeof(msg.update), buffer, strlen(buffer) + 1) != EOK) {
         LOG(ERROR) << "SetMessageToMisc strncat_s failed";
@@ -175,10 +183,24 @@ static UpdaterStatus VerifyPackages(const UpdaterParams &upParams)
     return UPDATE_SUCCESS;
 }
 
-UpdaterStatus UpdaterFromSdcard()
+static UpdaterStatus GetSdcardPkgsPath(UpdaterParams &upParams)
+{
+    std::vector<std::string> sdcardPkgs = Utils::SplitString(SDCARD_CARD_PKG_PATH, ", ");
+    for (auto pkgPath : sdcardPkgs) {
+        if (access(pkgPath.c_str(), 0) == 0) {
+            LOG(INFO) << "find sdcard package : " << pkgPath;
+            upParams.updatePackage.push_back(pkgPath);
+        }
+    }
+    if (upParams.updatePackage.size() == 0) {
+        return UPDATE_ERROR;
+    }
+    return UPDATE_SUCCESS;
+}
+
+static UpdaterStatus CheckSdcardPkgs(UpdaterParams &upParams)
 {
 #ifndef UPDATER_UT
-    // sdcard fsType only support ext4/vfat
     auto sdParam = "updater.data.configs";
     Flashd::SetParameter(sdParam, "1");
     std::string sdcardStr = GetBlockDeviceByMountPoint(SDCARD_PATH);
@@ -187,49 +209,17 @@ UpdaterStatus UpdaterFromSdcard()
             (errno == ENOENT) ? TR(LOG_SDCARD_NOTFIND) : TR(LOG_SDCARD_ABNORMAL), true);
         return UPDATE_ERROR;
     }
-    if (MountForPath(SDCARD_PATH) != 0) {
-        int ret = mount(sdcardStr.c_str(), SDCARD_PATH, "vfat", 0, NULL);
-        if (ret != 0) {
-            LOG(WARNING) << "MountForPath /sdcard failed!";
-            return UPDATE_ERROR;
-        }
+    std::string sdcardPath = SDCARD_PATH;
+    if (MountSdcard(sdcardPath, sdcardStr) != 0) {
+        LOG(ERROR) << "mount sdcard fail!";
+        return UPDATE_ERROR;
     }
 #endif
-    if (access(SDCARD_CARD_PKG_PATH, 0) != 0) {
-        LOG(ERROR) << "package is not exist";
-        UPDATER_UI_INSTANCE.ShowLog(TR(LOG_NOPKG), true);
+    if (GetSdcardPkgsPath(upParams) != UPDATE_SUCCESS) {
+        LOG(ERROR) << "there is no package in sdcard/updater, please check";
         return UPDATE_ERROR;
     }
-
-    UpdaterParams upParams {
-        false, false, 0, 0, 1, 0, {SDCARD_CARD_PKG_PATH}
-    };
-    // verify packages first
-    if (VerifyPackages(upParams) != UPDATE_SUCCESS) {
-        return UPDATE_ERROR;
-    }
-    upParams.initialProgress += VERIFY_PERCENT;
-    upParams.currentPercentage -= VERIFY_PERCENT;
-    PkgManager::PkgManagerPtr pkgManager = PkgManager::GetPackageInstance();
-    if (pkgManager == nullptr) {
-        LOG(ERROR) << "pkgManager is nullptr";
-        return UPDATE_ERROR;
-    }
-
-    STAGE(UPDATE_STAGE_BEGIN) << "UpdaterFromSdcard";
-    LOG(INFO) << "UpdaterFromSdcard start, sdcard updaterPath : " << upParams.updatePackage[upParams.pkgLocation];
-    UPDATER_UI_INSTANCE.ShowLog(TR(LOG_SDCARD_NOTMOVE));
-    UpdaterStatus updateRet = DoInstallUpdaterPackage(pkgManager, upParams, SDCARD_UPDATE);
-    if (updateRet != UPDATE_SUCCESS) {
-        UPDATER_UI_INSTANCE.Sleep(UI_SHOW_DURATION);
-        UPDATER_UI_INSTANCE.ShowLog(TR(LOG_SDCARD_FAIL));
-        STAGE(UPDATE_STAGE_FAIL) << "UpdaterFromSdcard failed";
-    } else {
-        LOG(INFO) << "Update from SD Card successfully!";
-        STAGE(UPDATE_STAGE_SUCCESS) << "UpdaterFromSdcard success";
-    }
-    PkgManager::ReleasePackageInstance(pkgManager);
-    return updateRet;
+    return UPDATE_SUCCESS;
 }
 
 bool GetBatteryCapacity(int &capacity)
@@ -355,10 +345,6 @@ static UpdaterStatus CalcProgress(const UpdaterParams &upParams,
 static UpdaterStatus PreUpdatePackages(UpdaterParams &upParams)
 {
     LOG(INFO) << "start to update packages, start index:" << upParams.pkgLocation;
-    for (unsigned int i = 0; i < upParams.updatePackage.size(); i++) {
-        LOG(INFO) << "package " << i << ":" << upParams.updatePackage[i] <<
-            " precent:" << upParams.currentPercentage;
-    }
 
     UpdaterStatus status = UPDATE_UNKNOWN;
     if (SetupPartitions() != 0) {
@@ -399,6 +385,10 @@ static UpdaterStatus DoUpdatePackages(UpdaterParams &upParams)
     if (status != UPDATE_SUCCESS) {
         return status;
     }
+    for (unsigned int i = 0; i < upParams.updatePackage.size(); i++) {
+        LOG(INFO) << "package " << i << ":" << upParams.updatePackage[i] <<
+            " precent:" << upParams.currentPercentage;
+    }
     UPDATER_UI_INSTANCE.ShowProgress(updateStartPosition * FULL_PERCENT_PROGRESS);
     for (; upParams.pkgLocation < upParams.updatePackage.size(); upParams.pkgLocation++) {
         PkgManager::PkgManagerPtr manager = PkgManager::GetPackageInstance();
@@ -408,7 +398,11 @@ static UpdaterStatus DoUpdatePackages(UpdaterParams &upParams)
         LOG(INFO) << "InstallUpdaterPackage pkg is " << upParams.updatePackage[upParams.pkgLocation] <<
             " percent:" << upParams.initialProgress << "~" << pkgStartPosition[upParams.pkgLocation + 1];
 
-        status = InstallUpdaterPackage(upParams, manager);
+        if (upParams.sdcardUpdate) {
+            status = DoInstallUpdaterPackage(manager, upParams, SDCARD_UPDATE);
+        } else {
+            status = InstallUpdaterPackage(upParams, manager);
+        }
         SetMessageToMisc(upParams.pkgLocation + 1, "upgraded_pkg_num");
         ProgressSmoothHandler(
             static_cast<int>(upParams.initialProgress * FULL_PERCENT_PROGRESS +
@@ -457,6 +451,26 @@ static void PostUpdatePackages(UpdaterParams &upParams, bool updateResult)
     WriteDumpResult(writeBuffer);
 }
 
+UpdaterStatus UpdaterFromSdcard(UpdaterParams &upParams)
+{
+    if (CheckSdcardPkgs(upParams) != UPDATE_SUCCESS) {
+        LOG(ERROR) << "can not find sdcard packages";
+        return UPDATE_ERROR;
+    }
+    // verify packages first
+    if (upParams.pkgLocation == 0 && VerifyPackages(upParams) != UPDATE_SUCCESS) {
+        return UPDATE_ERROR;
+    }
+    upParams.initialProgress += VERIFY_PERCENT;
+    upParams.currentPercentage -= VERIFY_PERCENT;
+
+    STAGE(UPDATE_STAGE_BEGIN) << "UpdaterFromSdcard";
+    LOG(INFO) << "UpdaterFromSdcard start, sdcard updaterPath : " << upParams.updatePackage[upParams.pkgLocation];
+    UPDATER_UI_INSTANCE.ShowLog(TR(LOG_SDCARD_NOTMOVE));
+    return DoUpdatePackages(upParams);
+}
+
+
 static UpdaterStatus InstallUpdaterPackages(UpdaterParams &upParams)
 {
     UpdaterStatus status = PreUpdatePackages(upParams);
@@ -470,6 +484,11 @@ static UpdaterStatus InstallUpdaterPackages(UpdaterParams &upParams)
 static UpdaterStatus StartUpdaterEntry(UpdaterParams &upParams)
 {
     UpdaterStatus status = UPDATE_UNKNOWN;
+    if (upParams.sdcardUpdate) {
+        LOG(INFO) << "start sdcard update";
+        status = UpdaterFromSdcard(upParams);
+        return status;
+    }
     if (upParams.updatePackage.size() > 0) {
         UPDATER_UI_INSTANCE.ShowProgressPage();
         status = InstallUpdaterPackages(upParams);
@@ -513,7 +532,7 @@ static UpdaterStatus StartUpdater(const std::vector<std::string> &args,
     char **argv, PackageUpdateMode &mode)
 {
     UpdaterParams upParams {
-        false, false, 0, 0, 0, 0
+        false, false, false, 0, 0, 0, 0
     };
     std::vector<char *> extractedArgs;
     int rc;
@@ -544,12 +563,13 @@ static UpdaterStatus StartUpdater(const std::vector<std::string> &args,
                     upParams.userWipeData = true;
                 } else if (option == "upgraded_pkg_num") {
                     upParams.pkgLocation = static_cast<unsigned int>(atoi(optarg));
+                } else if (option == "sdcard_update") {
+                    upParams.sdcardUpdate = true;
+                    (void)UPDATER_UI_INSTANCE.SetMode(UpdaterMode::SDCARD);
+                    mode = SDCARD_UPDATE;
                 }
                 break;
             }
-            case '?':
-                LOG(ERROR) << "Invalid argument.";
-                break;
             default:
                 LOG(ERROR) << "Invalid argument.";
                 break;

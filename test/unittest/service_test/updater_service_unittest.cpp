@@ -49,11 +49,11 @@ public:
 HWTEST_F(UpdaterUtilUnitTest, DeleteUpdaterPath, TestSize.Level1)
 {
     std::string path = "/data/test/test/test";
-    bool ret = DeleteUpdaterPath(path);
+    bool ret = DeleteUpdaterPath(path, false);
     EXPECT_EQ(ret, true);
 
     path = "/data/test";
-    ret = DeleteUpdaterPath(path);
+    ret = DeleteUpdaterPath(path, false);
     EXPECT_EQ(ret, true);
 }
 

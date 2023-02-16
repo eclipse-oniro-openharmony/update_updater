@@ -25,6 +25,7 @@ void LoadSpecificFstab(const std::string &fstabName);
 int FormatPartition(const std::string &path, bool isZeroErase = false);
 int UmountForPath(const std::string &path);
 int MountForPath(const std::string &path);
+int MountSdcard(std::string &mountPoint, std::string &path);
 int SetupPartitions(PackageUpdateMode mode = HOTA_UPDATE);
 const std::string GetBlockDeviceByMountPoint(const std::string &mountPoint);
 MountStatus GetMountStatusForPath(const std::string &path);

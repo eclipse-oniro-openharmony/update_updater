@@ -34,7 +34,7 @@ namespace Updater {
 using namespace Hpackage;
 using namespace Updater::Utils;
 
-bool DeleteUpdaterPath(const std::string &path)
+bool DeleteUpdaterPath(const std::string &path, const bool sdcardTmp)
 {
     auto pDir = std::unique_ptr<DIR, decltype(&closedir)>(opendir(path.c_str()), closedir);
     if (pDir == nullptr) {
@@ -45,12 +45,13 @@ bool DeleteUpdaterPath(const std::string &path)
     while ((dp = readdir(pDir.get())) != nullptr) {
         std::string currentName(dp->d_name);
         if (currentName[0] != '.' && (currentName.compare("log") != 0) &&
-            (currentName.compare(UPDATER_RESULT_FILE) != 0) &&
-            (currentName.compare(UPDATER_LOCALE_FILE) != 0)) {
+            (currentName.compare(UPDATER_RESULT_FILE) != 0) && (currentName.compare(UPDATER_LOCALE_FILE) != 0) &&
+            (!sdcardTmp || (sdcardTmp && currentName.compare(SDCARD_FULL_PACKAGE) != 0 &&
+            currentName.compare(SDCARD_CUST_PACKAGE) != 0 && currentName.compare(SDCARD_PRELOAD_PACKAGE) != 0))) {
             std::string tmpName(path);
             tmpName.append("/" + currentName);
             if (IsDirExist(tmpName)) {
-                DeleteUpdaterPath(tmpName);
+                DeleteUpdaterPath(tmpName, sdcardTmp);
             }
 #ifndef UPDATER_UT
             remove(tmpName.c_str());
@@ -163,13 +164,13 @@ void PostUpdater(bool clearMisc)
     }
 
     // delete updater tmp files
-    if (access(UPDATER_PATH, 0) == 0 && access(SDCARD_CARD_PATH, 0) != 0 && !DeleteUpdaterPath(UPDATER_PATH)) {
+    if (access(UPDATER_PATH, 0) == 0 && access(SDCARD_CARD_PATH, 0) != 0 && !DeleteUpdaterPath(UPDATER_PATH, false)) {
         LOG(ERROR) << "DeleteUpdaterPath failed";
     }
-    if (access(SDCARD_CARD_PATH, 0) == 0 && !DeleteUpdaterPath(SDCARD_CARD_PATH)) {
+    if (access(SDCARD_CARD_PATH, 0) == 0 && !DeleteUpdaterPath(SDCARD_CARD_PATH, true)) {
         LOG(ERROR) << "Delete sdcard path failed";
     }
-    if (access(Flashd::FLASHD_FILE_PATH, 0) == 0 && !DeleteUpdaterPath(Flashd::FLASHD_FILE_PATH)) {
+    if (access(Flashd::FLASHD_FILE_PATH, 0) == 0 && !DeleteUpdaterPath(Flashd::FLASHD_FILE_PATH, false)) {
         LOG(ERROR) << "DeleteUpdaterPath failed";
     }
 

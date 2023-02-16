@@ -44,6 +44,20 @@ static bool WriteToMiscAndRebootToUpdater(const struct UpdateMessage &updateMsg)
 #endif
 }
 
+bool RebootAndInstallSdcardPackage()
+{
+    struct UpdateMessage msg {};
+    int ret = snprintf_s(msg.update, sizeof(msg.update), sizeof(msg.update) - 1, "--sdcard_update\n");
+    if (ret < 0) {
+        std::cout << "updaterkits: copy updater message failed\n";
+        return false;
+    }
+    WriteToMiscAndRebootToUpdater(msg);
+
+    // Never get here.
+    return true;
+}
+
 bool RebootAndInstallUpgradePackage(const std::string &miscFile, const std::vector<std::string> &packageName)
 {
     if (packageName.size() == 0) {

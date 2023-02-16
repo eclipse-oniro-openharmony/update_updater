@@ -117,6 +117,105 @@ int UmountForPath(const std::string& path)
     return 0;
 }
 
+static void SleepMsec(long long msec)
+{
+    struct timespec ts;
+    int err;
+    ts.tv_sec = (msec / 1000);
+    ts.tv_nsec = (msec % 1000) * 1000 * 1000;
+    do {
+        err = nanosleep(&ts, &ts);
+    } while (err < 0 && errno == EINTR);
+}
+
+static int MountNtfsWithRetry(std::string source, std::string target)
+{
+    char *argv[] = {const_cast<char *>("system/bin/mount.ntfs"),
+        const_cast<char *>(source.c_str()), const_cast<char *>(target.c_str()), nullptr};
+    int num = 0;
+    // int status = -1;
+    do {
+        pid_t child = fork();
+        if (child == 0) {
+            if (execv(argv[0], argv)) {
+                _exit(-1);
+            }
+        }
+        // status
+        int status = -1;
+        if (waitpid(child, &status, 0) < 0) {
+            LOG(ERROR) << "waitpid failed, " << child;
+        }
+        if (WIFEXITED(status)) {
+            LOG(ERROR) << "child terminated by exit " << WEXITSTATUS(status);
+        } else if (WIFSIGNALED(status)) {
+            LOG(ERROR) << "child terminated by signal " << WTERMSIG(status);
+        } else if (WIFSTOPPED(status)) {
+            LOG(ERROR) << "child stopped by signal " << WSTOPSIG(status);
+        }
+
+        if (status == 0) {
+            SleepMsec(100);
+            LOG(INFO) << "success to mount " << source << " on " << target;
+            return 0;
+        } else {
+            if ((errno == ENOENT) || (errno == ENODEV) || (errno == ENOMEDIUM)) {
+                LOG(ERROR) << "SD card never insert, dont try again, failed to mount " << source << " on " << target;
+                return -1;
+            }
+        }
+        sleep(3);
+        num++;
+        LOG(ERROR) << "failed to mount " << source << " on " << target << ", errno is " << errno;
+    } while (num < 3);
+    return -1;
+}
+
+int MountSdcard(std::string &mountPoint, std::string &path)
+{
+    if (path == "" || mountPoint == "") {
+        LOG(ERROR) << "path or mountPoint is null, mount fail";
+        return -1;
+    }
+    MountStatus rc = GetMountStatusForMountPoint(item->mountPoint);
+    if (rc == MountStatus::MOUNT_ERROR) {
+        return -1;
+    } else if (rc == MountStatus::MOUNT_MOUNTED) {
+        LOG(INFO) << path << " already mounted";
+        return 0;
+    } else {
+        struct stat st = {};
+        if (stat(mountPoint.c_str(), &st) != 0 && errno != ENOENT) {
+            LOG(ERROR) << "cannot get stat";
+            return -1;
+        }
+        if ((st.st_mode & S_IFMT) == S_IFLINK) {
+            unlink(mountPoint.c_str());
+        }
+        if (mkdir(mountPoint.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) < 0) {
+            if (errno != EEXIST) {
+                LOG(ERROR) << "failed to creat dir";
+                return -1;
+            }
+        }
+        errno = 0;
+        int ret = 0;
+        const std::vector<char *> fileSystemType = {"ext4", "vfat"};
+        for (auto type : fileSystemType) {
+            if ((ret = mount(path.c_str(), mountPoint.c_str(), type, 0, nullptr)) == 0) {
+                LOG(INFO) << "mount success, sdcard type is " << type;
+                mountFlag = true;
+                return 0;
+            }
+        }
+        if (MountNtfsWithRetry(path, mountPoint) == 0) {
+            LOG(INFO) << "mount success, sdcard type is ntfs";
+            return 0;
+        }
+    }
+    return -1;
+}
+
 int MountForPath(const std::string &path)
 {
     if (g_fstab == nullptr) {

@@ -21,13 +21,19 @@
 using namespace std;
 using namespace Updater;
 
+static void PrintPrompts()
+{
+    cout << "Please input correct command, examples :" << endl;
+    cout << "updater       :  write_updater updater /data/updater/updater.zip" << endl;
+    cout << "factory_reset :  write_updater user_factory_reset" << endl;
+    cout << "sdcard_update :  write_updater sdcard_update" << endl;
+    cout << "clear command :  write_updater clear" << endl;
+}
+
 int main(int argc, char **argv)
 {
     if (argc == 1) {
-        cout << "Please input correct command, examples :" << endl;
-        cout << "updater       :  write_updater updater /data/updater/updater.zip" << endl;
-        cout << "factory_reset :  write_updater user_factory_reset" << endl;
-        cout << "clear command :  write_updater clear" << endl;
+        PrintPrompts();
         return -1;
     }
 
@@ -57,6 +63,11 @@ int main(int argc, char **argv)
         }
     } else if (strcmp(argv[1], "clear") == 0) {
         cout << "clear misc" << endl;
+    } else if (strcmp(argv[1], "clear") == 0) {
+        if (strncpy_s(boot.update, sizeof(boot.update), "--sdcard_update", sizeof(boot.update) - 1) != 0) {
+            cout << "strncpy_s failed!" << endl;
+            return -1;
+        }
     } else {
         cout << "Please input correct command!" << endl;
         return -1;
