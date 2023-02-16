@@ -458,6 +458,13 @@ UpdaterStatus UpdaterFromSdcard(UpdaterParams &upParams)
         return UPDATE_ERROR;
     }
     // verify packages first
+    if (upParams.retryCount == 0 && !IsBatteryCapacitySufficient()) {
+        UPDATER_UI_INSTANCE.ShowUpdInfo(TR(LOG_LOWPOWER));
+        UPDATER_UI_INSTANCE.Sleep(UI_SHOW_DURATION);
+        LOG(ERROR) << "Battery is not sufficient for install package.";
+        return UPDATE_SKIP;
+    }
+
     if (upParams.pkgLocation == 0 && VerifyPackages(upParams) != UPDATE_SUCCESS) {
         return UPDATE_ERROR;
     }
