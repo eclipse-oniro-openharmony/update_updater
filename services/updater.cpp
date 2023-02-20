@@ -76,7 +76,7 @@ int GetUpdatePackageInfo(PkgManager::PkgManagerPtr pkgManager, const std::string
 {
     std::vector<std::string> components;
     if (pkgManager == nullptr) {
-        LOG(ERROR) << "Fail to GetPackageInstance";
+        LOG(ERROR) << "pkgManager is nullptr";
         return UPDATE_CORRUPT;
     }
     int32_t ret = pkgManager->LoadPackage(path, Utils::GetCertName(), components);
@@ -192,7 +192,7 @@ UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, Upda
     UPDATER_UI_INSTANCE.ShowProgressPage();
     UPDATER_UI_INSTANCE.ShowProgress(upParams.initialProgress * FULL_PERCENT_PROGRESS);
     if (pkgManager == nullptr) {
-        LOG(ERROR) << "Fail to GetPackageInstance";
+        LOG(ERROR) << "pkgManager is null";
         UPDATER_LAST_WORD(UPDATE_CORRUPT);
         return UPDATE_CORRUPT;
     }
@@ -205,8 +205,6 @@ UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, Upda
 
     if (upParams.retryCount > 0) {
         LOG(INFO) << "Retry for " << upParams.retryCount << " time(s)";
-    } else {
-        pkgManager = PkgManager::GetPackageInstance();
     }
     int32_t verifyret = GetUpdatePackageInfo(pkgManager, upParams.updatePackage[upParams.pkgLocation]);
     g_tmpProgressValue = 0;
@@ -404,7 +402,7 @@ UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, UpdaterPara
         return UPDATE_ERROR;
     }
     if (pkgManager == nullptr) {
-        LOG(ERROR) << "Fail to GetPackageInstance";
+        LOG(ERROR) << "pkgManager is null";
         UPDATER_LAST_WORD(UPDATE_CORRUPT);
         return UPDATE_CORRUPT;
     }

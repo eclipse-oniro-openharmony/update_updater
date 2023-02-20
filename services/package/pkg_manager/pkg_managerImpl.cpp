@@ -644,7 +644,7 @@ int32_t PkgManagerImpl::VerifyPackage(const std::string &packagePath, const std:
     } else {
         PkgManager::PkgManagerPtr pkgManager = PkgManager::GetPackageInstance();
         if (pkgManager == nullptr) {
-            PKG_LOGE("Fail to GetPackageInstance");
+            PKG_LOGE("pkgManager is null");
             return PKG_INVALID_SIGNATURE;
         }
         std::vector<std::string> components;
