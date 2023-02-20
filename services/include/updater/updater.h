@@ -75,7 +75,7 @@ void SaveLogs();
 
 void PostUpdater(bool clearMisc);
 
-bool DeleteUpdaterPath(const std::string &path, const bool sdcardTmp);
+bool DeleteUpdaterPath(const std::string &path);
 
 std::vector<std::string> ParseParams(int argc, char **argv);
 

@@ -117,17 +117,6 @@ int UmountForPath(const std::string& path)
     return 0;
 }
 
-static void SleepMsec(long long msec)
-{
-    struct timespec ts;
-    int err;
-    ts.tv_sec = (msec / 1000);
-    ts.tv_nsec = (msec % 1000) * 1000 * 1000;
-    do {
-        err = nanosleep(&ts, &ts);
-    } while (err < 0 && errno == EINTR);
-}
-
 static int MountNtfsWithRetry(std::string source, std::string target)
 {
     char *argv[] = {const_cast<char *>("system/bin/mount.ntfs"),
@@ -155,7 +144,7 @@ static int MountNtfsWithRetry(std::string source, std::string target)
         }
 
         if (status == 0) {
-            SleepMsec(100);
+            Utils::UsSleep(100); // 100 : Wait interval
             LOG(INFO) << "success to mount " << source << " on " << target;
             return 0;
         } else {
@@ -183,35 +172,33 @@ int MountSdcard(std::string &path, std::string &mountPoint)
     } else if (rc == MountStatus::MOUNT_MOUNTED) {
         LOG(INFO) << path << " already mounted";
         return 0;
-    } else {
-        struct stat st = {};
-        if (stat(path.c_str(), &st) != 0 && errno != ENOENT) {
-            LOG(ERROR) << "cannot get stat";
+    }
+    struct stat st = {};
+    if (stat(path.c_str(), &st) != 0 && errno != ENOENT) {
+        LOG(ERROR) << "cannot get stat";
+        return -1;
+    }
+    if ((st.st_mode & S_IFMT) == S_IFLNK) {
+        unlink(path.c_str());
+    }
+    if (mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) < 0) {
+        if (errno != EEXIST) {
+            LOG(ERROR) << "failed to creat dir";
             return -1;
         }
-        if ((st.st_mode & S_IFMT) == S_IFLINK) {
-            unlink(path.c_str());
-        }
-        if (mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) < 0) {
-            if (errno != EEXIST) {
-                LOG(ERROR) << "failed to creat dir";
-                return -1;
-            }
-        }
-        errno = 0;
-        int ret = 0;
-        const std::vector<char *> fileSystemType = {"ext4", "vfat"};
-        for (auto type : fileSystemType) {
-            if ((ret = mount(path.c_str(), path.c_str(), type, 0, nullptr)) == 0) {
-                LOG(INFO) << "mount success, sdcard type is " << type;
-                mountFlag = true;
-                return 0;
-            }
-        }
-        if (MountNtfsWithRetry(path, mountPoint) == 0) {
-            LOG(INFO) << "mount success, sdcard type is ntfs";
+    }
+    errno = 0;
+    int ret = 0;
+    const std::vector<const char *> fileSystemType = {"ext4", "vfat"};
+    for (auto type : fileSystemType) {
+        if ((ret = mount(path.c_str(), path.c_str(), type, 0, nullptr)) == 0) {
+            LOG(INFO) << "mount success, sdcard type is " << type;
             return 0;
         }
+    }
+    if (MountNtfsWithRetry(path, mountPoint) == 0) {
+        LOG(INFO) << "mount success, sdcard type is ntfs";
+        return 0;
     }
     return -1;
 }

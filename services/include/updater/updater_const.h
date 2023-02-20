@@ -48,7 +48,9 @@ constexpr const char *G_WORK_PATH = "/tmp/";
 #else
 constexpr const char *SDCARD_CARD_PATH = "/data/sdcard/updater";
 constexpr const char *SDCARD_CARD_PKG_PATH =
-    "/sdcard/updater/updater_full.zip, /sdcard/updater/updater_cust.zip, /sdcard/updater/updater_preload.zip";
+    "/data/updater/updater/updater_full.zip, "
+    "/data/updater/updater/updater_cust.zip, "
+    "/data/updater/updater/updater_preload.zip";
 constexpr const char *G_WORK_PATH = "/data/updater/src/";
 constexpr const char *UT_VERSION = "OpenHarmony 3.2.9.1";
 #endif

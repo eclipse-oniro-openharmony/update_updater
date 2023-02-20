@@ -449,6 +449,10 @@ static void PostUpdatePackages(UpdaterParams &upParams, bool updateResult)
 
 UpdaterStatus UpdaterFromSdcard(UpdaterParams &upParams)
 {
+    SetMessageToMisc(0, "sdcard_update");
+    UpdaterParams upParams {
+        false, false, true, 0, 0, 0, 0
+    };
     if (CheckSdcardPkgs(upParams) != UPDATE_SUCCESS) {
         LOG(ERROR) << "can not find sdcard packages";
         return UPDATE_ERROR;
