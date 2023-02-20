@@ -192,7 +192,7 @@ UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, Upda
     UPDATER_UI_INSTANCE.ShowProgressPage();
     UPDATER_UI_INSTANCE.ShowProgress(upParams.initialProgress * FULL_PERCENT_PROGRESS);
     if (pkgManager == nullptr) {
-        LOG(ERROR) << "pkgManager is null";
+        LOG(ERROR) << "pkgManager is nullptr";
         UPDATER_LAST_WORD(UPDATE_CORRUPT);
         return UPDATE_CORRUPT;
     }
@@ -402,7 +402,7 @@ UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, UpdaterPara
         return UPDATE_ERROR;
     }
     if (pkgManager == nullptr) {
-        LOG(ERROR) << "pkgManager is null";
+        LOG(ERROR) << "pkgManager is nullptr";
         UPDATER_LAST_WORD(UPDATE_CORRUPT);
         return UPDATE_CORRUPT;
     }

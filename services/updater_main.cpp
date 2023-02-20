@@ -124,7 +124,7 @@ static int OtaUpdatePreCheck(PkgManager::PkgManagerPtr pkgManager, const std::st
 {
     UPDATER_INIT_RECORD;
     if (pkgManager == nullptr) {
-        LOG(ERROR) << "pkgManager is null";
+        LOG(ERROR) << "pkgManager is nullptr";
         UPDATER_LAST_WORD(PKG_INVALID_FILE);
         return UPDATE_CORRUPT;
     }
