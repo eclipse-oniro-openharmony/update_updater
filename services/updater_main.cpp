@@ -447,7 +447,7 @@ static void PostUpdatePackages(UpdaterParams &upParams, bool updateResult)
     WriteDumpResult(writeBuffer);
 }
 
-UpdaterStatus UpdaterFromSdcard(UpdaterParams &upParams)
+UpdaterStatus UpdaterFromSdcard()
 {
     SetMessageToMisc(0, "sdcard_update");
     UpdaterParams upParams {
@@ -493,7 +493,7 @@ static UpdaterStatus StartUpdaterEntry(UpdaterParams &upParams)
     UpdaterStatus status = UPDATE_UNKNOWN;
     if (upParams.sdcardUpdate) {
         LOG(INFO) << "start sdcard update";
-        status = UpdaterFromSdcard(upParams);
+        status = UpdaterFromSdcard();
         return status;
     }
     if (upParams.updatePackage.size() > 0) {
