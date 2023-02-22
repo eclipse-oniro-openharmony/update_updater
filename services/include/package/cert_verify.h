@@ -31,7 +31,7 @@ struct CertInfo {
 class CertHelper {
 public:
     virtual int32_t CertChainCheck(STACK_OF(X509) *certStack, X509 *cert) const = 0;
-    virtual int32_t Init() = 0;
+    virtual int32_t Init();
     virtual ~CertHelper() {}
 };
 

@@ -128,4 +128,9 @@ int32_t SingleCertHelper::CompareCertSubjectAndIssuer(X509 *cert) const
 
     return -1;
 }
+
+int32_t CertHelper::Init()
+{
+    return 0;
+}
 } // namespace Hpackage
