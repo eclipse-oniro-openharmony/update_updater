@@ -40,7 +40,16 @@ CertVerify &CertVerify::GetInstance()
     return certVerify;
 }
 
-int32_t CertVerify::CheckCertChain(STACK_OF(X509) *certStack, X509 *cert)
+int32_t CertVerify::Init()
+{
+    if (helper_ == nullptr) {
+        PKG_LOGE("helper_ null error");
+        return -1;
+    }
+    return helper_->Init();
+}
+
+int32_t CertVerify::CheckCertChain(STACK_OF(X509) *certStack, X509 *cert) const
 {
     if (helper_ == nullptr) {
         PKG_LOGE("helper_ null error");
@@ -56,16 +65,20 @@ SingleCertHelper::~SingleCertHelper()
     }
 }
 
-int32_t SingleCertHelper::CertChainCheck(STACK_OF(X509) *certStack, X509 *cert)
+int32_t SingleCertHelper::Init()
 {
-    UNUSED(certStack);
-    if (cert == nullptr) {
-        return -1;
-    }
-
     int32_t ret = InitRootCert();
     if (ret != 0) {
         PKG_LOGE("Init root cert fail");
+        return -1;
+    }
+    return 0;
+}
+
+int32_t SingleCertHelper::CertChainCheck(STACK_OF(X509) * certStack, X509 *cert) const
+{
+    UNUSED(certStack);
+    if (cert == nullptr) {
         return -1;
     }
 
@@ -81,6 +94,10 @@ int32_t SingleCertHelper::InitRootCert()
         UPDATER_LAST_WORD(-1);
         return -1;
     }
+    if (rootInfo_.rootCert != nullptr) {
+        X509_free(rootInfo_.rootCert);
+        rootInfo_.rootCert = nullptr;
+    }
     rootInfo_.rootCert = rootCert;
     rootInfo_.subject = GetX509CertSubjectName(rootCert);
     rootInfo_.issuer = GetX509CertIssuerName(rootCert);
@@ -89,7 +106,7 @@ int32_t SingleCertHelper::InitRootCert()
     return 0;
 }
 
-int32_t SingleCertHelper::VerifySingleCert(X509 *cert)
+int32_t SingleCertHelper::VerifySingleCert(X509 *cert) const
 {
     int32_t ret = CompareCertSubjectAndIssuer(cert);
     if (ret != 0) {
@@ -100,7 +117,7 @@ int32_t SingleCertHelper::VerifySingleCert(X509 *cert)
     return ((VerifyX509CertByIssuerCert(cert, rootInfo_.rootCert)) ? 0 : -1);
 }
 
-int32_t SingleCertHelper::CompareCertSubjectAndIssuer(X509 *cert)
+int32_t SingleCertHelper::CompareCertSubjectAndIssuer(X509 *cert) const
 {
     string certSubject = GetX509CertSubjectName(cert);
     string certIssuer = GetX509CertIssuerName(cert);

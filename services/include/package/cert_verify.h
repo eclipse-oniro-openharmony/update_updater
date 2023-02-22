@@ -30,7 +30,8 @@ struct CertInfo {
 
 class CertHelper {
 public:
-    virtual int32_t CertChainCheck(STACK_OF(X509) *certStack, X509 *cert) = 0;
+    virtual int32_t CertChainCheck(STACK_OF(X509) *certStack, X509 *cert) const = 0;
+    virtual int32_t Init() = 0;
     virtual ~CertHelper() {}
 };
 
@@ -39,7 +40,8 @@ class CertVerify {
 public:
     void RegisterCertHelper(std::unique_ptr<CertHelper> ptr);
     static CertVerify &GetInstance();
-    int32_t CheckCertChain(STACK_OF(X509) *certStack, X509 *cert);
+    int32_t Init();
+    int32_t CheckCertChain(STACK_OF(X509) *certStack, X509 *cert) const;
 
 private:
     CertVerify() = default;
@@ -52,13 +54,13 @@ public:
     SingleCertHelper() = default;
     virtual ~SingleCertHelper();
 
-    int32_t CertChainCheck(STACK_OF(X509) *certStack, X509 *cert) override;
+    int32_t Init() override;
+    int32_t CertChainCheck(STACK_OF(X509) *certStack, X509 *cert) const override;
 
 private:
     int32_t InitRootCert();
-    int32_t VerifySingleCert(X509 *cert);
-    int32_t CompareCertSubjectAndIssuer(X509 *cert);
-
+    int32_t VerifySingleCert(X509 *cert) const;
+    int32_t CompareCertSubjectAndIssuer(X509 *cert) const;
     CertInfo rootInfo_ {};
 };
 } // namespace Hpackage
