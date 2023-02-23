@@ -49,7 +49,7 @@ int32_t CertVerify::Init()
     return helper_->Init();
 }
 
-int32_t CertVerify::CheckCertChain(STACK_OF(X509) *certStack, X509 *cert) const
+int32_t CertVerify::CheckCertChain(STACK_OF(X509) *certStack, X509 *cert)
 {
     if (helper_ == nullptr) {
         PKG_LOGE("helper_ null error");
@@ -75,7 +75,7 @@ int32_t SingleCertHelper::Init()
     return 0;
 }
 
-int32_t SingleCertHelper::CertChainCheck(STACK_OF(X509) * certStack, X509 *cert) const
+int32_t SingleCertHelper::CertChainCheck(STACK_OF(X509) * certStack, X509 *cert)
 {
     UNUSED(certStack);
     if (cert == nullptr) {
@@ -106,7 +106,7 @@ int32_t SingleCertHelper::InitRootCert()
     return 0;
 }
 
-int32_t SingleCertHelper::VerifySingleCert(X509 *cert) const
+int32_t SingleCertHelper::VerifySingleCert(X509 *cert)
 {
     int32_t ret = CompareCertSubjectAndIssuer(cert);
     if (ret != 0) {
@@ -117,7 +117,7 @@ int32_t SingleCertHelper::VerifySingleCert(X509 *cert) const
     return ((VerifyX509CertByIssuerCert(cert, rootInfo_.rootCert)) ? 0 : -1);
 }
 
-int32_t SingleCertHelper::CompareCertSubjectAndIssuer(X509 *cert) const
+int32_t SingleCertHelper::CompareCertSubjectAndIssuer(X509 *cert)
 {
     string certSubject = GetX509CertSubjectName(cert);
     string certIssuer = GetX509CertIssuerName(cert);
