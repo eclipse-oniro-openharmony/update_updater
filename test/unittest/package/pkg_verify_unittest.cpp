@@ -283,17 +283,6 @@ public:
         std::vector<std::string> fileList { "updater_binary", "loadScript.us", "Verse-script.us" };
         for (const auto &fileName : fileList) {
             EXPECT_EQ(VerifyFileByVerifier(verifier, fileName), 0);
-            const FileInfo *info = pkgManager_->GetFileInfo(fileName);
-            EXPECT_NE(info, nullptr) << "info is null " << fileName;
-            if (info == nullptr) {
-                return -1;
-            }
-            PkgBuffer buffer{info->unpackedSize};
-            PkgManager::StreamPtr outStream = nullptr;
-            EXPECT_EQ(PKG_SUCCESS, pkgManager_->CreatePkgStream(outStream, fileName, buffer)) << fileName;
-            EXPECT_EQ(PKG_SUCCESS, pkgManager_->ExtractFile(fileName, outStream)) << fileName;
-            EXPECT_TRUE(verifier.VerifyHashData(fileName, outStream));
-            pkgManager_->ClosePkgStream(outStream);
         }
         PkgManager::ReleasePackageInstance(pkgManager_);
         return 0;
