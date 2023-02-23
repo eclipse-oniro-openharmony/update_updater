@@ -29,13 +29,13 @@ public:
 
     int32_t VerifyPackageSign(const Hpackage::PkgStreamPtr PkgStream) const;
 
+    int32_t GetSignature(const PkgStreamPtr pkgStream, size_t &signatureSize,
+        std::vector<uint8_t> &signature) const;
 #ifndef UPDATER_UT
 private:
 #else
 public:
 #endif
-    int32_t GetSignature(const PkgStreamPtr pkgStream, size_t &signatureSize,
-        std::vector<uint8_t> &signature) const;
 
     int32_t ParsePackage(const PkgStreamPtr pkgStream, size_t &signatureStart,
         size_t &signatureSize) const;

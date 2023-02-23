@@ -84,12 +84,18 @@ int32_t Pkcs7SignedData::ParsePkcs7Data(const uint8_t *srcData, const size_t dat
 
 int32_t Pkcs7SignedData::Verify() const
 {
-    if (digest_.empty()) {
+    return Verify(digest_, {}, true);
+}
+
+int32_t Pkcs7SignedData::Verify(const std::vector<uint8_t> &hash, const std::vector<uint8_t> &sig,
+    bool sigInSignerInfo) const
+{
+    if (hash.empty()) {
         return -1;
     }
     int32_t ret = -1;
     for (auto &signerInfo : signerInfos_) {
-        ret = Pkcs7SignleSignerVerify(signerInfo);
+        ret = Pkcs7SignleSignerVerify(signerInfo, hash, sigInSignerInfo ? signerInfo.digestEncryptData : sig);
         if (ret == 0) {
             PKG_LOGI("p7sourceData check success");
             break;
@@ -113,6 +119,10 @@ int32_t Pkcs7SignedData::Init(const uint8_t *sourceData, const uint32_t sourceDa
         return -1;
     }
 
+    if (pkcs7_ != nullptr) {
+        PKCS7_free(pkcs7_);
+        pkcs7_ = nullptr;
+    }
     pkcs7_ = d2i_PKCS7_bio(p7Bio, nullptr);
     if (pkcs7_ == nullptr) {
         PKG_LOGE("d2i_PKCS7_bio failed!");
@@ -128,6 +138,10 @@ int32_t Pkcs7SignedData::Init(const uint8_t *sourceData, const uint32_t sourceDa
     }
 
     BIO_free(p7Bio);
+    if (CertVerify::GetInstance().Init() != 0) {
+        PKG_LOGE("init cert verify fail");
+        return -1;
+    }
     return 0;
 }
 
@@ -288,7 +302,8 @@ int32_t Pkcs7SignedData::SignerInfoParse(PKCS7_SIGNER_INFO *p7SignerInfo, Pkcs7S
     return 0;
 }
 
-int32_t Pkcs7SignedData::Pkcs7SignleSignerVerify(const Pkcs7SignerInfo &signerInfo) const
+int32_t Pkcs7SignedData::Pkcs7SignleSignerVerify(const Pkcs7SignerInfo &signerInfo, const std::vector<uint8_t> &hash,
+    const std::vector<uint8_t> &sig) const
 {
     if (pkcs7_ == nullptr) {
         UPDATER_LAST_WORD(-1);
@@ -311,17 +326,18 @@ int32_t Pkcs7SignedData::Pkcs7SignleSignerVerify(const Pkcs7SignerInfo &signerIn
         return -1;
     }
 
-    return VerifyDigest(cert, signerInfo);
+    return VerifyDigest(cert, signerInfo, hash, sig);
 }
 
-int32_t Pkcs7SignedData::VerifyDigest(X509 *cert, const Pkcs7SignerInfo &signer) const
+int32_t Pkcs7SignedData::VerifyDigest(X509 *cert, const Pkcs7SignerInfo &signer, const std::vector<uint8_t> &hash,
+    const std::vector<uint8_t> &sig) const
 {
     if (cert == nullptr) {
         return -1;
     }
 
     size_t digestLen = GetDigestLength(signer.digestNid);
-    if (digestLen == 0 || digest_.size() != digestLen) {
+    if (digestLen == 0 || hash.size() != digestLen) {
         PKG_LOGE("invalid digest length %zu", digestLen);
         UPDATER_LAST_WORD(-1, digestLen);
         return -1;
@@ -334,7 +350,7 @@ int32_t Pkcs7SignedData::VerifyDigest(X509 *cert, const Pkcs7SignerInfo &signer)
         return -1;
     }
 
-    auto ret = VerifyDigestByPubKey(pubKey, signer.digestNid, digest_, signer.digestEncryptData);
+    auto ret = VerifyDigestByPubKey(pubKey, signer.digestNid, hash, sig);
     EVP_PKEY_free(pubKey);
     return ret;
 }

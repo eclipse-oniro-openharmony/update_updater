@@ -40,12 +40,6 @@ int32_t PkgVerifyUtil::VerifyPackageSign(const PkgStreamPtr pkgStream) const
         PKG_LOGE("get package signature fail!");
         return PKG_INVALID_SIGNATURE;
     }
-    size_t fileLen = pkgStream->GetFileLength();
-    if (fileLen < (signatureSize + ZIP_EOCD_FIXED_PART_LEN)) {
-        PKG_LOGE("Invalid fileLen[%zu] and signature size[%zu]", fileLen, signatureSize);
-        UPDATER_LAST_WORD(PKG_INVALID_PARAM, fileLen, signatureSize);
-        return PKG_INVALID_PARAM;
-    }
 
     std::vector<uint8_t> hash;
     int32_t ret = Pkcs7verify(signature, hash);
@@ -53,7 +47,7 @@ int32_t PkgVerifyUtil::VerifyPackageSign(const PkgStreamPtr pkgStream) const
         PKG_LOGE("pkcs7 verify fail!");
         return ret;
     }
-    size_t srcDataLen = fileLen - signatureSize - ZIP_EOCD_FIXED_PART_LEN;
+    size_t srcDataLen = pkgStream->GetFileLength() - signatureSize - ZIP_EOCD_FIXED_PART_LEN;
 
     return HashCheck(pkgStream, srcDataLen, hash);
 }
@@ -77,6 +71,13 @@ int32_t PkgVerifyUtil::GetSignature(const PkgStreamPtr pkgStream, size_t &signat
         return ret;
     }
     signature.assign(signData.buffer, signData.buffer + readLen);
+
+    size_t fileLen = pkgStream->GetFileLength();
+    if (fileLen < (signatureSize + ZIP_EOCD_FIXED_PART_LEN)) {
+        PKG_LOGE("Invalid fileLen[%zu] and signature size[%zu]", fileLen, signatureSize);
+        UPDATER_LAST_WORD(PKG_INVALID_PARAM, fileLen, signatureSize);
+        return PKG_INVALID_PARAM;
+    }
 
     return PKG_SUCCESS;
 }

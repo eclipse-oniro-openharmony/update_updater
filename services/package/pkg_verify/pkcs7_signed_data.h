@@ -43,6 +43,7 @@ public:
 
     int32_t Verify() const;
 
+    int32_t Verify(const std::vector<uint8_t> &hash, const std::vector<uint8_t> &sig, bool sigInSignerInfo) const;
 private:
     int32_t Init(const uint8_t *sourceData, const uint32_t sourceDataLen);
     int32_t DoParse();
@@ -50,9 +51,10 @@ private:
     int32_t GetDigestFromContentInfo(std::vector<uint8_t> &digestBlock);
     int32_t SignerInfosParse();
     int32_t SignerInfoParse(PKCS7_SIGNER_INFO *p7SignerInfo, Pkcs7SignerInfo &signerInfo);
-    int32_t Pkcs7SignleSignerVerify(const Pkcs7SignerInfo &signerInfo) const;
-    int32_t VerifyDigest(X509 *cert, const Pkcs7SignerInfo &signer) const;
-
+    int32_t Pkcs7SignleSignerVerify(const Pkcs7SignerInfo &signerInfo, const std::vector<uint8_t> &hash,
+        const std::vector<uint8_t> &sig) const;
+    int32_t VerifyDigest(X509 *cert, const Pkcs7SignerInfo &signer, const std::vector<uint8_t> &hash,
+        const std::vector<uint8_t> &sig) const;
 private:
     PKCS7 *pkcs7_;
     std::vector<uint8_t> digest_;
