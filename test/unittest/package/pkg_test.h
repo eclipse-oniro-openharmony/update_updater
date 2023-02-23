@@ -194,6 +194,7 @@ protected:
     std::string testLz4PackageName = "test_package.lz4";
     std::string testGZipPackageName = "test_package.gz";
     std::string testCombinePkgName = "test_CombinePackage.zip";
+    std::string testPackagePath = "/data/updater/package/";
 };
 }
 #endif // PKG_TEST

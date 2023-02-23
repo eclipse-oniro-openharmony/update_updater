@@ -56,6 +56,7 @@ ohos_static_library("libupdaterpackage") {
     "$SUBSYSTEM_DIR/pkg_package/pkg_upgradefile.cpp",
     "$SUBSYSTEM_DIR/pkg_package/pkg_zipfile.cpp",
     "$SUBSYSTEM_DIR/pkg_verify/cert_verify.cpp",
+    "$SUBSYSTEM_DIR/pkg_verify/hash_data_verifier.cpp",
     "$SUBSYSTEM_DIR/pkg_verify/openssl_util.cpp",
     "$SUBSYSTEM_DIR/pkg_verify/pkcs7_signed_data.cpp",
     "$SUBSYSTEM_DIR/pkg_verify/pkg_verify_util.cpp",
@@ -63,6 +64,7 @@ ohos_static_library("libupdaterpackage") {
   ]
 
   deps = [
+    "../rust/hash_signed_data:rust_hash_signed_data",
     "//base/update/updater/services/log:libupdaterlog",
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/openssl:libcrypto_static",
@@ -71,6 +73,7 @@ ohos_static_library("libupdaterpackage") {
   configs = [ ":package_config" ]
 
   if (is_mingw) {
+    deps -= [ "../rust/hash_signed_data:rust_hash_signed_data" ]
     libs = [
       "setupapi",
       "psapi",

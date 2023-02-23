@@ -152,6 +152,10 @@
             <option name="push" value="src/rsa_private_key384.pem -> /data/updater/src" src="res"/>
             <option name="push" value="src/rsa_private_key2048.pem -> /data/updater/src" src="res"/>
             <option name="push" value="src/test_gzip_package.gz -> /data/updater/src" src="res"/>
+            <option name="push" value="package/updater_full_with_hsd.zip -> /data/updater/package" src="res"/>
+            <option name="push" value="package/updater_full_with_invalid_footer.zip -> /data/updater/package" src="res"/>
+            <option name="push" value="package/updater_full_with_invalid_hsd.zip -> /data/updater/package" src="res"/>
+            <option name="push" value="package/updater_full_without_hsd.zip -> /data/updater/package" src="res"/>
         </preparer>
     </target>
     <target name="script_unittest">

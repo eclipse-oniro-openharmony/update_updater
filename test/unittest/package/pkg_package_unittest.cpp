@@ -86,8 +86,8 @@ public:
         EXPECT_NE(entry, nullptr);
 
         EXPECT_NE(((PkgEntryPtr)entry.get())->GetPkgFile(), nullptr);
-        FileInfo fileInfo;
-        ret = entry->Init(&fileInfo, PkgStreamImpl::ConvertPkgStream(stream));
+        Lz4FileInfo fileInfo {};
+        ret = entry->Init(&fileInfo.fileInfo, PkgStreamImpl::ConvertPkgStream(stream));
         EXPECT_EQ(ret, 0);
         return 0;
     }
@@ -191,7 +191,7 @@ public:
     int TestUpdaterPreProcess()
     {
         PkgManager::PkgManagerPtr pkgManager = PkgManager::GetPackageInstance();
-        std::string packagePath = "/data/updater/package/test_package.zip";
+        std::string packagePath = testPackagePath + "test_package.zip";
         std::vector<std::string> components;
         int32_t ret = pkgManager->LoadPackage(packagePath, Utils::GetCertName(), components);
         EXPECT_EQ(ret, PKG_SUCCESS);
@@ -199,7 +199,7 @@ public:
         PackagesInfoPtr pkginfomanager = PackagesInfo::GetPackagesInfoInstance();
         std::vector<std::string> result;
         std::vector<std::string> targetVersions = pkginfomanager->GetOTAVersion(
-            pkgManager, "/version_list", "/data/updater/package/");
+            pkgManager, "/version_list", testPackagePath);
         EXPECT_NE(targetVersions, result);
 
         std::vector<std::string> boardIdList = pkginfomanager->GetBoardID(pkgManager, "/board_list", "");

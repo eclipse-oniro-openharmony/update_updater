@@ -55,7 +55,7 @@ void SetLogLevel(int level);
 void InitUpdaterLogger(const std::string &tag, const std::string &logFile, const std::string &stageFile,
     const std::string &errorCodeFile);
 
-void Logger(int level, const char* fileName, int32_t line, const char* format, ...);
+extern "C" void Logger(int level, const char* fileName, int32_t line, const char* format, ...);
 
 class UpdaterLogger {
 public:
