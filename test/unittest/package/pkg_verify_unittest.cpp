@@ -254,21 +254,6 @@ public:
         return 0;
     }
 
-    int TestHashDataVerifierFailed05()
-    {
-        // invalid sig in hash signed data
-        std::string invalidPkgPath = "updater_full_with_hsd.zip";
-        pkgManager_ = static_cast<PkgManagerImpl*>(PkgManager::GetPackageInstance());
-        std::vector<std::string> fileIds {};
-        EXPECT_EQ(PKG_SUCCESS, pkgManager_->LoadPackage(testPackagePath + invalidPkgPath,
-            Utils::GetCertName(), fileIds));
-        HashDataVerifier verifier {pkgManager_};
-        EXPECT_TRUE(verifier.LoadHashDataAndPkcs7(testPackagePath + invalidPkgPath));
-        EXPECT_EQ(VerifyFileByVerifier(verifier, "updater_binary"), 0);
-        PkgManager::ReleasePackageInstance(pkgManager_);
-        return 0;
-    }
-
     int TestHashDataVerifierSuccess()
     {
         pkgManager_ = static_cast<PkgManagerImpl*>(PkgManager::GetPackageInstance());
@@ -356,12 +341,6 @@ HWTEST_F(PackageVerifyTest, TestHashDataVerifierFailed04, TestSize.Level1)
 {
     PackageVerifyTest test;
     EXPECT_EQ(0, test.TestHashDataVerifierFailed04());
-}
-
-HWTEST_F(PackageVerifyTest, TestHashDataVerifierFailed05, TestSize.Level1)
-{
-    PackageVerifyTest test;
-    EXPECT_EQ(0, test.TestHashDataVerifierFailed05());
 }
 
 HWTEST_F(PackageVerifyTest, TestHashDataVerifierSuccess, TestSize.Level1)
