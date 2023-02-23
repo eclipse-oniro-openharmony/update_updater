@@ -154,7 +154,7 @@ HWTEST_F(UpdaterUtilUnitTest, UpdaterMain, TestSize.Level1)
     delete []argv;
 }
 
-HWTEST_F(UpdaterUtilUnitTest, UpdaterMain, TestSize.Level1)
+HWTEST_F(UpdaterUtilUnitTest, UpdaterFromSdcardTest, TestSize.Level1)
 {
     UpdateMessage boot {};
     if (access("/data/updater/", 0)) {
