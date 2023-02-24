@@ -185,6 +185,11 @@ static UpdaterStatus VerifyPackages(const UpdaterParams &upParams)
 
 static UpdaterStatus GetSdcardPkgsPath(UpdaterParams &upParams)
 {
+    if (upParams.updatePackage.size() != 0) {
+        LOG(INFO) << "get sdcard packages from misc";
+        return UPDATE_SUCCESS;
+    }
+    LOG(INFO) << "get sdcard packages from default path";
     std::vector<std::string> sdcardPkgs = Utils::SplitString(SDCARD_CARD_PKG_PATH, ", ");
     for (auto pkgPath : sdcardPkgs) {
         if (access(pkgPath.c_str(), 0) == 0) {
@@ -447,12 +452,12 @@ static void PostUpdatePackages(UpdaterParams &upParams, bool updateResult)
     WriteDumpResult(writeBuffer);
 }
 
-UpdaterStatus UpdaterFromSdcard()
+UpdaterStatus UpdaterFromSdcard(UpdaterParams &upParams)
 {
     SetMessageToMisc(0, "sdcard_update");
-    UpdaterParams upParams {
-        false, false, true, 0, 0, 0, 0
-    };
+    // UpdaterParams upParams {
+    //     false, false, true, 0, 0, 0, 0
+    // };
     if (CheckSdcardPkgs(upParams) != UPDATE_SUCCESS) {
         LOG(ERROR) << "can not find sdcard packages";
         return UPDATE_ERROR;
@@ -493,7 +498,7 @@ static UpdaterStatus StartUpdaterEntry(UpdaterParams &upParams)
     UpdaterStatus status = UPDATE_UNKNOWN;
     if (upParams.sdcardUpdate) {
         LOG(INFO) << "start sdcard update";
-        status = UpdaterFromSdcard();
+        status = UpdaterFromSdcard(upParams);
         return status;
     }
     if (upParams.updatePackage.size() > 0) {

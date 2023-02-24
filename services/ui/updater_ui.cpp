@@ -134,7 +134,10 @@ void OnLabelSDCardEvt()
             GetFacade().ShowProgress(0);
             GetFacade().ShowLog(TR(LOG_SDCARD_NOTMOVE));
             Utils::UsSleep(DISPLAY_TIME);
-            if (UpdaterFromSdcard() != UPDATE_SUCCESS) {
+            UpdaterParams upParams {
+                false, false, true, 0, 0, 0, 0
+            };
+            if (UpdaterFromSdcard(upParams) != UPDATE_SUCCESS) {
                 GetFacade().ShowMainpage();
                 return;
             }
@@ -154,7 +157,10 @@ void OnLabelSDCardNoDelayEvt()
                 return;
             }
             Utils::UsSleep(CALLBACK_DELAY);
-            if (auto res = UpdaterFromSdcard(); res != UPDATE_SUCCESS) {
+            UpdaterParams upParams {
+                false, false, true, 0, 0, 0, 0
+            };
+            if (auto res = UpdaterFromSdcard(upParams); res != UPDATE_SUCCESS) {
                 GetFacade().ShowLogRes(res == UPDATE_CORRUPT ? TR(LOGRES_VERIFY_FAILED) : TR(LOGRES_UPDATE_FAILED));
                 GetFacade().ShowFailedPage();
                 Utils::UsSleep(FAIL_DELAY);

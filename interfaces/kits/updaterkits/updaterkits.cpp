@@ -44,12 +44,39 @@ static bool WriteToMiscAndRebootToUpdater(const struct UpdateMessage &updateMsg)
 #endif
 }
 
-bool RebootAndInstallSdcardPackage()
+static bool AddPkgPath(struct UpdateMessage &msg, size_t updateOffset, const std::vector<std::string> &packageName)
+{
+    for (auto path : packageName) {
+        if (access(path.c_str(), R_OK) < 0) {
+            std::cout << "updaterkits: " << path << " is not readable\n";
+            return false;
+        }
+        if (updateOffset > sizeof(msg.update)) {
+            std::cout << "updaterkits: updateOffset > msg.update, return false\n";
+            return false;
+        }
+        int ret = snprintf_s(msg.update + updateOffset, sizeof(msg.update) - updateOffset,
+            sizeof(msg.update) - 1 - updateOffset, "--update_package=%s\n", path.c_str());
+        if (ret < 0) {
+            std::cout << "updaterkits: copy updater message failed\n";
+            return false;
+        }
+        updateOffset += static_cast<size_t>(ret);
+    }
+    return true;
+}
+
+bool RebootAndInstallSdcardPackage(const std::string &miscFile, const std::vector<std::string> &packageName)
 {
     struct UpdateMessage msg {};
     int ret = snprintf_s(msg.update, sizeof(msg.update), sizeof(msg.update) - 1, "--sdcard_update\n");
     if (ret < 0) {
         std::cout << "updaterkits: copy updater message failed\n";
+        return false;
+    }
+
+    if(packageName.size() != 0 && !AddPkgPath(msg, static_cast<size_t>(ret), packageName)) {
+        std::cout << "get sdcard pkg path fail";
         return false;
     }
     WriteToMiscAndRebootToUpdater(msg);
@@ -66,23 +93,8 @@ bool RebootAndInstallUpgradePackage(const std::string &miscFile, const std::vect
     }
 
     struct UpdateMessage updateMsg {};
-    size_t updateOffset = 0;
-    for (auto path : packageName) {
-        if (access(path.c_str(), R_OK) < 0) {
-            std::cout << "updaterkits: " << path << " is not readable\n";
-            return false;
-        }
-        if (updateOffset > sizeof(updateMsg.update)) {
-            std::cout << "updaterkits: updateOffset > updateMsg.update, return false\n";
-            return false;
-        }
-        int ret = snprintf_s(updateMsg.update + updateOffset, sizeof(updateMsg.update) - updateOffset,
-            sizeof(updateMsg.update) - 1 - updateOffset, "--update_package=%s\n", path.c_str());
-        if (ret < 0) {
-            std::cout << "updaterkits: copy updater message failed\n";
-            return false;
-        }
-        updateOffset += static_cast<size_t>(ret);
+    if (!AddPkgPath(updateMsg, 0, packageName)) {
+        return false;
     }
 
     WriteToMiscAndRebootToUpdater(updateMsg);
