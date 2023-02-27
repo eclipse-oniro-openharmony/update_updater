@@ -31,6 +31,7 @@ public:
     ~HashDataVerifier();
 private:
     bool LoadPkcs7FromPackage(const std::string &pkgPath);
+    bool LoadHashDataFromPackage(void);
     PkgManager::PkgManagerPtr manager_ {nullptr};
     std::unique_ptr<Pkcs7SignedData> pkcs7_ {nullptr};
     const HashSignedData *hsd_ {nullptr};

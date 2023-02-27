@@ -52,6 +52,7 @@ ohos_unittest("package_unittest") {
     "//base/update/updater/services/package/pkg_verify/pkcs7_signed_data.cpp",
     "//base/update/updater/services/package/pkg_verify/pkg_verify_util.cpp",
     "//base/update/updater/services/package/pkg_verify/zip_pkg_parse.cpp",
+    "//base/update/updater/services/package/pkg_verify/hash_data_verifier.cpp",
   ]
 
   include_dirs = [
