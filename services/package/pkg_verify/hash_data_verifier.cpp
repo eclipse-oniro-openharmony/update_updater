@@ -37,7 +37,7 @@ HashDataVerifier::~HashDataVerifier()
 
 bool HashDataVerifier::LoadHashDataAndPkcs7(const std::string &pkgPath)
 {
-    // only allow load once
+    // only allow loading once
     if (hsd_ != nullptr) {
         PKG_LOGW("hash signed data has been loaded before");
         return true;
@@ -52,15 +52,24 @@ bool HashDataVerifier::LoadHashDataAndPkcs7(const std::string &pkgPath)
         UPDATER_LAST_WORD(PKG_INVALID_FILE, pkgPath);
         return false;
     }
+    if (!LoadHashDataFromPackage()) {
+        PKG_LOGE("load pkcs7 from %s failed", pkgPath.c_str());
+        UPDATER_LAST_WORD(PKG_INVALID_FILE, pkgPath);
+        return false;
+    }
+    return true;
+}
+
+bool HashDataVerifier::LoadHashDataFromPackage(void)
+{
     PkgManager::StreamPtr outStream = nullptr;
     auto info = manager_->GetFileInfo(UPDATER_HASH_SIGNED_DATA);
     if (info == nullptr || info->unpackedSize == 0) {
         PKG_LOGE("hash signed data not find in pkg manager");
-        UPDATER_LAST_WORD(PKG_INVALID_FILE, pkgPath);
         return false;
     }
     // 1 more byte bigger than unpacked size to ensure a ending '\0' in buffer
-    PkgBuffer buffer{info->unpackedSize + 1};
+    PkgBuffer buffer {info->unpackedSize + 1};
     int32_t ret = manager_->CreatePkgStream(outStream, "", buffer);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("create stream fail");
@@ -109,6 +118,8 @@ bool HashDataVerifier::VerifyHashData(const std::string &fileName, PkgManager::S
         PKG_LOGE("stream is null");
         return false;
     }
+
+    // get hash from stream
     std::vector<uint8_t> hash {};
     int32_t ret = CalcSha256Digest(PkgStreamImpl::ConvertPkgStream(stream), stream->GetFileLength(), hash);
     if (ret != 0) {
@@ -116,6 +127,8 @@ bool HashDataVerifier::VerifyHashData(const std::string &fileName, PkgManager::S
         UPDATER_LAST_WORD(ret, fileName);
         return false;
     }
+
+    // get sig from hash data
     std::string name = std::string("build_tools/") + fileName;
     std::vector<uint8_t> sig(MAX_SIG_SIZE, 0);
     auto sigLen = GetSigFromHashData(hsd_, sig.data(), sig.size(), name.c_str());
@@ -126,7 +139,7 @@ bool HashDataVerifier::VerifyHashData(const std::string &fileName, PkgManager::S
     }
     sig.resize(sigLen);
 
-    // then using cert from it to verify hash data
+    // then using cert from pkcs7 to verify hash data
     if (pkcs7_ == nullptr || pkcs7_->Verify(hash, sig, false) != 0) {
         PKG_LOGE("verify hash signed data for %s failed", fileName.c_str());
         UPDATER_LAST_WORD(PKG_INVALID_SIGNATURE, fileName);
