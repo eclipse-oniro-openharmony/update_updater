@@ -68,6 +68,10 @@ ohos_static_library("libupdaterpackage") {
     "//third_party/openssl:libcrypto_static",
   ]
 
+  if (!is_linux && !is_mingw && !is_mac) {
+    deps += [ "../rust/hash_signed_data:rust_hash_signed_data" ]
+  }
+
   configs = [ ":package_config" ]
 
   if (is_mingw) {

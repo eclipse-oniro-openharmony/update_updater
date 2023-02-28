@@ -32,6 +32,7 @@ ohos_unittest("package_unittest") {
   ]
 
   sources += [
+    "../../../services/package/pkg_verify/hash_data_verifier.cpp",
     "//base/update/updater/interfaces/kits/packages/package.cpp",
     "//base/update/updater/services/package/pkg_algorithm/pkg_algo_deflate.cpp",
     "//base/update/updater/services/package/pkg_algorithm/pkg_algo_digest.cpp",

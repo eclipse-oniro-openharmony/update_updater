@@ -27,6 +27,7 @@
 
 #include "package.h"
 #include "cert_verify.h"
+#include "hash_data_verifier.h"
 #include "openssl_util.h"
 #include "pkg_verify_util.h"
 #include "zip_pkg_parse.h"
@@ -61,11 +62,10 @@ public:
         ret = ExtraPackageFile(packagePath.c_str(), keyPath.c_str(), file.c_str(), outPath.c_str());
         EXPECT_EQ(ret, PKG_INVALID_FILE);
 
-        packagePath = "/data/updater/package/test_package.zip";
+        packagePath = testPackagePath + "test_package.zip";
         keyPath = "/data/updater/src/signing_cert.crt";
         file = "updater.bin";
-        outPath = "/data/updater/package/";
-        ret = ExtraPackageFile(packagePath.c_str(), keyPath.c_str(), file.c_str(), outPath.c_str());
+        ret = ExtraPackageFile(packagePath.c_str(), keyPath.c_str(), file.c_str(), testPackagePath.c_str());
         EXPECT_EQ(ret, PKG_SUCCESS);
         return 0;
     }
@@ -81,10 +81,9 @@ public:
         ret = ExtraPackageDir(packagePath.c_str(), keyPath.c_str(), nullptr, outPath.c_str());
         EXPECT_EQ(ret, PKG_INVALID_FILE);
 
-        packagePath = "/data/updater/package/test_package.zip";
+        packagePath = testPackagePath + "test_package.zip";
         keyPath = "/data/updater/src/signing_cert.crt";
-        outPath = "/data/updater/package/";
-        ret = ExtraPackageDir(packagePath.c_str(), keyPath.c_str(), nullptr, outPath.c_str());
+        ret = ExtraPackageDir(packagePath.c_str(), keyPath.c_str(), nullptr, testPackagePath.c_str());
         EXPECT_EQ(ret, PKG_SUCCESS);
         return 0;
     }
@@ -189,6 +188,90 @@ public:
         EXPECT_NE(ret, PKG_SUCCESS);
         return 0;
     }
+
+    int TestHashDataVerifierFailed01()
+    {
+        // verifier with null pkg manager
+        HashDataVerifier verifier {nullptr};
+        EXPECT_FALSE(verifier.LoadHashDataAndPkcs7(""));
+        EXPECT_FALSE(verifier.VerifyHashData("updater_binary", nullptr));
+        FileStream filestream(nullptr, "", nullptr, PkgStream::PkgStreamType_Read);
+        EXPECT_FALSE(verifier.VerifyHashData("updater_binary", &filestream));
+        return 0;
+    }
+
+    int TestHashDataVerifierFailed02()
+    {
+        // no hash signed data in pkg
+        std::string invalidPkgPath = "updater_full_without_hsd.zip";
+        pkgManager_ = static_cast<PkgManagerImpl*>(PkgManager::GetPackageInstance());
+        HashDataVerifier verifier {pkgManager_};
+        EXPECT_FALSE(verifier.LoadHashDataAndPkcs7(testPackagePath + invalidPkgPath));
+
+        // invalid package path
+        EXPECT_FALSE(verifier.LoadHashDataAndPkcs7("invalid package path"));
+        return 0;
+    }
+
+    int TestHashDataVerifierFailed03()
+    {
+        // invalid hash signed data format
+        std::string invalidPkgPath = "updater_full_with_invalid_hsd.zip";
+        pkgManager_ = static_cast<PkgManagerImpl*>(PkgManager::GetPackageInstance());
+        std::vector<std::string> fileIds {};
+        EXPECT_EQ(PKG_SUCCESS, pkgManager_->LoadPackage(testPackagePath + invalidPkgPath,
+            Utils::GetCertName(), fileIds));
+        HashDataVerifier verifier {pkgManager_};
+        EXPECT_FALSE(verifier.LoadHashDataAndPkcs7(testPackagePath + invalidPkgPath));
+        PkgManager::ReleasePackageInstance(pkgManager_);
+        return 0;
+    }
+
+    int TestHashDataVerifierFailed04()
+    {
+        // invalid pkg footer
+        std::string invalidPkgPath = "updater_full_with_invalid_footer.zip";
+        pkgManager_ = static_cast<PkgManagerImpl*>(PkgManager::GetPackageInstance());
+        HashDataVerifier verifier {pkgManager_};
+        EXPECT_FALSE(verifier.LoadHashDataAndPkcs7(testPackagePath + invalidPkgPath));
+        return 0;
+    }
+
+    int VerifyFileByVerifier(const HashDataVerifier &verifier, const std::string &fileName)
+    {
+        const FileInfo *info = pkgManager_->GetFileInfo(fileName);
+        EXPECT_NE(info, nullptr) << "info is null " << fileName;
+        if (info == nullptr) {
+            return -1;
+        }
+        PkgManager::StreamPtr outStream = nullptr;
+        PkgBuffer buffer{info->unpackedSize};
+        EXPECT_EQ(PKG_SUCCESS, pkgManager_->CreatePkgStream(outStream, fileName, buffer)) << fileName;
+        EXPECT_EQ(PKG_SUCCESS, pkgManager_->ExtractFile(fileName, outStream)) << fileName;
+        EXPECT_TRUE(verifier.VerifyHashData(fileName, outStream));
+        EXPECT_FALSE(verifier.VerifyHashData("invalid", outStream));
+        pkgManager_->ClosePkgStream(outStream);
+        return 0;
+    }
+
+    int TestHashDataVerifierSuccess()
+    {
+        pkgManager_ = static_cast<PkgManagerImpl*>(PkgManager::GetPackageInstance());
+        std::vector<std::string> fileIds {};
+        EXPECT_EQ(PKG_SUCCESS, pkgManager_->LoadPackage(testPackagePath + "updater_full_with_hsd.zip",
+            Utils::GetCertName(), fileIds));
+        HashDataVerifier verifier {pkgManager_};
+        EXPECT_TRUE(verifier.LoadHashDataAndPkcs7(testPackagePath + testZipPackageName));
+
+        // secondary load directly return true
+        EXPECT_TRUE(verifier.LoadHashDataAndPkcs7(testPackagePath + testZipPackageName));
+        std::vector<std::string> fileList { "updater_binary", "loadScript.us", "Verse-script.us" };
+        for (const auto &fileName : fileList) {
+            EXPECT_EQ(VerifyFileByVerifier(verifier, fileName), 0);
+        }
+        PkgManager::ReleasePackageInstance(pkgManager_);
+        return 0;
+    }
 };
 
 HWTEST_F(PackageVerifyTest, TestPkgVerifyFailed, TestSize.Level1)
@@ -232,7 +315,37 @@ HWTEST_F(PackageVerifyTest, TestGetFileSize, TestSize.Level1)
     PackageVerifyTest test;
     std::string testFileName = "invalid_path";
     EXPECT_EQ(0, test.TestGetFileSize(testFileName));
-    testFileName = "/data/updater/package/test_package.zip";
+    testFileName = testPackagePath + "test_package.zip";
     EXPECT_EQ(1368949, test.TestGetFileSize(testFileName));
+}
+
+HWTEST_F(PackageVerifyTest, TestHashDataVerifierFailed01, TestSize.Level1)
+{
+    PackageVerifyTest test;
+    EXPECT_EQ(0, test.TestHashDataVerifierFailed01());
+}
+
+HWTEST_F(PackageVerifyTest, TestHashDataVerifierFailed02, TestSize.Level1)
+{
+    PackageVerifyTest test;
+    EXPECT_EQ(0, test.TestHashDataVerifierFailed02());
+}
+
+HWTEST_F(PackageVerifyTest, TestHashDataVerifierFailed03, TestSize.Level1)
+{
+    PackageVerifyTest test;
+    EXPECT_EQ(0, test.TestHashDataVerifierFailed03());
+}
+
+HWTEST_F(PackageVerifyTest, TestHashDataVerifierFailed04, TestSize.Level1)
+{
+    PackageVerifyTest test;
+    EXPECT_EQ(0, test.TestHashDataVerifierFailed04());
+}
+
+HWTEST_F(PackageVerifyTest, TestHashDataVerifierSuccess, TestSize.Level1)
+{
+    PackageVerifyTest test;
+    EXPECT_EQ(0, test.TestHashDataVerifierSuccess());
 }
 }

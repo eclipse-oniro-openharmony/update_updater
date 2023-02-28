@@ -40,12 +40,12 @@ public:
 public:
     int TestInvalidCreatePackage()
     {
-        ComponentInfoExt compInfo;
+        ComponentInfoExt compInfo {};
         uint8_t pkgType = PkgPackType::PKG_PACK_TYPE_UPGRADE;
         int ret = CreatePackage(nullptr, &compInfo, nullptr, GetTestPrivateKeyName(0).c_str());
         EXPECT_EQ(ret, PKG_INVALID_PARAM);
 
-        UpgradePkgInfoExt pkgInfoExt;
+        UpgradePkgInfoExt pkgInfoExt {};
         pkgInfoExt.pkgType = pkgType;
         ret = CreatePackage(&pkgInfoExt, &compInfo, nullptr, GetTestPrivateKeyName(0).c_str());
         EXPECT_EQ(ret, PKG_INVALID_PARAM);
@@ -139,7 +139,7 @@ public:
         std::vector<std::string> components;
         // 使用上面打包的包进行解析
         int32_t ret = pkgManager_->LoadPackage(
-            "/data/updater/package/test_package.zip", GetTestCertName(type), components);
+            testPackagePath + "test_package.zip", GetTestCertName(type), components);
         EXPECT_EQ(ret, PKG_SUCCESS);
 
         for (size_t i = 0; i < components.size(); i++) {
@@ -196,7 +196,7 @@ public:
     {
         constexpr size_t digestSize = 32;
         std::vector<uint8_t> digest(digestSize);
-        std::string path = "/data/updater/package/test_package.zip";
+        std::string path = testPackagePath + "test_package.zip";
         BuildFileDigest(*digest.data(), digest.capacity(), path.c_str());
         int ret = VerifyPackage(path.c_str(), GetTestCertName(0).c_str(), "", digest.data(), digest.capacity());
         EXPECT_EQ(0, ret);
@@ -207,7 +207,7 @@ public:
 
     int TestVerifyPackageWithCallback()
     {
-        std::string path = "/data/updater/package/test_package.zip";
+        std::string path = testPackagePath + "test_package.zip";
         int ret = VerifyPackageWithCallback(path.c_str(), GetTestCertName(0).c_str(),
             [](int32_t result, uint32_t percent) { PKG_LOGI("current progress: %u\n", percent); });
         EXPECT_EQ(0, ret);
