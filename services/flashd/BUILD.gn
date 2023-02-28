@@ -96,7 +96,10 @@ ohos_source_set("flashd_deamon") {
   if (build_selinux) {
     deps += [ "//third_party/selinux:libselinux" ]
     include_dirs += [ "//third_party/selinux/libselinux/include" ]
-    defines += [ "SURPPORT_SELINUX" ]
+    defines += [
+      "SURPPORT_SELINUX",
+      "UPDATER_MODE",
+    ]
   }
 }
 
