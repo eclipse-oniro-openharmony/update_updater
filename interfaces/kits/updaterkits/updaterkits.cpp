@@ -88,6 +88,12 @@ bool RebootAndInstallUpgradePackage(const std::string &miscFile, const std::vect
         return false;
     }
 
+    for (auto path : packageName) {
+        if (access(path.c_str(), R_OK) < 0) {
+            std::cout << "updaterkits: " << path << " is not readable\n";
+            return false;
+        }
+    }
     struct UpdateMessage updateMsg {};
     if (!AddPkgPath(updateMsg, 0, packageName)) {
         return false;
