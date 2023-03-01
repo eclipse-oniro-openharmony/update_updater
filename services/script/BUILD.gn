@@ -39,6 +39,7 @@ config("script_config") {
   visibility = [ ":*" ]
 
   include_dirs = [
+    "../include",
     "//base/update/updater/interfaces/kits/include",
     "//base/update/updater/services/include/log",
     "//base/update/updater/services/include/package",

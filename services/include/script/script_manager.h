@@ -17,6 +17,7 @@
 
 #include <cstdlib>
 #include <memory>
+#include "hash_data_verifier.h"
 #include "pkg_manager.h"
 #include "script_instruction.h"
 
@@ -56,7 +57,7 @@ public:
     /**
      * Get script manager
      */
-    static ScriptManager* GetScriptManager(UScriptEnv *env);
+    static ScriptManager* GetScriptManager(UScriptEnv *env, const Hpackage::HashDataVerifier *verifier);
     static void ReleaseScriptManager();
 };
 } // namespace Uscript

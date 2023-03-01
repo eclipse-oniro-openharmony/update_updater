@@ -41,6 +41,7 @@ config("package_config") {
 
 ohos_static_library("libupdaterpackage") {
   sources = [
+    "pkg_verify/hash_data_verifier.cpp",
     "$SUBSYSTEM_DIR/pkg_algorithm/pkg_algo_deflate.cpp",
     "$SUBSYSTEM_DIR/pkg_algorithm/pkg_algo_digest.cpp",
     "$SUBSYSTEM_DIR/pkg_algorithm/pkg_algo_lz4.cpp",

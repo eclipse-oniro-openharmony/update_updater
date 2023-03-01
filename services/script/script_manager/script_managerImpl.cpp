@@ -31,20 +31,24 @@ constexpr const char *LOAD_SCRIPT_NAME = "loadScript.us";
 constexpr const char *REGISTER_CMD_SCRIPT_NAME = "registerCmd.us";
 
 static ScriptManagerImpl* g_scriptManager = nullptr;
-ScriptManager* ScriptManager::GetScriptManager(UScriptEnv *env)
+ScriptManager* ScriptManager::GetScriptManager(UScriptEnv *env, const Hpackage::HashDataVerifier *verifier)
 {
-    if (env == nullptr) {
-        USCRIPT_LOGE("Env null");
+    if (env == nullptr || verifier == nullptr) {
+        USCRIPT_LOGE("Env or verifier is null");
         return nullptr;
     }
-
+    if (g_scriptManager != nullptr) {
+        return g_scriptManager;
+    }
+    g_scriptManager = new (std::nothrow) ScriptManagerImpl(env);
     if (g_scriptManager == nullptr) {
-        g_scriptManager = new(std::nothrow) ScriptManagerImpl(env);
-        if (g_scriptManager == nullptr) {
-            USCRIPT_LOGE("Create g_scriptManager failed");
-            return nullptr;
-        }
-        (void)g_scriptManager->Init();
+        USCRIPT_LOGE("Create g_scriptManager failed");
+        return nullptr;
+    }
+    g_scriptManager->SetVerifier(verifier);
+    if (g_scriptManager->Init() != USCRIPT_SUCCESS) {
+        USCRIPT_LOGE("g_scriptManager init failed");
+        return nullptr;
     }
     return g_scriptManager;
 }
@@ -163,10 +167,15 @@ int32_t ScriptManagerImpl::ExtractAndExecuteScript(PkgManager::PkgManagerPtr man
     }
     ret = manager->ExtractFile(scriptName, outStream);
     if (ret != USCRIPT_SUCCESS) {
+        manager->ClosePkgStream(outStream);
         USCRIPT_LOGE("Failed to extract script stream %s", scriptName.c_str());
         return ret;
     }
-
+    if (scriptVerifier_ == nullptr || !scriptVerifier_->VerifyHashData(scriptName, outStream)) {
+        manager->ClosePkgStream(outStream);
+        USCRIPT_LOGE("verify script %s by hash signed data failed", scriptName.c_str());
+        return USCRIPT_INVALID_SCRIPT;
+    }
     ret = ScriptInterpreter::ExecuteScript(this, outStream);
     manager->ClosePkgStream(outStream);
     if (ret != USCRIPT_SUCCESS) {

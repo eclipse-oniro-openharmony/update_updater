@@ -30,6 +30,7 @@
 #include "language/language_ui.h"
 #include "log/dump.h"
 #include "log/log.h"
+#include "package/hash_data_verifier.h"
 #include "package/pkg_manager.h"
 #include "package/packages_info.h"
 #include "parameter.h"
@@ -56,7 +57,8 @@ int g_tmpProgressValue;
 int g_tmpValue;
 
 namespace {
-int32_t ExtractUpdaterBinary(PkgManager::PkgManagerPtr manager, const std::string &updaterBinary)
+int32_t ExtractUpdaterBinary(PkgManager::PkgManagerPtr manager, std::string &packagePath,
+    const std::string &updaterBinary)
 {
     PkgManager::StreamPtr outStream = nullptr;
     int32_t ret = manager->CreatePkgStream(outStream,  GetWorkPath() + updaterBinary,
@@ -67,8 +69,17 @@ int32_t ExtractUpdaterBinary(PkgManager::PkgManagerPtr manager, const std::strin
         return UPDATE_CORRUPT;
     }
     ret = manager->ExtractFile(updaterBinary, outStream);
+    if (ret != PKG_SUCCESS) {
+        LOG(ERROR) << "ExtractUpdaterBinary extract file failed";
+        UPDATER_LAST_WORD(UPDATE_CORRUPT);
+        return UPDATE_CORRUPT;
+    }
+    HashDataVerifier verifier {manager};
+    if (!verifier.LoadHashDataAndPkcs7(packagePath) || !verifier.VerifyHashData(updaterBinary, outStream)) {
+        return UPDATE_CORRUPT;
+    }
     manager->ClosePkgStream(outStream);
-    return ret;
+    return UPDATE_SUCCESS;
 }
 }
 
@@ -413,8 +424,9 @@ UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, UpdaterPara
     int pipeWrite = pfd[1];
     std::string fullPath = GetWorkPath() + std::string(UPDATER_BINARY);
     (void)Utils::DeleteFile(fullPath);
-    if (ExtractUpdaterBinary(pkgManager, UPDATER_BINARY) != 0) {
-        LOG(INFO) << "There is no updater_binary in package, use updater_binary in device";
+
+    if (ExtractUpdaterBinary(pkgManager, upParams.updatePackage[upParams.pkgLocation], UPDATER_BINARY) != 0) {
+        LOG(INFO) << "There is no valid updater_binary in package, use updater_binary in device";
         fullPath = "/bin/updater_binary";
     }
 

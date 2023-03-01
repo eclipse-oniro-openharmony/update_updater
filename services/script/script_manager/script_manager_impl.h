@@ -34,7 +34,10 @@ public:
     virtual ~ScriptManagerImpl();
     int32_t Init();
     int32_t ExecuteScript(int32_t priority) override;
-
+    void SetVerifier(const Hpackage::HashDataVerifier *verifier)
+    {
+        scriptVerifier_ = verifier;
+    }
 private:
     int32_t ExtractAndExecuteScript(Hpackage::PkgManager::PkgManagerPtr manager,
         const std::string &scriptName);
@@ -49,6 +52,7 @@ private:
     std::vector<std::string> scriptFiles_[MAX_PRIORITY] {};
     ThreadPool *threadPool_ = nullptr;
     UScriptEnv *scriptEnv_ = nullptr;
+    const Hpackage::HashDataVerifier *scriptVerifier_ = nullptr;
 };
 } // namespace Uscript
 #endif
