@@ -419,6 +419,7 @@ static UpdaterStatus DoUpdatePackages(UpdaterParams &upParams)
             if (!CheckDumpResult()) {
                 UPDATER_LAST_WORD(status);
             }
+            PkgManager::ReleasePackageInstance(manager);
             return status;
         }
         PkgManager::ReleasePackageInstance(manager);
