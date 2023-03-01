@@ -565,8 +565,6 @@ static UpdaterStatus StartUpdater(const std::vector<std::string> &args,
                     mode = HOTA_UPDATE;
                 } else if (option == "retry_count") {
                     upParams.retryCount = atoi(optarg);
-                    (void)UPDATER_UI_INSTANCE.SetMode(UpdaterMode::OTA);
-                    mode = HOTA_UPDATE;
                 } else if (option == "factory_wipe_data") {
                     (void)UPDATER_UI_INSTANCE.SetMode(UpdaterMode::REBOOTFACTORYRST);
                     upParams.factoryWipeData = true;
@@ -577,8 +575,6 @@ static UpdaterStatus StartUpdater(const std::vector<std::string> &args,
                     upParams.pkgLocation = static_cast<unsigned int>(atoi(optarg));
                 } else if (option == "sdcard_update") {
                     upParams.sdcardUpdate = true;
-                    (void)UPDATER_UI_INSTANCE.SetMode(UpdaterMode::SDCARD);
-                    mode = SDCARD_UPDATE;
                 }
                 break;
             }
@@ -589,6 +585,10 @@ static UpdaterStatus StartUpdater(const std::vector<std::string> &args,
     }
     optind = 1;
     // Sanity checks
+    if (upParams.sdcardUpdate) {
+        (void)UPDATER_UI_INSTANCE.SetMode(UpdaterMode::SDCARD);
+        mode = SDCARD_UPDATE;
+    }
     if (upParams.factoryWipeData && upParams.userWipeData) {
         LOG(WARNING) << "Factory level reset and user level reset both set. use user level reset.";
         upParams.factoryWipeData = false;

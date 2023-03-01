@@ -191,7 +191,7 @@ int MountSdcard(std::string &path, std::string &mountPoint)
     int ret = 0;
     const std::vector<const char *> fileSystemType = {"ext4", "vfat"};
     for (auto type : fileSystemType) {
-        if ((ret = mount(path.c_str(), path.c_str(), type, 0, nullptr)) == 0) {
+        if ((ret = mount(path.c_str(), mountPoint.c_str(), type, 0, nullptr)) == 0) {
             LOG(INFO) << "mount success, sdcard type is " << type;
             return 0;
         }

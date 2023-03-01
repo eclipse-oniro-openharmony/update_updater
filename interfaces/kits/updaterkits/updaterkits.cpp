@@ -47,10 +47,6 @@ static bool WriteToMiscAndRebootToUpdater(const struct UpdateMessage &updateMsg)
 static bool AddPkgPath(struct UpdateMessage &msg, size_t updateOffset, const std::vector<std::string> &packageName)
 {
     for (auto path : packageName) {
-        if (access(path.c_str(), R_OK) < 0) {
-            std::cout << "updaterkits: " << path << " is not readable\n";
-            return false;
-        }
         if (updateOffset > sizeof(msg.update)) {
             std::cout << "updaterkits: updateOffset > msg.update, return false\n";
             return false;
