@@ -153,10 +153,10 @@ static int MountNtfsWithRetry(std::string source, std::string target)
                 return -1;
             }
         }
-        sleep(3);
+        sleep(3); // 3 : wait 3s;
         num++;
         LOG(ERROR) << "failed to mount " << source << " on " << target << ", errno is " << errno;
-    } while (num < 3);
+    } while (num < 3); // 3 : retry three times
     return -1;
 }
 
@@ -191,7 +191,7 @@ int MountSdcard(std::string &path, std::string &mountPoint)
     int ret = 0;
     const std::vector<const char *> fileSystemType = {"ext4", "vfat"};
     for (auto type : fileSystemType) {
-        if ((ret = mount(path.c_str(), mountPoint.c_str(), type, 0, nullptr)) == 0) {
+        if ((ret = mount(mountPoint.c_str(), path.c_str(), type, 0, nullptr)) == 0) {
             LOG(INFO) << "mount success, sdcard type is " << type;
             return 0;
         }

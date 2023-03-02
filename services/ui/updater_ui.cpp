@@ -141,7 +141,7 @@ void OnLabelSDCardEvt()
                 GetFacade().ShowMainpage();
                 return;
             }
-            PostUpdater(false);
+            PostUpdater(true);
             Utils::DoReboot("");
         }
     }.detach();
@@ -170,7 +170,7 @@ void OnLabelSDCardNoDelayEvt()
             GetFacade().ShowLogRes(TR(LABEL_UPD_OK_DONE));
             GetFacade().ShowSuccessPage();
             Utils::UsSleep(SUCCESS_DELAY);
-            PostUpdater(false);
+            PostUpdater(true);
             Utils::DoReboot("");
         }
     }.detach();

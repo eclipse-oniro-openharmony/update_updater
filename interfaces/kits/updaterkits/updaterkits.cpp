@@ -71,7 +71,7 @@ bool RebootAndInstallSdcardPackage(const std::string &miscFile, const std::vecto
         return false;
     }
 
-    if(packageName.size() != 0 && !AddPkgPath(msg, static_cast<size_t>(ret), packageName)) {
+    if (packageName.size() != 0 && !AddPkgPath(msg, static_cast<size_t>(ret), packageName)) {
         std::cout << "get sdcard pkg path fail";
         return false;
     }
