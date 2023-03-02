@@ -124,7 +124,7 @@ static int OtaUpdatePreCheck(PkgManager::PkgManagerPtr pkgManager, const std::st
 {
     UPDATER_INIT_RECORD;
     if (pkgManager == nullptr) {
-        LOG(ERROR) << "Fail to GetPackageInstance";
+        LOG(ERROR) << "pkgManager is nullptr";
         UPDATER_LAST_WORD(PKG_INVALID_FILE);
         return UPDATE_CORRUPT;
     }
@@ -159,7 +159,7 @@ static UpdaterStatus VerifyPackages(const UpdaterParams &upParams)
     UPDATER_UI_INSTANCE.ShowProgress(0.0);
     for (unsigned int i = upParams.pkgLocation; i < upParams.updatePackage.size(); i++) {
         LOG(INFO) << "Verify package:" << upParams.updatePackage[i];
-        PkgManager::PkgManagerPtr manager = PkgManager::GetPackageInstance();
+        PkgManager::PkgManagerPtr manager = PkgManager::CreatePackageInstance();
         int32_t verifyret = OtaUpdatePreCheck(manager, upParams.updatePackage[i]);
         PkgManager::ReleasePackageInstance(manager);
 
@@ -401,7 +401,7 @@ static UpdaterStatus DoUpdatePackages(UpdaterParams &upParams)
     }
     UPDATER_UI_INSTANCE.ShowProgress(updateStartPosition * FULL_PERCENT_PROGRESS);
     for (; upParams.pkgLocation < upParams.updatePackage.size(); upParams.pkgLocation++) {
-        PkgManager::PkgManagerPtr manager = PkgManager::GetPackageInstance();
+        PkgManager::PkgManagerPtr manager = PkgManager::CreatePackageInstance();
         upParams.currentPercentage = pkgStartPosition[upParams.pkgLocation + 1] -
             pkgStartPosition[upParams.pkgLocation];
         upParams.initialProgress = pkgStartPosition[upParams.pkgLocation];
@@ -419,6 +419,7 @@ static UpdaterStatus DoUpdatePackages(UpdaterParams &upParams)
             if (!CheckDumpResult()) {
                 UPDATER_LAST_WORD(status);
             }
+            PkgManager::ReleasePackageInstance(manager);
             return status;
         }
         PkgManager::ReleasePackageInstance(manager);

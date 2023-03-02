@@ -342,9 +342,9 @@ int ProcessUpdater(bool retry, int pipeFd, const std::string &packagePath, const
     }
     // line buffered, make sure parent read per line.
     setlinebuf(pipeWrite);
-    PkgManager::PkgManagerPtr pkgManager = PkgManager::GetPackageInstance();
+    PkgManager::PkgManagerPtr pkgManager = PkgManager::CreatePackageInstance();
     if (pkgManager == nullptr) {
-        LOG(ERROR) << "Fail to GetPackageInstance";
+        LOG(ERROR) << "pkgManager is nullptr";
         fclose(pipeWrite);
         pipeWrite = nullptr;
         UPDATER_LAST_WORD(EXIT_INVALID_ARGS);
