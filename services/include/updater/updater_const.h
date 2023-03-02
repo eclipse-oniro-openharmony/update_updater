@@ -35,7 +35,7 @@ constexpr const char *UPDATER_BINARY = "updater_binary";
 constexpr const char *SDCARD_PATH = "/sdcard";
 constexpr const char *UPDATER_HDC_LOG = "/data/updater/log/flashd_hdc.log";
 constexpr const char *PREFIX_UFS_NODE = "/dev/block/sd";
-constexpr const char *SDCARD_FULL_PACKAGE = "updater_full.zip";
+constexpr const char *SDCARD_FULL_PACKAGE = "updater.zip";
 constexpr const char *SDCARD_CUST_PACKAGE = "updater_cust.zip";
 constexpr const char *SDCARD_PRELOAD_PACKAGE = "updater_preload.zip";
 
