@@ -122,7 +122,6 @@ static int MountNtfsWithRetry(std::string source, std::string target)
     char *argv[] = {const_cast<char *>("system/bin/mount.ntfs"),
         const_cast<char *>(source.c_str()), const_cast<char *>(target.c_str()), nullptr};
     int num = 0;
-    // int status = -1;
     do {
         pid_t child = fork();
         if (child == 0) {
@@ -130,7 +129,6 @@ static int MountNtfsWithRetry(std::string source, std::string target)
                 _exit(-1);
             }
         }
-        // status
         int status = -1;
         if (waitpid(child, &status, 0) < 0) {
             LOG(ERROR) << "waitpid failed, " << child;
@@ -162,7 +160,7 @@ static int MountNtfsWithRetry(std::string source, std::string target)
 
 int MountSdcard(std::string &path, std::string &mountPoint)
 {
-    if (path == "" || mountPoint == "") {
+    if (path.empty() || mountPoint.empty()) {
         LOG(ERROR) << "path or mountPoint is null, mount fail";
         return -1;
     }
@@ -187,11 +185,9 @@ int MountSdcard(std::string &path, std::string &mountPoint)
             return -1;
         }
     }
-    errno = 0;
-    int ret = 0;
     const std::vector<const char *> fileSystemType = {"ext4", "vfat"};
     for (auto type : fileSystemType) {
-        if ((ret = mount(mountPoint.c_str(), path.c_str(), type, 0, nullptr)) == 0) {
+        if (mount(mountPoint.c_str(), path.c_str(), type, 0, nullptr) == 0) {
             LOG(INFO) << "mount success, sdcard type is " << type;
             return 0;
         }

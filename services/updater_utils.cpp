@@ -49,21 +49,22 @@ bool DeleteUpdaterPath(const std::string &path)
     while ((dp = readdir(pDir.get())) != nullptr) {
         std::string currentName(dp->d_name);
         if (currentName[0] == '.' || (currentName.compare("log") == 0) ||
+            (currentName.compare(UPDATER_RESULT_FILE) == 0) ||
             (currentName.compare(UPDATER_LOCALE_FILE) == 0)) {
             continue;
         }
-        if ((!sdcardTmp && currentName.compare(UPDATER_RESULT_FILE) != 0) ||
-            (sdcardTmp && currentName.compare(SDCARD_FULL_PACKAGE) != 0 &&
-            currentName.compare(SDCARD_CUST_PACKAGE) != 0 && currentName.compare(SDCARD_PRELOAD_PACKAGE) != 0)) {
-            std::string tmpName(path);
-            tmpName.append("/" + currentName);
-            if (IsDirExist(tmpName)) {
-                DeleteUpdaterPath(tmpName);
-            }
-#ifndef UPDATER_UT
-            remove(tmpName.c_str());
-#endif
+        if (currentName.compare(SDCARD_FULL_PACKAGE) == 0 ||
+            currentName.compare(SDCARD_CUST_PACKAGE) == 0 || currentName.compare(SDCARD_PRELOAD_PACKAGE) == 0) {
+            continue;
         }
+        std::string tmpName(path);
+        tmpName.append("/" + currentName);
+        if (IsDirExist(tmpName)) {
+            DeleteUpdaterPath(tmpName);
+        }
+#ifndef UPDATER_UT
+        remove(tmpName.c_str());
+#endif
     }
     return true;
 }

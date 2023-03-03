@@ -479,7 +479,6 @@ UpdaterStatus UpdaterFromSdcard(UpdaterParams &upParams)
     return DoUpdatePackages(upParams);
 }
 
-
 static UpdaterStatus InstallUpdaterPackages(UpdaterParams &upParams)
 {
     UpdaterStatus status = PreUpdatePackages(upParams);
@@ -497,8 +496,7 @@ static UpdaterStatus StartUpdaterEntry(UpdaterParams &upParams)
         LOG(INFO) << "start sdcard update";
         status = UpdaterFromSdcard(upParams);
         return status;
-    }
-    if (upParams.updatePackage.size() > 0) {
+    } else if (upParams.updatePackage.size() > 0) {
         UPDATER_UI_INSTANCE.ShowProgressPage();
         status = InstallUpdaterPackages(upParams);
     } else if (upParams.factoryWipeData) {
@@ -540,9 +538,7 @@ static UpdaterStatus StartUpdaterEntry(UpdaterParams &upParams)
 static UpdaterStatus StartUpdater(const std::vector<std::string> &args,
     char **argv, PackageUpdateMode &mode)
 {
-    UpdaterParams upParams {
-        false, false, false, 0, 0, 0, 0
-    };
+    UpdaterParams upParams;
     std::vector<char *> extractedArgs;
     int rc;
     int optionIndex;
