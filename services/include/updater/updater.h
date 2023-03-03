@@ -39,12 +39,13 @@ enum PackageUpdateMode {
 };
 
 struct UpdaterParams {
-    bool factoryWipeData {};
-    bool userWipeData {};
-    int retryCount {};
-    float initialProgress {}; /* The upgrade starts at the progress bar location */
-    float currentPercentage {}; /* The proportion of progress bars occupied by the upgrade process */
-    unsigned int pkgLocation {};
+    bool factoryWipeData = false;
+    bool userWipeData = false;
+    bool sdcardUpdate = false;
+    int retryCount = 0;
+    float initialProgress = 0; /* The upgrade starts at the progress bar location */
+    float currentPercentage = 0; /* The proportion of progress bars occupied by the upgrade process */
+    unsigned int pkgLocation = 0;
     std::vector<std::string> updatePackage {};
 };
 
