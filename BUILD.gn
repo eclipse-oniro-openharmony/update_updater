@@ -29,11 +29,13 @@ group("unittest") {
     "test/unittest/applypatch_test:applypatch_unittest",
     "test/unittest/flashd_test:flashd_unittest",
     "test/unittest/package:package_unittest",
+    "test/unittest/common/ring_buffer:ring_buffer_test",
     "test/unittest/script:script_unittest",
     "test/unittest/script:user_instruction",
     "test/unittest/script:user_instruction_invalid",
     "test/unittest/service_test:updater_service_unittest",
     "test/unittest/updater_binary:binary_unittest",
+    "test/unittest/flow_update/update_bin:bin_flow_update_test",
     "test/unittest/updater_ui_test:ui_unittest",
     "test/unittest/utils:utils_test",
   ]

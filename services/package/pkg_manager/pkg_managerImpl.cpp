@@ -385,6 +385,19 @@ int32_t PkgManagerImpl::LoadPackage(const std::string &packagePath, std::vector<
     return LoadPackageWithStream(packagePath, fileIds, type, stream);
 }
 
+int32_t PkgManagerImpl::LoadPackageWithStream(const std::string &packagePath, const std::string &keyPath,
+    std::vector<std::string> &fileIds, uint8_t type, StreamPtr stream)
+{
+    int32_t ret = SetSignVerifyKeyName(keyPath);
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("Invalid keyname");
+        return ret;
+    }
+
+    return LoadPackageWithStream(packagePath, fileIds, static_cast<PkgFile::PkgType>(type),
+        static_cast<PkgStreamPtr>(stream));
+}
+
 int32_t PkgManagerImpl::LoadPackageWithStream(const std::string &packagePath,
     std::vector<std::string> &fileIds, PkgFile::PkgType type, PkgStreamPtr stream)
 {
