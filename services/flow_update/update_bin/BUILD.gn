@@ -13,9 +13,7 @@
 import("//build/ohos.gni")
 
 ohos_static_library("libBinFlowUpdate") {
-  sources = [
-    "bin_flow_update.cpp",
-  ]
+  sources = [ "bin_flow_update.cpp" ]
 
   include_dirs = [
     "//base/startup/init/interfaces/innerkits/include",
@@ -38,13 +36,11 @@ ohos_static_library("libBinFlowUpdate") {
     "//base/update/updater/services/fs_manager:libfsmanager",
     "//base/update/updater/services/log:libupdaterlog",
     "//base/update/updater/services/package:libupdaterpackage",
+    "//base/update/updater/utils:libutils",
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/openssl:ssl_source",
-    "//base/update/updater/utils:libutils",
   ]
-  external_deps = [
-    "hiviewdfx_hilog_native:libhilog",
-  ]
+  external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
   subsystem_name = "updater"
   part_name = "updater"
 }

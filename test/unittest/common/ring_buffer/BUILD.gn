@@ -20,9 +20,7 @@ MODULE_OUTPUT_PATH = "updater/updater_test"
 ohos_unittest("ring_buffer_test") {
   testonly = true
   module_out_path = MODULE_OUTPUT_PATH
-  sources = [
-    "ring_buffer_unittest.cpp"
-  ]
+  sources = [ "ring_buffer_unittest.cpp" ]
   include_dirs = [
     "//base/update/updater/services/common/ring_buffer",
     "//base/update/updater/services/include/log",
