@@ -17,7 +17,6 @@
 #include <algorithm>
 #include <functional>
 
-#include "fs_manager/mount.h"
 #include "log.h"
 #include "pkg_manager/pkg_stream.h"
 #include "pkg_package/pkg_pkgfile.h"
