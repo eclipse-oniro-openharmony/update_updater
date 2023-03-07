@@ -18,7 +18,7 @@ ohos_static_library("libringbuffer") {
   sources = [ "ring_buffer.cpp" ]
 
   include_dirs = [
-    "${updater_path}/services/common/ring_bufferinclude/log",
+    "${updater_path}/services/include/log",
     "${updater_path}/utils/include",
   ]
   deps = [
