@@ -13,7 +13,7 @@
 
 import("//build/test.gni")
 
-UPDATER_TEST_ROOT = "//base/update/updater/test/unittest"
+UPDATER_TEST_ROOT = "../../../../test/unittest"
 
 MODULE_OUTPUT_PATH = "updater/updater_test"
 
@@ -24,19 +24,19 @@ ohos_unittest("bin_flow_update_test") {
     "bin_flow_update_unittest.cpp"
   ]
   include_dirs = [
-    "../../../interfaces/kits/include",
-    "../../../services/include",
-    "../../../services/include/log",
-    "../../../services/include/package",
-    "../../../services/include/script",
-    "../../../services/flow_update/update_bin",
-    "../../../test/unittest",
-    "../../../utils/include",
+    "../../../../interfaces/kits/include",
+    "../../../../services/include",
+    "../../../../services/include/log",
+    "../../../../services/include/package",
+    "../../../../services/include/script",
+    "../../../../services/flow_update/update_bin",
+    "../../../../test/unittest",
+    "../../../../utils/include",
     "//third_party/googletest/googletest/include",
   ]
   deps = [
-    "../../../services/log:libupdaterlog",
-    "../../../services/flow_update/update_bin:libBinFlowUpdate",
+    "../../../../services/log:libupdaterlog",
+    "../../../../services/flow_update/update_bin:libBinFlowUpdate",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
   ]

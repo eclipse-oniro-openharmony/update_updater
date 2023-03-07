@@ -13,7 +13,7 @@
 
 import("//build/test.gni")
 
-UPDATER_TEST_ROOT = "//base/update/updater/test/unittest"
+UPDATER_TEST_ROOT = "../../../..//test/unittest"
 
 MODULE_OUTPUT_PATH = "updater/updater_test"
 
@@ -22,15 +22,15 @@ ohos_unittest("ring_buffer_test") {
   module_out_path = MODULE_OUTPUT_PATH
   sources = [ "ring_buffer_unittest.cpp" ]
   include_dirs = [
-    "../../../services/common/ring_buffer",
-    "../../../services/include/log",
-    "../../../utils/include",
-    "../../../test/unittest",
+    "../../../../services/common/ring_buffer",
+    "../../../../services/include/log",
+    "../../../../utils/include",
+    "../../../../test/unittest",
     "//third_party/googletest/googletest/include",
   ]
   deps = [
-    "../../../services/common/ring_buffer:libringbuffer",
-    "../../../services/log:libupdaterlog",
+    "../../../../services/common/ring_buffer:libringbuffer",
+    "../../../../services/log:libupdaterlog",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
   ]
