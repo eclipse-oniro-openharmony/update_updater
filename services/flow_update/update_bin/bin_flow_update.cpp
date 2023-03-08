@@ -18,7 +18,7 @@
 #include <functional>
 
 #include "log.h"
-#include "macros.h"
+#include "scope_guard.h"
 #include "pkg_manager/pkg_stream.h"
 #include "pkg_package/pkg_pkgfile.h"
 #include "securec.h"
