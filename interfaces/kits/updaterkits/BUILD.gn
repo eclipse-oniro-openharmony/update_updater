@@ -18,16 +18,16 @@ ohos_static_library("libupdaterkits") {
   sources = [ "updaterkits.cpp" ]
 
   include_dirs = [
-    "//base/update/updater/interfaces/kits/include",
-    "//base/update/updater/services/include/log",
-    "//base/update/updater/utils/include",
+    "../include",
+    "../../../services/include/log",
+    "../../../utils/include",
     "//third_party/bounds_checking_function/include",
   ]
 
   deps = [
-    "//base/update/updater/interfaces/kits/misc_info:libmiscinfo",
-    "//base/update/updater/services/log:libupdaterlog",
-    "//base/update/updater/utils:libutils",
+    "../misc_info:libmiscinfo",
+    "../../../services/log:libupdaterlog",
+    "../../../utils:libutils",
     "//third_party/bounds_checking_function:libsec_static",
   ]
 
