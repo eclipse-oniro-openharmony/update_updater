@@ -17,8 +17,8 @@
                 "comId" : ""
             },
             "labelLogResId" : {
-                "pageId" : "",
-                "comId" : ""
+                "pageId" : "upd",
+                "comId" : "UpdateAutoReboot_Label"
             },
             "labelUpdId" : {
                 "pageId" : "",
