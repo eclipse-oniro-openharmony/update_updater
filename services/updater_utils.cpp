@@ -27,6 +27,7 @@
 #include "securec.h"
 #include "updater/updater.h"
 #include "updater/updater_const.h"
+#include "updater_main.h"
 #include "updater_ui.h"
 #include "utils.h"
 
@@ -205,6 +206,25 @@ std::vector<std::string> ParseParams(int argc, char **argv)
     std::vector<std::string> parseParams1 = Utils::SplitString(boot.update, "\n");
     parseParams.insert(parseParams.end(), parseParams1.begin(), parseParams1.end());
     return parseParams;
+}
+
+void BootMode::InitMode(void)
+{
+    InitUpdaterLogger(modeName, TMP_LOG, TMP_STAGE_LOG, TMP_ERROR_CODE_PATH);
+    SetLogLevel(INFO);
+    LoadFstab();
+    STAGE(UPDATE_STAGE_OUT) << "Start " << modeName;
+    Flashd::SetParameter(modePara.c_str(), "1");
+}
+
+bool IsUpdater(const UpdateMessage &boot)
+{
+    return !IsFlashd(boot) && strncmp(boot.command, "boot_updater", sizeof("boot_updater") - 1) == 0;
+}
+
+bool IsFlashd(const UpdateMessage &boot)
+{
+    return strncmp(boot.update, "boot_flash", sizeof("boot_flash") - 1) == 0;
 }
 
 int GetBootMode(int &mode)
