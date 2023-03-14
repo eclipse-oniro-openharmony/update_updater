@@ -541,12 +541,12 @@ static UpdaterStatus StartUpdaterEntry(UpdaterParams &upParams)
 
 static void SetShutdownState(const char *forceAction)
 {
-    if (forceAction == nullptr || strlen(forceAction == 0)) {
+    if (forceAction == nullptr || strlen(forceAction) == 0) {
         LOG(ERROR) << "Invalid forceAction";
         return;
     }
 
-    LOG(INFO) << "force updater action" << forceAction;
+    LOG(INFO) << "force updater action:" << forceAction;
     if (strncmp(forceAction, POWEROFF, strlen(POWEROFF)) == 0) {
         g_isShutdown = true;
     }
