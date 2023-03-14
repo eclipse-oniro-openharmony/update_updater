@@ -585,7 +585,7 @@ static UpdaterStatus StartUpdater(const std::vector<std::string> &args,
                     upParams.pkgLocation = static_cast<unsigned int>(atoi(optarg));
                 } else if (option == "sdcard_update") {
                     upParams.sdcardUpdate = true;
-                } else if (option == "force_update_action") {
+                } else if (option == "force_update_action") { /* Only for OTA. */
                     SetShutdownState(optarg);
                 }
                 break;
