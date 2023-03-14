@@ -58,9 +58,11 @@ constexpr struct option OPTIONS[] = {
     { "user_wipe_data", no_argument, nullptr, 0 },
     { "sdcard_update", no_argument, nullptr, 0 },
     { "upgraded_pkg_num", required_argument, nullptr, 0 },
+    { "force_update_action", required_argument, nullptr, 0 },
     { nullptr, 0, nullptr, 0 },
 };
 constexpr float VERIFY_PERCENT = 0.05;
+static bool g_isShutdown = false;
 
 static void SetMessageToMisc(const int message, const std::string headInfo)
 {
@@ -419,6 +421,7 @@ static UpdaterStatus DoUpdatePackages(UpdaterParams &upParams)
         }
         PkgManager::ReleasePackageInstance(manager);
     }
+    UPDATER_UI_INSTANCE.ShowLogRes(g_isShutdown ? TR(LABEL_UPD_OK_SHUTDOWN) : TR(LABEL_UPD_OK_REBOOT));
     UPDATER_UI_INSTANCE.ShowSuccessPage();
     return status;
 }
@@ -536,6 +539,19 @@ static UpdaterStatus StartUpdaterEntry(UpdaterParams &upParams)
     return status;
 }
 
+static void SetShutdownState(const char *forceAction)
+{
+    if (forceAction == nullptr || strlen(forceAction == 0)) {
+        LOG(ERROR) << "Invalid forceAction";
+        return;
+    }
+
+    LOG(INFO) << "force updater action" << forceAction;
+    if (strncmp(forceAction, POWEROFF, strlen(POWEROFF)) == 0) {
+        g_isShutdown = true;
+    }
+}
+
 static UpdaterStatus StartUpdater(const std::vector<std::string> &args,
     char **argv, PackageUpdateMode &mode)
 {
@@ -569,6 +585,8 @@ static UpdaterStatus StartUpdater(const std::vector<std::string> &args,
                     upParams.pkgLocation = static_cast<unsigned int>(atoi(optarg));
                 } else if (option == "sdcard_update") {
                     upParams.sdcardUpdate = true;
+                } else if (option == "force_update_action") {
+                    SetShutdownState(optarg);
                 }
                 break;
             }
@@ -621,7 +639,7 @@ int UpdaterMain(int argc, char **argv)
     }
 #endif
     PostUpdater(true);
-    Utils::DoReboot("");
+    g_isShutdown ? Utils::DoShutdown() : Utils::DoReboot("");
     return 0;
 }
 } // Updater
