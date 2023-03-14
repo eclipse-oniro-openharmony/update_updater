@@ -17,6 +17,7 @@
 #include <string>
 #include <unistd.h>
 #include "init_reboot.h"
+#include "log.h"
 #include "misc_info/misc_info.h"
 #include "securec.h"
 #include "utils.h"
@@ -48,13 +49,13 @@ static bool AddPkgPath(struct UpdateMessage &msg, size_t updateOffset, const std
 {
     for (auto path : packageName) {
         if (updateOffset > sizeof(msg.update)) {
-            std::cout << "updaterkits: updateOffset > msg.update, return false\n";
+            LOG(ERROR) << "updaterkits: updateOffset > msg.update, return false";
             return false;
         }
         int ret = snprintf_s(msg.update + updateOffset, sizeof(msg.update) - updateOffset,
             sizeof(msg.update) - 1 - updateOffset, "--update_package=%s\n", path.c_str());
         if (ret < 0) {
-            std::cout << "updaterkits: copy updater message failed\n";
+            LOG(ERROR) << "updaterkits: copy updater message failed";
             return false;
         }
         updateOffset += static_cast<size_t>(ret);
@@ -67,12 +68,12 @@ bool RebootAndInstallSdcardPackage(const std::string &miscFile, const std::vecto
     struct UpdateMessage msg {};
     int ret = snprintf_s(msg.update, sizeof(msg.update), sizeof(msg.update) - 1, "--sdcard_update\n");
     if (ret < 0) {
-        std::cout << "updaterkits: copy updater message failed\n";
+        LOG(ERROR) << "updaterkits: copy updater message failed";
         return false;
     }
 
     if (packageName.size() != 0 && !AddPkgPath(msg, static_cast<size_t>(ret), packageName)) {
-        std::cout << "get sdcard pkg path fail";
+        LOG(ERROR) << "get sdcard pkg path fail";
         return false;
     }
     WriteToMiscAndRebootToUpdater(msg);
@@ -84,13 +85,13 @@ bool RebootAndInstallSdcardPackage(const std::string &miscFile, const std::vecto
 bool RebootAndInstallUpgradePackage(const std::string &miscFile, const std::vector<std::string> &packageName)
 {
     if (packageName.size() == 0) {
-        std::cout << "updaterkits: invalid argument. one of arugments is empty\n";
+        LOG(ERROR) << "updaterkits: invalid argument. one of arugments is empty";
         return false;
     }
 
     for (auto path : packageName) {
         if (access(path.c_str(), R_OK) < 0) {
-            std::cout << "updaterkits: " << path << " is not readable\n";
+            LOG(ERROR) << "updaterkits: " << path << " is not readable";
             return false;
         }
     }
@@ -108,14 +109,14 @@ bool RebootAndInstallUpgradePackage(const std::string &miscFile, const std::vect
 bool RebootAndCleanUserData(const std::string &miscFile, const std::string &cmd)
 {
     if (miscFile.empty() || cmd.empty()) {
-        std::cout << "updaterkits: invalid argument. one of arugments is empty\n";
+        LOG(ERROR) << "updaterkits: invalid argument. one of arugments is empty";
         return false;
     }
 
     // Write package name to misc, then trigger reboot.
     struct UpdateMessage updateMsg {};
     if (strncpy_s(updateMsg.update, sizeof(updateMsg.update), cmd.c_str(), cmd.size()) != EOK) {
-        std::cout << "updaterkits: copy updater message failed\n";
+        LOG(ERROR) << "updaterkits: copy updater message failed";
         return false;
     }
 
