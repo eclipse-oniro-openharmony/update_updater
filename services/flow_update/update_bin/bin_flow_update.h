@@ -26,7 +26,6 @@
 #include "package/pkg_manager.h"
 
 namespace Updater {
-using namespace Hpackage;
 
 using BinFlowUpdateStep = enum {
     BIN_UPDATE_STEP_PRE = 0,
@@ -47,11 +46,10 @@ struct BinFlowUpdateInfo {
 
 class BinFlowUpdate {
 public:
-    BinFlowUpdate(uint32_t maxBufSize_);
+    explicit BinFlowUpdate(uint32_t maxBufSize_);
     virtual ~BinFlowUpdate();
     int32_t StartBinFlowUpdate(uint8_t *data, uint32_t len);
 private:
-    BinFlowUpdate() = delete;
     int32_t BinUpdatePreWrite(uint8_t *data, uint32_t &len);
     int32_t BinUpdateDoWrite(uint8_t *data, uint32_t &len);
     int32_t BinUpdatePostWrite(uint8_t *data, uint32_t &len);
@@ -61,7 +59,7 @@ private:
     uint32_t UpdateBinHead(uint8_t *data, uint32_t &len);
     bool AddRemainData(uint8_t *data, uint32_t &len);
 
-    PkgManager::PkgManagerPtr pkgManager_;
+    Hpackage::PkgManager::PkgManagerPtr pkgManager_;
     uint8_t *buffer_ = nullptr;
     uint32_t maxBufSize_ = 0;
     uint32_t curlen_ = 0;

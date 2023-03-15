@@ -37,7 +37,7 @@ public:
 
 void ProducerTask(RingBuffer *ringBuffer)
 {
-    printf("ring buffer ProducerTask start\n");
+    std::cout << "ring buffer ProducerTask start\n";
     for (uint32_t i = 0; i < RING_MAX_LEN; i++) {
         uint8_t buf[4] {}; // 4: test buffer size
         buf[0] = i % BYTE_SIZE;
@@ -48,7 +48,7 @@ void ProducerTask(RingBuffer *ringBuffer)
 
 void ConsumerTask(RingBuffer *ringBuffer)
 {
-    printf("ring buffer ConsumerTask start\n");
+    std::cout << "ring buffer ConsumerTask start\n";
     while (1) {
         uint8_t buf[4] {}; // 4: test buffer size
         uint32_t len = 0;
@@ -65,7 +65,7 @@ void ConsumerTask(RingBuffer *ringBuffer)
 
 HWTEST_F(RingBufferTest, ringBufferTest01, TestSize.Level0)
 {
-    std::cout << "ringBufferTest01 start";
+    std::cout << "ringBufferTest01 start\n";
     g_num = 0;
     RingBuffer ringBuffer;
     bool ret = ringBuffer.Init(1024, 8);
@@ -75,7 +75,7 @@ HWTEST_F(RingBufferTest, ringBufferTest01, TestSize.Level0)
     consumer.join();
     producer.join();
     EXPECT_EQ(g_num, RING_MAX_LEN);
-    std::cout << "ringBufferTest01 end";
+    std::cout << "ringBufferTest01 end\n";
 }
 
 

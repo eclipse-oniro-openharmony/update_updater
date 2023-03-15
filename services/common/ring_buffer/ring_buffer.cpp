@@ -125,16 +125,16 @@ bool RingBuffer::Pop(uint8_t *buf, uint32_t maxLen, uint32_t &len)
 void RingBuffer::Release()
 {
     if (lenArray_ != nullptr) {
-        free(lenArray_);
+        delete[] lenArray_;
         lenArray_ = nullptr;
     }
 
     if (bufArray_ != nullptr) {
         for (uint32_t i = 0; i < num_ && bufArray_[i] != nullptr; i++) {
-            free(bufArray_[i]);
+            delete[] bufArray_[i];
             bufArray_[i] = nullptr;
         }
-        free(bufArray_);
+        delete[] bufArray_;
         bufArray_ = nullptr;
     }
 }

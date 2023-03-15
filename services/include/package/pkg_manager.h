@@ -347,7 +347,7 @@ public:
         std::vector<std::string> &fileIds) = 0;
     
     virtual int32_t LoadPackageWithStream(const std::string &packagePath, const std::string &keyPath,
-        std::vector<std::string> &fileIds, uint8_t type, StreamPtr stream);
+        std::vector<std::string> &fileIds, uint8_t type, StreamPtr stream) = 0;
 
     virtual int32_t ParsePackage(StreamPtr stream, std::vector<std::string> &fileIds, int32_t type) = 0;
 

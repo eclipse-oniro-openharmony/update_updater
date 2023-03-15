@@ -30,11 +30,11 @@ using namespace Hpackage;
 using namespace std::placeholders;
 
 constexpr const char *UPDATE_BIN_FILE = "update.bin";
-constexpr uint32_t MAX_BUFFER_SIZE = 4 * 1024 * 1024;
+constexpr uint32_t DEFAULT_BUFFER_SIZE = 4 * 1024 * 1024;
 
 BinFlowUpdate::BinFlowUpdate(uint32_t maxBufSize)
 {
-    maxBufSize_ = maxBufSize == 0 ? MAX_BUFFER_SIZE : maxBufSize;
+    maxBufSize_ = maxBufSize == 0 ? DEFAULT_BUFFER_SIZE : maxBufSize;
     buffer_ = new uint8_t[maxBufSize_];
     updateBinProcess_.emplace(BIN_UPDATE_STEP_PRE, std::bind(&BinFlowUpdate::BinUpdatePreWrite, this, _1, _2));
     updateBinProcess_.emplace(BIN_UPDATE_STEP_DO, std::bind(&BinFlowUpdate::BinUpdateDoWrite, this, _1, _2));
@@ -45,7 +45,7 @@ BinFlowUpdate::BinFlowUpdate(uint32_t maxBufSize)
 BinFlowUpdate::~BinFlowUpdate()
 {
     if (buffer_ != nullptr) {
-        free(buffer_);
+        delete[] buffer_;
         buffer_ = nullptr;
     }
 
@@ -205,6 +205,10 @@ int BinFlowUpdate::BinUpdateDoWrite(uint8_t *data, uint32_t &len)
     if (updateInfo_.imageWriteLen == updateInfo_.info->unpackedSize) {
         LOG(INFO) << "DoWriteBin all len " << updateInfo_.imageWriteLen;
         updateInfo_.updateStep = BIN_UPDATE_STEP_POST;
+    } else if (updateInfo_.imageWriteLen > updateInfo_.info->unpackedSize) {
+        LOG(INFO) << "DoWriteBin write len " << updateInfo_.imageWriteLen <<
+            " all len " << updateInfo_.info->unpackedSize;
+        return -1;
     }
 
     return 0;
