@@ -62,7 +62,6 @@ constexpr struct option OPTIONS[] = {
     { nullptr, 0, nullptr, 0 },
 };
 constexpr float VERIFY_PERCENT = 0.05;
-static bool g_isShutdown = false;
 
 static void SetMessageToMisc(const int message, const std::string headInfo)
 {
@@ -421,7 +420,9 @@ static UpdaterStatus DoUpdatePackages(UpdaterParams &upParams)
         }
         PkgManager::ReleasePackageInstance(manager);
     }
-    UPDATER_UI_INSTANCE.ShowLogRes(g_isShutdown ? TR(LABEL_UPD_OK_SHUTDOWN) : TR(LABEL_UPD_OK_REBOOT));
+    if (upParams.forceUpdate == true) {
+        UPDATER_UI_INSTANCE.ShowLogRes(TR(LABEL_UPD_OK_SHUTDOWN));
+    }
     UPDATER_UI_INSTANCE.ShowSuccessPage();
     return status;
 }
@@ -539,23 +540,9 @@ static UpdaterStatus StartUpdaterEntry(UpdaterParams &upParams)
     return status;
 }
 
-static void SetShutdownState(const char *forceAction)
-{
-    if (forceAction == nullptr || strlen(forceAction) == 0) {
-        LOG(ERROR) << "Invalid forceAction";
-        return;
-    }
-
-    LOG(INFO) << "force updater action:" << forceAction;
-    if (strncmp(forceAction, POWEROFF, strlen(POWEROFF)) == 0) {
-        g_isShutdown = true;
-    }
-}
-
 static UpdaterStatus StartUpdater(const std::vector<std::string> &args,
-    char **argv, PackageUpdateMode &mode)
+    char **argv, PackageUpdateMode &mode, UpdaterParams &upParams)
 {
-    UpdaterParams upParams;
     std::vector<char *> extractedArgs;
     int rc;
     int optionIndex;
@@ -585,8 +572,8 @@ static UpdaterStatus StartUpdater(const std::vector<std::string> &args,
                     upParams.pkgLocation = static_cast<unsigned int>(atoi(optarg));
                 } else if (option == "sdcard_update") {
                     upParams.sdcardUpdate = true;
-                } else if (option == "force_update_action") { /* Only for OTA. */
-                    SetShutdownState(optarg);
+                } else if (option == "force_update_action" && std::string(optarg) == POWEROFF) { /* Only for OTA. */
+                    upParams.forceUpdate = true;
                 }
                 break;
             }
@@ -611,6 +598,7 @@ static UpdaterStatus StartUpdater(const std::vector<std::string> &args,
 int UpdaterMain(int argc, char **argv)
 {
     [[maybe_unused]] UpdaterStatus status = UPDATE_UNKNOWN;
+    UpdaterParams upParams;
     UpdaterInit::GetInstance().InvokeEvent(UPDATER_PRE_INIT_EVENT);
     std::vector<std::string> args = ParseParams(argc, argv);
 
@@ -620,7 +608,7 @@ int UpdaterMain(int argc, char **argv)
 #endif
     UpdaterInit::GetInstance().InvokeEvent(UPDATER_INIT_EVENT);
     PackageUpdateMode mode = UNKNOWN_UPDATE;
-    status = StartUpdater(args, argv, mode);
+    status = StartUpdater(args, argv, mode, upParams);
 #if !defined(UPDATER_UT) && defined(UPDATER_UI_SUPPORT)
     UPDATER_UI_INSTANCE.Sleep(UI_SHOW_DURATION);
     if (status != UPDATE_SUCCESS && status != UPDATE_SKIP) {
@@ -639,7 +627,7 @@ int UpdaterMain(int argc, char **argv)
     }
 #endif
     PostUpdater(true);
-    g_isShutdown ? Utils::DoShutdown() : Utils::DoReboot("");
+    upParams.forceUpdate == false ? Utils::DoShutdown() : Utils::DoReboot("");
     return 0;
 }
 } // Updater
