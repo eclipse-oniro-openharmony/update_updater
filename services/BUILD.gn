@@ -34,7 +34,6 @@ updater_common_include = [
   "//base/update/updater/services",
   "//base/update/updater/services/ui",
   "//base/update/updater/services/include",
-  "//base/startup/syspara_lite/interfaces/innerkits/native/syspara/include",
 ]
 
 updater_common_deps = [
