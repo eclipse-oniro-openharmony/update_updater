@@ -65,8 +65,8 @@ updater模式启动与正常模式启动流程一致。当正常模式调通后�
 updater.img镜像是ramdisk格式且没有内核，需要uboot先拉起内核，然后加载updater.img到内存，作为根文件系统挂载到内核。如果芯片不支持ramdisk格式，需要进一步适配。
 
 ### init服务启动
-根文件系统挂载完成，会启动init服务，参考[启动子系统](https://gitee.com/openharmony/startup_init_lite)。启动服务根据根文件系统是否存在updater程序判断当前模式，仅updater模式下存在updater程序，如果是updater模式不会挂在其他分区，跳过挂在分区表这一流程。具体参考InUpdaterMode函数。
-init启动引导组件对应的进程为init进程，是内核完成初始化后启动的第一个用户态进程。init进程启动之后，读取init.cfg配置文件，依次启动各关键系统服务进程。updater模式下的init组件功能与正常模式一致，但是updater模式会根据自身业务对配置文件进行精简，只保留必须的命令。
+根文件系统挂载完成，第一个启动的进程是init服务，参考[启动子系统](https://gitee.com/openharmony/startup_init_lite)。init判断根文件是否存在updater程序，如果存在则进入updater模式，跳过挂在分区表这一流程。具体参考InUpdaterMode函数。
+init服务是内核完成初始化后启动的第一个用户态进程。init进程启动之后，读取init.cfg配置文件，依次启动各关键进程。updater模式下的init组件功能与正常模式一致，但是updater模式会根据自身业务对配置文件进行精简，只保留必须的命令。
 启动配置文件由以下配置文件组成：
 - 与产品相关的配置文件
 以RK3568为例，updater模式的init.cfg文件位于产品目录device/board/hihope/rk3568/updater下。init.cfg是启动的入口，通过import方式导入其他配置文件。init.rk3568.usb.cfg主要是USB和HDC相关的配置，与产品特性有关。
