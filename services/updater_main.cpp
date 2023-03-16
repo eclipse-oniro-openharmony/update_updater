@@ -420,7 +420,7 @@ static UpdaterStatus DoUpdatePackages(UpdaterParams &upParams)
         }
         PkgManager::ReleasePackageInstance(manager);
     }
-    if (upParams.forceUpdate == true) {
+    if (upParams.forceUpdate) {
         UPDATER_UI_INSTANCE.ShowLogRes(TR(LABEL_UPD_OK_SHUTDOWN));
     }
     UPDATER_UI_INSTANCE.ShowSuccessPage();
@@ -627,7 +627,7 @@ int UpdaterMain(int argc, char **argv)
     }
 #endif
     PostUpdater(true);
-    upParams.forceUpdate == false ? Utils::DoShutdown() : Utils::DoReboot("");
+    upParams.forceUpdate ? Utils::DoShutdown() : Utils::DoReboot("");
     return 0;
 }
 } // Updater
