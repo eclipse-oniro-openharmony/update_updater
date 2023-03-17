@@ -616,10 +616,11 @@ int UpdaterMain(int argc, char **argv)
         if (mode == HOTA_UPDATE) {
             UPDATER_UI_INSTANCE.ShowFailedPage();
         } else if (mode == SDCARD_UPDATE) {
-            GetFacade().ShowLogRes(res == UPDATE_CORRUPT ? TR(LOGRES_VERIFY_FAILED) : TR(LOGRES_UPDATE_FAILED));
-            GetFacade().ShowFailedPage();
-            Utils::UsSleep(FAIL_DELAY);
-            GetFacade().ShowMainpage();
+            UPDATER_UI_INSTANCE.ShowLogRes(
+                status == UPDATE_CORRUPT ? TR(LOGRES_VERIFY_FAILED) : TR(LOGRES_UPDATE_FAILED));
+            UPDATER_UI_INSTANCE.ShowFailedPage();
+            Utils::UsSleep(5 * DISPLAY_TIME); // 5 : 5s
+            UPDATER_UI_INSTANCE.ShowMainpage();
         } else {
             UPDATER_UI_INSTANCE.ShowMainpage();
             UPDATER_UI_INSTANCE.Sleep(50); /* wait for page flush 50ms */
