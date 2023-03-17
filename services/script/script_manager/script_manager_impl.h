@@ -31,13 +31,11 @@ public:
     friend class ScriptInstructionHelper;
 
     explicit ScriptManagerImpl(UScriptEnv *env) : scriptEnv_(env) {}
+    explicit ScriptManagerImpl(UScriptEnv *env, const Hpackage::HashDataVerifier *verifier) :
+        scriptEnv_(env), scriptVerifier_(verifier) {}
     virtual ~ScriptManagerImpl();
     int32_t Init();
     int32_t ExecuteScript(int32_t priority) override;
-    void SetVerifier(const Hpackage::HashDataVerifier *verifier)
-    {
-        scriptVerifier_ = verifier;
-    }
 private:
     int32_t ExtractAndExecuteScript(Hpackage::PkgManager::PkgManagerPtr manager,
         const std::string &scriptName);

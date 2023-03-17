@@ -40,12 +40,11 @@ ScriptManager* ScriptManager::GetScriptManager(UScriptEnv *env, const Hpackage::
     if (g_scriptManager != nullptr) {
         return g_scriptManager;
     }
-    g_scriptManager = new (std::nothrow) ScriptManagerImpl(env);
+    g_scriptManager = new (std::nothrow) ScriptManagerImpl(env, verifier);
     if (g_scriptManager == nullptr) {
         USCRIPT_LOGE("Create g_scriptManager failed");
         return nullptr;
     }
-    g_scriptManager->SetVerifier(verifier);
     if (g_scriptManager->Init() != USCRIPT_SUCCESS) {
         USCRIPT_LOGE("g_scriptManager init failed");
         return nullptr;
