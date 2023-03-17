@@ -31,8 +31,8 @@ public:
     friend class ScriptInstructionHelper;
 
     explicit ScriptManagerImpl(UScriptEnv *env) : scriptEnv_(env) {}
-    explicit ScriptManagerImpl(UScriptEnv *env, const Hpackage::HashDataVerifier *verifier) :
-        scriptEnv_(env), scriptVerifier_(verifier) {}
+    explicit ScriptManagerImpl(UScriptEnv *env, const Hpackage::HashDataVerifier *verifier)
+        : scriptEnv_(env), scriptVerifier_(verifier) {}
     virtual ~ScriptManagerImpl();
     int32_t Init();
     int32_t ExecuteScript(int32_t priority) override;
