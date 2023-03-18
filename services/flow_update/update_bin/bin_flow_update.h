@@ -41,7 +41,7 @@ struct BinFlowUpdateInfo {
     std::map<BinFlowUpdateStep, std::function<int32_t (uint8_t *, uint32_t &)>> updateBinProcess_;
     BinFlowUpdateStep updateStep = BIN_UPDATE_STEP_PRE;
     std::unique_ptr<DataWriter> writer;
-    const FileInfo *info = nullptr;
+    const Hpackage::FileInfo *info = nullptr;
 };
 
 class BinFlowUpdate {
