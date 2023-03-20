@@ -84,9 +84,9 @@ public:
         }
         auto stream = static_cast<MemoryMapStream *>(output);
         auto fd = open((TEST_PATH_FROM + fileId).c_str(), O_RDWR);
-		ON_SCOPE_EXIT(close) {
-		    close(fd);
-		};
+        ON_SCOPE_EXIT(close) {
+            close(fd);
+        };
         if (fd == -1) {
             PKG_LOGE("file %s not existed", (TEST_PATH_FROM + fileId).c_str());
             return PKG_INVALID_FILE;
