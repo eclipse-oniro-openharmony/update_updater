@@ -27,7 +27,6 @@
 #include "securec.h"
 #include "updater/updater.h"
 #include "updater/updater_const.h"
-#include "updater_main.h"
 #include "updater_ui.h"
 #include "utils.h"
 
