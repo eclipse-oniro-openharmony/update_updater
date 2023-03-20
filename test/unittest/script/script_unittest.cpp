@@ -25,6 +25,7 @@
 #include "log.h"
 #include "pkg_stream.h"
 #include "pkg_utils.h"
+#include "scope_guard.h"
 #include "script_instruction.h"
 #include "script_manager.h"
 #include "script/script_unittest.h"
@@ -83,6 +84,9 @@ public:
         }
         auto stream = static_cast<MemoryMapStream *>(output);
         auto fd = open((TEST_PATH_FROM + fileId).c_str(), O_RDWR);
+		ON_SCOPE_EXIT(close) {
+		    close(fd);
+		};
         if (fd == -1) {
             PKG_LOGE("file %s not existed", (TEST_PATH_FROM + fileId).c_str());
             return PKG_INVALID_FILE;
