@@ -17,31 +17,53 @@
 #include "log/log.h"
 #include "misc_info/misc_info.h"
 #include "updater/updater_const.h"
+#include "updater/updater.h"
 #include "updater_main.h"
 #include "utils.h"
 
 using namespace Updater;
 
+namespace Updater {
+std::tuple<std::vector<BootMode> &, BootMode &> GetBootModes(void)
+{
+    constexpr int defaultModeIdx = 0;
+    static std::vector<BootMode> bootModes {
+        { IsUpdater, "UPDATER", "updater.hdc.configfs", Updater::UpdaterMain },
+        { IsFlashd, "FLASHD", "updater.flashd.configfs", Flashd::flashd_main }
+    };
+    return {bootModes, bootModes[defaultModeIdx]};
+}
+
+void AddMode(const BootMode &mode)
+{
+    std::get<0>(GetBootModes()).push_back(mode);
+}
+}
+
 int main(int argc, char **argv)
 {
-    int mode = BOOT_UPDATER;
-    int ret = GetBootMode(mode);
-    if (ret != 0) {
-        printf("Failed to get boot mode, start updater mode \n");
-        mode = BOOT_UPDATER;
+    const auto &[modes, defaultMode] = GetBootModes();
+
+    struct UpdateMessage boot {};
+    // read from misc
+    if (!ReadUpdaterMiscMsg(boot)) {
+        // read misc failed, default enter updater mode
+        defaultMode.InitMode();
+        LOG(INFO) << "enter updater Mode";
+        return defaultMode.entryFunc(argc, argv);
     }
 
-    std::string modeStr = (mode == BOOT_FLASHD) ? "FLASHD" : "UPDATER";
-    InitUpdaterLogger(modeStr, TMP_LOG, TMP_STAGE_LOG, TMP_ERROR_CODE_PATH);
-    SetLogLevel(INFO);
-    LoadFstab();
-    STAGE(UPDATE_STAGE_OUT) << "Start " << ((mode == BOOT_FLASHD) ? "flashd" : "updater");
-    auto modePara = (mode == BOOT_FLASHD) ? "updater.flashd.configfs" : "updater.hdc.configfs";
-    Flashd::SetParameter(modePara, "1");
+    auto it = std::find_if(modes.begin(), modes.end(), [&boot] (const auto &bootMode) {
+        return bootMode.cond != nullptr && bootMode.cond(boot);
+    });
 
-    if (mode == BOOT_FLASHD) {
-        Utils::UsSleep(3000 * 1000); // 3000 * 1000 : wait 3s
-        return Flashd::flashd_main(argc, argv);
+	// misc check failed for each mode, then enter updater mode
+    if (it == modes.end() || it->entryFunc == nullptr) {
+        defaultMode.InitMode();
+        LOG(INFO) << "find valid mode failed, enter updater Mode";
+        return defaultMode.entryFunc(argc, argv);
     }
-    return Updater::UpdaterMain(argc, argv);
+    it->InitMode();
+    LOG(INFO) << "enter " << it->modeName << " mode";
+    return it->entryFunc(argc, argv);
 }

@@ -80,8 +80,10 @@ int UpdaterMain(int argc, char **argv);
 
 int FactoryReset(FactoryResetMode mode, const std::string &path);
 
-UpdaterStatus UpdaterFromSdcard();
+UpdaterStatus UpdaterFromSdcard(UpdaterParams &upParams);
 
 bool IsBatteryCapacitySufficient();
+
+std::tuple<std::vector<BootMode> &, BootMode &> GetBootModes(void);
 } // namespace Updater
 #endif // UPDATER_MAIN_H

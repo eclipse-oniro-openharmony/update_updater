@@ -116,7 +116,9 @@ HWTEST_F(UpdaterUnitTest, updater_GetUpdatePackageInfo, TestSize.Level1)
 HWTEST_F(UpdaterUnitTest, updater_UpdateSdcard, TestSize.Level1)
 {
     UpdaterStatus status;
-    status = UpdaterFromSdcard();
+    UpdaterParams upParams;
+    upParams.sdcardUpdate = true;
+    status = UpdaterFromSdcard(upParams);
     EXPECT_EQ(status, UPDATE_SUCCESS);
 }
 } // namespace updater_ut

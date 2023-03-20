@@ -27,6 +27,7 @@
 #include "securec.h"
 #include "updater/updater.h"
 #include "updater/updater_const.h"
+#include "updater_main.h"
 #include "updater_ui.h"
 #include "utils.h"
 
@@ -41,21 +42,30 @@ bool DeleteUpdaterPath(const std::string &path)
         LOG(INFO) << "Can not open dir";
         return true;
     }
+    bool sdcardTmp = false;
+    if (path.find("sdcard") != std::string::npos) {
+        sdcardTmp = true;
+    }
     struct dirent *dp = nullptr;
     while ((dp = readdir(pDir.get())) != nullptr) {
         std::string currentName(dp->d_name);
-        if (currentName[0] != '.' && (currentName.compare("log") != 0) &&
-            (currentName.compare(UPDATER_RESULT_FILE) != 0) &&
-            (currentName.compare(UPDATER_LOCALE_FILE) != 0)) {
-            std::string tmpName(path);
-            tmpName.append("/" + currentName);
-            if (IsDirExist(tmpName)) {
-                DeleteUpdaterPath(tmpName);
-            }
-#ifndef UPDATER_UT
-            remove(tmpName.c_str());
-#endif
+        if (currentName[0] == '.' || (currentName.compare("log") == 0) ||
+            (currentName.compare(UPDATER_RESULT_FILE) == 0) ||
+            (currentName.compare(UPDATER_LOCALE_FILE) == 0)) {
+            continue;
         }
+        if (currentName.compare(SDCARD_FULL_PACKAGE) == 0 ||
+            currentName.compare(SDCARD_CUST_PACKAGE) == 0 || currentName.compare(SDCARD_PRELOAD_PACKAGE) == 0) {
+            continue;
+        }
+        std::string tmpName(path);
+        tmpName.append("/" + currentName);
+        if (IsDirExist(tmpName)) {
+            DeleteUpdaterPath(tmpName);
+        }
+#ifndef UPDATER_UT
+        remove(tmpName.c_str());
+#endif
     }
     return true;
 }
@@ -196,6 +206,25 @@ std::vector<std::string> ParseParams(int argc, char **argv)
     std::vector<std::string> parseParams1 = Utils::SplitString(boot.update, "\n");
     parseParams.insert(parseParams.end(), parseParams1.begin(), parseParams1.end());
     return parseParams;
+}
+
+void BootMode::InitMode(void)
+{
+    InitUpdaterLogger(modeName, TMP_LOG, TMP_STAGE_LOG, TMP_ERROR_CODE_PATH);
+    SetLogLevel(INFO);
+    LoadFstab();
+    STAGE(UPDATE_STAGE_OUT) << "Start " << modeName;
+    Flashd::SetParameter(modePara.c_str(), "1");
+}
+
+bool IsUpdater(const UpdateMessage &boot)
+{
+    return !IsFlashd(boot) && strncmp(boot.command, "boot_updater", sizeof("boot_updater") - 1) == 0;
+}
+
+bool IsFlashd(const UpdateMessage &boot)
+{
+    return strncmp(boot.update, "boot_flash", sizeof("boot_flash") - 1) == 0;
 }
 
 int GetBootMode(int &mode)

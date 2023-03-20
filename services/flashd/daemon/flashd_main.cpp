@@ -17,11 +17,13 @@
 #include "flashd/flashd.h"
 #include "updater/updater.h"
 #include "updater_main.h"
+#include "utils.h"
 
 using namespace Hdc;
 namespace Flashd {
 int flashd_main(int argc, char **argv)
 {
+    Utils::UsSleep(3000 * 1000); // 3000 * 1000 : wait 3s
     Base::SetLogLevel(LOG_LAST);  // debug log print
     Base::SetLogCache(false);
     UpdaterInit::GetInstance().InvokeEvent(FLAHSD_PRE_INIT_EVENT);

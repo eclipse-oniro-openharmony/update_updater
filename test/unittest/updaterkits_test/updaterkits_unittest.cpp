@@ -56,6 +56,15 @@ HWTEST_F(UpdaterKitsUnitTest, updater_kits_test02, TestSize.Level1)
     bool ret = RebootAndCleanUserData(MISC_FILE, cmd1);
     EXPECT_EQ(ret, false);
 
+    std::vector<std::string> pkgPath {};
+    ret = RebootAndInstallSdcardPackage(MISC_FILE, pkgPath);
+    EXPECT_EQ(ret, true);
+
+    std::string path = "data/sdcard/updater/updater.zip";
+    pkgPath.push_back(path);
+    ret = RebootAndInstallSdcardPackage(MISC_FILE, pkgPath);
+    EXPECT_EQ(ret, true);
+
     const std::string cmd2 = "--user_wipe_data";
     auto fp = std::unique_ptr<FILE, decltype(&fclose)>(fopen(MISC_FILE.c_str(), "wb+"), fclose);
     EXPECT_NE(fp, nullptr);
