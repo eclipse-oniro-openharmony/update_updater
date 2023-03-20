@@ -21,9 +21,11 @@
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include "hash_data_verifier.h"
 #include "log.h"
 #include "pkg_stream.h"
 #include "pkg_utils.h"
+#include "scope_guard.h"
 #include "script_instruction.h"
 #include "script_manager.h"
 #include "script/script_unittest.h"
@@ -43,10 +45,6 @@ constexpr int32_t SCRIPT_TEST_LAST_PRIORITY = 2;
 
 class TestPkgManager : public TestScriptPkgManager {
 public:
-    int32_t ExtractFile(const std::string &fileId, StreamPtr output) override
-    {
-        return 0;
-    }
     const FileInfo *GetFileInfo(const std::string &fileId) override
     {
         static FileInfo fileInfo {};
@@ -62,22 +60,63 @@ public:
             "Verse-script.us",
             "test_script.us"
         };
+        if (fileId == "hash_signed_data") {
+            fileInfo.unpackedSize = GetFileSize(TEST_PATH_FROM + fileId);
+            return &fileInfo;
+        }
         if (std::find(testFileNames.begin(), testFileNames.end(), fileId) != testFileNames.end()) {
             return &fileInfo;
         }
         return nullptr;
+    }
+    int32_t CreatePkgStream(StreamPtr &stream, const std::string &fileName, const PkgBuffer &buffer) override
+    {
+        stream = new MemoryMapStream(this, fileName, buffer, PkgStream::PkgStreamType_Buffer);
+        return PKG_SUCCESS;
+    }
+    int32_t ExtractFile(const std::string &fileId, StreamPtr output) override
+    {
+        if (fileId != "hash_signed_data") {
+            return PKG_SUCCESS;
+        }
+        if (output == nullptr) {
+            return PKG_INVALID_STREAM;
+        }
+        auto stream = static_cast<MemoryMapStream *>(output);
+        auto fd = open((TEST_PATH_FROM + fileId).c_str(), O_RDWR);
+        if (fd == -1) {
+            PKG_LOGE("file %s not existed", (TEST_PATH_FROM + fileId).c_str());
+            return PKG_INVALID_FILE;
+        }
+        ON_SCOPE_EXIT(close) {
+            close(fd);
+        };
+        std::string content {};
+        if (!Utils::ReadFileToString(fd, content)) {
+            PKG_LOGE("read file to string failed");
+            return PKG_INVALID_FILE;
+        }
+        PkgBuffer buffer {};
+        stream->GetBuffer(buffer);
+        if (content.size() + 1 != buffer.length) {
+            PKG_LOGE("content size is not valid, %u != %u", content.size(), buffer.data.size());
+            return PKG_INVALID_FILE;
+        }
+        std::copy(content.begin(), content.end(), buffer.buffer);
+        return PKG_SUCCESS;
     }
     int32_t CreatePkgStream(StreamPtr &stream, const std::string &fileName,
          size_t size, int32_t type) override
     {
         FILE *file = nullptr;
         std::string fileNameReal = fileName;
-        char realPath[PATH_MAX + 1] = {};
-        if (!Updater::Utils::IsUpdaterMode()) {
-            fileNameReal = fileName.substr(fileName.rfind("/"));
+        auto pos = fileName.rfind('/');
+        if (pos != std::string::npos) {
+            fileNameReal = fileName.substr(pos + 1);
         }
+        char realPath[PATH_MAX + 1] = {};
         if (realpath((TEST_PATH_FROM + fileNameReal).c_str(), realPath) == nullptr) {
-            LOG(ERROR) << fileNameReal << " realpath failed";
+            LOG(ERROR) << (TEST_PATH_FROM + fileNameReal) << " realpath failed";
             return PKG_INVALID_FILE;
         }
         file = fopen(realPath, "rb");
@@ -184,8 +223,10 @@ public:
     {
         int32_t ret {};
         TestPkgManager packageManager;
-        UTestScriptEnv* env = new UTestScriptEnv(&packageManager);
-        ScriptManager* manager = ScriptManager::GetScriptManager(env);
+        UTestScriptEnv *env = new UTestScriptEnv(&packageManager);
+        HashDataVerifier verifier {&packageManager};
+        verifier.LoadHashDataAndPkcs7(TEST_PATH_FROM + "updater_fake_pkg.zip");
+        ScriptManager *manager = ScriptManager::GetScriptManager(env, &verifier);
         if (manager == nullptr) {
             USCRIPT_LOGI("create manager fail ret:%d", ret);
             delete env;

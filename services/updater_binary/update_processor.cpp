@@ -21,6 +21,7 @@
 #include "applypatch/partition_record.h"
 #include "dump.h"
 #include "log.h"
+#include "package/hash_data_verifier.h"
 #include "pkg_manager.h"
 #ifdef UPDATER_USE_PTABLE
 #include "ptable_manager.h"
@@ -261,16 +262,23 @@ int32_t UScriptInstructionPkgExtract::Execute(Uscript::UScriptEnv &env, Uscript:
     return ret;
 }
 
-int ExecUpdate(PkgManager::PkgManagerPtr pkgManager, int retry, PostMessageFunction postMessage)
+int ExecUpdate(PkgManager::PkgManagerPtr pkgManager, int retry, const std::string &pkgPath,
+    PostMessageFunction postMessage)
 {
-    UpdaterEnv* env = new UpdaterEnv(pkgManager, postMessage, retry);
+    Hpackage::HashDataVerifier scriptVerifier {pkgManager};
+    if (!scriptVerifier.LoadHashDataAndPkcs7(pkgPath)) {
+        LOG(ERROR) << "Fail to load hash data";
+        UPDATER_LAST_WORD(EXIT_VERIFY_SCRIPT_ERROR);
+        return EXIT_VERIFY_SCRIPT_ERROR;
+    }
+    UpdaterEnv* env = new (std::nothrow) UpdaterEnv(pkgManager, postMessage, retry);
     if (env == nullptr) {
         LOG(ERROR) << "Fail to creat env";
         UPDATER_LAST_WORD(EXIT_PARSE_SCRIPT_ERROR);
         return EXIT_PARSE_SCRIPT_ERROR;
     }
     int ret = 0;
-    ScriptManager* scriptManager = ScriptManager::GetScriptManager(env);
+    ScriptManager* scriptManager = ScriptManager::GetScriptManager(env, &scriptVerifier);
     if (scriptManager == nullptr) {
         LOG(ERROR) << "Fail to creat scriptManager";
         ScriptManager::ReleaseScriptManager();
@@ -366,7 +374,7 @@ int ProcessUpdater(bool retry, int pipeFd, const std::string &packagePath, const
     packagePtb.LoadPartitionInfo(pkgManager);
 #endif
 
-    ret = Updater::ExecUpdate(pkgManager, retry,
+    ret = Updater::ExecUpdate(pkgManager, retry, packagePath,
         [&pipeWrite](const char *cmd, const char *content) {
             if (pipeWrite != nullptr) {
                 fprintf(pipeWrite, "%s:%s\n", cmd, content);
