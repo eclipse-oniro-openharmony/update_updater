@@ -192,7 +192,7 @@ int MountSdcard(std::string &path, std::string &mountPoint)
             return 0;
         }
     }
-    if (MountNtfsWithRetry(path, mountPoint) == 0) {
+    if (MountNtfsWithRetry(mountPoint, path) == 0) {
         LOG(INFO) << "mount success, sdcard type is ntfs";
         return 0;
     }
