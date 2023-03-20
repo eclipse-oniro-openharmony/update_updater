@@ -38,6 +38,7 @@ constexpr const char *PREFIX_UFS_NODE = "/dev/block/sd";
 constexpr const char *SDCARD_FULL_PACKAGE = "updater.zip";
 constexpr const char *SDCARD_CUST_PACKAGE = "updater_cust.zip";
 constexpr const char *SDCARD_PRELOAD_PACKAGE = "updater_preload.zip";
+constexpr const char *POWEROFF = "shutdown";
 
 #ifndef UPDATER_UT
 constexpr const char *SDCARD_CARD_PATH = "/sdcard/updater";

@@ -77,6 +77,12 @@
         "en":"",
         "spa":""
     },
+    "LABEL_UPD_OK_SHUTDOWN" : {
+        "type": "UIString",
+        "zh":"设备将自动关机",
+        "en":"",
+        "spa":""
+    },
     "LABEL_UPD_FAIL_REBOOT" : {
         "type": "UIString",
         "zh":"重启设备",
