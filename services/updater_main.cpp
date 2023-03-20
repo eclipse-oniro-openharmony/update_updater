@@ -499,6 +499,7 @@ static UpdaterStatus StartUpdaterEntry(UpdaterParams &upParams)
     UpdaterStatus status = UPDATE_UNKNOWN;
     if (upParams.sdcardUpdate) {
         LOG(INFO) << "start sdcard update";
+        UPDATER_UI_INSTANCE.ShowProgressPage();
         status = UpdaterFromSdcard(upParams);
         return status;
     } else if (upParams.updatePackage.size() > 0) {
@@ -614,6 +615,12 @@ int UpdaterMain(int argc, char **argv)
     if (status != UPDATE_SUCCESS && status != UPDATE_SKIP) {
         if (mode == HOTA_UPDATE) {
             UPDATER_UI_INSTANCE.ShowFailedPage();
+        } else if (mode == SDCARD_UPDATE) {
+            UPDATER_UI_INSTANCE.ShowLogRes(
+                status == UPDATE_CORRUPT ? TR(LOGRES_VERIFY_FAILED) : TR(LOGRES_UPDATE_FAILED));
+            UPDATER_UI_INSTANCE.ShowFailedPage();
+            Utils::UsSleep(5 * DISPLAY_TIME); // 5 : 5s
+            UPDATER_UI_INSTANCE.ShowMainpage();
         } else {
             UPDATER_UI_INSTANCE.ShowMainpage();
             UPDATER_UI_INSTANCE.Sleep(50); /* wait for page flush 50ms */
