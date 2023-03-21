@@ -23,8 +23,11 @@
 
 namespace Updater {
 enum UpdaterInitEvent {
+    // main
+    UPDATER_MAIN_PRE_EVENT = 0,
+
     // updater
-    UPDATER_PRE_INIT_EVENT = 0,
+    UPDATER_PRE_INIT_EVENT,
     UPDATER_INIT_EVENT,
     UPDATER_POST_INIT_EVENT,
 

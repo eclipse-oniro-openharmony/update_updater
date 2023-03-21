@@ -16,6 +16,7 @@
 #ifndef UPDATER_UPDATER_H
 #define UPDATER_UPDATER_H
 #include <string>
+#include "misc_info/misc_info.h"
 #include "package/packages_info.h"
 #include "package/pkg_manager.h"
 
@@ -48,6 +49,18 @@ struct UpdaterParams {
     float currentPercentage = 0; /* The proportion of progress bars occupied by the upgrade process */
     unsigned int pkgLocation = 0;
     std::vector<std::string> updatePackage {};
+};
+
+using CondFunc = std::function<bool(const UpdateMessage &)>;
+
+using EntryFunc = std::function<int(int, char **)>;
+
+struct BootMode {
+    CondFunc cond {nullptr};
+    std::string modeName {};
+    std::string modePara {};
+    EntryFunc entryFunc {nullptr};
+    void InitMode(void);
 };
 
 int GetTmpProgressValue();
@@ -86,5 +99,11 @@ bool ClearMisc();
 int GetBootMode(int &mode);
 
 std::string GetWorkPath();
+
+bool IsUpdater(const UpdateMessage &boot);
+
+bool IsFlashd(const UpdateMessage &boot);
+
+void AddMode(const BootMode &mode);
 } // Updater
 #endif /* UPDATER_UPDATER_H */
