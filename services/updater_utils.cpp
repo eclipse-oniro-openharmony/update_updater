@@ -208,7 +208,7 @@ std::vector<std::string> ParseParams(int argc, char **argv)
     return parseParams;
 }
 
-void BootMode::InitMode(void)
+void BootMode::InitMode(void) const
 {
     InitUpdaterLogger(modeName, TMP_LOG, TMP_STAGE_LOG, TMP_ERROR_CODE_PATH);
     SetLogLevel(INFO);

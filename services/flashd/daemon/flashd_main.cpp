@@ -21,6 +21,9 @@
 
 using namespace Hdc;
 namespace Flashd {
+
+DEFINE_MODE(flashd, { IsFlashd, "FLASHD", "updater.flashd.configfs", Flashd::flashd_main });
+
 int flashd_main(int argc, char **argv)
 {
     Utils::UsSleep(3000 * 1000); // 3000 * 1000 : wait 3s

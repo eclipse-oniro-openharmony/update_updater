@@ -60,7 +60,7 @@ struct BootMode {
     std::string modeName {};
     std::string modePara {};
     EntryFunc entryFunc {nullptr};
-    void InitMode(void);
+    void InitMode(void) const;
 };
 
 int GetTmpProgressValue();
@@ -104,6 +104,6 @@ bool IsUpdater(const UpdateMessage &boot);
 
 bool IsFlashd(const UpdateMessage &boot);
 
-void AddMode(const BootMode &mode);
+void RegisterMode(const BootMode &mode);
 } // Updater
 #endif /* UPDATER_UPDATER_H */

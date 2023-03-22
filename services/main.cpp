@@ -24,17 +24,16 @@
 using namespace Updater;
 
 namespace Updater {
-std::tuple<std::vector<BootMode> &, BootMode &> GetBootModes(void)
+std::tuple<std::vector<BootMode> &, BootMode> GetBootModes(void)
 {
     constexpr int defaultModeIdx = 0;
     static std::vector<BootMode> bootModes {
-        { IsUpdater, "UPDATER", "updater.hdc.configfs", Updater::UpdaterMain },
-        { IsFlashd, "FLASHD", "updater.flashd.configfs", Flashd::flashd_main }
+        { IsUpdater, "UPDATER", "updater.hdc.configfs", Updater::UpdaterMain }
     };
     return {bootModes, bootModes[defaultModeIdx]};
 }
 
-void AddMode(const BootMode &mode)
+void RegisterMode(const BootMode &mode)
 {
     std::get<0>(GetBootModes()).push_back(mode);
 }
@@ -43,7 +42,7 @@ void AddMode(const BootMode &mode)
 int main(int argc, char **argv)
 {
     UpdaterInit::GetInstance().InvokeEvent(UPDATER_MAIN_PRE_EVENT);
-    const auto &[modes, defaultMode] = GetBootModes();
+    const auto [modes, defaultMode] = GetBootModes();
 
     struct UpdateMessage boot {};
     // read from misc
@@ -58,7 +57,7 @@ int main(int argc, char **argv)
         return bootMode.cond != nullptr && bootMode.cond(boot);
     });
 
-	// misc check failed for each mode, then enter updater mode
+    // misc check failed for each mode, then enter updater mode
     if (it == modes.end() || it->entryFunc == nullptr) {
         defaultMode.InitMode();
         LOG(INFO) << "find valid mode failed, enter updater Mode";
