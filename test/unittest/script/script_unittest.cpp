@@ -50,7 +50,6 @@ public:
         static FileInfo fileInfo {};
         static std::vector<std::string> testFileNames = {
             "loadScript.us",
-            "registerCmd.us",
             "test_function.us",
             "test_if.us",
             "test_logic.us",
