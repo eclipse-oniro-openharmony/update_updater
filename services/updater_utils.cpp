@@ -200,10 +200,11 @@ std::vector<std::string> ParseParams(int argc, char **argv)
         }
     }
     STAGE(UPDATE_STAGE_OUT) << "Init Params: " << boot.update;
-    std::vector<std::string> parseParams(argv, argv + argc);
     boot.update[sizeof(boot.update) - 1] = '\0';
-    std::vector<std::string> parseParams1 = Utils::SplitString(boot.update, "\n");
-    parseParams.insert(parseParams.end(), parseParams1.begin(), parseParams1.end());
+    std::vector<std::string> parseParams = Utils::SplitString(boot.update, "\n");
+    if (argc != 0 && argv != nullptr) {
+        parseParams.insert(parseParams.begin(), argv, argv + argc);
+    }
     return parseParams;
 }
 

@@ -315,7 +315,7 @@ namespace OHOS {
         pFile = fopen("test_script.us", "w+");
         if (pFile == nullptr) {
             LOG(ERROR) << "[fuzz]open file failed";
-            return -1;
+            return false;
         }
 
         (void)fwrite(data, 1, size, pFile);
@@ -323,7 +323,7 @@ namespace OHOS {
 
         ExtractAndExecuteScriptFun(inputFile);
         (void)remove("test_script.us");
-        return 0;
+        return true;
     }
 }
 

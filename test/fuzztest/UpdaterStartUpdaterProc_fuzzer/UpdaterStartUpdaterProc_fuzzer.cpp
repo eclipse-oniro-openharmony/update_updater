@@ -182,7 +182,7 @@ namespace OHOS {
         pFile = fopen("updater.txt", "w+");
         if (pFile == nullptr) {
             LOG(ERROR) << "[fuzz]open file failed";
-            return -1;
+            return false;
         }
 
         fwrite(data, 1, size, pFile);
@@ -194,7 +194,7 @@ namespace OHOS {
         remove("updater.txt");
         remove("test_package.zip");
 
-        return 0;
+        return true;
     }
 }
 
