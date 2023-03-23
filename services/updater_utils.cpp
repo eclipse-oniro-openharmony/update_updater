@@ -227,24 +227,33 @@ bool IsFlashd(const UpdateMessage &boot)
     return strncmp(boot.update, "boot_flash", sizeof("boot_flash") - 1) == 0;
 }
 
-int GetBootMode(int &mode)
+std::vector<BootMode> &GetBootModes(void)
 {
-#ifndef UPDATER_UT
-    mode = BOOT_UPDATER;
-#else
-    mode = BOOT_FLASHD;
-#endif
-    struct UpdateMessage boot {};
-    // read from misc
-    bool ret = ReadUpdaterMiscMsg(boot);
-    if (!ret) {
-        return -1;
-    }
+    static std::vector<BootMode> bootModes {};
+    return bootModes;
+}
 
-    LOG(INFO) << "GetBootMode, boot.update" << boot.update;
-    if (strncmp(boot.update, "boot_flash", strlen("boot_flash")) == 0) {
-        mode = BOOT_FLASHD;
+void RegisterMode(const BootMode &mode)
+{
+    GetBootModes().push_back(mode);
+}
+
+std::optional<BootMode> SelectMode(const UpdateMessage &boot)
+{
+    const auto &modes = GetBootModes();
+
+    // select modes by bootMode.cond which would check misc message
+    auto it = std::find_if(modes.begin(), modes.end(), [&boot] (const auto &bootMode) {
+        return bootMode.cond != nullptr && bootMode.cond(boot);
+    });
+
+    // misc check failed for each mode, then enter updater mode
+    if (it == modes.end() || it->entryFunc == nullptr) {
+        LOG(INFO) << "find valid mode failed, enter updater Mode";
+        return std::nullopt;
     }
-    return 0;
+    
+    LOG(INFO) << "enter " << it->modeName << " mode";
+    return *it;
 }
 } // namespace Updater

@@ -70,11 +70,40 @@ HWTEST_F(UpdaterUtilUnitTest, IsSDCardExist, TestSize.Level1)
     EXPECT_EQ(ret, false);
 }
 
-HWTEST_F(UpdaterUtilUnitTest, GetBootMode, TestSize.Level1)
+HWTEST_F(UpdaterUtilUnitTest, IsFlashd, TestSize.Level1)
 {
-    int mode = BOOT_UPDATER;
-    int ret = GetBootMode(mode);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(IsFlashd({"boot_updater", "boot_flash", ""}), true);
+    EXPECT_EQ(IsFlashd({"boot_updater", "", ""}), false);
+}
+
+HWTEST_F(UpdaterUtilUnitTest, IsUpdater, TestSize.Level1)
+{
+    EXPECT_EQ(IsUpdater({"boot_updater", "", ""}), true);
+    EXPECT_EQ(IsUpdater({"boot_updater", "boot_flash", ""}), false);
+    EXPECT_EQ(IsUpdater({"boot_updater", "xxx", ""}), true);
+}
+
+HWTEST_F(UpdaterUtilUnitTest, SelectMode, TestSize.Level1)
+{
+    // clear already registered mode
+    GetBootModes().clear();
+
+    auto dummyEntry = [] (int argc, char **argv) -> int { return 0; };
+    // register modes
+    RegisterMode({ IsFlashd, "FLASHD", "", dummyEntry });
+    RegisterMode({ IsUpdater, "UPDATER", "", dummyEntry });
+
+    // test select mode
+    auto mode = SelectMode({"boot_updater", "", ""});
+    ASSERT_NE(mode, std::nullopt);
+    EXPECT_EQ(mode->modeName, "UPDATER");
+
+    mode = SelectMode({"boot_updater", "boot_flash", ""});
+    ASSERT_NE(mode, std::nullopt);
+    EXPECT_EQ(mode->modeName, "FLASH");
+
+    mode = SelectMode({"invalid_command", "", ""});
+    EXPECT_EQ(mode, std::nullopt);
 }
 
 HWTEST_F(UpdaterUtilUnitTest, PostUpdater, TestSize.Level1)

@@ -15,6 +15,7 @@
 
 #ifndef UPDATER_UPDATER_H
 #define UPDATER_UPDATER_H
+#include <optional>
 #include <string>
 #include "misc_info/misc_info.h"
 #include "package/packages_info.h"
@@ -96,8 +97,6 @@ std::vector<std::string> ParseParams(int argc, char **argv);
 
 bool ClearMisc();
 
-int GetBootMode(int &mode);
-
 std::string GetWorkPath();
 
 bool IsUpdater(const UpdateMessage &boot);
@@ -105,5 +104,9 @@ bool IsUpdater(const UpdateMessage &boot);
 bool IsFlashd(const UpdateMessage &boot);
 
 void RegisterMode(const BootMode &mode);
+
+std::vector<BootMode> &GetBootModes(void);
+
+std::optional<BootMode> SelectMode(const UpdateMessage &boot);
 } // Updater
 #endif /* UPDATER_UPDATER_H */

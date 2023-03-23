@@ -22,6 +22,7 @@
 using namespace Hdc;
 namespace Flashd {
 
+// add flashd mode
 DEFINE_MODE(flashd, { IsFlashd, "FLASHD", "updater.flashd.configfs", Flashd::flashd_main });
 
 int flashd_main(int argc, char **argv)

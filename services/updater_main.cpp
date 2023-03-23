@@ -596,6 +596,9 @@ static UpdaterStatus StartUpdater(const std::vector<std::string> &args,
     return StartUpdaterEntry(upParams);
 }
 
+// add updater mode
+DEFINE_MODE(updater, { IsUpdater, "UPDATER", "updater.hdc.configfs", Updater::UpdaterMain });
+
 int UpdaterMain(int argc, char **argv)
 {
     [[maybe_unused]] UpdaterStatus status = UPDATE_UNKNOWN;

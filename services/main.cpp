@@ -23,47 +23,24 @@
 
 using namespace Updater;
 
-namespace Updater {
-std::tuple<std::vector<BootMode> &, BootMode> GetBootModes(void)
-{
-    constexpr int defaultModeIdx = 0;
-    static std::vector<BootMode> bootModes {
-        { IsUpdater, "UPDATER", "updater.hdc.configfs", Updater::UpdaterMain }
-    };
-    return {bootModes, bootModes[defaultModeIdx]};
-}
-
-void RegisterMode(const BootMode &mode)
-{
-    std::get<0>(GetBootModes()).push_back(mode);
-}
-}
-
 int main(int argc, char **argv)
 {
+    // prepare modes vector by macro DEFINE_MODE which subscribe UPDATER_MAIN_PRE_EVENT event
     UpdaterInit::GetInstance().InvokeEvent(UPDATER_MAIN_PRE_EVENT);
-    const auto [modes, defaultMode] = GetBootModes();
 
     struct UpdateMessage boot {};
-    // read from misc
     if (!ReadUpdaterMiscMsg(boot)) {
         // read misc failed, default enter updater mode
-        defaultMode.InitMode();
-        LOG(INFO) << "enter updater Mode";
-        return defaultMode.entryFunc(argc, argv);
+        boot = {"boot_updater", "", ""};
     }
 
-    auto it = std::find_if(modes.begin(), modes.end(), [&boot] (const auto &bootMode) {
-        return bootMode.cond != nullptr && bootMode.cond(boot);
-    });
+    // select modes by bootMode.cond which would check misc message
+    auto bootMode = SelectMode(boot).
+        value_or(BootMode { IsUpdater, "UPDATER", "updater.hdc.configfs", Updater::UpdaterMain });
 
-    // misc check failed for each mode, then enter updater mode
-    if (it == modes.end() || it->entryFunc == nullptr) {
-        defaultMode.InitMode();
-        LOG(INFO) << "find valid mode failed, enter updater Mode";
-        return defaultMode.entryFunc(argc, argv);
-    }
-    it->InitMode();
-    LOG(INFO) << "enter " << it->modeName << " mode";
-    return it->entryFunc(argc, argv);
+    // execute mode initialization
+    bootMode.InitMode();
+
+    // mode entry
+    return bootMode.entryFunc(argc, argv);
 }
