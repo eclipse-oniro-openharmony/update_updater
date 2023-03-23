@@ -77,7 +77,7 @@ private:
 #define DEFINE_INIT_EVENT(name, event, ...)                                    \
     void name_##event_##Init(void)                                             \
     {                                                                          \
-        RegisterMode(__VA_ARGS__);                                             \
+        __VA_ARGS__;                                                           \
     }                                                                          \
     extern "C" __attribute((constructor)) void Register_##name_##event(void)   \
     {                                                                          \
@@ -85,8 +85,8 @@ private:
     }                                                                          \
     static_assert(true)
 
-#define DEFINE_MODE(name, ...)                                    \
-    DEFINE_INIT_EVENT(name, UPDATER_MAIN_PRE_EVENT, __VA_ARGS__); \
+#define DEFINE_MODE(name, ...)                                                  \
+    DEFINE_INIT_EVENT(name, UPDATER_MAIN_PRE_EVENT, RegisterMode(__VA_ARGS__)); \
     static_assert(true)
 
 enum FactoryResetMode {
