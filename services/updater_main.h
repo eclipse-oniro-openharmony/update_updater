@@ -17,78 +17,10 @@
 
 #include <iostream>
 #include <string>
-#include <vector>
-#include "macros.h"
 #include "updater/updater.h"
+#include "updater_init.h"
 
 namespace Updater {
-enum UpdaterInitEvent {
-    // main
-    UPDATER_MAIN_PRE_EVENT = 0,
-
-    // updater
-    UPDATER_PRE_INIT_EVENT,
-    UPDATER_INIT_EVENT,
-    UPDATER_POST_INIT_EVENT,
-
-    // flashd
-    FLAHSD_PRE_INIT_EVENT,
-
-    // binary
-    UPDATER_BINARY_INIT_EVENT,
-    UPDATER_BINARY_INIT_DONE_EVENT,
-
-    UPDATER_INIT_EVENT_BUTT
-};
-
-using InitHandler = void (*)(void);
-
-class UpdaterInit {
-    DISALLOW_COPY_MOVE(UpdaterInit);
-public:
-    static UpdaterInit &GetInstance()
-    {
-        static UpdaterInit instance;
-        return instance;
-    }
-    void InvokeEvent(enum UpdaterInitEvent eventId) const
-    {
-        if (eventId >= UPDATER_INIT_EVENT_BUTT) {
-            return;
-        }
-        for (const auto &handler : initEvent_[eventId]) {
-            if (handler != nullptr) {
-                handler();
-            }
-        }
-    }
-    void SubscribeEvent(enum UpdaterInitEvent eventId, InitHandler handler)
-    {
-        if (eventId < UPDATER_INIT_EVENT_BUTT) {
-            initEvent_[eventId].push_back(handler);
-        }
-    }
-private:
-    UpdaterInit() = default;
-    ~UpdaterInit() = default;
-    std::vector<InitHandler> initEvent_[UPDATER_INIT_EVENT_BUTT];
-};
-
-#define DEFINE_INIT_EVENT(name, event, ...)                                      \
-    static void name##_##event##_Init(void)                                      \
-    {                                                                            \
-        __VA_ARGS__;                                                             \
-    }                                                                            \
-    __attribute((constructor)) static void Register_##name##_##event(void)       \
-    {                                                                            \
-        UpdaterInit::GetInstance().SubscribeEvent(event, name##_##event##_Init); \
-    }                                                                            \
-    static_assert(true)
-
-#define DEFINE_MODE(name, ...)                                                  \
-    DEFINE_INIT_EVENT(name, UPDATER_MAIN_PRE_EVENT, RegisterMode(__VA_ARGS__)); \
-    static_assert(true)
-
 enum FactoryResetMode {
     USER_WIPE_DATA = 0,
     FACTORY_WIPE_DATA,

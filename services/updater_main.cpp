@@ -597,7 +597,7 @@ static UpdaterStatus StartUpdater(const std::vector<std::string> &args,
 }
 
 // add updater mode
-DEFINE_MODE(updater, { IsUpdater, "UPDATER", "updater.hdc.configfs", Updater::UpdaterMain });
+REGISTER_MODE(Updater, "updater.hdc.configfs");
 
 int UpdaterMain(int argc, char **argv)
 {

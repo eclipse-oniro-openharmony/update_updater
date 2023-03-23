@@ -52,8 +52,6 @@ constexpr const char *FLASHD_FILE_PATH = "/data/updater/updater/";
 constexpr const char *FLASHD_HDC_LOG_PATH = "/data/updater/flashd_hdc.log";
 #endif
 
-int flashd_main(int argc, char **argv);
-
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {

@@ -57,11 +57,11 @@ using CondFunc = std::function<bool(const UpdateMessage &)>;
 using EntryFunc = std::function<int(int, char **)>;
 
 struct BootMode {
-    CondFunc cond {nullptr};
-    std::string modeName {};
-    std::string modePara {};
-    EntryFunc entryFunc {nullptr};
-    void InitMode(void) const;
+    CondFunc cond {nullptr}; // enter mode condition
+    std::string modeName {}; // mode name
+    std::string modePara {}; // parameter config of mode
+    EntryFunc entryFunc {nullptr}; // mode entry
+    void InitMode(void) const; // mode related initialization
 };
 
 int GetTmpProgressValue();

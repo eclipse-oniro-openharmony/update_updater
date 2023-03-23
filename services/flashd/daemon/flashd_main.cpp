@@ -21,11 +21,12 @@
 
 using namespace Hdc;
 namespace Flashd {
+int FlashdMain(int argc, char **argv);
 
 // add flashd mode
-DEFINE_MODE(flashd, { IsFlashd, "FLASHD", "updater.flashd.configfs", Flashd::flashd_main });
+REGISTER_MODE(Flashd, "updater.flashd.configfs");
 
-int flashd_main(int argc, char **argv)
+int FlashdMain(int argc, char **argv)
 {
     Utils::UsSleep(3000 * 1000); // 3000 * 1000 : wait 3s
     Base::SetLogLevel(LOG_LAST);  // debug log print

@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 #include "fs_manager/mount.h"
-#include "flashd/flashd.h"
 #include "log/log.h"
 #include "misc_info/misc_info.h"
 #include "updater/updater_const.h"
@@ -35,8 +34,7 @@ int main(int argc, char **argv)
     }
 
     // select modes by bootMode.cond which would check misc message
-    auto bootMode = SelectMode(boot).
-        value_or(BootMode { IsUpdater, "UPDATER", "updater.hdc.configfs", Updater::UpdaterMain });
+    auto bootMode = SelectMode(boot).value_or(BOOT_MODE(Updater, "updater.hdc.configfs"));
 
     // execute mode initialization
     bootMode.InitMode();
