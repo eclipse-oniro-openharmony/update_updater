@@ -74,15 +74,15 @@ private:
     std::vector<InitHandler> initEvent_[UPDATER_INIT_EVENT_BUTT];
 };
 
-#define DEFINE_INIT_EVENT(name, event, ...)                                    \
-    void name_##event_##Init(void)                                             \
-    {                                                                          \
-        __VA_ARGS__;                                                           \
-    }                                                                          \
-    extern "C" __attribute((constructor)) void Register_##name_##event(void)   \
-    {                                                                          \
-        UpdaterInit::GetInstance().SubscribeEvent(event, name_##event_##Init); \
-    }                                                                          \
+#define DEFINE_INIT_EVENT(name, event, ...)                                      \
+    static void name##_##event##_Init(void)                                      \
+    {                                                                            \
+        __VA_ARGS__;                                                             \
+    }                                                                            \
+    __attribute((constructor)) static void Register_##name##_##event(void)       \
+    {                                                                            \
+        UpdaterInit::GetInstance().SubscribeEvent(event, name##_##event##_Init); \
+    }                                                                            \
     static_assert(true)
 
 #define DEFINE_MODE(name, ...)                                                  \

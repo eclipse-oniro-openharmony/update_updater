@@ -68,19 +68,19 @@ ohos_executable("updater") {
     "//base/update/updater/services/ui/view",
   ]
 
-  # force link flashd library
-  ldflags = [
-    "-Wl,--whole-archive",
-    "${target_out_dir}/flashd/libflashd.a",
-    "-Wl,--no-whole-archive"
-  ]
-
   deps = updater_common_deps
   deps += [
     "flashd:libflashd",
     "//base/update/updater/interfaces/kits/misc_info:libmiscinfo",
     "//base/update/updater/services/ui:libui",
     "//third_party/libdrm:libdrm",
+  ]
+
+  # force link flashd library
+  ldflags = [
+    "-Wl,--whole-archive",
+    rebase_path("${target_out_dir}/flashd/libflashd.a"),
+    "-Wl,--no-whole-archive",
   ]
 
   if (defined(use_ptable)) {
