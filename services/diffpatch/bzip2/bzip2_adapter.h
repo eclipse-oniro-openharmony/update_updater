@@ -29,7 +29,7 @@ public:
     ~BZip2Adapter() override {}
 
     int32_t Open() override;
-    int32_t Close();
+    int32_t Close() override;
 protected:
     static constexpr int32_t BLOCK_SIZE_BEST = 9;
     bz_stream stream_ {};

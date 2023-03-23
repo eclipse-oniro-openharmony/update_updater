@@ -29,7 +29,7 @@ public:
     {
         return 0;
     };
-    int32_t Close()
+    virtual int32_t Close()
     {
         return 0;
     };

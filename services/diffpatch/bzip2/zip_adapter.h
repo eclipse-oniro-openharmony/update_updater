@@ -33,7 +33,7 @@ public:
     }
 
     int32_t Open() override;
-    int32_t Close();
+    int32_t Close() override;
 
     int32_t WriteData(const BlockBuffer &srcData) override;
     int32_t FlushData(size_t &offset) override;
