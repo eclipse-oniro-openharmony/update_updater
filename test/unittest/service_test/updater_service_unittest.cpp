@@ -100,7 +100,7 @@ HWTEST_F(UpdaterUtilUnitTest, SelectMode, TestSize.Level1)
 
     mode = SelectMode({"boot_updater", "boot_flash", ""});
     ASSERT_NE(mode, std::nullopt);
-    EXPECT_EQ(mode->modeName, "FLASH");
+    EXPECT_EQ(mode->modeName, "FLASHD");
 
     mode = SelectMode({"invalid_command", "", ""});
     EXPECT_EQ(mode, std::nullopt);
