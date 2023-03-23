@@ -15,8 +15,8 @@
 #include "fs_manager/mount.h"
 #include "log/log.h"
 #include "misc_info/misc_info.h"
-#include "updater/updater_const.h"
 #include "updater/updater.h"
+#include "updater/updater_const.h"
 #include "updater_main.h"
 #include "utils.h"
 
