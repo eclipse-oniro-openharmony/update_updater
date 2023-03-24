@@ -97,7 +97,7 @@ ohos_executable("updater") {
 
   # force link invisible function
   if (defined(updater_force_link_libs)) {
-    ldflags = [ "-Wl,--whole-archive" ]
+    ldflags += [ "-Wl,--whole-archive" ]
     foreach(lib, updater_force_link_libs) {
       ldflags += [ "${lib}" ]
     }
