@@ -15,6 +15,7 @@
 #include "updater_ui.h"
 #include <mutex>
 #include <thread>
+#include "callback_manager.h"
 #include "language/language_ui.h"
 #include "log/log.h"
 #include "page/page_manager.h"
@@ -29,43 +30,12 @@ constexpr uint32_t DISPLAY_TIME = 1 * 1000 * 1000; /* 1s */
 constexpr uint32_t FAIL_DELAY = 5 * 1000 * 1000;
 constexpr uint32_t SUCCESS_DELAY = 3 * 1000 * 1000;
 constexpr int CALLBACK_DELAY = 20 * 1000; /* 20ms */
-std::mutex g_mtx;
-bool g_isInCallback { false };
 bool g_timerStopped { false };
-bool IsAlreadyInCallback()
-{
-    std::lock_guard<std::mutex> lck(g_mtx);
-    if (!g_isInCallback) {
-        return false;
-    }
-    g_isInCallback = true;
-    return true;
-}
-
-void ExitCallback()
-{
-    std::lock_guard<std::mutex> lck(g_mtx);
-    g_isInCallback = false;
-}
 
 inline auto &GetFacade()
 {
     return UpdaterUiFacade::GetInstance();
 }
-
-/**
- * avoid calling multipule callback simultaneously.
- * When defining a new callback, should place a
- * CALLBACK_GUARD_RETURN at the beginning of callback function
- */
-#define CALLBACK_GUARD_RETURN    \
-    if (IsAlreadyInCallback()) { \
-        return;                  \
-    }                            \
-    ON_SCOPE_EXIT(exitCallback)  \
-    {                            \
-        ExitCallback();          \
-    }
 }  // namespace
 
 std::ostream &operator<<(std::ostream &os, const ComInfo &com)
@@ -98,172 +68,134 @@ void DoProgress()
     }
 }
 
-void OnRebootEvt()
+DEFINE_CALLBACK(OnRebootEvt)
 {
     LOG(INFO) << "On Label Reboot";
-    std::thread {
-        [] () {
-            CALLBACK_GUARD_RETURN;
-            PostUpdater(false);
-            Utils::DoReboot("");
-        }
-    }.detach();
+    PostUpdater(false);
+    Utils::DoReboot("");
 }
 
-void OnLabelResetEvt()
+DEFINE_CALLBACK(OnLabelResetEvt)
 {
     LOG(INFO) << "On Label Reset";
-    CALLBACK_GUARD_RETURN;
     if (!GetFacade().SetMode(UpdaterMode::FACTORYRST)) {
         return;
     }
     GetFacade().ShowFactoryConfirmPage();
 }
 
-void OnLabelSDCardEvt()
+DEFINE_CALLBACK(OnLabelSDCardEvt)
 {
     LOG(INFO) << "On Label SDCard";
-    std::thread {
-        [] () {
-            CALLBACK_GUARD_RETURN;
-            if (!GetFacade().SetMode(UpdaterMode::SDCARD)) {
-                return;
-            }
-            Utils::UsSleep(CALLBACK_DELAY);
-            GetFacade().ClearText();
-            GetFacade().ShowProgress(0);
-            GetFacade().ShowLog(TR(LOG_SDCARD_NOTMOVE));
-            Utils::UsSleep(DISPLAY_TIME);
-            UpdaterParams upParams;
-            upParams.sdcardUpdate = true;
-            if (UpdaterFromSdcard(upParams) != UPDATE_SUCCESS) {
-                GetFacade().ShowMainpage();
-                return;
-            }
-            PostUpdater(true);
-            Utils::DoReboot("");
-        }
-    }.detach();
+    if (!GetFacade().SetMode(UpdaterMode::SDCARD)) {
+        return;
+    }
+    Utils::UsSleep(CALLBACK_DELAY);
+    GetFacade().ClearText();
+    GetFacade().ShowProgress(0);
+    GetFacade().ShowLog(TR(LOG_SDCARD_NOTMOVE));
+    Utils::UsSleep(DISPLAY_TIME);
+    UpdaterParams upParams;
+    upParams.sdcardUpdate = true;
+    if (UpdaterFromSdcard(upParams) != UPDATE_SUCCESS) {
+        GetFacade().ShowMainpage();
+        return;
+    }
+    PostUpdater(true);
+    Utils::DoReboot("");
 }
 
-void OnLabelSDCardNoDelayEvt()
+DEFINE_CALLBACK(OnLabelSDCardNoDelayEvt)
 {
     LOG(INFO) << "On Label SDCard";
-    std::thread {
-        [] () {
-            CALLBACK_GUARD_RETURN;
-            if (!GetFacade().SetMode(UpdaterMode::SDCARD)) {
-                return;
-            }
-            Utils::UsSleep(CALLBACK_DELAY);
-            UpdaterParams upParams;
-            upParams.sdcardUpdate = true;
-            if (auto res = UpdaterFromSdcard(upParams); res != UPDATE_SUCCESS) {
-                GetFacade().ShowLogRes(res == UPDATE_CORRUPT ? TR(LOGRES_VERIFY_FAILED) : TR(LOGRES_UPDATE_FAILED));
-                GetFacade().ShowFailedPage();
-                Utils::UsSleep(FAIL_DELAY);
-                GetFacade().ShowMainpage();
-                return;
-            }
-            GetFacade().ShowLogRes(TR(LABEL_UPD_OK_DONE));
-            GetFacade().ShowSuccessPage();
-            Utils::UsSleep(SUCCESS_DELAY);
-            PostUpdater(true);
-            Utils::DoReboot("");
-        }
-    }.detach();
+    if (!GetFacade().SetMode(UpdaterMode::SDCARD)) {
+        return;
+    }
+    Utils::UsSleep(CALLBACK_DELAY);
+    UpdaterParams upParams;
+    upParams.sdcardUpdate = true;
+    if (auto res = UpdaterFromSdcard(upParams); res != UPDATE_SUCCESS) {
+        GetFacade().ShowLogRes(res == UPDATE_CORRUPT ? TR(LOGRES_VERIFY_FAILED) : TR(LOGRES_UPDATE_FAILED));
+        GetFacade().ShowFailedPage();
+        Utils::UsSleep(FAIL_DELAY);
+        GetFacade().ShowMainpage();
+        return;
+    }
+    GetFacade().ShowLogRes(TR(LABEL_UPD_OK_DONE));
+    GetFacade().ShowSuccessPage();
+    Utils::UsSleep(SUCCESS_DELAY);
+    PostUpdater(true);
+    Utils::DoReboot("");
 }
 
-void OnLabelCancelEvt()
+DEFINE_CALLBACK(OnLabelCancelEvt)
 {
-    CALLBACK_GUARD_RETURN;
     LOG(INFO) << "On Label Cancel";
     PageManager::GetInstance().GoBack();
 }
 
-void OnLabelOkEvt()
+DEFINE_CALLBACK(OnLabelOkEvt)
 {
     LOG(INFO) << "On Label Ok";
-    std::thread {
-        [] () {
-            CALLBACK_GUARD_RETURN;
-            Utils::UsSleep(CALLBACK_DELAY);
-            GetFacade().ShowMainpage();
-            GetFacade().ClearText();
-            GetFacade().ShowLog(TR(LOG_WIPE_DATA));
-            if (!GetFacade().SetMode(UpdaterMode::FACTORYRST)) {
-                return;
-            }
-            GetFacade().ShowProgress(0);
-            GetFacade().ShowProgressPage();
-            DoProgress();
-            if (FactoryReset(USER_WIPE_DATA, "/data") == 0) {
-                GetFacade().ShowLog(TR(LOG_WIPE_DONE));
-                GetFacade().ShowSuccessPage();
-            } else {
-                GetFacade().ShowLog(TR(LOG_WIPE_FAIL));
-                GetFacade().ShowFailedPage();
-            }
-        }
-    }.detach();
+    Utils::UsSleep(CALLBACK_DELAY);
+    GetFacade().ShowMainpage();
+    GetFacade().ClearText();
+    GetFacade().ShowLog(TR(LOG_WIPE_DATA));
+    if (!GetFacade().SetMode(UpdaterMode::FACTORYRST)) {
+        return;
+    }
+    GetFacade().ShowProgress(0);
+    GetFacade().ShowProgressPage();
+    DoProgress();
+    if (FactoryReset(USER_WIPE_DATA, "/data") == 0) {
+        GetFacade().ShowLog(TR(LOG_WIPE_DONE));
+        GetFacade().ShowSuccessPage();
+    } else {
+        GetFacade().ShowLog(TR(LOG_WIPE_FAIL));
+        GetFacade().ShowFailedPage();
+    }
 }
 
-void OnConfirmRstEvt()
+DEFINE_CALLBACK(OnConfirmRstEvt)
 {
     LOG(INFO) << "On Label Ok";
-    std::thread {
-        [] () {
-            CALLBACK_GUARD_RETURN;
-            if (!GetFacade().SetMode(UpdaterMode::FACTORYRST)) {
-                return;
-            }
-            GetFacade().ShowUpdInfo(TR(LABEL_RESET_PROGRESS_INFO));
-            GetFacade().ShowProgressPage();
-            DoProgress();
-            if (FactoryReset(USER_WIPE_DATA, "/data") != 0) {
-                GetFacade().ShowLogRes(TR(LOG_WIPE_FAIL));
-                GetFacade().ShowFailedPage();
-                Utils::UsSleep(FAIL_DELAY);
-                GetFacade().ShowMainpage();
-            } else {
-                GetFacade().ShowUpdInfo(TR(LOGRES_WIPE_FINISH));
-                Utils::UsSleep(DISPLAY_TIME);
-                GetFacade().ShowSuccessPage();
-            }
-        }
-    }.detach();
+    if (!GetFacade().SetMode(UpdaterMode::FACTORYRST)) {
+        return;
+    }
+    GetFacade().ShowUpdInfo(TR(LABEL_RESET_PROGRESS_INFO));
+    GetFacade().ShowProgressPage();
+    DoProgress();
+    if (FactoryReset(USER_WIPE_DATA, "/data") != 0) {
+        GetFacade().ShowLogRes(TR(LOG_WIPE_FAIL));
+        GetFacade().ShowFailedPage();
+        Utils::UsSleep(FAIL_DELAY);
+        GetFacade().ShowMainpage();
+    } else {
+        GetFacade().ShowUpdInfo(TR(LOGRES_WIPE_FINISH));
+        Utils::UsSleep(DISPLAY_TIME);
+        GetFacade().ShowSuccessPage();
+    }
 }
 
-void OnMenuShutdownEvt()
+DEFINE_CALLBACK(OnMenuShutdownEvt)
 {
-    LOG(INFO) << "On btn shutdown";
-    std::thread {
-        [] () {
-            CALLBACK_GUARD_RETURN;
-            LOG(DEBUG) << "shutdown";
-            Utils::DoShutdown();
-        }
-    }.detach();
+    LOG(DEBUG) << "shutdown";
+    Utils::DoShutdown();
 }
 
-void OnMenuClearCacheEvt()
+DEFINE_CALLBACK(OnMenuClearCacheEvt)
 {
     LOG(INFO) << "On clear cache";
-    std::thread {
-        [] () {
-            CALLBACK_GUARD_RETURN;
-            GetFacade().ClearText();
-            if (!GetFacade().SetMode(UpdaterMode::FACTORYRST)) {
-                return;
-            }
-            Utils::UsSleep(CALLBACK_DELAY);
-            GetFacade().ShowUpdInfo(TR(LOG_CLEAR_CAHCE));
-            GetFacade().ShowProgressPage();
-            ClearMisc();
-            DoProgress();
-            GetFacade().ShowMainpage();
-        }
-    }.detach();
+    GetFacade().ClearText();
+    if (!GetFacade().SetMode(UpdaterMode::FACTORYRST)) {
+        return;
+    }
+    Utils::UsSleep(CALLBACK_DELAY);
+    GetFacade().ShowUpdInfo(TR(LOG_CLEAR_CAHCE));
+    GetFacade().ShowProgressPage();
+    ClearMisc();
+    DoProgress();
+    GetFacade().ShowMainpage();
 }
 
 void StartLongPressTimer()

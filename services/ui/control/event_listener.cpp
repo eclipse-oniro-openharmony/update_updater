@@ -16,12 +16,15 @@
 #include "event_listener.h"
 
 #include <linux/input.h>
+#include <mutex>
+#include <thread>
 #include "dock/focus_manager.h"
 #include "dock/input_device.h"
 #include "page/page_manager.h"
 #include "scope_guard.h"
 
 namespace Updater {
+std::mutex CallBackDecorator::mtx_;
 void CallBackDecorator::operator()() const
 {
     auto *page = view_.GetParent();
@@ -49,7 +52,14 @@ void CallBackDecorator::operator()() const
         return;
     }
     // then can trigger callback
-    cb_();
+    std::thread{[cb = cb_] () {
+        std::unique_lock<std::mutex> lock(mtx_, std::defer_lock);
+        if (!lock.try_lock()) {
+            LOG(ERROR) << "try lock failed, only allow running one callback at the same time";
+            return;
+        }
+        cb();
+    }}.detach();
 }
 
 bool LabelOnTouchListener::OnRelease(OHOS::UIView &view, [[maybe_unused]] const OHOS::ReleaseEvent &event)

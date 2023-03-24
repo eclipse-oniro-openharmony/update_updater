@@ -31,18 +31,6 @@ std::unordered_map<std::string, EventType> CallbackManager::evtTypes_ = {
     {"CLICKEVENT", EventType::CLICKEVENT}
 };
 
-std::unordered_map<std::string, Callback> CallbackManager::funcs_ = {
-    {"OnLabelCancelEvt", &OnLabelCancelEvt},
-    {"OnLabelOkEvt", &OnLabelOkEvt},
-    {"OnRebootEvt", &OnRebootEvt},
-    {"OnLabelResetEvt", &OnLabelResetEvt},
-    {"OnMenuShutdownEvt", &OnMenuShutdownEvt},
-    {"OnLabelSDCardEvt", &OnLabelSDCardEvt},
-    {"OnLabelSDCardNoDelayEvt", &OnLabelSDCardNoDelayEvt},
-    {"OnConfirmRstEvt", &OnConfirmRstEvt},
-    {"OnMenuClearCacheEvt", &OnMenuClearCacheEvt}
-};
-
 bool CallbackManager::LoadCallbacks(const JsonNode &node)
 {
     const JsonNode &cbNodes = node[CB_FIELD];
@@ -62,6 +50,16 @@ bool CallbackManager::LoadCallbacks(const JsonNode &node)
     return true;
 }
 
+bool CallbackManager::RegisterFunc(const std::string &name, Callback cb)
+{
+    return GetFuncs().insert({name, cb}).second;
+}
+
+std::unordered_map<std::string, Callback> &CallbackManager::GetFuncs() {
+    static std::unordered_map<std::string, Callback> funcs;
+    return funcs;
+}
+
 void CallbackManager::Register(const CallbackCfg &cbCfg)
 {
     auto it = evtTypes_.find(cbCfg.type);
@@ -69,8 +67,9 @@ void CallbackManager::Register(const CallbackCfg &cbCfg)
         LOG(ERROR) << "not recognized event type: " << cbCfg.type;
         return;
     }
-    auto itFunc = funcs_.find(cbCfg.func);
-    if (itFunc == funcs_.end()) {
+    auto &funcs = GetFuncs();
+    auto itFunc = funcs.find(cbCfg.func);
+    if (itFunc == funcs.end()) {
         LOG(ERROR) << "not recognized event type: " << cbCfg.func;
         return;
     }
