@@ -19,7 +19,6 @@
 #include "event_listener.h"
 #include "event_manager.h"
 #include "page/page_manager.h"
-#include "updater_ui.h"
 
 namespace Updater {
 constexpr auto CB_FIELD = "callbacks";

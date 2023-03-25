@@ -31,16 +31,6 @@ enum class UpdaterMode {
 };
 std::ostream &operator<<(std::ostream &os, const ComInfo &com);
 void DoProgress();
-void OnLabelOkEvt();
-void OnRebootEvt();
-void OnLabelResetEvt();
-void OnLabelSDCardEvt();
-void OnLabelCancelEvt();
-void OnUpdFailReboot();
-void OnMenuShutdownEvt();
-void OnLabelSDCardNoDelayEvt();
-void OnConfirmRstEvt();
-void OnMenuClearCacheEvt();
 void StartLongPressTimer();
 void StopLongPressTimer();
 } // namespace Updater

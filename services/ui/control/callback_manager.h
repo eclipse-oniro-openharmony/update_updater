@@ -38,6 +38,7 @@ private:
 };
 
 #define DEFINE_CALLBACK(name)                                       \
+    void name();                                                    \
     static void __attribute((constructor)) RegisterCallback##name() \
     {                                                               \
         CallbackManager::RegisterFunc(#name, &name);                \
