@@ -58,6 +58,7 @@ constexpr struct option OPTIONS[] = {
     { "user_wipe_data", no_argument, nullptr, 0 },
     { "sdcard_update", no_argument, nullptr, 0 },
     { "upgraded_pkg_num", required_argument, nullptr, 0 },
+    { "force_update_action", required_argument, nullptr, 0 },
     { nullptr, 0, nullptr, 0 },
 };
 constexpr float VERIFY_PERCENT = 0.05;
@@ -293,7 +294,11 @@ static UpdaterStatus InstallUpdaterPackage(UpdaterParams &upParams, PkgManager::
         }
         SetMessageToMisc(upParams.retryCount + 1, "retry_count");
     }
-    status = DoInstallUpdaterPackage(manager, upParams, HOTA_UPDATE);
+    if (upParams.sdcardUpdate) {
+        status = DoInstallUpdaterPackage(manager, upParams, SDCARD_UPDATE);
+    } else {
+        status = DoInstallUpdaterPackage(manager, upParams, HOTA_UPDATE);
+    }
     if (status != UPDATE_SUCCESS) {
         UPDATER_UI_INSTANCE.Sleep(UI_SHOW_DURATION);
         UPDATER_UI_INSTANCE.ShowLog(TR(LOG_UPDFAIL));
@@ -419,6 +424,9 @@ static UpdaterStatus DoUpdatePackages(UpdaterParams &upParams)
         }
         PkgManager::ReleasePackageInstance(manager);
     }
+    if (upParams.forceUpdate) {
+        UPDATER_UI_INSTANCE.ShowLogRes(TR(LABEL_UPD_OK_SHUTDOWN));
+    }
     UPDATER_UI_INSTANCE.ShowSuccessPage();
     return status;
 }
@@ -495,6 +503,7 @@ static UpdaterStatus StartUpdaterEntry(UpdaterParams &upParams)
     UpdaterStatus status = UPDATE_UNKNOWN;
     if (upParams.sdcardUpdate) {
         LOG(INFO) << "start sdcard update";
+        UPDATER_UI_INSTANCE.ShowProgressPage();
         status = UpdaterFromSdcard(upParams);
         return status;
     } else if (upParams.updatePackage.size() > 0) {
@@ -537,9 +546,8 @@ static UpdaterStatus StartUpdaterEntry(UpdaterParams &upParams)
 }
 
 static UpdaterStatus StartUpdater(const std::vector<std::string> &args,
-    char **argv, PackageUpdateMode &mode)
+    char **argv, PackageUpdateMode &mode, UpdaterParams &upParams)
 {
-    UpdaterParams upParams;
     std::vector<char *> extractedArgs;
     int rc;
     int optionIndex;
@@ -569,6 +577,8 @@ static UpdaterStatus StartUpdater(const std::vector<std::string> &args,
                     upParams.pkgLocation = static_cast<unsigned int>(atoi(optarg));
                 } else if (option == "sdcard_update") {
                     upParams.sdcardUpdate = true;
+                } else if (option == "force_update_action" && std::string(optarg) == POWEROFF) { /* Only for OTA. */
+                    upParams.forceUpdate = true;
                 }
                 break;
             }
@@ -593,6 +603,7 @@ static UpdaterStatus StartUpdater(const std::vector<std::string> &args,
 int UpdaterMain(int argc, char **argv)
 {
     [[maybe_unused]] UpdaterStatus status = UPDATE_UNKNOWN;
+    UpdaterParams upParams;
     UpdaterInit::GetInstance().InvokeEvent(UPDATER_PRE_INIT_EVENT);
     std::vector<std::string> args = ParseParams(argc, argv);
 
@@ -602,12 +613,18 @@ int UpdaterMain(int argc, char **argv)
 #endif
     UpdaterInit::GetInstance().InvokeEvent(UPDATER_INIT_EVENT);
     PackageUpdateMode mode = UNKNOWN_UPDATE;
-    status = StartUpdater(args, argv, mode);
+    status = StartUpdater(args, argv, mode, upParams);
 #if !defined(UPDATER_UT) && defined(UPDATER_UI_SUPPORT)
     UPDATER_UI_INSTANCE.Sleep(UI_SHOW_DURATION);
     if (status != UPDATE_SUCCESS && status != UPDATE_SKIP) {
         if (mode == HOTA_UPDATE) {
             UPDATER_UI_INSTANCE.ShowFailedPage();
+        } else if (mode == SDCARD_UPDATE) {
+            UPDATER_UI_INSTANCE.ShowLogRes(
+                status == UPDATE_CORRUPT ? TR(LOGRES_VERIFY_FAILED) : TR(LOGRES_UPDATE_FAILED));
+            UPDATER_UI_INSTANCE.ShowFailedPage();
+            Utils::UsSleep(5 * DISPLAY_TIME); // 5 : 5s
+            UPDATER_UI_INSTANCE.ShowMainpage();
         } else {
             UPDATER_UI_INSTANCE.ShowMainpage();
             UPDATER_UI_INSTANCE.Sleep(50); /* wait for page flush 50ms */
@@ -621,7 +638,7 @@ int UpdaterMain(int argc, char **argv)
     }
 #endif
     PostUpdater(true);
-    Utils::DoReboot("");
+    upParams.forceUpdate ? Utils::DoShutdown() : Utils::DoReboot("");
     return 0;
 }
 } // Updater

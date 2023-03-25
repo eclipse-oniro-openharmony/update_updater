@@ -36,7 +36,7 @@ namespace OHOS {
         pFile = fopen("ReadFstabFromFile.txt", "w+");
         if (pFile == nullptr) {
             LOG(ERROR) << "[fuzz]open file failed";
-            return -1;
+            return false;
         }
 
         (void)fwrite(data, 1, size, pFile);
@@ -44,7 +44,7 @@ namespace OHOS {
         fstab = ReadFstabFromFile(fstabFile.c_str(), false);
         (void)remove("ReadFstabFromFile.txt");
         ReleaseFstab(fstab);
-        return 0;
+        return true;
     }
 }
 

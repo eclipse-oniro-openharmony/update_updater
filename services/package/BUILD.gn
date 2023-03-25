@@ -60,6 +60,7 @@ ohos_static_library("libupdaterpackage") {
     "$SUBSYSTEM_DIR/pkg_verify/pkcs7_signed_data.cpp",
     "$SUBSYSTEM_DIR/pkg_verify/pkg_verify_util.cpp",
     "$SUBSYSTEM_DIR/pkg_verify/zip_pkg_parse.cpp",
+    "pkg_verify/hash_data_verifier.cpp",
   ]
 
   deps = [

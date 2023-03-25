@@ -53,8 +53,8 @@ bool DeleteUpdaterPath(const std::string &path)
             (currentName.compare(UPDATER_LOCALE_FILE) == 0)) {
             continue;
         }
-        if (currentName.compare(SDCARD_FULL_PACKAGE) == 0 ||
-            currentName.compare(SDCARD_CUST_PACKAGE) == 0 || currentName.compare(SDCARD_PRELOAD_PACKAGE) == 0) {
+        if (sdcardTmp && (currentName.compare(SDCARD_FULL_PACKAGE) == 0 ||
+            currentName.compare(SDCARD_CUST_PACKAGE) == 0 || currentName.compare(SDCARD_PRELOAD_PACKAGE) == 0)) {
             continue;
         }
         std::string tmpName(path);
@@ -200,10 +200,11 @@ std::vector<std::string> ParseParams(int argc, char **argv)
         }
     }
     STAGE(UPDATE_STAGE_OUT) << "Init Params: " << boot.update;
-    std::vector<std::string> parseParams(argv, argv + argc);
     boot.update[sizeof(boot.update) - 1] = '\0';
-    std::vector<std::string> parseParams1 = Utils::SplitString(boot.update, "\n");
-    parseParams.insert(parseParams.end(), parseParams1.begin(), parseParams1.end());
+    std::vector<std::string> parseParams = Utils::SplitString(boot.update, "\n");
+    if (argc != 0 && argv != nullptr) {
+        parseParams.insert(parseParams.begin(), argv, argv + argc);
+    }
     return parseParams;
 }
 

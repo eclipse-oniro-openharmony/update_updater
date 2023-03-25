@@ -36,6 +36,7 @@ enum EXIT_CODES {
     EXIT_FOUND_SCRIPT_ERROR = 3,
     EXIT_PARSE_SCRIPT_ERROR = 4,
     EXIT_EXEC_SCRIPT_ERROR = 5,
+    EXIT_VERIFY_SCRIPT_ERROR = 6,
 };
 
 int ProcessUpdater(bool retry, int pipeFd, const std::string &packagePath, const std::string &keyPath);

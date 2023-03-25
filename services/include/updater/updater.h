@@ -42,6 +42,7 @@ struct UpdaterParams {
     bool factoryWipeData = false;
     bool userWipeData = false;
     bool sdcardUpdate = false;
+    bool forceUpdate = false;
     int retryCount = 0;
     float initialProgress = 0; /* The upgrade starts at the progress bar location */
     float currentPercentage = 0; /* The proportion of progress bars occupied by the upgrade process */
@@ -65,7 +66,8 @@ int GetUpdatePackageInfo(Hpackage::PkgManager::PkgManagerPtr pkgManager, const s
 bool PtableProcess(Hpackage::PkgManager::PkgManagerPtr pkgManager, PackageUpdateMode updateMode);
 #endif
 
-int ExecUpdate(Hpackage::PkgManager::PkgManagerPtr pkgManager, int retry, PostMessageFunction postMessage);
+int ExecUpdate(Hpackage::PkgManager::PkgManagerPtr pkgManager, int retry, const std::string &pkgPath,
+    PostMessageFunction postMessage);
 
 UpdaterStatus IsSpaceCapacitySufficient(const std::vector<std::string> &packagePath);
 
