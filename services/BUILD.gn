@@ -40,6 +40,7 @@ updater_common_deps = [
   "//base/update/updater/interfaces/kits/packages:libpackageExt",
   "//base/update/updater/services/applypatch:libapplypatch",
   "//base/update/updater/services/diffpatch/patch:libpatch",
+  "//base/update/updater/services/flashd:libflashd",
   "//base/update/updater/services/fs_manager:libfsmanager",
   "//base/update/updater/services/log:libupdaterlog",
   "//base/update/updater/services/package:libupdaterpackage",
@@ -70,7 +71,6 @@ ohos_executable("updater") {
 
   deps = updater_common_deps
   deps += [
-    "flashd:libflashd",
     "//base/update/updater/interfaces/kits/misc_info:libmiscinfo",
     "//base/update/updater/services/ui:libui",
     "//third_party/libdrm:libdrm",
@@ -93,6 +93,10 @@ ohos_executable("updater") {
   if (defined(updater_custom_lib)) {
     deps += updater_custom_lib
     deps += [ "//drivers/peripheral/input/udriver:hdi_input_udriver" ]
+  }
+
+  if (defined(updater_only_custom_deps)) {
+    deps += updater_only_custom_deps
   }
 
   # force link invisible function
@@ -136,9 +140,16 @@ ohos_static_library("libupdater") {
     deps += [ "//drivers/peripheral/input/udriver:hdi_input_udriver" ]
   }
 
+# force link flashd library
+  ldflags = [
+    "-Wl,--whole-archive",
+    rebase_path("${target_out_dir}/flashd/libflashd.a"),
+    "-Wl,--no-whole-archive",
+  ]
+
   # force link invisible function
   if (defined(updater_force_link_libs)) {
-    ldflags = [ "-Wl,--whole-archive" ]
+    ldflags += [ "-Wl,--whole-archive" ]
     foreach(lib, updater_force_link_libs) {
       ldflags += [ "${lib}" ]
     }
