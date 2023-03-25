@@ -159,7 +159,7 @@ std::unique_ptr<DataWriter> BinFlowUpdate::GetDataWriter(const std::string &part
 
 int BinFlowUpdate::BinUpdatePreWrite(uint8_t *data, uint32_t &len)
 {
-    if (procCompIndex_ > updateInfo_.componentNames.size()) {
+    if (procCompIndex_ >= updateInfo_.componentNames.size()) {
         LOG(ERROR) << "PreWriteBin index error cur:" << procCompIndex_ << " max:" << updateInfo_.componentNames.size();
         return -1;
     }
