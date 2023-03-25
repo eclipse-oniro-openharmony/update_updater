@@ -294,7 +294,11 @@ static UpdaterStatus InstallUpdaterPackage(UpdaterParams &upParams, PkgManager::
         }
         SetMessageToMisc(upParams.retryCount + 1, "retry_count");
     }
-    status = DoInstallUpdaterPackage(manager, upParams, HOTA_UPDATE);
+    if (upParams.sdcardUpdate) {
+        status = DoInstallUpdaterPackage(manager, upParams, SDCARD_UPDATE);
+    } else {
+        status = DoInstallUpdaterPackage(manager, upParams, HOTA_UPDATE);
+    }
     if (status != UPDATE_SUCCESS) {
         UPDATER_UI_INSTANCE.Sleep(UI_SHOW_DURATION);
         UPDATER_UI_INSTANCE.ShowLog(TR(LOG_UPDFAIL));
