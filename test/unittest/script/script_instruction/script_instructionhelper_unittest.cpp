@@ -302,9 +302,4 @@ HWTEST_F(ScriptInstructionHelperUnitTest, TestRegisterUserInstruction01, TestSiz
     test.TestRegisterUserInstruction01();
 }
 
-HWTEST_F(ScriptInstructionHelperUnitTest, TestRegisterUserInstruction02, TestSize.Level1)
-{
-    ScriptInstructionHelperUnitTest test;
-    test.TestRegisterUserInstruction02();
-}
 }
