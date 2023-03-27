@@ -51,7 +51,11 @@ bool CallbackManager::LoadCallbacks(const JsonNode &node)
 
 bool CallbackManager::RegisterFunc(const std::string &name, Callback cb)
 {
-    return GetFuncs().insert({name, cb}).second;
+    if (!GetFuncs().insert({name, cb}).second) {
+        LOG(ERROR) << "register fun failed for " << name;
+        return false;
+    }
+    return true;
 }
 
 std::unordered_map<std::string, Callback> &CallbackManager::GetFuncs() {
