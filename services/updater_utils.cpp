@@ -244,11 +244,15 @@ std::optional<BootMode> SelectMode(const UpdateMessage &boot)
 
     // select modes by bootMode.cond which would check misc message
     auto it = std::find_if(modes.begin(), modes.end(), [&boot] (const auto &bootMode) {
-        return bootMode.cond != nullptr && bootMode.cond(boot);
+        if (bootMode.cond != nullptr && bootMode.cond(boot)) {
+            return true;
+        }
+        LOG(WARNING) << "condition for mode " << bootMode.modeName << " is not satisfied";
+        return false;
     });
     // misc check failed for each mode, then enter updater mode
     if (it == modes.end() || it->entryFunc == nullptr) {
-        LOG(INFO) << "find valid mode failed, enter updater Mode";
+        LOG(WARNING) << "find valid mode failed, enter updater Mode";
         return std::nullopt;
     }
 
