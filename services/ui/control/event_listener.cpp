@@ -52,7 +52,7 @@ void CallBackDecorator::operator()() const
         return;
     }
     // then can trigger callback
-    std::thread {
+    std::thread t {
         [cb = cb_] () {
             std::unique_lock<std::mutex> lock(mtx_, std::defer_lock);
             if (!lock.try_lock()) {
@@ -61,7 +61,8 @@ void CallBackDecorator::operator()() const
             }
             cb();
         }
-    }.detach();
+    };
+    t.detach();
 }
 
 bool LabelOnTouchListener::OnRelease(OHOS::UIView &view, [[maybe_unused]] const OHOS::ReleaseEvent &event)
