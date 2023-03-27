@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +15,9 @@
 
 #ifndef UPDATER_UPDATER_H
 #define UPDATER_UPDATER_H
+#include <optional>
 #include <string>
+#include "misc_info/misc_info.h"
 #include "package/packages_info.h"
 #include "package/pkg_manager.h"
 
@@ -48,6 +50,18 @@ struct UpdaterParams {
     float currentPercentage = 0; /* The proportion of progress bars occupied by the upgrade process */
     unsigned int pkgLocation = 0;
     std::vector<std::string> updatePackage {};
+};
+
+using CondFunc = std::function<bool(const UpdateMessage &)>;
+
+using EntryFunc = std::function<int(int, char **)>;
+
+struct BootMode {
+    CondFunc cond {nullptr}; // enter mode condition
+    std::string modeName {}; // mode name
+    std::string modePara {}; // parameter config of mode
+    EntryFunc entryFunc {nullptr}; // mode entry
+    void InitMode(void) const; // mode related initialization
 };
 
 int GetTmpProgressValue();
@@ -83,8 +97,16 @@ std::vector<std::string> ParseParams(int argc, char **argv);
 
 bool ClearMisc();
 
-int GetBootMode(int &mode);
-
 std::string GetWorkPath();
+
+bool IsUpdater(const UpdateMessage &boot);
+
+bool IsFlashd(const UpdateMessage &boot);
+
+void RegisterMode(const BootMode &mode);
+
+std::vector<BootMode> &GetBootModes(void);
+
+std::optional<BootMode> SelectMode(const UpdateMessage &boot);
 } // Updater
 #endif /* UPDATER_UPDATER_H */

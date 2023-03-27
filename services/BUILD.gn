@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -76,6 +76,13 @@ ohos_executable("updater") {
     "//third_party/libdrm:libdrm",
   ]
 
+  # force link flashd library
+  ldflags = [
+    "-Wl,--whole-archive",
+    rebase_path("${target_out_dir}/flashd/libflashd.a"),
+    "-Wl,--no-whole-archive",
+  ]
+
   if (defined(use_ptable)) {
     include_dirs += [ "//base/update/updater/services/ptable_parse" ]
     deps += [ "//base/update/updater/services/ptable_parse:libptableparse" ]
@@ -88,9 +95,13 @@ ohos_executable("updater") {
     deps += [ "//drivers/peripheral/input/udriver:hdi_input_udriver" ]
   }
 
+  if (defined(updater_only_custom_deps)) {
+    deps += updater_only_custom_deps
+  }
+
   # force link invisible function
   if (defined(updater_force_link_libs)) {
-    ldflags = [ "-Wl,--whole-archive" ]
+    ldflags += [ "-Wl,--whole-archive" ]
     foreach(lib, updater_force_link_libs) {
       ldflags += [ "${lib}" ]
     }
@@ -129,9 +140,16 @@ ohos_static_library("libupdater") {
     deps += [ "//drivers/peripheral/input/udriver:hdi_input_udriver" ]
   }
 
+  # force link flashd library
+  ldflags = [
+    "-Wl,--whole-archive",
+    rebase_path("${target_out_dir}/flashd/libflashd.a"),
+    "-Wl,--no-whole-archive",
+  ]
+
   # force link invisible function
   if (defined(updater_force_link_libs)) {
-    ldflags = [ "-Wl,--whole-archive" ]
+    ldflags += [ "-Wl,--whole-archive" ]
     foreach(lib, updater_force_link_libs) {
       ldflags += [ "${lib}" ]
     }

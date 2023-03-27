@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 #include "fs_manager/mount.h"
-#include "flashd/flashd.h"
 #include "log/log.h"
 #include "misc_info/misc_info.h"
+#include "updater/updater.h"
 #include "updater/updater_const.h"
 #include "updater_main.h"
 #include "utils.h"
@@ -24,24 +24,21 @@ using namespace Updater;
 
 int main(int argc, char **argv)
 {
-    int mode = BOOT_UPDATER;
-    int ret = GetBootMode(mode);
-    if (ret != 0) {
-        printf("Failed to get boot mode, start updater mode \n");
-        mode = BOOT_UPDATER;
+    // prepare modes vector by macro DEFINE_MODE which subscribe UPDATER_MAIN_PRE_EVENT event
+    UpdaterInit::GetInstance().InvokeEvent(UPDATER_MAIN_PRE_EVENT);
+
+    struct UpdateMessage boot {};
+    if (!ReadUpdaterMiscMsg(boot)) {
+        // read misc failed, default enter updater mode
+        boot = {"boot_updater", "", ""};
     }
 
-    std::string modeStr = (mode == BOOT_FLASHD) ? "FLASHD" : "UPDATER";
-    InitUpdaterLogger(modeStr, TMP_LOG, TMP_STAGE_LOG, TMP_ERROR_CODE_PATH);
-    SetLogLevel(INFO);
-    LoadFstab();
-    STAGE(UPDATE_STAGE_OUT) << "Start " << ((mode == BOOT_FLASHD) ? "flashd" : "updater");
-    auto modePara = (mode == BOOT_FLASHD) ? "updater.flashd.configfs" : "updater.hdc.configfs";
-    Flashd::SetParameter(modePara, "1");
+    // select modes by bootMode.cond which would check misc message
+    auto bootMode = SelectMode(boot).value_or(BOOT_MODE(Updater, "updater.hdc.configfs"));
 
-    if (mode == BOOT_FLASHD) {
-        Utils::UsSleep(3000 * 1000); // 3000 * 1000 : wait 3s
-        return Flashd::flashd_main(argc, argv);
-    }
-    return Updater::UpdaterMain(argc, argv);
+    // execute mode initialization
+    bootMode.InitMode();
+
+    // mode entry
+    return bootMode.entryFunc(argc, argv);
 }

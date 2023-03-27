@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -599,6 +599,9 @@ static UpdaterStatus StartUpdater(const std::vector<std::string> &args,
     }
     return StartUpdaterEntry(upParams);
 }
+
+// add updater mode
+REGISTER_MODE(Updater, "updater.hdc.configfs");
 
 int UpdaterMain(int argc, char **argv)
 {

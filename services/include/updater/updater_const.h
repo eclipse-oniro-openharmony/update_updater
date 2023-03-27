@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -92,7 +92,5 @@ constexpr unsigned int UI_SHOW_DURATION = 2000;
 constexpr unsigned int INTERVAL_TIME = 300;
 constexpr float EPSINON = 0.00001;
 constexpr float FULL_EPSINON = 1;
-constexpr int BOOT_FLASHD = 1;
-constexpr int BOOT_UPDATER = 2;
 } // namespace Updater
 #endif
