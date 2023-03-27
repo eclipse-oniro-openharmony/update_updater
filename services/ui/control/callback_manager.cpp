@@ -58,7 +58,8 @@ bool CallbackManager::RegisterFunc(const std::string &name, Callback cb)
     return true;
 }
 
-std::unordered_map<std::string, Callback> &CallbackManager::GetFuncs() {
+std::unordered_map<std::string, Callback> &CallbackManager::GetFuncs()
+{
     static std::unordered_map<std::string, Callback> funcs;
     return funcs;
 }

@@ -52,14 +52,16 @@ void CallBackDecorator::operator()() const
         return;
     }
     // then can trigger callback
-    std::thread{[cb = cb_] () {
-        std::unique_lock<std::mutex> lock(mtx_, std::defer_lock);
-        if (!lock.try_lock()) {
-            LOG(ERROR) << "try lock failed, only allow running one callback at the same time";
-            return;
+    std::thread {
+        [cb = cb_] () {
+            std::unique_lock<std::mutex> lock(mtx_, std::defer_lock);
+            if (!lock.try_lock()) {
+                LOG(ERROR) << "try lock failed, only allow running one callback at the same time";
+                return;
+            }
+            cb();
         }
-        cb();
-    }}.detach();
+    }.detach();
 }
 
 bool LabelOnTouchListener::OnRelease(OHOS::UIView &view, [[maybe_unused]] const OHOS::ReleaseEvent &event)
