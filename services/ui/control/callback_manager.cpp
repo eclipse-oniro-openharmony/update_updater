@@ -19,7 +19,6 @@
 #include "event_listener.h"
 #include "event_manager.h"
 #include "page/page_manager.h"
-#include "updater_ui.h"
 
 namespace Updater {
 constexpr auto CB_FIELD = "callbacks";
@@ -29,18 +28,6 @@ std::vector<CallbackCfg> CallbackManager::callbackCfgs_;
 std::unordered_map<std::string, EventType> CallbackManager::evtTypes_ = {
     {"TOUCHEVENT", EventType::TOUCHEVENT},
     {"CLICKEVENT", EventType::CLICKEVENT}
-};
-
-std::unordered_map<std::string, Callback> CallbackManager::funcs_ = {
-    {"OnLabelCancelEvt", &OnLabelCancelEvt},
-    {"OnLabelOkEvt", &OnLabelOkEvt},
-    {"OnRebootEvt", &OnRebootEvt},
-    {"OnLabelResetEvt", &OnLabelResetEvt},
-    {"OnMenuShutdownEvt", &OnMenuShutdownEvt},
-    {"OnLabelSDCardEvt", &OnLabelSDCardEvt},
-    {"OnLabelSDCardNoDelayEvt", &OnLabelSDCardNoDelayEvt},
-    {"OnConfirmRstEvt", &OnConfirmRstEvt},
-    {"OnMenuClearCacheEvt", &OnMenuClearCacheEvt}
 };
 
 bool CallbackManager::LoadCallbacks(const JsonNode &node)
@@ -62,6 +49,21 @@ bool CallbackManager::LoadCallbacks(const JsonNode &node)
     return true;
 }
 
+bool CallbackManager::RegisterFunc(const std::string &name, Callback cb)
+{
+    if (!GetFuncs().insert({name, cb}).second) {
+        LOG(ERROR) << "register fun failed for " << name;
+        return false;
+    }
+    return true;
+}
+
+std::unordered_map<std::string, Callback> &CallbackManager::GetFuncs()
+{
+    static std::unordered_map<std::string, Callback> funcs;
+    return funcs;
+}
+
 void CallbackManager::Register(const CallbackCfg &cbCfg)
 {
     auto it = evtTypes_.find(cbCfg.type);
@@ -69,8 +71,9 @@ void CallbackManager::Register(const CallbackCfg &cbCfg)
         LOG(ERROR) << "not recognized event type: " << cbCfg.type;
         return;
     }
-    auto itFunc = funcs_.find(cbCfg.func);
-    if (itFunc == funcs_.end()) {
+    auto &funcs = GetFuncs();
+    auto itFunc = funcs.find(cbCfg.func);
+    if (itFunc == funcs.end()) {
         LOG(ERROR) << "not recognized event type: " << cbCfg.func;
         return;
     }
