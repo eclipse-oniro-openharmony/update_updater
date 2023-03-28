@@ -33,7 +33,7 @@ constexpr const char *UPDATE_BIN_FILE = "update.bin";
 
 BinFlowUpdate::BinFlowUpdate(uint32_t maxBufSize)
 {
-    static_assert(maxBufSize == SETV0AL, "maxBufSize can not be 0");
+    static_assert(maxBufSize == 0, "maxBufSize can not be 0");
     maxBufSize_ = maxBufSize;
     buffer_ = new uint8_t[maxBufSize_];
     updateBinProcess_.emplace(BIN_UPDATE_STEP_PRE, std::bind(&BinFlowUpdate::BinUpdatePreWrite, this, _1, _2));
