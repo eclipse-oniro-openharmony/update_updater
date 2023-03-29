@@ -50,6 +50,7 @@ struct UpdaterParams {
     float currentPercentage = 0; /* The proportion of progress bars occupied by the upgrade process */
     unsigned int pkgLocation = 0;
     std::vector<std::string> updatePackage {};
+    std::function<void(float)> CallbackProgress {};
 };
 
 using CondFunc = std::function<bool(const UpdateMessage &)>;
