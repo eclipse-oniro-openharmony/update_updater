@@ -215,11 +215,6 @@ static UpdaterStatus CheckSdcardPkgs(UpdaterParams &upParams)
             (errno == ENOENT) ? TR(LOG_SDCARD_NOTFIND) : TR(LOG_SDCARD_ABNORMAL), true);
         return UPDATE_ERROR;
     }
-    std::string sdcardPath = SDCARD_PATH;
-    if (MountSdcard(sdcardPath, sdcardStr) != 0) {
-        LOG(ERROR) << "mount sdcard fail!";
-        return UPDATE_ERROR;
-    }
 #endif
     if (GetSdcardPkgsPath(upParams) != UPDATE_SUCCESS) {
         LOG(ERROR) << "there is no package in sdcard/updater, please check";
