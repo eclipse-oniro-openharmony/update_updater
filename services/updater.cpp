@@ -201,6 +201,11 @@ UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, Upda
 {
     UPDATER_INIT_RECORD;
     UPDATER_UI_INSTANCE.ShowProgressPage();
+    if (upParams.CallbackProgress == nullptr) {
+        LOG(ERROR) << "CallbackProgress is nullptr";
+        UPDATER_LAST_WORD(UPDATE_CORRUPT);
+        return UPDATE_CORRUPT;
+    }
     upParams.CallbackProgress(upParams.initialProgress * FULL_PERCENT_PROGRESS);
     if (pkgManager == nullptr) {
         LOG(ERROR) << "pkgManager is nullptr";
@@ -249,6 +254,10 @@ UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, Upda
 namespace {
 void SetProgress(const std::vector<std::string> &output, UpdaterParams &upParams)
 {
+    if (upParams.CallbackProgress == nullptr) {
+        LOG(ERROR) << "CallbackProgress is nullptr";
+        return;
+    }
     if (output.size() < DEFAULT_PROCESS_NUM) {
         LOG(ERROR) << "check output fail";
         return;

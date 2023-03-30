@@ -165,6 +165,11 @@ static UpdaterStatus VerifyPackages(const UpdaterParams &upParams)
     UPDATER_UI_INSTANCE.ShowProgressPage();
     UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_VERIFYPKG));
 
+    if (upParams.CallbackProgress == nullptr) {
+        UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_VERIFYPKGFAIL), true);
+        UPDATER_LAST_WORD(UPDATE_CORRUPT);
+        return UPDATE_CORRUPT;
+    }
     upParams.CallbackProgress(0.0);
     for (unsigned int i = upParams.pkgLocation; i < upParams.updatePackage.size(); i++) {
         LOG(INFO) << "Verify package:" << upParams.updatePackage[i];
@@ -398,6 +403,10 @@ static UpdaterStatus DoUpdatePackages(UpdaterParams &upParams)
     for (unsigned int i = 0; i < upParams.updatePackage.size(); i++) {
         LOG(INFO) << "package " << i << ":" << upParams.updatePackage[i] <<
             " precent:" << upParams.currentPercentage;
+    }
+    if (upParams.CallbackProgress == nullptr) {
+        LOG(ERROR) << "CallbackProgress is nullptr";
+        return UPDATE_CORRUPT;
     }
     upParams.CallbackProgress(updateStartPosition * FULL_PERCENT_PROGRESS);
     for (; upParams.pkgLocation < upParams.updatePackage.size(); upParams.pkgLocation++) {
