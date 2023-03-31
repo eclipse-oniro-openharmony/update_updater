@@ -39,6 +39,7 @@
 #include "package/pkg_manager.h"
 #include "pkg_manager.h"
 #include "pkg_utils.h"
+#include "ptable_process.h"
 #include "securec.h"
 #include "updater/updater_const.h"
 #include "updater_ui_stub.h"
@@ -383,6 +384,14 @@ static UpdaterStatus PreUpdatePackages(UpdaterParams &upParams)
         LOG(ERROR) << "Battery is not sufficient for install package.";
         return UPDATE_SKIP;
     }
+
+#ifdef UPDATER_USE_PTABLE
+    if(!PtablePreProcess.GetInstance().DoPtableProcess(upParams))
+    {
+        LOG(ERROR) << "DoPtableProcess failed";
+        return UPDATE_ERROR;
+    }
+#endif
     return UPDATE_SUCCESS;
 }
 
@@ -479,6 +488,13 @@ UpdaterStatus UpdaterFromSdcard(UpdaterParams &upParams)
     if (upParams.pkgLocation == 0 && VerifyPackages(upParams) != UPDATE_SUCCESS) {
         return UPDATE_ERROR;
     }
+#ifdef UPDATER_USE_PTABLE
+    if(!PtablePreProcess.GetInstance().DoPtableProcess(upParams))
+    {
+        LOG(ERROR) << "DoPtableProcess failed";
+        return UPDATE_ERROR;
+    }
+#endif
     upParams.initialProgress += VERIFY_PERCENT;
     upParams.currentPercentage -= VERIFY_PERCENT;
 

@@ -76,10 +76,6 @@ UpdaterStatus StartUpdaterProc(Hpackage::PkgManager::PkgManagerPtr pkgManager,
 
 int GetUpdatePackageInfo(Hpackage::PkgManager::PkgManagerPtr pkgManager, const std::string& path);
 
-#ifdef UPDATER_USE_PTABLE
-bool PtableProcess(Hpackage::PkgManager::PkgManagerPtr pkgManager, PackageUpdateMode updateMode);
-#endif
-
 int ExecUpdate(Hpackage::PkgManager::PkgManagerPtr pkgManager, int retry, const std::string &pkgPath,
     PostMessageFunction postMessage);
 

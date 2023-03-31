@@ -173,31 +173,6 @@ void ProgressSmoothHandler(int beginProgress, int endProgress)
 #endif
 }
 
-#ifdef UPDATER_USE_PTABLE
-bool PtableProcess(PkgManager::PkgManagerPtr pkgManager, PackageUpdateMode updateMode)
-{
-    DevicePtable& devicePtb = DevicePtable::GetInstance();
-    devicePtb.LoadPartitionInfo();
-    PackagePtable& packagePtb = PackagePtable::GetInstance();
-    packagePtb.LoadPartitionInfo(pkgManager);
-    if (!devicePtb.ComparePtable(packagePtb)) {
-        LOG(INFO) << "Ptable NOT changed, no need to process!";
-        return true;
-    }
-    if (updateMode == HOTA_UPDATE) {
-        if (devicePtb.ComparePartition(packagePtb, "USERDATA")) {
-            LOG(ERROR) << "Hota update not allow userdata partition change!";
-            return false;
-        }
-    }
-    if (!packagePtb.WritePtableToDevice()) {
-        LOG(ERROR) << "Ptable changed, write new ptable failed!";
-        return false;
-    }
-    return true;
-}
-#endif
-
 UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, UpdaterParams &upParams,
     PackageUpdateMode updateMode)
 {
@@ -231,13 +206,6 @@ UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, Upda
         LOG(ERROR) << "Version Check Fail...";
         return UPDATE_CORRUPT;
     }
-
-#ifdef UPDATER_USE_PTABLE
-    if (!PtableProcess(pkgManager, updateMode)) {
-        LOG(ERROR) << "Ptable process failed!";
-        return UPDATE_CORRUPT;
-    }
-#endif
 
     int maxTemperature;
     UpdaterStatus updateRet = StartUpdaterProc(pkgManager, upParams, maxTemperature);

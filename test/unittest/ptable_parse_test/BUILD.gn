@@ -1,4 +1,4 @@
-# Copyright (c) 2022 Huawei Device Co., Ltd.
+# Copyright (c) 2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,12 +11,31 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//base/update/updater/updater_default_cfg.gni")
-import("//build/ohos.gni")
-SUBSYSTEM_DIR = "//base/update/updater/services/ptable_parse"
+import("//build/test.gni")
 
-config("updater_config") {
-  visibility = [ ":*" ]
+UPDATER_TEST_ROOT = "//base/update/updater/test/unittest"
+
+MODULE_OUTPUT_PATH = "updater/updater_test"
+
+ohos_unittest("ptable_parse_unittest") {
+  testonly = true
+  resource_config_file =
+      "//base/update/updater/test/unittest/test_data/ohos_test.xml"
+  module_out_path = MODULE_OUTPUT_PATH
+  defines = [ "UPDATER_UT" ]
+  sources = [
+    "ptable_unittest.cpp",
+    "ptable_manager_unittest.cpp",
+    "ptable_process_unittest.cpp",
+  ]
+
+  sources += [
+    "//base/update/updater/services/ptable_parse/ptable.cpp",
+    "//base/update/updater/services/ptable_parse/ptable_manager.cpp",
+    "//base/update/updater/services/ptable_parse/ptable_process.cpp",
+    "//base/update/updater/services/ptable_parse/ufs_ptable.cpp",
+  ]
+
   include_dirs = [
     "//base/update/updater/services/include",
     "//base/update/updater/utils/include",
@@ -29,18 +48,6 @@ config("updater_config") {
     "//base/update/updater/services/include/applypatch",
     "//base/update/updater/services/include/log",
   ]
-}
-
-ohos_static_library("libptableparse") {
-  sources = [
-    "${SUBSYSTEM_DIR}/ptable.cpp",
-    "${SUBSYSTEM_DIR}/ptable_manager.cpp",
-    "${SUBSYSTEM_DIR}/ufs_ptable.cpp",
-    "${SUBSYSTEM_DIR}/ptable_process.cpp",
-  ]
-  configs = [ ":updater_config" ]
-
-  ldflags = [ "-Wl -std=c++11" ]
 
   deps = [
     "//base/update/updater/services/log:libupdaterlog",
@@ -48,8 +55,14 @@ ohos_static_library("libptableparse") {
     "//third_party/bzip2:libbz2",
     "//third_party/cJSON:cjson",
     "//third_party/zlib:libz",
+    "//third_party/googletest:gmock_main",
+    "//third_party/googletest:gtest_main",
   ]
-
+  configs = [ "$UPDATER_TEST_ROOT:utest_config" ]
+  external_deps = [
+    "c_utils:utils",
+    "hiviewdfx_hilog_native:libhilog",
+  ]
+  install_enable = true
   part_name = "updater"
-  subsystem_name = "updater"
 }
