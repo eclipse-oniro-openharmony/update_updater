@@ -40,6 +40,7 @@ public:
 
     std::unique_ptr<Ptable> pPtable_;
     StorageType storage_ = StorageType::STORAGE_UNKNOWN;
+    static std::string ptbImgTag_;
 
 protected:
     PtableManager();
@@ -69,7 +70,7 @@ public:
 
     void LoadPartitionInfo([[maybe_unused]] Hpackage::PkgManager *pkgManager = nullptr) override;
 
-private:
+protected:
     PackagePtable();
     bool GetPtableBufferFromPkg(Hpackage::PkgManager *pkgManager, uint8_t *&imageBuf, uint32_t size);
 };
@@ -88,7 +89,7 @@ public:
     void LoadPartitionInfo([[maybe_unused]] Hpackage::PkgManager *pkgManager = nullptr) override;
     bool ComparePtable(PtableManager &newPtbManager);
     bool ComparePartition(PtableManager &newPtbManager, const std::string partitionName);
-private:
+protected:
     DevicePtable();
 };
 } // namespace Updater
