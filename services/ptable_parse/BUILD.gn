@@ -35,8 +35,8 @@ ohos_static_library("libptableparse") {
   sources = [
     "${SUBSYSTEM_DIR}/ptable.cpp",
     "${SUBSYSTEM_DIR}/ptable_manager.cpp",
-    "${SUBSYSTEM_DIR}/ufs_ptable.cpp",
     "${SUBSYSTEM_DIR}/ptable_process.cpp",
+    "${SUBSYSTEM_DIR}/ufs_ptable.cpp",
   ]
   configs = [ ":updater_config" ]
 
