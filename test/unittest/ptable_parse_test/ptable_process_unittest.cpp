@@ -34,7 +34,7 @@ public:
         UpdaterParams upParams;
         bool ret = PtableProcess(upParams);
         ASSERT_EQ(ret, true);
-        std::string path = "data/updater/ptable_parse/updater.zip"
+        std::string path = "data/updater/ptable_parse/updater.zip";
         upParams.updatePackage.push_back(path);
         ret = PtableProcess(upParams);
         ASSERT_EQ(ret, true);
