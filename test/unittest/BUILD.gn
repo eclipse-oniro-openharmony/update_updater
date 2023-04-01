@@ -52,7 +52,6 @@ ohos_unittest("updater_unittest") {
     "log_test/log_unittest.cpp",
     "misc_info_test/misc_info_unittest.cpp",
     "ptable_parse_test/ptable_manager_unittest.cpp",
-    "ptable_parse_test/ptable_process_unittest.cpp",
     "ptable_parse_test/ptable_unittest.cpp",
     "updaterkits_test/updaterkits_unittest.cpp",
   ]
@@ -60,7 +59,6 @@ ohos_unittest("updater_unittest") {
   sources += [
     "$root_out_dir/updater/updater/yacc/lexer.cpp",
     "$root_out_dir/updater/updater/yacc/parser.cpp",
-    "../../services/ptable_parse/ptable_process.cpp",
     "//base/update/updater/interfaces/kits/misc_info/misc_info.cpp",
     "//base/update/updater/interfaces/kits/packages/package.cpp",
     "//base/update/updater/interfaces/kits/updaterkits/updaterkits.cpp",
