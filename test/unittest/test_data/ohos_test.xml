@@ -96,6 +96,7 @@
             <option name="push" value="diffpatch/ImgageDiffPatchLz4File_3_lz4_new.lz -> /data/updater/diffpatch" src="res"/>
             <option name="push" value="diffpatch/PatchGztest_gz.img_patch -> /data/updater/diffpatch" src="res"/>
             <option name="push" value="diffpatch/ImgageDiffPatchLz4File_1_old.lz -> /data/updater/diffpatch" src="res"/>
+            <option name="push" value="ptable_parse/updater1.zip -> /data/updater/ptable_parse" src="res"/>
             <option name="push" value="src/rsa_private_key384.pem -> /data/updater/src" src="res"/>
             <option name="push" value="src/signing_cert384.crt -> /data/updater/src" src="res"/>
             <option name="push" value="src/rsa_private_key2048.pem -> /data/updater/src" src="res"/>
