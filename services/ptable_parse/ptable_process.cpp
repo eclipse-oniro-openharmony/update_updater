@@ -20,12 +20,12 @@
 
 using namespace Hpackage;
 namespace Updater {
-extern "C" __attribute__((constructor)) void RegisterHelper(void)
+extern "C" __attribute__((constructor)) void RegisterPtableHelper(void)
 {
-    PtablePreProcess::GetInstance().RegisterHelper(PtableProcess);
+    PtablePreProcess::GetInstance().RegisterPtableHelper(PtableProcess);
 }
 
-void PtablePreProcess::RegisterHelper(PtablePreProcessFunc ptr)
+void PtablePreProcess::RegisterPtableHelper(PtablePreProcessFunc ptr)
 {
     helper_ = std::move(ptr);
 }

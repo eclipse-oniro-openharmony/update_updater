@@ -45,7 +45,6 @@ public:
     void PrintPtableInfo(const std::vector<PtnInfo> &ptnInfo) const;
     bool GetPartionInfoByName(const std::string &partitionName, PtnInfo &ptnInfo, int32_t &index);
     std::vector<PtnInfo>& GetPtablePartitionInfoInstance();
-    void SwapPtablePartitionInfo();
     bool LoadPtnInfo(std::vector<PtnInfo>& ptnInfo);
 
     virtual bool ParsePartitionFromBuffer(uint8_t *ptbImgBuffer, const uint32_t imgBufSize) = 0;

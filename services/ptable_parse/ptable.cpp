@@ -54,16 +54,9 @@ bool Ptable::LoadPtnInfo(std::vector<PtnInfo> &ptnInfo)
     return true;
 }
 
-std::vector<PtnInfo>& Ptable::GetPtablePartitionInfoInstance()
+std::vector<Ptable::PtnInfo>& Ptable::GetPtablePartitionInfoInstance()
 {
     return partitionInfo_;
-}
-
-void Ptable::SwapPtablePartitionInfo()
-{
-    if (!partitionInfo_.empty()) {
-        std::vector<PtnInfo>().swap(partitionInfo_);
-    }
 }
 
 bool Ptable::InitPtable()
