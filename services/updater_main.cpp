@@ -39,7 +39,7 @@
 #include "package/pkg_manager.h"
 #include "pkg_manager.h"
 #include "pkg_utils.h"
-#include "ptable_process.h"
+#include "ptable_parse/ptable_process.h"
 #include "securec.h"
 #include "updater/updater_const.h"
 #include "updater_ui_stub.h"

@@ -89,7 +89,7 @@ ohos_unittest("updater_unittest") {
     "//base/update/updater/services/package/pkg_package/pkg_zipfile.cpp",
     "//base/update/updater/services/ptable_parse/ptable.cpp",
     "//base/update/updater/services/ptable_parse/ptable_manager.cpp",
-    "./services/ptable_parse/ptable_process.cpp",
+    "../../services/ptable_parse/ptable_process.cpp",
     "//base/update/updater/services/ptable_parse/ufs_ptable.cpp",
     "//base/update/updater/services/script/script_instruction/script_basicinstruction.cpp",
     "//base/update/updater/services/script/script_instruction/script_instructionhelper.cpp",
