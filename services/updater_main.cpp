@@ -386,8 +386,7 @@ static UpdaterStatus PreUpdatePackages(UpdaterParams &upParams)
     }
 
 #ifdef UPDATER_USE_PTABLE
-    if(!PtablePreProcess.GetInstance().DoPtableProcess(upParams))
-    {
+    if (!PtablePreProcess.GetInstance().DoPtableProcess(upParams)) {
         LOG(ERROR) << "DoPtableProcess failed";
         return UPDATE_ERROR;
     }
@@ -489,8 +488,7 @@ UpdaterStatus UpdaterFromSdcard(UpdaterParams &upParams)
         return UPDATE_ERROR;
     }
 #ifdef UPDATER_USE_PTABLE
-    if(!PtablePreProcess.GetInstance().DoPtableProcess(upParams))
-    {
+    if (!PtablePreProcess.GetInstance().DoPtableProcess(upParams)) {
         LOG(ERROR) << "DoPtableProcess failed";
         return UPDATE_ERROR;
     }
