@@ -306,9 +306,9 @@ int UScriptInstructionRawImageWrite::GetWritePathAndOffset(const std::string &pa
     uint64_t &offset, uint64_t &partitionSize)
 {
 #ifdef UPDATER_USE_PTABLE
-    PackagePtable& packagePtb = PackagePtable::GetInstance();
+    DevicePtable& devicePtb = DevicePtable::GetInstance();
     Ptable::PtnInfo ptnInfo;
-    if (!packagePtb.GetPartionInfoByName(partitionName, ptnInfo)) {
+    if (!devicePtb.GetPartionInfoByName(partitionName, ptnInfo)) {
         LOG(ERROR) << "Datawriter: cannot find device path for partition \'" <<
                 partitionName.substr(1, partitionName.size()) << "\'.";
         return USCRIPT_ERROR_EXECUTE;
@@ -370,8 +370,8 @@ int ProcessUpdater(bool retry, int pipeFd, const std::string &packagePath, const
         return EXIT_INVALID_ARGS;
     }
 #ifdef UPDATER_USE_PTABLE
-    PackagePtable& packagePtb = PackagePtable::GetInstance();
-    packagePtb.LoadPartitionInfo(pkgManager);
+    DevicePtable& devicePtb = DevicePtable::GetInstance();
+    devicePtb.LoadPartitionInfo();
 #endif
 
     ret = Updater::ExecUpdate(pkgManager, retry, packagePath,
