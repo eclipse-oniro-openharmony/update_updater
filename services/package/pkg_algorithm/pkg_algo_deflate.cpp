@@ -142,7 +142,7 @@ int32_t PkgAlgoDeflate::CalculateUnpackData(z_stream &zstream, uint32_t &crc, in
     context.unpackedSize = unpackContext.destOffset - context.destOffset;
     if (context.crc != 0 && context.crc != crc) {
         PKG_LOGE("crc fail %u %u!", crc, context.crc);
-        return ret;
+        return PKG_VERIFY_FAIL;
     }
     context.crc = crc;
     return (ret == Z_STREAM_END) ? PKG_SUCCESS : ret;
@@ -166,13 +166,14 @@ int32_t PkgAlgoDeflate::UnpackCalculate(PkgAlgorithmContext &context, const PkgS
     PkgBuffer crcResult((uint8_t *)&crc, sizeof(crc));
     PkgAlgorithmContext unpackContext = context;
     size_t readLen = 0;
-    while ((unpackContext.packedSize > 0) || (zstream.avail_in > 0)) {
+    int32_t unpack_ret = Z_OK;
+    while ((unpackContext.packedSize > 0) || (unpack_ret != Z_STREAM_END)) {
         if (ReadUnpackData(inStream, inBuffer, zstream, unpackContext, readLen) != PKG_SUCCESS) {
             break;
         }
-        ret = inflate(&zstream, Z_SYNC_FLUSH);
-        if (ret < Z_OK) {
-            PKG_LOGE("fail inflate ret:%d", ret);
+        unpack_ret = inflate(&zstream, Z_SYNC_FLUSH);
+        if (unpack_ret < Z_OK) {
+            PKG_LOGE("fail inflate ret:%d", unpack_ret);
             break;
         }
         inflateLen = outBuffer.length - zstream.avail_out;
@@ -190,15 +191,13 @@ int32_t PkgAlgoDeflate::UnpackCalculate(PkgAlgorithmContext &context, const PkgS
             errorTimes = 0;
             algorithm->Calculate(crcResult, outBuffer, inflateLen);
         }
-        if (ret == Z_STREAM_END) {
-            break;
-        }
+
         if (errorTimes >= INFLATE_ERROR_TIMES) {
             PKG_LOGE("unzip inflated data is abnormal!");
             break;
         }
     }
-    return CalculateUnpackData(zstream, crc, ret, context, unpackContext);
+    return CalculateUnpackData(zstream, crc, unpack_ret, context, unpackContext);
 }
 
 int32_t PkgAlgoDeflate::Unpack(const PkgStreamPtr inStream, const PkgStreamPtr outStream,
