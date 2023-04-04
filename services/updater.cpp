@@ -201,12 +201,12 @@ UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, Upda
 {
     UPDATER_INIT_RECORD;
     UPDATER_UI_INSTANCE.ShowProgressPage();
-    if (upParams.CallbackProgress == nullptr) {
+    if (upParams.callbackProgress == nullptr) {
         LOG(ERROR) << "CallbackProgress is nullptr";
         UPDATER_LAST_WORD(UPDATE_CORRUPT);
         return UPDATE_CORRUPT;
     }
-    upParams.CallbackProgress(upParams.initialProgress * FULL_PERCENT_PROGRESS);
+    upParams.callbackProgress(upParams.initialProgress * FULL_PERCENT_PROGRESS);
     if (pkgManager == nullptr) {
         LOG(ERROR) << "pkgManager is nullptr";
         UPDATER_LAST_WORD(UPDATE_CORRUPT);
@@ -254,7 +254,7 @@ UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, Upda
 namespace {
 void SetProgress(const std::vector<std::string> &output, UpdaterParams &upParams)
 {
-    if (upParams.CallbackProgress == nullptr) {
+    if (upParams.callbackProgress == nullptr) {
         LOG(ERROR) << "CallbackProgress is nullptr";
         return;
     }
@@ -273,7 +273,7 @@ void SetProgress(const std::vector<std::string> &output, UpdaterParams &upParams
     if (frac >= FULL_EPSINON && g_tmpValue + g_percentage < FULL_PERCENT_PROGRESS) {
         g_tmpValue += g_percentage;
         g_tmpProgressValue = g_tmpValue;
-        upParams.CallbackProgress(g_tmpProgressValue *
+        upParams.callbackProgress(g_tmpProgressValue *
             upParams.currentPercentage + upParams.initialProgress * FULL_PERCENT_PROGRESS);
         return;
     }
@@ -281,7 +281,7 @@ void SetProgress(const std::vector<std::string> &output, UpdaterParams &upParams
     if (g_tmpProgressValue == 0) {
         return;
     }
-    upParams.CallbackProgress(g_tmpProgressValue *
+    upParams.callbackProgress(g_tmpProgressValue *
         upParams.currentPercentage + upParams.initialProgress * FULL_PERCENT_PROGRESS);
 }
 

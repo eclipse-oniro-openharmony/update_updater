@@ -165,12 +165,12 @@ static UpdaterStatus VerifyPackages(const UpdaterParams &upParams)
     UPDATER_UI_INSTANCE.ShowProgressPage();
     UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_VERIFYPKG));
 
-    if (upParams.CallbackProgress == nullptr) {
+    if (upParams.callbackProgress == nullptr) {
         UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_VERIFYPKGFAIL), true);
         UPDATER_LAST_WORD(UPDATE_CORRUPT);
         return UPDATE_CORRUPT;
     }
-    upParams.CallbackProgress(0.0);
+    upParams.callbackProgress(0.0);
     for (unsigned int i = upParams.pkgLocation; i < upParams.updatePackage.size(); i++) {
         LOG(INFO) << "Verify package:" << upParams.updatePackage[i];
         PkgManager::PkgManagerPtr manager = PkgManager::CreatePackageInstance();
@@ -404,11 +404,11 @@ static UpdaterStatus DoUpdatePackages(UpdaterParams &upParams)
         LOG(INFO) << "package " << i << ":" << upParams.updatePackage[i] <<
             " precent:" << upParams.currentPercentage;
     }
-    if (upParams.CallbackProgress == nullptr) {
+    if (upParams.callbackProgress == nullptr) {
         LOG(ERROR) << "CallbackProgress is nullptr";
         return UPDATE_CORRUPT;
     }
-    upParams.CallbackProgress(updateStartPosition * FULL_PERCENT_PROGRESS);
+    upParams.callbackProgress(updateStartPosition * FULL_PERCENT_PROGRESS);
     for (; upParams.pkgLocation < upParams.updatePackage.size(); upParams.pkgLocation++) {
         PkgManager::PkgManagerPtr manager = PkgManager::CreatePackageInstance();
         upParams.currentPercentage = pkgStartPosition[upParams.pkgLocation + 1] -
@@ -472,7 +472,7 @@ static void PostUpdatePackages(UpdaterParams &upParams, bool updateResult)
 
 UpdaterStatus UpdaterFromSdcard(UpdaterParams &upParams)
 {
-    upParams.CallbackProgress = [] (float value) { UPDATER_UI_INSTANCE.ShowProgress(value); };
+    upParams.callbackProgress = [] (float value) { UPDATER_UI_INSTANCE.ShowProgress(value); };
     SetMessageToMisc(0, "sdcard_update");
     if (CheckSdcardPkgs(upParams) != UPDATE_SUCCESS) {
         LOG(ERROR) << "can not find sdcard packages";
@@ -617,7 +617,7 @@ int UpdaterMain(int argc, char **argv)
 {
     [[maybe_unused]] UpdaterStatus status = UPDATE_UNKNOWN;
     UpdaterParams upParams;
-    upParams.CallbackProgress = [] (float value) { UPDATER_UI_INSTANCE.ShowProgress(value); };
+    upParams.callbackProgress = [] (float value) { UPDATER_UI_INSTANCE.ShowProgress(value); };
     UpdaterInit::GetInstance().InvokeEvent(UPDATER_PRE_INIT_EVENT);
     std::vector<std::string> args = ParseParams(argc, argv);
 
