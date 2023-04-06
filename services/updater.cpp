@@ -156,7 +156,6 @@ int GetTmpProgressValue()
 
 void ProgressSmoothHandler(int beginProgress, int endProgress)
 {
-#ifdef UPDATER_UI_SUPPORT
     if (endProgress < 0 || endProgress > FULL_PERCENT_PROGRESS || beginProgress < 0) {
         return;
     }
@@ -170,7 +169,6 @@ void ProgressSmoothHandler(int beginProgress, int endProgress)
             UPDATER_UI_INSTANCE.Sleep(SHOW_FULL_PROGRESS_TIME);
         }
     }
-#endif
 }
 
 UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, UpdaterParams &upParams,
@@ -178,7 +176,12 @@ UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, Upda
 {
     UPDATER_INIT_RECORD;
     UPDATER_UI_INSTANCE.ShowProgressPage();
-    UPDATER_UI_INSTANCE.ShowProgress(upParams.initialProgress * FULL_PERCENT_PROGRESS);
+    if (upParams.callbackProgress == nullptr) {
+        LOG(ERROR) << "CallbackProgress is nullptr";
+        UPDATER_LAST_WORD(UPDATE_CORRUPT);
+        return UPDATE_CORRUPT;
+    }
+    upParams.callbackProgress(upParams.initialProgress * FULL_PERCENT_PROGRESS);
     if (pkgManager == nullptr) {
         LOG(ERROR) << "pkgManager is nullptr";
         UPDATER_LAST_WORD(UPDATE_CORRUPT);
@@ -217,9 +220,12 @@ UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, Upda
 }
 
 namespace {
-#ifdef UPDATER_UI_SUPPORT
 void SetProgress(const std::vector<std::string> &output, UpdaterParams &upParams)
 {
+    if (upParams.callbackProgress == nullptr) {
+        LOG(ERROR) << "CallbackProgress is nullptr";
+        return;
+    }
     if (output.size() < DEFAULT_PROCESS_NUM) {
         LOG(ERROR) << "check output fail";
         return;
@@ -235,7 +241,7 @@ void SetProgress(const std::vector<std::string> &output, UpdaterParams &upParams
     if (frac >= FULL_EPSINON && g_tmpValue + g_percentage < FULL_PERCENT_PROGRESS) {
         g_tmpValue += g_percentage;
         g_tmpProgressValue = g_tmpValue;
-        UPDATER_UI_INSTANCE.ShowProgress(g_tmpProgressValue *
+        upParams.callbackProgress(g_tmpProgressValue *
             upParams.currentPercentage + upParams.initialProgress * FULL_PERCENT_PROGRESS);
         return;
     }
@@ -243,10 +249,9 @@ void SetProgress(const std::vector<std::string> &output, UpdaterParams &upParams
     if (g_tmpProgressValue == 0) {
         return;
     }
-    UPDATER_UI_INSTANCE.ShowProgress(g_tmpProgressValue *
+    upParams.callbackProgress(g_tmpProgressValue *
         upParams.currentPercentage + upParams.initialProgress * FULL_PERCENT_PROGRESS);
 }
-#endif
 
 void HandleChildOutput(const std::string &buffer, int32_t bufferLen, bool &retryUpdate, UpdaterParams &upParams)
 {
@@ -269,7 +274,6 @@ void HandleChildOutput(const std::string &buffer, int32_t bufferLen, bool &retry
         LOG(INFO) << outputInfo;
     } else if (outputHeader == "retry_update") {
         retryUpdate = true;
-#ifdef UPDATER_UI_SUPPORT
     } else if (outputHeader == "ui_log") {
         if (output.size() < DEFAULT_PROCESS_NUM) {
             LOG(ERROR) << "check output fail";
@@ -296,7 +300,6 @@ void HandleChildOutput(const std::string &buffer, int32_t bufferLen, bool &retry
         SetProgress(output, upParams);
     } else {
         LOG(WARNING) << "Child process returns unexpected message.";
-#endif
     }
 }
 }
