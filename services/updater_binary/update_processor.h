@@ -72,5 +72,17 @@ public:
     virtual ~UScriptInstructionPkgExtract() {}
     int32_t Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context) override;
 };
+
+class UScriptInstructionUpdateFromBin : public Uscript::UScriptInstruction {
+public:
+    UScriptInstructionUpdateFromBin() {}
+    virtual ~UScriptInstructionUpdateFromBin() {}
+    int32_t Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context) override;
+private:
+    static int UnCompressDataProducer(const Hpackage::PkgBuffer &buffer, size_t size, size_t start, bool isFinish,
+        const void* context);
+    size_t stashDataSize_ = 0;
+    constexpr size_t STASH_BUFFER_SIZE = 1024 * 1024 * 4;
+};
 } // Updater
 #endif /* UPDATE_PROCESSOR_H */

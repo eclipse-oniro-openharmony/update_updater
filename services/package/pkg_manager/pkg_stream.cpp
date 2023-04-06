@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 #include "pkg_stream.h"
+#include <sys/mman.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <cstdio>
 #include "dump.h"
 #include "pkg_manager.h"
@@ -77,7 +80,7 @@ int32_t FileStream::Read(const PkgBuffer &data, size_t start, size_t needRead, s
         return PKG_INVALID_STREAM;
     }
     if (data.length < needRead) {
-        PKG_LOGE("Invalid stream");
+        PKG_LOGE("Invalid buffer length");
         UPDATER_LAST_WORD(PKG_INVALID_STREAM);
         return PKG_INVALID_STREAM;
     }
@@ -91,6 +94,10 @@ int32_t FileStream::Read(const PkgBuffer &data, size_t start, size_t needRead, s
         PKG_LOGE("Invalid start");
         UPDATER_LAST_WORD(PKG_INVALID_STREAM);
         return PKG_INVALID_STREAM;
+    }
+    if (data.buffer == nullptr || data.data.size() < needRead) {
+        data.data.resize(needRead);
+        data.buffer = data.data.data();
     }
     readLen = fread(data.buffer, 1, needRead, stream_);
     if (readLen == 0) {
@@ -213,13 +220,17 @@ int32_t MemoryMapStream::Read(const PkgBuffer &data, size_t start, size_t needRe
         return PKG_INVALID_STREAM;
     }
 
-    MemoryMapStream::Seek(start, SEEK_SET);
     size_t copyLen = GetFileLength() - start;
     readLen = ((copyLen > needRead) ? needRead : copyLen);
-    if (memcpy_s(data.buffer, needRead, memMap_ + currOffset_, readLen) != EOK) {
-        PKG_LOGE("Memcpy failed size:%zu, start:%zu copyLen:%zu %zu", needRead, start, copyLen, readLen);
-        return PKG_NONE_MEMORY;
+    if (data.data.size() == 0) {
+        data.buffer = memMap_ + start;
+        data.length = readLen;
+    } else {
+        if (memcpy_s(data.buffer, needRead, memMap_ + start, readLen) != EOK)
+            PKG_LOGE("Memcpy failed size:%zu, start:%zu copyLen:%zu %zu", needRead, start, copyLen, readLen);
+            return PKG_NONE_MEMORY;
     }
+
     return PKG_SUCCESS;
 }
 
@@ -279,6 +290,32 @@ int32_t MemoryMapStream::Seek(long int offset, int whence)
         }
         currOffset_ = static_cast<size_t>(memSize + offset);
     }
+    return PKG_SUCCESS;
+}
+
+int32_t MemoryMapStream::FileMapToMem()
+{
+    if (memMap_ == nullptr) {
+        PKG_LOGE("Invalid memory map");
+        return PKG_INVALID_STREAM;
+    }
+    char *realPath = realpath(fileName_.c_str(), NULL);
+    if (realPath == nullptr) {
+        PKG_LOGE("realPath is NULL");
+        return PKG_INVALID_FILE;
+    }
+    int fd = open(realPath, O_RDONLY);
+    free(realPath);
+    if (fd < 0) {
+        PKG_LOGE("Failed to open file");
+        return PKG_INVALID_FILE;
+    }
+    void *mappedData = mmap(memMap_, memSize_, PROT_READ, MAP_PRIVATE | MAP_FIXED, fd, 0);
+    if (mappedData == MAP_FAILED) {
+        PKG_LOGE("Failed to mmap file");
+        return PKG_INVALID_STREAM;
+    }
+    close(fd);
     return PKG_SUCCESS;
 }
 } // namespace Hpackage

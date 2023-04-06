@@ -158,11 +158,16 @@ struct PkgBuffer {
         this->length = buffer.capacity();
     }
 
-    PkgBuffer(size_t bufferSize)
+    PkgBuffer(size_t bufferSize, bool isAlloc = true)
     {
-        data.resize(bufferSize, 0);
-        this->buffer = data.data();
-        this->length = bufferSize;
+        if (isAlloc) {
+            data.resize(bufferSize, 0);
+            this->buffer = data.data();
+            this->length = bufferSize;
+        } else {
+            this->buffer = nullptr;
+            this->length = bufferSize;
+        }
     }
 };
 

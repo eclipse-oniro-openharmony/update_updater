@@ -24,7 +24,7 @@ std::string PtableManager::ptbImgTag_ = "";
 PtableManager::PtableManager() : pPtable_(nullptr)
 {
     InitPtablePtr();
-    PtableManager::ptbImgTag_ = "/ptable";
+    PtableManager::ptbImgTag_ = "ptable.img";
 }
 
 PtableManager::StorageType PtableManager::GetDeviceStorageType()

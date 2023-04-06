@@ -34,6 +34,7 @@
 #include "update_partitions.h"
 #include "updater_main.h"
 #include "updater/updater_const.h"
+#include "ring_buffer.h"
 
 using namespace Uscript;
 using namespace Hpackage;
@@ -71,7 +72,7 @@ const std::vector<std::string> UpdaterEnv::GetInstructionNames() const
     static std::vector<std::string> updaterCmds = {
         "sha_check", "first_block_check", "block_update",
         "raw_image_write", "update_partitions", "image_patch",
-        "image_sha_check", "pkg_extract"
+        "image_sha_check", "pkg_extract", "update_from_bin"
     };
     return updaterCmds;
 }
@@ -95,6 +96,8 @@ int32_t UpdaterInstructionFactory::CreateInstructionInstance(UScriptInstructionP
         instr = new USInstrImageShaCheck();
     } else if (name == "pkg_extract") {
         instr = new UScriptInstructionPkgExtract();
+    } else if (name == "update_from_bin") {
+        instr = new UScriptInstructionUpdateFromBin();
     }
     return USCRIPT_SUCCESS;
 }
@@ -276,6 +279,82 @@ int32_t UScriptInstructionPkgExtract::Execute(Uscript::UScriptEnv &env, Uscript:
     manager->ClosePkgStream(outStream);
     LOG(INFO)<<"UScriptInstructionPkgExtract finish";
     return ret;
+}
+
+int32_t UScriptInstructionUpdateFromBin::Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context)
+{
+    std::string upgradeFileName;
+    int32_t ret = context.GetParam(0, upgradeFileName);
+    if (ret != USCRIPT_SUCCESS) {
+        LOG(ERROR) << "Error to get partitionName";
+        return ret;
+    }
+
+    LOG(INFO) << "UScriptInstructionUpdateFromZip::Execute " << upgradeFileName;
+
+    PkgManager::PkgManagerPtr pkgManager = env.GetPkgManager();
+    if (pkgManager == nullptr) {
+        LOG(ERROR) << "Error to get pkg manager";
+        return USCRIPT_INVALID_PARAM;
+    }
+
+    RingBuffer ringBuffer;
+    if (ringBuffer.Init(STASH_BUFFER_SIZE, 8)) {
+        LOG(ERROR) << "Error to get ringbuffer";
+        return USCRIPT_INVALID_PARAM;
+    }
+
+    PkgManager::StreamPtr outStream = nullptr;
+    ret = pkgManager->CreatePkgStream(outStream, upgradeFileName, UnCompressDataProducer, &ringbuffer);
+    if (ret != USCRIPT_SUCCESS || outStream == nullptr) {
+        LOG(ERROR) << "Error to create output stream";
+        return USCRIPT_INVALID_PARAM;
+    }
+
+    ret = pkgManager->ExtractFile(upgradeFileName, outStream);
+    if (ret != USCRIPT_SUCCESS) {
+        LOG(ERROR) << "Error to extract" << upgradeFileName;
+        pkgManager->ClosePkgStream(outStream);
+        return USCRIPT_ERROR_EXECUTE;
+    }
+    pkgManager->ClosePkgStream(outStream);
+    return USCRIPT_SUCCESS;
+}
+
+int UScriptInstructionUpdateFromBin::UnCompressDataProducer(const PkgBuffer &buffer, size_t size, size_t start,
+                                                            bool isFinish, const void* context)
+{
+    static PkgBuffer stashBuffer(STASH_BUFFER_SIZE);
+    if (buffer.buffer == nullptr || size == 0) {
+        return PKG_SUCCESS;
+    }
+    while(stashDataSize_ + size >= STASH_BUFFER_SIZE) {
+        int readLen = STASH_BUFFER_SIZE - stashDataSize_;
+        if (memcpy_s(stashBuffer.data + stashDataSize_, readLen, buffer.buffer + start, readLen) != 0) {
+                return USCRIPT_ERROR_EXECUTE;
+        }
+        void *p = const_cast<void *>(context);
+        RingBuffer *ringBuffer = static_cast<RingBuffer *>(p);
+        if (ringBuffer == nullptr) {
+            LOG(ERROR) << "ring buffer is nullptr";
+            return PKG_INVALID_STREAM;
+        }
+        //  ringBuffer.push()
+        stashDataSize_ = 0;
+        size -= readLen;
+        start += readLen;
+    }
+    if (size == 0) {
+        return PKG_SUCCESS;
+    } else if (memcpy_s(stashBuffer.data + stashDataSize_, STASH_BUFFER_SIZE - stashDataSize_,
+        buffer.data + start, size) == 0) {
+        if (isFinish) {
+            // ringBuffer.push
+        }
+        return PKG_SUCCESS;
+    } else {
+        return USCRIPT_ERROR_EXECUTE;
+    }
 }
 
 int ExecUpdate(PkgManager::PkgManagerPtr pkgManager, int retry, const std::string &pkgPath,

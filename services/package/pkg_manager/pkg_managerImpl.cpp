@@ -315,7 +315,7 @@ int32_t PkgManagerImpl::LoadPackage(const std::string &packagePath, const std::s
         }
         for (auto name : innerFileNames) {
             pkgType = GetPkgTypeByName(name);
-            if (pkgType == PkgFile::PKG_TYPE_NONE) {
+            if (pkgType == PkgFile::PKG_TYPE_NONE || pkgType == PkgFile::PKG_TYPE_UPGRADE) {
                 fileIds.push_back(name);
                 continue;
             }
@@ -376,9 +376,15 @@ int32_t PkgManagerImpl::LoadPackage(const std::string &packagePath, std::vector<
     PkgFile::PkgType type)
 {
     PkgStreamPtr stream = nullptr;
-    int32_t ret = CreatePkgStream(stream, packagePath, 0, PkgStream::PkgStreamType_Read);
+    int32_t ret = CreatePkgStream(stream, packagePath, 0, PkgStream::PkgStreamType_MemoryMap);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("Create input stream fail %s", packagePath.c_str());
+        UPDATER_LAST_WORD(ret);
+        return ret;
+    }
+    ret = dynamic_cast<MemoryMapStream*>stream -> FileMapToMem();
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("mmap fail %s", packagePath.c_str());
         UPDATER_LAST_WORD(ret);
         return ret;
     }

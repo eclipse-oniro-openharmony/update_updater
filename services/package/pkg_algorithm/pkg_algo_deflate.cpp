@@ -20,8 +20,10 @@
 
 namespace Hpackage {
 constexpr uint8_t INFLATE_ERROR_TIMES = 5;
-constexpr uint32_t IN_BUFFER_SIZE = 1024 * 64;
-constexpr uint32_t OUT_BUFFER_SIZE = 1024 * 32;
+constexpr uint32_t DEFLATE_IN_BUFFER_SIZE = 1024 * 64;
+constexpr uint32_t DEFLATE_OUT_BUFFER_SIZE = 1024 * 32;
+constexpr uint32_t INFLATE_IN_BUFFER_SIZE = 1024 * 1024 * 1024;
+constexpr uint32_t INFLATE_OUT_BUFFER_SIZE = 1024 * 1024;
 
 int32_t PkgAlgoDeflate::DeflateData(const PkgStreamPtr outStream, z_stream &zstream, int32_t flush,
     PkgBuffer &outBuffer, size_t &destOffset) const
@@ -160,7 +162,6 @@ int32_t PkgAlgoDeflate::UnpackCalculate(PkgAlgorithmContext &context, const PkgS
         return ret;
     }
     size_t inflateLen = 0;
-    uint32_t errorTimes = 0;
     uint32_t crc = 0;
 
     PkgBuffer crcResult((uint8_t *)&crc, sizeof(crc));
@@ -168,6 +169,7 @@ int32_t PkgAlgoDeflate::UnpackCalculate(PkgAlgorithmContext &context, const PkgS
     size_t readLen = 0;
     int32_t unpack_ret = Z_OK;
     while ((unpackContext.packedSize > 0) || (unpack_ret != Z_STREAM_END)) {
+        inBuffer.length = INFLATE_IN_BUFFER_SIZE;
         if (ReadUnpackData(inStream, inBuffer, zstream, unpackContext, readLen) != PKG_SUCCESS) {
             break;
         }
@@ -176,9 +178,9 @@ int32_t PkgAlgoDeflate::UnpackCalculate(PkgAlgorithmContext &context, const PkgS
             PKG_LOGE("fail inflate ret:%d", unpack_ret);
             break;
         }
-        inflateLen = outBuffer.length - zstream.avail_out;
-        errorTimes++;
-        if (inflateLen > 0) {
+
+        if (zstream.avail_out == 0 || (unpack_ret == Z_STREAM_END && zstream.avail_out != INFLATE_OUT_BUFFER_SIZE)) {
+            inflateLen = outBuffer.length - zstream.avail_out;
             ret = outStream->Write(outBuffer, inflateLen, unpackContext.destOffset);
             if (ret != PKG_SUCCESS) {
                 PKG_LOGE("write data is fail!");
@@ -188,13 +190,7 @@ int32_t PkgAlgoDeflate::UnpackCalculate(PkgAlgorithmContext &context, const PkgS
             zstream.next_out = outBuffer.buffer;
             zstream.avail_out = outBuffer.length;
 
-            errorTimes = 0;
-            algorithm->Calculate(crcResult, outBuffer, inflateLen);
-        }
-
-        if (errorTimes >= INFLATE_ERROR_TIMES) {
-            PKG_LOGE("unzip inflated data is abnormal!");
-            break;
+            algorithm->Calculate(crcResult, outBuffer, inflateLen)
         }
     }
     return CalculateUnpackData(zstream, crc, unpack_ret, context, unpackContext);
@@ -232,21 +228,19 @@ int32_t PkgAlgoDeflate::InitStream(z_stream &zstream, bool zip, PkgBuffer &inBuf
             PKG_LOGE("fail deflateInit2 ret %d", ret);
             return PKG_NOT_EXIST_ALGORITHM;
         }
-        inBuffer.length = IN_BUFFER_SIZE;
-        outBuffer.length = OUT_BUFFER_SIZE;
+        inBuffer.length = DEFLATE_IN_BUFFER_SIZE;
+        outBuffer.length = DEFLATE_OUT_BUFFER_SIZE;
     } else {
         ret = inflateInit2(&zstream, windowBits_);
         if (ret != Z_OK) {
             PKG_LOGE("fail deflateInit2");
             return PKG_NOT_EXIST_ALGORITHM;
         }
-        inBuffer.length = IN_BUFFER_SIZE;
-        outBuffer.length = OUT_BUFFER_SIZE;
+        inBuffer.length = INFLATE_IN_BUFFER_SIZE;
+        outBuffer.length = INFLATE_OUT_BUFFER_SIZE;
     }
 
-    inBuffer.data.resize(inBuffer.length);
     outBuffer.data.resize(outBuffer.length);
-    inBuffer.buffer = reinterpret_cast<uint8_t *>(inBuffer.data.data());
     outBuffer.buffer = reinterpret_cast<uint8_t *>(outBuffer.data.data());
     zstream.next_out = outBuffer.buffer;
     zstream.avail_out = outBuffer.length;
