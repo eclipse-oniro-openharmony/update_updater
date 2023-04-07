@@ -136,7 +136,7 @@ int32_t ZipPkgFile::LoadPackage(std::vector<std::string> &fileNames, const PkgBu
 #endif
         ) {
         PKG_LOGE("end dir format error %s", pkgStream_->GetFileName().c_str());
-        Updater::UPDATER_LAST_WORD(PKG_INVALID_PKG_FORMAT);
+        UPDATER_LAST_WORD(PKG_INVALID_PKG_FORMAT);
         return PKG_INVALID_PKG_FORMAT;
     }
     size_t currentPos = endDir.offset;
@@ -190,7 +190,7 @@ int32_t ZipPkgFile::LoadPackage(std::vector<std::string>& fileNames, VerifyFunct
     int32_t ret = GetFileLength(fileLen);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("GetFileLength FAIL");
-        Updater::UPDATER_LAST_WORD(ret);
+        UPDATER_LAST_WORD(ret);
         return ret;
     }
     size_t buffSize = sizeof(EndCentralDir);
@@ -207,7 +207,7 @@ int32_t ZipPkgFile::LoadPackage(std::vector<std::string>& fileNames, VerifyFunct
     ret = pkgStream_->Read(buffer, endDirPos, sizeof(EndCentralDir), readLen);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("read EOCD struct failed %s", pkgStream_->GetFileName().c_str());
-        Updater::UPDATER_LAST_WORD(ret);
+        UPDATER_LAST_WORD(ret);
         return ret;
     }
     magic = ReadLE32(buffer.buffer);
@@ -217,7 +217,7 @@ int32_t ZipPkgFile::LoadPackage(std::vector<std::string>& fileNames, VerifyFunct
         ret = zipParse.ParseZipPkg(pkgStream_, signatureStart, signatureLen);
         if (ret != PKG_SUCCESS) {
             PKG_LOGE("Parse zip package signature failed");
-            Updater::UPDATER_LAST_WORD(ret);
+            UPDATER_LAST_WORD(ret);
             return ret;
         }
 
@@ -225,7 +225,7 @@ int32_t ZipPkgFile::LoadPackage(std::vector<std::string>& fileNames, VerifyFunct
         ret = pkgStream_->Read(buffer, endDirPos, sizeof(EndCentralDir), readLen);
         if (ret != PKG_SUCCESS) {
             PKG_LOGE("read EOCD struct failed %s", pkgStream_->GetFileName().c_str());
-            Updater::UPDATER_LAST_WORD(ret);
+            UPDATER_LAST_WORD(ret);
             return ret;
         }
     }
