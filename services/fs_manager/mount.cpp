@@ -171,20 +171,6 @@ int MountSdcard(std::string &path, std::string &mountPoint)
         LOG(INFO) << path << " already mounted";
         return 0;
     }
-    struct stat st = {};
-    if (stat(path.c_str(), &st) != 0 && errno != ENOENT) {
-        LOG(ERROR) << "cannot get stat";
-        return -1;
-    }
-    if ((st.st_mode & S_IFMT) == S_IFLNK) {
-        unlink(path.c_str());
-    }
-    if (mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) < 0) {
-        if (errno != EEXIST) {
-            LOG(ERROR) << "failed to creat dir";
-            return -1;
-        }
-    }
     const std::vector<const char *> fileSystemType = {"ext4", "vfat", "exfat"};
     for (auto type : fileSystemType) {
         if (mount(mountPoint.c_str(), path.c_str(), type, 0, nullptr) == 0) {
