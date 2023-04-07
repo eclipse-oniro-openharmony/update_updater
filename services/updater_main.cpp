@@ -296,6 +296,7 @@ static UpdaterStatus InstallUpdaterPackage(UpdaterParams &upParams, PkgManager::
         // First time enter updater, record retryCount in case of abnormal reset.
         if (!PartitionRecord::GetInstance().ClearRecordPartitionOffset()) {
             LOG(ERROR) << "ClearRecordPartitionOffset failed";
+            UPDATER_LAST_WORD(UPDATE_ERROR);
             return UPDATE_ERROR;
         }
         SetMessageToMisc(upParams.retryCount + 1, "retry_count");
@@ -325,12 +326,14 @@ static UpdaterStatus InstallUpdaterPackage(UpdaterParams &upParams, PkgManager::
 static UpdaterStatus CalcProgress(const UpdaterParams &upParams,
     std::vector<double> &pkgStartPosition, double &updateStartPosition)
 {
+    UPDATER_INIT_RECORD;
     int64_t allPkgSize = 0;
     std::vector<int64_t> everyPkgSize;
     for (const auto &path : upParams.updatePackage) {
         char realPath[PATH_MAX + 1] = {0};
         if (realpath(path.c_str(), realPath) == nullptr) {
             LOG(ERROR) << "Can not find updatePackage : " << path;
+            UPDATER_LAST_WORD(UPDATE_ERROR);
             return UPDATE_ERROR;
         }
         struct stat st {};
@@ -343,6 +346,7 @@ static UpdaterStatus CalcProgress(const UpdaterParams &upParams,
     pkgStartPosition.push_back(VERIFY_PERCENT);
     if (allPkgSize == 0) {
         LOG(ERROR) << "All packages's size is 0.";
+        UPDATER_LAST_WORD(UPDATE_ERROR);
         return UPDATE_ERROR;
     }
     int64_t startSize = 0;
@@ -360,11 +364,13 @@ static UpdaterStatus CalcProgress(const UpdaterParams &upParams,
 
 static UpdaterStatus PreUpdatePackages(UpdaterParams &upParams)
 {
+    UPDATER_INIT_RECORD;
     LOG(INFO) << "start to update packages, start index:" << upParams.pkgLocation;
 
     UpdaterStatus status = UPDATE_UNKNOWN;
     if (SetupPartitions() != 0) {
         UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_SETPART_FAIL), true);
+        UPDATER_LAST_WORD(UPDATE_ERROR);
         return UPDATE_ERROR;
     }
     const std::string resultPath = std::string(UPDATER_PATH) + "/" + std::string(UPDATER_RESULT_FILE);
@@ -375,11 +381,13 @@ static UpdaterStatus PreUpdatePackages(UpdaterParams &upParams)
 
     // verify packages first
     if (VerifyPackages(upParams) != UPDATE_SUCCESS) {
+        UPDATER_LAST_WORD(UPDATE_ERROR);
         return UPDATE_ERROR;
     }
 
     // Only handle UPATE_ERROR and UPDATE_SUCCESS here.Let package verify handle others.
     if (IsSpaceCapacitySufficient(upParams.updatePackage) == UPDATE_ERROR) {
+        UPDATER_LAST_WORD(status);
         return status;
     }
     if (upParams.retryCount == 0 && !IsBatteryCapacitySufficient()) {
@@ -406,6 +414,7 @@ static UpdaterStatus DoUpdatePackages(UpdaterParams &upParams)
     double updateStartPosition;
     status = CalcProgress(upParams, pkgStartPosition, updateStartPosition);
     if (status != UPDATE_SUCCESS) {
+        UPDATER_LAST_WORD(status);
         return status;
     }
     for (unsigned int i = 0; i < upParams.updatePackage.size(); i++) {

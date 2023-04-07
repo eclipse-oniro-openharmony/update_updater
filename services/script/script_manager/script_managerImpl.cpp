@@ -157,22 +157,26 @@ int32_t ScriptManagerImpl::RegisterInstruction(ScriptInstructionHelper &helper)
 int32_t ScriptManagerImpl::ExtractAndExecuteScript(PkgManager::PkgManagerPtr manager,
     const std::string &scriptName)
 {
+    UPDATER_INIT_RECORD;
     PkgManager::StreamPtr outStream = nullptr;
     const std::string path = Updater::Utils::IsUpdaterMode() ? "" : Updater::UPDATER_PATH;
     int32_t ret = manager->CreatePkgStream(outStream, path + "/" + scriptName, 0, PkgStream::PkgStreamType_Write);
     if (ret != USCRIPT_SUCCESS) {
         USCRIPT_LOGE("Failed to create script stream %s", scriptName.c_str());
+        UPDATER_LAST_WORD(ret);
         return ret;
     }
     ret = manager->ExtractFile(scriptName, outStream);
     if (ret != USCRIPT_SUCCESS) {
         manager->ClosePkgStream(outStream);
         USCRIPT_LOGE("Failed to extract script stream %s", scriptName.c_str());
+        UPDATER_LAST_WORD(ret);
         return ret;
     }
     if (scriptVerifier_ == nullptr || !scriptVerifier_->VerifyHashData(scriptName, outStream)) {
         manager->ClosePkgStream(outStream);
         USCRIPT_LOGE("verify script %s by hash signed data failed", scriptName.c_str());
+        UPDATER_LAST_WORD(ret);
         return USCRIPT_INVALID_SCRIPT;
     }
     ret = ScriptInterpreter::ExecuteScript(this, outStream);
@@ -237,19 +241,23 @@ int32_t ScriptManagerImpl::AddInstruction(const std::string &instrName, const US
 
 int32_t ScriptManagerImpl::AddScript(const std::string &scriptName, int32_t priority)
 {
+    UPDATER_INIT_RECORD;
     if (priority < 0 || priority >= MAX_PRIORITY) {
         USCRIPT_LOGE("Invalid priority %d", priority);
+        UPDATER_LAST_WORD(USCRIPT_INVALID_PRIORITY);
         return USCRIPT_INVALID_PRIORITY;
     }
 
     PkgManager::PkgManagerPtr manager = scriptEnv_->GetPkgManager();
     if (manager == nullptr) {
         USCRIPT_LOGE("Failed to get pkg manager");
+        UPDATER_LAST_WORD(USCRIPT_INVALID_PARAM);
         return USCRIPT_INVALID_PARAM;
     }
 
     if (manager->GetFileInfo(scriptName) == nullptr) {
         USCRIPT_LOGE("Failed to access script %s", scriptName.c_str());
+        UPDATER_LAST_WORD(USCRIPT_INVALID_SCRIPT);
         return USCRIPT_INVALID_SCRIPT;
     }
     scriptFiles_[priority].push_back(scriptName);

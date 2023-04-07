@@ -87,6 +87,7 @@ int32_t ExtractUpdaterBinary(PkgManager::PkgManagerPtr manager, std::string &pac
 
 int GetUpdatePackageInfo(PkgManager::PkgManagerPtr pkgManager, const std::string &path)
 {
+    UPDATER_INIT_RECORD;
     std::vector<std::string> components;
     if (pkgManager == nullptr) {
         LOG(ERROR) << "pkgManager is nullptr";
@@ -102,11 +103,13 @@ int GetUpdatePackageInfo(PkgManager::PkgManagerPtr pkgManager, const std::string
 
 UpdaterStatus IsSpaceCapacitySufficient(const std::vector<std::string> &packagePath)
 {
+    UPDATER_INIT_RECORD;
     uint64_t totalPkgSize = 0;
     for (auto path : packagePath) {
         PkgManager::PkgManagerPtr pkgManager = Hpackage::PkgManager::CreatePackageInstance();
         if (pkgManager == nullptr) {
             LOG(ERROR) << "pkgManager is nullptr";
+            UPDATER_LAST_WORD(UPDATE_CORRUPT);
             return UPDATE_CORRUPT;
         }
         std::vector<std::string> fileIds;
@@ -114,6 +117,7 @@ UpdaterStatus IsSpaceCapacitySufficient(const std::vector<std::string> &packageP
         if (ret != PKG_SUCCESS) {
             LOG(ERROR) << "LoadPackageWithoutUnPack failed";
             PkgManager::ReleasePackageInstance(pkgManager);
+            UPDATER_LAST_WORD(UPDATE_CORRUPT);
             return UPDATE_CORRUPT;
         }
 
@@ -121,6 +125,7 @@ UpdaterStatus IsSpaceCapacitySufficient(const std::vector<std::string> &packageP
         if (info == nullptr) {
             LOG(ERROR) << "update.bin is not exist";
             PkgManager::ReleasePackageInstance(pkgManager);
+            UPDATER_LAST_WORD(UPDATE_CORRUPT);
             return UPDATE_CORRUPT;
         }
         totalPkgSize += static_cast<uint64_t>(info->unpackedSize + MAX_LOG_SPACE);
@@ -131,11 +136,13 @@ UpdaterStatus IsSpaceCapacitySufficient(const std::vector<std::string> &packageP
     if (access("/sdcard/updater", 0) == 0) {
         if (statvfs64("/sdcard", &updaterVfs) < 0) {
             LOG(ERROR) << "Statvfs read /sdcard error!";
+            UPDATER_LAST_WORD(UPDATE_ERROR);
             return UPDATE_ERROR;
         }
     } else {
         if (statvfs64("/data", &updaterVfs) < 0) {
             LOG(ERROR) << "Statvfs read /data error!";
+            UPDATER_LAST_WORD(UPDATE_ERROR);
             return UPDATE_ERROR;
         }
     }
@@ -144,6 +151,7 @@ UpdaterStatus IsSpaceCapacitySufficient(const std::vector<std::string> &packageP
         LOG(ERROR) << "Can not update, free space is not enough";
         UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_SPACE_NOTENOUGH), true);
         UPDATER_UI_INSTANCE.Sleep(UI_SHOW_DURATION);
+        UPDATER_LAST_WORD(UPDATE_ERROR);
         return UPDATE_ERROR;
     }
     return UPDATE_SUCCESS;

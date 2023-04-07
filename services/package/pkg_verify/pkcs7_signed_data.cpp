@@ -56,12 +56,14 @@ int32_t Pkcs7SignedData::GetHashFromSignBlock(const uint8_t *srcData, const size
     int32_t ret = ParsePkcs7Data(srcData, dataLen);
     if (ret != 0) {
         PKG_LOGE("parse pkcs7 data fail");
+        UPDATER_LAST_WORD(ret);
         return ret;
     }
 
     ret = Verify();
     if (ret != 0) {
         PKG_LOGE("verify pkcs7 data fail");
+        UPDATER_LAST_WORD(ret);
         return ret;
     }
     hash.assign(digest_.begin(), digest_.end());
@@ -71,11 +73,14 @@ int32_t Pkcs7SignedData::GetHashFromSignBlock(const uint8_t *srcData, const size
 
 int32_t Pkcs7SignedData::ParsePkcs7Data(const uint8_t *srcData, const size_t dataLen)
 {
+    UPDATER_INIT_RECORD;
     if (srcData == nullptr || dataLen == 0) {
+        UPDATER_LAST_WORD(-1);
         return -1;
     }
     if (Init(srcData, dataLen) != 0) {
         PKG_LOGE("init pkcs7 data fail");
+        UPDATER_LAST_WORD(-1);
         return -1;
     }
 
@@ -108,13 +113,16 @@ int32_t Pkcs7SignedData::Verify(const std::vector<uint8_t> &hash, const std::vec
 
 int32_t Pkcs7SignedData::Init(const uint8_t *sourceData, const uint32_t sourceDataLen)
 {
+    UPDATER_INIT_RECORD;
     BIO *p7Bio = BIO_new(BIO_s_mem());
     if (p7Bio == nullptr) {
         PKG_LOGE("BIO_new error!");
+        UPDATER_LAST_WORD(-1);
         return -1;
     }
     if (static_cast<uint32_t>(BIO_write(p7Bio, sourceData, sourceDataLen)) != sourceDataLen) {
         PKG_LOGE("BIO_write error!");
+        UPDATER_LAST_WORD(-1);
         BIO_free(p7Bio);
         return -1;
     }
@@ -127,6 +135,7 @@ int32_t Pkcs7SignedData::Init(const uint8_t *sourceData, const uint32_t sourceDa
     if (pkcs7_ == nullptr) {
         PKG_LOGE("d2i_PKCS7_bio failed!");
         BIO_free(p7Bio);
+        UPDATER_LAST_WORD(-1);
         return -1;
     }
 
@@ -134,12 +143,14 @@ int32_t Pkcs7SignedData::Init(const uint8_t *sourceData, const uint32_t sourceDa
     if (type != NID_pkcs7_signed) {
         PKG_LOGE("Invalid pkcs7 data type %d", type);
         BIO_free(p7Bio);
+        UPDATER_LAST_WORD(-1);
         return -1;
     }
 
     BIO_free(p7Bio);
     if (CertVerify::GetInstance().Init() != 0) {
         PKG_LOGE("init cert verify fail");
+        UPDATER_LAST_WORD(-1);
         return -1;
     }
     return 0;
@@ -161,12 +172,14 @@ int32_t Pkcs7SignedData::DoParse()
     int32_t ret = ParseContentInfo(contentInfo);
     if (ret != 0) {
         PKG_LOGE("parse pkcs7 contentInfo fail");
+        UPDATER_LAST_WORD(-1);
         return -1;
     }
 
     ret = GetDigestFromContentInfo(contentInfo);
     if (ret != 0) {
         PKG_LOGE("invalid pkcs7 contentInfo fail");
+        UPDATER_LAST_WORD(-1);
         return -1;
     }
 
@@ -184,24 +197,29 @@ int32_t Pkcs7SignedData::DoParse()
  */
 int32_t Pkcs7SignedData::ParseContentInfo(std::vector<uint8_t> &digestBlock) const
 {
+    UPDATER_INIT_RECORD;
     PKCS7_SIGNED *signData = pkcs7_->d.sign;
     if (signData == nullptr) {
         PKG_LOGE("invalid pkcs7 signed data!");
+        UPDATER_LAST_WORD(-1);
         return -1;
     }
 
     PKCS7 *contentInfo = signData->contents;
     if (contentInfo == nullptr) {
         PKG_LOGE("pkcs7 content is nullptr!");
+        UPDATER_LAST_WORD(-1);
         return -1;
     }
     if (OBJ_obj2nid(contentInfo->type) != NID_pkcs7_data) {
         PKG_LOGE("invalid pkcs7 signed data type");
+        UPDATER_LAST_WORD(-1);
         return -1;
     }
 
     if (GetASN1OctetStringData(contentInfo->d.data, digestBlock) != 0) {
         PKG_LOGE("get pkcs7 contentInfo fail");
+        UPDATER_LAST_WORD(-1);
         return -1;
     }
 
@@ -210,8 +228,10 @@ int32_t Pkcs7SignedData::ParseContentInfo(std::vector<uint8_t> &digestBlock) con
 
 int32_t Pkcs7SignedData::GetDigestFromContentInfo(std::vector<uint8_t> &digestBlock)
 {
+    UPDATER_INIT_RECORD;
     if (digestBlock.size() <= sizeof(uint32_t)) {
         PKG_LOGE("invalid digest block info.");
+        UPDATER_LAST_WORD(-1);
         return -1;
     }
 
@@ -222,6 +242,7 @@ int32_t Pkcs7SignedData::GetDigestFromContentInfo(std::vector<uint8_t> &digestBl
     offset += static_cast<size_t>(sizeof(uint16_t));
     if ((GetDigestLength(algoId) != digestLen) || ((digestLen + offset) != digestBlock.size())) {
         PKG_LOGE("invalid digestLen[%zu] and digestBlock len[%zu]", digestLen, digestBlock.size());
+        UPDATER_LAST_WORD(-1);
         return -1;
     }
     digest_.assign(digestBlock.begin() + offset, digestBlock.end());
@@ -242,15 +263,18 @@ int32_t Pkcs7SignedData::GetDigestFromContentInfo(std::vector<uint8_t> &digestBl
  */
 int32_t Pkcs7SignedData::SignerInfosParse()
 {
+    UPDATER_INIT_RECORD;
     STACK_OF(PKCS7_SIGNER_INFO) *p7SignerInfos = PKCS7_get_signer_info(pkcs7_);
     if (p7SignerInfos == nullptr) {
         PKG_LOGE("get pkcs7 signers info failed!");
+        UPDATER_LAST_WORD(-1);
         return -1;
     }
 
     int signerInfoNum = sk_PKCS7_SIGNER_INFO_num(p7SignerInfos);
     if (signerInfoNum <= 0) {
         PKG_LOGE("invalid signers info num %d!", signerInfoNum);
+        UPDATER_LAST_WORD(-1);
         return -1;
     }
 
@@ -305,6 +329,7 @@ int32_t Pkcs7SignedData::SignerInfoParse(PKCS7_SIGNER_INFO *p7SignerInfo, Pkcs7S
 int32_t Pkcs7SignedData::Pkcs7SignleSignerVerify(const Pkcs7SignerInfo &signerInfo, const std::vector<uint8_t> &hash,
     const std::vector<uint8_t> &sig) const
 {
+    UPDATER_INIT_RECORD;
     if (pkcs7_ == nullptr) {
         UPDATER_LAST_WORD(-1);
         return -1;
@@ -312,17 +337,20 @@ int32_t Pkcs7SignedData::Pkcs7SignleSignerVerify(const Pkcs7SignerInfo &signerIn
     STACK_OF(X509) *certStack = pkcs7_->d.sign->cert;
     if (certStack == nullptr) {
         PKG_LOGE("certStack is empty!");
+        UPDATER_LAST_WORD(-1);
         return -1;
     }
 
     X509 *cert = X509_find_by_issuer_and_serial(certStack, signerInfo.issuerName, signerInfo.serialNumber);
     if (cert == nullptr) {
         PKG_LOGE("cert is empty");
+        UPDATER_LAST_WORD(-1);
         return -1;
     }
 
     if (CertVerify::GetInstance().CheckCertChain(certStack, cert) != 0) {
         PKG_LOGE("public cert check fail");
+        UPDATER_LAST_WORD(-1);
         return -1;
     }
 
@@ -332,7 +360,9 @@ int32_t Pkcs7SignedData::Pkcs7SignleSignerVerify(const Pkcs7SignerInfo &signerIn
 int32_t Pkcs7SignedData::VerifyDigest(X509 *cert, const Pkcs7SignerInfo &signer, const std::vector<uint8_t> &hash,
     const std::vector<uint8_t> &sig) const
 {
+    UPDATER_INIT_RECORD;
     if (cert == nullptr) {
+        UPDATER_LAST_WORD(-1);
         return -1;
     }
 

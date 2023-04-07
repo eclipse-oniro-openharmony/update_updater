@@ -300,6 +300,7 @@ int FormatPartition(const std::string &path, bool isZeroErase)
 
 int SetupPartitions(PackageUpdateMode mode)
 {
+    UPDATER_INIT_RECORD;
     if (!Utils::IsUpdaterMode()) {
         LOG(ERROR) << "live update mode";
         return 0;
@@ -307,6 +308,7 @@ int SetupPartitions(PackageUpdateMode mode)
 
     if (g_fstab == NULL || g_fstab->head == NULL) {
         LOG(ERROR) << "Fstab is invalid";
+        UPDATER_LAST_WORD(-1);
         return -1;
     }
     for (const FstabItem *item = g_fstab->head; item != nullptr; item = item->next) {
@@ -320,12 +322,14 @@ int SetupPartitions(PackageUpdateMode mode)
         if (mountPoint == "/data" && mode != SDCARD_UPDATE) {
             if (MountForPath(mountPoint) != 0) {
                 LOG(ERROR) << "Expected partition " << mountPoint << " is not mounted.";
+                UPDATER_LAST_WORD(-1);
                 return -1;
             }
             continue;
         }
         if (UmountForPath(mountPoint) != 0) {
             LOG(ERROR) << "Umount " << mountPoint << " failed";
+            UPDATER_LAST_WORD(-1);
             return -1;
         }
     }

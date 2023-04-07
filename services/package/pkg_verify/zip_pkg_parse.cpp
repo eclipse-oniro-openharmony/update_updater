@@ -88,6 +88,7 @@ int32_t ZipPkgParse::DoParseZipPkg(PkgStreamPtr pkgStream, size_t &signatureStar
 
 int32_t ZipPkgParse::ParseZipPkg(PkgStreamPtr pkgStream, size_t &signatureStart, size_t &signatureSize) const
 {
+    UPDATER_INIT_RECORD;
     if (pkgStream == nullptr) {
         UPDATER_LAST_WORD(PKG_INVALID_PARAM);
         return PKG_INVALID_PARAM;
@@ -123,6 +124,7 @@ int32_t ZipPkgParse::ParseZipPkg(PkgStreamPtr pkgStream, size_t &signatureStart,
 int32_t ZipPkgParse::ParsePkgFooter(const uint8_t *footer, size_t length,
     uint16_t &signCommentAppendLen, uint16_t &signCommentTotalLen) const
 {
+    UPDATER_INIT_RECORD;
     if (length < PKG_FOOTER_SIZE) {
         PKG_LOGE("length[%d] < Footer Size[%d]", length, PKG_FOOTER_SIZE);
         UPDATER_LAST_WORD(PKG_INVALID_PARAM, length);
@@ -158,14 +160,17 @@ int32_t ZipPkgParse::ParsePkgFooter(const uint8_t *footer, size_t length,
 int32_t ZipPkgParse::CheckZipEocd(const uint8_t *eocd, size_t length,
     uint16_t signCommentTotalLen) const
 {
+    UPDATER_INIT_RECORD;
     if (length < PKG_ZIP_EOCD_MIN_LEN) {
         PKG_LOGE("bad eocd length: append[0x%04X]", length);
+        UPDATER_LAST_WORD(PKG_INVALID_PKG_FORMAT);
         return PKG_INVALID_PKG_FORMAT;
     }
 
     uint32_t eocdSignature = ReadLE32(eocd);
     if (eocdSignature != ZIP_EOCD_SIGNATURE) {
         PKG_LOGE("bad zip eocd flag[%zu]", eocdSignature);
+        UPDATER_LAST_WORD(PKG_INVALID_PKG_FORMAT);
         return PKG_INVALID_PKG_FORMAT;
     }
 
@@ -178,6 +183,7 @@ int32_t ZipPkgParse::CheckZipEocd(const uint8_t *eocd, size_t length,
             eocd[i + 2] == ZIP_EOCD_SIGNATURE_BIG_ENDIAN[2] && /* eocd[i + 2] = 0x05 */
             eocd[i + 3] == ZIP_EOCD_SIGNATURE_BIG_ENDIAN[3]) { /* eocd[i + 3] = 0x06 */
             PKG_LOGE("EOCD marker occurs after start of EOCD");
+            UPDATER_LAST_WORD(PKG_INVALID_PKG_FORMAT);
             return PKG_INVALID_PKG_FORMAT;
         }
     }
@@ -186,6 +192,7 @@ int32_t ZipPkgParse::CheckZipEocd(const uint8_t *eocd, size_t length,
     uint16_t tempLen = ReadLE16(zipSignCommentAddr);
     if (signCommentTotalLen != tempLen) {
         PKG_LOGE("compare sign comment length: eocd[0x%04X], footer[0x%04X] error", tempLen, signCommentTotalLen);
+        UPDATER_LAST_WORD(PKG_INVALID_PKG_FORMAT);
         return PKG_INVALID_PKG_FORMAT;
     }
 

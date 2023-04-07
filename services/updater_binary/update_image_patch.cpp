@@ -165,6 +165,7 @@ std::string USInstrImagePatch::GetSourceFile(const ImagePatchPara &para)
 
 int32_t USInstrImagePatch::ExecuteImagePatch(Uscript::UScriptEnv &env, Uscript::UScriptContext &context)
 {
+    UPDATER_INIT_RECORD;
     ImagePatchPara para {};
     int32_t ret = GetParam(context, para);
     if (ret != USCRIPT_SUCCESS) {
@@ -258,6 +259,7 @@ int32_t USInstrImageShaCheck::CheckHash(const CheckPara &para)
 
 int32_t USInstrImageShaCheck::ExecuteShaCheck(Uscript::UScriptEnv &env, Uscript::UScriptContext &context)
 {
+    UPDATER_INIT_RECORD;
     if (env.IsRetry()) {
         return USCRIPT_SUCCESS;
     }

@@ -105,17 +105,20 @@ int32_t ScriptInstructionHelper::AddInstruction(const std::string &instrName, co
 int32_t ScriptInstructionHelper::RegisterAddInstruction(const Uscript::UScriptInstructionFactoryPtr factory,
     const std::string &instrName)
 {
+    UPDATER_INIT_RECORD;
     // Create instruction and register it
     UScriptInstructionPtr instr = nullptr;
     int32_t ret = factory->CreateInstructionInstance(instr, instrName);
     if (ret != USCRIPT_SUCCESS || instr == nullptr) {
         USCRIPT_LOGE("Fail to create instruction for %s", instrName.c_str());
+        UPDATER_LAST_WORD(ret);
         return ret == USCRIPT_SUCCESS ? USCRIPT_ERROR_CREATE_OBJ : USCRIPT_NOTEXIST_INSTRUCTION;
     }
 
     ret = AddInstruction(instrName, instr);
     if (ret != USCRIPT_SUCCESS) {
         USCRIPT_LOGE("Fail to add instruction for %s", instrName.c_str());
+        UPDATER_LAST_WORD(ret);
         // ret is USCRIPT_ERROR_REVERED, instr register failed, can be deleted
         delete instr;
         instr = nullptr;
@@ -128,15 +131,18 @@ int32_t ScriptInstructionHelper::RegisterUserInstruction(const std::string& libN
     const std::string &instrName)
 {
     // first get realpath of libName, then compare with realLibName
+    UPDATER_INIT_RECORD;
     char *realPath = realpath(libName.c_str(), nullptr);
     if (realPath == nullptr) {
         USCRIPT_LOGE("realPath is NULL %s", libName.c_str());
+        UPDATER_LAST_WORD(USCRIPT_INVALID_PARAM);
         return USCRIPT_INVALID_PARAM;
     }
     std::string realLibName = realPath;
     free(realPath);
     if (!userInstrLibName_.empty() && userInstrLibName_.compare(realLibName) != 0) {
         USCRIPT_LOGE("Lib name must be equal %s ", realLibName.c_str());
+        UPDATER_LAST_WORD(USCRIPT_INVALID_PARAM);
         return USCRIPT_INVALID_PARAM;
     }
 
@@ -147,6 +153,7 @@ int32_t ScriptInstructionHelper::RegisterUserInstruction(const std::string& libN
     }
     if (instrLib_ == nullptr) {
         USCRIPT_LOGE("Fail to dlopen %s , dlerror: %s", libName.c_str(), dlerror());
+        UPDATER_LAST_WORD(USCRIPT_INVALID_PARAM);
         return USCRIPT_INVALID_PARAM;
     }
     auto pGetInstructionFactory =
@@ -155,11 +162,13 @@ int32_t ScriptInstructionHelper::RegisterUserInstruction(const std::string& libN
         (void(*)(Uscript::UScriptInstructionFactoryPtr))dlsym(instrLib_, "ReleaseInstructionFactory");
     if (pReleaseInstructionFactory == nullptr || pGetInstructionFactory == nullptr) {
         USCRIPT_LOGE("Fail to get sym %s", libName.c_str());
+        UPDATER_LAST_WORD(USCRIPT_INVALID_PARAM);
         return USCRIPT_INVALID_PARAM;
     }
     factory = pGetInstructionFactory();
     if (factory == nullptr) {
         USCRIPT_LOGE("Fail to create instruction factory for %s", instrName.c_str());
+        UPDATER_LAST_WORD(USCRIPT_INVALID_PARAM);
         return USCRIPT_INVALID_PARAM;
     }
     ON_SCOPE_EXIT(freeFactory) {

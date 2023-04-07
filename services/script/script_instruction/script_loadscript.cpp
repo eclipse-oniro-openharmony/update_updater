@@ -26,6 +26,7 @@ int32_t ScriptLoadScript::Execute(UScriptEnv &env, UScriptContext &context)
     ScriptInstructionHelper* helper = ScriptInstructionHelper::GetBasicInstructionHelper();
     if (helper == nullptr) {
         USCRIPT_LOGE("Failed to get instruction helper");
+        UPDATER_LAST_WORD(USCRIPT_INVALID_PARAM);
         return USCRIPT_INVALID_PARAM;
     }
 
@@ -34,11 +35,13 @@ int32_t ScriptLoadScript::Execute(UScriptEnv &env, UScriptContext &context)
     int32_t ret = context.GetParam(0, scriptName);
     if (ret != USCRIPT_SUCCESS) {
         USCRIPT_LOGE("Failed to get param");
+        UPDATER_LAST_WORD(ret);
         return ret;
     }
     ret = context.GetParam(1, priority);
     if (ret != USCRIPT_SUCCESS) {
         USCRIPT_LOGE("Failed to get param");
+        UPDATER_LAST_WORD(ret);
         return ret;
     }
     USCRIPT_LOGI("ScriptLoadScript %s priority:%d", scriptName.c_str(), priority);
