@@ -71,13 +71,13 @@ int32_t PkgFile::ExtractFile(const PkgEntryPtr node, PkgStreamPtr output)
     PKG_LOGI("ExtractFile %s", output->GetFileName().c_str());
     if (!CheckState({PKG_FILE_STATE_WORKING}, PKG_FILE_STATE_WORKING)) {
         PKG_LOGE("error state curr %d ", state_);
-        Updater::UPDATER_LAST_WORD(PKG_INVALID_STATE);
+        UPDATER_LAST_WORD(PKG_INVALID_STATE);
         return PKG_INVALID_STATE;
     }
     auto entry = static_cast<PkgEntryPtr>(node);
     if (entry == nullptr) {
         PKG_LOGE("error get entry %s", pkgStream_->GetFileName().c_str());
-        Updater::UPDATER_LAST_WORD(PKG_INVALID_PARAM);
+        UPDATER_LAST_WORD(PKG_INVALID_PARAM);
         return PKG_INVALID_PARAM;
     }
     return entry->Unpack(output);
