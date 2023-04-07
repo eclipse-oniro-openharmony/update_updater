@@ -112,7 +112,7 @@ int32_t Pkcs7SignedData::Verify(const std::vector<uint8_t> &hash, const std::vec
 
 int32_t Pkcs7SignedData::Init(const uint8_t *sourceData, const uint32_t sourceDataLen)
 {
-    UPDATER_INIT_RECORD;
+    Updater::UPDATER_INIT_RECORD;;
     BIO *p7Bio = BIO_new(BIO_s_mem());
     if (p7Bio == nullptr) {
         PKG_LOGE("BIO_new error!");
@@ -196,7 +196,7 @@ int32_t Pkcs7SignedData::DoParse()
  */
 int32_t Pkcs7SignedData::ParseContentInfo(std::vector<uint8_t> &digestBlock) const
 {
-    UPDATER_INIT_RECORD;
+    Updater::UPDATER_INIT_RECORD;;
     PKCS7_SIGNED *signData = pkcs7_->d.sign;
     if (signData == nullptr) {
         PKG_LOGE("invalid pkcs7 signed data!");
@@ -227,7 +227,7 @@ int32_t Pkcs7SignedData::ParseContentInfo(std::vector<uint8_t> &digestBlock) con
 
 int32_t Pkcs7SignedData::GetDigestFromContentInfo(std::vector<uint8_t> &digestBlock)
 {
-    UPDATER_INIT_RECORD;
+    Updater::UPDATER_INIT_RECORD;;
     if (digestBlock.size() <= sizeof(uint32_t)) {
         PKG_LOGE("invalid digest block info.");
         UPDATER_LAST_WORD(-1);
@@ -262,7 +262,7 @@ int32_t Pkcs7SignedData::GetDigestFromContentInfo(std::vector<uint8_t> &digestBl
  */
 int32_t Pkcs7SignedData::SignerInfosParse()
 {
-    UPDATER_INIT_RECORD;
+    Updater::UPDATER_INIT_RECORD;;
     STACK_OF(PKCS7_SIGNER_INFO) *p7SignerInfos = PKCS7_get_signer_info(pkcs7_);
     if (p7SignerInfos == nullptr) {
         PKG_LOGE("get pkcs7 signers info failed!");
@@ -358,7 +358,7 @@ int32_t Pkcs7SignedData::Pkcs7SignleSignerVerify(const Pkcs7SignerInfo &signerIn
 int32_t Pkcs7SignedData::VerifyDigest(X509 *cert, const Pkcs7SignerInfo &signer, const std::vector<uint8_t> &hash,
     const std::vector<uint8_t> &sig) const
 {
-    UPDATER_INIT_RECORD;
+    Updater::UPDATER_INIT_RECORD;;
     if (cert == nullptr) {
         UPDATER_LAST_WORD(-1);
         return -1;

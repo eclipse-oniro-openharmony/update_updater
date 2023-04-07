@@ -257,7 +257,7 @@ void GZipFileEntry::DecodeHeaderCalOffset(uint8_t flags, const PkgBuffer &buffer
 int32_t GZipFileEntry::DecodeHeader(const PkgBuffer &buffer, size_t headerOffset, size_t dataOffset,
     size_t &decodeLen)
 {
-    UPDATER_INIT_RECORD;
+    Updater::UPDATER_INIT_RECORD;;
     PkgStreamPtr inStream = pkgFile_->GetPkgStream();
     if (inStream == nullptr || buffer.buffer == nullptr) {
         PKG_LOGE("outStream or inStream null for %s", fileInfo_.fileInfo.identity.c_str());

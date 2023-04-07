@@ -70,7 +70,7 @@ FileStream::~FileStream()
 
 int32_t FileStream::Read(const PkgBuffer &data, size_t start, size_t needRead, size_t &readLen)
 {
-    UPDATER_INIT_RECORD
+    Updater::UPDATER_INIT_RECORD;;
     if (stream_ == nullptr) {
         PKG_LOGE("Invalid stream");
         UPDATER_LAST_WORD(PKG_INVALID_STREAM);

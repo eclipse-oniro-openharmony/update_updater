@@ -236,7 +236,7 @@ int32_t ZipPkgFile::LoadPackage(std::vector<std::string>& fileNames, VerifyFunct
 int32_t ZipPkgFile::ParseFileEntries(std::vector<std::string> &fileNames,
     const EndCentralDir &endDir, size_t currentPos, size_t fileLen)
 {
-    UPDATER_INIT_RECORD;
+    Updater::UPDATER_INIT_RECORD;;
     int32_t ret = PKG_SUCCESS;
     size_t buffLen = MAX_FILE_NAME + sizeof(LocalFileHeader) + sizeof(DataDescriptor)
         + sizeof(CentralDirEntry) + BIG_SIZE_HEADER;
