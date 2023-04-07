@@ -331,6 +331,7 @@ int32_t UpgradePkgFile::LoadPackage(std::vector<std::string> &fileNames, VerifyF
     }
     algorithm->Update(buffer, UPGRADE_RESERVE_LEN + GetUpgradeSignatureLen());
     parsedLen += UPGRADE_RESERVE_LEN + GetUpgradeSignatureLen();
+    pkgInfo_.pkgInfo.updateFileHeadLen = parsedLen;
 
     // Calculate digest and verify
     return Verify(parsedLen, algorithm, verifier, signData);

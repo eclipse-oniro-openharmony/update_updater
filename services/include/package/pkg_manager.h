@@ -59,6 +59,7 @@ enum {
  */
 struct PkgInfo {
     uint32_t entryCount = 0;
+    uint32_t updateFileHeadLen = 0;
     uint8_t signMethod;
     uint8_t digestMethod;
     uint8_t pkgType;
@@ -344,6 +345,9 @@ public:
 
     virtual int32_t LoadPackageWithoutUnPack(const std::string &packagePath,
         std::vector<std::string> &fileIds) = 0;
+    
+    virtual int32_t LoadPackageWithStream(const std::string &packagePath, const std::string &keyPath,
+        std::vector<std::string> &fileIds, uint8_t type, StreamPtr stream) = 0;
 
     virtual int32_t ParsePackage(StreamPtr stream, std::vector<std::string> &fileIds, int32_t type) = 0;
 
