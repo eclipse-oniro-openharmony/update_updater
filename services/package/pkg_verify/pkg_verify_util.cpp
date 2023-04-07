@@ -32,14 +32,14 @@ constexpr uint32_t PKG_HASH_CONTENT_LEN = SHA256_DIGEST_LENGTH;
 int32_t PkgVerifyUtil::VerifyPackageSign(const PkgStreamPtr pkgStream) const
 {
     if (pkgStream == nullptr) {
-        UPDATER_LAST_WORD(PKG_INVALID_PARAM);
+        Updater::UPDATER_LAST_WORD(PKG_INVALID_PARAM);
         return PKG_INVALID_PARAM;
     }
     size_t signatureSize = 0;
     std::vector<uint8_t> signature;
     if (GetSignature(pkgStream, signatureSize, signature) != PKG_SUCCESS) {
         PKG_LOGE("get package signature fail!");
-        UPDATER_LAST_WORD(PKG_INVALID_SIGNATURE);
+        Updater::UPDATER_LAST_WORD(PKG_INVALID_SIGNATURE);
         return PKG_INVALID_SIGNATURE;
     }
 
@@ -47,7 +47,7 @@ int32_t PkgVerifyUtil::VerifyPackageSign(const PkgStreamPtr pkgStream) const
     int32_t ret = Pkcs7verify(signature, hash);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("pkcs7 verify fail!");
-        UPDATER_LAST_WORD(ret);
+        Updater::UPDATER_LAST_WORD(ret);
         return ret;
     }
     size_t srcDataLen = pkgStream->GetFileLength() - signatureSize - ZIP_EOCD_FIXED_PART_LEN;
@@ -58,12 +58,12 @@ int32_t PkgVerifyUtil::VerifyPackageSign(const PkgStreamPtr pkgStream) const
 int32_t PkgVerifyUtil::GetSignature(const PkgStreamPtr pkgStream, size_t &signatureSize,
     std::vector<uint8_t> &signature) const
 {
-    UPDATER_INIT_RECORD;
+    Updater::UPDATER_INIT_RECORD;
     size_t signatureStart = 0;
     int32_t ret = ParsePackage(pkgStream, signatureStart, signatureSize);
     if (ret != PKG_SUCCESS || signatureSize < PKG_FOOTER_SIZE) {
         PKG_LOGE("Parse package failed.");
-        UPDATER_LAST_WORD(-1);
+        Updater::UPDATER_LAST_WORD(-1);
         return -1;
     }
 
@@ -73,7 +73,7 @@ int32_t PkgVerifyUtil::GetSignature(const PkgStreamPtr pkgStream, size_t &signat
     ret = pkgStream->Read(signData, signatureStart, signDataLen, readLen);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("read signature failed %s", pkgStream->GetFileName().c_str());
-        UPDATER_LAST_WORD(ret);
+        Updater::UPDATER_LAST_WORD(ret);
         return ret;
     }
     signature.assign(signData.buffer, signData.buffer + readLen);
@@ -81,7 +81,7 @@ int32_t PkgVerifyUtil::GetSignature(const PkgStreamPtr pkgStream, size_t &signat
     size_t fileLen = pkgStream->GetFileLength();
     if (fileLen < (signatureSize + ZIP_EOCD_FIXED_PART_LEN)) {
         PKG_LOGE("Invalid fileLen[%zu] and signature size[%zu]", fileLen, signatureSize);
-        UPDATER_LAST_WORD(PKG_INVALID_PARAM, fileLen, signatureSize);
+        Updater::UPDATER_LAST_WORD(PKG_INVALID_PARAM, fileLen, signatureSize);
         return PKG_INVALID_PARAM;
     }
 
@@ -95,7 +95,7 @@ int32_t PkgVerifyUtil::ParsePackage(const PkgStreamPtr pkgStream, size_t &signat
     int32_t ret = zipParse.ParseZipPkg(pkgStream, signatureStart, signatureSize);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("Parse zip package signature failed.");
-        UPDATER_LAST_WORD(ret);
+        Updater::UPDATER_LAST_WORD(ret);
         return ret;
     }
 
@@ -112,29 +112,29 @@ int32_t PkgVerifyUtil::Pkcs7verify(std::vector<uint8_t> &signature, std::vector<
 int32_t PkgVerifyUtil::HashCheck(const PkgStreamPtr srcData, const size_t dataLen,
     const std::vector<uint8_t> &hash) const
 {
-    UPDATER_INIT_RECORD;
+    Updater::UPDATER_INIT_RECORD;
     if (srcData == nullptr || dataLen == 0) {
-        UPDATER_LAST_WORD(PKG_INVALID_PARAM);
+        Updater::UPDATER_LAST_WORD(PKG_INVALID_PARAM);
         return PKG_INVALID_PARAM;
     }
 
     size_t digestLen = hash.size();
     if (digestLen != PKG_HASH_CONTENT_LEN) {
         PKG_LOGE("calc pkg sha256 digest failed.");
-        UPDATER_LAST_WORD(PKG_INVALID_PARAM);
+        Updater::UPDATER_LAST_WORD(PKG_INVALID_PARAM);
         return PKG_INVALID_PARAM;
     }
     std::vector<uint8_t> sourceDigest(digestLen);
     int32_t ret = CalcSha256Digest(srcData, dataLen, sourceDigest);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("calc pkg sha256 digest failed.");
-        UPDATER_LAST_WORD(ret);
+        Updater::UPDATER_LAST_WORD(ret);
         return ret;
     }
 
     if (memcmp(hash.data(), sourceDigest.data(), digestLen) != EOK) {
         PKG_LOGE("Failed to memcmp data.");
-        UPDATER_LAST_WORD(PKG_INVALID_DIGEST);
+        Updater::UPDATER_LAST_WORD(PKG_INVALID_DIGEST);
         return PKG_INVALID_DIGEST;
     }
 

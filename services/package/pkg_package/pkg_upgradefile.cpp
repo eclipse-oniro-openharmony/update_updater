@@ -19,6 +19,7 @@
 #include <ctime>
 #include <limits>
 #include <memory>
+#include "dump.h"
 #include "pkg_lz4file.h"
 #include "pkg_manager.h"
 #include "pkg_pkgfile.h"
@@ -258,7 +259,7 @@ int32_t UpgradePkgFile::ReadPackageInfo(PkgBuffer &buffer, std::vector<uint8_t> 
     size_t ret = pkgStream_->Read(buffer, parsedLen, GetUpgradeSignatureLen() + UPGRADE_RESERVE_LEN, readBytes);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("read sign data fail");
-        UPDATER_LAST_WORD(ret);
+        Updater::UPDATER_LAST_WORD(ret);
         return ret;
     }
 
@@ -273,14 +274,14 @@ int32_t UpgradePkgFile::ReadPackageInfo(PkgBuffer &buffer, std::vector<uint8_t> 
     }
     if (ret != EOK) {
         PKG_LOGE("memcpy sign data fail");
-        UPDATER_LAST_WORD(PKG_NONE_MEMORY);
+        Updater::UPDATER_LAST_WORD(PKG_NONE_MEMORY);
         return PKG_NONE_MEMORY;
     }
 
     ret = memset_s(buffer.buffer + UPGRADE_RESERVE_LEN, buffer.length, 0, GetUpgradeSignatureLen());
     if (ret != EOK) {
         PKG_LOGE("memset buff fail");
-        UPDATER_LAST_WORD(PKG_NONE_MEMORY);
+        Updater::UPDATER_LAST_WORD(PKG_NONE_MEMORY);
         return PKG_NONE_MEMORY;
     }
     return PKG_SUCCESS;
@@ -290,12 +291,12 @@ int32_t UpgradePkgFile::LoadPackage(std::vector<std::string> &fileNames, VerifyF
 {
     if (verifier == nullptr) {
         PKG_LOGE("Check verifier nullptr");
-        UPDATER_LAST_WORD(PKG_INVALID_SIGNATURE);
+        Updater::UPDATER_LAST_WORD(PKG_INVALID_SIGNATURE);
         return PKG_INVALID_SIGNATURE;
     }
     if (!CheckState({PKG_FILE_STATE_IDLE}, PKG_FILE_STATE_WORKING)) {
         PKG_LOGE("error state curr %d ", state_);
-        UPDATER_LAST_WORD(PKG_INVALID_STATE);
+        Updater::UPDATER_LAST_WORD(PKG_INVALID_STATE);
         return PKG_INVALID_STATE;
     }
     PKG_LOGI("LoadPackage %s ", pkgStream_->GetFileName().c_str());
@@ -305,7 +306,7 @@ int32_t UpgradePkgFile::LoadPackage(std::vector<std::string> &fileNames, VerifyF
         GetUpgradeSignatureLen() + UPGRADE_RESERVE_LEN;
     if (fileLen < buffSize) {
         PKG_LOGE("Invalid file %s fileLen:%zu ", pkgStream_->GetFileName().c_str(), fileLen);
-        UPDATER_LAST_WORD(PKG_INVALID_STATE);
+        Updater::UPDATER_LAST_WORD(PKG_INVALID_STATE);
         return PKG_INVALID_FILE;
     }
 
@@ -317,20 +318,20 @@ int32_t UpgradePkgFile::LoadPackage(std::vector<std::string> &fileNames, VerifyF
     int32_t ret = ReadUpgradePkgHeader(buffer, parsedLen, algorithm);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("Decode header fail %d", ret);
-        UPDATER_LAST_WORD(PKG_INVALID_STATE);
+        Updater::UPDATER_LAST_WORD(PKG_INVALID_STATE);
         return ret;
     }
 
     ret = ReadComponents(buffer, parsedLen, algorithm, fileNames);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("Decode components fail %d", ret);
-        UPDATER_LAST_WORD(ret);
+        Updater::UPDATER_LAST_WORD(ret);
         return ret;
     }
 
     if (parsedLen + UPGRADE_RESERVE_LEN + GetUpgradeSignatureLen() >= fileLen) {
         PKG_LOGE("Decode components fail %d", ret);
-        UPDATER_LAST_WORD(ret);
+        Updater::UPDATER_LAST_WORD(ret);
         return ret;
     }
     // Read signature information
@@ -349,7 +350,7 @@ int32_t UpgradePkgFile::LoadPackage(std::vector<std::string> &fileNames, VerifyF
 int32_t UpgradePkgFile::Verify(size_t start, DigestAlgorithm::DigestAlgorithmPtr algorithm,
     VerifyFunction verifier, const std::vector<uint8_t> &signData)
 {
-    UPDATER_INIT_RECORD;
+    Updater::UPDATER_INIT_RECORD;
     int ret = 0;
     size_t buffSize = BUFFER_SIZE;
     size_t offset = start;
@@ -364,7 +365,7 @@ int32_t UpgradePkgFile::Verify(size_t start, DigestAlgorithm::DigestAlgorithmPtr
         ret = pkgStream_->Read(buffer, offset, remainBytes, readBytes);
         if (ret != PKG_SUCCESS) {
             PKG_LOGE("Fail to read data ");
-            UPDATER_LAST_WORD(ret);
+            Updater::UPDATER_LAST_WORD(ret);
             return ret;
         }
         algorithm->Update(buffer, readBytes);
@@ -376,7 +377,7 @@ int32_t UpgradePkgFile::Verify(size_t start, DigestAlgorithm::DigestAlgorithmPtr
     ret = verifier(&pkgInfo_.pkgInfo, digest.data, signData);
     if (ret != 0) {
         PKG_LOGE("Fail to verifier signature");
-        UPDATER_LAST_WORD(PKG_INVALID_SIGNATURE);
+        Updater::UPDATER_LAST_WORD(PKG_INVALID_SIGNATURE);
         return PKG_INVALID_SIGNATURE;
     }
     return 0;
@@ -434,7 +435,7 @@ int32_t UpgradePkgFile::ReadComponents(const PkgBuffer &buffer, size_t &parsedLe
     int32_t ret = pkgStream_->Read(buffer, parsedLen, buffer.length, info.readLen);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("Read component fail");
-        UPDATER_LAST_WORD(ret);
+        Updater::UPDATER_LAST_WORD(ret);
         return ret;
     }
     PkgTlv tlv;
@@ -454,7 +455,7 @@ int32_t UpgradePkgFile::ReadComponents(const PkgBuffer &buffer, size_t &parsedLe
             ret = pkgStream_->Read(buffer, parsedLen + info.srcOffset, buffer.length, info.readLen);
             if (ret != PKG_SUCCESS) {
                 PKG_LOGE("Fail to read data");
-                UPDATER_LAST_WORD(ret);
+                Updater::UPDATER_LAST_WORD(ret);
                 return ret;
             }
             info.currLen = 0;
@@ -462,7 +463,7 @@ int32_t UpgradePkgFile::ReadComponents(const PkgBuffer &buffer, size_t &parsedLe
         size_t ret = SaveEntry(buffer, parsedLen, info, algorithm, fileNames);
         if (ret != PKG_SUCCESS) {
             PKG_LOGE("SaveEntry");
-            UPDATER_LAST_WORD(ret);
+            Updater::UPDATER_LAST_WORD(ret);
             return ret;
         }
     }
@@ -495,7 +496,7 @@ void UpgradePkgFile::ParsePkgHeaderToTlv(const PkgBuffer &buffer, size_t &currLe
 int32_t UpgradePkgFile::ReadUpgradePkgHeader(const PkgBuffer &buffer, size_t &realLen,
     DigestAlgorithm::DigestAlgorithmPtr &algorithm)
 {
-    UPDATER_INIT_RECORD;
+    Updater::UPDATER_INIT_RECORD;
     size_t fileLen = pkgStream_->GetFileLength();
     size_t readLen = 0;
     size_t currLen = 0;
@@ -503,14 +504,14 @@ int32_t UpgradePkgFile::ReadUpgradePkgHeader(const PkgBuffer &buffer, size_t &re
     int32_t ret = pkgStream_->Read(buffer, 0, buffer.length, readLen);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("Fail to read header");
-        UPDATER_LAST_WORD(ret);
+        Updater::UPDATER_LAST_WORD(ret);
         return ret;
     }
     ParsePkgHeaderToTlv(buffer, currLen, tlv);
     algorithm = PkgAlgorithmFactory::GetDigestAlgorithm(pkgInfo_.pkgInfo.digestMethod);
     if (algorithm == nullptr) {
         PKG_LOGE("Invalid file %s", pkgStream_->GetFileName().c_str());
-        UPDATER_LAST_WORD(PKG_NOT_EXIST_ALGORITHM);
+        Updater::UPDATER_LAST_WORD(PKG_NOT_EXIST_ALGORITHM);
         return PKG_NOT_EXIST_ALGORITHM;
     }
     algorithm->Init();
@@ -521,7 +522,7 @@ int32_t UpgradePkgFile::ReadUpgradePkgHeader(const PkgBuffer &buffer, size_t &re
         ret = pkgStream_->Read(buffer, realLen, buffer.length, readLen);
         if (ret != PKG_SUCCESS) {
             PKG_LOGE("Fail to read header");
-            UPDATER_LAST_WORD(ret);
+            Updater::UPDATER_LAST_WORD(ret);
             return ret;
         }
         currLen = 0;

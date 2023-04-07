@@ -55,7 +55,7 @@ int32_t ZipPkgParse::DoParseZipPkg(PkgStreamPtr pkgStream, size_t &signatureStar
     size_t eocdTotalLen = ZIP_EOCD_FIXED_PART_LEN + signCommentTotalLen;
     if (fileLen <= eocdTotalLen) {
         PKG_LOGE("Invalid eocd len[%zu]", eocdTotalLen);
-        UPDATER_LAST_WORD(PKG_INVALID_PKG_FORMAT);
+        Updater::UPDATER_LAST_WORD(PKG_INVALID_PKG_FORMAT);
         return PKG_INVALID_PKG_FORMAT;
     }
 
@@ -64,20 +64,20 @@ int32_t ZipPkgParse::DoParseZipPkg(PkgStreamPtr pkgStream, size_t &signatureStar
     int32_t ret = pkgStream->Read(zipEocd, zipEocdStart, eocdTotalLen, readLen);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("read zip eocd failed %s", pkgStream->GetFileName().c_str());
-        UPDATER_LAST_WORD(PKG_INVALID_PKG_FORMAT);
+        Updater::UPDATER_LAST_WORD(PKG_INVALID_PKG_FORMAT);
         return ret;
     }
 
     ret = CheckZipEocd(zipEocd.buffer, eocdTotalLen, signCommentTotalLen);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("CheckZipEocd() error, ret[%d]", ret);
-        UPDATER_LAST_WORD(PKG_INVALID_PKG_FORMAT);
+        Updater::UPDATER_LAST_WORD(PKG_INVALID_PKG_FORMAT);
         return ret;
     }
 
     if (fileLen <= signCommentTotalLen) {
         PKG_LOGE("file len[%zu] < signCommentTotalLen[%zu]", fileLen, signCommentTotalLen);
-        UPDATER_LAST_WORD(PKG_INVALID_PKG_FORMAT, fileLen, signCommentTotalLen);
+        Updater::UPDATER_LAST_WORD(PKG_INVALID_PKG_FORMAT, fileLen, signCommentTotalLen);
         return PKG_INVALID_FILE;
     }
     signatureStart = fileLen - signCommentTotalLen;
@@ -89,14 +89,14 @@ int32_t ZipPkgParse::DoParseZipPkg(PkgStreamPtr pkgStream, size_t &signatureStar
 int32_t ZipPkgParse::ParseZipPkg(PkgStreamPtr pkgStream, size_t &signatureStart, size_t &signatureSize) const
 {
     if (pkgStream == nullptr) {
-        UPDATER_LAST_WORD(PKG_INVALID_PARAM);
+        Updater::UPDATER_LAST_WORD(PKG_INVALID_PARAM);
         return PKG_INVALID_PARAM;
     }
     size_t fileLen = pkgStream->GetFileLength();
     size_t footerSize = PKG_FOOTER_SIZE;
     if (fileLen <= footerSize) {
         PKG_LOGE("file len[%zu] < footerSize.", pkgStream->GetFileLength());
-        UPDATER_LAST_WORD(PKG_INVALID_FILE, fileLen);
+        Updater::UPDATER_LAST_WORD(PKG_INVALID_FILE, fileLen);
         return PKG_INVALID_FILE;
     }
     size_t footerStart = fileLen - footerSize;
@@ -105,7 +105,7 @@ int32_t ZipPkgParse::ParseZipPkg(PkgStreamPtr pkgStream, size_t &signatureStart,
     int32_t ret = pkgStream->Read(footer, footerStart, footerSize, readLen);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("read FOOTER struct failed %s", pkgStream->GetFileName().c_str());
-        UPDATER_LAST_WORD(ret);
+        Updater::UPDATER_LAST_WORD(ret);
         return ret;
     }
 
@@ -114,7 +114,7 @@ int32_t ZipPkgParse::ParseZipPkg(PkgStreamPtr pkgStream, size_t &signatureStart,
     ret = ParsePkgFooter(footer.buffer, PKG_FOOTER_SIZE, signCommentAppendLen, signCommentTotalLen);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("ParsePkgFooter() error, ret[%d]", ret);
-        UPDATER_LAST_WORD(ret);
+        Updater::UPDATER_LAST_WORD(ret);
         return ret;
     }
     return DoParseZipPkg(pkgStream, signatureStart, signatureSize, readLen, signCommentTotalLen);
@@ -123,10 +123,10 @@ int32_t ZipPkgParse::ParseZipPkg(PkgStreamPtr pkgStream, size_t &signatureStart,
 int32_t ZipPkgParse::ParsePkgFooter(const uint8_t *footer, size_t length,
     uint16_t &signCommentAppendLen, uint16_t &signCommentTotalLen) const
 {
-    UPDATER_INIT_RECORD;
+    Updater::UPDATER_INIT_RECORD;
     if (length < PKG_FOOTER_SIZE) {
         PKG_LOGE("length[%d] < Footer Size[%d]", length, PKG_FOOTER_SIZE);
-        UPDATER_LAST_WORD(PKG_INVALID_PARAM, length);
+        Updater::UPDATER_LAST_WORD(PKG_INVALID_PARAM, length);
         return PKG_INVALID_PARAM;
     }
 
@@ -139,7 +139,7 @@ int32_t ZipPkgParse::ParsePkgFooter(const uint8_t *footer, size_t length,
     signFooter.signDataSize = ReadLE16(footer + offset);
     if (signFooter.signDataFlag != PKG_ZIP_EOCD_FOOTER_FLAG) {
         PKG_LOGE("error FooterFlag[0x%04X]", signFooter.signDataFlag);
-        UPDATER_LAST_WORD(PKG_INVALID_PKG_FORMAT, signFooter.signDataFlag);
+        Updater::UPDATER_LAST_WORD(PKG_INVALID_PKG_FORMAT, signFooter.signDataFlag);
         return PKG_INVALID_PKG_FORMAT;
     }
 
@@ -149,7 +149,7 @@ int32_t ZipPkgParse::ParsePkgFooter(const uint8_t *footer, size_t length,
         (signCommentAppendLen > signCommentTotalLen)) {
         PKG_LOGE("bad footer length: append[0x%04X], total[0x%04X]",
             signCommentAppendLen, signCommentTotalLen);
-        UPDATER_LAST_WORD(PKG_INVALID_PKG_FORMAT, signCommentAppendLen, signCommentTotalLen);
+        Updater::UPDATER_LAST_WORD(PKG_INVALID_PKG_FORMAT, signCommentAppendLen, signCommentTotalLen);
         return PKG_INVALID_PKG_FORMAT;
     }
 
@@ -159,17 +159,17 @@ int32_t ZipPkgParse::ParsePkgFooter(const uint8_t *footer, size_t length,
 int32_t ZipPkgParse::CheckZipEocd(const uint8_t *eocd, size_t length,
     uint16_t signCommentTotalLen) const
 {
-    UPDATER_INIT_RECORD;
+    Updater::UPDATER_INIT_RECORD;
     if (length < PKG_ZIP_EOCD_MIN_LEN) {
         PKG_LOGE("bad eocd length: append[0x%04X]", length);
-        UPDATER_LAST_WORD(PKG_INVALID_PKG_FORMAT);
+        Updater::UPDATER_LAST_WORD(PKG_INVALID_PKG_FORMAT);
         return PKG_INVALID_PKG_FORMAT;
     }
 
     uint32_t eocdSignature = ReadLE32(eocd);
     if (eocdSignature != ZIP_EOCD_SIGNATURE) {
         PKG_LOGE("bad zip eocd flag[%zu]", eocdSignature);
-        UPDATER_LAST_WORD(PKG_INVALID_PKG_FORMAT);
+        Updater::UPDATER_LAST_WORD(PKG_INVALID_PKG_FORMAT);
         return PKG_INVALID_PKG_FORMAT;
     }
 
@@ -182,7 +182,7 @@ int32_t ZipPkgParse::CheckZipEocd(const uint8_t *eocd, size_t length,
             eocd[i + 2] == ZIP_EOCD_SIGNATURE_BIG_ENDIAN[2] && /* eocd[i + 2] = 0x05 */
             eocd[i + 3] == ZIP_EOCD_SIGNATURE_BIG_ENDIAN[3]) { /* eocd[i + 3] = 0x06 */
             PKG_LOGE("EOCD marker occurs after start of EOCD");
-            UPDATER_LAST_WORD(PKG_INVALID_PKG_FORMAT);
+            Updater::UPDATER_LAST_WORD(PKG_INVALID_PKG_FORMAT);
             return PKG_INVALID_PKG_FORMAT;
         }
     }
@@ -191,7 +191,7 @@ int32_t ZipPkgParse::CheckZipEocd(const uint8_t *eocd, size_t length,
     uint16_t tempLen = ReadLE16(zipSignCommentAddr);
     if (signCommentTotalLen != tempLen) {
         PKG_LOGE("compare sign comment length: eocd[0x%04X], footer[0x%04X] error", tempLen, signCommentTotalLen);
-        UPDATER_LAST_WORD(PKG_INVALID_PKG_FORMAT);
+        Updater::UPDATER_LAST_WORD(PKG_INVALID_PKG_FORMAT);
         return PKG_INVALID_PKG_FORMAT;
     }
 
