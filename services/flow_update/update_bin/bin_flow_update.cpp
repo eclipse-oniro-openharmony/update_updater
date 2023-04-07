@@ -30,11 +30,11 @@ using namespace Hpackage;
 using namespace std::placeholders;
 
 constexpr const char *UPDATE_BIN_FILE = "update.bin";
+constexpr uint32_t DEFAULT_SIZE = 4 * 1024 * 1024;
 
 BinFlowUpdate::BinFlowUpdate(uint32_t maxBufSize)
 {
-    static_assert(maxBufSize == 0, "maxBufSize can not be 0");
-    maxBufSize_ = maxBufSize;
+    maxBufSize_ = maxBufSize == 0 ? DEFAULT_SIZE : maxBufSize;
     buffer_ = new uint8_t[maxBufSize_];
     updateBinProcess_.emplace(BIN_UPDATE_STEP_PRE, std::bind(&BinFlowUpdate::BinUpdatePreWrite, this, _1, _2));
     updateBinProcess_.emplace(BIN_UPDATE_STEP_DO, std::bind(&BinFlowUpdate::BinUpdateDoWrite, this, _1, _2));
