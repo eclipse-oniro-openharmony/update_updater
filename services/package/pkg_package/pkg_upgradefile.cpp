@@ -428,7 +428,7 @@ int32_t UpgradePkgFile::SaveEntry(const PkgBuffer &buffer, size_t &parsedLen, Up
 int32_t UpgradePkgFile::ReadComponents(const PkgBuffer &buffer, size_t &parsedLen,
     DigestAlgorithm::DigestAlgorithmPtr algorithm, std::vector<std::string> &fileNames)
 {
-    Updater::UPDATER_INIT_WORD;
+    Updater::UPDATER_INIT_RECORD;
     UpgradeParam info;
     size_t fileLen = pkgStream_->GetFileLength();
     info.readLen = 0;
