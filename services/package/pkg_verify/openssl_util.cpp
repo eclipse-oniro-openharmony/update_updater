@@ -193,9 +193,9 @@ int32_t VerifyDigestByPubKey(EVP_PKEY *pubKey, const int nid, const std::vector<
 
 int32_t CalcSha256Digest(const PkgStreamPtr srcData, const size_t dataLen, std::vector<uint8_t> &result)
 {
-    Updater::UPDATER_INIT_RECORD;
+    UPDATER_INIT_RECORD;
     if (srcData == nullptr || dataLen == 0) {
-        Updater::UPDATER_LAST_WORD(-1);
+        UPDATER_LAST_WORD(-1);
         return -1;
     }
     if (result.size() != SHA256_DIGEST_LENGTH) {
@@ -214,7 +214,7 @@ int32_t CalcSha256Digest(const PkgStreamPtr srcData, const size_t dataLen, std::
         ret = srcData->Read(buffer, offset, blockLen, readLen);
         if (ret != 0) {
             PKG_LOGE("Fail read data");
-            Updater::UPDATER_LAST_WORD(-1);
+            UPDATER_LAST_WORD(-1);
             return -1;
         }
         SHA256_Update(&ctx, buffer.buffer, blockLen);
@@ -225,7 +225,7 @@ int32_t CalcSha256Digest(const PkgStreamPtr srcData, const size_t dataLen, std::
         ret = srcData->Read(buffer, offset, remainLen, readLen);
         if (ret != 0) {
             PKG_LOGE("Fail read data");
-            Updater::UPDATER_LAST_WORD(-1);
+            UPDATER_LAST_WORD(-1);
             return -1;
         }
         SHA256_Update(&ctx, buffer.buffer, readLen);
@@ -233,7 +233,7 @@ int32_t CalcSha256Digest(const PkgStreamPtr srcData, const size_t dataLen, std::
 
     if (SHA256_Final(result.data(), &ctx) != 1) {
         PKG_LOGE("SHA256_Final(), error");
-        Updater::UPDATER_LAST_WORD(-1);
+        UPDATER_LAST_WORD(-1);
         return -1;
     }
 

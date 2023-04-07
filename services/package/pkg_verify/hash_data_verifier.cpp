@@ -37,7 +37,6 @@ HashDataVerifier::~HashDataVerifier()
 
 bool HashDataVerifier::LoadHashDataAndPkcs7(const std::string &pkgPath)
 {
-    Updater::UPDATER_INIT_RECORD;
     // only allow loading once
     if (hsd_ != nullptr) {
         PKG_LOGW("hash signed data has been loaded before");
@@ -45,7 +44,7 @@ bool HashDataVerifier::LoadHashDataAndPkcs7(const std::string &pkgPath)
     }
     if (manager_ == nullptr) {
         PKG_LOGE("pkg manager is null");
-        Updater::UPDATER_LAST_WORD(false);
+        UPDATER_LAST_WORD(false);
         return false;
     }
     // load pkcs7 from package
@@ -99,7 +98,6 @@ bool HashDataVerifier::LoadHashDataFromPackage(void)
 
 bool HashDataVerifier::LoadPkcs7FromPackage(const std::string &pkgPath)
 {
-    UPDATER_INIT_RECORD;
     PkgManager::StreamPtr pkgStream = nullptr;
     int32_t ret = manager_->CreatePkgStream(pkgStream, pkgPath, 0, PkgStream::PkgStreamType_Read);
     if (ret != PKG_SUCCESS) {

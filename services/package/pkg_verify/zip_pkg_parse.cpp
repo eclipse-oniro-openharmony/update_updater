@@ -88,7 +88,6 @@ int32_t ZipPkgParse::DoParseZipPkg(PkgStreamPtr pkgStream, size_t &signatureStar
 
 int32_t ZipPkgParse::ParseZipPkg(PkgStreamPtr pkgStream, size_t &signatureStart, size_t &signatureSize) const
 {
-    UPDATER_INIT_RECORD;
     if (pkgStream == nullptr) {
         UPDATER_LAST_WORD(PKG_INVALID_PARAM);
         return PKG_INVALID_PARAM;

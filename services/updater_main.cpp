@@ -289,7 +289,6 @@ bool IsBatteryCapacitySufficient()
 
 static UpdaterStatus InstallUpdaterPackage(UpdaterParams &upParams, PkgManager::PkgManagerPtr manager)
 {
-    UPDATER_INIT_RECORD;
     UpdaterStatus status = UPDATE_UNKNOWN;
     STAGE(UPDATE_STAGE_BEGIN) << "Install package";
     if (upParams.retryCount == 0) {

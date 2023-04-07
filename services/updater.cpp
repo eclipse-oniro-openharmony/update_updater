@@ -87,7 +87,6 @@ int32_t ExtractUpdaterBinary(PkgManager::PkgManagerPtr manager, std::string &pac
 
 int GetUpdatePackageInfo(PkgManager::PkgManagerPtr pkgManager, const std::string &path)
 {
-    UPDATER_INIT_RECORD;
     std::vector<std::string> components;
     if (pkgManager == nullptr) {
         LOG(ERROR) << "pkgManager is nullptr";

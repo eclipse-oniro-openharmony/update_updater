@@ -73,7 +73,6 @@ int32_t Pkcs7SignedData::GetHashFromSignBlock(const uint8_t *srcData, const size
 
 int32_t Pkcs7SignedData::ParsePkcs7Data(const uint8_t *srcData, const size_t dataLen)
 {
-    UPDATER_INIT_RECORD;
     if (srcData == nullptr || dataLen == 0) {
         UPDATER_LAST_WORD(-1);
         return -1;
@@ -329,7 +328,6 @@ int32_t Pkcs7SignedData::SignerInfoParse(PKCS7_SIGNER_INFO *p7SignerInfo, Pkcs7S
 int32_t Pkcs7SignedData::Pkcs7SignleSignerVerify(const Pkcs7SignerInfo &signerInfo, const std::vector<uint8_t> &hash,
     const std::vector<uint8_t> &sig) const
 {
-    UPDATER_INIT_RECORD;
     if (pkcs7_ == nullptr) {
         UPDATER_LAST_WORD(-1);
         return -1;

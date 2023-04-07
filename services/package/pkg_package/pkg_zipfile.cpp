@@ -235,7 +235,7 @@ int32_t ZipPkgFile::LoadPackage(std::vector<std::string>& fileNames, VerifyFunct
 int32_t ZipPkgFile::ParseFileEntries(std::vector<std::string> &fileNames,
     const EndCentralDir &endDir, size_t currentPos, size_t fileLen)
 {
-    Updater::UPDATER_INIT_RECORD;
+    UPDATER_INIT_RECORD;
     int32_t ret = PKG_SUCCESS;
     size_t buffLen = MAX_FILE_NAME + sizeof(LocalFileHeader) + sizeof(DataDescriptor)
         + sizeof(CentralDirEntry) + BIG_SIZE_HEADER;
@@ -244,14 +244,14 @@ int32_t ZipPkgFile::ParseFileEntries(std::vector<std::string> &fileNames,
     for (int32_t i = 0; i < endDir.totalEntries; i++) {
         if (fileLen <= currentPos) {
             PKG_LOGE("too small to be zip");
-            Updater::UPDATER_LAST_WORD(PKG_INVALID_FILE);
+            UPDATER_LAST_WORD(PKG_INVALID_FILE);
             return PKG_INVALID_FILE;
         }
 
         ZipFileEntry* entry = new ZipFileEntry(this, nodeId_++);
         if (entry == nullptr) {
             PKG_LOGE("Failed to create zip node for %s", pkgStream_->GetFileName().c_str());
-            Updater::UPDATER_LAST_WORD(PKG_NONE_MEMORY);
+            UPDATER_LAST_WORD(PKG_NONE_MEMORY);
             return PKG_NONE_MEMORY;
         }
 
@@ -261,7 +261,7 @@ int32_t ZipPkgFile::ParseFileEntries(std::vector<std::string> &fileNames,
         if (ret != PKG_SUCCESS) {
             PKG_LOGE("DecodeHeader failed");
             delete entry;
-            Updater::UPDATER_LAST_WORD(ret);
+            UPDATER_LAST_WORD(ret);
             return ret;
         }
 
