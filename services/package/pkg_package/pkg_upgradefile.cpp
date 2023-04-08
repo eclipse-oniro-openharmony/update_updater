@@ -350,7 +350,7 @@ int32_t UpgradePkgFile::LoadPackage(std::vector<std::string> &fileNames, VerifyF
 int32_t UpgradePkgFile::Verify(size_t start, DigestAlgorithm::DigestAlgorithmPtr algorithm,
     VerifyFunction verifier, const std::vector<uint8_t> &signData)
 {
-    Updater::UPDATER_INIT_RECORD;;
+    Updater::UPDATER_INIT_RECORD;
     int ret = 0;
     size_t buffSize = BUFFER_SIZE;
     size_t offset = start;
@@ -496,7 +496,7 @@ void UpgradePkgFile::ParsePkgHeaderToTlv(const PkgBuffer &buffer, size_t &currLe
 int32_t UpgradePkgFile::ReadUpgradePkgHeader(const PkgBuffer &buffer, size_t &realLen,
     DigestAlgorithm::DigestAlgorithmPtr &algorithm)
 {
-    Updater::UPDATER_INIT_RECORD;;
+    Updater::UPDATER_INIT_RECORD;
     size_t fileLen = pkgStream_->GetFileLength();
     size_t readLen = 0;
     size_t currLen = 0;

@@ -63,7 +63,7 @@ bool HashDataVerifier::LoadHashDataAndPkcs7(const std::string &pkgPath)
 
 bool HashDataVerifier::LoadHashDataFromPackage(void)
 {
-    Updater::UPDATER_INIT_RECORD;;
+    Updater::UPDATER_INIT_RECORD;
     PkgManager::StreamPtr outStream = nullptr;
     auto info = manager_->GetFileInfo(UPDATER_HASH_SIGNED_DATA);
     if (info == nullptr || info->unpackedSize == 0) {
@@ -121,7 +121,7 @@ bool HashDataVerifier::LoadPkcs7FromPackage(const std::string &pkgPath)
 
 bool HashDataVerifier::VerifyHashData(const std::string &fileName, PkgManager::StreamPtr stream) const
 {
-    Updater::UPDATER_INIT_RECORD;;
+    Updater::UPDATER_INIT_RECORD;
     if (stream == nullptr) {
         PKG_LOGE("stream is null");
         UPDATER_LAST_WORD(false);

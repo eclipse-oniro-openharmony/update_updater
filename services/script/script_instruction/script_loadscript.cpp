@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "script_loadscript.h"
+#include "dump.h"
 #include "script_instruction.h"
 #include "script_instructionhelper.h"
 #include "script_manager.h"

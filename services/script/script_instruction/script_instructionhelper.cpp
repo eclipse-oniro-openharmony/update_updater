@@ -15,6 +15,7 @@
 #include "script_instructionhelper.h"
 #include <dlfcn.h>
 #include <set>
+#include "dump.h"
 #include "scope_guard.h"
 #include "script_basicinstruction.h"
 #include "script_loadscript.h"

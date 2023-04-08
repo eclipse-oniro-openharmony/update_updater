@@ -157,7 +157,7 @@ int32_t ScriptManagerImpl::RegisterInstruction(ScriptInstructionHelper &helper)
 int32_t ScriptManagerImpl::ExtractAndExecuteScript(PkgManager::PkgManagerPtr manager,
     const std::string &scriptName)
 {
-    UPDATER_INIT_RECORD;
+    Updater::UPDATER_INIT_RECORD;
     PkgManager::StreamPtr outStream = nullptr;
     const std::string path = Updater::Utils::IsUpdaterMode() ? "" : Updater::UPDATER_PATH;
     int32_t ret = manager->CreatePkgStream(outStream, path + "/" + scriptName, 0, PkgStream::PkgStreamType_Write);
@@ -241,7 +241,7 @@ int32_t ScriptManagerImpl::AddInstruction(const std::string &instrName, const US
 
 int32_t ScriptManagerImpl::AddScript(const std::string &scriptName, int32_t priority)
 {
-    UPDATER_INIT_RECORD;
+    Updater::UPDATER_INIT_RECORD;
     if (priority < 0 || priority >= MAX_PRIORITY) {
         USCRIPT_LOGE("Invalid priority %d", priority);
         UPDATER_LAST_WORD(USCRIPT_INVALID_PRIORITY);

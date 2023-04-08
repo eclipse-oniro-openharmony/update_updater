@@ -153,7 +153,7 @@ bool VerifyX509CertByIssuerCert(X509 *cert, X509 *issuerCert)
 int32_t VerifyDigestByPubKey(EVP_PKEY *pubKey, const int nid, const std::vector<uint8_t> &digestData,
     const std::vector<uint8_t> &signature)
 {
-    Updater::UPDATER_INIT_RECORD;;
+    Updater::UPDATER_INIT_RECORD;
     if (pubKey == nullptr) {
         PKG_LOGE("pubKey is empty");
         UPDATER_LAST_WORD(-1);
@@ -194,7 +194,7 @@ int32_t VerifyDigestByPubKey(EVP_PKEY *pubKey, const int nid, const std::vector<
 
 int32_t CalcSha256Digest(const PkgStreamPtr srcData, const size_t dataLen, std::vector<uint8_t> &result)
 {
-    Updater::UPDATER_INIT_RECORD;;
+    Updater::UPDATER_INIT_RECORD;
     if (srcData == nullptr || dataLen == 0) {
         UPDATER_LAST_WORD(-1);
         return -1;

@@ -18,6 +18,7 @@
 #include <sstream>
 #include <string>
 #include "log/log.h"
+#include "log/dump.h"
 #include "updater/updater_const.h"
 #include "utils.h"
 

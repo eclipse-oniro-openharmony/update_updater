@@ -15,6 +15,7 @@
 #include "script_registercmd.h"
 #include <cstring>
 #include <dlfcn.h>
+#include "dump.h"
 #include "script_instruction.h"
 #include "script_instructionhelper.h"
 #include "script_manager.h"
