@@ -112,7 +112,7 @@ uint32_t BinFlowUpdate::UpdateBinHead(uint8_t *data, uint32_t &len)
         pkgManager_->ClosePkgStream(stream);
     };
 
-    if (auto ret = pkgManager_->LoadPackageWithStream(UPDATE_BIN_FILE, Utils::GetCertName(), 
+    if (auto ret = pkgManager_->LoadPackageWithStream(UPDATE_BIN_FILE, Utils::GetCertName(),
         updateInfo_.componentNames, PkgFile::PKG_TYPE_UPGRADE, stream); ret != PKG_SUCCESS) {
         LOG(ERROR) << "LoadPackage fail ret :"<< ret;
         return ret;
