@@ -189,7 +189,6 @@ int BinFlowUpdate::BinUpdateDoWrite(uint8_t *data, uint32_t &len)
     LOG(INFO) << "DoWriteBin len " << len << " unpackedSize " << updateInfo_.info->unpackedSize << " already write " <<
         updateInfo_.imageWriteLen;
 
-    // sha256, < 4M , updateInfo_.needNewData = true;
     if (!updateInfo_.writer->Write(data, writeLen, nullptr)) {
         LOG(ERROR) << "Write failed";
         return -1;
