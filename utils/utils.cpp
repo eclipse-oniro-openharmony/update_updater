@@ -203,33 +203,33 @@ bool SetRebootMisc(const std::string& rebootTarget, const std::string &extData, 
     return true;
 }
 
-void DoReboot(const std::string& rebootTarget, const std::string &extData)
+void UpdaterDoReboot(const std::string& rebootTarget, const std::string &extData)
 {
     LOG(INFO) << ", rebootTarget: " << rebootTarget;
     LoadFstab();
     struct UpdateMessage msg = {};
     if (rebootTarget.empty()) {
         if (WriteUpdaterMiscMsg(msg) != true) {
-            LOG(INFO) << "DoReboot: WriteUpdaterMessage empty error";
+            LOG(INFO) << "UpdaterDoReboot: WriteUpdaterMessage empty error";
             return;
         }
     } else {
         if (!ReadUpdaterMiscMsg(msg)) {
-            LOG(ERROR) << "DoReboot read misc failed";
+            LOG(ERROR) << "UpdaterDoReboot read misc failed";
             return;
         }
         if (!SetRebootMisc(rebootTarget, extData, msg)) {
-            LOG(ERROR) << "DoReboot set misc failed";
+            LOG(ERROR) << "UpdaterDoReboot set misc failed";
             return;
         }
         if (!WriteUpdaterMiscMsg(msg)) {
-            LOG(INFO) << "DoReboot: WriteUpdaterMiscMsg error";
+            LOG(INFO) << "UpdaterDoReboot: WriteUpdaterMiscMsg error";
             return;
         }
     }
     sync();
 #ifndef UPDATER_UT
-    syscall(__NR_reboot, LINUX_REBOOT_MAGIC1, LINUX_REBOOT_MAGIC2, LINUX_REBOOT_CMD_RESTART2, rebootTarget.c_str());
+    DoReboot(rebootTarget.c_str());
     while (true) {
         pause();
     }
@@ -246,7 +246,7 @@ void DoShutdown()
         return;
     }
     sync();
-    reboot(RB_POWER_OFF);
+    DoReboot("shutdown");
 }
 
 std::string GetCertName()

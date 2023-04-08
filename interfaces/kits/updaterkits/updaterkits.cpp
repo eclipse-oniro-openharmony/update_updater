@@ -36,7 +36,7 @@ static bool WriteToMiscAndRebootToUpdater(const struct UpdateMessage &updateMsg)
     }
 #ifndef UPDATER_UT
     WriteUpdaterMiscMsg(updateMsg);
-    DoReboot("updater");
+    UpdaterDoReboot("updater");
     while (true) {
         pause();
     }

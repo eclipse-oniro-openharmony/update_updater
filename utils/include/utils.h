@@ -52,7 +52,7 @@ int64_t GetFilesFromDirectory(const std::string &path, std::vector<std::string> 
 std::vector<std::string> SplitString(const std::string &str, const std::string del = " \t");
 std::string Trim(const std::string &str);
 std::string ConvertSha256Hex(const uint8_t* shaDigest, size_t length);
-void DoReboot(const std::string& rebootTarget, const std::string& extData = "");
+void UpdaterDoReboot(const std::string& rebootTarget, const std::string& extData = "");
 void DoShutdown();
 std::string GetCertName();
 bool WriteFully(int fd, const uint8_t *data, size_t size);

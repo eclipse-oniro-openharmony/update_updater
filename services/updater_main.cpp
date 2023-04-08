@@ -313,7 +313,7 @@ static UpdaterStatus InstallUpdaterPackage(UpdaterParams &upParams, PkgManager::
             upParams.retryCount += 1;
             UPDATER_UI_INSTANCE.ShowFailedPage();
             SetMessageToMisc(upParams.retryCount, "retry_count");
-            Utils::DoReboot("updater");
+            Utils::UpdaterDoReboot("updater");
         }
     } else {
         LOG(INFO) << "Install package success.";
@@ -666,7 +666,7 @@ int UpdaterMain(int argc, char **argv)
     }
 #endif
     PostUpdater(true);
-    upParams.forceUpdate ? Utils::DoShutdown() : Utils::DoReboot("");
+    upParams.forceUpdate ? Utils::DoShutdown() : Utils::UpdaterDoReboot("");
     return 0;
 }
 } // Updater
