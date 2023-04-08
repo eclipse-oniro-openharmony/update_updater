@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef __BIN_FLOW_UPDATE__
-#define __BIN_FLOW_UPDATE__
+#ifndef BIN_FLOW_UPDATE
+#define BIN_FLOW_UPDATE
 
 #include <cstdio>
 #include <functional>
@@ -72,4 +72,4 @@ private:
     BinFlowUpdateInfo updateInfo_ {};
 };
 } // Updater
-#endif /* __BIN_FLOW_UPDATE__ */
+#endif /* BIN_FLOW_UPDATE */
