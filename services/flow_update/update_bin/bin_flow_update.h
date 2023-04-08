@@ -35,7 +35,7 @@ using BinFlowUpdateStep = enum {
 
 struct BinFlowUpdateInfo {
     std::vector<std::string> componentNames;
-    uint32_t curIndex_ = 0;
+    uint32_t curIndex = 0;
     size_t imageWriteLen = 0;
     bool needNewData = false;
     std::map<BinFlowUpdateStep, std::function<int32_t (uint8_t *, uint32_t &)>> updateBinProcess_;
@@ -46,7 +46,7 @@ struct BinFlowUpdateInfo {
 
 class BinFlowUpdate {
 public:
-    explicit BinFlowUpdate(uint32_t maxBufSize_);
+    explicit BinFlowUpdate(uint32_t maxBufSize);
     virtual ~BinFlowUpdate();
     int32_t StartBinFlowUpdate(uint8_t *data, uint32_t len);
 private:
