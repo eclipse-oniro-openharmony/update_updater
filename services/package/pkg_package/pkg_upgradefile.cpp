@@ -254,7 +254,6 @@ int32_t UpgradePkgFile::SavePackage(size_t &signOffset)
 
 int32_t UpgradePkgFile::ReadPackageInfo(PkgBuffer &buffer, std::vector<uint8_t> &signData, size_t &parsedLen)
 {
-
     size_t readBytes = 0;
     size_t ret = pkgStream_->Read(buffer, parsedLen, GetUpgradeSignatureLen() + UPGRADE_RESERVE_LEN, readBytes);
     if (ret != PKG_SUCCESS) {
