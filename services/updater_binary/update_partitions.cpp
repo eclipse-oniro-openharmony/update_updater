@@ -130,12 +130,10 @@ int UpdatePartitions::DoNewPartitions(PartitonList &newPartList)
 
 int UpdatePartitions::SetNewPartition(const std::string &filePath, const FileInfo *info, Uscript::UScriptEnv &env)
 {
-    UPDATER_INIT_RECORD;
     std::string tmpPath = "/data/updater" + filePath;
     char realPath[PATH_MAX + 1] = {};
     if (realpath(tmpPath.c_str(), realPath) == nullptr) {
         LOG(ERROR) << "Error to create: " << tmpPath;
-        UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE);
         return USCRIPT_ERROR_EXECUTE;
     }
     Hpackage::PkgManager::StreamPtr outStream = nullptr;
@@ -143,21 +141,18 @@ int UpdatePartitions::SetNewPartition(const std::string &filePath, const FileInf
         std::string(realPath), info->unpackedSize, PkgStream::PkgStreamType_Write);
     if (ret != USCRIPT_SUCCESS || outStream == nullptr) {
         LOG(ERROR) << "Error to create output stream";
-        UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE);
         return USCRIPT_ERROR_EXECUTE;
     }
     ret = env.GetPkgManager()->ExtractFile(filePath, outStream);
     if (ret != USCRIPT_SUCCESS) {
         LOG(ERROR) << "Error to extract file";
         env.GetPkgManager()->ClosePkgStream(outStream);
-        UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE);
         return USCRIPT_ERROR_EXECUTE;
     }
     FILE *fp = fopen(realPath, "rb");
     if (!fp) {
         LOG(ERROR) << "Open " << tmpPath << " failed: " << errno;
         env.GetPkgManager()->ClosePkgStream(outStream);
-        UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE);
         return USCRIPT_ERROR_EXECUTE;
     }
     char partitionInfo[MAX_LOG_BUF_SIZE];
@@ -166,13 +161,11 @@ int UpdatePartitions::SetNewPartition(const std::string &filePath, const FileInf
     if (partitionCount <= LEAST_PARTITION_COUNT) {
         env.GetPkgManager()->ClosePkgStream(outStream);
         LOG(ERROR) << "Invalid partition size, too small";
-        UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE);
         return USCRIPT_ERROR_EXECUTE;
     }
     PartitonList newPartList {};
     if (ParsePartitionInfo(std::string(partitionInfo), newPartList) == 0) {
         env.GetPkgManager()->ClosePkgStream(outStream);
-        UPDATER_LAST_WORD(USCRIPT_ABOART);
         return USCRIPT_ABOART;
     }
     if (newPartList.empty()) {
