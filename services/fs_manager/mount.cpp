@@ -23,8 +23,8 @@
 #include <unistd.h>
 #include <vector>
 #include <linux/fs.h>
-#include "log/log.h"
 #include "log/dump.h"
+#include "log/log.h"
 #include "utils.h"
 
 namespace Updater {
