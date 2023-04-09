@@ -131,7 +131,7 @@ UpdaterStatus IsSpaceCapacitySufficient(const std::vector<std::string> &packageP
         PkgManager::ReleasePackageInstance(pkgManager);
     }
 
-    if (CheckStatvfs != UPDATE_SUCCESS) {
+    if (CheckStatvfs(totalPkgSize) != UPDATE_SUCCESS) {
         LOG(ERROR) << "CheckStatvfs error";
         UPDATER_LAST_WORD(UPDATE_ERROR);
         return UPDATE_ERROR;
@@ -140,7 +140,7 @@ UpdaterStatus IsSpaceCapacitySufficient(const std::vector<std::string> &packageP
     return UPDATE_SUCCESS;
 }
 
-int CheckStatvfs()
+int CheckStatvfs(const uint64_t totalPkgSize)
 {
     struct statvfs64 updaterVfs;
     if (access("/sdcard/updater", 0) == 0) {
