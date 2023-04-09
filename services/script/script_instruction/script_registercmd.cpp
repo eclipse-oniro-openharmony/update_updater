@@ -15,6 +15,7 @@
 #include "script_registercmd.h"
 #include <cstring>
 #include <dlfcn.h>
+#include "dump.h"
 #include "script_instruction.h"
 #include "script_instructionhelper.h"
 #include "script_manager.h"
@@ -27,6 +28,7 @@ int32_t ScriptRegisterCmd::Execute(UScriptEnv &env, UScriptContext &context)
     ScriptInstructionHelper* helper = ScriptInstructionHelper::GetBasicInstructionHelper();
     if (helper == nullptr) {
         USCRIPT_LOGE("Fail to get instruction helper");
+        UPDATER_LAST_WORD(USCRIPT_INVALID_PARAM);
         return USCRIPT_INVALID_PARAM;
     }
 
@@ -35,11 +37,13 @@ int32_t ScriptRegisterCmd::Execute(UScriptEnv &env, UScriptContext &context)
     int32_t ret = context.GetParam(0, instrName);
     if (ret != USCRIPT_SUCCESS) {
         USCRIPT_LOGE("Fail to get param");
+        UPDATER_LAST_WORD(ret);
         return ret;
     }
     ret = context.GetParam(1, libName);
     if (ret != USCRIPT_SUCCESS) {
         USCRIPT_LOGE("Fail to get param");
+        UPDATER_LAST_WORD(ret);
         return ret;
     }
 

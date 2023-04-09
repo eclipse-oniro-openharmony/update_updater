@@ -428,6 +428,7 @@ int32_t PkgManagerImpl::ExtractFile(const std::string &path, PkgManager::StreamP
 {
     if (output == nullptr) {
         PKG_LOGE("Invalid stream");
+        UPDATER_LAST_WORD(PKG_INVALID_STREAM);
         return PKG_INVALID_STREAM;
     }
     int32_t ret = PKG_INVALID_FILE;
@@ -554,10 +555,12 @@ int32_t PkgManagerImpl::DoCreatePkgStream(PkgStreamPtr &stream, const std::strin
 
 int32_t PkgManagerImpl::CreatePkgStream(PkgStreamPtr &stream, const std::string &fileName, size_t size, int32_t type)
 {
+    Updater::UPDATER_INIT_RECORD;
     stream = nullptr;
     if (type == PkgStream::PkgStreamType_Write || type == PkgStream::PkgStreamType_Read) {
         int32_t ret = DoCreatePkgStream(stream, fileName, type);
         if (ret != PKG_SUCCESS) {
+            UPDATER_LAST_WORD(ret);
             return ret;
         }
     } else if (type == PkgStream::PkgStreamType_MemoryMap) {
@@ -839,6 +842,7 @@ int32_t PkgManagerImpl::Sign(PkgStreamPtr stream, size_t offset, const PkgInfoPt
 
 int32_t PkgManagerImpl::SetSignVerifyKeyName(const std::string &keyName)
 {
+    Updater::UPDATER_INIT_RECORD;
     if (access(keyName.c_str(), 0) != 0) {
         UPDATER_LAST_WORD(PKG_INVALID_FILE);
         return PKG_INVALID_FILE;

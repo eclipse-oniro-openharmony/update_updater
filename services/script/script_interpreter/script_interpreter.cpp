@@ -28,6 +28,7 @@ static int32_t g_instanceId = 0;
 
 int32_t ScriptInterpreter::ExecuteScript(ScriptManagerImpl *manager, Hpackage::PkgManager::StreamPtr pkgStream)
 {
+    Updater::UPDATER_INIT_RECORD;
     if (pkgStream == nullptr) {
         USCRIPT_LOGE("Param error");
         UPDATER_LAST_WORD(USCRIPT_INVALID_PARAM);
