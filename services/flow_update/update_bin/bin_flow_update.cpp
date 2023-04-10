@@ -44,19 +44,16 @@ BinFlowUpdate::BinFlowUpdate(uint32_t maxBufSize)
 
 BinFlowUpdate::~BinFlowUpdate()
 {
+    PkgManager::ReleasePackageInstance(pkgManager_);
     if (buffer_ != nullptr) {
         delete[] buffer_;
         buffer_ = nullptr;
-    }
-
-    if (pkgManager_ != nullptr) {
-        PkgManager::ReleasePackageInstance(pkgManager_);
     }
 }
 
 int32_t BinFlowUpdate::StartBinFlowUpdate(uint8_t *data, uint32_t len)
 {
-    if (data == nullptr || len == 0) {
+    if (data == nullptr || len == 0 || pkgManager_ == nullptr) {
         LOG(ERROR) << "para error";
         return -1;
     }
@@ -107,10 +104,6 @@ uint32_t BinFlowUpdate::UpdateBinHead(uint8_t *data, uint32_t &len)
         LOG(ERROR) << "ParseHead failed";
         return -1;
     }
-
-    ON_SCOPE_EXIT(closeStream) {
-        pkgManager_->ClosePkgStream(stream);
-    };
 
     if (auto ret = pkgManager_->LoadPackageWithStream(UPDATE_BIN_FILE, Utils::GetCertName(),
         updateInfo_.componentNames, PkgFile::PKG_TYPE_UPGRADE, stream); ret != PKG_SUCCESS) {
