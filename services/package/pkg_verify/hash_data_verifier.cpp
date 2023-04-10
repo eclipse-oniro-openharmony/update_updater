@@ -37,6 +37,7 @@ HashDataVerifier::~HashDataVerifier()
 
 bool HashDataVerifier::LoadHashDataAndPkcs7(const std::string &pkgPath)
 {
+    Updater::UPDATER_INIT_RECORD;
     // only allow loading once
     if (hsd_ != nullptr) {
         PKG_LOGW("hash signed data has been loaded before");
