@@ -408,6 +408,7 @@ static UpdaterStatus PreUpdatePackages(UpdaterParams &upParams)
 
 static UpdaterStatus DoUpdatePackages(UpdaterParams &upParams)
 {
+    UPDATER_INIT_RECORD;
     UpdaterStatus status = UPDATE_UNKNOWN;
     std::vector<double> pkgStartPosition {};
     double updateStartPosition;
