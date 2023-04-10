@@ -400,6 +400,7 @@ static UpdaterStatus PreUpdatePackages(UpdaterParams &upParams)
 #ifdef UPDATER_USE_PTABLE
     if (!PtablePreProcess::GetInstance().DoPtableProcess(upParams)) {
         LOG(ERROR) << "DoPtableProcess failed";
+        UPDATER_LAST_WORD(UPDATE_ERROR);
         return UPDATE_ERROR;
     }
 #endif
