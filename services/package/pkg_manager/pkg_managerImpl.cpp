@@ -606,6 +606,13 @@ void PkgManagerImpl::ClosePkgStream(PkgStreamPtr &stream)
         return;
     }
 
+    for (auto iter : pkgFiles_) {
+        if (iter != nullptr && mapStream == iter->GetPkgStream()) {
+            iter->SetPkgStream();
+            break;
+        }
+    }
+
     std::lock_guard<std::mutex> lock(mapLock_);
     auto iter = pkgStreams_.find(mapStream->GetFileName());
     if (iter != pkgStreams_.end()) {
