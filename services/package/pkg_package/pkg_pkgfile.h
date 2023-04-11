@@ -116,7 +116,7 @@ public:
         return type_;
     }
 
-    void SetPkgStream()
+    void ClearPkgStream()
     {
         pkgStream_ = nullptr;
     }
