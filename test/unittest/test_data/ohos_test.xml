@@ -228,4 +228,9 @@
             <option name="push" value="src/signing_cert.crt -> /data/updater/src" src="res"/>
         </preparer>
     </target>
+    <target name="bin_flow_update_test">
+        <preparer>
+            <option name="push" value="updater/update.bin -> /data/updater/package" src="res"/>
+        </preparer>
+    </target>
 </configuration>
