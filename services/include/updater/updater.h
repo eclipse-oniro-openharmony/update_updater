@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +15,9 @@
 
 #ifndef UPDATER_UPDATER_H
 #define UPDATER_UPDATER_H
+#include <optional>
 #include <string>
+#include "misc_info/misc_info.h"
 #include "package/packages_info.h"
 #include "package/pkg_manager.h"
 
@@ -48,6 +50,19 @@ struct UpdaterParams {
     float currentPercentage = 0; /* The proportion of progress bars occupied by the upgrade process */
     unsigned int pkgLocation = 0;
     std::vector<std::string> updatePackage {};
+    std::function<void(float)> callbackProgress {};
+};
+
+using CondFunc = std::function<bool(const UpdateMessage &)>;
+
+using EntryFunc = std::function<int(int, char **)>;
+
+struct BootMode {
+    CondFunc cond {nullptr}; // enter mode condition
+    std::string modeName {}; // mode name
+    std::string modePara {}; // parameter config of mode
+    EntryFunc entryFunc {nullptr}; // mode entry
+    void InitMode(void) const; // mode related initialization
 };
 
 int GetTmpProgressValue();
@@ -62,14 +77,11 @@ UpdaterStatus StartUpdaterProc(Hpackage::PkgManager::PkgManagerPtr pkgManager,
 
 int GetUpdatePackageInfo(Hpackage::PkgManager::PkgManagerPtr pkgManager, const std::string& path);
 
-#ifdef UPDATER_USE_PTABLE
-bool PtableProcess(Hpackage::PkgManager::PkgManagerPtr pkgManager, PackageUpdateMode updateMode);
-#endif
-
 int ExecUpdate(Hpackage::PkgManager::PkgManagerPtr pkgManager, int retry, const std::string &pkgPath,
     PostMessageFunction postMessage);
 
 UpdaterStatus IsSpaceCapacitySufficient(const std::vector<std::string> &packagePath);
+int CheckStatvfs(const uint64_t totalPkgSize);
 
 bool IsSDCardExist(const std::string &sdcard_path);
 
@@ -83,8 +95,16 @@ std::vector<std::string> ParseParams(int argc, char **argv);
 
 bool ClearMisc();
 
-int GetBootMode(int &mode);
-
 std::string GetWorkPath();
+
+bool IsUpdater(const UpdateMessage &boot);
+
+bool IsFlashd(const UpdateMessage &boot);
+
+void RegisterMode(const BootMode &mode);
+
+std::vector<BootMode> &GetBootModes(void);
+
+std::optional<BootMode> SelectMode(const UpdateMessage &boot);
 } // Updater
 #endif /* UPDATER_UPDATER_H */

@@ -44,6 +44,21 @@ uint32_t Ptable::GetPtablePartitionNum() const
     return partitionInfo_.size();
 }
 
+bool Ptable::LoadPtnInfo(std::vector<PtnInfo> &ptnInfo)
+{
+    if (ptnInfo.empty()) {
+        LOG(ERROR) << "ptnInfo is empty";
+        return false;
+    }
+    partitionInfo_ = ptnInfo;
+    return true;
+}
+
+std::vector<Ptable::PtnInfo>& Ptable::GetPtablePartitionInfoInstance()
+{
+    return partitionInfo_;
+}
+
 bool Ptable::InitPtable()
 {
     if (!partitionInfo_.empty()) {

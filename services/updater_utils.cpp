@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,6 +27,7 @@
 #include "securec.h"
 #include "updater/updater.h"
 #include "updater/updater_const.h"
+#include "updater_main.h"
 #include "updater_ui.h"
 #include "utils.h"
 
@@ -208,24 +209,55 @@ std::vector<std::string> ParseParams(int argc, char **argv)
     return parseParams;
 }
 
-int GetBootMode(int &mode)
+void BootMode::InitMode(void) const
 {
-#ifndef UPDATER_UT
-    mode = BOOT_UPDATER;
-#else
-    mode = BOOT_FLASHD;
-#endif
-    struct UpdateMessage boot {};
-    // read from misc
-    bool ret = ReadUpdaterMiscMsg(boot);
-    if (!ret) {
-        return -1;
+    InitUpdaterLogger(modeName, TMP_LOG, TMP_STAGE_LOG, TMP_ERROR_CODE_PATH);
+    SetLogLevel(INFO);
+    LoadFstab();
+    STAGE(UPDATE_STAGE_OUT) << "Start " << modeName;
+    Flashd::SetParameter(modePara.c_str(), "1");
+}
+
+bool IsUpdater(const UpdateMessage &boot)
+{
+    return !IsFlashd(boot) && strncmp(boot.command, "boot_updater", sizeof("boot_updater") - 1) == 0;
+}
+
+bool IsFlashd(const UpdateMessage &boot)
+{
+    return strncmp(boot.update, "boot_flash", sizeof("boot_flash") - 1) == 0;
+}
+
+std::vector<BootMode> &GetBootModes(void)
+{
+    static std::vector<BootMode> bootModes {};
+    return bootModes;
+}
+
+void RegisterMode(const BootMode &mode)
+{
+    GetBootModes().push_back(mode);
+}
+
+std::optional<BootMode> SelectMode(const UpdateMessage &boot)
+{
+    const auto &modes = GetBootModes();
+
+    // select modes by bootMode.cond which would check misc message
+    auto it = std::find_if(modes.begin(), modes.end(), [&boot] (const auto &bootMode) {
+        if (bootMode.cond != nullptr && bootMode.cond(boot)) {
+            return true;
+        }
+        LOG(WARNING) << "condition for mode " << bootMode.modeName << " is not satisfied";
+        return false;
+    });
+    // misc check failed for each mode, then enter updater mode
+    if (it == modes.end() || it->entryFunc == nullptr) {
+        LOG(WARNING) << "find valid mode failed, enter updater Mode";
+        return std::nullopt;
     }
 
-    LOG(INFO) << "GetBootMode, boot.update" << boot.update;
-    if (strncmp(boot.update, "boot_flash", strlen("boot_flash")) == 0) {
-        mode = BOOT_FLASHD;
-    }
-    return 0;
+    LOG(INFO) << "enter " << it->modeName << " mode";
+    return *it;
 }
 } // namespace Updater

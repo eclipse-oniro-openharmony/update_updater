@@ -23,6 +23,7 @@
 #include <unistd.h>
 #include <vector>
 #include <linux/fs.h>
+#include "log/dump.h"
 #include "log/log.h"
 #include "utils.h"
 
@@ -171,20 +172,6 @@ int MountSdcard(std::string &path, std::string &mountPoint)
         LOG(INFO) << path << " already mounted";
         return 0;
     }
-    struct stat st = {};
-    if (stat(path.c_str(), &st) != 0 && errno != ENOENT) {
-        LOG(ERROR) << "cannot get stat";
-        return -1;
-    }
-    if ((st.st_mode & S_IFMT) == S_IFLNK) {
-        unlink(path.c_str());
-    }
-    if (mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) < 0) {
-        if (errno != EEXIST) {
-            LOG(ERROR) << "failed to creat dir";
-            return -1;
-        }
-    }
     const std::vector<const char *> fileSystemType = {"ext4", "vfat", "exfat"};
     for (auto type : fileSystemType) {
         if (mount(mountPoint.c_str(), path.c_str(), type, 0, nullptr) == 0) {
@@ -300,6 +287,7 @@ int FormatPartition(const std::string &path, bool isZeroErase)
 
 int SetupPartitions(PackageUpdateMode mode)
 {
+    UPDATER_INIT_RECORD;
     if (!Utils::IsUpdaterMode()) {
         LOG(ERROR) << "live update mode";
         return 0;
@@ -307,6 +295,7 @@ int SetupPartitions(PackageUpdateMode mode)
 
     if (g_fstab == NULL || g_fstab->head == NULL) {
         LOG(ERROR) << "Fstab is invalid";
+        UPDATER_LAST_WORD(-1);
         return -1;
     }
     for (const FstabItem *item = g_fstab->head; item != nullptr; item = item->next) {
@@ -320,12 +309,14 @@ int SetupPartitions(PackageUpdateMode mode)
         if (mountPoint == "/data" && mode != SDCARD_UPDATE) {
             if (MountForPath(mountPoint) != 0) {
                 LOG(ERROR) << "Expected partition " << mountPoint << " is not mounted.";
+                UPDATER_LAST_WORD(-1);
                 return -1;
             }
             continue;
         }
         if (UmountForPath(mountPoint) != 0) {
             LOG(ERROR) << "Umount " << mountPoint << " failed";
+            UPDATER_LAST_WORD(-1);
             return -1;
         }
     }

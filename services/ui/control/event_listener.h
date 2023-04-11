@@ -17,6 +17,7 @@
 #define UPDATER_UI_EVENT_PRODUCT_H
 
 #include <functional>
+#include <mutex>
 #include "components/root_view.h"
 #include "components/ui_view.h"
 
@@ -37,6 +38,7 @@ public:
     void operator()() const;
 private:
     Callback cb_;
+    static std::mutex mtx_;
     OHOS::UIView &view_;
 };
 

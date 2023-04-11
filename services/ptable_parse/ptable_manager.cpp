@@ -19,10 +19,12 @@
 #include "securec.h"
 
 namespace Updater {
+std::string PtableManager::ptbImgTag_ = "";
 // class PtableManager
 PtableManager::PtableManager() : pPtable_(nullptr)
 {
     InitPtablePtr();
+    PtableManager::ptbImgTag_ = "/ptable";
 }
 
 PtableManager::StorageType PtableManager::GetDeviceStorageType()
@@ -269,21 +271,20 @@ bool PackagePtable::GetPtableBufferFromPkg(Hpackage::PkgManager *pkgManager, uin
         return false;
     }
 
-    std::string ptableName = "/ptable";
-    const Hpackage::FileInfo *info = pkgManager->GetFileInfo(ptableName);
+    const Hpackage::FileInfo *info = pkgManager->GetFileInfo(PtableManager::ptbImgTag_);
     if (info == nullptr) {
-        LOG(ERROR) << "Can not get file info " << ptableName;
+        LOG(ERROR) << "Can not get file info " << PtableManager::ptbImgTag_;
         return false;
     }
     Hpackage::PkgManager::StreamPtr outStream = nullptr;
-    (void)pkgManager->CreatePkgStream(outStream, ptableName, info->unpackedSize,
+    (void)pkgManager->CreatePkgStream(outStream, PtableManager::ptbImgTag_, info->unpackedSize,
         Hpackage::PkgStream::PkgStreamType_MemoryMap);
     if (outStream == nullptr) {
         LOG(ERROR) << "Error to create output stream";
         return false;
     }
 
-    if (pkgManager->ExtractFile(ptableName, outStream) != Hpackage::PKG_SUCCESS) {
+    if (pkgManager->ExtractFile(PtableManager::ptbImgTag_, outStream) != Hpackage::PKG_SUCCESS) {
         LOG(ERROR) << "Error to extract ptable";
         pkgManager->ClosePkgStream(outStream);
         return false;

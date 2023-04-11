@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,6 +39,7 @@
 #include "package/pkg_manager.h"
 #include "pkg_manager.h"
 #include "pkg_utils.h"
+#include "ptable_parse/ptable_process.h"
 #include "securec.h"
 #include "updater/updater_const.h"
 #include "updater_ui_stub.h"
@@ -165,7 +166,12 @@ static UpdaterStatus VerifyPackages(const UpdaterParams &upParams)
     UPDATER_UI_INSTANCE.ShowProgressPage();
     UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_VERIFYPKG));
 
-    UPDATER_UI_INSTANCE.ShowProgress(0.0);
+    if (upParams.callbackProgress == nullptr) {
+        UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_VERIFYPKGFAIL), true);
+        UPDATER_LAST_WORD(UPDATE_CORRUPT);
+        return UPDATE_CORRUPT;
+    }
+    upParams.callbackProgress(0.0);
     for (unsigned int i = upParams.pkgLocation; i < upParams.updatePackage.size(); i++) {
         LOG(INFO) << "Verify package:" << upParams.updatePackage[i];
         PkgManager::PkgManagerPtr manager = PkgManager::CreatePackageInstance();
@@ -283,13 +289,13 @@ bool IsBatteryCapacitySufficient()
 
 static UpdaterStatus InstallUpdaterPackage(UpdaterParams &upParams, PkgManager::PkgManagerPtr manager)
 {
-    UPDATER_INIT_RECORD;
     UpdaterStatus status = UPDATE_UNKNOWN;
     STAGE(UPDATE_STAGE_BEGIN) << "Install package";
     if (upParams.retryCount == 0) {
         // First time enter updater, record retryCount in case of abnormal reset.
         if (!PartitionRecord::GetInstance().ClearRecordPartitionOffset()) {
             LOG(ERROR) << "ClearRecordPartitionOffset failed";
+            UPDATER_LAST_WORD(UPDATE_ERROR);
             return UPDATE_ERROR;
         }
         SetMessageToMisc(upParams.retryCount + 1, "retry_count");
@@ -319,12 +325,14 @@ static UpdaterStatus InstallUpdaterPackage(UpdaterParams &upParams, PkgManager::
 static UpdaterStatus CalcProgress(const UpdaterParams &upParams,
     std::vector<double> &pkgStartPosition, double &updateStartPosition)
 {
+    UPDATER_INIT_RECORD;
     int64_t allPkgSize = 0;
     std::vector<int64_t> everyPkgSize;
     for (const auto &path : upParams.updatePackage) {
         char realPath[PATH_MAX + 1] = {0};
         if (realpath(path.c_str(), realPath) == nullptr) {
             LOG(ERROR) << "Can not find updatePackage : " << path;
+            UPDATER_LAST_WORD(UPDATE_ERROR);
             return UPDATE_ERROR;
         }
         struct stat st {};
@@ -337,6 +345,7 @@ static UpdaterStatus CalcProgress(const UpdaterParams &upParams,
     pkgStartPosition.push_back(VERIFY_PERCENT);
     if (allPkgSize == 0) {
         LOG(ERROR) << "All packages's size is 0.";
+        UPDATER_LAST_WORD(UPDATE_ERROR);
         return UPDATE_ERROR;
     }
     int64_t startSize = 0;
@@ -354,11 +363,13 @@ static UpdaterStatus CalcProgress(const UpdaterParams &upParams,
 
 static UpdaterStatus PreUpdatePackages(UpdaterParams &upParams)
 {
+    UPDATER_INIT_RECORD;
     LOG(INFO) << "start to update packages, start index:" << upParams.pkgLocation;
 
     UpdaterStatus status = UPDATE_UNKNOWN;
     if (SetupPartitions() != 0) {
         UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_SETPART_FAIL), true);
+        UPDATER_LAST_WORD(UPDATE_ERROR);
         return UPDATE_ERROR;
     }
     const std::string resultPath = std::string(UPDATER_PATH) + "/" + std::string(UPDATER_RESULT_FILE);
@@ -369,11 +380,13 @@ static UpdaterStatus PreUpdatePackages(UpdaterParams &upParams)
 
     // verify packages first
     if (VerifyPackages(upParams) != UPDATE_SUCCESS) {
+        UPDATER_LAST_WORD(UPDATE_ERROR);
         return UPDATE_ERROR;
     }
 
     // Only handle UPATE_ERROR and UPDATE_SUCCESS here.Let package verify handle others.
     if (IsSpaceCapacitySufficient(upParams.updatePackage) == UPDATE_ERROR) {
+        UPDATER_LAST_WORD(status);
         return status;
     }
     if (upParams.retryCount == 0 && !IsBatteryCapacitySufficient()) {
@@ -383,23 +396,37 @@ static UpdaterStatus PreUpdatePackages(UpdaterParams &upParams)
         LOG(ERROR) << "Battery is not sufficient for install package.";
         return UPDATE_SKIP;
     }
+
+#ifdef UPDATER_USE_PTABLE
+    if (!PtablePreProcess::GetInstance().DoPtableProcess(upParams)) {
+        LOG(ERROR) << "DoPtableProcess failed";
+        UPDATER_LAST_WORD(UPDATE_ERROR);
+        return UPDATE_ERROR;
+    }
+#endif
     return UPDATE_SUCCESS;
 }
 
 static UpdaterStatus DoUpdatePackages(UpdaterParams &upParams)
 {
+    UPDATER_INIT_RECORD;
     UpdaterStatus status = UPDATE_UNKNOWN;
     std::vector<double> pkgStartPosition {};
     double updateStartPosition;
     status = CalcProgress(upParams, pkgStartPosition, updateStartPosition);
     if (status != UPDATE_SUCCESS) {
+        UPDATER_LAST_WORD(status);
         return status;
     }
     for (unsigned int i = 0; i < upParams.updatePackage.size(); i++) {
         LOG(INFO) << "package " << i << ":" << upParams.updatePackage[i] <<
             " precent:" << upParams.currentPercentage;
     }
-    UPDATER_UI_INSTANCE.ShowProgress(updateStartPosition * FULL_PERCENT_PROGRESS);
+    if (upParams.callbackProgress == nullptr) {
+        LOG(ERROR) << "CallbackProgress is nullptr";
+        return UPDATE_CORRUPT;
+    }
+    upParams.callbackProgress(updateStartPosition * FULL_PERCENT_PROGRESS);
     for (; upParams.pkgLocation < upParams.updatePackage.size(); upParams.pkgLocation++) {
         PkgManager::PkgManagerPtr manager = PkgManager::CreatePackageInstance();
         upParams.currentPercentage = pkgStartPosition[upParams.pkgLocation + 1] -
@@ -463,6 +490,7 @@ static void PostUpdatePackages(UpdaterParams &upParams, bool updateResult)
 
 UpdaterStatus UpdaterFromSdcard(UpdaterParams &upParams)
 {
+    upParams.callbackProgress = [] (float value) { UPDATER_UI_INSTANCE.ShowProgress(value); };
     SetMessageToMisc(0, "sdcard_update");
     if (CheckSdcardPkgs(upParams) != UPDATE_SUCCESS) {
         LOG(ERROR) << "can not find sdcard packages";
@@ -479,6 +507,12 @@ UpdaterStatus UpdaterFromSdcard(UpdaterParams &upParams)
     if (upParams.pkgLocation == 0 && VerifyPackages(upParams) != UPDATE_SUCCESS) {
         return UPDATE_ERROR;
     }
+#ifdef UPDATER_USE_PTABLE
+    if (!PtablePreProcess::GetInstance().DoPtableProcess(upParams)) {
+        LOG(ERROR) << "DoPtableProcess failed";
+        return UPDATE_ERROR;
+    }
+#endif
     upParams.initialProgress += VERIFY_PERCENT;
     upParams.currentPercentage -= VERIFY_PERCENT;
 
@@ -600,10 +634,14 @@ static UpdaterStatus StartUpdater(const std::vector<std::string> &args,
     return StartUpdaterEntry(upParams);
 }
 
+// add updater mode
+REGISTER_MODE(Updater, "updater.hdc.configfs");
+
 int UpdaterMain(int argc, char **argv)
 {
     [[maybe_unused]] UpdaterStatus status = UPDATE_UNKNOWN;
     UpdaterParams upParams;
+    upParams.callbackProgress = [] (float value) { UPDATER_UI_INSTANCE.ShowProgress(value); };
     UpdaterInit::GetInstance().InvokeEvent(UPDATER_PRE_INIT_EVENT);
     std::vector<std::string> args = ParseParams(argc, argv);
 

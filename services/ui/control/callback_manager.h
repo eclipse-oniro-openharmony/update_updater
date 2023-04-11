@@ -30,10 +30,19 @@ public:
     static void Init(bool hasFocus);
     static void Register(const CallbackCfg &cbCfg);
     static bool LoadCallbacks(const JsonNode &node);
+    static bool RegisterFunc(const std::string &name, Callback cb);
 private:
+    static std::unordered_map<std::string, Callback> &GetFuncs();
     static std::unordered_map<std::string, EventType> evtTypes_;
-    static std::unordered_map<std::string, Callback> funcs_;
     static std::vector<CallbackCfg> callbackCfgs_;
 };
+
+#define DEFINE_CALLBACK(name)                                       \
+    void name();                                                    \
+    static void __attribute((constructor)) RegisterCallback##name() \
+    {                                                               \
+        CallbackManager::RegisterFunc(#name, &name);                \
+    }                                                               \
+    void name()
 }
 #endif

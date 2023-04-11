@@ -102,11 +102,13 @@ int GetUpdatePackageInfo(PkgManager::PkgManagerPtr pkgManager, const std::string
 
 UpdaterStatus IsSpaceCapacitySufficient(const std::vector<std::string> &packagePath)
 {
+    UPDATER_INIT_RECORD;
     uint64_t totalPkgSize = 0;
     for (auto path : packagePath) {
         PkgManager::PkgManagerPtr pkgManager = Hpackage::PkgManager::CreatePackageInstance();
         if (pkgManager == nullptr) {
             LOG(ERROR) << "pkgManager is nullptr";
+            UPDATER_LAST_WORD(UPDATE_CORRUPT);
             return UPDATE_CORRUPT;
         }
         std::vector<std::string> fileIds;
@@ -114,6 +116,7 @@ UpdaterStatus IsSpaceCapacitySufficient(const std::vector<std::string> &packageP
         if (ret != PKG_SUCCESS) {
             LOG(ERROR) << "LoadPackageWithoutUnPack failed";
             PkgManager::ReleasePackageInstance(pkgManager);
+            UPDATER_LAST_WORD(UPDATE_CORRUPT);
             return UPDATE_CORRUPT;
         }
 
@@ -121,21 +124,35 @@ UpdaterStatus IsSpaceCapacitySufficient(const std::vector<std::string> &packageP
         if (info == nullptr) {
             LOG(ERROR) << "update.bin is not exist";
             PkgManager::ReleasePackageInstance(pkgManager);
+            UPDATER_LAST_WORD(UPDATE_CORRUPT);
             return UPDATE_CORRUPT;
         }
         totalPkgSize += static_cast<uint64_t>(info->unpackedSize + MAX_LOG_SPACE);
         PkgManager::ReleasePackageInstance(pkgManager);
     }
 
+    if (CheckStatvfs(totalPkgSize) != UPDATE_SUCCESS) {
+        LOG(ERROR) << "CheckStatvfs error";
+        UPDATER_LAST_WORD(UPDATE_ERROR);
+        return UPDATE_ERROR;
+    }
+
+    return UPDATE_SUCCESS;
+}
+
+int CheckStatvfs(const uint64_t totalPkgSize)
+{
     struct statvfs64 updaterVfs;
     if (access("/sdcard/updater", 0) == 0) {
         if (statvfs64("/sdcard", &updaterVfs) < 0) {
             LOG(ERROR) << "Statvfs read /sdcard error!";
+            UPDATER_LAST_WORD(UPDATE_ERROR);
             return UPDATE_ERROR;
         }
     } else {
         if (statvfs64("/data", &updaterVfs) < 0) {
             LOG(ERROR) << "Statvfs read /data error!";
+            UPDATER_LAST_WORD(UPDATE_ERROR);
             return UPDATE_ERROR;
         }
     }
@@ -144,6 +161,7 @@ UpdaterStatus IsSpaceCapacitySufficient(const std::vector<std::string> &packageP
         LOG(ERROR) << "Can not update, free space is not enough";
         UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_SPACE_NOTENOUGH), true);
         UPDATER_UI_INSTANCE.Sleep(UI_SHOW_DURATION);
+        UPDATER_LAST_WORD(UPDATE_ERROR);
         return UPDATE_ERROR;
     }
     return UPDATE_SUCCESS;
@@ -156,7 +174,6 @@ int GetTmpProgressValue()
 
 void ProgressSmoothHandler(int beginProgress, int endProgress)
 {
-#ifdef UPDATER_UI_SUPPORT
     if (endProgress < 0 || endProgress > FULL_PERCENT_PROGRESS || beginProgress < 0) {
         return;
     }
@@ -170,40 +187,19 @@ void ProgressSmoothHandler(int beginProgress, int endProgress)
             UPDATER_UI_INSTANCE.Sleep(SHOW_FULL_PROGRESS_TIME);
         }
     }
-#endif
 }
-
-#ifdef UPDATER_USE_PTABLE
-bool PtableProcess(PkgManager::PkgManagerPtr pkgManager, PackageUpdateMode updateMode)
-{
-    DevicePtable& devicePtb = DevicePtable::GetInstance();
-    devicePtb.LoadPartitionInfo();
-    PackagePtable& packagePtb = PackagePtable::GetInstance();
-    packagePtb.LoadPartitionInfo(pkgManager);
-    if (!devicePtb.ComparePtable(packagePtb)) {
-        LOG(INFO) << "Ptable NOT changed, no need to process!";
-        return true;
-    }
-    if (updateMode == HOTA_UPDATE) {
-        if (devicePtb.ComparePartition(packagePtb, "USERDATA")) {
-            LOG(ERROR) << "Hota update not allow userdata partition change!";
-            return false;
-        }
-    }
-    if (!packagePtb.WritePtableToDevice()) {
-        LOG(ERROR) << "Ptable changed, write new ptable failed!";
-        return false;
-    }
-    return true;
-}
-#endif
 
 UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, UpdaterParams &upParams,
     PackageUpdateMode updateMode)
 {
     UPDATER_INIT_RECORD;
     UPDATER_UI_INSTANCE.ShowProgressPage();
-    UPDATER_UI_INSTANCE.ShowProgress(upParams.initialProgress * FULL_PERCENT_PROGRESS);
+    if (upParams.callbackProgress == nullptr) {
+        LOG(ERROR) << "CallbackProgress is nullptr";
+        UPDATER_LAST_WORD(UPDATE_CORRUPT);
+        return UPDATE_CORRUPT;
+    }
+    upParams.callbackProgress(upParams.initialProgress * FULL_PERCENT_PROGRESS);
     if (pkgManager == nullptr) {
         LOG(ERROR) << "pkgManager is nullptr";
         UPDATER_LAST_WORD(UPDATE_CORRUPT);
@@ -232,13 +228,6 @@ UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, Upda
         return UPDATE_CORRUPT;
     }
 
-#ifdef UPDATER_USE_PTABLE
-    if (!PtableProcess(pkgManager, updateMode)) {
-        LOG(ERROR) << "Ptable process failed!";
-        return UPDATE_CORRUPT;
-    }
-#endif
-
     int maxTemperature;
     UpdaterStatus updateRet = StartUpdaterProc(pkgManager, upParams, maxTemperature);
     if (updateRet != UPDATE_SUCCESS) {
@@ -249,9 +238,12 @@ UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, Upda
 }
 
 namespace {
-#ifdef UPDATER_UI_SUPPORT
 void SetProgress(const std::vector<std::string> &output, UpdaterParams &upParams)
 {
+    if (upParams.callbackProgress == nullptr) {
+        LOG(ERROR) << "CallbackProgress is nullptr";
+        return;
+    }
     if (output.size() < DEFAULT_PROCESS_NUM) {
         LOG(ERROR) << "check output fail";
         return;
@@ -267,7 +259,7 @@ void SetProgress(const std::vector<std::string> &output, UpdaterParams &upParams
     if (frac >= FULL_EPSINON && g_tmpValue + g_percentage < FULL_PERCENT_PROGRESS) {
         g_tmpValue += g_percentage;
         g_tmpProgressValue = g_tmpValue;
-        UPDATER_UI_INSTANCE.ShowProgress(g_tmpProgressValue *
+        upParams.callbackProgress(g_tmpProgressValue *
             upParams.currentPercentage + upParams.initialProgress * FULL_PERCENT_PROGRESS);
         return;
     }
@@ -275,10 +267,9 @@ void SetProgress(const std::vector<std::string> &output, UpdaterParams &upParams
     if (g_tmpProgressValue == 0) {
         return;
     }
-    UPDATER_UI_INSTANCE.ShowProgress(g_tmpProgressValue *
+    upParams.callbackProgress(g_tmpProgressValue *
         upParams.currentPercentage + upParams.initialProgress * FULL_PERCENT_PROGRESS);
 }
-#endif
 
 void HandleChildOutput(const std::string &buffer, int32_t bufferLen, bool &retryUpdate, UpdaterParams &upParams)
 {
@@ -301,7 +292,6 @@ void HandleChildOutput(const std::string &buffer, int32_t bufferLen, bool &retry
         LOG(INFO) << outputInfo;
     } else if (outputHeader == "retry_update") {
         retryUpdate = true;
-#ifdef UPDATER_UI_SUPPORT
     } else if (outputHeader == "ui_log") {
         if (output.size() < DEFAULT_PROCESS_NUM) {
             LOG(ERROR) << "check output fail";
@@ -328,7 +318,6 @@ void HandleChildOutput(const std::string &buffer, int32_t bufferLen, bool &retry
         SetProgress(output, upParams);
     } else {
         LOG(WARNING) << "Child process returns unexpected message.";
-#endif
     }
 }
 }

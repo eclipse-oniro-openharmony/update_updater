@@ -96,6 +96,7 @@
             <option name="push" value="diffpatch/ImgageDiffPatchLz4File_3_lz4_new.lz -> /data/updater/diffpatch" src="res"/>
             <option name="push" value="diffpatch/PatchGztest_gz.img_patch -> /data/updater/diffpatch" src="res"/>
             <option name="push" value="diffpatch/ImgageDiffPatchLz4File_1_old.lz -> /data/updater/diffpatch" src="res"/>
+            <option name="push" value="ptable_parse/updater1.zip -> /data/updater/ptable_parse" src="res"/>
             <option name="push" value="src/rsa_private_key384.pem -> /data/updater/src" src="res"/>
             <option name="push" value="src/signing_cert384.crt -> /data/updater/src" src="res"/>
             <option name="push" value="src/rsa_private_key2048.pem -> /data/updater/src" src="res"/>
@@ -217,6 +218,11 @@
             <option name="push" value="updater/etc/fstab.ut.updater -> /data/updater/updater/etc" src="res"/>
         </preparer>
     </target>
+    <target name="bin_flow_update_test">
+        <preparer>
+            <option name="push" value="updater/update.bin -> /data/updater/package" src="res"/>
+        </preparer>
+    </target>
     <target name="binary_unittest">
         <preparer>
             <option name="push" value="applypatch/etc/fstab.ut.updater -> /data/updater/applypatch/etc" src="res"/>
@@ -228,9 +234,9 @@
             <option name="push" value="src/signing_cert.crt -> /data/updater/src" src="res"/>
         </preparer>
     </target>
-    <target name="bin_flow_update_test">
+    <target name="ptable_parse_unittest">
         <preparer>
-            <option name="push" value="updater/update.bin -> /data/updater/package" src="res"/>
+            <option name="push" value="ptable_parse/updater1.zip -> /data/updater/ptable_parse" src="res"/>
         </preparer>
     </target>
 </configuration>
