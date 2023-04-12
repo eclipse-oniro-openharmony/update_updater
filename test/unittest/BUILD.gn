@@ -17,7 +17,12 @@ import("//build/test.gni")
 module_output_path = "updater/updater_test"
 
 config("utest_config") {
-  visibility = [ ":*" ]
+  visibility = [ "./*" ]
+  visibility += [
+    "//base/startup/appspawn/test/unittest/*",
+    "//base/startup/init/test/unittest/*",
+    "//base/update/sys_installer/test/unittest/*",
+  ]
 
   cflags = [
     "--coverage",
