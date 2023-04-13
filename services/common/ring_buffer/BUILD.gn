@@ -18,11 +18,11 @@ ohos_static_library("libringbuffer") {
   sources = [ "ring_buffer.cpp" ]
 
   include_dirs = [
-    "${updater_path}/services/include/log",
-    "${updater_path}/utils/include",
+    "../../../services/include/log",
+    "../../../utils/include",
   ]
   deps = [
-    "${updater_path}/services/log:libupdaterlog",
+    "../../../services/log:libupdaterlog",
     "//third_party/bounds_checking_function:libsec_static",
   ]
   external_deps = [ "hiviewdfx_hilog_native:libhilog" ]

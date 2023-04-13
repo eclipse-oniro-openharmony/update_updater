@@ -13,14 +13,13 @@
 
 import("//build/test.gni")
 
-UPDATER_TEST_ROOT = "//base/update/updater/test/unittest"
 
 MODULE_OUTPUT_PATH = "updater/updater_test"
 
 ohos_unittest("script_unittest") {
   testonly = true
   resource_config_file =
-      "//base/update/updater/test/unittest/test_data/ohos_test.xml"
+      "../../../test/unittest/test_data/ohos_test.xml"
   module_out_path = MODULE_OUTPUT_PATH
   sources = [
     "script_instruction/basic_instruction_unittest.cpp",
@@ -35,47 +34,47 @@ ohos_unittest("script_unittest") {
   sources += [
     "$root_out_dir/updater/updater/yacc/lexer.cpp",
     "$root_out_dir/updater/updater/yacc/parser.cpp",
-    "//base/update/updater/services/script/script_instruction/script_basicinstruction.cpp",
-    "//base/update/updater/services/script/script_instruction/script_instructionhelper.cpp",
-    "//base/update/updater/services/script/script_instruction/script_loadscript.cpp",
-    "//base/update/updater/services/script/script_instruction/script_registercmd.cpp",
-    "//base/update/updater/services/script/script_instruction/script_updateprocesser.cpp",
-    "//base/update/updater/services/script/script_interpreter/script_context.cpp",
-    "//base/update/updater/services/script/script_interpreter/script_expression.cpp",
-    "//base/update/updater/services/script/script_interpreter/script_function.cpp",
-    "//base/update/updater/services/script/script_interpreter/script_interpreter.cpp",
-    "//base/update/updater/services/script/script_interpreter/script_param.cpp",
-    "//base/update/updater/services/script/script_interpreter/script_scanner.cpp",
-    "//base/update/updater/services/script/script_interpreter/script_statement.cpp",
-    "//base/update/updater/services/script/script_manager/script_managerImpl.cpp",
-    "//base/update/updater/services/script/script_manager/script_utils.cpp",
-    "//base/update/updater/services/script/threadpool/threadpool.cpp",
+    "../../../services/script/script_instruction/script_basicinstruction.cpp",
+    "../../../services/script/script_instruction/script_instructionhelper.cpp",
+    "../../../services/script/script_instruction/script_loadscript.cpp",
+    "../../../services/script/script_instruction/script_registercmd.cpp",
+    "../../../services/script/script_instruction/script_updateprocesser.cpp",
+    "../../../services/script/script_interpreter/script_context.cpp",
+    "../../../services/script/script_interpreter/script_expression.cpp",
+    "../../../services/script/script_interpreter/script_function.cpp",
+    "../../../services/script/script_interpreter/script_interpreter.cpp",
+    "../../../services/script/script_interpreter/script_param.cpp",
+    "../../../services/script/script_interpreter/script_scanner.cpp",
+    "../../../services/script/script_interpreter/script_statement.cpp",
+    "../../../services/script/script_manager/script_managerImpl.cpp",
+    "../../../services/script/script_manager/script_utils.cpp",
+    "../../../services/script/threadpool/threadpool.cpp",
   ]
   include_dirs = [
-    "//base/update/updater/interfaces/kits/include",
-    "//base/update/updater/services/include/package",
-    "//base/update/updater/services/include/script",
-    "//base/update/updater/services/include/log",
-    "//base/update/updater/services/include/updater",
-    "//base/update/updater/services/package/pkg_algorithm",
-    "//base/update/updater/services/package/pkg_manager",
-    "//base/update/updater/services/script/script_instruction",
-    "//base/update/updater/services/script/script_interpreter",
-    "//base/update/updater/services/script/script_manager",
-    "//base/update/updater/services/script/threadpool",
+    "../../../interfaces/kits/include",
+    "../../../services/include/package",
+    "../../../services/include/script",
+    "../../../services/include/log",
+    "../../../services/include/updater",
+    "../../../services/package/pkg_algorithm",
+    "../../../services/package/pkg_manager",
+    "../../../services/script/script_instruction",
+    "../../../services/script/script_interpreter",
+    "../../../services/script/script_manager",
+    "../../../services/script/threadpool",
     "$root_out_dir/updater/updater/yacc",
-    "//base/update/updater/test/unittest",
-    "//base/update/updater/utils/include",
+    "../../../test/unittest",
+    "../../../utils/include",
     "//third_party/bounds_checking_function/include",
     "//third_party/openssl/include",
   ]
 
   deps = [
-    "//base/update/updater/interfaces/kits/packages:libpackageExt",
-    "//base/update/updater/services/log:libupdaterlog",
-    "//base/update/updater/services/package:libupdaterpackage",
-    "//base/update/updater/services/script:gen_yacc",
-    "//base/update/updater/utils:libutils",
+    "../../../interfaces/kits/packages:libpackageExt",
+    "../../../services/log:libupdaterlog",
+    "../../../services/package:libupdaterpackage",
+    "../../../services/script:gen_yacc",
+    "../../../utils:libutils",
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/bzip2:libbz2",
     "//third_party/googletest:gmock_main",
@@ -85,7 +84,7 @@ ohos_unittest("script_unittest") {
     "//third_party/openssl:ssl_source",
     "//third_party/zlib:libz",
   ]
-  configs = [ "$UPDATER_TEST_ROOT:utest_config" ]
+  configs = [ "../../../test/unittest:utest_config" ]
   external_deps = [
     "c_utils:utils",
     "hiviewdfx_hilog_native:libhilog",
@@ -99,11 +98,11 @@ ohos_shared_library("user_instruction") {
   output_extension = "so"
   ldflags = [ "-rdynamic" ]
   include_dirs = [
-    "//base/update/updater/interfaces/kits/include/",
-    "//base/update/updater/services/include",
-    "//base/update/updater/services/include/package",
-    "//base/update/updater/services/include/script",
-    "//base/update/updater/services/script/script_instruction",
+    "../../../interfaces/kits/include/",
+    "../../../services/include",
+    "../../../services/include/package",
+    "../../../services/include/script",
+    "../../../services/script/script_instruction",
   ]
   install_enable = true
   part_name = "updater"
@@ -115,11 +114,11 @@ ohos_shared_library("user_instruction_invalid") {
   output_extension = "so"
   ldflags = [ "-rdynamic" ]
   include_dirs = [
-    "//base/update/updater/interfaces/kits/include/",
-    "//base/update/updater/services/include",
-    "//base/update/updater/services/include/package",
-    "//base/update/updater/services/include/script",
-    "//base/update/updater/services/script/script_instruction",
+    "../../../interfaces/kits/include/",
+    "../../../services/include",
+    "../../../services/include/package",
+    "../../../services/include/script",
+    "../../../services/script/script_instruction",
   ]
   install_enable = true
   part_name = "updater"

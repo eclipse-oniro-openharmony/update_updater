@@ -18,16 +18,16 @@ ohos_static_library("libpackageExt") {
   sources = [ "package.cpp" ]
 
   include_dirs = [
-    "//base/update/updater/interfaces/kits/include",
-    "//base/update/updater/services/include",
-    "//base/update/updater/utils/include",
+    "../../../interfaces/kits/include",
+    "../../../services/include",
+    "../../../utils/include",
     "//third_party/bounds_checking_function/include",
     "//third_party/openssl/include",
   ]
 
   deps = [
-    "//base/update/updater/services/log:libupdaterlog",
-    "//base/update/updater/services/package:libupdaterpackage",
+    "../../../services/log:libupdaterlog",
+    "../../../services/package:libupdaterpackage",
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/lz4:liblz4_static",
     "//third_party/openssl:libcrypto_static",

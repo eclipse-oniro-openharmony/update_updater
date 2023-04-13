@@ -22,8 +22,8 @@ ohos_static_library("libutils") {
 
   include_dirs = [
     "include",
-    "//base/update/updater/interfaces/kits/include/",
-    "//base/update/updater/services/include/",
+    "../../interfaces/kits/include/",
+    "../../services/include/",
     "//third_party/bounds_checking_function/include",
     "//third_party/cJSON",
   ]
@@ -43,14 +43,14 @@ ohos_executable("updater_reboot") {
 
   include_dirs = [
     "include",
-    "//base/update/updater/interfaces/kits/include/",
-    "//base/update/updater/services/include/",
+    "../../interfaces/kits/include/",
+    "../../services/include/",
   ]
 
   deps = [
-    "//base/update/updater/interfaces/kits/misc_info:libmiscinfo",
-    "//base/update/updater/services/fs_manager:libfsmanager",
-    "//base/update/updater/utils:libutils",
+    "../../interfaces/kits/misc_info:libmiscinfo",
+    "../../services/fs_manager:libfsmanager",
+    "../../utils:libutils",
   ]
   install_images = [ "updater" ]
   install_enable = true
@@ -63,14 +63,14 @@ ohos_executable("write_updater") {
 
   include_dirs = [
     "include",
-    "//base/update/updater/interfaces/kits/include/",
-    "//base/update/updater/services/include/",
+    "../../interfaces/kits/include/",
+    "../../services/include/",
     "//third_party/bounds_checking_function/include",
     "//base/startup/init/interfaces/innerkits/include",
   ]
 
   deps = [
-    "//base/update/updater/interfaces/kits/misc_info:libmiscinfo",
+    "../../interfaces/kits/misc_info:libmiscinfo",
     "//third_party/bounds_checking_function:libsec_static",
   ]
   external_deps = [ "init:libbegetutil" ]

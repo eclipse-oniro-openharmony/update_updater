@@ -14,7 +14,6 @@
 import("//base/update/updater/updater_default_cfg.gni")
 import("//build/test.gni")
 
-UPDATER_TEST_ROOT = "${updater_path}/test/unittest"
 
 MODULE_OUTPUT_PATH = "updater/updater_test"
 
@@ -23,20 +22,20 @@ ohos_unittest("ring_buffer_test") {
   module_out_path = MODULE_OUTPUT_PATH
   sources = [ "ring_buffer_unittest.cpp" ]
   include_dirs = [
-    "${updater_path}/services/common/ring_buffer",
-    "${updater_path}/services/include/log",
-    "${updater_path}/utils/include",
-    "${updater_path}/test/unittest",
+    "../../../../services/common/ring_buffer",
+    "../../../../services/include/log",
+    "../../../../utils/include",
+    "../../../../test/unittest",
     "//third_party/googletest/googletest/include",
   ]
   deps = [
-    "${updater_path}/services/common/ring_buffer:libringbuffer",
-    "${updater_path}/services/log:libupdaterlog",
+    "../../../../services/common/ring_buffer:libringbuffer",
+    "../../../../services/log:libupdaterlog",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
   ]
   defines = [ "UPDATER_UT" ]
-  configs = [ "$UPDATER_TEST_ROOT:utest_config" ]
+  configs = [ "../../../../test/unittest:utest_config" ]
   install_enable = true
   part_name = "updater"
 }

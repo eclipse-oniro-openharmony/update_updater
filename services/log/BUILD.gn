@@ -12,6 +12,8 @@
 # limitations under the License.
 import("//build/ohos.gni")
 
+
+
 config("log_config") {
   if (is_linux || is_mingw || is_mac) {
     cflags_cc = [ "-std=c++17" ]
@@ -26,9 +28,9 @@ ohos_static_library("libupdaterlog") {
   ]
 
   include_dirs = [
-    "//base/update/updater/services/include",
+    "../../services/include",
+    "../../utils/include",
     "//third_party/bounds_checking_function/include",
-    "//base/update/updater/utils/include",
   ]
 
   public_configs = [ ":log_config" ]

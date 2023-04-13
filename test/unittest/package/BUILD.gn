@@ -13,14 +13,13 @@
 
 import("//build/test.gni")
 
-UPDATER_TEST_ROOT = "//base/update/updater/test/unittest"
 
 MODULE_OUTPUT_PATH = "updater/updater_test"
 
 ohos_unittest("package_unittest") {
   testonly = true
   resource_config_file =
-      "//base/update/updater/test/unittest/test_data/ohos_test.xml"
+      "../../../test/unittest/test_data/ohos_test.xml"
   module_out_path = MODULE_OUTPUT_PATH
   defines = [ "UPDATER_UT" ]
   sources = [
@@ -33,41 +32,41 @@ ohos_unittest("package_unittest") {
 
   sources += [
     "../../../services/package/pkg_verify/hash_data_verifier.cpp",
-    "//base/update/updater/interfaces/kits/packages/package.cpp",
-    "//base/update/updater/services/package/pkg_algorithm/pkg_algo_deflate.cpp",
-    "//base/update/updater/services/package/pkg_algorithm/pkg_algo_digest.cpp",
-    "//base/update/updater/services/package/pkg_algorithm/pkg_algo_lz4.cpp",
-    "//base/update/updater/services/package/pkg_algorithm/pkg_algo_sign.cpp",
-    "//base/update/updater/services/package/pkg_algorithm/pkg_algorithm.cpp",
-    "//base/update/updater/services/package/pkg_manager/pkg_managerImpl.cpp",
-    "//base/update/updater/services/package/pkg_manager/pkg_stream.cpp",
-    "//base/update/updater/services/package/pkg_manager/pkg_utils.cpp",
-    "//base/update/updater/services/package/pkg_package/packages_info.cpp",
-    "//base/update/updater/services/package/pkg_package/pkg_gzipfile.cpp",
-    "//base/update/updater/services/package/pkg_package/pkg_lz4file.cpp",
-    "//base/update/updater/services/package/pkg_package/pkg_pkgfile.cpp",
-    "//base/update/updater/services/package/pkg_package/pkg_upgradefile.cpp",
-    "//base/update/updater/services/package/pkg_package/pkg_zipfile.cpp",
-    "//base/update/updater/services/package/pkg_verify/cert_verify.cpp",
-    "//base/update/updater/services/package/pkg_verify/openssl_util.cpp",
-    "//base/update/updater/services/package/pkg_verify/pkcs7_signed_data.cpp",
-    "//base/update/updater/services/package/pkg_verify/pkg_verify_util.cpp",
-    "//base/update/updater/services/package/pkg_verify/zip_pkg_parse.cpp",
+    "../../../interfaces/kits/packages/package.cpp",
+    "../../../services/package/pkg_algorithm/pkg_algo_deflate.cpp",
+    "../../../services/package/pkg_algorithm/pkg_algo_digest.cpp",
+    "../../../services/package/pkg_algorithm/pkg_algo_lz4.cpp",
+    "../../../services/package/pkg_algorithm/pkg_algo_sign.cpp",
+    "../../../services/package/pkg_algorithm/pkg_algorithm.cpp",
+    "../../../services/package/pkg_manager/pkg_managerImpl.cpp",
+    "../../../services/package/pkg_manager/pkg_stream.cpp",
+    "../../../services/package/pkg_manager/pkg_utils.cpp",
+    "../../../services/package/pkg_package/packages_info.cpp",
+    "../../../services/package/pkg_package/pkg_gzipfile.cpp",
+    "../../../services/package/pkg_package/pkg_lz4file.cpp",
+    "../../../services/package/pkg_package/pkg_pkgfile.cpp",
+    "../../../services/package/pkg_package/pkg_upgradefile.cpp",
+    "../../../services/package/pkg_package/pkg_zipfile.cpp",
+    "../../../services/package/pkg_verify/cert_verify.cpp",
+    "../../../services/package/pkg_verify/openssl_util.cpp",
+    "../../../services/package/pkg_verify/pkcs7_signed_data.cpp",
+    "../../../services/package/pkg_verify/pkg_verify_util.cpp",
+    "../../../services/package/pkg_verify/zip_pkg_parse.cpp",
   ]
 
   include_dirs = [
-    "//base/update/updater/interfaces/kits/include",
-    "//base/update/updater/interfaces/kits/include/package",
-    "//base/update/updater/services/include",
-    "//base/update/updater/services/include/package",
-    "//base/update/updater/services/include/script",
-    "//base/update/updater/services/include/log",
-    "//base/update/updater/services/package/pkg_algorithm",
-    "//base/update/updater/services/package/pkg_manager",
-    "//base/update/updater/services/package/pkg_package",
-    "//base/update/updater/services/package/pkg_verify",
-    "//base/update/updater/test/unittest",
-    "//base/update/updater/utils/include",
+    "../../../interfaces/kits/include",
+    "../../../interfaces/kits/include/package",
+    "../../../services/include",
+    "../../../services/include/package",
+    "../../../services/include/script",
+    "../../../services/include/log",
+    "../../../services/package/pkg_algorithm",
+    "../../../services/package/pkg_manager",
+    "../../../services/package/pkg_package",
+    "../../../services/package/pkg_verify",
+    "../../../test/unittest",
+    "../../../utils/include",
     "//third_party/bounds_checking_function/include",
     "//third_party/lz4/lib",
     "//third_party/openssl/include",
@@ -75,9 +74,9 @@ ohos_unittest("package_unittest") {
   ]
 
   deps = [
-    "//base/update/updater/interfaces/kits/packages:libpackageExt",
-    "//base/update/updater/services/log:libupdaterlog",
-    "//base/update/updater/utils:libutils",
+    "../../../interfaces/kits/packages:libpackageExt",
+    "../../../services/log:libupdaterlog",
+    "../../../utils:libutils",
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/bzip2:libbz2",
     "//third_party/googletest:gmock_main",
@@ -86,7 +85,7 @@ ohos_unittest("package_unittest") {
     "//third_party/openssl:libcrypto_shared",
     "//third_party/zlib:libz",
   ]
-  configs = [ "$UPDATER_TEST_ROOT:utest_config" ]
+  configs = [ "../../../test/unittest:utest_config" ]
   external_deps = [
     "c_utils:utils",
     "hiviewdfx_hilog_native:libhilog",

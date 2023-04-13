@@ -18,33 +18,33 @@ SUBSYSTEM_DIR = "//base/update/updater/services/ptable_parse"
 config("updater_config") {
   visibility = [ ":*" ]
   include_dirs = [
-    "//base/update/updater/services/include",
-    "//base/update/updater/utils/include",
-    "//base/update/updater/utils/json",
+    "../../services/include",
+    "../../utils/include",
+    "../../utils/json",
     "//third_party/bounds_checking_function/include",
     "//drivers/hdf/frameworks/include/utils",
-    "//base/update/updater/interfaces/kits/include/",
-    "//base/update/updater/services/include/script",
-    "//base/update/updater/services/include/package",
-    "//base/update/updater/services/include/applypatch",
-    "//base/update/updater/services/include/log",
+    "../../interfaces/kits/include/",
+    "../../services/include/script",
+    "../../services/include/package",
+    "../../services/include/applypatch",
+    "../../services/include/log",
   ]
 }
 
 ohos_static_library("libptableparse") {
   sources = [
-    "${SUBSYSTEM_DIR}/ptable.cpp",
-    "${SUBSYSTEM_DIR}/ptable_manager.cpp",
-    "${SUBSYSTEM_DIR}/ptable_process.cpp",
-    "${SUBSYSTEM_DIR}/ufs_ptable.cpp",
+    "./ptable.cpp",
+    "./ptable_manager.cpp",
+    "./ptable_process.cpp",
+    "./ufs_ptable.cpp",
   ]
   configs = [ ":updater_config" ]
 
   ldflags = [ "-Wl -std=c++11" ]
 
   deps = [
-    "//base/update/updater/services/log:libupdaterlog",
-    "//base/update/updater/utils:libutils",
+    "../../services/log:libupdaterlog",
+    "../../utils:libutils",
     "//third_party/bzip2:libbz2",
     "//third_party/cJSON:cjson",
     "//third_party/zlib:libz",

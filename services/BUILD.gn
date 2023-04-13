@@ -19,32 +19,29 @@ SUBSYSTEM_DIR = "//base/update/updater"
 updater_common_include = [
   "include",
   "ui/view",
-  "${SUBSYSTEM_DIR}/utils/include",
-  "${SUBSYSTEM_DIR}/interfaces/kits/include/",
-  "//base/update/updater/services/include/package",
-  "//base/update/updater/services/package/pkg_manager",
-  "//base/update/updater/services/package/pkg_verify",
-  "//base/update/updater/services/include/log",
-  "//base/update/updater/utils/json",
+  "../utils/include",
+  "../interfaces/kits/include/",
+  "../services/include/package",
+  "../services/package/pkg_manager",
+  "../services/package/pkg_verify",
+  "../services/include/log",
+  "../utils/json",
   "//foundation/graphic/ui/frameworks",
   "//foundation/graphic/ui/interfaces/kits",
   "//foundation/graphic/ui/interfaces/innerkits",
   "//foundation/graphic/utils/interfaces/kits",
   "//foundation/graphic/utils/interfaces/innerkits",
   "//third_party/bounds_checking_function/include",
-  "//base/update/updater/services",
-  "//base/update/updater/services/ui",
-  "//base/update/updater/services/include",
 ]
 
 updater_common_deps = [
-  "//base/update/updater/interfaces/kits/packages:libpackageExt",
-  "//base/update/updater/services/applypatch:libapplypatch",
-  "//base/update/updater/services/diffpatch/patch:libpatch",
-  "//base/update/updater/services/flashd:libflashd",
-  "//base/update/updater/services/fs_manager:libfsmanager",
-  "//base/update/updater/services/log:libupdaterlog",
-  "//base/update/updater/services/package:libupdaterpackage",
+  "../interfaces/kits/packages:libpackageExt",
+  "../services/applypatch:libapplypatch",
+  "../services/diffpatch/patch:libpatch",
+  "../services/flashd:libflashd",
+  "../services/fs_manager:libfsmanager",
+  "../services/log:libupdaterlog",
+  "../services/package:libupdaterpackage",
   "//third_party/bounds_checking_function:libsec_shared",
   "//third_party/bounds_checking_function:libsec_static",
   "//third_party/bzip2:libbz2",
@@ -69,8 +66,8 @@ ohos_executable("updater") {
 
   deps = updater_common_deps
   deps += [
-    "//base/update/updater/interfaces/kits/misc_info:libmiscinfo",
-    "//base/update/updater/services/ui:libui",
+    "../interfaces/kits/misc_info:libmiscinfo",
+    "../services/ui:libui",
     "//third_party/libdrm:libdrm",
   ]
 
@@ -82,8 +79,8 @@ ohos_executable("updater") {
   ]
 
   if (defined(use_ptable)) {
-    include_dirs += [ "//base/update/updater/services/ptable_parse" ]
-    deps += [ "//base/update/updater/services/ptable_parse:libptableparse" ]
+    include_dirs += [ "../services/ptable_parse" ]
+    deps += [ "../services/ptable_parse:libptableparse" ]
     defines += [ "UPDATER_USE_PTABLE" ]
   }
 
@@ -127,8 +124,8 @@ ohos_static_library("libupdater") {
   deps = updater_common_deps
 
   if (defined(use_ptable)) {
-    include_dirs += [ "//base/update/updater/services/ptable_parse" ]
-    deps += [ "//base/update/updater/services/ptable_parse:libptableparse" ]
+    include_dirs += [ "../services/ptable_parse" ]
+    deps += [ "../services/ptable_parse:libptableparse" ]
     defines += [ "UPDATER_USE_PTABLE" ]
   }
 

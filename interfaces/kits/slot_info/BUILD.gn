@@ -19,13 +19,13 @@ ohos_static_library("libslotinfo") {
   sources = [ "slot_info.cpp" ]
 
   include_dirs = [
-    "//base/update/updater/interfaces/kits/include",
-    "//base/update/updater/services/include",
-    "//base/update/updater/utils/include",
+    "../../../interfaces/kits/include",
+    "../../../services/include",
+    "../../../utils/include",
     "//drivers/peripheral/partitionslot/hal/include",
   ]
 
-  deps = [ "//base/update/updater/services/log:libupdaterlog" ]
+  deps = [ "../../../services/log:libupdaterlog" ]
   if (enable_ohos_startup_init_feature_ab_partition) {
     defines = [ "UPDATER_AB_SUPPORT" ]
     deps +=
