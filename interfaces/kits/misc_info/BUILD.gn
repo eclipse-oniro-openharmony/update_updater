@@ -19,15 +19,15 @@ ohos_static_library("libmiscinfo") {
 
   include_dirs = [
     "//base/startup/init/interfaces/innerkits/include",
-    "//base/update/updater/interfaces/kits/include",
-    "//base/update/updater/services/include",
-    "//base/update/updater/utils/include",
+    "../../../interfaces/kits/include",
+    "../../../services/include",
+    "../../../utils/include",
     "//third_party/bounds_checking_function/include",
   ]
 
   deps = [
-    "//base/update/updater/services/fs_manager:libfsmanager",
-    "//base/update/updater/services/log:libupdaterlog",
+    "../../../services/fs_manager:libfsmanager",
+    "../../../services/log:libupdaterlog",
     "//third_party/bounds_checking_function:libsec_static",
   ]
 

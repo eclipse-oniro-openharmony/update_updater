@@ -13,11 +13,11 @@
 
 import("//base/update/updater/updater_default_cfg.gni")
 import("//build/ohos.gni")
-SUBSYSTEM_DIR = "//base/update/updater/services/script"
+
 
 yacc_path = "$root_out_dir/updater/updater/yacc"
-script_yacc_path = "$SUBSYSTEM_DIR/script_interpreter/script_yacc.y"
-script_lex_path = "$SUBSYSTEM_DIR/script_interpreter/script_lex.l"
+script_yacc_path = "./script_interpreter/script_yacc.y"
+script_lex_path = "./script_interpreter/script_lex.l"
 action("gen_yacc") {
   script = "//base/update/updater/services/script/generate_yacc.py"
   inputs = [ script ]
@@ -39,13 +39,13 @@ config("script_config") {
   visibility = [ ":*" ]
 
   include_dirs = [
-    "../include",
-    "//base/update/updater/interfaces/kits/include",
-    "//base/update/updater/services/include/log",
-    "//base/update/updater/services/include/package",
-    "//base/update/updater/services/include/script",
-    "//base/update/updater/services/include/updater",
-    "//base/update/updater/utils/include",
+    "../../services/include",
+    "../../interfaces/kits/include",
+    "../../services/include/log",
+    "../../services/include/package",
+    "../../services/include/script",
+    "../../services/include/updater",
+    "../../utils/include",
     "//third_party/bounds_checking_function/include",
     "script_instruction",
     "script_interpreter",
@@ -59,21 +59,21 @@ config("script_config") {
 
 ohos_static_library("libupdaterscript") {
   sources = [
-    "$SUBSYSTEM_DIR/script_instruction/script_basicinstruction.cpp",
-    "$SUBSYSTEM_DIR/script_instruction/script_instructionhelper.cpp",
-    "$SUBSYSTEM_DIR/script_instruction/script_loadscript.cpp",
-    "$SUBSYSTEM_DIR/script_instruction/script_registercmd.cpp",
-    "$SUBSYSTEM_DIR/script_instruction/script_updateprocesser.cpp",
-    "$SUBSYSTEM_DIR/script_interpreter/script_context.cpp",
-    "$SUBSYSTEM_DIR/script_interpreter/script_expression.cpp",
-    "$SUBSYSTEM_DIR/script_interpreter/script_function.cpp",
-    "$SUBSYSTEM_DIR/script_interpreter/script_interpreter.cpp",
-    "$SUBSYSTEM_DIR/script_interpreter/script_param.cpp",
-    "$SUBSYSTEM_DIR/script_interpreter/script_scanner.cpp",
-    "$SUBSYSTEM_DIR/script_interpreter/script_statement.cpp",
-    "$SUBSYSTEM_DIR/script_manager/script_managerImpl.cpp",
-    "$SUBSYSTEM_DIR/script_manager/script_utils.cpp",
-    "$SUBSYSTEM_DIR/threadpool/threadpool.cpp",
+    "./script_instruction/script_basicinstruction.cpp",
+    "./script_instruction/script_instructionhelper.cpp",
+    "./script_instruction/script_loadscript.cpp",
+    "./script_instruction/script_registercmd.cpp",
+    "./script_instruction/script_updateprocesser.cpp",
+    "./script_interpreter/script_context.cpp",
+    "./script_interpreter/script_expression.cpp",
+    "./script_interpreter/script_function.cpp",
+    "./script_interpreter/script_interpreter.cpp",
+    "./script_interpreter/script_param.cpp",
+    "./script_interpreter/script_scanner.cpp",
+    "./script_interpreter/script_statement.cpp",
+    "./script_manager/script_managerImpl.cpp",
+    "./script_manager/script_utils.cpp",
+    "./threadpool/threadpool.cpp",
     "$root_out_dir/updater/updater/yacc/lexer.cpp",
     "$root_out_dir/updater/updater/yacc/parser.cpp",
   ]
@@ -81,7 +81,7 @@ ohos_static_library("libupdaterscript") {
 
   external_deps = [ "c_utils:utils" ]
   deps = [
-    "//base/update/updater/services/script:gen_yacc",
+    "../../services/script:gen_yacc",
     "//third_party/bounds_checking_function:libsec_static",
   ]
 }

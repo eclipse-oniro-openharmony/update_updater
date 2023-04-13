@@ -13,55 +13,54 @@
 
 import("//build/test.gni")
 
-UPDATER_TEST_ROOT = "//base/update/updater/test/unittest"
+UPDATER_TEST_ROOT = "../../../test/unittest"
 
 MODULE_OUTPUT_PATH = "updater/updater_test"
 
-SUBSYSTEM_DIR = "//base/update/updater"
 
 ohos_unittest("updater_service_unittest") {
   defines = [ "UPDATER_UT" ]
   testonly = true
   resource_config_file =
-      "//base/update/updater/test/unittest/test_data/ohos_test.xml"
+      "../../../test/unittest/test_data/ohos_test.xml"
   module_out_path = MODULE_OUTPUT_PATH
   sources = [
-    "//base/update/updater/services/updater.cpp",
-    "//base/update/updater/services/updater_main.cpp",
-    "//base/update/updater/services/updater_preprocess.cpp",
-    "//base/update/updater/services/updater_utils.cpp",
-    "//base/update/updater/utils/utils.cpp",
+    "../../../services/updater.cpp",
+    "../../../services/updater_main.cpp",
+    "../../../services/updater_preprocess.cpp",
+    "../../../services/updater_utils.cpp",
+    "../../../utils/utils.cpp",
     "updater_service_unittest.cpp",
   ]
   include_dirs = [
     "include",
-    "${SUBSYSTEM_DIR}/utils/include",
-    "${SUBSYSTEM_DIR}/interfaces/kits/include/",
-    "//base/update/updater/services/include/package",
-    "//base/update/updater/services/package/pkg_manager",
-    "//base/update/updater/services/package/pkg_verify",
-    "//base/update/updater/services/include/log",
-    "//base/update/updater/utils/json",
+    "../../../utils/include",
+    "../../../interfaces/kits/include/",
+    "../../../services/include/package",
+    "../../../services/package/pkg_manager",
+    "../../../services/package/pkg_verify",
+    "../../../services/include/log",
+    "../../../utils/json",
     "//foundation/graphic/ui/frameworks",
     "//foundation/graphic/ui/interfaces/kits",
     "//foundation/graphic/ui/interfaces/innerkits",
     "//foundation/graphic/utils/interfaces/kits",
     "//foundation/graphic/utils/interfaces/innerkits",
     "//third_party/bounds_checking_function/include",
-    "//base/update/updater/services",
-    "//base/update/updater/services/ui",
-    "//base/update/updater/services/include",
-    "//base/update/updater/services/ui/view",
+    "../../../services",
+    "../../../services/ui",
+    "../../../services/include",
+    "../../../services/ui/view",
   ]
 
   deps = [
-    "//base/update/updater/interfaces/kits/misc_info:libmiscinfo",
-    "//base/update/updater/interfaces/kits/packages:libpackageExt",
-    "//base/update/updater/services/applypatch:libapplypatch",
-    "//base/update/updater/services/diffpatch/patch:libpatch",
-    "//base/update/updater/services/fs_manager:libfsmanager",
-    "//base/update/updater/services/log:libupdaterlog",
-    "//base/update/updater/services/package:libupdaterpackage",
+    "../../../interfaces/kits/misc_info:libmiscinfo",
+    "../../../interfaces/kits/packages:libpackageExt",
+    "../../../services/applypatch:libapplypatch",
+    "../../../services/diffpatch/patch:libpatch",
+    "../../../services/fs_manager:libfsmanager",
+    "../../../services/log:libupdaterlog",
+    "../../../services/package:libupdaterpackage",
     "//third_party/bounds_checking_function:libsec_shared",
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/bzip2:libbz2",
@@ -76,7 +75,7 @@ ohos_unittest("updater_service_unittest") {
     "hiviewdfx_hilog_native:libhilog",
     "init:libbegetutil",
   ]
-  configs = [ "$UPDATER_TEST_ROOT:utest_config" ]
+  configs = [ "../../../test/unittest:utest_config" ]
   install_enable = true
   part_name = "updater"
 }

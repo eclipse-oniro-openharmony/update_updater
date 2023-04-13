@@ -29,22 +29,22 @@ ohos_static_library("libapplypatch") {
   ]
 
   include_dirs = [
-    "//base/update/updater/services/include",
-    "//base/update/updater/services/applypatch",
-    "//base/update/updater/utils/include",
-    "//base/update/updater/interfaces/kits/include",
-    "//base/update/updater/services/include/script",
+    "../../services/include",
+    "../../services/applypatch",
+    "../../utils/include",
+    "../../interfaces/kits/include",
+    "../../services/include/script",
     "//third_party/openssl/include",
     "//third_party/zlib",
     "//third_party/external/lz4/lib",
-    "//base/update/updater/services/include/package",
-    "//base/update/updater/services/include/log",
+    "../../services/include/package",
+    "../../services/include/log",
     "//third_party/bounds_checking_function/include",
   ]
 
   deps = [
-    "//base/update/updater/services/diffpatch/patch:libpatch",
-    "//base/update/updater/services/fs_manager:libfsmanager",
+    "../../services/diffpatch/patch:libpatch",
+    "../../services/fs_manager:libfsmanager",
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/bzip2:libbz2",
   ]

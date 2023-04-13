@@ -18,34 +18,34 @@ ohos_static_library("libdiff_patch") {
   sources = [ "diff_patch_interface.cpp" ]
 
   include_dirs = [
-    "//base/update/updater/interfaces/kits/include",
-    "//base/update/updater/services/include",
-    "//base/update/updater/services/include/patch",
+    "../../../interfaces/kits/include",
+    "../../../services/include",
+    "../../../services/include/patch",
     "//third_party/openssl/include",
   ]
 
-  deps = [ "//base/update/updater/services/diffpatch/patch:libpatch" ]
+  deps = [ "../../../services/diffpatch/patch:libpatch" ]
 }
 
 ohos_shared_library("libdiff_patch_shared") {
   sources = [ "diff_patch_interface.cpp" ]
 
   include_dirs = [
-    "//base/update/updater/interfaces/kits/include",
-    "//base/update/updater/services/include",
-    "//base/update/updater/services/include/patch",
+    "../../../interfaces/kits/include",
+    "../../../services/include",
+    "../../../services/include/patch",
     "//third_party/openssl/include",
   ]
 
   deps = [
-    "//base/update/updater/interfaces/kits/misc_info:libmiscinfo",
-    "//base/update/updater/services/applypatch:libapplypatch",
-    "//base/update/updater/services/diffpatch/patch:libpatch",
-    "//base/update/updater/services/fs_manager:libfsmanager",
-    "//base/update/updater/services/log:libupdaterlog",
-    "//base/update/updater/services/package:libupdaterpackage",
-    "//base/update/updater/services/ptable_parse:libptableparse",
-    "//base/update/updater/utils:libutils",
+    "../../../interfaces/kits/misc_info:libmiscinfo",
+    "../../../services/applypatch:libapplypatch",
+    "../../../services/diffpatch/patch:libpatch",
+    "../../../services/fs_manager:libfsmanager",
+    "../../../services/log:libupdaterlog",
+    "../../../services/package:libupdaterpackage",
+    "../../../services/ptable_parse:libptableparse",
+    "../../../utils:libutils",
   ]
 
   subsystem_name = "updater"

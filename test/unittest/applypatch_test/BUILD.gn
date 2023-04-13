@@ -13,14 +13,13 @@
 
 import("//build/test.gni")
 
-UPDATER_TEST_ROOT = "//base/update/updater/test/unittest"
 
 MODULE_OUTPUT_PATH = "updater/updater_test"
 
 ohos_unittest("applypatch_unittest") {
   testonly = true
   resource_config_file =
-      "//base/update/updater/test/unittest/test_data/ohos_test.xml"
+      "../../../test/unittest/test_data/ohos_test.xml"
   module_out_path = MODULE_OUTPUT_PATH
   sources = [
     "all_cmd_unittest.cpp",
@@ -33,39 +32,39 @@ ohos_unittest("applypatch_unittest") {
     "transfer_manager_unittest.cpp",
   ]
   sources += [
-    "//base/update/updater/services/applypatch/block_set.cpp",
-    "//base/update/updater/services/applypatch/block_writer.cpp",
-    "//base/update/updater/services/applypatch/command.cpp",
-    "//base/update/updater/services/applypatch/command_function.cpp",
-    "//base/update/updater/services/applypatch/command_process.cpp",
-    "//base/update/updater/services/applypatch/data_writer.cpp",
-    "//base/update/updater/services/applypatch/partition_record.cpp",
-    "//base/update/updater/services/applypatch/raw_writer.cpp",
-    "//base/update/updater/services/applypatch/store.cpp",
-    "//base/update/updater/services/applypatch/transfer_manager.cpp",
+    "../../../services/applypatch/block_set.cpp",
+    "../../../services/applypatch/block_writer.cpp",
+    "../../../services/applypatch/command.cpp",
+    "../../../services/applypatch/command_function.cpp",
+    "../../../services/applypatch/command_process.cpp",
+    "../../../services/applypatch/data_writer.cpp",
+    "../../../services/applypatch/partition_record.cpp",
+    "../../../services/applypatch/raw_writer.cpp",
+    "../../../services/applypatch/store.cpp",
+    "../../../services/applypatch/transfer_manager.cpp",
   ]
   include_dirs = [
-    "//base/update/updater/interfaces/kits/include",
-    "//base/update/updater/services/include",
-    "//base/update/updater/services/include/fs_manager",
-    "//base/update/updater/services/include/log",
-    "//base/update/updater/services/include/package",
-    "//base/update/updater/services/include/script",
-    "//base/update/updater/services/package/pkg_manager",
-    "//base/update/updater/test/unittest",
-    "//base/update/updater/utils/include",
+    "../../../interfaces/kits/include",
+    "../../../services/include",
+    "../../../services/include/fs_manager",
+    "../../../services/include/log",
+    "../../../services/include/package",
+    "../../../services/include/script",
+    "../../../services/package/pkg_manager",
+    "../../../test/unittest",
+    "../../../utils/include",
     "//third_party/bounds_checking_function/include",
   ]
   deps = [
-    "//base/update/updater/services/applypatch:libapplypatch",
-    "//base/update/updater/services/fs_manager:libfsmanager",
+    "../../../services/applypatch:libapplypatch",
+    "../../../services/fs_manager:libfsmanager",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
     "//third_party/openssl:libcrypto_static",
     "//third_party/openssl:ssl_source",
   ]
   external_deps = [ "init:libbegetutil" ]
-  configs = [ "$UPDATER_TEST_ROOT:utest_config" ]
+  configs = [ "../../../test/unittest:utest_config" ]
   install_enable = true
   part_name = "updater"
 }
