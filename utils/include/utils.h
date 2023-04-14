@@ -71,6 +71,7 @@ bool IsUpdaterMode();
 bool RemoveDir(const std::string &path);
 bool IsFileExist(const std::string &path);
 bool IsDirExist(const std::string &path);
+int GetUpdaterMode(int &mode);
 } // Utils
 } // Updater
 #endif // UPDATER_UTILS_H
