@@ -269,7 +269,7 @@ int32_t PkgManagerImpl::ParsePackage(StreamPtr stream, std::vector<std::string> 
         });
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("Load package fail %s", stream->GetFileName().c_str());
-        pkgFile->SetPkgStream();
+        pkgFile->ClearPkgStream();
         delete pkgFile;
         return ret;
     }
@@ -607,6 +607,13 @@ void PkgManagerImpl::ClosePkgStream(PkgStreamPtr &stream)
     PkgStreamPtr mapStream = stream;
     if (mapStream == nullptr) {
         return;
+    }
+
+    for (auto iter : pkgFiles_) {
+        if (iter != nullptr && mapStream == iter->GetPkgStream()) {
+            iter->ClearPkgStream();
+            break;
+        }
     }
 
     std::lock_guard<std::mutex> lock(mapLock_);
