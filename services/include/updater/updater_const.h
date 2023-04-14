@@ -93,5 +93,7 @@ constexpr unsigned int UI_SHOW_DURATION = 2000;
 constexpr unsigned int INTERVAL_TIME = 300;
 constexpr float EPSINON = 0.00001;
 constexpr float FULL_EPSINON = 1;
+constexpr int DATA_MODE = 1;
+constexpr int SDCARD_MODE = 1;
 } // namespace Updater
 #endif

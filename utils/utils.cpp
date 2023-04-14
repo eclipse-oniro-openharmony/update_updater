@@ -28,6 +28,7 @@
 #include <unistd.h>
 #include <vector>
 #include "fs_manager/mount.h"
+#include "init_reboot.h"
 #include "log/log.h"
 #include "misc_info/misc_info.h"
 #include "package/pkg_manager.h"
