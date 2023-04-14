@@ -170,7 +170,7 @@ int32_t ScriptManagerImpl::ExtractAndExecuteScript(PkgManager::PkgManagerPtr man
     } else if (mode == Updater::SDCARD_MODE){
         path = Updater::UPDATER_SDCARD_PATH;
     }
-    int32_t ret = manager->CreatePkgStream(outStream, path + "/" + scriptName, 0, PkgStream::PkgStreamType_Write);
+    ret = manager->CreatePkgStream(outStream, path + "/" + scriptName, 0, PkgStream::PkgStreamType_Write);
     if (ret != USCRIPT_SUCCESS) {
         USCRIPT_LOGE("Failed to create script stream %s", scriptName.c_str());
         return ret;
