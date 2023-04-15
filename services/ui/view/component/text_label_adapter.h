@@ -32,7 +32,7 @@ class TextLabelAdapter : public OHOS::UILabel {
     static constexpr uint32_t MAX_FONT_SIZE = 200;
 public:
     using SpecificInfoType = UxLabelInfo;
-    static constexpr auto ComponentType = "UILabel";
+    static constexpr auto COMPONENT_TYPE = "UILabel";
     TextLabelAdapter() = default;
     explicit TextLabelAdapter(const UxViewInfo &info);
     virtual ~TextLabelAdapter() = default;

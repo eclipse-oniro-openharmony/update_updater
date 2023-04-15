@@ -38,7 +38,7 @@ class ImgViewAdapter : public OHOS::UIImageView {
     static constexpr int ANIMATION_FILE_NAME_LENGTH = 5;
 public:
     using SpecificInfoType = UxImageInfo;
-    static constexpr auto ComponentType = "UIImageView";
+    static constexpr auto COMPONENT_TYPE = "UIImageView";
     ImgViewAdapter();
     explicit ImgViewAdapter(const UxViewInfo &info);
     ~ImgViewAdapter();

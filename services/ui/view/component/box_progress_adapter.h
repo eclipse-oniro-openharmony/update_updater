@@ -35,7 +35,7 @@ class BoxProgressAdapter : public OHOS::UIBoxProgress {
     DISALLOW_COPY_MOVE(BoxProgressAdapter);
 public:
     using SpecificInfoType = UxBoxProgressInfo;
-    static constexpr auto ComponentType = "UIBoxProgress";
+    static constexpr auto COMPONENT_TYPE = "UIBoxProgress";
     BoxProgressAdapter() = default;
     explicit BoxProgressAdapter(const UxViewInfo &info);
     virtual ~BoxProgressAdapter() {}

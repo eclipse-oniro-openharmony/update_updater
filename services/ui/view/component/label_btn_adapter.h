@@ -36,7 +36,7 @@ class LabelBtnAdapter : public OHOS::UILabelButton {
     static constexpr uint32_t MAX_FONT_SIZE = 200;
 public:
     using SpecificInfoType = UxLabelBtnInfo;
-    static constexpr auto ComponentType = "UILabelButton";
+    static constexpr auto COMPONENT_TYPE = "UILabelButton";
     LabelBtnAdapter();
     explicit LabelBtnAdapter(const UxViewInfo &info);
     virtual ~LabelBtnAdapter();

@@ -62,7 +62,7 @@ DEFINE_TRAIT(UxViewCommonInfo, "Common",
     (bool, visible)
 );
 
-DEFINE_TRAIT(UxBoxProgressInfo, "UIBoxProgress",
+DEFINE_TRAIT(UxBoxProgressInfo, BoxProgressAdapter::COMPONENT_TYPE,
     (uint32_t, defaultValue),
     (std::string, fgColor),
     (std::string, bgColor),
@@ -70,7 +70,7 @@ DEFINE_TRAIT(UxBoxProgressInfo, "UIBoxProgress",
     (bool, hasEp)
 );
 
-DEFINE_TRAIT(UxLabelInfo, "UILabel",
+DEFINE_TRAIT(UxLabelInfo, TextLabelAdapter::COMPONENT_TYPE,
     (uint8_t, fontSize),
     (std::string, text),
     (std::string, align),
@@ -78,14 +78,14 @@ DEFINE_TRAIT(UxLabelInfo, "UILabel",
     (std::string, bgColor)
 );
 
-DEFINE_TRAIT(UxImageInfo, "UIImageView",
+DEFINE_TRAIT(UxImageInfo, ImgViewAdapter::COMPONENT_TYPE,
     (std::string, resPath),
     (std::string, filePrefix),
     (uint32_t, imgCnt),
     (uint32_t, updInterval)
 );
 
-DEFINE_TRAIT(UxLabelBtnInfo, "UILabelButton",
+DEFINE_TRAIT(UxLabelBtnInfo, LabelBtnAdapter::COMPONENT_TYPE,
     (uint8_t, fontSize),
     (std::string, text),
     (std::string, txtColor),

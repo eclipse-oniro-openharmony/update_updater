@@ -56,7 +56,7 @@ template<typename ... Components>
 const auto &GetSpecificInfoMap()
 {
     const static std::unordered_map<std::string, SpecificInfoFunc> specificInfoMap {
-        { Components::ComponentType, [] () { return typename Components::SpecificInfoType {}; }}...
+        { Components::COMPONENT_TYPE, [] () { return typename Components::SpecificInfoType {}; }}...
     };
     return specificInfoMap;
 }
