@@ -18,7 +18,7 @@
 #include <ostream>
 #include <string>
 #include <string_view>
-#include "json_visitor.h"
+#include "updater_ui_traits.h"
 #include "macros.h"
 
 namespace Updater {

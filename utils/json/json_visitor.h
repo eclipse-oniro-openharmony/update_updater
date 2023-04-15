@@ -20,9 +20,9 @@
 
 #include "json_node.h"
 #include "log/log.h"
-#include "updater_ui_traits.h"
 
 namespace Updater {
+template<typename T> struct Traits;
 enum Action { SETVAL, PRINTVAL };
 namespace Detail {
 template<typename Traits>

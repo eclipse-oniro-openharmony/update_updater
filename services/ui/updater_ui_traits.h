@@ -16,12 +16,12 @@
 #ifndef UPDATER_UI_TRAITS_H
 #define UPDATER_UI_TRAITS_H
 
+#include "component/component_factory.h"
+#include "json_visitor.h"
 #include "macros.h"
 #include "traits_util.h"
-#include "component/component_factory.h"
 
 namespace Updater {
-template<typename T> struct Traits;
 // define struct for load ui strategy in ui config file
 DEFINE_STRUCT_TRAIT(ComInfo, "com",
     (std::string, pageId),
