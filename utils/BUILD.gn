@@ -29,6 +29,7 @@ ohos_static_library("libutils") {
   ]
 
   deps = [
+    "//base/update/updater/interfaces/kits/misc_info:libmiscinfo",
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/cJSON:cjson",
   ]
