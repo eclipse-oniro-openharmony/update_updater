@@ -16,6 +16,7 @@
 #include <thread>
 #include "gtest/gtest.h"
 #include "component/box_progress_adapter.h"
+#include "component/component_factory.h"
 #include "component/label_btn_adapter.h"
 #include "component/text_label_adapter.h"
 #include "common/task_manager.h"

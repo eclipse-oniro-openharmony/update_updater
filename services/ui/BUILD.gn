@@ -107,4 +107,8 @@ ohos_static_library("libui") {
     "//third_party/libdrm:libdrm",
     "//third_party/libpng:libpng",
   ]
+
+  if (defined(updater_ui_custom_deps)) {
+    deps += updater_ui_custom_deps
+  }
 }
