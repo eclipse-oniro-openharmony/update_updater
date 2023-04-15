@@ -22,6 +22,7 @@
 #include "common/task_manager.h"
 #include "dock/focus_manager.h"
 #include "ui_test_graphic_engine.h"
+#include "view_api.h"
 
 using namespace testing::ext;
 using namespace Updater;
