@@ -167,7 +167,7 @@ int32_t ScriptManagerImpl::ExtractAndExecuteScript(PkgManager::PkgManagerPtr man
     std::string path = "";
     if (mode == Updater::DATA_MODE) {
         path = Updater::UPDATER_PATH;
-    } else if (mode == Updater::SDCARD_MODE){
+    } else if (mode == Updater::SDCARD_MODE) {
         path = Updater::UPDATER_SDCARD_PATH;
     }
     ret = manager->CreatePkgStream(outStream, path + "/" + scriptName, 0, PkgStream::PkgStreamType_Write);
