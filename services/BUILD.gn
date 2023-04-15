@@ -33,6 +33,7 @@ updater_common_include = [
   "//third_party/bounds_checking_function/include",
   "//base/update/updater/services",
   "//base/update/updater/services/ui",
+  "//base/update/updater/services/ui/view",
   "//base/update/updater/services/include",
 ]
 

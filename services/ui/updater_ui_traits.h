@@ -18,6 +18,7 @@
 
 #include "macros.h"
 #include "traits_util.h"
+#include "component/component_factory.h"
 
 namespace Updater {
 template<typename T> struct Traits;
@@ -26,6 +27,7 @@ DEFINE_STRUCT_TRAIT(ComInfo, "com",
     (std::string, pageId),
     (std::string, comId)
 );
+
 DEFINE_STRUCT_TRAIT(ProgressPage, "",
     (std::string, progressPageId),
     (std::string, progressComId),
@@ -34,10 +36,12 @@ DEFINE_STRUCT_TRAIT(ProgressPage, "",
     (std::string, logoType),
     (std::string, warningComId)
 );
+
 DEFINE_STRUCT_TRAIT(ResPage, "",
     (std::string, successPageId),
     (std::string, failPageId)
 );
+
 DEFINE_STRUCT_TRAIT(UiStrategyCfg, "strategy",
     (std::string, confirmPageId),
     (ComInfo, labelLogId),
@@ -48,7 +52,7 @@ DEFINE_STRUCT_TRAIT(UiStrategyCfg, "strategy",
 );
 
 // define struct for load pages' components from page json config, such as menu.json, update.json
-DEFINE_STRUCT_TRAIT(UxViewCommonInfo, "Common",
+DEFINE_TRAIT(UxViewCommonInfo, "Common",
     (int, x),
     (int, y),
     (int, w),
@@ -58,27 +62,30 @@ DEFINE_STRUCT_TRAIT(UxViewCommonInfo, "Common",
     (bool, visible)
 );
 
-DEFINE_STRUCT_TRAIT(UxLabelInfo, "UILabel",
-    (uint8_t, fontSize),
-    (std::string, text),
-    (std::string, align),
-    (std::string, fontColor),
-    (std::string, bgColor)
-);
-DEFINE_STRUCT_TRAIT(UxImageInfo, "UIImageView",
-    (std::string, resPath),
-    (std::string, filePrefix),
-    (uint32_t, imgCnt),
-    (uint32_t, updInterval)
-);
-DEFINE_STRUCT_TRAIT(UxBoxProgressInfo, "UIBoxProgress",
+DEFINE_TRAIT(UxBoxProgressInfo, "UIBoxProgress",
     (uint32_t, defaultValue),
     (std::string, fgColor),
     (std::string, bgColor),
     (std::string, endPoint),
     (bool, hasEp)
 );
-DEFINE_STRUCT_TRAIT(UxLabelBtnInfo, "UILabelButton",
+
+DEFINE_TRAIT(UxLabelInfo, "UILabel",
+    (uint8_t, fontSize),
+    (std::string, text),
+    (std::string, align),
+    (std::string, fontColor),
+    (std::string, bgColor)
+);
+
+DEFINE_TRAIT(UxImageInfo, "UIImageView",
+    (std::string, resPath),
+    (std::string, filePrefix),
+    (uint32_t, imgCnt),
+    (uint32_t, updInterval)
+);
+
+DEFINE_TRAIT(UxLabelBtnInfo, "UILabelButton",
     (uint8_t, fontSize),
     (std::string, text),
     (std::string, txtColor),
@@ -87,23 +94,18 @@ DEFINE_STRUCT_TRAIT(UxLabelBtnInfo, "UILabelButton",
     (std::string, focusedBgColor),
     (bool, focusable)
 );
+
 DEFINE_STRUCT_TRAIT(UxSubPageInfo, "subpages",
     (std::string, id),
     (std::string, bgColor),
     (std::vector<std::string>, coms)
 );
+
 DEFINE_STRUCT_TRAIT(PagePath, "",
     (std::string, dir),
     (std::string, entry),
     (std::vector<std::string>, pages)
 );
-
-using SpecificInfo = std::variant<UxLabelInfo, UxImageInfo, UxBoxProgressInfo, UxLabelBtnInfo>;
-
-struct UxViewInfo {
-    UxViewCommonInfo commonInfo {};
-    SpecificInfo specificInfo {};
-};
 
 struct UxPageInfo {
     std::string id {};
@@ -122,11 +124,13 @@ DEFINE_TRAIT(UxPageInfo, "",
     (std::string, bgColor),
     (std::vector<UxSubPageInfo>, subpages)
 );
+
 // define struct for load language resources in ui config file
 DEFINE_STRUCT_TRAIT(Res, "Res",
     (std::string, path),
     (int, level)
 );
+
 DEFINE_STRUCT_TRAIT(LangResource, "",
     (std::string, localeFile),
     (std::vector<Res>, res)

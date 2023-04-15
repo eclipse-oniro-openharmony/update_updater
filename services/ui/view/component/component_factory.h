@@ -16,22 +16,64 @@
 #ifndef UPDATER_UI_COMPONENT_FACTORY_H
 #define UPDATER_UI_COMPONENT_FACTORY_H
 
+#include <functional>
 #include <memory>
 #include <string>
-#include "components/ui_view_group.h"
-#include "view_api.h"
+#include <tuple>
+#include <variant>
+#include "box_progress_adapter.h"
+#include "img_view_adapter.h"
+#include "label_btn_adapter.h"
+#include "text_label_adapter.h"
+#ifdef COMPONENT_EXT_INCLUDE
+#include COMPONENT_EXT_INCLUDE
+#endif
+
+/*
+ * all supported component types listed here, you
+ * should add a template argument when add a new
+ * component type
+ */
+#ifndef COMPONENT_TYPE_LIST
+#define COMPONENT_TYPE_LIST BoxProgressAdapter, ImgViewAdapter, TextLabelAdapter, LabelBtnAdapter
+#endif
 
 namespace Updater {
+template<typename ... Components>
+struct SpecificInfo {
+    using Type = std::variant<typename Components::SpecificInfoType...>;
+};
+
 class ComponentFactory final {
-    template<template<typename> typename Functor, typename ... Component>
-    class Visitor;
 public:
-    static std::unique_ptr<OHOS::UIViewGroup> CreateUxGroup()
-    {
-        return std::make_unique<OHOS::UIViewGroup>();
-    }
     static std::unique_ptr<OHOS::UIView> CreateUxComponent(const UxViewInfo &info);
     static bool CheckUxComponent(const UxViewInfo &info);
+};
+
+using SpecificInfoFunc = std::function<SpecificInfo<COMPONENT_TYPE_LIST>::Type()>;
+
+template<typename ... Components>
+const auto &GetSpecificInfoMap()
+{
+    const static std::unordered_map<std::string, SpecificInfoFunc> specificInfoMap {
+        { Components::ComponentType, [] () { return typename Components::SpecificInfoType {}; }}...
+    };
+    return specificInfoMap;
+}
+
+struct UxViewCommonInfo {
+    int x;
+    int y;
+    int w;
+    int h;
+    std::string id;
+    std::string type;
+    bool visible;
+};
+
+struct UxViewInfo {
+    UxViewCommonInfo commonInfo {};
+    SpecificInfo<COMPONENT_TYPE_LIST>::Type specificInfo {};
 };
 } // namespace Updater
 #endif

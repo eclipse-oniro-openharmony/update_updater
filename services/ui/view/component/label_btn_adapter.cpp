@@ -17,6 +17,7 @@
 #include "log/log.h"
 #include "page/view_proxy.h"
 #include "updater_ui_const.h"
+#include "view_api.h"
 
 namespace Updater {
 struct LabelBtnAdapter::LabelBtnOnFocusListener : public OHOS::UIView::OnFocusListener {
