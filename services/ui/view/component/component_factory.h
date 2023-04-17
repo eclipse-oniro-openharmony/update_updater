@@ -34,8 +34,11 @@
  * should add a template argument when add a new
  * component type
  */
-#ifndef COMPONENT_TYPE_LIST
+#ifndef COMPONENT_EXT_TYPE_LIST
 #define COMPONENT_TYPE_LIST BoxProgressAdapter, ImgViewAdapter, TextLabelAdapter, LabelBtnAdapter
+#else
+#define COMPONENT_TYPE_LIST BoxProgressAdapter, ImgViewAdapter, TextLabelAdapter, LabelBtnAdapter\
+    COMPONENT_EXT_TYPE_LIST
 #endif
 
 namespace Updater {
