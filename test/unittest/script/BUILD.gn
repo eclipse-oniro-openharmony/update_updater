@@ -71,7 +71,7 @@ ohos_unittest("script_unittest") {
   ]
 
   deps = [
-    "../..//interfaces/kits/misc_info:libmiscinfo",
+    "../../interfaces/kits/misc_info:libmiscinfo",
     "//base/update/updater/interfaces/kits/packages:libpackageExt",
     "//base/update/updater/services/log:libupdaterlog",
     "//base/update/updater/services/package:libupdaterpackage",
