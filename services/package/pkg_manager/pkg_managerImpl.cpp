@@ -315,7 +315,8 @@ int32_t PkgManagerImpl::LoadPackage(const std::string &packagePath, const std::s
         }
         for (auto name : innerFileNames) {
             pkgType = GetPkgTypeByName(name);
-            if (pkgType == PkgFile::PKG_TYPE_NONE || pkgType == PkgFile::PKG_TYPE_UPGRADE) {
+            if (pkgType == PkgFile::PKG_TYPE_NONE ||
+                (pkgType == PkgFile::PKG_TYPE_UPGRADE || innerFileNames.size() > 4)) { // 4 determine whether to unzip update.bin 
                 fileIds.push_back(name);
                 continue;
             }

@@ -362,7 +362,7 @@ int32_t GZipPkgFile::LoadPackage(std::vector<std::string> &fileNames, VerifyFunc
     PKG_LOGI("LoadPackage %s ", pkgStream_->GetFileName().c_str());
     size_t srcOffset = 0;
     size_t readLen = 0;
-    PkgBuffer buffer(BUFFER_SIZE);
+    PkgBuffer buffer(BUFFER_SIZE, false);
     int32_t ret = pkgStream_->Read(buffer, srcOffset, buffer.length, readLen);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("Fail to read file %s", pkgStream_->GetFileName().c_str());

@@ -203,7 +203,7 @@ int32_t ZipPkgFile::LoadPackage(std::vector<std::string>& fileNames, VerifyFunct
     uint32_t endDirLen = sizeof(EndCentralDir);
     size_t endDirPos = fileLen - endDirLen;
     size_t readLen = 0;
-    PkgBuffer buffer(buffSize);
+    PkgBuffer buffer(buffSize, false);
     ret = pkgStream_->Read(buffer, endDirPos, sizeof(EndCentralDir), readLen);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("read EOCD struct failed %s", pkgStream_->GetFileName().c_str());

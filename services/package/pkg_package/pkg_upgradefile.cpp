@@ -312,7 +312,7 @@ int32_t UpgradePkgFile::LoadPackage(std::vector<std::string> &fileNames, VerifyF
     std::vector<uint8_t> signData;
     DigestAlgorithm::DigestAlgorithmPtr algorithm = nullptr;
     // Parse header
-    PkgBuffer buffer(buffSize);
+    PkgBuffer buffer(buffSize, false);
     size_t parsedLen = 0;
     int32_t ret = ReadUpgradePkgHeader(buffer, parsedLen, algorithm);
     if (ret != PKG_SUCCESS) {

@@ -273,9 +273,13 @@ bool PackagePtable::GetPtableBufferFromPkg(Hpackage::PkgManager *pkgManager, uin
 
     const Hpackage::FileInfo *info = pkgManager->GetFileInfo(PtableManager::ptbImgTag_);
     if (info == nullptr) {
-        LOG(ERROR) << "Can not get file info " << PtableManager::ptbImgTag_;
-        return false;
+        info = pkgManager->GetFileInfo("/ptable");
+        if (info == nullptr) {
+            LOG(ERROR) << "Can not get file info " << PtableManager::ptbImgTag_;
+            return false;
+        }
     }
+
     Hpackage::PkgManager::StreamPtr outStream = nullptr;
     (void)pkgManager->CreatePkgStream(outStream, PtableManager::ptbImgTag_, info->unpackedSize,
         Hpackage::PkgStream::PkgStreamType_MemoryMap);
