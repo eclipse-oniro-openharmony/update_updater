@@ -20,7 +20,7 @@ config("updater_ui_support_cfg") {
   }
 }
 
-ohos_static_library("libui") {
+ohos_source_set("libui") {
   defines = [
     "ENABLE_BITMAP_FONT = 0",
     "ENABLE_ICU = 0",
