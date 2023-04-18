@@ -18,6 +18,7 @@ SUBSYSTEM_DIR = "//base/update/updater"
 
 updater_common_include = [
   "include",
+  "ui/view",
   "${SUBSYSTEM_DIR}/utils/include",
   "${SUBSYSTEM_DIR}/interfaces/kits/include/",
   "//base/update/updater/services/include/package",
