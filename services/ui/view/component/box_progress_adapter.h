@@ -16,7 +16,7 @@
 #ifndef UPDATER_UI_BOX_PROGRESS_ADAPTER_H
 #define UPDATER_UI_BOX_PROGRESS_ADAPTER_H
 
-#include "component/img_view_adapter.h"
+#include <string>
 #include "components/ui_box_progress.h"
 #include "macros.h"
 

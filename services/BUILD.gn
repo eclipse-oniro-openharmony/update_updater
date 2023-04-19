@@ -65,10 +65,7 @@ ohos_executable("updater") {
   ]
 
   include_dirs = updater_common_include
-  include_dirs += [
-    "//third_party/openssl/include",
-    "//base/update/updater/services/ui/view",
-  ]
+  include_dirs += [ "//third_party/openssl/include" ]
 
   deps = updater_common_deps
   deps += [
