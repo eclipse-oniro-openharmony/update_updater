@@ -133,7 +133,6 @@ ohos_static_library("libupdater") {
     deps += [ "//base/update/updater/services/ptable_parse:libptableparse" ]
     defines += [ "UPDATER_USE_PTABLE" ]
   }
-
   # add updater custom library
   if (defined(updater_custom_lib)) {
     deps += updater_custom_lib
