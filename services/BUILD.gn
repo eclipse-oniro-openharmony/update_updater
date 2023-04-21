@@ -151,6 +151,7 @@ ohos_static_library("libupdater") {
     rebase_path("${target_out_dir}/flashd/libflashd.a"),
     "-Wl,--no-whole-archive",
   ]
+
   # force link invisible function
   if (defined(updater_force_link_libs)) {
     ldflags += [ "-Wl,--whole-archive" ]
