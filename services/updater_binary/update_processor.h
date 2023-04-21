@@ -81,8 +81,8 @@ public:
 private:
     static int UnCompressDataProducer(const Hpackage::PkgBuffer &buffer, size_t size, size_t start, bool isFinish,
         const void* context);
-    size_t stashDataSize_ = 0;
-    constexpr size_t STASH_BUFFER_SIZE = 1024 * 1024 * 4;
+    static size_t stashDataSize_;
+    constexpr static size_t STASH_BUFFER_SIZE = 1024 * 1024 * 4;
 };
 } // Updater
 #endif /* UPDATE_PROCESSOR_H */

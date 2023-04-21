@@ -383,7 +383,13 @@ int32_t PkgManagerImpl::LoadPackage(const std::string &packagePath, std::vector<
         UPDATER_LAST_WORD(ret);
         return ret;
     }
-    ret = dynamic_cast<MemoryMapStream*>stream -> FileMapToMem();
+    MemoryMapStream* mmapStream = dynamic_cast<MemoryMapStream*>(stream);
+    if (mmapStream == nullptr) {
+        PKG_LOGE("get mmapStream fail");
+        UPDATER_LAST_WORD(PKG_INVALID_STREAM);
+        return PKG_INVALID_STREAM;
+    }
+    ret = mmapStream -> FileMapToMem();
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("mmap fail %s", packagePath.c_str());
         UPDATER_LAST_WORD(ret);

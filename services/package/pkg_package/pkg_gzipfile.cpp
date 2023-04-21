@@ -254,7 +254,7 @@ void GZipFileEntry::DecodeHeaderCalOffset(uint8_t flags, const PkgBuffer &buffer
     return;
 }
 
-int32_t GZipFileEntry::DecodeHeader(const PkgBuffer &buffer, size_t headerOffset, size_t dataOffset,
+int32_t GZipFileEntry::DecodeHeader(PkgBuffer &buffer, size_t headerOffset, size_t dataOffset,
     size_t &decodeLen)
 {
     Updater::UPDATER_INIT_RECORD;

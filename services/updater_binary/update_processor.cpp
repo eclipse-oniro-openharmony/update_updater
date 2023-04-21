@@ -17,6 +17,7 @@
 #include <memory>
 #include <string>
 #include <unistd.h>
+#include "securec.h"
 #include "applypatch/data_writer.h"
 #include "applypatch/partition_record.h"
 #include "dump.h"
@@ -43,6 +44,7 @@ using namespace Updater;
 namespace Updater {
 size_t UScriptInstructionRawImageWrite::totalSize_ = 0;
 size_t UScriptInstructionRawImageWrite::readSize_ = 0;
+size_t UScriptInstructionUpdateFromBin::stashDataSize_ = 0;
 
 UpdaterEnv::~UpdaterEnv()
 {
@@ -305,7 +307,7 @@ int32_t UScriptInstructionUpdateFromBin::Execute(Uscript::UScriptEnv &env, Uscri
     }
 
     PkgManager::StreamPtr outStream = nullptr;
-    ret = pkgManager->CreatePkgStream(outStream, upgradeFileName, UnCompressDataProducer, &ringbuffer);
+    ret = pkgManager->CreatePkgStream(outStream, upgradeFileName, UnCompressDataProducer, &ringBuffer);
     if (ret != USCRIPT_SUCCESS || outStream == nullptr) {
         LOG(ERROR) << "Error to create output stream";
         return USCRIPT_INVALID_PARAM;
@@ -329,8 +331,8 @@ int UScriptInstructionUpdateFromBin::UnCompressDataProducer(const PkgBuffer &buf
         return PKG_SUCCESS;
     }
     while(stashDataSize_ + size >= STASH_BUFFER_SIZE) {
-        int readLen = STASH_BUFFER_SIZE - stashDataSize_;
-        if (memcpy_s(stashBuffer.data + stashDataSize_, readLen, buffer.buffer + start, readLen) != 0) {
+        size_t readLen = STASH_BUFFER_SIZE - stashDataSize_;
+        if (memcpy_s(stashBuffer.buffer + stashDataSize_, readLen, buffer.buffer + start, readLen) != 0) {
                 return USCRIPT_ERROR_EXECUTE;
         }
         void *p = const_cast<void *>(context);
@@ -346,8 +348,8 @@ int UScriptInstructionUpdateFromBin::UnCompressDataProducer(const PkgBuffer &buf
     }
     if (size == 0) {
         return PKG_SUCCESS;
-    } else if (memcpy_s(stashBuffer.data + stashDataSize_, STASH_BUFFER_SIZE - stashDataSize_,
-        buffer.data + start, size) == 0) {
+    } else if (memcpy_s(stashBuffer.buffer + stashDataSize_, STASH_BUFFER_SIZE - stashDataSize_,
+        buffer.buffer + start, size) == 0) {
         if (isFinish) {
             // ringBuffer.push
         }

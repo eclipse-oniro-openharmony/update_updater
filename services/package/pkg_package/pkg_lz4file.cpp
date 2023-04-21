@@ -106,7 +106,7 @@ int32_t Lz4FileEntry::Unpack(PkgStreamPtr outStream)
     return PKG_SUCCESS;
 }
 
-int32_t Lz4FileEntry::DecodeHeader(const PkgBuffer &buffer, size_t headerOffset, size_t dataOffset,
+int32_t Lz4FileEntry::DecodeHeader(PkgBuffer &buffer, size_t headerOffset, size_t dataOffset,
     size_t &decodeLen)
 {
     fileInfo_.fileInfo.identity = "lz4_";

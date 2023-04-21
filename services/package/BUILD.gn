@@ -20,7 +20,10 @@ SUBSYSTEM_DIR = "//base/update/updater/services/package"
 
 config("package_config") {
   visibility = [ ":*" ]
-  cflags_cc = [ "-std=c++17" ]
+  cflags_cc = [
+    "-frtti",
+    "-std=c++17",
+  ]
   include_dirs = [
     "//base/update/updater/interfaces/kits/include",
     "//base/update/updater/utils/include",

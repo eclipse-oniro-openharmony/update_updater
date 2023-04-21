@@ -19,7 +19,6 @@
 #include "zlib.h"
 
 namespace Hpackage {
-constexpr uint8_t INFLATE_ERROR_TIMES = 5;
 constexpr uint32_t DEFLATE_IN_BUFFER_SIZE = 1024 * 64;
 constexpr uint32_t DEFLATE_OUT_BUFFER_SIZE = 1024 * 32;
 constexpr uint32_t INFLATE_IN_BUFFER_SIZE = 1024 * 1024 * 1024;
@@ -190,7 +189,7 @@ int32_t PkgAlgoDeflate::UnpackCalculate(PkgAlgorithmContext &context, const PkgS
             zstream.next_out = outBuffer.buffer;
             zstream.avail_out = outBuffer.length;
 
-            algorithm->Calculate(crcResult, outBuffer, inflateLen)
+            algorithm->Calculate(crcResult, outBuffer, inflateLen);
         }
     }
     return CalculateUnpackData(zstream, crc, unpack_ret, context, unpackContext);

@@ -13,9 +13,10 @@
  * limitations under the License.
  */
 #include "pkg_stream.h"
-#include <sys/mman.h>
+#include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <unistd.h>
 #include <cstdio>
 #include "dump.h"
 #include "pkg_manager.h"
@@ -71,7 +72,7 @@ FileStream::~FileStream()
     }
 }
 
-int32_t FileStream::Read(const PkgBuffer &data, size_t start, size_t needRead, size_t &readLen)
+int32_t FileStream::Read(PkgBuffer &data, size_t start, size_t needRead, size_t &readLen)
 {
     Updater::UPDATER_INIT_RECORD;
     if (stream_ == nullptr) {
@@ -205,7 +206,7 @@ MemoryMapStream::~MemoryMapStream()
     }
 }
 
-int32_t MemoryMapStream::Read(const PkgBuffer &data, size_t start, size_t needRead, size_t &readLen)
+int32_t MemoryMapStream::Read(PkgBuffer &data, size_t start, size_t needRead, size_t &readLen)
 {
     if (memMap_ == nullptr) {
         PKG_LOGE("Invalid memory map");
