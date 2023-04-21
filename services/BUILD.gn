@@ -106,14 +106,14 @@ ohos_executable("updater") {
     ldflags += [ "-Wl,--no-whole-archive" ]
   }
 
+  external_deps = [ "init:libbegetutil" ]
+
   if (build_selinux) {
     external_deps += [ "selinux:librestorecon" ]
     deps += [ "//third_party/selinux:libselinux" ]
     include_dirs += [ "//third_party/selinux/libselinux/include" ]
     cflags = [ "-DWITH_SELINUX" ]
   }
-
-  external_deps = [ "init:libbegetutil" ]
 
   install_images = [ "updater" ]
   install_enable = true
