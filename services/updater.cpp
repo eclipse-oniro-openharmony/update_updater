@@ -37,6 +37,7 @@
 #include "misc_info/misc_info.h"
 #ifdef WITH_SELINUX
 #include <policycoreutils.h>
+#include "selinux/selinux.h"
 #endif // WITH_SELINUX
 #ifdef UPDATER_USE_PTABLE
 #include "ptable_parse/ptable_manager.h"
@@ -439,6 +440,9 @@ UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, UpdaterPara
     }
 
     if (pid == 0) { // child
+        #ifdef WITH_SELINUX
+        setcon("u:r:updater_binary:s0");
+        #endif // WITH_SELINUX
         close(pipeRead);   // close read endpoint
         ExcuteSubProc(upParams, fullPath, pipeWrite);
     }
