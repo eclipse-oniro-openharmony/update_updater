@@ -106,6 +106,13 @@ ohos_executable("updater") {
     ldflags += [ "-Wl,--no-whole-archive" ]
   }
 
+  if (build_selinux) {
+    external_deps += [ "selinux:librestorecon" ]
+    deps += [ "//third_party/selinux:libselinux" ]
+    include_dirs += [ "//third_party/selinux/libselinux/include" ]
+    cflags = [ "-DWITH_SELINUX" ]
+  }
+
   external_deps = [ "init:libbegetutil" ]
 
   install_images = [ "updater" ]
@@ -144,7 +151,6 @@ ohos_static_library("libupdater") {
     rebase_path("${target_out_dir}/flashd/libflashd.a"),
     "-Wl,--no-whole-archive",
   ]
-  cflags = []
   # force link invisible function
   if (defined(updater_force_link_libs)) {
     ldflags += [ "-Wl,--whole-archive" ]
