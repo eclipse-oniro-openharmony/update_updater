@@ -14,9 +14,11 @@
  */
 
 #include "layout_parser.h"
+#include "component/component_factory.h"
 #include "components/ui_view.h"
 #include "json_visitor.h"
 #include "log/log.h"
+#include "view_api.h"
 
 namespace Updater {
 namespace {
@@ -24,18 +26,6 @@ constexpr auto DEFAULT_MODULE = "default";
 constexpr auto COMPONENT_MODULE = "coms";
 constexpr auto COMMON_LABEL = "Common";
 constexpr auto COMMON_TYPE = "type";
-
-inline const auto &GetSpecificInfoMap()
-{
-    using namespace OHOS;
-    const static std::unordered_map<std::string, std::function<SpecificInfo()>> specificInfoMap {
-        {VIEW_TYPE_STRING[UI_IMAGE_VIEW], [] () { return UxImageInfo {}; }},
-        {VIEW_TYPE_STRING[UI_BOX_PROGRESS], [] () { return UxBoxProgressInfo {}; }},
-        {VIEW_TYPE_STRING[UI_LABEL], [] () { return UxLabelInfo {}; }},
-        {VIEW_TYPE_STRING[UI_LABEL_BUTTON], [] () { return UxLabelBtnInfo {}; }}
-    };
-    return specificInfoMap;
-}
 }
 
 class LayoutParser::Impl {
@@ -97,8 +87,8 @@ private:
                 return false;
             }
 
-            auto it = GetSpecificInfoMap().find(*viewType);
-            if (it == GetSpecificInfoMap().end()) {
+            auto it = GetSpecificInfoMap<COMPONENT_TYPE_LIST>().find(*viewType);
+            if (it == GetSpecificInfoMap<COMPONENT_TYPE_LIST>().end()) {
                 LOG(ERROR) << "Can't recognize this type " << *viewType;
                 return false;
             }

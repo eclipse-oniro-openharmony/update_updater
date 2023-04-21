@@ -69,6 +69,11 @@ DEFINE_STRUCT_TRAIT(K, "K",
 DEFINE_STRUCT_TRAIT(L, "L",
     (std::vector<int>, d1)
 );
+
+bool operator==(const D &lhs, const D &rhs)
+{
+    return lhs.d1 == rhs.d1 && lhs.d2 == rhs.d2 && lhs.d3 == rhs.d3;
+}
 }
 
 using namespace Updater;
@@ -250,13 +255,13 @@ HWTEST_F(UtilsJsonVisitorUnitTest, testJ, TestSize.Level0)
     J j {};
     JsonNode node {R"({"J" : {"d1" : [["foo","bar","baz"],["foo1","bar1","baz1"]]}})"s};
     EXPECT_EQ(Visit<SETVAL>(node["J"], j), true);
-    ASSERT_EQ(j.d1.size(), 2);
+    ASSERT_EQ(j.d1.size(), 2u);
     EXPECT_EQ(j.d1[0], std::vector<std::string>({"foo", "bar", "baz"}));
     EXPECT_EQ(j.d1[1], std::vector<std::string>({"foo1", "bar1", "baz1"}));
 
     j = {};
     EXPECT_EQ(Visit<SETVAL>({}, node["J"], j), true);
-    ASSERT_EQ(j.d1.size(), 2);
+    ASSERT_EQ(j.d1.size(), 2u);
     EXPECT_EQ(j.d1[0], std::vector<std::string>({"foo", "bar", "baz"}));
     EXPECT_EQ(j.d1[1], std::vector<std::string>({"foo1", "bar1", "baz1"}));
 
@@ -314,5 +319,33 @@ HWTEST_F(UtilsJsonVisitorUnitTest, testArrayL, TestSize.Level0)
     EXPECT_EQ(Visit<SETVAL>(node["L"], node["LNonDefault1"], l), false);
     EXPECT_EQ(Visit<SETVAL>(node["L"], node["LNonDefault2"], l), false);
     EXPECT_EQ(Visit<SETVAL>(node["LNonDefault2"], node["L"], l), false);
+}
+
+HWTEST_F(UtilsJsonVisitorUnitTest, testVisitVector, TestSize.Level0)
+{
+    std::string jsonStr = R"({
+        "dVector" : [
+            {"d1":1, "d2":"1", "d3":false},
+            {"d1":2, "d2":"2", "d3":true},
+            {"d1":3, "d2":"3", "d3":false}
+        ],
+        "dVector_empty" : [],
+        "dVector_invalid1" : [{"d1":1, "d2":"1"}],
+        "dVector_invalid2" : [{"d1":"1"}]
+    })";
+    std::vector<D> dVector {};
+    JsonNode node {jsonStr};
+    EXPECT_EQ(Visit<SETVAL>(node["dVector"], dVector), true);
+    EXPECT_EQ(dVector, (std::vector<D>{{1, "1", false}, {2, "2", true}, {3, "3", false}}));
+
+    dVector.clear();
+    EXPECT_EQ(Visit<SETVAL>(node["dVector_empty"], dVector), true);
+    EXPECT_EQ(dVector, std::vector<D>{});
+
+    dVector.clear();
+    EXPECT_EQ(Visit<SETVAL>(node["dVector_invalid1"], dVector), false);
+
+    dVector.clear();
+    EXPECT_EQ(Visit<SETVAL>(node["dVector_invalid2"], dVector), false);
 }
 } // namespace UpdaterUt

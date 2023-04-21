@@ -16,17 +16,26 @@
 #ifndef UPDATER_UI_BOX_PROGRESS_ADAPTER_H
 #define UPDATER_UI_BOX_PROGRESS_ADAPTER_H
 
+#include <string>
 #include "components/ui_box_progress.h"
-#include "img_view_adapter.h"
-#include "page/view_proxy.h"
-#include "view_api.h"
+#include "macros.h"
 
 namespace Updater {
+struct UxBoxProgressInfo {
+    uint32_t defaultValue;
+    std::string fgColor;
+    std::string bgColor;
+    std::string endPoint;
+    bool hasEp;
+};
+struct UxViewInfo;
+class ImgViewAdapter;
 class BoxProgressAdapter : public OHOS::UIBoxProgress {
     static constexpr uint32_t MAX_PROGRESS_VALUE = 100;
     DISALLOW_COPY_MOVE(BoxProgressAdapter);
 public:
     using SpecificInfoType = UxBoxProgressInfo;
+    static constexpr auto COMPONENT_TYPE = "UIBoxProgress";
     BoxProgressAdapter() = default;
     explicit BoxProgressAdapter(const UxViewInfo &info);
     virtual ~BoxProgressAdapter() {}

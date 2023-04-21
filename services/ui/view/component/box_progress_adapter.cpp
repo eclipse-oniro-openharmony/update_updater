@@ -14,9 +14,11 @@
  */
 #include "box_progress_adapter.h"
 #include "graphic_engine.h"
+#include "img_view_adapter.h"
 #include "log/log.h"
 #include "scope_guard.h"
 #include "updater/updater_const.h"
+#include "view_api.h"
 
 namespace Updater {
 BoxProgressAdapter::BoxProgressAdapter(const UxViewInfo &info)

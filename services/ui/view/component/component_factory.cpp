@@ -14,10 +14,6 @@
  */
 
 #include "component_factory.h"
-#include "box_progress_adapter.h"
-#include "img_view_adapter.h"
-#include "label_btn_adapter.h"
-#include "text_label_adapter.h"
 
 namespace Updater {
 /*
@@ -48,7 +44,7 @@ public:
 };
 
 template<template<typename> typename Functor, typename ...Component>
-class ComponentFactory::Visitor<Functor, std::tuple<Component...>>: Functor<Component>... {
+class Visitor : Functor<Component>... {
 public:
     /*
      * overloading only works within the same scope.
@@ -62,23 +58,13 @@ public:
     }
 };
 
-/*
- * all supported component types listed here, you
- * should add a template argument when add a new
- * component type
- */
-using ComponentTypes = std::tuple<BoxProgressAdapter, ImgViewAdapter, TextLabelAdapter, LabelBtnAdapter>;
-
-static_assert(std::tuple_size_v<ComponentTypes> == std::variant_size_v<SpecificInfo>,
-    "SpecificInfo's size should be equal to the ComponentTypes' size");
-
 std::unique_ptr<OHOS::UIView> ComponentFactory::CreateUxComponent(const UxViewInfo &info)
 {
-    return Visitor<CreateFunctor, ComponentTypes> {}.Visit(info);
+    return Visitor<CreateFunctor, COMPONENT_TYPE_LIST> {}.Visit(info);
 }
 
 bool ComponentFactory::CheckUxComponent(const UxViewInfo &info)
 {
-    return Visitor<CheckFunctor, ComponentTypes> {}.Visit(info);
+    return Visitor<CheckFunctor, COMPONENT_TYPE_LIST> {}.Visit(info);
 }
 } // namespace Updater
