@@ -440,7 +440,9 @@ UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, UpdaterPara
     }
 
     if (pid == 0) { // child
+        #ifdef WITH_SELINUX
         setcon("u:r:updater_binary:s0");
+        #endif // WITH_SELINUX
         close(pipeRead);   // close read endpoint
         ExcuteSubProc(upParams, fullPath, pipeWrite);
     }
