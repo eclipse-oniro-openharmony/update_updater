@@ -20,12 +20,8 @@
 namespace Updater {
 TextLabelAdapter::TextLabelAdapter(const UxViewInfo &info)
 {
-    const UxViewCommonInfo &common = info.commonInfo;
     const UxLabelInfo &spec = std::get<UxLabelInfo>(info.specificInfo);
-    viewId_ = common.id;
-    this->SetPosition(common.x, common.y, common.w, common.h);
-    this->SetVisible(common.visible);
-    this->SetViewId(viewId_.c_str());
+    SetViewCommonInfo(info.commonInfo);
     this->SetAlign(GetAlign(spec.align), OHOS::TEXT_ALIGNMENT_CENTER);
     this->SetText(TranslateText(spec.text).c_str());
     this->SetFont(DEFAULT_FONT_FILENAME, spec.fontSize);

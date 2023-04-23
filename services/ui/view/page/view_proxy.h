@@ -19,6 +19,7 @@
 #include <memory>
 #include <string>
 #include <type_traits>
+#include "component/component_factory.h"
 #include "components/ui_view.h"
 #include "log/log.h"
 
@@ -26,15 +27,15 @@ namespace Updater {
 class ViewProxy final {
 public:
     ViewProxy() = default;
-    ViewProxy(std::unique_ptr<OHOS::UIView> view, const std::string &message)
+    ViewProxy(std::unique_ptr<ComponentInterface> view, const std::string &message)
         : view_(std::move(view)), errMsg_(message) { }
-    explicit ViewProxy(std::unique_ptr<OHOS::UIView> view) : view_(std::move(view)) { }
+    explicit ViewProxy(std::unique_ptr<ComponentInterface> view) : view_(std::move(view)) { }
     ~ViewProxy() = default;
     OHOS::UIView *operator->() const
     {
         static OHOS::UIView dummy;
         if (view_ != nullptr) {
-            return view_.get();
+            return view_->GetOhosView();
         }
         return &dummy;
     }
@@ -44,7 +45,22 @@ public:
         std::string errMsg {};
         return As<T>(errMsg);
     }
-    template<typename T = OHOS::UIView>
+    template<typename T, std::enable_if_t<IsUpdaterComponent<T>> * = nullptr>
+    T *As(std::string &errMsg) const 
+    {
+        static T dummy;
+        if (view_ == nullptr) {
+            errMsg = errMsg_ + " view is null";
+            return &dummy;
+        }
+        if (std::string(dummy.GetComponentType()) != view_->GetComponentType()) {
+            errMsg = errMsg_ + " view's real type not matched";
+            LOG(ERROR) << errMsg;
+            return &dummy;
+        }
+        return static_cast<T *>(view_.get());
+    }
+    template<typename T = OHOS::UIView, std::enable_if_t<!IsUpdaterComponent<T>> * = nullptr>
     T *As(std::string &errMsg) const
     {
         static T dummy;
@@ -54,18 +70,19 @@ public:
             errMsg = errMsg_ + " view is null";
             return &dummy;
         }
+        OHOS::UIView *ohosView = view_->GetOhosView();
         if constexpr (std::is_same_v<OHOS::UIView, T>) {
-            return static_cast<T *>(view_.get());
+            return ohosView;
         }
-        if (dummy.GetViewType() != view_->GetViewType()) {
+        if (dummy.GetViewType() != ohosView->GetViewType()) {
             errMsg = errMsg_ + " view's real type not matched";
             LOG(ERROR) << errMsg;
             return &dummy;
         }
-        return static_cast<T *>(view_.get());
+        return static_cast<T *>(ohosView);
     }
 private:
-    std::unique_ptr<OHOS::UIView> view_ {nullptr};
+    std::unique_ptr<ComponentInterface> view_ {nullptr};
     std::string errMsg_ {};
 };
 } // namespace Updater

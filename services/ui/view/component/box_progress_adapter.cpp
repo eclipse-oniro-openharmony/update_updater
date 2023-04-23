@@ -23,12 +23,8 @@
 namespace Updater {
 BoxProgressAdapter::BoxProgressAdapter(const UxViewInfo &info)
 {
-    const UxViewCommonInfo &common = info.commonInfo;
+    SetViewCommonInfo(info.commonInfo);
     const UxBoxProgressInfo &spec = std::get<UxBoxProgressInfo>(info.specificInfo);
-    viewId_ = common.id;
-    this->SetPosition(common.x, common.y, common.w, common.h);
-    this->SetVisible(common.visible);
-    this->SetViewId(viewId_.c_str());
     this->SetRange(progressWidth_ - 1, 0);
     this->SetValue(spec.defaultValue);
 
