@@ -72,10 +72,10 @@ struct UxViewInfo {
 
 namespace Detail {
 template<typename T, typename ... Components>
-inline constexpr bool CheckComponentList = (std::is_same_v<T, Components> || ... );
+inline constexpr bool CHECK_COMPONENT_LIST = (std::is_same_v<T, Components> || ...);
 }
 
 template<typename T>
-inline constexpr bool IsUpdaterComponent = Detail::CheckComponentList<T, COMPONENT_TYPE_LIST>;
+inline constexpr bool Is_UPDATER_COMPONENT = Detail::CHECK_COMPONENT_LIST<T, COMPONENT_TYPE_LIST>;
 } // namespace Updater
 #endif

@@ -45,8 +45,8 @@ public:
         std::string errMsg {};
         return As<T>(errMsg);
     }
-    template<typename T, std::enable_if_t<IsUpdaterComponent<T>> * = nullptr>
-    T *As(std::string &errMsg) const 
+    template<typename T, std::enable_if_t<Is_UPDATER_COMPONENT<T>>* = nullptr>
+    T *As(std::string &errMsg) const
     {
         static T dummy;
         if (view_ == nullptr) {
@@ -60,7 +60,7 @@ public:
         }
         return static_cast<T *>(view_.get());
     }
-    template<typename T = OHOS::UIView, std::enable_if_t<!IsUpdaterComponent<T>> * = nullptr>
+    template<typename T = OHOS::UIView, std::enable_if_t<!Is_UPDATER_COMPONENT<T>>* = nullptr>
     T *As(std::string &errMsg) const
     {
         static T dummy;

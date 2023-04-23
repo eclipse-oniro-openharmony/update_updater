@@ -41,19 +41,15 @@ public:
 template<class Component>
 class ComponentCommon : public ComponentInterface {
 public:
-    virtual ~ComponentCommon() = default;
-    virtual const char *GetComponentType()
+    ~ComponentCommon() override = default;
+    const char *GetComponentType() override
     {
         static_assert(Component::COMPONENT_TYPE != nullptr, "you must not assign a nullptr to COMPONNET_TYPE");
         return Component::COMPONENT_TYPE;
     }
-    Component *GetComponent(void)
+    OHOS::UIView *GetOhosView() override
     {
         return static_cast<Component *>(this);
-    }
-    OHOS::UIView *GetOhosView()
-    {
-        return static_cast<OHOS::UIView *>(static_cast<Component *>(this));
     }
     void SetViewCommonInfo(const UxViewCommonInfo &common)
     {
