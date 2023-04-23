@@ -76,6 +76,6 @@ inline constexpr bool CHECK_COMPONENT_LIST = (std::is_same_v<T, Components> || .
 }
 
 template<typename T>
-inline constexpr bool Is_UPDATER_COMPONENT = Detail::CHECK_COMPONENT_LIST<T, COMPONENT_TYPE_LIST>;
+inline constexpr bool IS_UPDATER_COMPONENT = Detail::CHECK_COMPONENT_LIST<T, COMPONENT_TYPE_LIST>;
 } // namespace Updater
 #endif
