@@ -67,6 +67,21 @@ HWTEST_F(UpdaterUiViewProxyUnitTest, test_as_when_view_type_not_matched, TestSiz
     EXPECT_EQ(err, "");
 }
 
+HWTEST_F(UpdaterUiViewProxyUnitTest, test_as_when_view_type_not_matched_02, TestSize.Level0)
+{
+    std::unique_ptr<ComponentInterface> label = std::make_unique<TextLabelAdapter>();
+    OHOS::UIView *real = label->GetOhosView();
+    ViewProxy viewproxy { std::move(label), "label1" };
+
+    std::string err {};
+    EXPECT_NE(viewproxy.As<OHOS::UILabelButton>(err), real);
+    EXPECT_EQ(err, "label1 view's real type not matched");
+
+    err = "";
+    EXPECT_EQ(viewproxy.As<OHOS::UILabel>(err), real);
+    EXPECT_EQ(err, "");
+}
+
 HWTEST_F(UpdaterUiViewProxyUnitTest, test_as_without_err_out_param, TestSize.Level0)
 {
     std::unique_ptr<ComponentInterface> label = std::make_unique<TextLabelAdapter>();
