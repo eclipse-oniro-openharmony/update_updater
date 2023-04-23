@@ -22,7 +22,10 @@
 #include "components/ui_view.h"
 
 namespace Updater {
-using Callback = std::function<void()>;
+struct Callback {
+    std::function<void(OHOS::UIView &)> cb {nullptr};
+    bool isAsync {false};
+};
 using KeyCallback = std::function<void(bool)>;
 enum class EventType {
     TOUCHEVENT,
@@ -33,13 +36,12 @@ enum class EventType {
 // avoid callback on invisible component
 class CallBackDecorator final {
 public:
-    CallBackDecorator(OHOS::UIView &view, Callback cb) : cb_(cb), view_(view) {}
+    CallBackDecorator(Callback cb) : cb_(cb) {}
     ~CallBackDecorator() = default;
-    void operator()() const;
+    void operator()(OHOS::UIView &view, bool isAsync) const;
 private:
     Callback cb_;
     static std::mutex mtx_;
-    OHOS::UIView &view_;
 };
 
 class LabelOnTouchListener final : public OHOS::UIView::OnTouchListener {

@@ -35,9 +35,7 @@ class LanguageUI final {
 public:
     static LanguageUI &GetInstance();
     [[nodiscard]] bool Init(Language language);
-    // msgId used here to specify validation of msgId
-    const std::string &Translate(const std::string &key,
-        [[maybe_unused]] UpdaterUiMsgID msgId = UpdaterUiMsgID::DEFAULT_STRING) const;
+    const std::string &Translate(const std::string &key) const;
     [[nodiscard]] bool LoadLangRes(const JsonNode &node);
     Language ParseLanguage() const;
 private:
@@ -57,7 +55,7 @@ private:
 }
 
 #ifdef UPDATER_UI_SUPPORT
-#define TR(tag) Lang::LanguageUI::GetInstance().Translate(STRINGFY(tag), UpdaterUiMsgID::tag)
+#define TR(tag) Lang::LanguageUI::GetInstance().Translate(STRINGFY(tag))
 #else
 #define TR(tag) ""
 #endif
