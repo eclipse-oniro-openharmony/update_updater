@@ -27,7 +27,6 @@ constexpr const char *UPDATER_LOG_DIR = "/data/updater/log";
 constexpr const char *UPDATER_LOG = "/data/updater/log/updater_log";
 constexpr const char *UPDATER_STAGE_LOG = "/data/updater/log/updater_stage_log";
 constexpr const char *UPDATER_PATH = "/data/updater";
-constexpr const char *UPDATER_SDCARD_PATH = "/sdcard/updater";
 constexpr const char *UPDATER_LOCALE_FILE = "locale";
 constexpr const char *UPDATER_RESULT_FILE = "updater_result";
 constexpr const char *MISC_FILE = "/dev/block/platform/soc/10100000.himci.eMMC/by-name/misc";
@@ -93,7 +92,5 @@ constexpr unsigned int UI_SHOW_DURATION = 2000;
 constexpr unsigned int INTERVAL_TIME = 300;
 constexpr float EPSINON = 0.00001;
 constexpr float FULL_EPSINON = 1;
-constexpr int DATA_MODE = 1;
-constexpr int SDCARD_MODE = 2;
 } // namespace Updater
 #endif

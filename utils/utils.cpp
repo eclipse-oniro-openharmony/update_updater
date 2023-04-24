@@ -583,22 +583,5 @@ bool IsDirExist(const std::string &path)
     return false;
 }
 
-int GetUpdaterMode(int &mode)
-{
-    struct UpdateMessage boot {};
-    // read from misc
-    bool ret = ReadUpdaterMiscMsg(boot);
-    if (!ret) {
-        return -1;
-    }
-    // LOG(INFO) << "GetBootMode, boot.update" << boot.update;
-    std::string miscinfo = boot.update;
-    if (miscinfo.find("sdcard_update") != std::string::npos) {
-        mode = SDCARD_MODE;
-        return 0;
-    }
-    mode = DATA_MODE;
-    return 0;
-}
 } // Utils
 } // namespace Updater

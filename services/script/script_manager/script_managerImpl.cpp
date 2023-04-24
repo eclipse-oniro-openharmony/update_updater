@@ -158,19 +158,8 @@ int32_t ScriptManagerImpl::ExtractAndExecuteScript(PkgManager::PkgManagerPtr man
     const std::string &scriptName)
 {
     PkgManager::StreamPtr outStream = nullptr;
-    int mode = Updater::DATA_MODE;
-    int ret = Updater::Utils::GetUpdaterMode(mode);
-    if (ret != 0) {
-        USCRIPT_LOGE("Failed to get updater mode");
-        return ret;
-    }
-    std::string path = "";
-    if (mode == Updater::DATA_MODE) {
-        path = Updater::UPDATER_PATH;
-    } else if (mode == Updater::SDCARD_MODE) {
-        path = Updater::UPDATER_SDCARD_PATH;
-    }
-    ret = manager->CreatePkgStream(outStream, path + "/" + scriptName, 0, PkgStream::PkgStreamType_Write);
+    const std::string path = Updater::Utils::IsUpdaterMode() ? "tmp" : Updater::UPDATER_PATH;
+    int32_t ret = manager->CreatePkgStream(outStream, path + "/" + scriptName, 0, PkgStream::PkgStreamType_Write);
     if (ret != USCRIPT_SUCCESS) {
         USCRIPT_LOGE("Failed to create script stream %s", scriptName.c_str());
         return ret;
