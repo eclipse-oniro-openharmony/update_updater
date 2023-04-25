@@ -48,8 +48,7 @@ config("utest_config") {
 
 ohos_unittest("updater_unittest") {
   testonly = true
-  resource_config_file =
-      "../../test/unittest/test_data/ohos_test.xml"
+  resource_config_file = "../../test/unittest/test_data/ohos_test.xml"
   module_out_path = module_output_path
   sources = [
     "diffpatch/bzip2_unittest.cpp",
