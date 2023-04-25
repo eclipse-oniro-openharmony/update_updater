@@ -55,20 +55,27 @@ void CallBackDecorator::operator()(OHOS::UIView &view, bool isAsync) const
         LOG(INFO) << "callback by async method";
         // then can trigger callback by async method
         std::thread t {
-            [cb = cb_.cb, &view] () {
-                std::unique_lock<std::mutex> lock(mtx_, std::defer_lock);
-                if (!lock.try_lock()) {
-                    LOG(ERROR) << "try lock failed, only allow running one callback at the same time";
-                    return;
-                }
-                cb(view);
+            [cb = cb_, &view] () {
+                CallbackWithGuard(cb, view);
             }
         };
         t.detach();
     } else {
         LOG(INFO) << "callback by sync method";
         // then can trigger callback by sync method
-        cb_.cb(view);
+        CallbackWithGuard(cb_, view);
+    }
+}
+
+void CallBackDecorator::CallbackWithGuard(Callback cb, OHOS::UIView &view)
+{
+    std::unique_lock<std::mutex> lock(mtx_, std::defer_lock);
+    if (!lock.try_lock()) {
+        LOG(ERROR) << "try lock failed, only allow running one callback at the same time";
+        return;
+    }
+    if (cb.func != nullptr) {
+        cb.func(view);
     }
 }
 

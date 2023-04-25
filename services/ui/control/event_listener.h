@@ -23,7 +23,7 @@
 
 namespace Updater {
 struct Callback {
-    std::function<void(OHOS::UIView &)> cb {nullptr};
+    std::function<void(OHOS::UIView &)> func {nullptr};
     bool isAsync {false};
 };
 using KeyCallback = std::function<void(bool)>;
@@ -40,6 +40,7 @@ public:
     ~CallBackDecorator() = default;
     void operator()(OHOS::UIView &view, bool isAsync) const;
 private:
+    static void CallbackWithGuard(Callback cb, OHOS::UIView &view);
     Callback cb_;
     static std::mutex mtx_;
 };
