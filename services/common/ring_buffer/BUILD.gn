@@ -14,15 +14,16 @@
 import("//base/update/updater/updater_default_cfg.gni")
 import("//build/ohos.gni")
 
+updater_path = "../../.."
 ohos_static_library("libringbuffer") {
   sources = [ "ring_buffer.cpp" ]
 
   include_dirs = [
-    "../../../services/include/log",
-    "../../../utils/include",
+    "${updater_path}/services/include/log",
+    "${updater_path}/utils/include",
   ]
   deps = [
-    "../../../services/log:libupdaterlog",
+    "${updater_path}/services/log:libupdaterlog",
     "//third_party/bounds_checking_function:libsec_static",
   ]
   external_deps = [ "hiviewdfx_hilog_native:libhilog" ]

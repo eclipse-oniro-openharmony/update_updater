@@ -22,12 +22,13 @@ config("diff_config") {
   }
 }
 
+updater_path = "../.."
 ohos_executable("diff") {
   use_exceptions = true
   configs = [ ":diff_config" ]
 
   sources = [
-    "../../services/package/pkg_manager/pkg_utils.cpp",
+    "${updater_path}/services/package/pkg_manager/pkg_utils.cpp",
     "./bzip2/bzip2_adapter.cpp",
     "./bzip2/lz4_adapter.cpp",
     "./bzip2/zip_adapter.cpp",
@@ -43,17 +44,17 @@ ohos_executable("diff") {
 
   include_dirs = [
     ".",
-    "../../interfaces/kits/include",
-    "../../services/include/package",
-    "../../services/include/patch",
-    "../../services/include",
-    "../../utils/include",
-    "../../services/diffpatch/bzip2",
-    "../../services/diffpatch/diff",
-    "../../services/diffpatch/patch",
-    "../../services/diffpatch",
-    "../../services/package/pkg_manager",
-    "../../services/include/log",
+    "${updater_path}/interfaces/kits/include",
+    "${updater_path}/services/include/package",
+    "${updater_path}/services/include/patch",
+    "${updater_path}/services/include",
+    "${updater_path}/utils/include",
+    "${updater_path}/services/diffpatch/bzip2",
+    "${updater_path}/services/diffpatch/diff",
+    "${updater_path}/services/diffpatch/patch",
+    "${updater_path}/services/diffpatch",
+    "${updater_path}/services/package/pkg_manager",
+    "${updater_path}/services/include/log",
     "//third_party/bounds_checking_function/include",
     "//third_party/openssl/include",
     "//third_party/bzip2",
@@ -62,8 +63,8 @@ ohos_executable("diff") {
   ]
 
   deps = [
-    "../../services/log:libupdaterlog",
-    "../../services/package:libupdaterpackage",
+    "${updater_path}/services/log:libupdaterlog",
+    "${updater_path}/services/package:libupdaterpackage",
     "//third_party/bzip2:libbz2",
     "//third_party/lz4:liblz4_static",
     "//third_party/openssl:libcrypto_static",

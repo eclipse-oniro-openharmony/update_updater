@@ -14,18 +14,19 @@
 import("//base/update/updater/updater_default_cfg.gni")
 import("//build/ohos.gni")
 
+updater_path = "../.."
 config("updater_config") {
   visibility = [ ":*" ]
   include_dirs = [
-    "../../interfaces/kits/include",
-    "../../services",
-    "../../services/include/package",
-    "../../services/include/script",
-    "../../services/include/log",
-    "../../services/include",
-    "../../utils/include",
-    "../../utils/json",
-    "../../services/include/applypatch",
+    "${updater_path}/interfaces/kits/include",
+    "${updater_path}/services",
+    "${updater_path}/services/include/package",
+    "${updater_path}/services/include/script",
+    "${updater_path}/services/include/log",
+    "${updater_path}/services/include",
+    "${updater_path}/utils/include",
+    "${updater_path}/utils/json",
+    "${updater_path}/services/include/applypatch",
     "//base/startup/init/interfaces/innerkits/include",
     "//third_party/openssl/include",
     "//third_party/bounds_checking_function/include",
@@ -35,11 +36,11 @@ config("updater_config") {
 
 ohos_executable("updater_binary") {
   sources = [
-    "../../services/updater_binary/main.cpp",
-    "../../services/updater_binary/update_image_block.cpp",
-    "../../services/updater_binary/update_image_patch.cpp",
-    "../../services/updater_binary/update_partitions.cpp",
-    "../../services/updater_binary/update_processor.cpp",
+    "${updater_path}/services/updater_binary/main.cpp",
+    "${updater_path}/services/updater_binary/update_image_block.cpp",
+    "${updater_path}/services/updater_binary/update_image_patch.cpp",
+    "${updater_path}/services/updater_binary/update_partitions.cpp",
+    "${updater_path}/services/updater_binary/update_processor.cpp",
   ]
   configs = [ ":updater_config" ]
 
@@ -52,14 +53,14 @@ ohos_executable("updater_binary") {
     ldflags += [ "-Wl,--no-whole-archive" ]
   }
   deps = [
-    "../../interfaces/kits/misc_info:libmiscinfo",
-    "../../interfaces/kits/slot_info:libslotinfo",
-    "../../services/applypatch:libapplypatch",
-    "../../services/diffpatch/patch:libpatch",
-    "../../services/fs_manager:libfsmanager",
-    "../../services/log:libupdaterlog",
-    "../../services/package:libupdaterpackage",
-    "../../services/script:libupdaterscript",
+    "${updater_path}/interfaces/kits/misc_info:libmiscinfo",
+    "${updater_path}/interfaces/kits/slot_info:libslotinfo",
+    "${updater_path}/services/applypatch:libapplypatch",
+    "${updater_path}/services/diffpatch/patch:libpatch",
+    "${updater_path}/services/fs_manager:libfsmanager",
+    "${updater_path}/services/log:libupdaterlog",
+    "${updater_path}/services/package:libupdaterpackage",
+    "${updater_path}/services/script:libupdaterscript",
     "//third_party/bzip2:libbz2",
     "//third_party/cJSON:cjson_static",
     "//third_party/lz4:liblz4_static",
@@ -73,8 +74,8 @@ ohos_executable("updater_binary") {
   }
 
   if (defined(use_ptable)) {
-    include_dirs = [ "../../services/ptable_parse" ]
-    deps += [ "../../services/ptable_parse:libptableparse" ]
+    include_dirs = [ "${updater_path}/services/ptable_parse" ]
+    deps += [ "${updater_path}/services/ptable_parse:libptableparse" ]
     defines = [ "UPDATER_USE_PTABLE" ]
   }
 

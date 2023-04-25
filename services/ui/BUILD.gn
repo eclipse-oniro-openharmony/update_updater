@@ -14,6 +14,7 @@
 import("//base/update/updater/updater_default_cfg.gni")
 import("//build/ohos.gni")
 
+updater_path = "../.."
 config("updater_ui_support_cfg") {
   if (updater_ui_support) {
     defines = [ "UPDATER_UI_SUPPORT" ]
@@ -67,8 +68,8 @@ ohos_static_library("libui") {
     "//third_party/libpng",
     "//third_party/libdrm/include/drm",
     "//third_party/libdrm",
-    "../../services/include/log",
-    "../../services/include",
+    "${updater_path}/services/include/log",
+    "${updater_path}/services/include",
     "//drivers/hdf_core/framework/ability/sbuf/include",
     "//drivers/hdf_core/framework/include/platform",
     "//drivers/hdf_core/framework/include/core",
@@ -79,16 +80,16 @@ ohos_static_library("libui") {
     "//drivers/hdf_core/adapter/uhdf2/hdi",
     "//drivers/peripheral/input/hal/include",
     "//drivers/peripheral/input/interfaces/include",
-    "../../utils/include",
-    "../../utils/json",
-    "../../services",
-    "../../interfaces/kits/include",
-    "../../services/ui",
-    "../../services/ui/include",
-    "../../services/ui/control",
-    "../../services/ui/driver",
-    "../../services/ui/view",
-    "../../services/ui/language",
+    "${updater_path}/utils/include",
+    "${updater_path}/utils/json",
+    "${updater_path}/services",
+    "${updater_path}/interfaces/kits/include",
+    "${updater_path}/services/ui",
+    "${updater_path}/services/ui/include",
+    "${updater_path}/services/ui/control",
+    "${updater_path}/services/ui/driver",
+    "${updater_path}/services/ui/view",
+    "${updater_path}/services/ui/language",
     "//foundation/graphic/ui/frameworks",
     "//foundation/graphic/ui/interfaces/kits",
     "//foundation/graphic/ui/interfaces/innerkits",
@@ -97,9 +98,9 @@ ohos_static_library("libui") {
   ]
 
   deps = [
-    "../../interfaces/kits/packages:libpackageExt",
-    "../../services/log:libupdaterlog",
-    "../../utils:libutils",
+    "${updater_path}/interfaces/kits/packages:libpackageExt",
+    "${updater_path}/services/log:libupdaterlog",
+    "${updater_path}/utils:libutils",
     "//drivers/peripheral/input/hal:hdi_input",
     "//foundation/graphic/ui/ext/updater:libupdater_layout",
     "//third_party/bounds_checking_function:libsec_static",

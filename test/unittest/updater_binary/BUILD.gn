@@ -14,9 +14,10 @@
 import("//build/test.gni")
 
 MODULE_OUTPUT_PATH = "updater/updater_test"
+updater_path = "../../.."
 
 ohos_unittest("binary_unittest") {
-  resource_config_file = "../../../test/unittest/test_data/ohos_test.xml"
+  resource_config_file = "${updater_path}/test/unittest/test_data/ohos_test.xml"
   module_out_path = MODULE_OUTPUT_PATH
   sources = [
     "update_image_block_test.cpp",
@@ -25,39 +26,39 @@ ohos_unittest("binary_unittest") {
   ]
 
   sources += [
-    "../../../services/applypatch/block_set.cpp",
-    "../../../services/updater_binary/update_image_block.cpp",
-    "../../../services/updater_binary/update_image_patch.cpp",
-    "../../../services/updater_binary/update_partitions.cpp",
-    "../../../services/updater_binary/update_processor.cpp",
+    "${updater_path}/services/applypatch/block_set.cpp",
+    "${updater_path}/services/updater_binary/update_image_block.cpp",
+    "${updater_path}/services/updater_binary/update_image_patch.cpp",
+    "${updater_path}/services/updater_binary/update_partitions.cpp",
+    "${updater_path}/services/updater_binary/update_processor.cpp",
   ]
 
   include_dirs = [
-    "../../../interfaces/kits/include",
-    "../../../services",
-    "../../../services/include/package",
-    "../../../services/include/script",
-    "../../../services/include/log",
-    "../../../services/include/fs_manager",
-    "../../../services/include",
-    "../../../utils/include",
-    "../../../utils/json",
-    "../../../services/include/applypatch",
-    "../../../services/script/script_manager",
-    "../../../services/script/script_interpreter",
-    "../../../test/unittest",
-    "../../../test/unittest/script",
-    "../../../services/updater_binary",
+    "${updater_path}/interfaces/kits/include",
+    "${updater_path}/services",
+    "${updater_path}/services/include/package",
+    "${updater_path}/services/include/script",
+    "${updater_path}/services/include/log",
+    "${updater_path}/services/include/fs_manager",
+    "${updater_path}/services/include",
+    "${updater_path}/utils/include",
+    "${updater_path}/utils/json",
+    "${updater_path}/services/include/applypatch",
+    "${updater_path}/services/script/script_manager",
+    "${updater_path}/services/script/script_interpreter",
+    "${updater_path}/test/unittest",
+    "${updater_path}/test/unittest/script",
+    "${updater_path}/services/updater_binary",
   ]
   deps = [
-    "../../../interfaces/kits/misc_info:libmiscinfo",
-    "../../../interfaces/kits/slot_info:libslotinfo",
-    "../../../services/applypatch:libapplypatch",
-    "../../../services/diffpatch/patch:libpatch",
-    "../../../services/fs_manager:libfsmanager",
-    "../../../services/log:libupdaterlog",
-    "../../../services/package:libupdaterpackage",
-    "../../../services/script:libupdaterscript",
+    "${updater_path}/interfaces/kits/misc_info:libmiscinfo",
+    "${updater_path}/interfaces/kits/slot_info:libslotinfo",
+    "${updater_path}/services/applypatch:libapplypatch",
+    "${updater_path}/services/diffpatch/patch:libpatch",
+    "${updater_path}/services/fs_manager:libfsmanager",
+    "${updater_path}/services/log:libupdaterlog",
+    "${updater_path}/services/package:libupdaterpackage",
+    "${updater_path}/services/script:libupdaterscript",
     "//third_party/bzip2:libbz2",
     "//third_party/cJSON:cjson",
     "//third_party/googletest:gmock_main",
@@ -68,7 +69,7 @@ ohos_unittest("binary_unittest") {
     "//third_party/zlib:libz",
   ]
 
-  configs = [ "../../../test/unittest:utest_config" ]
+  configs = [ "${updater_path}/test/unittest:utest_config" ]
   external_deps = [
     "c_utils:utils",
     "hiviewdfx_hilog_native:libhilog",

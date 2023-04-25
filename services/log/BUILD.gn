@@ -19,6 +19,7 @@ config("log_config") {
   }
 }
 
+updater_path = "../.."
 ohos_static_library("libupdaterlog") {
   sources = [
     "dump.cpp",
@@ -26,8 +27,8 @@ ohos_static_library("libupdaterlog") {
   ]
 
   include_dirs = [
-    "../../services/include",
-    "../../utils/include",
+    "${updater_path}/services/include",
+    "${updater_path}/utils/include",
     "//third_party/bounds_checking_function/include",
   ]
 

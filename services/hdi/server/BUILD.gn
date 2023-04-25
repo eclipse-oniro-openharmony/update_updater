@@ -14,10 +14,11 @@
 import("//base/update/updater/updater_default_cfg.gni")
 import("//build/ohos.gni")
 
+updater_path = "../../.."
 ohos_shared_library("libupdate_hdi_impl") {
   sources = [ "update_hdi_impl.cpp" ]
 
-  include_dirs = [ "../../../interfaces/kits/include" ]
+  include_dirs = [ "${updater_path}/interfaces/kits/include" ]
 
   deps = []
   install_images = [ "updater" ]

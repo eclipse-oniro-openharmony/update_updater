@@ -14,6 +14,7 @@
 import("//build/test.gni")
 
 MODULE_OUTPUT_PATH = "updater/updater_test"
+updater_path = "../../.."
 
 ohos_unittest("utils_test") {
   testonly = true
@@ -24,17 +25,17 @@ ohos_unittest("utils_test") {
     "utils_unittest.cpp",
   ]
   sources += [
-    "../../../utils/json/json_node.cpp",
-    "../../../utils/utils.cpp",
+    "${updater_path}/utils/json/json_node.cpp",
+    "${updater_path}/utils/utils.cpp",
   ]
   include_dirs = [
     "include",
-    "../../../interfaces/kits/include/",
-    "../../../services/include/",
-    "../../../utils/include",
-    "../../../utils/json",
-    "../../../services/ui",
-    "../../../test/unittest",
+    "${updater_path}/interfaces/kits/include/",
+    "${updater_path}/services/include/",
+    "${updater_path}/utils/include",
+    "${updater_path}/utils/json",
+    "${updater_path}/services/ui",
+    "${updater_path}/test/unittest",
     "//third_party/bounds_checking_function/include",
     "//third_party/cJSON",
   ]
@@ -43,13 +44,13 @@ ohos_unittest("utils_test") {
     "init:libbegetutil",
   ]
   deps = [
-    "../../../services/log:libupdaterlog",
+    "${updater_path}/services/log:libupdaterlog",
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/cJSON:cjson",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
   ]
-  configs = [ "../../../test/unittest:utest_config" ]
+  configs = [ "${updater_path}/test/unittest:utest_config" ]
   install_enable = true
   part_name = "updater"
 }

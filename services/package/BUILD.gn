@@ -16,19 +16,20 @@ if (!is_linux && !is_mingw && !is_mac) {
 }
 import("//build/ohos.gni")
 
+updater_path = "../.."
 config("package_config") {
   visibility = [ ":*" ]
   cflags_cc = [ "-std=c++17" ]
   include_dirs = [
-    "../../interfaces/kits/include",
-    "../../utils/include",
-    "../../services/include",
+    "${updater_path}/interfaces/kits/include",
+    "${updater_path}/utils/include",
+    "${updater_path}/services/include",
     "//third_party/zlib",
     "//third_party/openssl/include",
     "//third_party/lz4/lib",
-    "../../services/include/package",
-    "../../services/include/script",
-    "../../services/include/log",
+    "${updater_path}/services/include/package",
+    "${updater_path}/services/include/script",
+    "${updater_path}/services/include/log",
     "pkg_algorithm",
     "pkg_manager",
     "pkg_package",
@@ -62,7 +63,7 @@ ohos_static_library("libupdaterpackage") {
   ]
 
   deps = [
-    "../../services/log:libupdaterlog",
+    "${updater_path}/services/log:libupdaterlog",
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/openssl:libcrypto_static",
   ]
