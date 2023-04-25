@@ -14,8 +14,6 @@
 import("//base/update/updater/updater_default_cfg.gni")
 import("//build/ohos.gni")
 
-
-
 config("updater_config") {
   visibility = [ ":*" ]
   include_dirs = [

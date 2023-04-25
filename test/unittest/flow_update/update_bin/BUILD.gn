@@ -14,7 +14,6 @@
 import("//base/update/updater/updater_default_cfg.gni")
 import("//build/test.gni")
 
-
 MODULE_OUTPUT_PATH = "updater/updater_test"
 
 ohos_unittest("bin_flow_update_test") {

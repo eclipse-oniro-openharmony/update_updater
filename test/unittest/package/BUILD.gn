@@ -13,7 +13,6 @@
 
 import("//build/test.gni")
 
-
 MODULE_OUTPUT_PATH = "updater/updater_test"
 
 ohos_unittest("package_unittest") {
