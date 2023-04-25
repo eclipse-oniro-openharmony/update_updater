@@ -12,8 +12,6 @@
 # limitations under the License.
 import("//build/ohos.gni")
 
-
-
 config("log_config") {
   if (is_linux || is_mingw || is_mac) {
     cflags_cc = [ "-std=c++17" ]
