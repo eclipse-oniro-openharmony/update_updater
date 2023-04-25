@@ -30,6 +30,9 @@ updater_common_include = [
   "//foundation/graphic/utils/interfaces/kits",
   "//foundation/graphic/utils/interfaces/innerkits",
   "//third_party/bounds_checking_function/include",
+  ".",
+  "./include",
+  "./ui",
 ]
 
 updater_common_deps = [
