@@ -18,7 +18,7 @@ yacc_path = "$root_out_dir/updater/updater/yacc"
 script_yacc_path = "./script_interpreter/script_yacc.y"
 script_lex_path = "./script_interpreter/script_lex.l"
 action("gen_yacc") {
-  script = "//base/update/updater/services/script/generate_yacc.py"
+  script = "../../services/script/generate_yacc.py"
   inputs = [ script ]
   outputs = [
     "$root_out_dir/updater/updater/yacc/lexer.cpp",
@@ -58,6 +58,8 @@ config("script_config") {
 
 ohos_static_library("libupdaterscript") {
   sources = [
+    "$root_out_dir/updater/updater/yacc/lexer.cpp",
+    "$root_out_dir/updater/updater/yacc/parser.cpp",
     "./script_instruction/script_basicinstruction.cpp",
     "./script_instruction/script_instructionhelper.cpp",
     "./script_instruction/script_loadscript.cpp",
@@ -73,8 +75,6 @@ ohos_static_library("libupdaterscript") {
     "./script_manager/script_managerImpl.cpp",
     "./script_manager/script_utils.cpp",
     "./threadpool/threadpool.cpp",
-    "$root_out_dir/updater/updater/yacc/lexer.cpp",
-    "$root_out_dir/updater/updater/yacc/parser.cpp",
   ]
   configs = [ ":script_config" ]
 
