@@ -13,10 +13,7 @@
 
 import("//build/test.gni")
 
-UPDATER_TEST_ROOT = "../../../test/unittest"
-
 MODULE_OUTPUT_PATH = "updater/updater_test"
-
 
 ohos_unittest("updater_service_unittest") {
   defines = [ "UPDATER_UT" ]

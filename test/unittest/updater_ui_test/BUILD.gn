@@ -13,14 +13,12 @@
 
 import("//build/test.gni")
 
-UPDATER_TEST_ROOT = "//base/update/updater/test/unittest"
-
 MODULE_OUTPUT_PATH = "updater/updater_test"
 
 ohos_unittest("ui_unittest") {
   testonly = true
   resource_config_file =
-      "//base/update/updater/test/unittest/test_data/ohos_test.xml"
+      "../../../test/unittest/test_data/ohos_test.xml"
   module_out_path = MODULE_OUTPUT_PATH
   defines = [
     "UPDATER_UT",
@@ -41,27 +39,27 @@ ohos_unittest("ui_unittest") {
     "view/ui_view_proxy_unittest.cpp",
   ]
   sources += [
-    "//base/update/updater/services/ui/language/language_ui.cpp",
-    "//base/update/updater/services/ui/strategy/ui_strategy.cpp",
-    "//base/update/updater/services/ui/view/component/box_progress_adapter.cpp",
-    "//base/update/updater/services/ui/view/component/component_factory.cpp",
-    "//base/update/updater/services/ui/view/component/img_view_adapter.cpp",
-    "//base/update/updater/services/ui/view/component/label_btn_adapter.cpp",
-    "//base/update/updater/services/ui/view/component/text_label_adapter.cpp",
-    "//base/update/updater/services/ui/view/layout/layout_parser.cpp",
-    "//base/update/updater/services/ui/view/page/base_page.cpp",
-    "//base/update/updater/services/ui/view/page/page.cpp",
-    "//base/update/updater/services/ui/view/page/page_manager.cpp",
-    "//base/update/updater/services/ui/view/page/sub_page.cpp",
-    "//base/update/updater/services/ui/view/view_api.cpp",
+    "../../../services/ui/language/language_ui.cpp",
+    "../../../services/ui/strategy/ui_strategy.cpp",
+    "../../../services/ui/view/component/box_progress_adapter.cpp",
+    "../../../services/ui/view/component/component_factory.cpp",
+    "../../../services/ui/view/component/img_view_adapter.cpp",
+    "../../../services/ui/view/component/label_btn_adapter.cpp",
+    "../../../services/ui/view/component/text_label_adapter.cpp",
+    "../../../services/ui/view/layout/layout_parser.cpp",
+    "../../../services/ui/view/page/base_page.cpp",
+    "../../../services/ui/view/page/page.cpp",
+    "../../../services/ui/view/page/page_manager.cpp",
+    "../../../services/ui/view/page/sub_page.cpp",
+    "../../../services/ui/view/view_api.cpp",
   ]
 
   include_dirs = [
     "//third_party/libpng",
     "//third_party/libdrm/include/drm",
     "//third_party/libdrm",
-    "//base/update/updater/services/include/log",
-    "//base/update/updater/services/include",
+    "../../../services/include/log",
+    "../../../services/include",
     "//drivers/hdf_core/framework/ability/sbuf/include",
     "//drivers/hdf_core/framework/include/platform",
     "//drivers/hdf_core/framework/include/core",
@@ -72,28 +70,28 @@ ohos_unittest("ui_unittest") {
     "//drivers/hdf_core/adapter/uhdf2/hdi",
     "//drivers/peripheral/input/hal/include",
     "//drivers/peripheral/input/interfaces/include",
-    "//base/update/updater/utils/include",
-    "//base/update/updater/utils/json",
-    "//base/update/updater/services",
-    "//base/update/updater/interfaces/kits/include",
-    "//base/update/updater/services/ui",
-    "//base/update/updater/services/ui/include",
-    "//base/update/updater/services/ui/control",
-    "//base/update/updater/services/ui/driver",
-    "//base/update/updater/services/ui/strategy",
-    "//base/update/updater/services/ui/view",
-    "//base/update/updater/services/ui/language",
+    "../../../utils/include",
+    "../../../utils/json",
+    "../../../services",
+    "../../../interfaces/kits/include",
+    "../../../services/ui",
+    "../../../services/ui/include",
+    "../../../services/ui/control",
+    "../../../services/ui/driver",
+    "../../../services/ui/strategy",
+    "../../../services/ui/view",
+    "../../../services/ui/language",
     "//foundation/graphic/ui/frameworks",
     "//foundation/graphic/ui/interfaces/kits",
     "//foundation/graphic/ui/interfaces/innerkits",
     "//foundation/graphic/utils/interfaces/kits",
     "//foundation/graphic/utils/interfaces/innerkits",
-    "//base/update/updater/test/unittest/updater_ui_test",
+    "../../../test/unittest/updater_ui_test",
   ]
   deps = [
-    "//base/update/updater/interfaces/kits/packages:libpackageExt",
-    "//base/update/updater/services/log:libupdaterlog",
-    "//base/update/updater/utils:libutils",
+    "../../../interfaces/kits/packages:libpackageExt",
+    "../../../services/log:libupdaterlog",
+    "../../../utils:libutils",
     "//drivers/peripheral/input/hal:hdi_input",
     "//foundation/graphic/ui/ext/updater:libupdater_layout",
     "//third_party/bounds_checking_function:libsec_static",
@@ -103,7 +101,7 @@ ohos_unittest("ui_unittest") {
     "//third_party/libdrm:libdrm",
     "//third_party/libpng:libpng",
   ]
-  configs = [ "$UPDATER_TEST_ROOT:utest_config" ]
+  configs = [ "../../../test/unittest:utest_config" ]
   external_deps = [
     "c_utils:utils",
     "hiviewdfx_hilog_native:libhilog",
