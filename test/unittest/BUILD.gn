@@ -15,7 +15,7 @@ import("//base/update/updater/updater_default_cfg.gni")
 import("//build/test.gni")
 
 module_output_path = "updater/updater_test"
-updater_path = "../.."
+updater_path = rebase_path("//base/update/updater", ".")
 
 config("utest_config") {
   visibility = [ "./*" ]

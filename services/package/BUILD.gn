@@ -16,7 +16,7 @@ if (!is_linux && !is_mingw && !is_mac) {
 }
 import("//build/ohos.gni")
 
-updater_path = "../.."
+updater_path = rebase_path("//base/update/updater", ".")
 config("package_config") {
   visibility = [ ":*" ]
   cflags_cc = [ "-std=c++17" ]

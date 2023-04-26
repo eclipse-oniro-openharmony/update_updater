@@ -14,7 +14,7 @@
 import("//base/update/updater/updater_default_cfg.gni")
 import("//build/ohos.gni")
 
-updater_path = "../.."
+updater_path = rebase_path("//base/update/updater", ".")
 config("updater_ui_support_cfg") {
   if (updater_ui_support) {
     defines = [ "UPDATER_UI_SUPPORT" ]

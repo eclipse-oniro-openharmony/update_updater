@@ -14,7 +14,7 @@
 import("//base/update/updater/updater_default_cfg.gni")
 import("//build/ohos.gni")
 
-updater_path = "../.."
+updater_path = rebase_path("//base/update/updater", ".")
 yacc_path = "$root_out_dir/updater/updater/yacc"
 script_yacc_path = "./script_interpreter/script_yacc.y"
 script_lex_path = "./script_interpreter/script_lex.l"

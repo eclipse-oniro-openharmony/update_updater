@@ -14,7 +14,7 @@
 import("//build/test.gni")
 
 MODULE_OUTPUT_PATH = "updater/updater_test"
-updater_path = "../../.."
+updater_path = rebase_path("//base/update/updater", ".")
 
 ohos_unittest("binary_unittest") {
   resource_config_file = "${updater_path}/test/unittest/test_data/ohos_test.xml"

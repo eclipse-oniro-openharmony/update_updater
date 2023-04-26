@@ -22,7 +22,7 @@ config("diff_config") {
   }
 }
 
-updater_path = "../.."
+updater_path = rebase_path("//base/update/updater", ".")
 ohos_executable("diff") {
   use_exceptions = true
   configs = [ ":diff_config" ]
