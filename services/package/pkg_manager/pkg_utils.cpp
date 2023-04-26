@@ -40,7 +40,8 @@ constexpr uint32_t TM_MON_BITS = 5;
 constexpr uint32_t TM_MIN_BITS = 5;
 constexpr uint32_t TM_HOUR_BITS = 11;
 constexpr uint32_t BYTE_SIZE = 8;
-constexpr uint32_t MAX_MEM_SIZE = 0xFFFFFFFF;
+constexpr uint32_t MAX_MEM_SIZE = 1 << 29;
+constexpr size_t MAX_FILE_SIZE = 1UL << 32;
 constexpr uint32_t SECOND_BUFFER = 2;
 constexpr uint32_t THIRD_BUFFER = 3;
 constexpr uint8_t SHIFT_RIGHT_FOUR_BITS = 4;
@@ -118,7 +119,7 @@ int32_t CheckFile(const std::string &fileName)
     return PKG_SUCCESS;
 }
 
-uint8_t *MapMemory(const std::string &fileName, size_t size)
+uint8_t *AnonymousMap(const std::string &fileName, size_t size)
 {
     if (size > MAX_MEM_SIZE) {
         PKG_LOGE("Size bigger for alloc memory");
@@ -128,9 +129,36 @@ uint8_t *MapMemory(const std::string &fileName, size_t size)
     // Map the file to memory
     mappedData = mmap(nullptr, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_POPULATE | MAP_ANON, -1, 0);
     if (mappedData == MAP_FAILED) {
-        PKG_LOGE("Failed to mmap file %s ", fileName.c_str());
+        PKG_LOGE("Failed to mmap room for file %s ", fileName.c_str());
         return nullptr;
     }
+    return static_cast<uint8_t *>(mappedData);
+}
+
+uint8_t *FileMap(const std::string &path)
+{
+    char *realPath = realpath(path.c_str(), NULL);
+    if (realPath == nullptr) {
+        PKG_LOGE("realPath is NULL");
+        return nullptr;
+    }
+    int fd = open(realPath, O_RDONLY);
+    free(realPath);
+    if (fd < 0) {
+        PKG_LOGE("Failed to open file");
+        return nullptr;
+    }
+    size_t size = GetFileSize(path);
+    if (size > MAX_FILE_SIZE) {
+        PKG_LOGE("Size bigger for mmap");
+        return nullptr;
+    }
+    void *mappedData = mmap(mappedData, memSize_, PROT_READ, MAP_PRIVATE | MAP_FIXED, fd, 0);
+    if (mappedData == MAP_FAILED) {
+        PKG_LOGE("Failed to mmap file");
+        return nullptr;
+    }
+    close(fd);
     return static_cast<uint8_t *>(mappedData);
 }
 

@@ -383,18 +383,6 @@ int32_t PkgManagerImpl::LoadPackage(const std::string &packagePath, std::vector<
         UPDATER_LAST_WORD(ret);
         return ret;
     }
-    MemoryMapStream* mmapStream = dynamic_cast<MemoryMapStream*>(stream);
-    if (mmapStream == nullptr) {
-        PKG_LOGE("get mmapStream fail");
-        UPDATER_LAST_WORD(PKG_INVALID_STREAM);
-        return PKG_INVALID_STREAM;
-    }
-    ret = mmapStream -> FileMapToMem();
-    if (ret != PKG_SUCCESS) {
-        PKG_LOGE("mmap fail %s", packagePath.c_str());
-        UPDATER_LAST_WORD(ret);
-        return ret;
-    }
     return LoadPackageWithStream(packagePath, fileIds, type, stream);
 }
 
@@ -587,7 +575,7 @@ int32_t PkgManagerImpl::CreatePkgStream(PkgStreamPtr &stream, const std::string 
             PKG_LOGE("Fail to check file size %s ", fileName.c_str());
             return PKG_INVALID_FILE;
         }
-        uint8_t *memoryMap = MapMemory(fileName, fileSize);
+        uint8_t *memoryMap = AnonymousMap(fileName, fileSize);
         if (memoryMap == nullptr) {
             UPDATER_LAST_WORD(PKG_INVALID_FILE);
             PKG_LOGE("Fail to map memory %s ", fileName.c_str());

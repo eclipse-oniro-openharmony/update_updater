@@ -183,6 +183,7 @@ public:
         PkgStreamType_MemoryMap,    // memory mapping
         PkgStreamType_Process,      // processing while parsing
         PkgStreamType_Buffer,       // buffer
+        PKgStreamType_FileMap,      // memory-mapped file
     };
 
     virtual ~PkgStream() = default;

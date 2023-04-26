@@ -147,8 +147,6 @@ public:
         return PKG_SUCCESS;
     }
 
-    int32_t FileMapToMem();
-
 private:
     uint8_t *memMap_;
     size_t memSize_;

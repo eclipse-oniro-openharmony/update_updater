@@ -293,30 +293,4 @@ int32_t MemoryMapStream::Seek(long int offset, int whence)
     }
     return PKG_SUCCESS;
 }
-
-int32_t MemoryMapStream::FileMapToMem()
-{
-    if (memMap_ == nullptr) {
-        PKG_LOGE("Invalid memory map");
-        return PKG_INVALID_STREAM;
-    }
-    char *realPath = realpath(fileName_.c_str(), NULL);
-    if (realPath == nullptr) {
-        PKG_LOGE("realPath is NULL");
-        return PKG_INVALID_FILE;
-    }
-    int fd = open(realPath, O_RDONLY);
-    free(realPath);
-    if (fd < 0) {
-        PKG_LOGE("Failed to open file");
-        return PKG_INVALID_FILE;
-    }
-    void *mappedData = mmap(memMap_, memSize_, PROT_READ, MAP_PRIVATE | MAP_FIXED, fd, 0);
-    if (mappedData == MAP_FAILED) {
-        PKG_LOGE("Failed to mmap file");
-        return PKG_INVALID_STREAM;
-    }
-    close(fd);
-    return PKG_SUCCESS;
-}
 } // namespace Hpackage
