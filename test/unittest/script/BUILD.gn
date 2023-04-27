@@ -20,7 +20,8 @@ updater_path = rebase_path("${updater_absoulutely_path}", ".")
 
 ohos_unittest("script_unittest") {
   testonly = true
-  resource_config_file = "${updater_path}/test/unittest/test_data/ohos_test.xml"
+  resource_config_file =
+      "${updater_path}/test/unittest/test_data/ohos_test.xml"
   module_out_path = MODULE_OUTPUT_PATH
   sources = [
     "script_instruction/basic_instruction_unittest.cpp",
