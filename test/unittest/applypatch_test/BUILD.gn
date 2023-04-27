@@ -11,11 +11,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//base/update/updater/updater_default_cfg.gni")
 import("//build/test.gni")
 
 MODULE_OUTPUT_PATH = "updater/updater_test"
 
-updater_path = rebase_path("//base/update/updater", ".")
+updater_path = rebase_path("${updater_absoulutely_path}", ".")
 ohos_unittest("applypatch_unittest") {
   testonly = true
   resource_config_file = "${updater_path}/test/unittest/test_data/ohos_test.xml"
