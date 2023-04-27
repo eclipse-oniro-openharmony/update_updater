@@ -19,29 +19,30 @@ import("//base/update/updater/updater_default_cfg.gni")
 import("//build/config/features.gni")
 import("//build/test.gni")
 
+updater_path = rebase_path("${updater_absoulutely_path}", ".")
 ##############################fuzztest##########################################
 ohos_fuzztest("UpdaterFactoryResetFuzzTest") {
   module_out_path = module_output_path
   resource_config_file =
-      "//base/update/updater/test/fuzztest/fuzz_src_data/ohos_test.xml"
+      "${updater_path}/test/fuzztest/fuzz_src_data/ohos_test.xml"
   fuzz_config_file =
-      "//base/update/updater/test/fuzztest/updaterfactoryreset_fuzzer"
+      "${updater_path}/test/fuzztest/updaterfactoryreset_fuzzer"
   include_dirs = [
-    "//base/update/updater/utils/include",
-    "//base/update/updater/utils/json",
-    "//base/update/updater/interfaces/kits/include/",
-    "//base/update/updater/services/include/log",
-    "//base/update/updater/services",
-    "//base/update/updater/services/include",
-    "//base/update/updater/services/include/package",
-    "//base/update/updater/services/package/pkg_manager",
-    "//base/update/updater/services/include/fs_manager",
-    "//base/update/updater/services/ui",
-    "//base/update/updater/services/ui/include",
-    "//base/update/updater/services/ui/control",
-    "//base/update/updater/services/ui/driver",
-    "//base/update/updater/services/ui/view",
-    "//base/update/updater/services/ui/language",
+    "${updater_path}/utils/include",
+    "${updater_path}/utils/json",
+    "${updater_path}/interfaces/kits/include/",
+    "${updater_path}/services/include/log",
+    "${updater_path}/services",
+    "${updater_path}/services/include",
+    "${updater_path}/services/include/package",
+    "${updater_path}/services/package/pkg_manager",
+    "${updater_path}/services/include/fs_manager",
+    "${updater_path}/services/ui",
+    "${updater_path}/services/ui/include",
+    "${updater_path}/services/ui/control",
+    "${updater_path}/services/ui/driver",
+    "${updater_path}/services/ui/view",
+    "${updater_path}/services/ui/language",
     "//foundation/graphic/ui/frameworks",
     "//foundation/graphic/ui/interfaces/kits",
     "//foundation/graphic/ui/interfaces/innerkits",
@@ -50,16 +51,16 @@ ohos_fuzztest("UpdaterFactoryResetFuzzTest") {
   ]
 
   deps = [
-    "//base/update/updater/interfaces/kits/misc_info:libmiscinfo",
-    "//base/update/updater/interfaces/kits/packages:libpackageExt",
-    "//base/update/updater/services:libupdater",
-    "//base/update/updater/services/applypatch:libapplypatch",
-    "//base/update/updater/services/diffpatch/patch:libpatch",
-    "//base/update/updater/services/fs_manager:libfsmanager",
-    "//base/update/updater/services/log:libupdaterlog",
-    "//base/update/updater/services/package:libupdaterpackage",
-    "//base/update/updater/services/ui:libui",
-    "//base/update/updater/utils:libutils",
+    "${updater_path}/interfaces/kits/misc_info:libmiscinfo",
+    "${updater_path}/interfaces/kits/packages:libpackageExt",
+    "${updater_path}/services:libupdater",
+    "${updater_path}/services/applypatch:libapplypatch",
+    "${updater_path}/services/diffpatch/patch:libpatch",
+    "${updater_path}/services/fs_manager:libfsmanager",
+    "${updater_path}/services/log:libupdaterlog",
+    "${updater_path}/services/package:libupdaterpackage",
+    "${updater_path}/services/ui:libui",
+    "${updater_path}/utils:libutils",
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/bzip2:libbz2",
     "//third_party/cJSON:cjson",
@@ -79,7 +80,7 @@ ohos_fuzztest("UpdaterFactoryResetFuzzTest") {
     "-fno-omit-frame-pointer",
   ]
   sources = [
-    "//base/update/updater/services/updater_main.cpp",
+    "${updater_path}/services/updater_main.cpp",
     "updaterfactoryreset_fuzzer.cpp",
   ]
 }

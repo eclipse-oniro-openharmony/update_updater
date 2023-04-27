@@ -11,8 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/test.gni")
 import("//base/update/updater/updater_default_cfg.gni")
+import("//build/test.gni")
 
 MODULE_OUTPUT_PATH = "updater/updater_test"
 
