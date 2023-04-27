@@ -80,8 +80,8 @@ int32_t FileStream::Read(PkgBuffer &data, size_t start, size_t needRead, size_t 
         UPDATER_LAST_WORD(PKG_INVALID_STREAM);
         return PKG_INVALID_STREAM;
     }
-    if (data.length < needRead) {
-        PKG_LOGE("Invalid buffer length");
+    if (data.capacity < needRead) {
+        PKG_LOGE("insufficient buffer capacity");
         UPDATER_LAST_WORD(PKG_INVALID_STREAM);
         return PKG_INVALID_STREAM;
     }
@@ -96,7 +96,7 @@ int32_t FileStream::Read(PkgBuffer &data, size_t start, size_t needRead, size_t 
         UPDATER_LAST_WORD(PKG_INVALID_STREAM);
         return PKG_INVALID_STREAM;
     }
-    if (data.buffer == nullptr || data.data.size() < needRead) {
+    if (data.buffer == nullptr) {
         data.data.resize(needRead);
         data.buffer = data.data.data();
     }
@@ -106,6 +106,7 @@ int32_t FileStream::Read(PkgBuffer &data, size_t start, size_t needRead, size_t 
         UPDATER_LAST_WORD(PKG_INVALID_STREAM);
         return PKG_INVALID_STREAM;
     }
+    data.length = readLen;
     return PKG_SUCCESS;
 }
 
@@ -216,8 +217,8 @@ int32_t MemoryMapStream::Read(PkgBuffer &data, size_t start, size_t needRead, si
         PKG_LOGE("Invalid start");
         return PKG_INVALID_STREAM;
     }
-    if (data.length < needRead) {
-        PKG_LOGE("Invalid start");
+    if (data.capacity < needRead) {
+        PKG_LOGE("insufficient buffer capacity");
         return PKG_INVALID_STREAM;
     }
 
@@ -225,13 +226,12 @@ int32_t MemoryMapStream::Read(PkgBuffer &data, size_t start, size_t needRead, si
     readLen = ((copyLen > needRead) ? needRead : copyLen);
     if (data.data.size() == 0) {
         data.buffer = memMap_ + start;
-        data.length = readLen;
     } else {
         if (memcpy_s(data.buffer, needRead, memMap_ + start, readLen) != EOK)
             PKG_LOGE("Memcpy failed size:%zu, start:%zu copyLen:%zu %zu", needRead, start, copyLen, readLen);
             return PKG_NONE_MEMORY;
     }
-
+    data.length = readLen;
     return PKG_SUCCESS;
 }
 

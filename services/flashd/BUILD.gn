@@ -126,11 +126,11 @@ ohos_static_library("libflashd") {
 
   deps = [
     ":flashd_deamon",
+    "../common/ring_buffer:libringbuffer",
     "//base/update/updater/interfaces/kits/misc_info:libmiscinfo",
     "//base/update/updater/interfaces/kits/slot_info:libslotinfo",
     "//base/update/updater/interfaces/kits/updaterkits:libupdaterkits",
     "//base/update/updater/services/applypatch:libapplypatch",
-    "//base/update/updater/services/common/ring_buffer:libringbuffer",
     "//base/update/updater/services/diffpatch/patch:libpatch",
     "//base/update/updater/services/fs_manager:libfsmanager",
     "//base/update/updater/services/hdi/server:libupdate_hdi_impl",
@@ -152,10 +152,10 @@ ohos_static_library("libflashd") {
   }
 
   include_dirs = [
+    "../common/ring_buffer",
     "${HDC_PATH}/daemon",
     "${HDC_PATH}/common",
     "//base/update/updater/services",
-    "//base/update/updater/services/common/ring_buffer",
     "//base/update/updater/services/flashd",
     "//base/update/updater/services/flashd/daemon",
     "//base/update/updater/services/flashd/common",

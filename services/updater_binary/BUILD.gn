@@ -17,9 +17,9 @@ import("//build/ohos.gni")
 config("updater_config") {
   visibility = [ ":*" ]
   include_dirs = [
+    "../common/ring_buffer",
     "//base/update/updater/interfaces/kits/include",
     "//base/update/updater/services",
-    "//base/update/updater/services/common/ring_buffer",
     "//base/update/updater/services/include/package",
     "//base/update/updater/services/include/script",
     "//base/update/updater/services/include/log",
@@ -53,10 +53,10 @@ ohos_executable("updater_binary") {
     ldflags += [ "-Wl,--no-whole-archive" ]
   }
   deps = [
+    "../common/ring_buffer:libringbuffer",
     "//base/update/updater/interfaces/kits/misc_info:libmiscinfo",
     "//base/update/updater/interfaces/kits/slot_info:libslotinfo",
     "//base/update/updater/services/applypatch:libapplypatch",
-    "//base/update/updater/services/common/ring_buffer:libringbuffer",
     "//base/update/updater/services/diffpatch/patch:libpatch",
     "//base/update/updater/services/fs_manager:libfsmanager",
     "//base/update/updater/services/log:libupdaterlog",

@@ -138,6 +138,7 @@ struct ZipFileInfo {
 struct PkgBuffer {
     uint8_t *buffer;
     size_t length = 0; // buffer size
+    size_t capacity = 1UL << 31;
     
     std::vector<uint8_t> data;
 
@@ -156,7 +157,8 @@ struct PkgBuffer {
     PkgBuffer(std::vector<uint8_t> &buffer)
     {
         this->buffer = buffer.data();
-        this->length = buffer.capacity();
+        this->length = buffer.size();
+        this->capacity = buffer.capacity();
     }
 
     PkgBuffer(size_t bufferSize, bool isAlloc = true)
@@ -165,9 +167,10 @@ struct PkgBuffer {
             data.resize(bufferSize, 0);
             this->buffer = data.data();
             this->length = bufferSize;
+            this->capacity = bufferSize;
         } else {
             this->buffer = nullptr;
-            this->length = bufferSize;
+            this->capacity = bufferSize;
         }
     }
 };
@@ -183,7 +186,7 @@ public:
         PkgStreamType_MemoryMap,    // memory mapping
         PkgStreamType_Process,      // processing while parsing
         PkgStreamType_Buffer,       // buffer
-        PKgStreamType_FileMap,      // memory-mapped file
+        PKgStreamType_FileMap,      // file map to memory
     };
 
     virtual ~PkgStream() = default;

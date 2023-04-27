@@ -105,30 +105,7 @@ UpdaterStatus IsSpaceCapacitySufficient(const std::vector<std::string> &packageP
     UPDATER_INIT_RECORD;
     uint64_t totalPkgSize = 0;
     for (auto path : packagePath) {
-        PkgManager::PkgManagerPtr pkgManager = Hpackage::PkgManager::CreatePackageInstance();
-        if (pkgManager == nullptr) {
-            LOG(ERROR) << "pkgManager is nullptr";
-            UPDATER_LAST_WORD(UPDATE_CORRUPT);
-            return UPDATE_CORRUPT;
-        }
-        std::vector<std::string> fileIds;
-        int ret = pkgManager->LoadPackageWithoutUnPack(path, fileIds);
-        if (ret != PKG_SUCCESS) {
-            LOG(ERROR) << "LoadPackageWithoutUnPack failed";
-            PkgManager::ReleasePackageInstance(pkgManager);
-            UPDATER_LAST_WORD(UPDATE_CORRUPT);
-            return UPDATE_CORRUPT;
-        }
-
-        const FileInfo *info = pkgManager->GetFileInfo("update.bin");
-        if (info == nullptr) {
-            LOG(ERROR) << "update.bin is not exist";
-            PkgManager::ReleasePackageInstance(pkgManager);
-            UPDATER_LAST_WORD(UPDATE_CORRUPT);
-            return UPDATE_CORRUPT;
-        }
-        totalPkgSize += static_cast<uint64_t>(info->unpackedSize + MAX_LOG_SPACE);
-        PkgManager::ReleasePackageInstance(pkgManager);
+        totalPkgSize += static_cast<uint64_t>(MAX_LOG_SPACE);
     }
 
     if (CheckStatvfs(totalPkgSize) != UPDATE_SUCCESS) {

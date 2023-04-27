@@ -41,7 +41,7 @@ constexpr uint32_t TM_MIN_BITS = 5;
 constexpr uint32_t TM_HOUR_BITS = 11;
 constexpr uint32_t BYTE_SIZE = 8;
 constexpr uint32_t MAX_MEM_SIZE = 1 << 29;
-constexpr size_t MAX_FILE_SIZE = 1UL << 32;
+constexpr size_t MAX_FILE_SIZE = 1UL << 31;
 constexpr uint32_t SECOND_BUFFER = 2;
 constexpr uint32_t THIRD_BUFFER = 3;
 constexpr uint8_t SHIFT_RIGHT_FOUR_BITS = 4;
@@ -153,7 +153,7 @@ uint8_t *FileMap(const std::string &path)
         PKG_LOGE("Size bigger for mmap");
         return nullptr;
     }
-    void *mappedData = mmap(mappedData, memSize_, PROT_READ, MAP_PRIVATE | MAP_FIXED, fd, 0);
+    void *mappedData = mmap(nullptr, size, PROT_READ, MAP_PRIVATE | MAP_FIXED, fd, 0);
     if (mappedData == MAP_FAILED) {
         PKG_LOGE("Failed to mmap file");
         return nullptr;
