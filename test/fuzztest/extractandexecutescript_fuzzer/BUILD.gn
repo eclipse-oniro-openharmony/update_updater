@@ -23,10 +23,8 @@ updater_path = rebase_path("${updater_absoulutely_path}", ".")
 ##############################fuzztest##########################################
 ohos_fuzztest("ExtractAndExecuteScriptFuzzTest") {
   module_out_path = module_output_path
-  resource_config_file =
-      "${updater_path}/test/fuzztest/fuzz_src_data/ohos_test.xml"
-  fuzz_config_file =
-      "${updater_path}/test/fuzztest/extractandexecutescript_fuzzer"
+  resource_config_file = "${updater_path}/test/fuzztest/fuzz_src_data/ohos_test.xml"
+  fuzz_config_file = "${updater_path}/test/fuzztest/extractandexecutescript_fuzzer"
   include_dirs = [
     "${updater_path}/utils/include",
     "${updater_path}/interfaces/kits/include/",

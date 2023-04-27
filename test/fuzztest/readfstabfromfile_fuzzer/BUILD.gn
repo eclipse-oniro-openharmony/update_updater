@@ -23,8 +23,7 @@ updater_path = rebase_path("${updater_absoulutely_path}", ".")
 ##############################fuzztest##########################################
 ohos_fuzztest("ReadFstabFromFileFuzzTest") {
   module_out_path = module_output_path
-  fuzz_config_file =
-      "${updater_path}/test/fuzztest/readfstabfromfile_fuzzer"
+  fuzz_config_file = "${updater_path}/test/fuzztest/readfstabfromfile_fuzzer"
   sources = [ "readfstabfromfile_fuzzer.cpp" ]
 
   include_dirs = [
