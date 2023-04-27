@@ -36,6 +36,7 @@ ohos_unittest("binary_unittest") {
   ]
 
   include_dirs = [
+    "../../../services/common/ring_buffer",
     "//base/update/updater/interfaces/kits/include",
     "//base/update/updater/services",
     "//base/update/updater/services/include/package",

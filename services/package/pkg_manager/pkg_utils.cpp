@@ -137,13 +137,12 @@ uint8_t *AnonymousMap(const std::string &fileName, size_t size)
 
 uint8_t *FileMap(const std::string &path)
 {
-    char *realPath = realpath(path.c_str(), NULL);
-    if (realPath == nullptr) {
-        PKG_LOGE("realPath is NULL");
+
+    if (access(path.c_str(), 0) != 0) {
+        PKG_LOGE("Path not exist %s", path.c_str());
         return nullptr;
     }
-    int fd = open(realPath, O_RDONLY);
-    free(realPath);
+    int fd = open(path.c_str(), O_RDONLY);
     if (fd < 0) {
         PKG_LOGE("Failed to open file");
         return nullptr;
@@ -153,7 +152,7 @@ uint8_t *FileMap(const std::string &path)
         PKG_LOGE("Size bigger for mmap");
         return nullptr;
     }
-    void *mappedData = mmap(nullptr, size, PROT_READ, MAP_PRIVATE | MAP_FIXED, fd, 0);
+    void *mappedData = mmap(nullptr, size, PROT_READ, MAP_PRIVATE, fd, 0);
     if (mappedData == MAP_FAILED) {
         PKG_LOGE("Failed to mmap file");
         return nullptr;
