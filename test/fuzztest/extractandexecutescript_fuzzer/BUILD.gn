@@ -18,8 +18,8 @@ import("//base/update/updater/updater_default_cfg.gni")
 #####################hydra-fuzz###################
 import("//build/config/features.gni")
 import("//build/test.gni")
-
 updater_path = rebase_path("${updater_absoulutely_path}", ".")
+
 ##############################fuzztest##########################################
 ohos_fuzztest("ExtractAndExecuteScriptFuzzTest") {
   module_out_path = module_output_path
