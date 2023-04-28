@@ -66,7 +66,6 @@ ohos_unittest("script_unittest") {
     "${updater_path}/test/unittest",
     "${updater_path}/utils/include",
     "//third_party/bounds_checking_function/include",
-    "//third_party/openssl/include",
   ]
 
   deps = [
@@ -81,7 +80,7 @@ ohos_unittest("script_unittest") {
     "//third_party/googletest:gtest_main",
     "//third_party/lz4:liblz4_static",
     "//third_party/openssl:libcrypto_shared",
-    "//third_party/openssl:ssl_source",
+    "//third_party/openssl:libssl_shared",
     "//third_party/zlib:libz",
   ]
   configs = [ "${updater_path}/test/unittest:utest_config" ]

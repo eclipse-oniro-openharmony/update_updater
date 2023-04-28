@@ -22,10 +22,10 @@ ohos_static_library("libdiff_patch") {
     "${updater_path}/interfaces/kits/include",
     "${updater_path}/services/include",
     "${updater_path}/services/include/patch",
-    "//third_party/openssl/include",
   ]
 
   deps = [ "${updater_path}/services/diffpatch/patch:libpatch" ]
+  deps += [ "//third_party/openssl:libcrypto_shared" ]
 }
 
 ohos_shared_library("libdiff_patch_shared") {
@@ -35,7 +35,6 @@ ohos_shared_library("libdiff_patch_shared") {
     "${updater_path}/interfaces/kits/include",
     "${updater_path}/services/include",
     "${updater_path}/services/include/patch",
-    "//third_party/openssl/include",
   ]
 
   deps = [
@@ -47,6 +46,7 @@ ohos_shared_library("libdiff_patch_shared") {
     "${updater_path}/services/package:libupdaterpackage",
     "${updater_path}/services/ptable_parse:libptableparse",
     "${updater_path}/utils:libutils",
+    "//third_party/openssl:libcrypto_shared",
   ]
 
   subsystem_name = "updater"

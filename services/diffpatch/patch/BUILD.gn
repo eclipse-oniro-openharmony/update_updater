@@ -33,8 +33,8 @@ config("patch_config") {
     "//third_party/bzip2",
     "//third_party/zlib",
     "//third_party/lz4/lib",
-    "//third_party/openssl/include",
   ]
+  defines = [ "OPENSSL_SUPPRESS_DEPRECATED" ]
 }
 
 ohos_static_library("libpatch") {
@@ -54,6 +54,7 @@ ohos_static_library("libpatch") {
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/bzip2:libbz2",
     "//third_party/lz4:liblz4_static",
+    "//third_party/openssl:libcrypto_shared",
     "//third_party/zlib:libz",
   ]
 

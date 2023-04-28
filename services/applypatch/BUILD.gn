@@ -35,7 +35,6 @@ ohos_static_library("libapplypatch") {
     "${updater_path}/utils/include",
     "${updater_path}/interfaces/kits/include",
     "${updater_path}/services/include/script",
-    "//third_party/openssl/include",
     "//third_party/zlib",
     "//third_party/external/lz4/lib",
     "${updater_path}/services/include/package",
@@ -48,6 +47,7 @@ ohos_static_library("libapplypatch") {
     "${updater_path}/services/fs_manager:libfsmanager",
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/bzip2:libbz2",
+    "//third_party/openssl:libcrypto_shared",
   ]
   external_deps = [ "init:libbegetutil" ]
   subsystem_name = "updater"

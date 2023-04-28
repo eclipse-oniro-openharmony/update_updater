@@ -48,8 +48,8 @@ updater_common_deps = [
   "//third_party/bounds_checking_function:libsec_static",
   "//third_party/bzip2:libbz2",
   "//third_party/cJSON:cjson",
-  "//third_party/openssl:libcrypto_static",
-  "//third_party/openssl:ssl_source",
+  "//third_party/openssl:libcrypto_shared",
+  "//third_party/openssl:libssl_shared",
   "//third_party/zlib:libz",
 ]
 
@@ -64,13 +64,13 @@ ohos_executable("updater") {
   ]
 
   include_dirs = updater_common_include
-  include_dirs += [ "//third_party/openssl/include" ]
 
   deps = updater_common_deps
   deps += [
     "${updater_path}/interfaces/kits/misc_info:libmiscinfo",
     "${updater_path}/services/ui:libui",
     "//third_party/libdrm:libdrm",
+    "//third_party/openssl:libcrypto_shared",
   ]
 
   # force link flashd library
@@ -106,6 +106,13 @@ ohos_executable("updater") {
   }
 
   external_deps = [ "init:libbegetutil" ]
+
+  if (build_selinux) {
+    external_deps += [ "selinux:librestorecon" ]
+    deps += [ "//third_party/selinux:libselinux" ]
+    include_dirs += [ "//third_party/selinux/libselinux/include" ]
+    cflags = [ "-DWITH_SELINUX" ]
+  }
 
   install_images = [ "updater" ]
   install_enable = true

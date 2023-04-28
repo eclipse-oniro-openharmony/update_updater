@@ -23,7 +23,6 @@ ohos_static_library("libpackageExt") {
     "${updater_path}/services/include",
     "${updater_path}/utils/include",
     "//third_party/bounds_checking_function/include",
-    "//third_party/openssl/include",
   ]
 
   deps = [
@@ -31,8 +30,8 @@ ohos_static_library("libpackageExt") {
     "${updater_path}/services/package:libupdaterpackage",
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/lz4:liblz4_static",
-    "//third_party/openssl:libcrypto_static",
-    "//third_party/openssl:ssl_source",
+    "//third_party/openssl:libcrypto_shared",
+    "//third_party/openssl:libssl_shared",
     "//third_party/zlib:libz",
   ]
   subsystem_name = "updater"
