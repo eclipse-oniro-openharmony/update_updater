@@ -13,7 +13,7 @@
 
 if (!is_linux && !is_mingw && !is_mac) {
   import("//base/update/updater/updater_default_cfg.gni")
-  updater_path = rebase_path("${updater_absoulutely_path}", ".")
+  updater_path = rebase_path("${updater_absolutely_path}", ".")
 } else {
   updater_path = "../.."
 }

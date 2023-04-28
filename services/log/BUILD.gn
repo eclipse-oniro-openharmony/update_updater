@@ -20,7 +20,7 @@ config("log_config") {
   }
 }
 
-updater_path = rebase_path("${updater_absoulutely_path}", ".")
+updater_path = rebase_path("${updater_absolutely_path}", ".")
 ohos_static_library("libupdaterlog") {
   sources = [
     "dump.cpp",

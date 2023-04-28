@@ -18,7 +18,7 @@ import("//build/config/features.gni")
 import("//build/ohos.gni")
 import("//build/test.gni")
 module_output_path = "updater/read_fstab_from_file"
-updater_path = rebase_path("${updater_absoulutely_path}", ".")
+updater_path = rebase_path("${updater_absolutely_path}", ".")
 
 ##############################fuzztest##########################################
 ohos_fuzztest("ReadFstabFromFileFuzzTest") {
