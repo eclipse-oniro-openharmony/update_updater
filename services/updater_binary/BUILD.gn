@@ -72,10 +72,12 @@ ohos_executable("updater_binary") {
     deps += binary_custom_lib
   }
 
+  defines = [ "OPENSSL_SUPPRESS_DEPRECATED" ]
+
   if (defined(use_ptable)) {
     include_dirs = [ "${updater_path}/services/ptable_parse" ]
     deps += [ "${updater_path}/services/ptable_parse:libptableparse" ]
-    defines = [ "UPDATER_USE_PTABLE" ]
+    defines += [ "UPDATER_USE_PTABLE" ]
   }
 
   external_deps = [ "init:libfsmanager_static" ]
@@ -87,5 +89,4 @@ ohos_executable("updater_binary") {
   ]
   part_name = "updater"
   subsystem_name = "updater"
-  defines = [ "OPENSSL_SUPPRESS_DEPRECATED" ]
 }
