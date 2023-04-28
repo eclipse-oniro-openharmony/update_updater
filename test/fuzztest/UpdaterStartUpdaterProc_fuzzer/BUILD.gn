@@ -35,7 +35,6 @@ ohos_fuzztest("UpdaterStartUpdaterProcFuzzTest") {
     "//base/update/updater/services/ui",
     "//base/update/updater/utils/include",
     "//base/update/updater/utils/json/",
-    "//third_party/openssl/include",
   ]
 
   deps = [
@@ -53,8 +52,8 @@ ohos_fuzztest("UpdaterStartUpdaterProcFuzzTest") {
     "//third_party/libdrm:libdrm",
     "//third_party/libpng:libpng",
     "//third_party/lz4:liblz4_static",
-    "//third_party/openssl:libcrypto_static",
-    "//third_party/openssl:ssl_source",
+    "//third_party/openssl:libcrypto_shared",
+    "//third_party/openssl:libssl_shared",
     "//third_party/zlib:libz",
   ]
 
