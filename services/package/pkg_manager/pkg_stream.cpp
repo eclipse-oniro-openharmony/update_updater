@@ -221,15 +221,15 @@ int32_t MemoryMapStream::Read(PkgBuffer &data, size_t start, size_t needRead, si
         PKG_LOGE("insufficient buffer capacity");
         return PKG_INVALID_STREAM;
     }
-
     size_t copyLen = GetFileLength() - start;
     readLen = ((copyLen > needRead) ? needRead : copyLen);
     if (data.data.size() == 0) {
         data.buffer = memMap_ + start;
     } else {
-        if (memcpy_s(data.buffer, needRead, memMap_ + start, readLen) != EOK)
+        if (memcpy_s(data.buffer, needRead, memMap_ + start, readLen) != EOK) {
             PKG_LOGE("Memcpy failed size:%zu, start:%zu copyLen:%zu %zu", needRead, start, copyLen, readLen);
             return PKG_NONE_MEMORY;
+        }
     }
     data.length = readLen;
     return PKG_SUCCESS;

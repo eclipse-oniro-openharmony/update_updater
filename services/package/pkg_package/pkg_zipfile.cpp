@@ -551,7 +551,7 @@ int32_t ZipFileEntry::DecodeLocalFileHeaderCheck(PkgStreamPtr inStream, PkgBuffe
     size_t readLen = 0;
     if ((flags & GPBDD_FLAG_MASK) == GPBDD_FLAG_MASK) {
         currentPos += fileInfo_.fileInfo.packedSize;
-        int ret = inStream->Read(data, currentPos, data.length, readLen);
+        int ret = inStream->Read(data, currentPos, data.capacity, readLen);
         if (ret != PKG_SUCCESS) {
             PKG_LOGE("parse entry read centralDir failed");
             return ret;
@@ -591,7 +591,7 @@ int32_t ZipFileEntry::DecodeLocalFileHeader(PkgStreamPtr inStream, PkgBuffer &da
     size_t &decodeLen)
 {
     size_t readLen = 0;
-    int32_t ret = inStream->Read(data, currentPos, data.length, readLen);
+    int32_t ret = inStream->Read(data, currentPos, data.capacity, readLen);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("parse entry read centralDir failed");
         return ret;
@@ -698,7 +698,7 @@ int32_t ZipFileEntry::DecodeHeader(PkgBuffer &buff, size_t startOffset, size_t d
         return PKG_INVALID_PKG_FORMAT;
     }
     size_t readLen = 0;
-    int32_t ret = inStream->Read(buff, startOffset, buff.length, readLen);
+    int32_t ret = inStream->Read(buff, startOffset, buff.capacity, readLen);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("parse entry read centralDir failed");
         return ret;

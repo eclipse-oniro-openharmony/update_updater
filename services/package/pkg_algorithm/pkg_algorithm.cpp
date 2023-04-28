@@ -26,7 +26,7 @@ int32_t PkgAlgorithm::ReadData(const PkgStreamPtr inStream, size_t offset, PkgBu
     size_t &remainSize, size_t &readLen) const
 {
     size_t readBytes = 0;
-    size_t remainBytes = (remainSize > buffer.length) ? buffer.length : remainSize;
+    size_t remainBytes = (remainSize > buffer.capacity) ? buffer.capacity : remainSize;
     if (remainBytes != 0) {
         int32_t ret = inStream->Read(buffer, offset, remainBytes, readBytes);
         if (ret != PKG_SUCCESS) {

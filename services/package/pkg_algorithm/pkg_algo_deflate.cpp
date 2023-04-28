@@ -168,7 +168,6 @@ int32_t PkgAlgoDeflate::UnpackCalculate(PkgAlgorithmContext &context, const PkgS
     size_t readLen = 0;
     int32_t unpack_ret = Z_OK;
     while ((unpackContext.packedSize > 0) || (unpack_ret != Z_STREAM_END)) {
-        inBuffer.length = INFLATE_IN_BUFFER_SIZE;
         if (ReadUnpackData(inStream, inBuffer, zstream, unpackContext, readLen) != PKG_SUCCESS) {
             break;
         }

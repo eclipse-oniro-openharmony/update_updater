@@ -54,6 +54,7 @@ ohos_unittest("binary_unittest") {
     "//base/update/updater/services/updater_binary",
   ]
   deps = [
+    "../../../services/common/ring_buffer:libringbuffer",
     "//base/update/updater/interfaces/kits/misc_info:libmiscinfo",
     "//base/update/updater/interfaces/kits/slot_info:libslotinfo",
     "//base/update/updater/services/applypatch:libapplypatch",

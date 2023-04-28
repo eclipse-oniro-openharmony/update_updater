@@ -185,7 +185,7 @@ int32_t Lz4PkgFile::LoadPackage(std::vector<std::string> &fileNames, VerifyFunct
     size_t srcOffset = 0;
     size_t readLen = 0;
     PkgBuffer buffer(sizeof(PkgAlgorithmLz4::LZ4B_MAGIC_NUMBER), false);
-    int32_t ret = pkgStream_->Read(buffer, srcOffset, buffer.length, readLen);
+    int32_t ret = pkgStream_->Read(buffer, srcOffset, buffer.capacity, readLen);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("Fail to read buffer");
         return ret;
