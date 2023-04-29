@@ -25,9 +25,19 @@ extern "C" __attribute__((constructor)) void RegisterHelper(void)
     PreProcess::GetInstance().RegisterHelper(UpdatePreProcess);
 }
 
+extern "C" __attribute__((constructor)) void AuthHelper(void)
+{
+    PreProcess::GetInstance().AuthHelper(UpdateAuth);
+}
+
 void PreProcess::RegisterHelper(PreProcessFunc ptr)
 {
     helper_ = std::move(ptr);
+}
+
+void PreProcess::RegisterHelper(AuthFunc ptr)
+{
+    authHelper_ = std::move(ptr);
 }
 
 PreProcess &PreProcess::GetInstance()
@@ -43,6 +53,11 @@ int32_t PreProcess::DoUpdatePreProcess(PkgManager::PkgManagerPtr pkgManager)
         return -1;
     }
     return helper_(pkgManager);
+}
+
+int32_t PreProcess::DoUpdateAuth(std::string path)
+{
+    return authHelper_(path);
 }
 
 int CheckVersion(PkgManager::PkgManagerPtr pkgManager, PackagesInfoPtr pkginfomanager)
@@ -108,5 +123,10 @@ int32_t UpdatePreProcess(PkgManager::PkgManagerPtr pkgManager)
     ret = CheckVersion(pkgManager, pkginfomanager);
     PackagesInfo::ReleasePackagesInfoInstance(pkginfomanager);
     return ret;
+}
+
+int32_t UpdateAuth(std::string &path)
+{
+    return 0;
 }
 } // namespace Updater

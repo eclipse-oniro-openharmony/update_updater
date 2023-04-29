@@ -21,21 +21,26 @@
 
 namespace Updater {
 typedef int32_t (*PreProcessFunc)(Hpackage::PkgManager::PkgManagerPtr pkgManager);
+typedef int32_t (*AuthFunc)(std::string &path);
 
 int CheckBoardId(Hpackage::PkgManager::PkgManagerPtr pkgManager, PackagesInfoPtr pkginfomanager);
 int CheckVersion(Hpackage::PkgManager::PkgManagerPtr pkgManager, PackagesInfoPtr pkginfomanager);
 int32_t UpdatePreProcess(Hpackage::PkgManager::PkgManagerPtr pkgManager);
+int32_t UpdateAuth(std::string &path);
 
 class PreProcess {
     DISALLOW_COPY_MOVE(PreProcess);
 public:
     void RegisterHelper(PreProcessFunc ptr);
+    void AuthHelper(AuthFunc ptr);
     static PreProcess &GetInstance();
     int32_t DoUpdatePreProcess(Hpackage::PkgManager::PkgManagerPtr pkgManager);
+    int32_t DoUpdateAuth(std::string path);
 private:
     PreProcess() = default;
     ~PreProcess() = default;
     PreProcessFunc helper_ {};
+    AuthFunc authHelper_ {};
 };
 } // namespace Updater
 
