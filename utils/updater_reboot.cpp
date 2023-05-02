@@ -26,16 +26,16 @@ int main(int argc, char **argv)
         return 1;
     }
     if (argc == 1) {
-        Updater::LOG(Updater::INFO) << "Updater::Utils::DoReboot nullptr";
-        Updater::Utils::DoReboot("");
+        Updater::LOG(Updater::INFO) << "Updater::Utils::UpdaterDoReboot nullptr";
+        Updater::Utils::UpdaterDoReboot("");
     } else {
         std::string updaterStr = "updater";
         if (!memcmp(argv[1], updaterStr.c_str(), updaterStr.length())) {
-            Updater::Utils::DoReboot(argv[1]);
+            Updater::Utils::UpdaterDoReboot(argv[1]);
         } else if (strcmp(argv[1], "flashd") == 0) {
-            Updater::Utils::DoReboot(argv[1]);
+            Updater::Utils::UpdaterDoReboot(argv[1]);
         } else if (strncmp(argv[1], "flashd:", strlen("flashd:")) == 0) {
-            Updater::Utils::DoReboot("flashd", argv[1] + strlen("flashd:"));
+            Updater::Utils::UpdaterDoReboot("flashd", argv[1] + strlen("flashd:"));
         } else {
             Updater::LOG(Updater::INFO) << "param must be updater/flashd!";
         }
