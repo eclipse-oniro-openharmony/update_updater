@@ -137,7 +137,6 @@ uint8_t *AnonymousMap(const std::string &fileName, size_t size)
 
 uint8_t *FileMap(const std::string &path)
 {
-
     if (access(path.c_str(), 0) != 0) {
         PKG_LOGE("Path not exist %s", path.c_str());
         return nullptr;

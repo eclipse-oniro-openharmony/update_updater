@@ -301,7 +301,7 @@ int32_t UScriptInstructionUpdateFromBin::Execute(Uscript::UScriptEnv &env, Uscri
     }
 
     RingBuffer ringBuffer;
-    if (ringBuffer.Init(STASH_BUFFER_SIZE, 8)) {
+    if (ringBuffer.Init(STASH_BUFFER_SIZE, BUFFER_NUM)) {
         LOG(ERROR) << "Error to get ringbuffer";
         return USCRIPT_INVALID_PARAM;
     }
@@ -330,7 +330,7 @@ int UScriptInstructionUpdateFromBin::UnCompressDataProducer(const PkgBuffer &buf
     if (buffer.buffer == nullptr || size == 0) {
         return PKG_SUCCESS;
     }
-    while(stashDataSize_ + size >= STASH_BUFFER_SIZE) {
+    while (stashDataSize_ + size >= STASH_BUFFER_SIZE) {
         size_t readLen = STASH_BUFFER_SIZE - stashDataSize_;
         if (memcpy_s(stashBuffer.buffer + stashDataSize_, readLen, buffer.buffer + start, readLen) != 0) {
                 return USCRIPT_ERROR_EXECUTE;

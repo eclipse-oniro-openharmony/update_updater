@@ -354,7 +354,8 @@ int32_t PkgManagerImpl::ExtraAndLoadPackage(const std::string &path, const std::
     }
 
     // Extract package to file or memory
-    if (unzipToFile_ || type == PkgFile::PKG_TYPE_UPGRADE) {
+    // if (unzipToFile_ || type == PkgFile::PKG_TYPE_UPGRADE) {
+    if (unzipToFile_) {
         ret = CreatePkgStream(stream, tempPath + name + ".tmp", info->unpackedSize, PkgStream::PkgStreamType_Write);
     } else {
         ret = CreatePkgStream(stream, tempPath + name + ".tmp", info->unpackedSize, PkgStream::PkgStreamType_MemoryMap);

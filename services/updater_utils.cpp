@@ -173,9 +173,9 @@ void PostUpdater(bool clearMisc)
     }
 
     // delete updater tmp files
-    if (access(UPDATER_PATH, 0) == 0 && access(SDCARD_CARD_PATH, 0) != 0 && !DeleteUpdaterPath(UPDATER_PATH)) {
-        LOG(ERROR) << "DeleteUpdaterPath failed";
-    }
+    // if (access(UPDATER_PATH, 0) == 0 && access(SDCARD_CARD_PATH, 0) != 0 && !DeleteUpdaterPath(UPDATER_PATH)) {
+    //     LOG(ERROR) << "DeleteUpdaterPath failed";
+    // }
     if (access(SDCARD_CARD_PATH, 0) == 0 && !DeleteUpdaterPath(SDCARD_CARD_PATH)) {
         LOG(ERROR) << "Delete sdcard path failed";
     }
