@@ -35,7 +35,7 @@ void PreProcess::RegisterHelper(PreProcessFunc ptr)
     helper_ = std::move(ptr);
 }
 
-void PreProcess::RegisterHelper(AuthFunc ptr)
+void PreProcess::AuthHelper(AuthFunc ptr)
 {
     authHelper_ = std::move(ptr);
 }
