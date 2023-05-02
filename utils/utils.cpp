@@ -42,6 +42,15 @@ constexpr uint8_t SHIFT_RIGHT_FOUR_BITS = 4;
 constexpr int USECONDS_PER_SECONDS = 1000000; // 1s = 1000000us
 constexpr int NANOSECS_PER_USECONDS = 1000; // 1us = 1000ns
 constexpr int MAX_TIME_SIZE = 20;
+std::string GetFilePath(const std::string &fileName)
+{
+    std::size_t pos = fileName.find_last_of('/');
+    if (pos == std::string::npos) {
+        pos = fileName.find_last_of('\\');
+    }
+    return fileName.substr(0, pos + 1);
+}
+
 int32_t DeleteFile(const std::string& filename)
 {
     if (filename.empty()) {

@@ -46,6 +46,7 @@ T String2Int(const std::string &str, int base = N_HEX)
     T result = strtoull(str.c_str(), &end, base);
     return result;
 }
+std::string GetFilePath(const std::string &fileName);
 int32_t DeleteFile(const std::string& filename);
 int MkdirRecursive(const std::string &pathName, mode_t mode);
 int64_t GetFilesFromDirectory(const std::string &path, std::vector<std::string> &files, bool isRecursive = false);
