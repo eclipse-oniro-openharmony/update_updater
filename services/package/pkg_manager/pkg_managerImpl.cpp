@@ -319,7 +319,7 @@ int32_t PkgManagerImpl::LoadPackage(const std::string &packagePath, const std::s
                 fileIds.push_back(name);
                 continue;
             }
-            ret = ExtraAndLoadPackage(Updater::Utils::GetFilePath(packagePath), name, pkgType, fileIds);
+            ret = ExtraAndLoadPackage(GetFilePath(packagePath), name, pkgType, fileIds);
             if (ret != PKG_SUCCESS) {
                 ClearPkgFile();
                 UPDATER_LAST_WORD(ret);

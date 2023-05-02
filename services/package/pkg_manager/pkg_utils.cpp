@@ -47,6 +47,15 @@ constexpr uint8_t SHIFT_RIGHT_FOUR_BITS = 4;
 
 using namespace Updater::Utils;
 
+std::string GetFilePath(const std::string &fileName)
+{
+    std::size_t pos = fileName.find_last_of('/');
+    if (pos == std::string::npos) {
+        pos = fileName.find_last_of('\\');
+    }
+    return fileName.substr(0, pos + 1);
+}
+
 size_t GetFileSize(const std::string &fileName)
 {
     char realPath[PATH_MAX] = { 0 };
