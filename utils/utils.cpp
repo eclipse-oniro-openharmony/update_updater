@@ -582,6 +582,5 @@ bool IsDirExist(const std::string &path)
     }
     return false;
 }
-
 } // Utils
 } // namespace Updater
