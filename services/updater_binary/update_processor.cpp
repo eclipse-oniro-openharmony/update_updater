@@ -292,7 +292,7 @@ int32_t UScriptInstructionUpdateFromBin::Execute(Uscript::UScriptEnv &env, Uscri
         return ret;
     }
 
-    LOG(INFO) << "UScriptInstructionUpdateFromZip::Execute " << upgradeFileName;
+    LOG(INFO) << "UScriptInstructionUpdateFromBin::Execute " << upgradeFileName;
 
     PkgManager::PkgManagerPtr pkgManager = env.GetPkgManager();
     if (pkgManager == nullptr) {
@@ -327,12 +327,10 @@ int UScriptInstructionUpdateFromBin::UnCompressDataProducer(const PkgBuffer &buf
                                                             bool isFinish, const void* context)
 {
     static PkgBuffer stashBuffer(STASH_BUFFER_SIZE);
-    if (buffer.buffer == nullptr || size == 0) {
-        return PKG_SUCCESS;
-    }
+    size_t bufferStart = 0;
     while (stashDataSize_ + size >= STASH_BUFFER_SIZE) {
         size_t readLen = STASH_BUFFER_SIZE - stashDataSize_;
-        if (memcpy_s(stashBuffer.buffer + stashDataSize_, readLen, buffer.buffer + start, readLen) != 0) {
+        if (memcpy_s(stashBuffer.buffer + stashDataSize_, readLen, buffer.buffer + bufferStart, readLen) != 0) {
                 return USCRIPT_ERROR_EXECUTE;
         }
         void *p = const_cast<void *>(context);
@@ -341,17 +339,17 @@ int UScriptInstructionUpdateFromBin::UnCompressDataProducer(const PkgBuffer &buf
             LOG(ERROR) << "ring buffer is nullptr";
             return PKG_INVALID_STREAM;
         }
-        //  ringBuffer.push()
+        ringBuffer.push(stashBuffer.buffer, STASH_BUFFER_SIZE);
         stashDataSize_ = 0;
         size -= readLen;
-        start += readLen;
+        bufferStart += readLen;
     }
-    if (size == 0) {
+    if (size == 0 && stashDataSize_ == 0) {
         return PKG_SUCCESS;
     } else if (memcpy_s(stashBuffer.buffer + stashDataSize_, STASH_BUFFER_SIZE - stashDataSize_,
-        buffer.buffer + start, size) == 0) {
+        buffer.buffer + bufferStart, size) == 0) {
         if (isFinish) {
-            // ringBuffer.push
+            ringBuffer.push(stashBuffer.buffer, stashDataSize_ + size);
         }
         return PKG_SUCCESS;
     } else {
