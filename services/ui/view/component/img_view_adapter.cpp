@@ -22,6 +22,7 @@
 #include "updater_ui_const.h"
 #include "updater_ui_env.h"
 #include "utils.h"
+#include "view_api.h"
 
 namespace Updater {
 class ImgViewAdapter::ImgAnimatorCallback final : public OHOS::AnimatorCallback {

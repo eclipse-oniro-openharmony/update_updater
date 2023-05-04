@@ -136,11 +136,6 @@ bool TransferManager::RegisterForRetry(const std::string &cmd)
         LOG(ERROR) << "Failed to create";
         return false;
     }
-    if (fchown(fd, O_USER_GROUP_ID, O_USER_GROUP_ID) != 0) {
-        LOG(ERROR) << "Failed to chown";
-        close(fd);
-        return -1;
-    }
     bool ret = Utils::WriteStringToFile(fd, cmd);
     if (ret == false) {
         LOG(ERROR) << "Write retry flag error";

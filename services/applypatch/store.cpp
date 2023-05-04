@@ -122,11 +122,6 @@ int32_t Store::WriteDataToStore(const std::string &dirPath, const std::string &f
         LOG(ERROR) << "Failed to create store";
         return -1;
     }
-    if (fchown(fd, O_USER_GROUP_ID, O_USER_GROUP_ID) != 0) {
-        LOG(ERROR) << "Failed to chown";
-        close(fd);
-        return -1;
-    }
     LOG(INFO) << "Writing " << size << " blocks to " << path;
     if (size < 0 || !WriteFully(fd, buffer.data(), static_cast<size_t>(size))) {
         if (errno == EIO) {

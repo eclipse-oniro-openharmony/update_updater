@@ -14,24 +14,24 @@
 import("//base/update/updater/updater_default_cfg.gni")
 import("//build/ohos.gni")
 
+updater_path = rebase_path("${updater_absolutely_path}", ".")
 ohos_static_library("libpackageExt") {
   sources = [ "package.cpp" ]
 
   include_dirs = [
-    "//base/update/updater/interfaces/kits/include",
-    "//base/update/updater/services/include",
-    "//base/update/updater/utils/include",
+    "${updater_path}/interfaces/kits/include",
+    "${updater_path}/services/include",
+    "${updater_path}/utils/include",
     "//third_party/bounds_checking_function/include",
-    "//third_party/openssl/include",
   ]
 
   deps = [
-    "//base/update/updater/services/log:libupdaterlog",
-    "//base/update/updater/services/package:libupdaterpackage",
+    "${updater_path}/services/log:libupdaterlog",
+    "${updater_path}/services/package:libupdaterpackage",
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/lz4:liblz4_static",
-    "//third_party/openssl:libcrypto_static",
-    "//third_party/openssl:ssl_source",
+    "//third_party/openssl:libcrypto_shared",
+    "//third_party/openssl:libssl_shared",
     "//third_party/zlib:libz",
   ]
   subsystem_name = "updater"

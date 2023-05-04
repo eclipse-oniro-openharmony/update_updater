@@ -14,9 +14,8 @@
 import("//base/update/updater/updater_default_cfg.gni")
 import("//build/test.gni")
 
-UPDATER_TEST_ROOT = "${updater_path}/test/unittest"
-
 MODULE_OUTPUT_PATH = "updater/updater_test"
+updater_path = rebase_path("${updater_absolutely_path}", ".")
 
 ohos_unittest("bin_flow_update_test") {
   testonly = true
@@ -40,7 +39,7 @@ ohos_unittest("bin_flow_update_test") {
     "//third_party/googletest:gtest_main",
   ]
   defines = [ "UPDATER_UT" ]
-  configs = [ "$UPDATER_TEST_ROOT:utest_config" ]
+  configs = [ "${updater_path}/test/unittest:utest_config" ]
   install_enable = true
   part_name = "updater"
 }

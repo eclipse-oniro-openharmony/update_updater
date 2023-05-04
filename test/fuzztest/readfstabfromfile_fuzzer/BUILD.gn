@@ -18,27 +18,27 @@ import("//build/config/features.gni")
 import("//build/ohos.gni")
 import("//build/test.gni")
 module_output_path = "updater/read_fstab_from_file"
+updater_path = rebase_path("${updater_absolutely_path}", ".")
 
 ##############################fuzztest##########################################
 ohos_fuzztest("ReadFstabFromFileFuzzTest") {
   module_out_path = module_output_path
-  fuzz_config_file =
-      "//base/update/updater/test/fuzztest/readfstabfromfile_fuzzer"
+  fuzz_config_file = "${updater_path}/test/fuzztest/readfstabfromfile_fuzzer"
   sources = [ "readfstabfromfile_fuzzer.cpp" ]
 
   include_dirs = [
-    "//base/update/updater/utils/include",
-    "//base/update/updater/interfaces/kits/include/",
-    "//base/update/updater/services/include/package",
-    "//base/update/updater/services/include/fs_manager",
-    "//base/update/updater/services/include/log",
-    "//base/update/updater/services",
-    "//base/update/updater/services/include",
+    "${updater_path}/utils/include",
+    "${updater_path}/interfaces/kits/include/",
+    "${updater_path}/services/include/package",
+    "${updater_path}/services/include/fs_manager",
+    "${updater_path}/services/include/log",
+    "${updater_path}/services",
+    "${updater_path}/services/include",
   ]
 
   deps = [
-    "//base/update/updater/services/fs_manager:libfsmanager",
-    "//base/update/updater/services/log:libupdaterlog",
+    "${updater_path}/services/fs_manager:libfsmanager",
+    "${updater_path}/services/log:libupdaterlog",
   ]
 
   external_deps = [ "init:libbegetutil" ]

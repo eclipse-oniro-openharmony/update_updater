@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//base/update/updater/updater_default_cfg.gni")
 import("//build/test.gni")
 
 UPDATER_TEST_ROOT = "//base/update/updater/test/unittest"
@@ -28,6 +29,7 @@ ohos_unittest("flashd_unittest") {
     "${HDC_PATH}/common/auth.cpp",
     "${HDC_PATH}/common/base.cpp",
     "${HDC_PATH}/common/channel.cpp",
+    "${HDC_PATH}/common/circle_buffer.cpp",
     "${HDC_PATH}/common/debug.cpp",
     "${HDC_PATH}/common/file.cpp",
     "${HDC_PATH}/common/file_descriptor.cpp",
@@ -72,7 +74,6 @@ ohos_unittest("flashd_unittest") {
     "//base/startup/init/services/include/param",
     "//third_party/bounds_checking_function/include",
     "//third_party/cJSON",
-    "//third_party/openssl/include",
     "//third_party/lz4/lib",
     "//third_party/libuv",
   ]
@@ -97,7 +98,7 @@ ohos_unittest("flashd_unittest") {
     "//third_party/googletest:gtest_main",
     "//third_party/libuv:uv",
     "//third_party/lz4:liblz4_static",
-    "//third_party/openssl:libcrypto_static",
+    "//third_party/openssl:libcrypto_shared",
     "//third_party/zlib:libz",
   ]
 
@@ -108,4 +109,5 @@ ohos_unittest("flashd_unittest") {
   configs = [ "$UPDATER_TEST_ROOT:utest_config" ]
   install_enable = true
   part_name = "updater"
+  defines = [ "OPENSSL_SUPPRESS_DEPRECATED" ]
 }

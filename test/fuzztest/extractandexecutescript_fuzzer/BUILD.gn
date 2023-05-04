@@ -18,49 +18,49 @@ import("//base/update/updater/updater_default_cfg.gni")
 #####################hydra-fuzz###################
 import("//build/config/features.gni")
 import("//build/test.gni")
+updater_path = rebase_path("${updater_absolutely_path}", ".")
 
 ##############################fuzztest##########################################
 ohos_fuzztest("ExtractAndExecuteScriptFuzzTest") {
   module_out_path = module_output_path
   resource_config_file =
-      "//base/update/updater/test/fuzztest/fuzz_src_data/ohos_test.xml"
+      "${updater_path}/test/fuzztest/fuzz_src_data/ohos_test.xml"
   fuzz_config_file =
-      "//base/update/updater/test/fuzztest/extractandexecutescript_fuzzer"
+      "${updater_path}/test/fuzztest/extractandexecutescript_fuzzer"
   include_dirs = [
-    "//base/update/updater/utils/include",
-    "//base/update/updater/interfaces/kits/include/",
-    "//base/update/updater/services/include/package",
-    "//base/update/updater/services/package/pkg_manager",
-    "//base/update/updater/services/package/pkg_algorithm",
-    "//base/update/updater/services/include/log",
-    "//base/update/updater/services",
-    "//base/update/updater/services/ui",
-    "//base/update/updater/services/include",
-    "//base/update/updater/services/include/script",
-    "//base/update/updater/services/script/threadpool",
-    "//base/update/updater/services/script/script_manager",
-    "//base/update/updater/services/script/script_instruction",
+    "${updater_path}/utils/include",
+    "${updater_path}/interfaces/kits/include/",
+    "${updater_path}/services/include/package",
+    "${updater_path}/services/package/pkg_manager",
+    "${updater_path}/services/package/pkg_algorithm",
+    "${updater_path}/services/include/log",
+    "${updater_path}/services",
+    "${updater_path}/services/ui",
+    "${updater_path}/services/include",
+    "${updater_path}/services/include/script",
+    "${updater_path}/services/script/threadpool",
+    "${updater_path}/services/script/script_manager",
+    "${updater_path}/services/script/script_instruction",
     "//third_party/bounds_checking_function/include",
-    "//third_party/openssl/include",
   ]
 
   deps = [
-    "//base/update/updater/interfaces/kits/misc_info:libmiscinfo",
-    "//base/update/updater/interfaces/kits/packages:libpackageExt",
-    "//base/update/updater/services/applypatch:libapplypatch",
-    "//base/update/updater/services/diffpatch/patch:libpatch",
-    "//base/update/updater/services/fs_manager:libfsmanager",
-    "//base/update/updater/services/log:libupdaterlog",
-    "//base/update/updater/services/package:libupdaterpackage",
-    "//base/update/updater/services/script:libupdaterscript",
-    "//base/update/updater/services/ui:libui",
-    "//base/update/updater/utils:libutils",
+    "${updater_path}/interfaces/kits/misc_info:libmiscinfo",
+    "${updater_path}/interfaces/kits/packages:libpackageExt",
+    "${updater_path}/services/applypatch:libapplypatch",
+    "${updater_path}/services/diffpatch/patch:libpatch",
+    "${updater_path}/services/fs_manager:libfsmanager",
+    "${updater_path}/services/log:libupdaterlog",
+    "${updater_path}/services/package:libupdaterpackage",
+    "${updater_path}/services/script:libupdaterscript",
+    "${updater_path}/services/ui:libui",
+    "${updater_path}/utils:libutils",
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/bzip2:libbz2",
     "//third_party/libdrm:libdrm",
     "//third_party/lz4:liblz4_static",
-    "//third_party/openssl:libcrypto_static",
-    "//third_party/openssl:ssl_source",
+    "//third_party/openssl:libcrypto_shared",
+    "//third_party/openssl:libssl_shared",
     "//third_party/zlib:libz",
   ]
   external_deps = [ "c_utils:utils" ]

@@ -15,16 +15,28 @@
 #ifndef UPDATER_UI_LABEL_BTN_ADAPTER_H
 #define UPDATER_UI_LABEL_BTN_ADAPTER_H
 
+#include <memory>
 #include "components/ui_label_button.h"
-#include "view_api.h"
+#include "macros.h"
 
 namespace Updater {
+struct UxLabelBtnInfo {
+    uint8_t fontSize;
+    std::string text;
+    std::string txtColor;
+    std::string bgColor;
+    std::string focusedTxtColor;
+    std::string focusedBgColor;
+    bool focusable;
+};
+struct UxViewInfo;
 class LabelBtnAdapter : public OHOS::UILabelButton {
     DISALLOW_COPY_MOVE(LabelBtnAdapter);
     struct LabelBtnOnFocusListener;
     static constexpr uint32_t MAX_FONT_SIZE = 200;
 public:
     using SpecificInfoType = UxLabelBtnInfo;
+    static constexpr auto COMPONENT_TYPE = "UILabelButton";
     LabelBtnAdapter();
     explicit LabelBtnAdapter(const UxViewInfo &info);
     virtual ~LabelBtnAdapter();

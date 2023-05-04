@@ -14,38 +14,39 @@
 import("//base/update/updater/updater_default_cfg.gni")
 import("//build/ohos.gni")
 
+updater_path = rebase_path("${updater_absolutely_path}", ".")
 ohos_static_library("libdiff_patch") {
   sources = [ "diff_patch_interface.cpp" ]
 
   include_dirs = [
-    "//base/update/updater/interfaces/kits/include",
-    "//base/update/updater/services/include",
-    "//base/update/updater/services/include/patch",
-    "//third_party/openssl/include",
+    "${updater_path}/interfaces/kits/include",
+    "${updater_path}/services/include",
+    "${updater_path}/services/include/patch",
   ]
 
-  deps = [ "//base/update/updater/services/diffpatch/patch:libpatch" ]
+  deps = [ "${updater_path}/services/diffpatch/patch:libpatch" ]
+  deps += [ "//third_party/openssl:libcrypto_shared" ]
 }
 
 ohos_shared_library("libdiff_patch_shared") {
   sources = [ "diff_patch_interface.cpp" ]
 
   include_dirs = [
-    "//base/update/updater/interfaces/kits/include",
-    "//base/update/updater/services/include",
-    "//base/update/updater/services/include/patch",
-    "//third_party/openssl/include",
+    "${updater_path}/interfaces/kits/include",
+    "${updater_path}/services/include",
+    "${updater_path}/services/include/patch",
   ]
 
   deps = [
-    "//base/update/updater/interfaces/kits/misc_info:libmiscinfo",
-    "//base/update/updater/services/applypatch:libapplypatch",
-    "//base/update/updater/services/diffpatch/patch:libpatch",
-    "//base/update/updater/services/fs_manager:libfsmanager",
-    "//base/update/updater/services/log:libupdaterlog",
-    "//base/update/updater/services/package:libupdaterpackage",
-    "//base/update/updater/services/ptable_parse:libptableparse",
-    "//base/update/updater/utils:libutils",
+    "${updater_path}/interfaces/kits/misc_info:libmiscinfo",
+    "${updater_path}/services/applypatch:libapplypatch",
+    "${updater_path}/services/diffpatch/patch:libpatch",
+    "${updater_path}/services/fs_manager:libfsmanager",
+    "${updater_path}/services/log:libupdaterlog",
+    "${updater_path}/services/package:libupdaterpackage",
+    "${updater_path}/services/ptable_parse:libptableparse",
+    "${updater_path}/utils:libutils",
+    "//third_party/openssl:libcrypto_shared",
   ]
 
   subsystem_name = "updater"

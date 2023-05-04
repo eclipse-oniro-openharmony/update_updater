@@ -14,42 +14,42 @@
 import("//base/update/updater/updater_default_cfg.gni")
 import("//build/ohos.gni")
 
-SUBSYSTEM_DIR = "//base/update/updater"
-
+updater_path = rebase_path("${updater_absolutely_path}", ".")
 updater_common_include = [
   "include",
-  "${SUBSYSTEM_DIR}/utils/include",
-  "${SUBSYSTEM_DIR}/interfaces/kits/include/",
-  "//base/update/updater/services/include/package",
-  "//base/update/updater/services/package/pkg_manager",
-  "//base/update/updater/services/package/pkg_verify",
-  "//base/update/updater/services/include/log",
-  "//base/update/updater/utils/json",
+  "ui/view",
+  "${updater_path}/utils/include",
+  "${updater_path}/interfaces/kits/include/",
+  "${updater_path}/services/include/package",
+  "${updater_path}/services/package/pkg_manager",
+  "${updater_path}/services/package/pkg_verify",
+  "${updater_path}/services/include/log",
+  "${updater_path}/utils/json",
   "//foundation/graphic/ui/frameworks",
   "//foundation/graphic/ui/interfaces/kits",
   "//foundation/graphic/ui/interfaces/innerkits",
   "//foundation/graphic/utils/interfaces/kits",
   "//foundation/graphic/utils/interfaces/innerkits",
   "//third_party/bounds_checking_function/include",
-  "//base/update/updater/services",
-  "//base/update/updater/services/ui",
-  "//base/update/updater/services/include",
+  ".",
+  "./include",
+  "./ui",
 ]
 
 updater_common_deps = [
-  "//base/update/updater/interfaces/kits/packages:libpackageExt",
-  "//base/update/updater/services/applypatch:libapplypatch",
-  "//base/update/updater/services/diffpatch/patch:libpatch",
-  "//base/update/updater/services/flashd:libflashd",
-  "//base/update/updater/services/fs_manager:libfsmanager",
-  "//base/update/updater/services/log:libupdaterlog",
-  "//base/update/updater/services/package:libupdaterpackage",
+  "${updater_path}/interfaces/kits/packages:libpackageExt",
+  "${updater_path}/services/applypatch:libapplypatch",
+  "${updater_path}/services/diffpatch/patch:libpatch",
+  "${updater_path}/services/flashd:libflashd",
+  "${updater_path}/services/fs_manager:libfsmanager",
+  "${updater_path}/services/log:libupdaterlog",
+  "${updater_path}/services/package:libupdaterpackage",
   "//third_party/bounds_checking_function:libsec_shared",
   "//third_party/bounds_checking_function:libsec_static",
   "//third_party/bzip2:libbz2",
   "//third_party/cJSON:cjson",
-  "//third_party/openssl:libcrypto_static",
-  "//third_party/openssl:ssl_source",
+  "//third_party/openssl:libcrypto_shared",
+  "//third_party/openssl:libssl_shared",
   "//third_party/zlib:libz",
 ]
 
@@ -64,16 +64,13 @@ ohos_executable("updater") {
   ]
 
   include_dirs = updater_common_include
-  include_dirs += [
-    "//third_party/openssl/include",
-    "//base/update/updater/services/ui/view",
-  ]
 
   deps = updater_common_deps
   deps += [
-    "//base/update/updater/interfaces/kits/misc_info:libmiscinfo",
-    "//base/update/updater/services/ui:libui",
+    "${updater_path}/interfaces/kits/misc_info:libmiscinfo",
+    "${updater_path}/services/ui:libui",
     "//third_party/libdrm:libdrm",
+    "//third_party/openssl:libcrypto_shared",
   ]
 
   # force link flashd library
@@ -84,8 +81,8 @@ ohos_executable("updater") {
   ]
 
   if (defined(use_ptable)) {
-    include_dirs += [ "//base/update/updater/services/ptable_parse" ]
-    deps += [ "//base/update/updater/services/ptable_parse:libptableparse" ]
+    include_dirs += [ "${updater_path}/services/ptable_parse" ]
+    deps += [ "${updater_path}/services/ptable_parse:libptableparse" ]
     defines += [ "UPDATER_USE_PTABLE" ]
   }
 
@@ -110,6 +107,13 @@ ohos_executable("updater") {
 
   external_deps = [ "init:libbegetutil" ]
 
+  if (build_selinux) {
+    external_deps += [ "selinux:librestorecon" ]
+    deps += [ "//third_party/selinux:libselinux" ]
+    include_dirs += [ "//third_party/selinux/libselinux/include" ]
+    cflags = [ "-DWITH_SELINUX" ]
+  }
+
   install_images = [ "updater" ]
   install_enable = true
   part_name = "updater"
@@ -129,8 +133,8 @@ ohos_static_library("libupdater") {
   deps = updater_common_deps
 
   if (defined(use_ptable)) {
-    include_dirs += [ "//base/update/updater/services/ptable_parse" ]
-    deps += [ "//base/update/updater/services/ptable_parse:libptableparse" ]
+    include_dirs += [ "${updater_path}/services/ptable_parse" ]
+    deps += [ "${updater_path}/services/ptable_parse:libptableparse" ]
     defines += [ "UPDATER_USE_PTABLE" ]
   }
 
@@ -159,6 +163,8 @@ ohos_static_library("libupdater") {
   external_deps = [ "init:libbegetutil" ]
   if (build_selinux) {
     external_deps += [ "selinux:librestorecon" ]
+    deps += [ "//third_party/selinux:libselinux" ]
+    include_dirs += [ "//third_party/selinux/libselinux/include" ]
     cflags = [ "-DWITH_SELINUX" ]
   }
 

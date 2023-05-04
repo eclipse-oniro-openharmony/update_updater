@@ -269,7 +269,7 @@ int32_t PkgManagerImpl::ParsePackage(StreamPtr stream, std::vector<std::string> 
         });
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("Load package fail %s", stream->GetFileName().c_str());
-        pkgFile->SetPkgStream();
+        pkgFile->ClearPkgStream();
         delete pkgFile;
         return ret;
     }

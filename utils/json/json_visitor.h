@@ -20,9 +20,9 @@
 
 #include "json_node.h"
 #include "log/log.h"
-#include "updater_ui_traits.h"
 
 namespace Updater {
+template<typename T> struct Traits;
 enum Action { SETVAL, PRINTVAL };
 namespace Detail {
 template<typename Traits>
@@ -121,6 +121,13 @@ struct MemberVisitor<SETVAL> {
     }
 };
 }  // namespace Detail
+
+template<Action act, typename T, std::enable_if_t<Detail::G_IS_VECTOR<T>, bool> = true>
+bool Visit(const JsonNode &node, T &obj)
+{
+    static_assert(act == SETVAL, "only for setting stl vector without default node");
+    return Detail::MemberVisitor<act>::VisitMember(node, {}, obj, "");
+}
 
 template<Action act, typename T, std::enable_if_t<Detail::G_IS_NUM<decltype(Traits<T>::COUNT)>, bool> = true>
 bool Visit(const JsonNode &node, const JsonNode &defaultNode, T &obj)
