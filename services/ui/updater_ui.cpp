@@ -68,14 +68,14 @@ void DoProgress()
     }
 }
 
-DEFINE_CALLBACK(OnRebootEvt)
+DEFINE_ASYN_CALLBACK(OnRebootEvt)
 {
     LOG(INFO) << "On Label Reboot";
     PostUpdater(false);
     Utils::UpdaterDoReboot("");
 }
 
-DEFINE_CALLBACK(OnLabelResetEvt)
+DEFINE_SYNC_CALLBACK(OnLabelResetEvt)
 {
     LOG(INFO) << "On Label Reset";
     if (!GetFacade().SetMode(UpdaterMode::FACTORYRST)) {
@@ -84,7 +84,7 @@ DEFINE_CALLBACK(OnLabelResetEvt)
     GetFacade().ShowFactoryConfirmPage();
 }
 
-DEFINE_CALLBACK(OnLabelSDCardEvt)
+DEFINE_ASYN_CALLBACK(OnLabelSDCardEvt)
 {
     LOG(INFO) << "On Label SDCard";
     if (!GetFacade().SetMode(UpdaterMode::SDCARD)) {
@@ -105,7 +105,7 @@ DEFINE_CALLBACK(OnLabelSDCardEvt)
     Utils::UpdaterDoReboot("");
 }
 
-DEFINE_CALLBACK(OnLabelSDCardNoDelayEvt)
+DEFINE_ASYN_CALLBACK(OnLabelSDCardNoDelayEvt)
 {
     LOG(INFO) << "On Label SDCard";
     if (!GetFacade().SetMode(UpdaterMode::SDCARD)) {
@@ -128,13 +128,13 @@ DEFINE_CALLBACK(OnLabelSDCardNoDelayEvt)
     Utils::UpdaterDoReboot("");
 }
 
-DEFINE_CALLBACK(OnLabelCancelEvt)
+DEFINE_SYNC_CALLBACK(OnLabelCancelEvt)
 {
     LOG(INFO) << "On Label Cancel";
     PageManager::GetInstance().GoBack();
 }
 
-DEFINE_CALLBACK(OnLabelOkEvt)
+DEFINE_ASYN_CALLBACK(OnLabelOkEvt)
 {
     LOG(INFO) << "On Label Ok";
     Utils::UsSleep(CALLBACK_DELAY);
@@ -156,7 +156,7 @@ DEFINE_CALLBACK(OnLabelOkEvt)
     }
 }
 
-DEFINE_CALLBACK(OnConfirmRstEvt)
+DEFINE_ASYN_CALLBACK(OnConfirmRstEvt)
 {
     LOG(INFO) << "On Label Ok";
     if (!GetFacade().SetMode(UpdaterMode::FACTORYRST)) {
@@ -177,13 +177,13 @@ DEFINE_CALLBACK(OnConfirmRstEvt)
     }
 }
 
-DEFINE_CALLBACK(OnMenuShutdownEvt)
+DEFINE_ASYN_CALLBACK(OnMenuShutdownEvt)
 {
     LOG(DEBUG) << "shutdown";
     Utils::DoShutdown();
 }
 
-DEFINE_CALLBACK(OnMenuClearCacheEvt)
+DEFINE_ASYN_CALLBACK(OnMenuClearCacheEvt)
 {
     LOG(INFO) << "On clear cache";
     GetFacade().ClearText();

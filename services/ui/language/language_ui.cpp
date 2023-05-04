@@ -129,7 +129,7 @@ bool LanguageUI::CheckLevel(int level)
     return true;
 }
 
-const std::string &LanguageUI::Translate(const std::string &key, UpdaterUiMsgID msgId) const
+const std::string &LanguageUI::Translate(const std::string &key) const
 {
     static std::string emptyStr;
     if (auto it = strMap_.find(key); it != strMap_.end() && !it->second.empty()) {
