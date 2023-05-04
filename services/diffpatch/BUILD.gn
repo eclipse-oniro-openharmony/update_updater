@@ -10,9 +10,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import("//base/update/updater/updater_default_cfg.gni")
 import("//build/ohos.gni")
-UPDATER_DIR = "//base/update/updater"
-DIFFPATCH_DIR = "//base/update/updater/services/diffpatch"
 
 config("diff_config") {
   cflags_cc = [
@@ -25,38 +24,39 @@ config("diff_config") {
   defines = [ "OPENSSL_SUPPRESS_DEPRECATED" ]
 }
 
+updater_path = rebase_path("${updater_absolutely_path}", ".")
 ohos_executable("diff") {
   use_exceptions = true
   configs = [ ":diff_config" ]
 
   sources = [
-    "${DIFFPATCH_DIR}/bzip2/bzip2_adapter.cpp",
-    "${DIFFPATCH_DIR}/bzip2/lz4_adapter.cpp",
-    "${DIFFPATCH_DIR}/bzip2/zip_adapter.cpp",
-    "${DIFFPATCH_DIR}/diff/blocks_diff.cpp",
-    "${DIFFPATCH_DIR}/diff/image_diff.cpp",
-    "${DIFFPATCH_DIR}/diff/update_diff.cpp",
-    "${DIFFPATCH_DIR}/diff_main.cpp",
-    "${DIFFPATCH_DIR}/diffpatch.cpp",
-    "${DIFFPATCH_DIR}/patch/blocks_patch.cpp",
-    "${DIFFPATCH_DIR}/patch/image_patch.cpp",
-    "${DIFFPATCH_DIR}/patch/update_patch.cpp",
-    "${UPDATER_DIR}/services/package/pkg_manager/pkg_utils.cpp",
+    "${updater_path}/services/package/pkg_manager/pkg_utils.cpp",
+    "./bzip2/bzip2_adapter.cpp",
+    "./bzip2/lz4_adapter.cpp",
+    "./bzip2/zip_adapter.cpp",
+    "./diff/blocks_diff.cpp",
+    "./diff/image_diff.cpp",
+    "./diff/update_diff.cpp",
+    "./diff_main.cpp",
+    "./diffpatch.cpp",
+    "./patch/blocks_patch.cpp",
+    "./patch/image_patch.cpp",
+    "./patch/update_patch.cpp",
   ]
 
   include_dirs = [
-    "${DIFFPATCH_DIR}",
-    "${UPDATER_DIR}/interfaces/kits/include",
-    "${UPDATER_DIR}/services/include/package",
-    "${UPDATER_DIR}/services/include/patch",
-    "${UPDATER_DIR}/services/include",
-    "${UPDATER_DIR}/utils/include",
-    "${UPDATER_DIR}/services/diffpatch/bzip2",
-    "${UPDATER_DIR}/services/diffpatch/diff",
-    "${UPDATER_DIR}/services/diffpatch/patch",
-    "${UPDATER_DIR}/services/diffpatch",
-    "${UPDATER_DIR}/services/package/pkg_manager",
-    "${UPDATER_DIR}/services/include/log",
+    ".",
+    "${updater_path}/interfaces/kits/include",
+    "${updater_path}/services/include/package",
+    "${updater_path}/services/include/patch",
+    "${updater_path}/services/include",
+    "${updater_path}/utils/include",
+    "${updater_path}/services/diffpatch/bzip2",
+    "${updater_path}/services/diffpatch/diff",
+    "${updater_path}/services/diffpatch/patch",
+    "${updater_path}/services/diffpatch",
+    "${updater_path}/services/package/pkg_manager",
+    "${updater_path}/services/include/log",
     "//third_party/bounds_checking_function/include",
     "//third_party/bzip2",
     "//third_party/zlib",
@@ -64,8 +64,8 @@ ohos_executable("diff") {
   ]
 
   deps = [
-    "//base/update/updater/services/log:libupdaterlog",
-    "//base/update/updater/services/package:libupdaterpackage",
+    "${updater_path}/services/log:libupdaterlog",
+    "${updater_path}/services/package:libupdaterpackage",
     "//third_party/bzip2:libbz2",
     "//third_party/lz4:liblz4_static",
     "//third_party/openssl:libcrypto_shared",

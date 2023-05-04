@@ -10,6 +10,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import("//base/update/updater/updater_default_cfg.gni")
 import("//build/ohos.gni")
 
 config("log_config") {
@@ -19,6 +20,7 @@ config("log_config") {
   }
 }
 
+updater_path = rebase_path("${updater_absolutely_path}", ".")
 ohos_static_library("libupdaterlog") {
   sources = [
     "dump.cpp",
@@ -26,9 +28,9 @@ ohos_static_library("libupdaterlog") {
   ]
 
   include_dirs = [
-    "//base/update/updater/services/include",
+    "${updater_path}/services/include",
+    "${updater_path}/utils/include",
     "//third_party/bounds_checking_function/include",
-    "//base/update/updater/utils/include",
   ]
 
   public_configs = [ ":log_config" ]
