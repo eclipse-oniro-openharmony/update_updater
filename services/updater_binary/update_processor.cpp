@@ -328,18 +328,18 @@ int UScriptInstructionUpdateFromBin::UnCompressDataProducer(const PkgBuffer &buf
 {
     static PkgBuffer stashBuffer(STASH_BUFFER_SIZE);
     size_t bufferStart = 0;
+    void *p = const_cast<void *>(context);
+    RingBuffer *ringBuffer = static_cast<RingBuffer *>(p);
+    if (ringBuffer == nullptr) {
+        LOG(ERROR) << "ring buffer is nullptr";
+        return PKG_INVALID_STREAM;
+    }
     while (stashDataSize_ + size >= STASH_BUFFER_SIZE) {
         size_t readLen = STASH_BUFFER_SIZE - stashDataSize_;
         if (memcpy_s(stashBuffer.buffer + stashDataSize_, readLen, buffer.buffer + bufferStart, readLen) != 0) {
                 return USCRIPT_ERROR_EXECUTE;
         }
-        void *p = const_cast<void *>(context);
-        RingBuffer *ringBuffer = static_cast<RingBuffer *>(p);
-        if (ringBuffer == nullptr) {
-            LOG(ERROR) << "ring buffer is nullptr";
-            return PKG_INVALID_STREAM;
-        }
-        ringBuffer.push(stashBuffer.buffer, STASH_BUFFER_SIZE);
+        ringBuffer.Push(stashBuffer.buffer, STASH_BUFFER_SIZE);
         stashDataSize_ = 0;
         size -= readLen;
         bufferStart += readLen;
@@ -349,7 +349,7 @@ int UScriptInstructionUpdateFromBin::UnCompressDataProducer(const PkgBuffer &buf
     } else if (memcpy_s(stashBuffer.buffer + stashDataSize_, STASH_BUFFER_SIZE - stashDataSize_,
         buffer.buffer + bufferStart, size) == 0) {
         if (isFinish) {
-            ringBuffer.push(stashBuffer.buffer, stashDataSize_ + size);
+            ringBuffer.Push(stashBuffer.buffer, stashDataSize_ + size);
         }
         return PKG_SUCCESS;
     } else {
