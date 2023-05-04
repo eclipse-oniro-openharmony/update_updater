@@ -13,23 +13,24 @@
 
 if (!is_linux && !is_mingw && !is_mac) {
   import("//base/update/updater/updater_default_cfg.gni")
+  updater_path = rebase_path("${updater_absolutely_path}", ".")
+} else {
+  updater_path = "../.."
 }
 import("//build/ohos.gni")
-
-SUBSYSTEM_DIR = "//base/update/updater/services/package"
 
 config("package_config") {
   visibility = [ ":*" ]
   cflags_cc = [ "-std=c++17" ]
   include_dirs = [
-    "//base/update/updater/interfaces/kits/include",
-    "//base/update/updater/utils/include",
-    "//base/update/updater/services/include",
+    "${updater_path}/interfaces/kits/include",
+    "${updater_path}/utils/include",
+    "${updater_path}/services/include",
     "//third_party/zlib",
     "//third_party/lz4/lib",
-    "//base/update/updater/services/include/package",
-    "//base/update/updater/services/include/script",
-    "//base/update/updater/services/include/log",
+    "${updater_path}/services/include/package",
+    "${updater_path}/services/include/script",
+    "${updater_path}/services/include/log",
     "pkg_algorithm",
     "pkg_manager",
     "pkg_package",
@@ -40,30 +41,30 @@ config("package_config") {
 
 ohos_static_library("libupdaterpackage") {
   sources = [
-    "$SUBSYSTEM_DIR/pkg_algorithm/pkg_algo_deflate.cpp",
-    "$SUBSYSTEM_DIR/pkg_algorithm/pkg_algo_digest.cpp",
-    "$SUBSYSTEM_DIR/pkg_algorithm/pkg_algo_lz4.cpp",
-    "$SUBSYSTEM_DIR/pkg_algorithm/pkg_algo_sign.cpp",
-    "$SUBSYSTEM_DIR/pkg_algorithm/pkg_algorithm.cpp",
-    "$SUBSYSTEM_DIR/pkg_manager/pkg_managerImpl.cpp",
-    "$SUBSYSTEM_DIR/pkg_manager/pkg_stream.cpp",
-    "$SUBSYSTEM_DIR/pkg_manager/pkg_utils.cpp",
-    "$SUBSYSTEM_DIR/pkg_package/packages_info.cpp",
-    "$SUBSYSTEM_DIR/pkg_package/pkg_gzipfile.cpp",
-    "$SUBSYSTEM_DIR/pkg_package/pkg_lz4file.cpp",
-    "$SUBSYSTEM_DIR/pkg_package/pkg_pkgfile.cpp",
-    "$SUBSYSTEM_DIR/pkg_package/pkg_upgradefile.cpp",
-    "$SUBSYSTEM_DIR/pkg_package/pkg_zipfile.cpp",
-    "$SUBSYSTEM_DIR/pkg_verify/cert_verify.cpp",
-    "$SUBSYSTEM_DIR/pkg_verify/openssl_util.cpp",
-    "$SUBSYSTEM_DIR/pkg_verify/pkcs7_signed_data.cpp",
-    "$SUBSYSTEM_DIR/pkg_verify/pkg_verify_util.cpp",
-    "$SUBSYSTEM_DIR/pkg_verify/zip_pkg_parse.cpp",
+    "./pkg_algorithm/pkg_algo_deflate.cpp",
+    "./pkg_algorithm/pkg_algo_digest.cpp",
+    "./pkg_algorithm/pkg_algo_lz4.cpp",
+    "./pkg_algorithm/pkg_algo_sign.cpp",
+    "./pkg_algorithm/pkg_algorithm.cpp",
+    "./pkg_manager/pkg_managerImpl.cpp",
+    "./pkg_manager/pkg_stream.cpp",
+    "./pkg_manager/pkg_utils.cpp",
+    "./pkg_package/packages_info.cpp",
+    "./pkg_package/pkg_gzipfile.cpp",
+    "./pkg_package/pkg_lz4file.cpp",
+    "./pkg_package/pkg_pkgfile.cpp",
+    "./pkg_package/pkg_upgradefile.cpp",
+    "./pkg_package/pkg_zipfile.cpp",
+    "./pkg_verify/cert_verify.cpp",
+    "./pkg_verify/openssl_util.cpp",
+    "./pkg_verify/pkcs7_signed_data.cpp",
+    "./pkg_verify/pkg_verify_util.cpp",
+    "./pkg_verify/zip_pkg_parse.cpp",
     "pkg_verify/hash_data_verifier.cpp",
   ]
 
   deps = [
-    "//base/update/updater/services/log:libupdaterlog",
+    "${updater_path}/services/log:libupdaterlog",
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/openssl:libcrypto_shared",
   ]
