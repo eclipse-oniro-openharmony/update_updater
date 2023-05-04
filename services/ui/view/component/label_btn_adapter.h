@@ -16,6 +16,7 @@
 #define UPDATER_UI_LABEL_BTN_ADAPTER_H
 
 #include <memory>
+#include "component_common.h"
 #include "components/ui_label_button.h"
 #include "macros.h"
 
@@ -30,7 +31,7 @@ struct UxLabelBtnInfo {
     bool focusable;
 };
 struct UxViewInfo;
-class LabelBtnAdapter : public OHOS::UILabelButton {
+class LabelBtnAdapter : public OHOS::UILabelButton, public ComponentCommon<LabelBtnAdapter> {
     DISALLOW_COPY_MOVE(LabelBtnAdapter);
     struct LabelBtnOnFocusListener;
     static constexpr uint32_t MAX_FONT_SIZE = 200;
@@ -46,7 +47,6 @@ public:
 private:
     void InitFocus(const OHOS::ColorType &txtColor, const OHOS::ColorType &bgColor,
         const OHOS::ColorType &focusedTxtColor, const OHOS::ColorType &focusedBgColor);
-    std::string viewId_ {};
     std::unique_ptr<LabelBtnOnFocusListener> focusListener_ {};
 };
 } // namespace Updater

@@ -27,7 +27,7 @@ template<typename T>
 class CreateFunctor {
 public:
     auto operator()([[maybe_unused]] const typename T::SpecificInfoType &specific) const
-        -> std::function<std::unique_ptr<OHOS::UIView>(const UxViewInfo &info)>
+        -> std::function<std::unique_ptr<ComponentInterface>(const UxViewInfo &info)>
     {
         return [] (const UxViewInfo &info) { return std::make_unique<T>(info); };
     }
@@ -58,7 +58,7 @@ public:
     }
 };
 
-std::unique_ptr<OHOS::UIView> ComponentFactory::CreateUxComponent(const UxViewInfo &info)
+std::unique_ptr<ComponentInterface> ComponentFactory::CreateUxComponent(const UxViewInfo &info)
 {
     return Visitor<CreateFunctor, COMPONENT_TYPE_LIST> {}.Visit(info);
 }
