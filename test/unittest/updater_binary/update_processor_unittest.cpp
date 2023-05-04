@@ -36,9 +36,10 @@ using namespace Uscript;
 namespace UpdaterUt {
 constexpr const char *UT_MISC_PARTITION_NAME = "/misc";
 constexpr const uint32_t UT_MISC_BUFFER_SIZE = 2048;
-constexpr const uint32_t DATA_PUSH_TIMES = 3;
-
+constexpr const uint32_t BUFFER_PUSH_TIMES = 3;
+constexpr const uint32_t BUFFER_SIZE = 1024 * 1024 * 2;
 void UpdateProcessorUnitTest::SetUp(void)
+
 {
     cout << "Updater Unit UpdateProcessorUnitTest Begin!" << endl;
 
@@ -103,21 +104,20 @@ HWTEST_F(UpdateProcessorUnitTest, UpdateProcessor_003, TestSize.Level1)
 
 HWTEST_F(UpdateProcessorUnitTest, UpdateProcessor_004, TestSize.Level1)
 {
-    size_t buffersize = UScriptInstructionUpdateFromBin::STASH_BUFFER_SIZE / 2; // half
-    PkgBuffer buffer(buffersize);
+    PkgBuffer buffer(BUFFER_SIZE);
     RingBuffer ringBuffer;
-    bool ret = ringBuffer.Init(UScriptInstructionUpdateFromBin::STASH_BUFFER_SIZE, DATA_PUSH_TIMES);
+    bool ret = ringBuffer.Init(UScriptInstructionUpdateFromBin::STASH_BUFFER_SIZE, BUFFER_PUSH_TIMES);
     EXPECT_TRUE(ret);
-    for(int i = 0; i < DATA_PUSH_TIMES; i++) {
-        EXPECT_EQ(UScriptInstructionUpdateFromBin::UnCompressDataProducer(buffer, buffersize, 0, false, &ringBuffer), 0);
+    for(uint32_t i = 0; i < BUFFER_PUSH_TIMES; i++) {
+        EXPECT_EQ(UScriptInstructionUpdateFromBin::UnCompressDataProducer(buffer, BUFFER_SIZE, 0, false, &ringBuffer), 0);
     }
     PkgBuffer emptyBuffer = {};
     EXPECT_EQ(UScriptInstructionUpdateFromBin::UnCompressDataProducer(emptyBuffer, 0, 0, true, &ringBuffer), 0);
-    uint8_t recvBuffer[buffersize] {};
+    uint8_t recvBuffer[BUFFER_SIZE] {};
     uint32_t len = 0;
-    ringBuffer->Pop(recvBuffer, buffersize, len);
+    ringBuffer->Pop(recvBuffer, BUFFER_SIZE, len);
     EXPECT_EQ(len, UScriptInstructionUpdateFromBin::STASH_BUFFER_SIZE);
-    ringBuffer->Pop(recvBuffer, buffersize, len);
-    EXPECT_EQ(len, buffersize);
+    ringBuffer->Pop(recvBuffer, BUFFER_SIZE, len);
+    EXPECT_EQ(len, BUFFER_SIZE);
 }
 } // namespace updater_ut

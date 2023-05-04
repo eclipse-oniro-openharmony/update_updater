@@ -108,7 +108,7 @@ UpdaterStatus IsSpaceCapacitySufficient(const std::vector<std::string> &packageP
     for (auto path : packagePath) {
         totalPkgSize += static_cast<uint64_t>(MAX_LOG_SPACE);
     }
-
+    totalPkgSize += static_cast<uint64_t>(MAX_STASH_SPACE);
     if (CheckStatvfs(totalPkgSize) != UPDATE_SUCCESS) {
         LOG(ERROR) << "CheckStatvfs error";
         UPDATER_LAST_WORD(UPDATE_ERROR);
