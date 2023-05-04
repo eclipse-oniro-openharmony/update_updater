@@ -269,7 +269,7 @@ int32_t PkgManagerImpl::ParsePackage(StreamPtr stream, std::vector<std::string> 
         });
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("Load package fail %s", stream->GetFileName().c_str());
-        pkgFile->SetPkgStream();
+        pkgFile->ClearPkgStream();
         delete pkgFile;
         return ret;
     }
@@ -385,6 +385,19 @@ int32_t PkgManagerImpl::LoadPackage(const std::string &packagePath, std::vector<
     return LoadPackageWithStream(packagePath, fileIds, type, stream);
 }
 
+int32_t PkgManagerImpl::LoadPackageWithStream(const std::string &packagePath, const std::string &keyPath,
+    std::vector<std::string> &fileIds, uint8_t type, StreamPtr stream)
+{
+    int32_t ret = SetSignVerifyKeyName(keyPath);
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("Invalid keyname");
+        return ret;
+    }
+
+    return LoadPackageWithStream(packagePath, fileIds, static_cast<PkgFile::PkgType>(type),
+        static_cast<PkgStreamPtr>(stream));
+}
+
 int32_t PkgManagerImpl::LoadPackageWithStream(const std::string &packagePath,
     std::vector<std::string> &fileIds, PkgFile::PkgType type, PkgStreamPtr stream)
 {
@@ -415,6 +428,7 @@ int32_t PkgManagerImpl::ExtractFile(const std::string &path, PkgManager::StreamP
 {
     if (output == nullptr) {
         PKG_LOGE("Invalid stream");
+        UPDATER_LAST_WORD(PKG_INVALID_STREAM);
         return PKG_INVALID_STREAM;
     }
     int32_t ret = PKG_INVALID_FILE;
@@ -541,10 +555,12 @@ int32_t PkgManagerImpl::DoCreatePkgStream(PkgStreamPtr &stream, const std::strin
 
 int32_t PkgManagerImpl::CreatePkgStream(PkgStreamPtr &stream, const std::string &fileName, size_t size, int32_t type)
 {
+    Updater::UPDATER_INIT_RECORD;
     stream = nullptr;
     if (type == PkgStream::PkgStreamType_Write || type == PkgStream::PkgStreamType_Read) {
         int32_t ret = DoCreatePkgStream(stream, fileName, type);
         if (ret != PKG_SUCCESS) {
+            UPDATER_LAST_WORD(ret);
             return ret;
         }
     } else if (type == PkgStream::PkgStreamType_MemoryMap) {
@@ -826,6 +842,7 @@ int32_t PkgManagerImpl::Sign(PkgStreamPtr stream, size_t offset, const PkgInfoPt
 
 int32_t PkgManagerImpl::SetSignVerifyKeyName(const std::string &keyName)
 {
+    Updater::UPDATER_INIT_RECORD;
     if (access(keyName.c_str(), 0) != 0) {
         UPDATER_LAST_WORD(PKG_INVALID_FILE);
         return PKG_INVALID_FILE;

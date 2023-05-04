@@ -131,16 +131,19 @@ int UScriptInstructionRawImageWrite::RawImageWriteProcessor(const PkgBuffer &buf
 bool UScriptInstructionRawImageWrite::WriteRawImage(const std::string &partitionName, const std::unique_ptr<DataWriter> &writer,
     [[maybe_unused]] uint64_t partitionSize, Uscript::UScriptEnv &env)
 {
+    UPDATER_INIT_RECORD;
     // Extract partition information
     const FileInfo *info = env.GetPkgManager()->GetFileInfo(partitionName);
     if (info == nullptr) {
         LOG(ERROR) << "Error to get file info";
+        UPDATER_LAST_WORD(false);
         return false;
     }
     totalSize_ = info->unpackedSize;
 #ifdef UPDATER_USE_PTABLE
     if (partitionSize < totalSize_) {
         LOG(ERROR) << "partition size: " << partitionSize << " is short than image size: " << totalSize_;
+        UPDATER_LAST_WORD(false);
         return false;
     }
 #endif
@@ -150,6 +153,7 @@ bool UScriptInstructionRawImageWrite::WriteRawImage(const std::string &partition
         partitionName, RawImageWriteProcessor, writer.get());
     if (ret != USCRIPT_SUCCESS || outStream == nullptr) {
         LOG(ERROR) << "Error to create output stream";
+        UPDATER_LAST_WORD(false);
         return false;
     }
 
@@ -157,6 +161,7 @@ bool UScriptInstructionRawImageWrite::WriteRawImage(const std::string &partition
     if (ret != USCRIPT_SUCCESS) {
         LOG(ERROR) << "Error to extract file";
         env.GetPkgManager()->ClosePkgStream(outStream);
+        UPDATER_LAST_WORD(false);
         return false;
     }
     env.GetPkgManager()->ClosePkgStream(outStream);
@@ -169,6 +174,7 @@ int32_t UScriptInstructionRawImageWrite::Execute(Uscript::UScriptEnv &env, Uscri
     int32_t ret = context.GetParam(0, partitionName);
     if (ret != USCRIPT_SUCCESS) {
         LOG(ERROR) << "Error to get partitionName";
+        UPDATER_LAST_WORD(ret);
         return ret;
     }
 
@@ -183,6 +189,7 @@ int32_t UScriptInstructionRawImageWrite::Execute(Uscript::UScriptEnv &env, Uscri
     LOG(INFO) << "UScriptInstructionRawImageWrite::Execute " << partitionName;
     if (env.GetPkgManager() == nullptr) {
         LOG(ERROR) << "Error to get pkg manager";
+        UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE);
         return USCRIPT_ERROR_EXECUTE;
     }
 
@@ -192,6 +199,7 @@ int32_t UScriptInstructionRawImageWrite::Execute(Uscript::UScriptEnv &env, Uscri
     if (GetWritePathAndOffset(partitionName, writePath, offset, partitionSize) != USCRIPT_SUCCESS) {
         LOG(ERROR) << "Get partition:%s WritePathAndOffset fail \'" <<
             partitionName.substr(1, partitionName.size()) << "\'.";
+        UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE);
         return USCRIPT_ERROR_EXECUTE;
     }
 
@@ -199,10 +207,12 @@ int32_t UScriptInstructionRawImageWrite::Execute(Uscript::UScriptEnv &env, Uscri
         static_cast<UpdaterEnv *>(&env), offset);
     if (writer == nullptr) {
         LOG(ERROR) << "Error to create writer";
+        UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE);
         return USCRIPT_ERROR_EXECUTE;
     }
     if (!WriteRawImage(partitionName, writer, partitionSize, env)) {
         DataWriter::ReleaseDataWriter(writer);
+        UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE);
         return USCRIPT_ERROR_EXECUTE;
     }
     PartitionRecord::GetInstance().RecordPartitionUpdateStatus(partitionName, true);
@@ -219,6 +229,7 @@ int32_t UScriptInstructionPkgExtract::Execute(Uscript::UScriptEnv &env, Uscript:
     int32_t ret = context.GetParam(0, pkgFileName);
     if (ret != USCRIPT_SUCCESS) {
         LOG(ERROR) << "Error to get pkgFileName";
+        UPDATER_LAST_WORD(ret);
         return ret;
     }
 
@@ -226,6 +237,7 @@ int32_t UScriptInstructionPkgExtract::Execute(Uscript::UScriptEnv &env, Uscript:
     ret = context.GetParam(1, destPath);
     if (ret != USCRIPT_SUCCESS) {
         LOG(ERROR) << "Error to get destPath";
+        UPDATER_LAST_WORD(ret);
         return ret;
     }
 
@@ -233,12 +245,14 @@ int32_t UScriptInstructionPkgExtract::Execute(Uscript::UScriptEnv &env, Uscript:
     PkgManager::PkgManagerPtr manager = env.GetPkgManager();
     if (manager == nullptr) {
         LOG(ERROR) << "Error to get pkg manager";
+        UPDATER_LAST_WORD(USCRIPT_INVALID_PARAM);
         return USCRIPT_INVALID_PARAM;
     }
 
     const FileInfo *info = manager->GetFileInfo(pkgFileName);
     if (info == nullptr) {
         LOG(ERROR) << "Error to get file info";
+        UPDATER_LAST_WORD(USCRIPT_INVALID_PARAM);
         return USCRIPT_INVALID_PARAM;
     }
 
@@ -247,6 +261,7 @@ int32_t UScriptInstructionPkgExtract::Execute(Uscript::UScriptEnv &env, Uscript:
         PkgStream::PkgStreamType_Write);
     if (ret != USCRIPT_SUCCESS) {
         LOG(ERROR) << "Error to create output stream";
+        UPDATER_LAST_WORD(USCRIPT_INVALID_PARAM);
         return USCRIPT_ERROR_EXECUTE;
     }
 
@@ -254,6 +269,7 @@ int32_t UScriptInstructionPkgExtract::Execute(Uscript::UScriptEnv &env, Uscript:
     if (ret != USCRIPT_SUCCESS) {
         LOG(ERROR) << "Error to extract file";
         manager->ClosePkgStream(outStream);
+        UPDATER_LAST_WORD(USCRIPT_INVALID_PARAM);
         return USCRIPT_ERROR_EXECUTE;
     }
 
@@ -306,9 +322,9 @@ int UScriptInstructionRawImageWrite::GetWritePathAndOffset(const std::string &pa
     uint64_t &offset, uint64_t &partitionSize)
 {
 #ifdef UPDATER_USE_PTABLE
-    PackagePtable& packagePtb = PackagePtable::GetInstance();
+    DevicePtable& devicePtb = DevicePtable::GetInstance();
     Ptable::PtnInfo ptnInfo;
-    if (!packagePtb.GetPartionInfoByName(partitionName, ptnInfo)) {
+    if (!devicePtb.GetPartionInfoByName(partitionName, ptnInfo)) {
         LOG(ERROR) << "Datawriter: cannot find device path for partition \'" <<
                 partitionName.substr(1, partitionName.size()) << "\'.";
         return USCRIPT_ERROR_EXECUTE;
@@ -370,8 +386,8 @@ int ProcessUpdater(bool retry, int pipeFd, const std::string &packagePath, const
         return EXIT_INVALID_ARGS;
     }
 #ifdef UPDATER_USE_PTABLE
-    PackagePtable& packagePtb = PackagePtable::GetInstance();
-    packagePtb.LoadPartitionInfo(pkgManager);
+    DevicePtable& devicePtb = DevicePtable::GetInstance();
+    devicePtb.LoadPartitionInfo();
 #endif
 
     ret = Updater::ExecUpdate(pkgManager, retry, packagePath,

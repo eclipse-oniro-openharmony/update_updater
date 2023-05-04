@@ -19,9 +19,16 @@
 #include <thread>
 #include "animator/animator_manager.h"
 #include "components/ui_image_view.h"
-#include "view_api.h"
+#include "macros.h"
 
 namespace Updater {
+struct UxImageInfo {
+    std::string resPath;
+    std::string filePrefix;
+    uint32_t imgCnt;
+    uint32_t updInterval;
+};
+struct UxViewInfo;
 class ImgViewAdapter : public OHOS::UIImageView {
     DISALLOW_COPY_MOVE(ImgViewAdapter);
     class ImgAnimatorCallback;
@@ -31,6 +38,7 @@ class ImgViewAdapter : public OHOS::UIImageView {
     static constexpr int ANIMATION_FILE_NAME_LENGTH = 5;
 public:
     using SpecificInfoType = UxImageInfo;
+    static constexpr auto COMPONENT_TYPE = "UIImageView";
     ImgViewAdapter();
     explicit ImgViewAdapter(const UxViewInfo &info);
     ~ImgViewAdapter();

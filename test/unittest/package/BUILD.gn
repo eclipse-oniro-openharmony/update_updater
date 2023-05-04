@@ -22,7 +22,10 @@ ohos_unittest("package_unittest") {
   resource_config_file =
       "//base/update/updater/test/unittest/test_data/ohos_test.xml"
   module_out_path = MODULE_OUTPUT_PATH
-  defines = [ "UPDATER_UT" ]
+  defines = [
+    "UPDATER_UT",
+    "OPENSSL_SUPPRESS_DEPRECATED",
+  ]
   sources = [
     "package_unittest.cpp",
     "pkg_algo_unittest.cpp",
@@ -70,7 +73,6 @@ ohos_unittest("package_unittest") {
     "//base/update/updater/utils/include",
     "//third_party/bounds_checking_function/include",
     "//third_party/lz4/lib",
-    "//third_party/openssl/include",
     "//third_party/zlib",
   ]
 

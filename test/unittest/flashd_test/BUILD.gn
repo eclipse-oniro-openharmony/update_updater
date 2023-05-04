@@ -72,7 +72,6 @@ ohos_unittest("flashd_unittest") {
     "//base/startup/init/services/include/param",
     "//third_party/bounds_checking_function/include",
     "//third_party/cJSON",
-    "//third_party/openssl/include",
     "//third_party/lz4/lib",
     "//third_party/libuv",
   ]
@@ -97,7 +96,7 @@ ohos_unittest("flashd_unittest") {
     "//third_party/googletest:gtest_main",
     "//third_party/libuv:uv",
     "//third_party/lz4:liblz4_static",
-    "//third_party/openssl:libcrypto_static",
+    "//third_party/openssl:libcrypto_shared",
     "//third_party/zlib:libz",
   ]
 
@@ -108,4 +107,5 @@ ohos_unittest("flashd_unittest") {
   configs = [ "$UPDATER_TEST_ROOT:utest_config" ]
   install_enable = true
   part_name = "updater"
+  defines = [ "OPENSSL_SUPPRESS_DEPRECATED" ]
 }

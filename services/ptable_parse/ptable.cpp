@@ -225,7 +225,7 @@ bool Ptable::VerifyMbrMagicNum(const uint8_t *buffer, const uint32_t size)
     // check to see if magic number(0x55AA) exists at pos 0x1FE
     if ((buffer[MBR_MAGIC_NUM_POS] != MBR_MAGIC_NUM_0) ||
         (buffer[MBR_MAGIC_NUM_POS + 1] != MBR_MAGIC_NUM_1)) {
-        LOG(ERROR) << "MBR magic number does not match, magic buffer is " << *(buffer + MBR_MAGIC_NUM_POS);
+        LOG(ERROR) << "MBR magic number does not match, magic buffer is " << unsigned(*(buffer + MBR_MAGIC_NUM_POS));
         return false;
     }
     return true;

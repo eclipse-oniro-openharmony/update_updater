@@ -17,6 +17,7 @@
 #include <cstdio>
 #include <sstream>
 #include <string>
+#include "log/dump.h"
 #include "log/log.h"
 #include "updater/updater_const.h"
 #include "utils.h"
@@ -121,7 +122,7 @@ int UpdatePartitions::DoNewPartitions(PartitonList &newPartList)
     } else if (ret > 1) {
         LOG(INFO) << "do_partitions success reboot";
 #ifndef UPDATER_UT
-        Utils::DoReboot("updater");
+        Utils::UpdaterDoReboot("updater");
 #endif
     }
     return ret;
@@ -182,12 +183,14 @@ int32_t UpdatePartitions::Execute(Uscript::UScriptEnv &env, Uscript::UScriptCont
     LOG(INFO) << "enter UpdatePartitions::Execute ";
     if (context.GetParamCount() != 1) {
         LOG(ERROR) << "Invalid UpdatePartitions::Execute param";
+        UPDATER_LAST_WORD(USCRIPT_INVALID_PARAM);
         return USCRIPT_INVALID_PARAM;
     }
     std::string filePath;
     int32_t ret = context.GetParam(0, filePath);
     if (ret != USCRIPT_SUCCESS) {
         LOG(ERROR) << "Fail to get filePath";
+        UPDATER_LAST_WORD(USCRIPT_INVALID_PARAM);
         return USCRIPT_INVALID_PARAM;
     } else {
         LOG(INFO) << "UpdatePartitions::Execute filePath " << filePath;
@@ -195,6 +198,7 @@ int32_t UpdatePartitions::Execute(Uscript::UScriptEnv &env, Uscript::UScriptCont
     const FileInfo *info = env.GetPkgManager()->GetFileInfo(filePath);
     if (info == nullptr) {
         LOG(ERROR) << "Error to get file info";
+        UPDATER_LAST_WORD(USCRIPT_INVALID_PARAM);
         return USCRIPT_ERROR_EXECUTE;
     }
     return SetNewPartition(filePath, info, env);

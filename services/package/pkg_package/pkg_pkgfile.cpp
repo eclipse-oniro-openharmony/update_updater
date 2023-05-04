@@ -16,6 +16,7 @@
 #include <ctime>
 #include <limits>
 #include <memory>
+#include "dump.h"
 #include "pkg_gzipfile.h"
 #include "pkg_lz4file.h"
 #include "pkg_stream.h"
@@ -70,11 +71,13 @@ int32_t PkgFile::ExtractFile(const PkgEntryPtr node, PkgStreamPtr output)
     PKG_LOGI("ExtractFile %s", output->GetFileName().c_str());
     if (!CheckState({PKG_FILE_STATE_WORKING}, PKG_FILE_STATE_WORKING)) {
         PKG_LOGE("error state curr %d ", state_);
+        UPDATER_LAST_WORD(PKG_INVALID_STATE);
         return PKG_INVALID_STATE;
     }
     auto entry = static_cast<PkgEntryPtr>(node);
     if (entry == nullptr) {
         PKG_LOGE("error get entry %s", pkgStream_->GetFileName().c_str());
+        UPDATER_LAST_WORD(PKG_INVALID_PARAM);
         return PKG_INVALID_PARAM;
     }
     return entry->Unpack(output);

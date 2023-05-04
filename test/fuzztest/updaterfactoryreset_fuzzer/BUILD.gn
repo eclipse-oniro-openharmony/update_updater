@@ -65,8 +65,8 @@ ohos_fuzztest("UpdaterFactoryResetFuzzTest") {
     "//third_party/cJSON:cjson",
     "//third_party/libdrm:libdrm",
     "//third_party/lz4:liblz4_static",
-    "//third_party/openssl:libcrypto_static",
-    "//third_party/openssl:ssl_source",
+    "//third_party/openssl:libcrypto_shared",
+    "//third_party/openssl:libssl_shared",
     "//third_party/zlib:libz",
   ]
 

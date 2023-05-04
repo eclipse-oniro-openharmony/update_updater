@@ -102,6 +102,11 @@ public:
     }
     void SetPkgDecodeProgress(PkgDecodeProgress decodeProgress) override {}
     void PostDecodeProgress(int type, size_t writeDataLen, const void *context) override {}
+    int32_t LoadPackageWithStream(const std::string &packagePath, const std::string &keyPath,
+        std::vector<std::string> &fileIds, uint8_t type, StreamPtr stream) override
+    {
+        return PKG_SUCCESS;
+    }
 };
 }
 #endif // SCRIPT_UNITTEST_H

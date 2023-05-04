@@ -17,7 +17,7 @@
 #define LAYOUT_PARSER_H
 
 #include "macros.h"
-#include "view_api.h"
+#include "updater_ui_traits.h"
 
 namespace Updater {
 class LayoutParser {

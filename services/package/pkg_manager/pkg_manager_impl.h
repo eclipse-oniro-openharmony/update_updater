@@ -68,6 +68,9 @@ public:
 
     int32_t LoadPackageWithoutUnPack(const std::string &packagePath, std::vector<std::string> &fileIds) override;
 
+    int32_t LoadPackageWithStream(const std::string &packagePath, const std::string &keyPath,
+        std::vector<std::string> &fileIds, uint8_t type, StreamPtr stream) override;
+
     int32_t ParsePackage(StreamPtr stream, std::vector<std::string> &fileIds, int32_t type) override;
 
     int32_t CreatePkgStream(StreamPtr &stream, const std::string &fileName, const PkgBuffer &buffer) override;

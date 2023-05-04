@@ -207,4 +207,14 @@ HWTEST_F(UpdaterUtilUnitTest, UpdaterFromSdcardTest, TestSize.Level1)
     delete argv[0];
     delete []argv;
 }
+
+HWTEST_F(UpdaterUtilUnitTest, DoInstallUpdaterPackageTest, TestSize.Level1)
+{
+    UpdaterParams upParams;
+    upParams.callbackProgress = nullptr;
+    std::vector<std::string> output;
+    EXPECT_EQ(DoInstallUpdaterPackage(nullptr, upParams, HOTA_UPDATE), UPDATE_CORRUPT);
+    upParams.callbackProgress = [] (float value) {};
+    EXPECT_EQ(DoInstallUpdaterPackage(nullptr, upParams, HOTA_UPDATE), UPDATE_CORRUPT);
+}
 }

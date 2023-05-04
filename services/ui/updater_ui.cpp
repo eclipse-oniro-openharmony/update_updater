@@ -72,7 +72,7 @@ DEFINE_CALLBACK(OnRebootEvt)
 {
     LOG(INFO) << "On Label Reboot";
     PostUpdater(false);
-    Utils::DoReboot("");
+    Utils::UpdaterDoReboot("");
 }
 
 DEFINE_CALLBACK(OnLabelResetEvt)
@@ -102,7 +102,7 @@ DEFINE_CALLBACK(OnLabelSDCardEvt)
         return;
     }
     PostUpdater(true);
-    Utils::DoReboot("");
+    Utils::UpdaterDoReboot("");
 }
 
 DEFINE_CALLBACK(OnLabelSDCardNoDelayEvt)
@@ -125,7 +125,7 @@ DEFINE_CALLBACK(OnLabelSDCardNoDelayEvt)
     GetFacade().ShowSuccessPage();
     Utils::UsSleep(SUCCESS_DELAY);
     PostUpdater(true);
-    Utils::DoReboot("");
+    Utils::UpdaterDoReboot("");
 }
 
 DEFINE_CALLBACK(OnLabelCancelEvt)
