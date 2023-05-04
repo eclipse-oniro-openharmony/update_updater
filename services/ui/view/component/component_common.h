@@ -61,6 +61,9 @@ public:
     }
 protected:
     std::string viewId_ {};
+private:
+    friend Component;
+    ComponentCommon() = default;
 };
 }
 
