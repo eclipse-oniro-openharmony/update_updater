@@ -339,7 +339,7 @@ int UScriptInstructionUpdateFromBin::UnCompressDataProducer(const PkgBuffer &buf
         if (memcpy_s(stashBuffer.buffer + stashDataSize_, readLen, buffer.buffer + bufferStart, readLen) != 0) {
                 return USCRIPT_ERROR_EXECUTE;
         }
-        ringBuffer.Push(stashBuffer.buffer, STASH_BUFFER_SIZE);
+        ringBuffer->Push(stashBuffer.buffer, STASH_BUFFER_SIZE);
         stashDataSize_ = 0;
         size -= readLen;
         bufferStart += readLen;
@@ -349,7 +349,7 @@ int UScriptInstructionUpdateFromBin::UnCompressDataProducer(const PkgBuffer &buf
     } else if (memcpy_s(stashBuffer.buffer + stashDataSize_, STASH_BUFFER_SIZE - stashDataSize_,
         buffer.buffer + bufferStart, size) == 0) {
         if (isFinish) {
-            ringBuffer.Push(stashBuffer.buffer, stashDataSize_ + size);
+            ringBuffer->Push(stashBuffer.buffer, stashDataSize_ + size);
         }
         return PKG_SUCCESS;
     } else {
