@@ -28,6 +28,7 @@ ohos_unittest("flashd_unittest") {
     "${HDC_PATH}/common/auth.cpp",
     "${HDC_PATH}/common/base.cpp",
     "${HDC_PATH}/common/channel.cpp",
+    "${HDC_PATH}/common/circle_buffer.cpp",
     "${HDC_PATH}/common/debug.cpp",
     "${HDC_PATH}/common/file.cpp",
     "${HDC_PATH}/common/file_descriptor.cpp",
