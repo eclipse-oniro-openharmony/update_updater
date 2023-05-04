@@ -115,9 +115,9 @@ HWTEST_F(UpdateProcessorUnitTest, UpdateProcessor_004, TestSize.Level1)
     EXPECT_EQ(UScriptInstructionUpdateFromBin::UnCompressDataProducer(emptyBuffer, 0, 0, true, &ringBuffer), 0);
     uint8_t recvBuffer[BUFFER_SIZE] {};
     uint32_t len = 0;
-    ringBuffer->Pop(recvBuffer, BUFFER_SIZE, len);
+    ringBuffer.Pop(recvBuffer, BUFFER_SIZE, len);
     EXPECT_EQ(len, UScriptInstructionUpdateFromBin::STASH_BUFFER_SIZE);
-    ringBuffer->Pop(recvBuffer, BUFFER_SIZE, len);
+    ringBuffer.Pop(recvBuffer, BUFFER_SIZE, len);
     EXPECT_EQ(len, BUFFER_SIZE);
 }
 } // namespace updater_ut
