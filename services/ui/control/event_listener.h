@@ -36,7 +36,7 @@ enum class EventType {
 // avoid callback on invisible component
 class CallBackDecorator final {
 public:
-    CallBackDecorator(Callback cb) : cb_(cb) {}
+    explicit CallBackDecorator(Callback cb) : cb_(cb) {}
     ~CallBackDecorator() = default;
     void operator()(OHOS::UIView &view, bool isAsync) const;
 private:
