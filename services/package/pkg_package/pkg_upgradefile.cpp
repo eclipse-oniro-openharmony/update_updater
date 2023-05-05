@@ -41,6 +41,10 @@ using namespace std;
 
 namespace Hpackage {
 constexpr int32_t UPGRADE_FILE_HEADER_LEN = 3 * sizeof(PkgTlv) + sizeof(UpgradePkgHeader) + sizeof(UpgradePkgTime);
+constexpr int32_t UPGRADE_FILE_BASIC_LEN = 2 * sizeof(PkgTlv) + sizeof(UpgradePkgHeader) + sizeof(UpgradePkgTime);
+constexpr int32_t HASH_TLV_SIZE = 6;
+constexpr int16_t TLV_TYPE_FOR_HASH = 0x0007;
+constexpr int16_t TLV_TYPE_FOR_SIGN = 0x0008;
 constexpr int32_t UPGRADE_RESERVE_LEN = 16;
 constexpr int16_t TLV_TYPE_FOR_SHA256 = 0x0001;
 constexpr int16_t TLV_TYPE_FOR_SHA384 = 0x0011;
@@ -255,7 +259,7 @@ int32_t UpgradePkgFile::SavePackage(size_t &signOffset)
 int32_t UpgradePkgFile::ReadPackageInfo(PkgBuffer &buffer, std::vector<uint8_t> &signData, size_t &parsedLen)
 {
     size_t readBytes = 0;
-    size_t ret = pkgStream_->Read(buffer, parsedLen, GetUpgradeSignatureLen() + UPGRADE_RESERVE_LEN, readBytes);
+    size_t ret = pkgStream_->Read(buffer, parsedLen, buffer.length, readBytes);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("read sign data fail");
         UPDATER_LAST_WORD(ret);
@@ -312,39 +316,34 @@ int32_t UpgradePkgFile::LoadPackage(std::vector<std::string> &fileNames, VerifyF
     std::vector<uint8_t> signData;
     DigestAlgorithm::DigestAlgorithmPtr algorithm = nullptr;
     // Parse header
-    PkgBuffer buffer(buffSize);
+    PkgBuffer headerBuffer(UPGRADE_FILE_BASIC_LEN);
     size_t parsedLen = 0;
-    int32_t ret = ReadUpgradePkgHeader(buffer, parsedLen, algorithm);
+    int32_t ret = ReadUpgradePkgHeader(headerBuffer, parsedLen, algorithm);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("Decode header fail %d", ret);
         UPDATER_LAST_WORD(PKG_INVALID_STATE);
         return ret;
     }
 
-    ret = ReadComponents(buffer, parsedLen, algorithm, fileNames);
+    PkgBuffer compBuffer(sizeof(PkgTlv));
+    ret = ReadComponents(compBuffer, parsedLen, algorithm, fileNames);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("Decode components fail %d", ret);
         UPDATER_LAST_WORD(ret);
         return ret;
     }
 
-    if (parsedLen + UPGRADE_RESERVE_LEN + GetUpgradeSignatureLen() >= fileLen) {
-        PKG_LOGE("Decode components fail %d", ret);
-        UPDATER_LAST_WORD(ret);
-        return ret;
-    }
     // Read signature information
-    ret = ReadPackageInfo(buffer, signData, parsedLen);
+    PkgBuffer signBuffer(HASH_TLV_SIZE);
+    ret = ReadHashAndSignData(signBuffer, signData, parsedLen, algorithm);
     if (ret != PKG_SUCCESS) {
-        PKG_LOGE("ReadPackageInfo fail %d", ret);
+        PKG_LOGE("ReadHashAndSignData fail %d", ret);
         return ret;
     }
-    algorithm->Update(buffer, UPGRADE_RESERVE_LEN + GetUpgradeSignatureLen());
-    parsedLen += UPGRADE_RESERVE_LEN + GetUpgradeSignatureLen();
     pkgInfo_.pkgInfo.updateFileHeadLen = parsedLen;
 
     // Calculate digest and verify
-    return Verify(parsedLen, algorithm, verifier, signData);
+    return VerifyNew(algorithm, verifier, signData);
 }
 
 int32_t UpgradePkgFile::Verify(size_t start, DigestAlgorithm::DigestAlgorithmPtr algorithm,
@@ -375,6 +374,21 @@ int32_t UpgradePkgFile::Verify(size_t start, DigestAlgorithm::DigestAlgorithmPtr
     PkgBuffer digest(GetDigestLen());
     algorithm->Final(digest);
     ret = verifier(&pkgInfo_.pkgInfo, digest.data, signData);
+    if (ret != 0) {
+        PKG_LOGE("Fail to verifier signature");
+        UPDATER_LAST_WORD(PKG_INVALID_SIGNATURE);
+        return PKG_INVALID_SIGNATURE;
+    }
+    return 0;
+}
+
+int32_t UpgradePkgFile::VerifyNew(DigestAlgorithm::DigestAlgorithmPtr algorithm,
+    VerifyFunction verifier, const std::vector<uint8_t> &signData)
+{
+    Updater::UPDATER_INIT_RECORD;
+    PkgBuffer digest(GetDigestLen());
+    algorithm->Final(digest);
+    int ret = verifier(&pkgInfo_.pkgInfo, digest.data, signData);
     if (ret != 0) {
         PKG_LOGE("Fail to verifier signature");
         UPDATER_LAST_WORD(PKG_INVALID_SIGNATURE);
@@ -449,10 +463,11 @@ int32_t UpgradePkgFile::ReadComponents(const PkgBuffer &buffer, size_t &parsedLe
     info.dataOffset = parsedLen + tlv.length + GetUpgradeSignatureLen() + UPGRADE_RESERVE_LEN;
     info.srcOffset = 0;
     info.currLen = sizeof(PkgTlv);
+    PkgBuffer compBuffer(sizeof(UpgradeCompInfo));
     while (info.srcOffset < tlv.length) {
         if (info.currLen + sizeof(UpgradeCompInfo) > info.readLen) {
             info.readLen = 0;
-            ret = pkgStream_->Read(buffer, parsedLen + info.srcOffset, buffer.length, info.readLen);
+            ret = pkgStream_->Read(compBuffer, parsedLen + info.srcOffset, compBuffer.length, info.readLen);
             if (ret != PKG_SUCCESS) {
                 PKG_LOGE("Fail to read data");
                 UPDATER_LAST_WORD(ret);
@@ -460,7 +475,7 @@ int32_t UpgradePkgFile::ReadComponents(const PkgBuffer &buffer, size_t &parsedLe
             }
             info.currLen = 0;
         }
-        size_t ret = SaveEntry(buffer, parsedLen, info, algorithm, fileNames);
+        size_t ret = SaveEntry(compBuffer, parsedLen, info, algorithm, fileNames);
         if (ret != PKG_SUCCESS) {
             PKG_LOGE("SaveEntry");
             UPDATER_LAST_WORD(ret);

@@ -130,6 +130,8 @@ private:
     int32_t CheckPackageHeader(std::vector<uint8_t> &buffer, size_t &offset);
     int32_t GetEntryOffset(size_t &dataOffset, const PkgManager::FileInfoPtr file);
     int32_t ReadPackageInfo(PkgBuffer &buffer, std::vector<uint8_t> &signData, size_t &parsedLen);
+    int32_t ReadSignData(PkgBuffer &buffer, std::vector<uint8_t> &signData,
+        size_t &parsedLen, DigestAlgorithm::DigestAlgorithmPtr algorithm)
 
 private:
     UpgradePkgInfo pkgInfo_ {};
