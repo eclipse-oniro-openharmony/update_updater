@@ -132,6 +132,8 @@ private:
     int32_t ReadPackageInfo(PkgBuffer &buffer, std::vector<uint8_t> &signData, size_t &parsedLen);
     int32_t ReadSignData(PkgBuffer &buffer, std::vector<uint8_t> &signData,
         size_t &parsedLen, DigestAlgorithm::DigestAlgorithmPtr algorithm);
+    int32_t VerifyNew(DigestAlgorithm::DigestAlgorithmPtr algorithm,
+        VerifyFunction verifier, const std::vector<uint8_t> &signData)£»
 
 private:
     UpgradePkgInfo pkgInfo_ {};

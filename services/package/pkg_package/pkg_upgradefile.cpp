@@ -256,6 +256,50 @@ int32_t UpgradePkgFile::SavePackage(size_t &signOffset)
     return PKG_SUCCESS;
 }
 
+int32_t UpgradePkgFile::ReadSignData(PkgBuffer &buffer, std::vector<uint8_t> &signData,
+    size_t &parsedLen, DigestAlgorithm::DigestAlgorithmPtr algorithm)
+{
+    size_t readBytes = 0;
+    PkgBuffer reserve_buf(UPGRADE_RESERVE_LEN);
+    size_t ret = pkgStream_->Read(reserve_buf, parsedLen, reserve_buf.length, readBytes);
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("read reserve data fail");
+        UPDATER_LAST_WORD(ret);
+        return ret;
+    }
+    algorithm->Update(reserve_buf, reserve_buf.length);
+    parsedLen += reserve_buf.length;
+
+    size_t ret = pkgStream_->Read(buffer, parsedLen, buffer.length, readBytes);
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("read sign data fail");
+        UPDATER_LAST_WORD(ret);
+        return ret;
+    }
+    uint16_t dataType = ReadLE16(buffer.buffer);
+    uint32_t dataLen = ReadLE32(buffer.buffer + sizeof(uint16_t));
+    if (dataType != TLV_TYPE_FOR_SIGN) {
+        PKG_LOGE("Invalid tlv type: %d length %u ", dataType, dataLen);
+        return PKG_INVALID_FILE;
+    }
+
+    PkgBuffer signBuf(dataLen);
+    ret = pkgStream_->Read(signBuf, parsedLen, signBuf.length, readBytes);
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("read hash data fail");
+        UPDATER_LAST_WORD(ret);
+        return ret;
+    }
+    parsedLen += signBuf.length;
+    signData.resize(dataLen);
+    if (memcpy_s(signData.data(), signData.size(), signBuf.buffer, signBuf.length) != EOK) {
+        PKG_LOGE("memcpy sign data fail");
+        UPDATER_LAST_WORD(PKG_NONE_MEMORY);
+        return PKG_NONE_MEMORY;
+    }
+    return PKG_SUCCESS;
+}
+
 int32_t UpgradePkgFile::ReadPackageInfo(PkgBuffer &buffer, std::vector<uint8_t> &signData, size_t &parsedLen)
 {
     size_t readBytes = 0;
