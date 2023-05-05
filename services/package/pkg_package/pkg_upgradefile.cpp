@@ -43,7 +43,6 @@ namespace Hpackage {
 constexpr int32_t UPGRADE_FILE_HEADER_LEN = 3 * sizeof(PkgTlv) + sizeof(UpgradePkgHeader) + sizeof(UpgradePkgTime);
 constexpr int32_t UPGRADE_FILE_BASIC_LEN = 2 * sizeof(PkgTlv) + sizeof(UpgradePkgHeader) + sizeof(UpgradePkgTime);
 constexpr int32_t HASH_TLV_SIZE = 6;
-constexpr int16_t TLV_TYPE_FOR_HASH = 0x0007;
 constexpr int16_t TLV_TYPE_FOR_SIGN = 0x0008;
 constexpr int32_t UPGRADE_RESERVE_LEN = 16;
 constexpr int16_t TLV_TYPE_FOR_SHA256 = 0x0001;
