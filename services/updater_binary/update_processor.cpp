@@ -366,6 +366,8 @@ int UScriptInstructionUpdateFromBin::UnCompressDataProducer(const PkgBuffer &buf
             // ringBuffer->Push(stashBuffer.buffer, stashDataSize_ + size);
             fwrite(stashBuffer.buffer, stashDataSize_ + size, 1, file_test);
             stashDataSize_ = 0;
+        } else {
+            stashDataSize_ += size;
         }
         return PKG_SUCCESS;
     } else {
