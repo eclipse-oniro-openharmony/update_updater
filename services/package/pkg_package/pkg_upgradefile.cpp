@@ -270,7 +270,7 @@ int32_t UpgradePkgFile::ReadSignData(PkgBuffer &buffer, std::vector<uint8_t> &si
     algorithm->Update(reserve_buf, reserve_buf.length);
     parsedLen += reserve_buf.length;
 
-    size_t ret = pkgStream_->Read(buffer, parsedLen, buffer.length, readBytes);
+    ret = pkgStream_->Read(buffer, parsedLen, buffer.length, readBytes);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("read sign data fail");
         UPDATER_LAST_WORD(ret);
