@@ -300,14 +300,14 @@ int32_t UScriptInstructionUpdateFromBin::Execute(Uscript::UScriptEnv &env, Uscri
         return USCRIPT_INVALID_PARAM;
     }
 
-    RingBuffer ringBuffer;
-    if (!ringBuffer.Init(STASH_BUFFER_SIZE, BUFFER_NUM)) {
-        LOG(ERROR) << "Error to get ringbuffer";
-        return USCRIPT_INVALID_PARAM;
-    }
-
+    // RingBuffer ringBuffer;
+    // if (!ringBuffer.Init(STASH_BUFFER_SIZE, BUFFER_NUM)) {
+    //     LOG(ERROR) << "Error to get ringbuffer";
+    //     return USCRIPT_INVALID_PARAM;
+    // }
+    FILE *file = fopen("/data/updater/testbin", "wb+");
     PkgManager::StreamPtr outStream = nullptr;
-    ret = pkgManager->CreatePkgStream(outStream, upgradeFileName, UnCompressDataProducer, &ringBuffer);
+    ret = pkgManager->CreatePkgStream(outStream, upgradeFileName, UnCompressDataProducer, file);
     if (ret != USCRIPT_SUCCESS || outStream == nullptr) {
         LOG(ERROR) << "Error to create output stream";
         return USCRIPT_INVALID_PARAM;
@@ -319,8 +319,9 @@ int32_t UScriptInstructionUpdateFromBin::Execute(Uscript::UScriptEnv &env, Uscri
         pkgManager->ClosePkgStream(outStream);
         return USCRIPT_ERROR_EXECUTE;
     }
+    fclose(file);
     pkgManager->ClosePkgStream(outStream);
-    return USCRIPT_SUCCESS;
+    return USCRIPT_ERROR_EXECUTE;
 }
 
 int UScriptInstructionUpdateFromBin::UnCompressDataProducer(const PkgBuffer &buffer, size_t size, size_t start,
@@ -329,17 +330,22 @@ int UScriptInstructionUpdateFromBin::UnCompressDataProducer(const PkgBuffer &buf
     static PkgBuffer stashBuffer(STASH_BUFFER_SIZE);
     size_t bufferStart = 0;
     void *p = const_cast<void *>(context);
-    RingBuffer *ringBuffer = static_cast<RingBuffer *>(p);
-    if (ringBuffer == nullptr) {
-        LOG(ERROR) << "ring buffer is nullptr";
-        return PKG_INVALID_STREAM;
-    }
+    FILE *file = static_cast<FILE *>(p);
+    // if (ringBuffer == nullptr) {
+    //     LOG(ERROR) << "ring buffer is nullptr";
+    //     return PKG_INVALID_STREAM;
+    // }
+    LOG(ERROR) << "ring buffer  " << size;
     while (stashDataSize_ + size >= STASH_BUFFER_SIZE) {
         size_t readLen = STASH_BUFFER_SIZE - stashDataSize_;
         if (memcpy_s(stashBuffer.buffer + stashDataSize_, readLen, buffer.buffer + bufferStart, readLen) != 0) {
                 return USCRIPT_ERROR_EXECUTE;
         }
-        ringBuffer->Push(stashBuffer.buffer, STASH_BUFFER_SIZE);
+        // ringBuffer->Push(stashBuffer.buffer, STASH_BUFFER_SIZE);
+        if(fwrite(stashBuffer.buffer, STASH_BUFFER_SIZE, 1, file) != 1) {
+            LOG(ERROR) << "fail write";
+        }
+        fflush(file);
         stashDataSize_ = 0;
         size -= readLen;
         bufferStart += readLen;
@@ -349,7 +355,9 @@ int UScriptInstructionUpdateFromBin::UnCompressDataProducer(const PkgBuffer &buf
     } else if (memcpy_s(stashBuffer.buffer + stashDataSize_, STASH_BUFFER_SIZE - stashDataSize_,
         buffer.buffer + bufferStart, size) == 0) {
         if (isFinish) {
-            ringBuffer->Push(stashBuffer.buffer, stashDataSize_ + size);
+            // ringBuffer->Push(stashBuffer.buffer, stashDataSize_ + size);
+            fwrite(stashBuffer.buffer, stashDataSize_ + size, 1, file);
+            fflush(file);
             stashDataSize_ = 0;
         }
         return PKG_SUCCESS;
