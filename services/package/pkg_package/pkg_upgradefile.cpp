@@ -379,9 +379,9 @@ int32_t UpgradePkgFile::LoadPackage(std::vector<std::string> &fileNames, VerifyF
 
     // Read signature information
     PkgBuffer signBuffer(HASH_TLV_SIZE);
-    ret = ReadHashAndSignData(signBuffer, signData, parsedLen, algorithm);
+    ret = ReadSignData(signBuffer, signData, parsedLen, algorithm);
     if (ret != PKG_SUCCESS) {
-        PKG_LOGE("ReadHashAndSignData fail %d", ret);
+        PKG_LOGE("ReadSignData fail %d", ret);
         return ret;
     }
     pkgInfo_.pkgInfo.updateFileHeadLen = parsedLen;
