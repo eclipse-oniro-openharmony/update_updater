@@ -301,7 +301,7 @@ int32_t UScriptInstructionUpdateFromBin::Execute(Uscript::UScriptEnv &env, Uscri
     }
 
     RingBuffer ringBuffer;
-    if (ringBuffer.Init(STASH_BUFFER_SIZE, BUFFER_NUM)) {
+    if (!ringBuffer.Init(STASH_BUFFER_SIZE, BUFFER_NUM)) {
         LOG(ERROR) << "Error to get ringbuffer";
         return USCRIPT_INVALID_PARAM;
     }

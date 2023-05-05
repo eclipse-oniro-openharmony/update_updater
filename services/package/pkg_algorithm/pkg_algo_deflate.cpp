@@ -226,19 +226,20 @@ int32_t PkgAlgoDeflate::InitStream(z_stream &zstream, bool zip, PkgBuffer &inBuf
             PKG_LOGE("fail deflateInit2 ret %d", ret);
             return PKG_NOT_EXIST_ALGORITHM;
         }
-        inBuffer.length = DEFLATE_IN_BUFFER_SIZE;
-        outBuffer.length = DEFLATE_OUT_BUFFER_SIZE;
+        inBuffer.capacity = DEFLATE_IN_BUFFER_SIZE;
+        outBuffer.capacity = DEFLATE_OUT_BUFFER_SIZE;
     } else {
         ret = inflateInit2(&zstream, windowBits_);
         if (ret != Z_OK) {
             PKG_LOGE("fail deflateInit2");
             return PKG_NOT_EXIST_ALGORITHM;
         }
-        inBuffer.length = INFLATE_IN_BUFFER_SIZE;
-        outBuffer.length = INFLATE_OUT_BUFFER_SIZE;
+        inBuffer.capacity = INFLATE_IN_BUFFER_SIZE;
+        outBuffer.capacity = INFLATE_OUT_BUFFER_SIZE;
     }
 
-    outBuffer.data.resize(outBuffer.length);
+    outBuffer.data.resize(outBuffer.capacity);
+    outBuffer.length = outBuffer.capacity;
     outBuffer.buffer = reinterpret_cast<uint8_t *>(outBuffer.data.data());
     zstream.next_out = outBuffer.buffer;
     zstream.avail_out = outBuffer.length;
