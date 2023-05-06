@@ -286,7 +286,6 @@ int32_t PkgManagerImpl::LoadPackage(const std::string &packagePath, const std::s
     }
     if (SetSignVerifyKeyName(keyPath) != PKG_SUCCESS) {
         UPDATER_LAST_WORD(PKG_INVALID_FILE);
-        PKG_LOGE("Invalid keyname");
         return PKG_INVALID_FILE;
     }
     // Check if package already loaded
@@ -851,6 +850,7 @@ int32_t PkgManagerImpl::SetSignVerifyKeyName(const std::string &keyName)
     Updater::UPDATER_INIT_RECORD;
     if (access(keyName.c_str(), 0) != 0) {
         UPDATER_LAST_WORD(PKG_INVALID_FILE);
+        PKG_LOGE("Invalid keyname");
         return PKG_INVALID_FILE;
     }
     signVerifyKeyName_ = keyName;

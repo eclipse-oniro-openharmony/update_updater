@@ -45,7 +45,7 @@ namespace Updater {
 size_t UScriptInstructionRawImageWrite::totalSize_ = 0;
 size_t UScriptInstructionRawImageWrite::readSize_ = 0;
 size_t UScriptInstructionUpdateFromBin::stashDataSize_ = 0;
-FILE *file_test = nullptr;
+
 UpdaterEnv::~UpdaterEnv()
 {
     if (factory_ != nullptr) {
@@ -305,11 +305,7 @@ int32_t UScriptInstructionUpdateFromBin::Execute(Uscript::UScriptEnv &env, Uscri
         LOG(ERROR) << "Error to get ringbuffer";
         return USCRIPT_INVALID_PARAM;
     }
-    file_test = fopen("/data/updater/testbin", "wb+");
-    if (file_test == nullptr) {
-        LOG(ERROR) << "Error to file_test";
-        return USCRIPT_INVALID_PARAM;
-    }
+
     PkgManager::StreamPtr outStream = nullptr;
     ret = pkgManager->CreatePkgStream(outStream, upgradeFileName, UnCompressDataProducer, &ringBuffer);
     if (ret != USCRIPT_SUCCESS || outStream == nullptr) {
@@ -318,11 +314,6 @@ int32_t UScriptInstructionUpdateFromBin::Execute(Uscript::UScriptEnv &env, Uscri
     }
 
     ret = pkgManager->ExtractFile(upgradeFileName, outStream);
-    if (fflush(file_test) != 0) {
-        LOG(ERROR) << "Invalid stream";
-        return PKG_INVALID_STREAM;
-    }
-    fclose(file_test);
     if (ret != USCRIPT_SUCCESS) {
         LOG(ERROR) << "Error to extract" << upgradeFileName;
         pkgManager->ClosePkgStream(outStream);
@@ -343,28 +334,23 @@ int UScriptInstructionUpdateFromBin::UnCompressDataProducer(const PkgBuffer &buf
         LOG(ERROR) << "ring buffer is nullptr";
         return PKG_INVALID_STREAM;
     }
-    LOG(ERROR) << "ring buffer  " << size;
+
     while (stashDataSize_ + size >= STASH_BUFFER_SIZE) {
         size_t readLen = STASH_BUFFER_SIZE - stashDataSize_;
         if (memcpy_s(stashBuffer.buffer + stashDataSize_, readLen, buffer.buffer + bufferStart, readLen) != 0) {
                 return USCRIPT_ERROR_EXECUTE;
         }
-        LOG(ERROR) << "memcpy_s" << stashDataSize_ << size;
-        // ringBuffer->Push(stashBuffer.buffer, STASH_BUFFER_SIZE);
-        if(fwrite(stashBuffer.buffer, STASH_BUFFER_SIZE, 1, file_test) != 1) {
-            LOG(ERROR) << "fail write";
-        }
+        ringBuffer->Push(stashBuffer.buffer, STASH_BUFFER_SIZE);
         stashDataSize_ = 0;
         size -= readLen;
         bufferStart += readLen;
     }
     if (size == 0 && stashDataSize_ == 0) {
         return PKG_SUCCESS;
-    } else if (memcpy_s(stashBuffer.buffer + stashDataSize_, STASH_BUFFER_SIZE - stashDataSize_,
+    } else if (size == 0 || memcpy_s(stashBuffer.buffer + stashDataSize_, STASH_BUFFER_SIZE - stashDataSize_,
         buffer.buffer + bufferStart, size) == 0) {
         if (isFinish) {
-            // ringBuffer->Push(stashBuffer.buffer, stashDataSize_ + size);
-            fwrite(stashBuffer.buffer, stashDataSize_ + size, 1, file_test);
+            ringBuffer->Push(stashBuffer.buffer, stashDataSize_ + size);
             stashDataSize_ = 0;
         } else {
             stashDataSize_ += size;

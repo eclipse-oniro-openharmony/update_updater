@@ -108,8 +108,9 @@ HWTEST_F(UpdateProcessorUnitTest, UpdateProcessor_004, TestSize.Level1)
     RingBuffer ringBuffer;
     bool ret = ringBuffer.Init(UScriptInstructionUpdateFromBin::STASH_BUFFER_SIZE, BUFFER_PUSH_TIMES);
     EXPECT_TRUE(ret);
-    for(uint32_t i = 0; i < BUFFER_PUSH_TIMES; i++) {
-        EXPECT_EQ(UScriptInstructionUpdateFromBin::UnCompressDataProducer(buffer, BUFFER_SIZE, 0, false, &ringBuffer), 0);
+    for (uint32_t i = 0; i < BUFFER_PUSH_TIMES; i++) {
+        EXPECT_EQ(UScriptInstructionUpdateFromBin::UnCompressDataProducer(buffer,
+            BUFFER_SIZE, 0, false, &ringBuffer), 0);
     }
     PkgBuffer emptyBuffer = {};
     EXPECT_EQ(UScriptInstructionUpdateFromBin::UnCompressDataProducer(emptyBuffer, 0, 0, true, &ringBuffer), 0);
