@@ -33,8 +33,8 @@ namespace Hpackage {
 
 std::string GetCurrPath();
 size_t GetFileSize(const std::string &fileName);
-std::string GetFilePath(const std::string &fileName);
 std::string GetName(const std::string &filePath);
+std::string GetFilePath(const std::string &fileName);
 int32_t CheckFile(const std::string &fileName);
 uint8_t *MapMemory(const std::string &fileName, size_t size);
 void ReleaseMemory(uint8_t *memMap, size_t size);
