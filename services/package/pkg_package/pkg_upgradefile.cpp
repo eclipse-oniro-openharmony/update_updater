@@ -275,6 +275,7 @@ int32_t UpgradePkgFile::ReadSignData(PkgBuffer &buffer, std::vector<uint8_t> &si
         UPDATER_LAST_WORD(ret);
         return ret;
     }
+    parsedLen += buffer.length;
     uint16_t dataType = ReadLE16(buffer.buffer);
     uint32_t dataLen = ReadLE32(buffer.buffer + sizeof(uint16_t));
     if (dataType != TLV_TYPE_FOR_SIGN) {
