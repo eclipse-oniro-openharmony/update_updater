@@ -303,7 +303,9 @@ int32_t UpgradePkgFile::ReadSignData(PkgBuffer &buffer, std::vector<uint8_t> &si
     // refresh component data offset
     hash_sign_len = parsedLen - hash_sign_len;
     for (auto &it : pkgEntryMapId_) {
-        it.second->AddDataOffset(hash_sign_len);
+        if (it.second != nullptr) {
+            it.second->AddDataOffset(hash_sign_len);
+        }
     }
     return PKG_SUCCESS;
 }
