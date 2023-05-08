@@ -269,6 +269,7 @@ int32_t UpgradePkgFile::ReadSignData(PkgBuffer &buffer, std::vector<uint8_t> &si
     algorithm->Update(reserve_buf, reserve_buf.length);
     parsedLen += reserve_buf.length;
 
+    size_t hash_sign_len = parsedLen;
     ret = pkgStream_->Read(buffer, parsedLen, buffer.length, readBytes);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("read sign data fail");
@@ -276,6 +277,7 @@ int32_t UpgradePkgFile::ReadSignData(PkgBuffer &buffer, std::vector<uint8_t> &si
         return ret;
     }
     parsedLen += buffer.length;
+
     uint16_t dataType = ReadLE16(buffer.buffer);
     uint32_t dataLen = ReadLE32(buffer.buffer + sizeof(uint16_t));
     if (dataType != TLV_TYPE_FOR_SIGN) {
@@ -296,6 +298,12 @@ int32_t UpgradePkgFile::ReadSignData(PkgBuffer &buffer, std::vector<uint8_t> &si
         PKG_LOGE("memcpy sign data fail");
         UPDATER_LAST_WORD(PKG_NONE_MEMORY);
         return PKG_NONE_MEMORY;
+    }
+
+    // refresh component data offset
+    hash_sign_len = parsedLen - hash_sign_len;
+    for (auto &it : pkgEntryMapId_) {
+        it.second->AddDataOffset(hash_sign_len);
     }
     return PKG_SUCCESS;
 }
@@ -504,7 +512,7 @@ int32_t UpgradePkgFile::ReadComponents(const PkgBuffer &buffer, size_t &parsedLe
 
     parsedLen += sizeof(PkgTlv);
 
-    info.dataOffset = parsedLen + tlv.length + GetUpgradeSignatureLen() + UPGRADE_RESERVE_LEN;
+    info.dataOffset = parsedLen + tlv.length + UPGRADE_RESERVE_LEN;
     info.srcOffset = 0;
     info.currLen = sizeof(PkgTlv);
     PkgBuffer compBuffer(sizeof(UpgradeCompInfo));
