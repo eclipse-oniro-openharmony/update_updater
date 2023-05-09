@@ -27,7 +27,6 @@ config("package_config") {
     "${updater_path}/utils/include",
     "${updater_path}/services/include",
     "//third_party/zlib",
-    "//third_party/openssl/include",
     "//third_party/lz4/lib",
     "${updater_path}/services/include/package",
     "${updater_path}/services/include/script",
@@ -67,7 +66,7 @@ ohos_static_library("libupdaterpackage") {
   deps = [
     "${updater_path}/services/log:libupdaterlog",
     "//third_party/bounds_checking_function:libsec_static",
-    "//third_party/openssl:libcrypto_static",
+    "//third_party/openssl:libcrypto_shared",
   ]
 
   if (!is_linux && !is_mingw && !is_mac) {
@@ -93,4 +92,5 @@ ohos_static_library("libupdaterpackage") {
       "-Wl,--no-whole-archive",
     ]
   }
+  defines = [ "OPENSSL_SUPPRESS_DEPRECATED" ]
 }

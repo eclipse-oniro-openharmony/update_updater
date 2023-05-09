@@ -21,6 +21,7 @@ config("diff_config") {
   if (is_mingw) {
     cflags_cc += [ "-Wno-inconsistent-dllimport" ]
   }
+  defines = [ "OPENSSL_SUPPRESS_DEPRECATED" ]
 }
 
 updater_path = rebase_path("${updater_absolutely_path}", ".")
@@ -57,7 +58,6 @@ ohos_executable("diff") {
     "${updater_path}/services/package/pkg_manager",
     "${updater_path}/services/include/log",
     "//third_party/bounds_checking_function/include",
-    "//third_party/openssl/include",
     "//third_party/bzip2",
     "//third_party/zlib",
     "//third_party/lz4/lib",
@@ -68,7 +68,7 @@ ohos_executable("diff") {
     "${updater_path}/services/package:libupdaterpackage",
     "//third_party/bzip2:libbz2",
     "//third_party/lz4:liblz4_static",
-    "//third_party/openssl:libcrypto_static",
+    "//third_party/openssl:libcrypto_shared",
     "//third_party/zlib:libz",
   ]
 

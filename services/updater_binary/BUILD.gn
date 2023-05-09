@@ -28,7 +28,6 @@ config("updater_config") {
     "${updater_path}/utils/json",
     "${updater_path}/services/include/applypatch",
     "//base/startup/init/interfaces/innerkits/include",
-    "//third_party/openssl/include",
     "//third_party/bounds_checking_function/include",
     "//drivers/hdf/frameworks/include/utils",
   ]
@@ -64,8 +63,8 @@ ohos_executable("updater_binary") {
     "//third_party/bzip2:libbz2",
     "//third_party/cJSON:cjson_static",
     "//third_party/lz4:liblz4_static",
-    "//third_party/openssl:libcrypto_static",
-    "//third_party/openssl:ssl_source",
+    "//third_party/openssl:libcrypto_shared",
+    "//third_party/openssl:libssl_shared",
     "//third_party/zlib:libz",
   ]
 
@@ -88,4 +87,5 @@ ohos_executable("updater_binary") {
   ]
   part_name = "updater"
   subsystem_name = "updater"
+  defines = [ "OPENSSL_SUPPRESS_DEPRECATED" ]
 }

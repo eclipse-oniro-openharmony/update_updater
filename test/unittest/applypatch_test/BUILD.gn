@@ -60,8 +60,8 @@ ohos_unittest("applypatch_unittest") {
     "${updater_path}/services/fs_manager:libfsmanager",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
-    "//third_party/openssl:libcrypto_static",
-    "//third_party/openssl:ssl_source",
+    "//third_party/openssl:libcrypto_shared",
+    "//third_party/openssl:libssl_shared",
   ]
   external_deps = [ "init:libbegetutil" ]
   configs = [ "${updater_path}/test/unittest:utest_config" ]
