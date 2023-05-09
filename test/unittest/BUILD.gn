@@ -153,7 +153,6 @@ ohos_unittest("updater_unittest") {
     "//foundation/arkui/napi/interfaces/kits",
     "//third_party/cJSON",
     "//third_party/curl/include",
-    "//third_party/openssl/include",
     "//third_party/bzip2",
     "//third_party/libdrm/include/drm",
     "//third_party/libdrm",
@@ -187,8 +186,8 @@ ohos_unittest("updater_unittest") {
     "//third_party/googletest:gtest_main",
     "//third_party/libuv:uv",
     "//third_party/lz4:liblz4_static",
-    "//third_party/openssl:libcrypto_static",
-    "//third_party/openssl:ssl_source",
+    "//third_party/openssl:libcrypto_shared",
+    "//third_party/openssl:libssl_shared",
     "//third_party/zlib:libz",
   ]
 
@@ -206,6 +205,7 @@ ohos_unittest("updater_unittest") {
   public_configs = [ ":utest_config" ]
   install_enable = true
   part_name = "updater"
+  defines = [ "OPENSSL_SUPPRESS_DEPRECATED" ]
 }
 
 ohos_executable("test_update_binary") {

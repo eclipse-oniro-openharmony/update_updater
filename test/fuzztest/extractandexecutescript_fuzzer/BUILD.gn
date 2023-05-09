@@ -42,7 +42,6 @@ ohos_fuzztest("ExtractAndExecuteScriptFuzzTest") {
     "${updater_path}/services/script/script_manager",
     "${updater_path}/services/script/script_instruction",
     "//third_party/bounds_checking_function/include",
-    "//third_party/openssl/include",
   ]
 
   deps = [
@@ -60,8 +59,8 @@ ohos_fuzztest("ExtractAndExecuteScriptFuzzTest") {
     "//third_party/bzip2:libbz2",
     "//third_party/libdrm:libdrm",
     "//third_party/lz4:liblz4_static",
-    "//third_party/openssl:libcrypto_static",
-    "//third_party/openssl:ssl_source",
+    "//third_party/openssl:libcrypto_shared",
+    "//third_party/openssl:libssl_shared",
     "//third_party/zlib:libz",
   ]
   external_deps = [ "c_utils:utils" ]
