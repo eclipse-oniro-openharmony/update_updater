@@ -102,6 +102,9 @@ ohos_source_set("flashd_deamon") {
       "UPDATER_MODE",
     ]
   }
+
+  subsystem_name = "updater"
+  part_name = "updater"
 }
 
 ohos_static_library("libflashd") {
