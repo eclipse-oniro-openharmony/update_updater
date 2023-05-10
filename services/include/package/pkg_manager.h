@@ -138,7 +138,6 @@ struct ZipFileInfo {
 struct PkgBuffer {
     uint8_t *buffer;
     size_t length = 0; // buffer size
-    size_t capacity = 1UL << 31;
     
     std::vector<uint8_t> data;
 
@@ -157,21 +156,14 @@ struct PkgBuffer {
     PkgBuffer(std::vector<uint8_t> &buffer)
     {
         this->buffer = buffer.data();
-        this->length = buffer.size();
-        this->capacity = buffer.capacity();
+        this->length = buffer.capacity();
     }
 
-    PkgBuffer(size_t bufferSize, bool isAlloc = true)
+    PkgBuffer(size_t bufferSize)
     {
-        if (isAlloc) {
-            data.resize(bufferSize, 0);
-            this->buffer = data.data();
-            this->length = bufferSize;
-            this->capacity = bufferSize;
-        } else {
-            this->buffer = nullptr;
-            this->capacity = bufferSize;
-        }
+        data.resize(bufferSize, 0);
+        this->buffer = data.data();
+        this->length = bufferSize;
     }
 };
 

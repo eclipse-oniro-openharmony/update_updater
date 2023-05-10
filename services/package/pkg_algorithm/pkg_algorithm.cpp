@@ -26,7 +26,7 @@ int32_t PkgAlgorithm::ReadData(const PkgStreamPtr inStream, size_t offset, PkgBu
     size_t &remainSize, size_t &readLen) const
 {
     size_t readBytes = 0;
-    size_t remainBytes = (remainSize > buffer.capacity) ? buffer.capacity : remainSize;
+    size_t remainBytes = (remainSize > buffer.length) ? buffer.length : remainSize;
     if (remainBytes != 0) {
         int32_t ret = inStream->Read(buffer, offset, remainBytes, readBytes);
         if (ret != PKG_SUCCESS) {
@@ -112,7 +112,7 @@ int32_t PkgAlgorithm::Unpack(const PkgStreamPtr inStream, const PkgStreamPtr out
         return PKG_NOT_EXIST_ALGORITHM;
     }
     algorithm->Init();
-    PkgBuffer buffer(MAX_BUFFER_SIZE, false);
+    PkgBuffer buffer(nullptr, MAX_BUFFER_SIZE);
     int32_t ret = PKG_SUCCESS;
     size_t srcOffset = context.srcOffset;
     size_t destOffset = context.destOffset;

@@ -129,7 +129,7 @@ uint8_t *AnonymousMap(const std::string &fileName, size_t size)
     // Map the file to memory
     mappedData = mmap(nullptr, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_POPULATE | MAP_ANON, -1, 0);
     if (mappedData == MAP_FAILED) {
-        PKG_LOGE("Failed to mmap room for file %s ", fileName.c_str());
+        PKG_LOGE("Failed to alloc memory for file %s ", fileName.c_str());
         return nullptr;
     }
     return static_cast<uint8_t *>(mappedData);

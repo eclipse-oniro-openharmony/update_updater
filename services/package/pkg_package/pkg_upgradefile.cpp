@@ -312,7 +312,7 @@ int32_t UpgradePkgFile::LoadPackage(std::vector<std::string> &fileNames, VerifyF
     std::vector<uint8_t> signData;
     DigestAlgorithm::DigestAlgorithmPtr algorithm = nullptr;
     // Parse header
-    PkgBuffer buffer(buffSize, false);
+    PkgBuffer buffer(nullptr, buffSize);
     size_t parsedLen = 0;
     int32_t ret = ReadUpgradePkgHeader(buffer, parsedLen, algorithm);
     if (ret != PKG_SUCCESS) {
@@ -320,6 +320,7 @@ int32_t UpgradePkgFile::LoadPackage(std::vector<std::string> &fileNames, VerifyF
         UPDATER_LAST_WORD(PKG_INVALID_STATE);
         return ret;
     }
+
     ret = ReadComponents(buffer, parsedLen, algorithm, fileNames);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("Decode components fail %d", ret);
@@ -431,7 +432,7 @@ int32_t UpgradePkgFile::ReadComponents(PkgBuffer &buffer, size_t &parsedLen,
     UpgradeParam info;
     size_t fileLen = pkgStream_->GetFileLength();
     info.readLen = 0;
-    int32_t ret = pkgStream_->Read(buffer, parsedLen, buffer.capacity, info.readLen);
+    int32_t ret = pkgStream_->Read(buffer, parsedLen, buffer.length, info.readLen);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("Read component fail");
         UPDATER_LAST_WORD(ret);
@@ -451,7 +452,7 @@ int32_t UpgradePkgFile::ReadComponents(PkgBuffer &buffer, size_t &parsedLen,
     while (info.srcOffset < tlv.length) {
         if (info.currLen + sizeof(UpgradeCompInfo) > info.readLen) {
             info.readLen = 0;
-            ret = pkgStream_->Read(buffer, parsedLen + info.srcOffset, buffer.capacity, info.readLen);
+            ret = pkgStream_->Read(buffer, parsedLen + info.srcOffset, buffer.length, info.readLen);
             if (ret != PKG_SUCCESS) {
                 PKG_LOGE("Fail to read data");
                 UPDATER_LAST_WORD(ret);
@@ -500,7 +501,7 @@ int32_t UpgradePkgFile::ReadUpgradePkgHeader(PkgBuffer &buffer, size_t &realLen,
     size_t readLen = 0;
     size_t currLen = 0;
     PkgTlv tlv;
-    int32_t ret = pkgStream_->Read(buffer, 0, buffer.capacity, readLen);
+    int32_t ret = pkgStream_->Read(buffer, 0, buffer.length, readLen);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("Fail to read header");
         UPDATER_LAST_WORD(ret);
@@ -519,7 +520,7 @@ int32_t UpgradePkgFile::ReadUpgradePkgHeader(PkgBuffer &buffer, size_t &realLen,
     if (currLen + tlv.length >= readLen) { // Extra TLV information, read it.
         realLen = currLen + tlv.length;
         algorithm->Update(buffer, realLen);
-        ret = pkgStream_->Read(buffer, realLen, buffer.capacity, readLen);
+        ret = pkgStream_->Read(buffer, realLen, buffer.length, readLen);
         if (ret != PKG_SUCCESS) {
             PKG_LOGE("Fail to read header");
             UPDATER_LAST_WORD(ret);

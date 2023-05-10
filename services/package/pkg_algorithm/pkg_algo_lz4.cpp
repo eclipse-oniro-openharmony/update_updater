@@ -364,8 +364,7 @@ int32_t PkgAlgorithmLz4::GetUnpackParam(LZ4F_decompressionContext_t &ctx, const 
     }
 
     size_t remainSize = LZ4S_HEADER_LEN;
-    PkgBuffer inbuffer(nextToRead, false);
-    pkgHeader.length = nextToRead;
+    PkgBuffer inbuffer(nullptr, nextToRead);
     if (ReadData(inStream, srcOffset, inbuffer, remainSize, readLen) != PKG_SUCCESS) {
         PKG_LOGE("Fail read data ");
         return PKG_INVALID_LZ4;
@@ -474,9 +473,9 @@ int32_t PkgAlgorithmLz4::Unpack(const PkgStreamPtr inStream, const PkgStreamPtr 
     }
     size_t inLength = static_cast<size_t>(inBuffSize);
     size_t outLength = static_cast<size_t>(outBuffSize);
-    PkgBuffer inBuffer(inLength, false);
+    PkgBuffer inBuffer(nullptr, inLength);
     PkgBuffer outBuffer(outLength);
-    if (inBuffer.buffer == nullptr || outBuffer.buffer == nullptr) {
+    if (outBuffer.buffer == nullptr) {
         (void)LZ4F_freeDecompressionContext(ctx);
         PKG_LOGE("Fail to alloc buffer ");
         return PKG_NONE_MEMORY;
