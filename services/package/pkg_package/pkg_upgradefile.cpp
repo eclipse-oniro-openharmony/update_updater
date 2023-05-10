@@ -263,25 +263,25 @@ int32_t UpgradePkgFile::ReadSignData(PkgBuffer &buffer, std::vector<uint8_t> &si
     size_t ret = pkgStream_->Read(reserve_buf, parsedLen, reserve_buf.length, readBytes);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("read reserve data fail");
-        UPDATER_LAST_WORD(ret);
+        UPDATER_LAST_WORD(ret, parsedLen);
         return ret;
     }
     algorithm->Update(reserve_buf, reserve_buf.length);
     parsedLen += reserve_buf.length;
 
-    size_t hash_sign_len = parsedLen;
+    size_t signLen = parsedLen;
     ret = pkgStream_->Read(buffer, parsedLen, buffer.length, readBytes);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("read sign data fail");
-        UPDATER_LAST_WORD(ret);
+        UPDATER_LAST_WORD(ret, parsedLen);
         return ret;
     }
     parsedLen += buffer.length;
-
     uint16_t dataType = ReadLE16(buffer.buffer);
     uint32_t dataLen = ReadLE32(buffer.buffer + sizeof(uint16_t));
     if (dataType != TLV_TYPE_FOR_SIGN) {
-        PKG_LOGE("Invalid tlv type: %d length %u ", dataType, dataLen);
+        PKG_LOGE("Invalid tlv type: %hu length %u ", dataType, dataLen);
+        UPDATER_LAST_WORD(ret, dataType);
         return PKG_INVALID_FILE;
     }
 
@@ -289,22 +289,18 @@ int32_t UpgradePkgFile::ReadSignData(PkgBuffer &buffer, std::vector<uint8_t> &si
     ret = pkgStream_->Read(signBuf, parsedLen, signBuf.length, readBytes);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("read hash data fail");
-        UPDATER_LAST_WORD(ret);
+        UPDATER_LAST_WORD(ret, parsedLen);
         return ret;
     }
     parsedLen += signBuf.length;
     signData.resize(dataLen);
-    if (memcpy_s(signData.data(), signData.size(), signBuf.buffer, signBuf.length) != EOK) {
-        PKG_LOGE("memcpy sign data fail");
-        UPDATER_LAST_WORD(PKG_NONE_MEMORY);
-        return PKG_NONE_MEMORY;
-    }
+    signData.assign(signBuf.data.begin(), signBuf.data.end());
 
     // refresh component data offset
-    hash_sign_len = parsedLen - hash_sign_len;
+    signLen = parsedLen - signLen;
     for (auto &it : pkgEntryMapId_) {
         if (it.second != nullptr) {
-            it.second->AddDataOffset(hash_sign_len);
+            it.second->AddDataOffset(signLen);
         }
     }
     return PKG_SUCCESS;
