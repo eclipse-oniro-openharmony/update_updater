@@ -38,7 +38,6 @@ ohos_unittest("flashd_unittest") {
     "${HDC_PATH}/common/tcp.cpp",
     "${HDC_PATH}/common/transfer.cpp",
     "${HDC_PATH}/common/usb.cpp",
-    "${updater_path}/services/hdi/server/update_hdi_impl.cpp",
     "${updater_path}/services/flashd/daemon/commander.cpp",
     "${updater_path}/services/flashd/daemon/commander_factory.cpp",
     "${updater_path}/services/flashd/daemon/daemon_updater.cpp",
@@ -50,6 +49,7 @@ ohos_unittest("flashd_unittest") {
     "${updater_path}/services/flashd/daemon/update_commander.cpp",
     "${updater_path}/services/flashd/image_writer/image_writer.cpp",
     "${updater_path}/services/flashd/partition.cpp",
+    "${updater_path}/services/hdi/server/update_hdi_impl.cpp",
     "${updater_path}/services/updater_utils.cpp",
     "flashd_unittest.cpp",
   ]
