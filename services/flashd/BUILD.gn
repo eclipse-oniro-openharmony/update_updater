@@ -14,8 +14,8 @@
 import("//base/update/updater/updater_default_cfg.gni")
 import("//build/ohos.gni")
 
-FLASHD_PATH = "//base/update/updater/services/flashd"
 HDC_PATH = "//developtools/hdc/src"
+updater_path = rebase_path("${updater_absolutely_path}", ".")
 
 common_sources = [
   "${HDC_PATH}/common/async_cmd.cpp",
@@ -35,14 +35,12 @@ common_sources = [
 ]
 
 config("flashd_hdc_config") {
-  include_dirs = [ "${FLASHD_PATH}/common" ]
+  include_dirs = [ "./common" ]
   cflags_cc = [ "-std=c++17" ]
 }
 
 ohos_source_set("flashd_deamon") {
   sources = [
-    "${FLASHD_PATH}/daemon/daemon.cpp",
-    "${FLASHD_PATH}/daemon/system_depend.cpp",
     "${HDC_PATH}/daemon/daemon_app.cpp",
     "${HDC_PATH}/daemon/daemon_forward.cpp",
     "${HDC_PATH}/daemon/daemon_tcp.cpp",
@@ -50,6 +48,8 @@ ohos_source_set("flashd_deamon") {
     "${HDC_PATH}/daemon/daemon_usb.cpp",
     "${HDC_PATH}/daemon/jdwp.cpp",
     "${HDC_PATH}/daemon/shell.cpp",
+    "daemon/daemon.cpp",
+    "daemon/system_depend.cpp",
   ]
 
   sources += common_sources
@@ -77,18 +77,18 @@ ohos_source_set("flashd_deamon") {
   include_dirs = [
     "${HDC_PATH}/daemon",
     "${HDC_PATH}/common",
-    "//base/update/updater/services/flashd",
-    "//base/update/updater/services/flashd/daemon",
-    "//base/update/updater/services/flashd/common",
-    "//base/update/updater/services/flashd/host",
-    "//base/update/updater/services/include",
-    "//base/update/updater/services/include/fs_manager",
-    "//base/update/updater/services/include/package",
-    "//base/update/updater/services/include/applypatch",
-    "//base/update/updater/services/include/script",
-    "//base/update/updater/services/include/log",
-    "//base/update/updater/interfaces/kits/include",
-    "//base/update/updater/utils/include",
+    "${updater_path}/services/flashd",
+    "${updater_path}/services/flashd/daemon",
+    "${updater_path}/services/flashd/common",
+    "${updater_path}/services/flashd/host",
+    "${updater_path}/services/include",
+    "${updater_path}/services/include/fs_manager",
+    "${updater_path}/services/include/package",
+    "${updater_path}/services/include/applypatch",
+    "${updater_path}/services/include/script",
+    "${updater_path}/services/include/log",
+    "${updater_path}/interfaces/kits/include",
+    "${updater_path}/utils/include",
     "//base/startup/init/services/include/param",
     "//third_party/bounds_checking_function/include",
     "//third_party/lz4/lib",
@@ -103,26 +103,29 @@ ohos_source_set("flashd_deamon") {
       "UPDATER_MODE",
     ]
   }
+
+  subsystem_name = "updater"
+  part_name = "updater"
 }
 
 ohos_static_library("libflashd") {
   sources = [
-    "//base/update/updater/services/flashd/daemon/commander.cpp",
-    "//base/update/updater/services/flashd/daemon/commander_factory.cpp",
-    "//base/update/updater/services/flashd/daemon/daemon_updater.cpp",
-    "//base/update/updater/services/flashd/daemon/erase_commander.cpp",
-    "//base/update/updater/services/flashd/daemon/flash_commander.cpp",
-    "//base/update/updater/services/flashd/daemon/flashd_main.cpp",
-    "//base/update/updater/services/flashd/daemon/flashd_utils.cpp",
-    "//base/update/updater/services/flashd/daemon/format_commander.cpp",
-    "//base/update/updater/services/flashd/daemon/update_commander.cpp",
-    "//base/update/updater/services/flashd/image_writer/image_writer.cpp",
-    "//base/update/updater/services/flashd/partition.cpp",
-    "//base/update/updater/services/hdi/client/update_hdi_client.cpp",
-    "//base/update/updater/services/updater_binary/update_image_block.cpp",
-    "//base/update/updater/services/updater_binary/update_image_patch.cpp",
-    "//base/update/updater/services/updater_binary/update_partitions.cpp",
-    "//base/update/updater/services/updater_binary/update_processor.cpp",
+    "${updater_path}/services/flashd/daemon/commander.cpp",
+    "${updater_path}/services/flashd/daemon/commander_factory.cpp",
+    "${updater_path}/services/flashd/daemon/daemon_updater.cpp",
+    "${updater_path}/services/flashd/daemon/erase_commander.cpp",
+    "${updater_path}/services/flashd/daemon/flash_commander.cpp",
+    "${updater_path}/services/flashd/daemon/flashd_main.cpp",
+    "${updater_path}/services/flashd/daemon/flashd_utils.cpp",
+    "${updater_path}/services/flashd/daemon/format_commander.cpp",
+    "${updater_path}/services/flashd/daemon/update_commander.cpp",
+    "${updater_path}/services/flashd/image_writer/image_writer.cpp",
+    "${updater_path}/services/flashd/partition.cpp",
+    "${updater_path}/services/hdi/client/update_hdi_client.cpp",
+    "${updater_path}/services/updater_binary/update_image_block.cpp",
+    "${updater_path}/services/updater_binary/update_image_patch.cpp",
+    "${updater_path}/services/updater_binary/update_partitions.cpp",
+    "${updater_path}/services/updater_binary/update_processor.cpp",
   ]
 
   defines = [
@@ -132,17 +135,17 @@ ohos_static_library("libflashd") {
 
   deps = [
     ":flashd_deamon",
-    "//base/update/updater/interfaces/kits/misc_info:libmiscinfo",
-    "//base/update/updater/interfaces/kits/slot_info:libslotinfo",
-    "//base/update/updater/interfaces/kits/updaterkits:libupdaterkits",
-    "//base/update/updater/services/applypatch:libapplypatch",
-    "//base/update/updater/services/diffpatch/patch:libpatch",
-    "//base/update/updater/services/fs_manager:libfsmanager",
-    "//base/update/updater/services/hdi/server:libupdate_hdi_impl",
-    "//base/update/updater/services/log:libupdaterlog",
-    "//base/update/updater/services/package:libupdaterpackage",
-    "//base/update/updater/services/script:libupdaterscript",
-    "//base/update/updater/utils:libutils",
+    "${updater_path}/interfaces/kits/misc_info:libmiscinfo",
+    "${updater_path}/interfaces/kits/slot_info:libslotinfo",
+    "${updater_path}/interfaces/kits/updaterkits:libupdaterkits",
+    "${updater_path}/services/applypatch:libapplypatch",
+    "${updater_path}/services/diffpatch/patch:libpatch",
+    "${updater_path}/services/fs_manager:libfsmanager",
+    "${updater_path}/services/hdi/server:libupdate_hdi_impl",
+    "${updater_path}/services/log:libupdaterlog",
+    "${updater_path}/services/package:libupdaterpackage",
+    "${updater_path}/services/script:libupdaterscript",
+    "${updater_path}/utils:libutils",
     "//developtools/hdc:hdc_hash_gen",
     "//third_party/bzip2:libbz2",
     "//third_party/cJSON:cjson",
@@ -159,19 +162,19 @@ ohos_static_library("libflashd") {
   include_dirs = [
     "${HDC_PATH}/daemon",
     "${HDC_PATH}/common",
-    "//base/update/updater/services",
-    "//base/update/updater/services/flashd",
-    "//base/update/updater/services/flashd/daemon",
-    "//base/update/updater/services/flashd/common",
-    "//base/update/updater/interfaces/kits/include",
-    "//base/update/updater/services/include/package",
-    "//base/update/updater/services/include/ptable_parse",
-    "//base/update/updater/services/include/script",
-    "//base/update/updater/services/include/log",
-    "//base/update/updater/services/include",
-    "//base/update/updater/services/ptable_parse",
-    "//base/update/updater/utils/include",
-    "//base/update/updater/utils/json",
+    "${updater_path}/services",
+    "${updater_path}/services/flashd",
+    "${updater_path}/services/flashd/daemon",
+    "${updater_path}/services/flashd/common",
+    "${updater_path}/interfaces/kits/include",
+    "${updater_path}/services/include/package",
+    "${updater_path}/services/include/ptable_parse",
+    "${updater_path}/services/include/script",
+    "${updater_path}/services/include/log",
+    "${updater_path}/services/include",
+    "${updater_path}/services/ptable_parse",
+    "${updater_path}/utils/include",
+    "${updater_path}/utils/json",
     "//base/startup/init/services/include/param",
     "//drivers/peripheral/partitionslot/hal/include",
     "//third_party/bounds_checking_function/include",
@@ -187,8 +190,8 @@ ohos_static_library("libflashd") {
   }
 
   if (defined(use_ptable)) {
-    include_dirs += [ "//base/update/updater/services/ptable_parse" ]
-    deps += [ "//base/update/updater/services/ptable_parse:libptableparse" ]
+    include_dirs += [ "${updater_path}/services/ptable_parse" ]
+    deps += [ "${updater_path}/services/ptable_parse:libptableparse" ]
     defines += [ "UPDATER_USE_PTABLE" ]
   }
 
