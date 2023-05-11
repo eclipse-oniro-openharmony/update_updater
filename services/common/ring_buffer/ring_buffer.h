@@ -33,6 +33,7 @@ public:
     [[nodiscard]] bool Init(uint32_t singleSize, uint32_t num);
     bool Push(uint8_t *buf, uint32_t len);
     bool Pop(uint8_t *buf, uint32_t maxLen, uint32_t &len);
+    void Stop();
 private:
     inline bool IsFull();
     inline bool IsEmpty();
@@ -44,6 +45,7 @@ private:
     uint32_t num_ = 0;  // buffer num
     uint8_t **bufArray_ = nullptr;
     uint32_t *lenArray_ = nullptr;
+    bool isStop = false;
     std::condition_variable notFull_;
     std::condition_variable notEmpty_;
     std::mutex notifyMtx_;

@@ -66,7 +66,8 @@ public:
 
     int32_t CompressBuffer(FileInfoPtr info, const PkgBuffer &buffer, StreamPtr stream) const override;
 
-    int32_t LoadPackageWithoutUnPack(const std::string &packagePath, std::vector<std::string> &fileIds) override;
+    int32_t LoadPackageWithoutUnPack(const std::string &packagePath, std::vector<std::string> &fileIds,
+        PkgStream::StreamType streamType = PkgStream::PKgStreamType_FileMap) override;
 
     int32_t LoadPackageWithStream(const std::string &packagePath, const std::string &keyPath,
         std::vector<std::string> &fileIds, uint8_t type, StreamPtr stream) override;
@@ -74,6 +75,11 @@ public:
     int32_t ParsePackage(StreamPtr stream, std::vector<std::string> &fileIds, int32_t type) override;
 
     int32_t CreatePkgStream(StreamPtr &stream, const std::string &fileName, const PkgBuffer &buffer) override;
+
+    int32_t CreatePkgStream(PkgStreamPtr &stream, const std::string &fileName,
+        PkgStream::ExtractFileProcessor processor, const void *context);
+
+    int32_t CreatePkgStream(StreamPtr &stream, const std::string &fileName, Updater::RingBuffer *buffer) override;
 
     int32_t VerifyOtaPackage(const std::string &packagePath) override;
 
@@ -87,6 +93,8 @@ public:
 
     void PostDecodeProgress(int type, size_t writeDataLen, const void *context) override;
 
+    PkgManager::StreamPtr GetPkgFileStream(const std::string &fileName) override;
+
 private:
     PkgFilePtr CreatePackage(PkgStreamPtr stream, PkgFile::PkgType type, PkgInfoPtr header = nullptr);
 
@@ -96,7 +104,8 @@ private:
 
     int32_t ExtraAndLoadPackage(const std::string &path, const std::string &name, PkgFile::PkgType,
         std::vector<std::string> &fileIds);
-    int32_t LoadPackage(const std::string &packagePath, std::vector<std::string> &fileIds, PkgFile::PkgType type);
+    int32_t LoadPackage(const std::string &packagePath, std::vector<std::string> &fileIds, PkgFile::PkgType type,
+        PkgStream::StreamType streamType = PkgStream::PKgStreamType_FileMap);
 
     int32_t LoadPackageWithStream(const std::string &packagePath,
         std::vector<std::string> &fileIds, PkgFile::PkgType type, PkgStreamPtr stream);

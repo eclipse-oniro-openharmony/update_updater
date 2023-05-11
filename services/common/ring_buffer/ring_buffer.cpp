@@ -77,6 +77,10 @@ bool RingBuffer::Push(uint8_t *buf, uint32_t len)
     if (IsFull()) {
         std::unique_lock<std::mutex> pushLock(notifyMtx_);
         while (IsFull()) {
+            if (isStop) {
+                LOG(WARNING) << "RingBuffer push stopped";
+                return false;
+            }
             LOG(ERROR) << "RingBuffer full, wait !!!";
             notFull_.wait(pushLock);
         }
@@ -104,6 +108,10 @@ bool RingBuffer::Pop(uint8_t *buf, uint32_t maxLen, uint32_t &len)
     if (IsEmpty()) {
         std::unique_lock<std::mutex> popLock(notifyMtx_);
         while (IsEmpty()) {
+            if (isStop) {
+                LOG(WARNING) << "RingBuffer pop stopped";
+                return false;
+            }
             LOG(ERROR) << "RingBuffer empty, wait !!!";
             notEmpty_.wait(popLock);
         }
@@ -120,6 +128,13 @@ bool RingBuffer::Pop(uint8_t *buf, uint32_t maxLen, uint32_t &len)
     std::unique_lock<std::mutex> popLock(notifyMtx_);
     notFull_.notify_all();
     return true;
+}
+
+void RingBuffer::Stop()
+{
+    isStop = true;
+    notFull_.notify_all();
+    notEmpty_.notify_all();
 }
 
 void RingBuffer::Release()

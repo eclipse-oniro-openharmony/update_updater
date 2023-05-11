@@ -20,6 +20,7 @@
 #include <atomic>
 #include "pkg_manager.h"
 #include "pkg_utils.h"
+#include "ring_buffer/ring_buffer.h"
 
 namespace Hpackage {
 class PkgStreamImpl;
@@ -47,7 +48,13 @@ public:
         return PKG_SUCCESS;
     }
 
-    virtual int32_t Write(const PkgBuffer &data, size_t size, size_t start) = 0;
+    int32_t Write(const PkgBuffer &data, size_t size, size_t start) override
+    {
+        UNUSED(data);
+        UNUSED(size);
+        UNUSED(start);
+        return PKG_SUCCESS;
+    }
 
     virtual int32_t Seek(long int offset, int whence) = 0;
 
@@ -213,6 +220,61 @@ public:
 private:
     ExtractFileProcessor processor_ = nullptr;
     const void *context_;
+};
+
+constexpr uint32_t MAX_FLOW_BUFFER_SIZE = 4 * 1024 * 1024;
+
+class FlowDataStream : public Hpackage::PkgStreamImpl {
+public:
+    FlowDataStream(Hpackage::PkgManager::PkgManagerPtr pkgManager, const std::string fileName,
+        const size_t fileSize, Updater::RingBuffer *buffer, int32_t streamType =
+        PkgStreamType_FlowData) : PkgStreamImpl(pkgManager, fileName), fileLength_(fileSize),
+        ringBuf_(buffer), streamType_(streamType) {}
+    ~FlowDataStream() override {}
+
+    int32_t Read(Hpackage::PkgBuffer &data, size_t start, size_t needRead, size_t &readLen) override;
+
+    int32_t Write(const Hpackage::PkgBuffer &data, size_t size, size_t start) override;
+
+    int32_t Seek(long int offset, int whence) override
+    {
+        UNUSED(offset);
+        UNUSED(whence);
+        return Hpackage::PKG_INVALID_STREAM;
+    }
+
+    int32_t GetStreamType() const override
+    {
+        return streamType_;
+    }
+
+    size_t GetFileLength() override
+    {
+        return fileLength_;
+    }
+
+    int32_t Flush(size_t size) override
+    {
+        UNUSED(size);
+        return Hpackage::PKG_INVALID_STREAM;
+    }
+
+    int32_t GetReadOffset() const override
+    {
+        return readOffset_;
+    }
+
+private:
+    int32_t ReadFromRingBuf(uint8_t *&buff, const uint32_t needLen, uint32_t &readLen);
+
+    size_t fileLength_ {};
+    Updater::RingBuffer *ringBuf_ {};
+    int32_t streamType_;
+    uint8_t buff_[MAX_FLOW_BUFFER_SIZE] = {0};
+    uint32_t avail_ {};
+    uint32_t bufOffset_ {};
+    size_t readOffset_ {};
+    size_t writeOffset_ {};
 };
 } // namespace Hpackage
 #endif // PKG_STREAM_H

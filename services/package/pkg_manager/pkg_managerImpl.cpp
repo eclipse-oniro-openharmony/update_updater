@@ -36,6 +36,7 @@
 #include "zip_pkg_parse.h"
 
 using namespace std;
+using namespace Updater;
 
 namespace Hpackage {
 constexpr int32_t BUFFER_SIZE = 4096;
@@ -239,10 +240,10 @@ PkgFilePtr PkgManagerImpl::CreatePackage(PkgStreamPtr stream, PkgFile::PkgType t
 }
 
 int32_t PkgManagerImpl::LoadPackageWithoutUnPack(const std::string &packagePath,
-    std::vector<std::string> &fileIds)
+    std::vector<std::string> &fileIds, PkgStream::StreamType streamType)
 {
     PkgFile::PkgType pkgType = GetPkgTypeByName(packagePath);
-    int32_t ret = LoadPackage(packagePath, fileIds, pkgType);
+    int32_t ret = LoadPackage(packagePath, fileIds, pkgType, streamType);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("Parse %s fail ", packagePath.c_str());
         ClearPkgFile();
@@ -373,10 +374,10 @@ int32_t PkgManagerImpl::ExtraAndLoadPackage(const std::string &path, const std::
 }
 
 int32_t PkgManagerImpl::LoadPackage(const std::string &packagePath, std::vector<std::string> &fileIds,
-    PkgFile::PkgType type)
+    PkgFile::PkgType type, PkgStream::StreamType streamType)
 {
     PkgStreamPtr stream = nullptr;
-    int32_t ret = CreatePkgStream(stream, packagePath, 0, PkgStream::PkgStreamType_Read);
+    int32_t ret = CreatePkgStream(stream, packagePath, 0, streamType);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("Create input stream fail %s", packagePath.c_str());
         UPDATER_LAST_WORD(ret);
@@ -475,6 +476,16 @@ PkgEntryPtr PkgManagerImpl::GetPkgEntry(const std::string &path)
     return nullptr;
 }
 
+PkgManager::StreamPtr PkgManagerImpl::GetPkgFileStream(const std::string &fileName)
+{
+    auto iter = pkgStreams_.find(fileName);
+    if (iter != pkgStreams_.end()) {
+        return (*iter).second;;
+    }
+
+    return nullptr;
+}
+
 int32_t PkgManagerImpl::CreatePkgStream(StreamPtr &stream, const std::string &fileName, size_t size, int32_t type)
 {
     PkgStreamPtr pkgStream;
@@ -505,6 +516,24 @@ int32_t PkgManagerImpl::CreatePkgStream(StreamPtr &stream, const std::string &fi
     int32_t ret = CreatePkgStream(pkgStream, fileName, processor, context);
     stream = pkgStream;
     return ret;
+}
+
+int32_t PkgManagerImpl::CreatePkgStream(StreamPtr &stream, const std::string &fileName, RingBuffer *buffer)
+{
+    const FileInfo *info = GetFileInfo(fileName);
+    if (info == nullptr) {
+        PKG_LOGE("Get file info fail %s", fileName.c_str());
+        return PKG_INVALID_FILE;
+    }
+
+    PkgStreamPtr pkgStream = new FlowDataStream(this, fileName, info->unpackedSize,
+        buffer, PkgStream::PkgStreamType_FlowData);
+    if (pkgStream == nullptr) {
+        PKG_LOGE("Failed to create stream");
+        return -1;
+    }
+    stream = pkgStream;
+    return PKG_SUCCESS;
 }
 
 void PkgManagerImpl::ClosePkgStream(StreamPtr &stream)
