@@ -71,14 +71,8 @@ LabelBtnAdapter::~LabelBtnAdapter() = default;
 
 LabelBtnAdapter::LabelBtnAdapter(const UxViewInfo &info)
 {
-    const UxViewCommonInfo &common = info.commonInfo;
     const UxLabelBtnInfo &spec = std::get<UxLabelBtnInfo>(info.specificInfo);
-    viewId_ = common.id;
-    this->SetPosition(common.x, common.y);
-    this->SetWidth(common.w);
-    this->SetHeight(common.h);
-    this->SetVisible(common.visible);
-    this->SetViewId(viewId_.c_str());
+    SetViewCommonInfo(info.commonInfo);
     this->SetText(TranslateText(spec.text).c_str());
     this->SetFont(DEFAULT_FONT_FILENAME, spec.fontSize);
     auto txtColor = StrToColor(spec.txtColor);

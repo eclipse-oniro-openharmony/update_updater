@@ -39,11 +39,6 @@ ohos_unittest("updater_service_unittest") {
     "${updater_path}/services/package/pkg_verify",
     "${updater_path}/services/include/log",
     "${updater_path}/utils/json",
-    "//foundation/graphic/ui/frameworks",
-    "//foundation/graphic/ui/interfaces/kits",
-    "//foundation/graphic/ui/interfaces/innerkits",
-    "//foundation/graphic/utils/interfaces/kits",
-    "//foundation/graphic/utils/interfaces/innerkits",
     "//third_party/bounds_checking_function/include",
     "${updater_path}/services",
     "${updater_path}/services/ui",
@@ -72,6 +67,7 @@ ohos_unittest("updater_service_unittest") {
   external_deps = [
     "hiviewdfx_hilog_native:libhilog",
     "init:libbegetutil",
+    "ui_lite:libupdater_layout",
   ]
   configs = [ "${updater_path}/test/unittest:utest_config" ]
   install_enable = true

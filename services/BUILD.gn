@@ -25,11 +25,6 @@ updater_common_include = [
   "${updater_path}/services/package/pkg_verify",
   "${updater_path}/services/include/log",
   "${updater_path}/utils/json",
-  "//foundation/graphic/ui/frameworks",
-  "//foundation/graphic/ui/interfaces/kits",
-  "//foundation/graphic/ui/interfaces/innerkits",
-  "//foundation/graphic/utils/interfaces/kits",
-  "//foundation/graphic/utils/interfaces/innerkits",
   "//third_party/bounds_checking_function/include",
   ".",
   "./include",
@@ -105,7 +100,10 @@ ohos_executable("updater") {
     ldflags += [ "-Wl,--no-whole-archive" ]
   }
 
-  external_deps = [ "init:libbegetutil" ]
+  external_deps = [
+    "init:libbegetutil",
+    "ui_lite:libupdater_layout",
+  ]
 
   if (build_selinux) {
     external_deps += [ "selinux:librestorecon" ]
@@ -160,7 +158,11 @@ ohos_static_library("libupdater") {
     ldflags += [ "-Wl,--no-whole-archive" ]
   }
 
-  external_deps = [ "init:libbegetutil" ]
+  external_deps = [
+    "init:libbegetutil",
+    "ui_lite:libupdater_layout",
+  ]
+
   if (build_selinux) {
     external_deps += [ "selinux:librestorecon" ]
     deps += [ "//third_party/selinux:libselinux" ]

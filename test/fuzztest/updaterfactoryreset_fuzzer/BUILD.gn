@@ -42,11 +42,6 @@ ohos_fuzztest("UpdaterFactoryResetFuzzTest") {
     "${updater_path}/services/ui/driver",
     "${updater_path}/services/ui/view",
     "${updater_path}/services/ui/language",
-    "//foundation/graphic/ui/frameworks",
-    "//foundation/graphic/ui/interfaces/kits",
-    "//foundation/graphic/ui/interfaces/innerkits",
-    "//foundation/graphic/utils/interfaces/kits",
-    "//foundation/graphic/utils/interfaces/innerkits",
   ]
 
   deps = [

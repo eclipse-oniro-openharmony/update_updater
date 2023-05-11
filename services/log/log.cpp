@@ -27,6 +27,7 @@ namespace Updater {
 static std::ofstream g_updaterLog;
 static std::ofstream g_updaterStage;
 static std::ofstream g_errorCode;
+static std::ofstream g_nullStream;
 static std::string g_logTag;
 static int g_logLevel = INFO;
 #ifndef DIFF_PATCH_SDK
@@ -47,7 +48,6 @@ UpdaterLogger::~UpdaterLogger()
 {
     std::string str = oss_.str();
     if (g_logLevel > level_) {
-        std::cout << std::endl << std::flush;
         return;
     }
 #ifndef DIFF_PATCH_SDK
@@ -86,7 +86,7 @@ std::ostream& UpdaterLogger::OutputUpdaterLog(const std::string &path, int line)
     if (g_logLevel <= level_) {
         return oss_ << path << " " << line << " : ";
     }
-    return std::cout;
+    return g_nullStream;
 }
 
 std::ostream& StageLogger::OutputUpdaterStage()
