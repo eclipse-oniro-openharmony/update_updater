@@ -76,6 +76,6 @@ int FormatCommander::DoFormat(const std::string &partitionName) const
 
 void FormatCommander::PostCommand()
 {
-    Updater::PostUpdater(false);
+    FLASHD_LOGI("format success");
 }
 } // namespace Flashd
