@@ -21,6 +21,8 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <memory>
+#include <vector>
 #include "applypatch/block_set.h"
 #include "applypatch/store.h"
 #include "applypatch/transfer_manager.h"
@@ -87,63 +89,60 @@ std::string USInstrImagePatch::GetFileHash(const std::string &file)
     return resultSha;
 }
 
-int32_t USInstrImagePatch::ApplyPatch(const ImagePatchPara &para, const std::string &patchFile)
+int32_t USInstrImagePatch::ApplyPatch(const ImagePatchPara &para, const UpdatePatch::MemMapInfo &srcData,
+    const PkgBuffer &patchData)
 {
-    std::string newFile = UPDATER_PATH + para.partName + ".new";
-    int32_t ret = UpdatePatch::UpdateApplyPatch::ApplyPatch(patchFile, para.devPath, newFile);
-    if (ret != UpdatePatch::PATCH_SUCCESS) {
-        UPDATER_LAST_WORD(ret);
-        LOG(ERROR) << "ApplyPatch error:" << ret;
-        return ret;
+    std::vector<uint8_t> empty;
+    UpdatePatch::PatchParam patchParam = {
+        srcData.memory, srcData.length, patchData.buffer, patchData.length
+    };
+    std::unique_ptr<DataWriter> writer = DataWriter::CreateDataWriter(WRITE_RAW, para.devPath);
+    if (writer.get() == nullptr) {
+        LOG(ERROR) << "Cannot create block writer, pkgdiff patch abort!";
+        return -1;
     }
-
-    std::string resultSha = GetFileHash(newFile);
-    if (resultSha != para.destHash) {
-        UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE);
-        LOG(ERROR) << "apply patch fail resultSha:" << resultSha << " destHash:" << para.destHash;
-        return USCRIPT_ERROR_EXECUTE;
+    int32_t ret = UpdatePatch::UpdateApplyPatch::ApplyImagePatch(patchParam, empty,
+        [&](size_t start, const UpdatePatch::BlockBuffer &data, size_t size) -> int {
+            return (writer->Write(data.buffer, size, nullptr)) ? 0 : -1;
+        }, para.destHash);
+    writer.reset();
+    if (ret != 0) {
+        LOG(ERROR) << "Fail to ApplyImagePatch";
+        return -1;
     }
-
-    if (!Utils::CopyFile(newFile, para.devPath)) {
-        UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE);
-        LOG(ERROR) << "write " << newFile << " to " << para.devPath << " failed";
-        return USCRIPT_ERROR_EXECUTE;
-    }
-    unlink(newFile.c_str());
     return USCRIPT_SUCCESS;
 }
 
-std::string USInstrImagePatch::GetPatchFile(Uscript::UScriptEnv &env, const ImagePatchPara &para)
+int32_t USInstrImagePatch::CreatePatchStream(Uscript::UScriptEnv &env, const ImagePatchPara &para,
+    PkgManager::StreamPtr &patchStream)
 {
     if (env.GetPkgManager() == nullptr) {
         LOG(ERROR) << "Error to get pkg manager";
-        return "";
+        return -1;
     }
 
     const FileInfo *info = env.GetPkgManager()->GetFileInfo(para.partName);
     if (info == nullptr) {
         LOG(ERROR) << "Error to get file info";
-        return "";
+        return -1;
     }
 
-    Hpackage::PkgManager::StreamPtr outStream = nullptr;
     std::string patchFile = UPDATER_PATH + para.partName;
-    int32_t ret = env.GetPkgManager()->CreatePkgStream(outStream,
-        patchFile, info->unpackedSize, PkgStream::PkgStreamType_Write);
-    if (ret != PKG_SUCCESS || outStream == nullptr) {
+    int32_t ret = env.GetPkgManager()->CreatePkgStream(patchStream,
+        patchFile, info->unpackedSize, PkgStream::PkgStreamType_MemoryMap);
+    if (ret != PKG_SUCCESS || patchStream == nullptr) {
         LOG(ERROR) << "Error to create output stream";
-        return "";
+        return -1;
     }
 
-    ret = env.GetPkgManager()->ExtractFile(para.partName, outStream);
-    env.GetPkgManager()->ClosePkgStream(outStream);
+    ret = env.GetPkgManager()->ExtractFile(para.partName, patchStream);
     if (ret != PKG_SUCCESS) {
-        LOG(ERROR) << "Error to extract file";
-        return "";
+        LOG(ERROR) << "Error to extract file" << para.partName;
+        return -1;
     }
 
-    LOG(INFO) << "USInstrImageShaCheck::Execute patchFile " << patchFile;
-    return patchFile;
+    LOG(INFO) << "USInstrImagePatch::CreatePatchStream :" << para.partName;
+    return USCRIPT_SUCCESS;
 }
 
 std::string USInstrImagePatch::GetSourceFile(const ImagePatchPara &para)
@@ -165,7 +164,6 @@ std::string USInstrImagePatch::GetSourceFile(const ImagePatchPara &para)
 
 int32_t USInstrImagePatch::ExecuteImagePatch(Uscript::UScriptEnv &env, Uscript::UScriptContext &context)
 {
-    UPDATER_INIT_RECORD;
     ImagePatchPara para {};
     int32_t ret = GetParam(context, para);
     if (ret != USCRIPT_SUCCESS) {
@@ -182,25 +180,37 @@ int32_t USInstrImagePatch::ExecuteImagePatch(Uscript::UScriptEnv &env, Uscript::
         }
     }
 
-    std::string patchFile = GetPatchFile(env, para);
-    if (patchFile.empty()) {
-        UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE);
-        LOG(ERROR) << "get patch file error";
-        return USCRIPT_ERROR_EXECUTE;
-    }
-
     std::string srcFile = GetSourceFile(para);
     if (srcFile.empty()) {
         UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE);
         LOG(ERROR) << "get source file error";
         return USCRIPT_ERROR_EXECUTE;
     }
-
-    ret = ApplyPatch(para, patchFile);
-    if (ret == USCRIPT_SUCCESS) {
-        PartitionRecord::GetInstance().RecordPartitionUpdateStatus(para.partName, true);
+    UpdatePatch::MemMapInfo srcData {};
+    ret = UpdatePatch::PatchMapFile(srcFile, srcData);
+    if (ret != 0) {
+        UPDATER_LAST_WORD(ret);
+        LOG(ERROR) << "Failed to mmap src file error:" << ret;
+        return -1;
     }
-    unlink(patchFile.c_str());
+
+    PkgManager::StreamPtr patchStream = nullptr;
+    ret = CreatePatchStream(env, para, patchStream);
+    if (ret != USCRIPT_SUCCESS) {
+        UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE);
+        LOG(ERROR) << "CreatePatchStream error";
+        return USCRIPT_ERROR_EXECUTE;
+    }
+    PkgBuffer patchData = {};
+    patchStream->GetBuffer(patchData);
+
+    ret = ApplyPatch(para, srcData, patchData);
+    if (ret != USCRIPT_SUCCESS) {
+        env.GetPkgManager()->ClosePkgStream(patchStream);
+        return ret;
+    }
+
+    PartitionRecord::GetInstance().RecordPartitionUpdateStatus(para.partName, true);
     unlink(srcFile.c_str());
     LOG(INFO) << "USInstrImageCheck::Execute ret:" << ret;
     return ret;
