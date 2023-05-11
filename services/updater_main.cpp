@@ -385,6 +385,7 @@ static UpdaterStatus PreUpdatePackages(UpdaterParams &upParams)
             LOG(INFO) << upParams.updatePackage[i] << " auth success";
         } else {
             LOG(ERROR) << upParams.updatePackage[i] << " auth failed";
+            UPDATER_LAST_WORD(UPDATE_ERROR);
             return UPDATE_ERROR;
         }
     }
