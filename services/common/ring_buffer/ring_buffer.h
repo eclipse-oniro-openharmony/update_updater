@@ -45,7 +45,7 @@ private:
     uint32_t num_ = 0;  // buffer num
     uint8_t **bufArray_ = nullptr;
     uint32_t *lenArray_ = nullptr;
-    bool isStop = false;
+    bool isStop_ = false;
     std::condition_variable notFull_;
     std::condition_variable notEmpty_;
     std::mutex notifyMtx_;
