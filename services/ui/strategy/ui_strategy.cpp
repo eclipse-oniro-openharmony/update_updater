@@ -83,7 +83,7 @@ bool UiStrategy::LoadStrategy(const JsonNode &node)
 {
     std::unordered_map<UpdaterMode, UiStrategyCfg>().swap(strategies_);
     constexpr std::array strategies {UpdaterMode::OTA, UpdaterMode::FACTORYRST,
-        UpdaterMode::SDCARD, UpdaterMode::REBOOTFACTORYRST};
+        UpdaterMode::SDCARD, UpdaterMode::REBOOTFACTORYRST, UpdaterMode::RECOVER};
     for (auto mode : strategies) {
         if (!LoadStrategy(node, mode)) {
             LOG(ERROR) << "load strategy " << modeStr_[mode] << " failed";
