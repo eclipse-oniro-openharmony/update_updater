@@ -67,8 +67,10 @@ ohos_unittest("updater_service_unittest") {
   external_deps = [
     "hiviewdfx_hilog_native:libhilog",
     "init:libbegetutil",
-    "ui_lite:libupdater_layout",
   ]
+  if (updater_ui_support) {
+    external_deps += [ "ui_lite:libupdater_layout" ]
+  }
   configs = [ "${updater_path}/test/unittest:utest_config" ]
   install_enable = true
   part_name = "updater"

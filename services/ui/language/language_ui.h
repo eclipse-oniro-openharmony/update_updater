@@ -15,14 +15,17 @@
 #ifndef UPDATE_UI_LANGUAGE_UI_H
 #define UPDATE_UI_LANGUAGE_UI_H
 
+#ifdef UPDATER_UI_SUPPORT
 #include <string>
 #include <unordered_map>
 #include <vector>
 #include "json_visitor.h"
 #include "language_ui_msg_id.h"
 #include "updater_ui_traits.h"
+#endif
 
 namespace Updater {
+#ifdef UPDATER_UI_SUPPORT
 namespace Lang {
 enum class Language {
     CHINESE = 0,
@@ -53,8 +56,6 @@ private:
     const static std::unordered_map<std::string, Language> LOCALES;
 };
 }
-
-#ifdef UPDATER_UI_SUPPORT
 #define TR(tag) Lang::LanguageUI::GetInstance().Translate(STRINGFY(tag))
 #else
 #define TR(tag) ""

@@ -102,6 +102,7 @@ ohos_unittest("ui_unittest") {
     "hiviewdfx_hilog_native:libhilog",
     "ui_lite:libupdater_layout",
   ]
+
   install_enable = true
   part_name = "updater"
 }

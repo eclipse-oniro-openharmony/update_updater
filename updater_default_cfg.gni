@@ -14,6 +14,9 @@
 declare_args() {
   updater_cfg_file = ""
   updater_ui_support = true
+  if (!defined(global_parts_info.arkui_ui_lite)) {
+    updater_ui_support = false
+  }
   updater_absolutely_path = "//base/update/updater"
 }
 

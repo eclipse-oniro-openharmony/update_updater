@@ -22,13 +22,6 @@
 #include "updater_ui_traits.h"
 
 namespace Updater {
-enum class UpdaterMode {
-    SDCARD = 0,
-    FACTORYRST,
-    REBOOTFACTORYRST,
-    OTA,
-    MODEMAX
-};
 std::ostream &operator<<(std::ostream &os, const ComInfo &com);
 void DoProgress();
 void StartLongPressTimer();

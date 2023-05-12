@@ -177,7 +177,6 @@ ohos_unittest("updater_unittest") {
     "${updater_path}/services/fs_manager:libfsmanager",
     "${updater_path}/services/log:libupdaterlog",
     "${updater_path}/services/package:libupdaterpackage",
-    "${updater_path}/services/ui:libui",
     "${updater_path}/utils:libutils",
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/bzip2:libbz2",
@@ -200,7 +199,6 @@ ohos_unittest("updater_unittest") {
   external_deps = [
     "hiviewdfx_hilog_native:libhilog",
     "init:libbegetutil",
-    "ui_lite:libupdater_layout",
   ]
 
   public_configs = [ ":utest_config" ]

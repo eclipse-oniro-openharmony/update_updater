@@ -100,10 +100,11 @@ ohos_executable("updater") {
     ldflags += [ "-Wl,--no-whole-archive" ]
   }
 
-  external_deps = [
-    "init:libbegetutil",
-    "ui_lite:libupdater_layout",
-  ]
+  external_deps = [ "init:libbegetutil" ]
+
+  if (updater_ui_support) {
+    external_deps += [ "ui_lite:libupdater_layout" ]
+  }
 
   if (build_selinux) {
     external_deps += [ "selinux:librestorecon" ]
@@ -158,10 +159,11 @@ ohos_static_library("libupdater") {
     ldflags += [ "-Wl,--no-whole-archive" ]
   }
 
-  external_deps = [
-    "init:libbegetutil",
-    "ui_lite:libupdater_layout",
-  ]
+  external_deps = [ "init:libbegetutil" ]
+
+  if (updater_ui_support) {
+    external_deps += [ "ui_lite:libupdater_layout" ]
+  }
 
   if (build_selinux) {
     external_deps += [ "selinux:librestorecon" ]

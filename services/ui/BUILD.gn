@@ -103,7 +103,11 @@ ohos_static_library("libui") {
     "//third_party/libpng:libpng",
   ]
 
-  external_deps = [ "ui_lite:libupdater_layout" ]
+  if (!updater_ui_support) {
+    sources = []
+  } else {
+    external_deps = [ "ui_lite:libupdater_layout" ]
+  }
 
   if (defined(updater_ui_custom_deps)) {
     deps += updater_ui_custom_deps
