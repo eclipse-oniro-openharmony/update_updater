@@ -55,6 +55,7 @@ std::unordered_map<UpdaterMode, std::string> UiStrategy::modeStr_ = {
     {UpdaterMode::FACTORYRST, "factoryRst"},
     {UpdaterMode::REBOOTFACTORYRST, "rebootFactoryRst"},
     {UpdaterMode::OTA, "ota"},
+    {UpdaterMode::RECOVER, "recover"},
 };
 
 const std::unordered_map<UpdaterMode, UiStrategyCfg> &UiStrategy::GetStrategy()
