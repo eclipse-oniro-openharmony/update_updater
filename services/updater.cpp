@@ -54,7 +54,7 @@ using Updater::Utils::SplitString;
 using Updater::Utils::Trim;
 using namespace Hpackage;
 
-constexpr uin MAX_STASH_SPACE = 100 * 1024 * 1024;
+constexpr uint64_t MAX_STASH_SPACE = 100 * 1024 * 1024;
 int g_percentage;
 int g_tmpProgressValue;
 int g_tmpValue;

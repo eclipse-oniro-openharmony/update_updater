@@ -38,7 +38,8 @@ public:
     int32_t Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context) override;
 private:
     int32_t GetParam(Uscript::UScriptContext &context, ImagePatchPara &para);
-    int32_t CreatePatchStream(Uscript::UScriptEnv &env, const ImagePatchPara &para, Hpackage::PkgManager::StreamPtr &outstream);
+    int32_t CreatePatchStream(Uscript::UScriptEnv &env, const ImagePatchPara &para,
+         Hpackage::PkgManager::StreamPtr &outstream);
     int32_t ExecuteImagePatch(Uscript::UScriptEnv &env, Uscript::UScriptContext &context);
     std::string GetSourceFile(const ImagePatchPara &para);
     int32_t ApplyPatch(const ImagePatchPara &para, const UpdatePatch::MemMapInfo &srcData,
