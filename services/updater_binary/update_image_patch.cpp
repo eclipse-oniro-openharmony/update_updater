@@ -123,10 +123,15 @@ int32_t USInstrImagePatch::CreatePatchStream(Uscript::UScriptEnv &env, const Ima
         return -1;
     }
 
-    const FileInfo *info = env.GetPkgManager()->GetFileInfo(para.patchFile);
+    std::string patchName = para.patchFile;
+    const FileInfo *info = env.GetPkgManager()->GetFileInfo(patchName);
     if (info == nullptr) {
-        LOG(ERROR) << "Error to get file info " << para.patchFile;
-        return -1;
+        LOG(WARNING) << "Error to get file info " << para.patchFile; // 兼容旧升级包
+        patchName = para.partName;
+        info = env.GetPkgManager()->GetFileInfo(patchName);
+        if (info == nullptr) {
+            return -1;
+        }
     }
 
     std::string patchFile = UPDATER_PATH + para.patchFile;
@@ -137,7 +142,7 @@ int32_t USInstrImagePatch::CreatePatchStream(Uscript::UScriptEnv &env, const Ima
         return -1;
     }
 
-    ret = env.GetPkgManager()->ExtractFile(para.patchFile, patchStream);
+    ret = env.GetPkgManager()->ExtractFile(patchName, patchStream);
     if (ret != PKG_SUCCESS) {
         LOG(ERROR) << "Error to extract file " << para.patchFile;
         return -1;

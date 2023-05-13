@@ -199,10 +199,10 @@ public:
         PackagesInfoPtr pkginfomanager = PackagesInfo::GetPackagesInfoInstance();
         std::vector<std::string> result;
         std::vector<std::string> targetVersions = pkginfomanager->GetOTAVersion(
-            pkgManager, "version_list", testPackagePath);
+            pkgManager, "/version_list", testPackagePath);
         EXPECT_NE(targetVersions, result);
 
-        std::vector<std::string> boardIdList = pkginfomanager->GetBoardID(pkgManager, "board_list", "");
+        std::vector<std::string> boardIdList = pkginfomanager->GetBoardID(pkgManager, "/board_list", "");
         EXPECT_NE(boardIdList, result);
         PackagesInfo::ReleasePackagesInfoInstance(pkginfomanager);
         return 0;

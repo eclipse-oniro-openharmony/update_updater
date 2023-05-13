@@ -106,7 +106,7 @@ HWTEST_F(UpdateProcessorUnitTest, UpdateProcessor_004, TestSize.Level1)
 {
     PkgBuffer buffer(BUFFER_SIZE);
     RingBuffer ringBuffer;
-    bool ret = ringBuffer.Init(UScriptInstructionUpdateFromBin::STASH_BUFFER_SIZE, BUFFER_PUSH_TIMES);
+    bool ret = ringBuffer.Init(UScriptInstructionUpdateFromBin::STASH_BUFFER_SIZE, 4); // power of 2
     EXPECT_TRUE(ret);
     for (uint32_t i = 0; i < BUFFER_PUSH_TIMES; i++) {
         EXPECT_EQ(UScriptInstructionUpdateFromBin::UnCompressDataProducer(buffer,
@@ -114,11 +114,11 @@ HWTEST_F(UpdateProcessorUnitTest, UpdateProcessor_004, TestSize.Level1)
     }
     PkgBuffer emptyBuffer = {};
     EXPECT_EQ(UScriptInstructionUpdateFromBin::UnCompressDataProducer(emptyBuffer, 0, 0, true, &ringBuffer), 0);
-    uint8_t recvBuffer[BUFFER_SIZE] {};
+    uint8_t recvBuffer[UScriptInstructionUpdateFromBin::STASH_BUFFER_SIZE] {};
     uint32_t len = 0;
-    ringBuffer.Pop(recvBuffer, BUFFER_SIZE, len);
+    ringBuffer.Pop(recvBuffer, UScriptInstructionUpdateFromBin::STASH_BUFFER_SIZE, len);
     EXPECT_EQ(len, UScriptInstructionUpdateFromBin::STASH_BUFFER_SIZE);
-    ringBuffer.Pop(recvBuffer, BUFFER_SIZE, len);
+    ringBuffer.Pop(recvBuffer, UScriptInstructionUpdateFromBin::STASH_BUFFER_SIZE, len);
     EXPECT_EQ(len, BUFFER_SIZE);
 }
 } // namespace updater_ut
