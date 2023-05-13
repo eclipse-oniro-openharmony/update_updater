@@ -24,6 +24,8 @@
 #include "unittest_comm.h"
 #include "update_processor.h"
 #include "script_manager.h"
+#include "pkg_manager.h"
+#include "ring_buffer.h"
 
 using namespace Updater;
 using namespace std;
@@ -34,8 +36,10 @@ using namespace Uscript;
 namespace UpdaterUt {
 constexpr const char *UT_MISC_PARTITION_NAME = "/misc";
 constexpr const uint32_t UT_MISC_BUFFER_SIZE = 2048;
-
+constexpr const uint32_t BUFFER_PUSH_TIMES = 3;
+constexpr const uint32_t BUFFER_SIZE = 1024 * 1024 * 2;
 void UpdateProcessorUnitTest::SetUp(void)
+
 {
     cout << "Updater Unit UpdateProcessorUnitTest Begin!" << endl;
 
@@ -96,5 +100,25 @@ HWTEST_F(UpdateProcessorUnitTest, UpdateProcessor_003, TestSize.Level1)
     const string packagePath = "/data/updater/updater/updater_write_diff_misc_img.zip";
     ret = ProcessUpdater(false, STDOUT_FILENO, packagePath, GetTestCertName());
     EXPECT_EQ(ret, USCRIPT_INVALID_PARAM);
+}
+
+HWTEST_F(UpdateProcessorUnitTest, UpdateProcessor_004, TestSize.Level1)
+{
+    PkgBuffer buffer(BUFFER_SIZE);
+    RingBuffer ringBuffer;
+    bool ret = ringBuffer.Init(UScriptInstructionUpdateFromBin::STASH_BUFFER_SIZE, 4); // power of 2
+    EXPECT_TRUE(ret);
+    for (uint32_t i = 0; i < BUFFER_PUSH_TIMES; i++) {
+        EXPECT_EQ(UScriptInstructionUpdateFromBin::UnCompressDataProducer(buffer,
+            BUFFER_SIZE, 0, false, &ringBuffer), 0);
+    }
+    PkgBuffer emptyBuffer = {};
+    EXPECT_EQ(UScriptInstructionUpdateFromBin::UnCompressDataProducer(emptyBuffer, 0, 0, true, &ringBuffer), 0);
+    uint8_t recvBuffer[UScriptInstructionUpdateFromBin::STASH_BUFFER_SIZE] {};
+    uint32_t len = 0;
+    ringBuffer.Pop(recvBuffer, UScriptInstructionUpdateFromBin::STASH_BUFFER_SIZE, len);
+    EXPECT_EQ(len, UScriptInstructionUpdateFromBin::STASH_BUFFER_SIZE);
+    ringBuffer.Pop(recvBuffer, UScriptInstructionUpdateFromBin::STASH_BUFFER_SIZE, len);
+    EXPECT_EQ(len, BUFFER_SIZE);
 }
 } // namespace updater_ut

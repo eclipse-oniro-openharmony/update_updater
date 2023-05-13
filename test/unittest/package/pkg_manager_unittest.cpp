@@ -56,7 +56,7 @@ public:
         : PkgStreamImpl(pkgManager, fileName) {}
     virtual ~TestPkgStream() {}
 
-    int32_t Read(const PkgBuffer &buff, size_t start, size_t size, size_t &readLen) override
+    int32_t Read(PkgBuffer &buff, size_t start, size_t size, size_t &readLen) override
     {
         return PkgStreamImpl::Read(buff, start, size, readLen);
     }

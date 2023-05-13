@@ -312,7 +312,7 @@ int32_t UpgradePkgFile::LoadPackage(std::vector<std::string> &fileNames, VerifyF
     std::vector<uint8_t> signData;
     DigestAlgorithm::DigestAlgorithmPtr algorithm = nullptr;
     // Parse header
-    PkgBuffer buffer(buffSize);
+    PkgBuffer buffer(nullptr, buffSize);
     size_t parsedLen = 0;
     int32_t ret = ReadUpgradePkgHeader(buffer, parsedLen, algorithm);
     if (ret != PKG_SUCCESS) {
@@ -425,7 +425,7 @@ int32_t UpgradePkgFile::SaveEntry(const PkgBuffer &buffer, size_t &parsedLen, Up
     return PKG_SUCCESS;
 }
 
-int32_t UpgradePkgFile::ReadComponents(const PkgBuffer &buffer, size_t &parsedLen,
+int32_t UpgradePkgFile::ReadComponents(PkgBuffer &buffer, size_t &parsedLen,
     DigestAlgorithm::DigestAlgorithmPtr algorithm, std::vector<std::string> &fileNames)
 {
     Updater::UPDATER_INIT_RECORD;
@@ -493,7 +493,7 @@ void UpgradePkgFile::ParsePkgHeaderToTlv(const PkgBuffer &buffer, size_t &currLe
         sizeof(header->productUpdateId)});
 }
 
-int32_t UpgradePkgFile::ReadUpgradePkgHeader(const PkgBuffer &buffer, size_t &realLen,
+int32_t UpgradePkgFile::ReadUpgradePkgHeader(PkgBuffer &buffer, size_t &realLen,
     DigestAlgorithm::DigestAlgorithmPtr &algorithm)
 {
     Updater::UPDATER_INIT_RECORD;
@@ -507,6 +507,7 @@ int32_t UpgradePkgFile::ReadUpgradePkgHeader(const PkgBuffer &buffer, size_t &re
         UPDATER_LAST_WORD(ret);
         return ret;
     }
+
     ParsePkgHeaderToTlv(buffer, currLen, tlv);
     algorithm = PkgAlgorithmFactory::GetDigestAlgorithm(pkgInfo_.pkgInfo.digestMethod);
     if (algorithm == nullptr) {
@@ -529,7 +530,6 @@ int32_t UpgradePkgFile::ReadUpgradePkgHeader(const PkgBuffer &buffer, size_t &re
     } else {
         currLen += tlv.length;
     }
-
     // Time information
     tlv.type = ReadLE16(buffer.buffer + currLen);
     tlv.length = ReadLE16(buffer.buffer + currLen + sizeof(uint16_t));
@@ -646,7 +646,7 @@ int32_t UpgradeFileEntry::Pack(PkgStreamPtr inStream, size_t startOffset, size_t
     return PKG_SUCCESS;
 }
 
-int32_t UpgradeFileEntry::DecodeHeader(const PkgBuffer &buffer, size_t headerOffset, size_t dataOffset,
+int32_t UpgradeFileEntry::DecodeHeader(PkgBuffer &buffer, size_t headerOffset, size_t dataOffset,
     size_t &decodeLen)
 {
     PkgStreamPtr inStream = pkgFile_->GetPkgStream();

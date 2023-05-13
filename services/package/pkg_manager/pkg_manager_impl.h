@@ -127,7 +127,7 @@ private:
     void ClosePkgStream(PkgStreamPtr &stream);
 
 private:
-    bool unzipToFile_ {true};
+    bool unzipToFile_ {false};
     std::vector<PkgFilePtr> pkgFiles_ {};
     std::mutex mapLock_ {};
     std::map<std::string, PkgStreamPtr> pkgStreams_ {};

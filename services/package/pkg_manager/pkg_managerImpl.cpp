@@ -286,7 +286,6 @@ int32_t PkgManagerImpl::LoadPackage(const std::string &packagePath, const std::s
     }
     if (SetSignVerifyKeyName(keyPath) != PKG_SUCCESS) {
         UPDATER_LAST_WORD(PKG_INVALID_FILE);
-        PKG_LOGE("Invalid keyname");
         return PKG_INVALID_FILE;
     }
     // Check if package already loaded
@@ -315,7 +314,8 @@ int32_t PkgManagerImpl::LoadPackage(const std::string &packagePath, const std::s
         }
         for (auto name : innerFileNames) {
             pkgType = GetPkgTypeByName(name);
-            if (pkgType == PkgFile::PKG_TYPE_NONE) {
+            if (pkgType == PkgFile::PKG_TYPE_NONE || (pkgType == PkgFile::PKG_TYPE_UPGRADE
+                && std::find(innerFileNames.begin(), innerFileNames.end(), "board_list") != innerFileNames.end())) {
                 fileIds.push_back(name);
                 continue;
             }
@@ -353,7 +353,7 @@ int32_t PkgManagerImpl::ExtraAndLoadPackage(const std::string &path, const std::
     }
 
     // Extract package to file or memory
-    if (unzipToFile_) {
+    if (unzipToFile_ || type == PkgFile::PKG_TYPE_UPGRADE) {
         ret = CreatePkgStream(stream, tempPath + name + ".tmp", info->unpackedSize, PkgStream::PkgStreamType_Write);
     } else {
         ret = CreatePkgStream(stream, tempPath + name + ".tmp", info->unpackedSize, PkgStream::PkgStreamType_MemoryMap);
@@ -376,7 +376,7 @@ int32_t PkgManagerImpl::LoadPackage(const std::string &packagePath, std::vector<
     PkgFile::PkgType type)
 {
     PkgStreamPtr stream = nullptr;
-    int32_t ret = CreatePkgStream(stream, packagePath, 0, PkgStream::PkgStreamType_Read);
+    int32_t ret = CreatePkgStream(stream, packagePath, 0, PkgStream::PKgStreamType_FileMap);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("Create input stream fail %s", packagePath.c_str());
         UPDATER_LAST_WORD(ret);
@@ -563,7 +563,7 @@ int32_t PkgManagerImpl::CreatePkgStream(PkgStreamPtr &stream, const std::string 
             UPDATER_LAST_WORD(ret);
             return ret;
         }
-    } else if (type == PkgStream::PkgStreamType_MemoryMap) {
+    } else if (type == PkgStream::PkgStreamType_MemoryMap || type == PkgStream::PKgStreamType_FileMap) {
         if ((size == 0) && (access(fileName.c_str(), 0) != 0)) {
             UPDATER_LAST_WORD(PKG_INVALID_FILE);
             return PKG_INVALID_FILE;
@@ -574,7 +574,12 @@ int32_t PkgManagerImpl::CreatePkgStream(PkgStreamPtr &stream, const std::string 
             PKG_LOGE("Fail to check file size %s ", fileName.c_str());
             return PKG_INVALID_FILE;
         }
-        uint8_t *memoryMap = MapMemory(fileName, fileSize);
+        uint8_t *memoryMap = nullptr;
+        if (type == PkgStream::PkgStreamType_MemoryMap) {
+            memoryMap = AnonymousMap(fileName, fileSize);
+        } else {
+            memoryMap = FileMap(fileName);
+        }
         if (memoryMap == nullptr) {
             UPDATER_LAST_WORD(PKG_INVALID_FILE);
             PKG_LOGE("Fail to map memory %s ", fileName.c_str());
@@ -845,6 +850,7 @@ int32_t PkgManagerImpl::SetSignVerifyKeyName(const std::string &keyName)
     Updater::UPDATER_INIT_RECORD;
     if (access(keyName.c_str(), 0) != 0) {
         UPDATER_LAST_WORD(PKG_INVALID_FILE);
+        PKG_LOGE("Invalid keyname");
         return PKG_INVALID_FILE;
     }
     signVerifyKeyName_ = keyName;
