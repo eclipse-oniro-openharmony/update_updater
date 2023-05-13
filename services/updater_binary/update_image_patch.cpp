@@ -101,10 +101,12 @@ int32_t USInstrImagePatch::ApplyPatch(const ImagePatchPara &para, const UpdatePa
         LOG(ERROR) << "Cannot create block writer, pkgdiff patch abort!";
         return -1;
     }
+    std::string resultSha = para.destHash;
+    std::transform(resultSha.begin(), resultSha.end(), resultSha.begin(), ::tolower);
     int32_t ret = UpdatePatch::UpdateApplyPatch::ApplyImagePatch(patchParam, empty,
         [&](size_t start, const UpdatePatch::BlockBuffer &data, size_t size) -> int {
             return (writer->Write(data.buffer, size, nullptr)) ? 0 : -1;
-        }, para.destHash);
+        }, resultSha);
     writer.reset();
     if (ret != 0) {
         LOG(ERROR) << "Fail to ApplyImagePatch";
@@ -121,13 +123,13 @@ int32_t USInstrImagePatch::CreatePatchStream(Uscript::UScriptEnv &env, const Ima
         return -1;
     }
 
-    const FileInfo *info = env.GetPkgManager()->GetFileInfo(para.partName);
+    const FileInfo *info = env.GetPkgManager()->GetFileInfo(para.patchFile);
     if (info == nullptr) {
-        LOG(ERROR) << "Error to get file info";
+        LOG(ERROR) << "Error to get file info " << para.patchFile;
         return -1;
     }
 
-    std::string patchFile = UPDATER_PATH + para.partName;
+    std::string patchFile = UPDATER_PATH + para.patchFile;
     int32_t ret = env.GetPkgManager()->CreatePkgStream(patchStream,
         patchFile, info->unpackedSize, PkgStream::PkgStreamType_MemoryMap);
     if (ret != PKG_SUCCESS || patchStream == nullptr) {
@@ -135,13 +137,13 @@ int32_t USInstrImagePatch::CreatePatchStream(Uscript::UScriptEnv &env, const Ima
         return -1;
     }
 
-    ret = env.GetPkgManager()->ExtractFile(para.partName, patchStream);
+    ret = env.GetPkgManager()->ExtractFile(para.patchFile, patchStream);
     if (ret != PKG_SUCCESS) {
-        LOG(ERROR) << "Error to extract file" << para.partName;
+        LOG(ERROR) << "Error to extract file " << para.patchFile;
         return -1;
     }
 
-    LOG(INFO) << "USInstrImagePatch::CreatePatchStream :" << para.partName;
+    LOG(INFO) << "USInstrImagePatch::CreatePatchStream " << para.partName;
     return USCRIPT_SUCCESS;
 }
 

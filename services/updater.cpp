@@ -113,6 +113,7 @@ UpdaterStatus IsSpaceCapacitySufficient(const std::vector<std::string> &packageP
         return UPDATE_ERROR;
     }
     uint64_t maxStashSize =  *max_element(stashSizeList.begin(), stashSizeList.end());
+    LOG(INFO) << "get max stash size" << maxStashSize;
     maxStashSize = maxStashSize > MAX_STASH_SPACE ? maxStashSize : MAX_STASH_SPACE;
     uint64_t maxLogSpace = MAX_LOG_SPACE * packagePath.size();
     uint64_t totalPkgSize = maxStashSize + maxLogSpace;
