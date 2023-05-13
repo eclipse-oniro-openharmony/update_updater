@@ -161,10 +161,10 @@ ohos_static_library("libflashd") {
   }
 
   include_dirs = [
-    "../common/ring_buffer",
     "${HDC_PATH}/daemon",
     "${HDC_PATH}/common",
     "${updater_path}/services",
+    "${updater_path}/services/common/ring_buffer",
     "${updater_path}/services/flashd",
     "${updater_path}/services/flashd/daemon",
     "${updater_path}/services/flashd/common",
