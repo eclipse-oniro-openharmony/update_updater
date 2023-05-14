@@ -18,6 +18,7 @@
 #include <string>
 #include <thread>
 #include "animator/animator_manager.h"
+#include "component_common.h"
 #include "components/ui_image_view.h"
 #include "macros.h"
 
@@ -29,7 +30,7 @@ struct UxImageInfo {
     uint32_t updInterval;
 };
 struct UxViewInfo;
-class ImgViewAdapter : public OHOS::UIImageView {
+class ImgViewAdapter : public OHOS::UIImageView, public ComponentCommon<ImgViewAdapter> {
     DISALLOW_COPY_MOVE(ImgViewAdapter);
     class ImgAnimatorCallback;
     static constexpr uint32_t MAX_IMG_CNT = 300;
@@ -62,7 +63,6 @@ private:
     uint32_t interval_ { 0 };
     std::string currPath_ {};
     std::string dir_ {};
-    std::string viewId_ {};
     std::string filePrefix_ {};
     std::unique_ptr<ImgAnimatorCallback> cb_ {};
 };

@@ -104,6 +104,7 @@ ohos_shared_library("user_instruction") {
     "${updater_path}/services/script/script_instruction",
   ]
   install_enable = true
+  subsystem_name = "updater"
   part_name = "updater"
 }
 
@@ -120,5 +121,6 @@ ohos_shared_library("user_instruction_invalid") {
     "${updater_path}/services/script/script_instruction",
   ]
   install_enable = true
+  subsystem_name = "updater"
   part_name = "updater"
 }

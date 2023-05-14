@@ -84,4 +84,7 @@ ohos_static_library("libupdaterscript") {
     "${updater_path}/services/script:gen_yacc",
     "//third_party/bounds_checking_function:libsec_static",
   ]
+
+  subsystem_name = "updater"
+  part_name = "updater"
 }

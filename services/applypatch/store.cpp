@@ -77,10 +77,6 @@ int32_t Store::CreateNewSpace(const std::string &path, bool needClear)
             LOG(ERROR) << "Failed to make store";
             return -1;
         }
-        if (chown(dirPath.c_str(), O_USER_GROUP_ID, O_USER_GROUP_ID) != 0) {
-            LOG(ERROR) << "Failed to chown store";
-            return -1;
-        }
     } else {
         if (!needClear) {
             return 0;

@@ -22,6 +22,7 @@
 #include <tuple>
 #include <variant>
 #include "box_progress_adapter.h"
+#include "component_common.h"
 #include "img_view_adapter.h"
 #include "label_btn_adapter.h"
 #include "text_label_adapter.h"
@@ -49,7 +50,7 @@ struct SpecificInfo {
 
 class ComponentFactory final {
 public:
-    static std::unique_ptr<OHOS::UIView> CreateUxComponent(const UxViewInfo &info);
+    static std::unique_ptr<ComponentInterface> CreateUxComponent(const UxViewInfo &info);
     static bool CheckUxComponent(const UxViewInfo &info);
 };
 
@@ -64,19 +65,17 @@ const auto &GetSpecificInfoMap()
     return specificInfoMap;
 }
 
-struct UxViewCommonInfo {
-    int x;
-    int y;
-    int w;
-    int h;
-    std::string id;
-    std::string type;
-    bool visible;
-};
-
 struct UxViewInfo {
     UxViewCommonInfo commonInfo {};
     SpecificInfo<COMPONENT_TYPE_LIST>::Type specificInfo {};
 };
+
+namespace Detail {
+template<typename T, typename ... Components>
+inline constexpr bool CHECK_COMPONENT_LIST = (std::is_same_v<T, Components> || ...);
+}
+
+template<typename T>
+inline constexpr bool IS_UPDATER_COMPONENT = Detail::CHECK_COMPONENT_LIST<T, COMPONENT_TYPE_LIST>;
 } // namespace Updater
 #endif

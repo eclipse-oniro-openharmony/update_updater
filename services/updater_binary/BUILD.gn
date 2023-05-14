@@ -20,6 +20,7 @@ config("updater_config") {
   include_dirs = [
     "${updater_path}/interfaces/kits/include",
     "${updater_path}/services",
+    "${updater_path}/services/common/ring_buffer",
     "${updater_path}/services/include/package",
     "${updater_path}/services/include/script",
     "${updater_path}/services/include/log",
@@ -55,6 +56,7 @@ ohos_executable("updater_binary") {
     "${updater_path}/interfaces/kits/misc_info:libmiscinfo",
     "${updater_path}/interfaces/kits/slot_info:libslotinfo",
     "${updater_path}/services/applypatch:libapplypatch",
+    "${updater_path}/services/common/ring_buffer:libringbuffer",
     "${updater_path}/services/diffpatch/patch:libpatch",
     "${updater_path}/services/fs_manager:libfsmanager",
     "${updater_path}/services/log:libupdaterlog",
@@ -72,10 +74,12 @@ ohos_executable("updater_binary") {
     deps += binary_custom_lib
   }
 
+  defines = [ "OPENSSL_SUPPRESS_DEPRECATED" ]
+
   if (defined(use_ptable)) {
     include_dirs = [ "${updater_path}/services/ptable_parse" ]
     deps += [ "${updater_path}/services/ptable_parse:libptableparse" ]
-    defines = [ "UPDATER_USE_PTABLE" ]
+    defines += [ "UPDATER_USE_PTABLE" ]
   }
 
   external_deps = [ "init:libfsmanager_static" ]
@@ -87,5 +91,4 @@ ohos_executable("updater_binary") {
   ]
   part_name = "updater"
   subsystem_name = "updater"
-  defines = [ "OPENSSL_SUPPRESS_DEPRECATED" ]
 }

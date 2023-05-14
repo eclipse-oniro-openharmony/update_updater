@@ -25,18 +25,18 @@
 
 namespace Updater {
 std::mutex CallBackDecorator::mtx_;
-void CallBackDecorator::operator()() const
+void CallBackDecorator::operator()(OHOS::UIView &view, bool isAsync) const
 {
-    auto *page = view_.GetParent();
+    auto *page = view.GetParent();
     if (page == nullptr) {
         LOG(ERROR) << "view hasn't a parent";
         return;
     }
-    if (view_.GetViewId() == nullptr) {
+    if (view.GetViewId() == nullptr) {
         LOG(ERROR) << "view is invalid, please check your json config";
         return;
     }
-    std::string id = view_.GetViewId();
+    std::string id = view.GetViewId();
     std::string pageId {};
     if (page->GetViewId() != nullptr) {
         pageId = page->GetViewId();
@@ -47,34 +47,48 @@ void CallBackDecorator::operator()() const
         return;
     }
     // component should be visible
-    if (!view_.IsVisible()) {
+    if (!view.IsVisible()) {
         LOG(ERROR) << id << " is not visible";
         return;
     }
-    // then can trigger callback
-    std::thread t {
-        [cb = cb_] () {
-            std::unique_lock<std::mutex> lock(mtx_, std::defer_lock);
-            if (!lock.try_lock()) {
-                LOG(ERROR) << "try lock failed, only allow running one callback at the same time";
-                return;
+    if (isAsync) {
+        LOG(INFO) << "callback by async method";
+        // then can trigger callback by async method
+        std::thread t {
+            [cb = cb_, &view] () {
+                CallbackWithGuard(cb, view);
             }
-            cb();
-        }
-    };
-    t.detach();
+        };
+        t.detach();
+    } else {
+        LOG(INFO) << "callback by sync method";
+        // then can trigger callback by sync method
+        CallbackWithGuard(cb_, view);
+    }
+}
+
+void CallBackDecorator::CallbackWithGuard(Callback cb, OHOS::UIView &view)
+{
+    std::unique_lock<std::mutex> lock(mtx_, std::defer_lock);
+    if (!lock.try_lock()) {
+        LOG(ERROR) << "try lock failed, only allow running one callback at the same time";
+        return;
+    }
+    if (cb.func != nullptr) {
+        cb.func(view);
+    }
 }
 
 bool LabelOnTouchListener::OnRelease(OHOS::UIView &view, [[maybe_unused]] const OHOS::ReleaseEvent &event)
 {
     // wrap cb_ with CallBackDecorator, then call operator()()
-    CallBackDecorator(view, cb_)();
+    CallBackDecorator{cb_}(view, cb_.isAsync);
     return isConsumed_;
 }
 
 bool BtnOnEventListener::OnClick(OHOS::UIView &view, [[maybe_unused]] const OHOS::ClickEvent &event)
 {
-    CallBackDecorator(view, cb_)();
+    CallBackDecorator{cb_}(view, cb_.isAsync);
     return isConsumed_;
 }
 
@@ -98,13 +112,13 @@ bool BtnOnEventListener::OnCancel(OHOS::UIView &view, [[maybe_unused]] const OHO
 
 bool BtnOnDragListener::OnDragStart(OHOS::UIView &view, [[maybe_unused]] const OHOS::DragEvent &event)
 {
-    CallBackDecorator(view, cb_)();
+    CallBackDecorator{cb_}(view, cb_.isAsync);
     return isConsumed_;
 }
 
 bool BtnOnDragListener::OnDrag(OHOS::UIView &view, const OHOS::DragEvent &event)
 {
-    CallBackDecorator(view, cb_)();
+    CallBackDecorator{cb_}(view, cb_.isAsync);
     view.SetPosition(view.GetX() + event.GetDeltaX(), view.GetY() + event.GetDeltaY());
     if (view.GetParent() != nullptr) {
         view.GetParent()->Invalidate();
@@ -114,7 +128,7 @@ bool BtnOnDragListener::OnDrag(OHOS::UIView &view, const OHOS::DragEvent &event)
 
 bool BtnOnDragListener::OnDragEnd(OHOS::UIView &view, [[maybe_unused]] const OHOS::DragEvent &event)
 {
-    CallBackDecorator(view, cb_)();
+    CallBackDecorator{cb_}(view, cb_.isAsync);
     return isConsumed_;
 }
 

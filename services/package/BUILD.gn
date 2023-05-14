@@ -93,4 +93,7 @@ ohos_static_library("libupdaterpackage") {
     ]
   }
   defines = [ "OPENSSL_SUPPRESS_DEPRECATED" ]
+
+  subsystem_name = "updater"
+  part_name = "updater"
 }

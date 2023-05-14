@@ -15,6 +15,7 @@
 #ifndef UPDATER_UI_TEXT_LABEL_ADAPTER_H
 #define UPDATER_UI_TEXT_LABEL_ADAPTER_H
 
+#include "component_common.h"
 #include "components/ui_label.h"
 #include "macros.h"
 
@@ -27,7 +28,7 @@ struct UxLabelInfo {
     std::string bgColor;
 };
 struct UxViewInfo;
-class TextLabelAdapter : public OHOS::UILabel {
+class TextLabelAdapter : public OHOS::UILabel, public ComponentCommon<TextLabelAdapter> {
     DISALLOW_COPY_MOVE(TextLabelAdapter);
     static constexpr uint32_t MAX_FONT_SIZE = 200;
 public:
@@ -38,8 +39,6 @@ public:
     virtual ~TextLabelAdapter() = default;
     void SetText(const std::string &txt);
     static bool IsValid(const UxLabelInfo &info);
-private:
-    std::string viewId_ {};
 };
 } // namespace Updater
 #endif

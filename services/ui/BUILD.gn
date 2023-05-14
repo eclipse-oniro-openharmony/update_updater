@@ -90,11 +90,6 @@ ohos_static_library("libui") {
     "${updater_path}/services/ui/driver",
     "${updater_path}/services/ui/view",
     "${updater_path}/services/ui/language",
-    "//foundation/graphic/ui/frameworks",
-    "//foundation/graphic/ui/interfaces/kits",
-    "//foundation/graphic/ui/interfaces/innerkits",
-    "//foundation/graphic/utils/interfaces/kits",
-    "//foundation/graphic/utils/interfaces/innerkits",
   ]
 
   deps = [
@@ -102,12 +97,13 @@ ohos_static_library("libui") {
     "${updater_path}/services/log:libupdaterlog",
     "${updater_path}/utils:libutils",
     "//drivers/peripheral/input/hal:hdi_input",
-    "//foundation/graphic/ui/ext/updater:libupdater_layout",
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/cJSON:cjson",
     "//third_party/libdrm:libdrm",
     "//third_party/libpng:libpng",
   ]
+
+  external_deps = [ "ui_lite:libupdater_layout" ]
 
   if (defined(updater_ui_custom_deps)) {
     deps += updater_ui_custom_deps
@@ -116,4 +112,7 @@ ohos_static_library("libui") {
   if (defined(updater_ui_custom_cfg)) {
     public_configs += updater_ui_custom_cfg
   }
+
+  subsystem_name = "updater"
+  part_name = "updater"
 }

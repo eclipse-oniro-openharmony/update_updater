@@ -33,10 +33,11 @@ namespace Hpackage {
 
 std::string GetCurrPath();
 size_t GetFileSize(const std::string &fileName);
-std::string GetFilePath(const std::string &fileName);
 std::string GetName(const std::string &filePath);
+std::string GetFilePath(const std::string &fileName);
 int32_t CheckFile(const std::string &fileName);
-uint8_t *MapMemory(const std::string &fileName, size_t size);
+uint8_t *AnonymousMap(const std::string &fileName, size_t size);
+uint8_t *FileMap(const std::string &path);
 void ReleaseMemory(uint8_t *memMap, size_t size);
 void ExtraTimeAndDate(time_t when, uint16_t &date, uint16_t &time);
 std::string ConvertShaHex(const std::vector<uint8_t> &shaDigest);

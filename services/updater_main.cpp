@@ -42,6 +42,7 @@
 #include "ptable_parse/ptable_process.h"
 #include "securec.h"
 #include "updater/updater_const.h"
+#include "updater/updater_preprocess.h"
 #include "updater_ui_stub.h"
 #include "utils.h"
 
@@ -376,6 +377,17 @@ static UpdaterStatus PreUpdatePackages(UpdaterParams &upParams)
     if (access(resultPath.c_str(), F_OK) != -1) {
         (void)DeleteFile(resultPath);
         LOG(INFO) << "deleate last upgrade file";
+    }
+
+    for (unsigned int i = 0; i < upParams.updatePackage.size(); i++) {
+        int ret = PreProcess::GetInstance().DoUpdateAuth(upParams.updatePackage[i]);
+        if (ret == 0) {
+            LOG(INFO) << upParams.updatePackage[i] << " auth success";
+        } else {
+            LOG(ERROR) << upParams.updatePackage[i] << " auth failed";
+            UPDATER_LAST_WORD(UPDATE_ERROR);
+            return UPDATE_ERROR;
+        }
     }
 
     // verify packages first

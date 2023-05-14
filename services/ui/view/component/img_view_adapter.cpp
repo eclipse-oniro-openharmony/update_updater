@@ -76,7 +76,6 @@ ImgViewAdapter::ImgViewAdapter() = default;
 
 ImgViewAdapter::ImgViewAdapter(const UxViewInfo &info)
 {
-    const UxViewCommonInfo &common = info.commonInfo;
     const UxImageInfo &spec = std::get<UxImageInfo>(info.specificInfo);
     dir_ = spec.resPath;
     imgCnt_ = spec.imgCnt;
@@ -84,13 +83,8 @@ ImgViewAdapter::ImgViewAdapter(const UxViewInfo &info)
     filePrefix_ = spec.filePrefix;
     currId_ = 0;
     valid_ = true;
-    viewId_ = common.id;
     this->SetAutoEnable(false);
-    this->SetPosition(common.x, common.y);
-    this->SetWidth(common.w);
-    this->SetHeight(common.h);
-    this->SetVisible(common.visible);
-    this->SetViewId(viewId_.c_str());
+    SetViewCommonInfo(info.commonInfo);
     LOG(INFO) << "dir:" << dir_ << ", imgCnt:" << imgCnt_ << ", interval:" << interval_;
     if (interval_ == 0) {
         this->SetSrc(dir_.c_str());

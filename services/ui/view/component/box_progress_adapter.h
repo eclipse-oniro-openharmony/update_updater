@@ -17,6 +17,7 @@
 #define UPDATER_UI_BOX_PROGRESS_ADAPTER_H
 
 #include <string>
+#include "component_common.h"
 #include "components/ui_box_progress.h"
 #include "macros.h"
 
@@ -30,7 +31,7 @@ struct UxBoxProgressInfo {
 };
 struct UxViewInfo;
 class ImgViewAdapter;
-class BoxProgressAdapter : public OHOS::UIBoxProgress {
+class BoxProgressAdapter : public OHOS::UIBoxProgress, public ComponentCommon<BoxProgressAdapter> {
     static constexpr uint32_t MAX_PROGRESS_VALUE = 100;
     DISALLOW_COPY_MOVE(BoxProgressAdapter);
 public:
@@ -45,7 +46,6 @@ public:
     static bool IsValid(const UxBoxProgressInfo &info);
 private:
     OHOS::Point GetPosOfEp();
-    std::string viewId_ = {};
     std::string epId_ = {};
     bool hasEp_ = false;
     ImgViewAdapter *ep_ = {};

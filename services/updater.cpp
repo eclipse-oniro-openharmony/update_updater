@@ -26,6 +26,7 @@
 #include <thread>
 #include <unistd.h>
 #include <vector>
+#include <algorithm>
 #include "fs_manager/mount.h"
 #include "language/language_ui.h"
 #include "log/dump.h"
@@ -53,6 +54,7 @@ using Updater::Utils::SplitString;
 using Updater::Utils::Trim;
 using namespace Hpackage;
 
+constexpr uint64_t MAX_STASH_SPACE = 100 * 1024 * 1024;
 int g_percentage;
 int g_tmpProgressValue;
 int g_tmpValue;
@@ -104,41 +106,80 @@ int GetUpdatePackageInfo(PkgManager::PkgManagerPtr pkgManager, const std::string
 UpdaterStatus IsSpaceCapacitySufficient(const std::vector<std::string> &packagePath)
 {
     UPDATER_INIT_RECORD;
-    uint64_t totalPkgSize = 0;
-    for (auto path : packagePath) {
-        PkgManager::PkgManagerPtr pkgManager = Hpackage::PkgManager::CreatePackageInstance();
-        if (pkgManager == nullptr) {
-            LOG(ERROR) << "pkgManager is nullptr";
-            UPDATER_LAST_WORD(UPDATE_CORRUPT);
-            return UPDATE_CORRUPT;
-        }
-        std::vector<std::string> fileIds;
-        int ret = pkgManager->LoadPackageWithoutUnPack(path, fileIds);
-        if (ret != PKG_SUCCESS) {
-            LOG(ERROR) << "LoadPackageWithoutUnPack failed";
-            PkgManager::ReleasePackageInstance(pkgManager);
-            UPDATER_LAST_WORD(UPDATE_CORRUPT);
-            return UPDATE_CORRUPT;
-        }
-
-        const FileInfo *info = pkgManager->GetFileInfo("update.bin");
-        if (info == nullptr) {
-            LOG(ERROR) << "update.bin is not exist";
-            PkgManager::ReleasePackageInstance(pkgManager);
-            UPDATER_LAST_WORD(UPDATE_CORRUPT);
-            return UPDATE_CORRUPT;
-        }
-        totalPkgSize += static_cast<uint64_t>(info->unpackedSize + MAX_LOG_SPACE);
-        PkgManager::ReleasePackageInstance(pkgManager);
+    std::vector<uint64_t> stashSizeList = GetStashSizeList(packagePath);
+    if (stashSizeList.size() == 0) {
+        LOG(ERROR) << "get stash size error";
+        UPDATER_LAST_WORD(UPDATE_ERROR);
+        return UPDATE_ERROR;
     }
+    uint64_t maxStashSize =  *max_element(stashSizeList.begin(), stashSizeList.end());
+    LOG(INFO) << "get max stash size" << maxStashSize;
+    maxStashSize = maxStashSize > MAX_STASH_SPACE ? maxStashSize : MAX_STASH_SPACE;
+    uint64_t maxLogSpace = MAX_LOG_SPACE * packagePath.size();
+    uint64_t totalPkgSize = maxStashSize + maxLogSpace;
 
     if (CheckStatvfs(totalPkgSize) != UPDATE_SUCCESS) {
         LOG(ERROR) << "CheckStatvfs error";
         UPDATER_LAST_WORD(UPDATE_ERROR);
         return UPDATE_ERROR;
     }
-
     return UPDATE_SUCCESS;
+}
+
+std::vector<uint64_t> GetStashSizeList(const std::vector<std::string> &packagePath)
+{
+    const std::string maxStashFileName = "all_max_stash";
+    std::vector<uint64_t> stashSizeList;
+    for (auto path : packagePath) {
+        PkgManager::PkgManagerPtr pkgManager = Hpackage::PkgManager::CreatePackageInstance();
+        if (pkgManager == nullptr) {
+            LOG(ERROR) << "pkgManager is nullptr";
+            UPDATER_LAST_WORD(UPDATE_CORRUPT);
+            return std::vector<uint64_t> {};
+        }
+
+        std::vector<std::string> fileIds;
+        int ret = pkgManager->LoadPackageWithoutUnPack(path, fileIds);
+        if (ret != PKG_SUCCESS) {
+            LOG(ERROR) << "LoadPackageWithoutUnPack failed " << path;
+            PkgManager::ReleasePackageInstance(pkgManager);
+            UPDATER_LAST_WORD(UPDATE_CORRUPT);
+            return  std::vector<uint64_t> {};
+        }
+
+        const FileInfo *info = pkgManager->GetFileInfo(maxStashFileName);
+        if (info == nullptr) {
+            LOG(INFO) << "all_max_stash not exist " << path;
+            stashSizeList.push_back(0);
+            PkgManager::ReleasePackageInstance(pkgManager);
+            continue;
+        }
+
+        PkgManager::StreamPtr outStream = nullptr;
+        ret = pkgManager->CreatePkgStream(outStream, maxStashFileName, info->unpackedSize,
+            PkgStream::PkgStreamType_MemoryMap);
+        if (outStream == nullptr) {
+            LOG(ERROR) << "Create stream fail " << maxStashFileName << " in " << path;
+            PkgManager::ReleasePackageInstance(pkgManager);
+            UPDATER_LAST_WORD(UPDATE_CORRUPT);
+            return std::vector<uint64_t> {};
+        }
+
+        ret = pkgManager->ExtractFile(maxStashFileName, outStream);
+        if (ret != PKG_SUCCESS) {
+            LOG(ERROR) << "ExtractFile fail " << maxStashFileName << " in " << path;
+            PkgManager::ReleasePackageInstance(pkgManager);
+            UPDATER_LAST_WORD(UPDATE_CORRUPT);
+            return std::vector<uint64_t> {};
+        }
+        PkgBuffer data {};
+        outStream->GetBuffer(data);
+        std::string str(reinterpret_cast<char*>(data.buffer), data.length);
+        int max_stash_size = std::stoi(str);
+        stashSizeList.push_back(static_cast<uint64_t>(max_stash_size));
+        PkgManager::ReleasePackageInstance(pkgManager);
+    }
+    return stashSizeList;
 }
 
 int CheckStatvfs(const uint64_t totalPkgSize)

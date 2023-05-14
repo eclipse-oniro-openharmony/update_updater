@@ -37,12 +37,17 @@ private:
     static std::vector<CallbackCfg> callbackCfgs_;
 };
 
-#define DEFINE_CALLBACK(name)                                       \
-    void name();                                                    \
-    static void __attribute((constructor)) RegisterCallback##name() \
-    {                                                               \
-        CallbackManager::RegisterFunc(#name, &name);                \
-    }                                                               \
-    void name()
+#define DEFINE_CALLBACK(name, async)                                   \
+    void name(OHOS::UIView &);                                         \
+    static void __attribute((constructor)) RegisterCallback##name()    \
+    {                                                                  \
+        LOG(INFO) << "register callback " << (#name);                  \
+        CallbackManager::RegisterFunc(#name, Callback{&name, async});  \
+    }                                                                  \
+    void name(OHOS::UIView &)
+
+#define DEFINE_ASYN_CALLBACK(name) DEFINE_CALLBACK(name, true)
+
+#define DEFINE_SYNC_CALLBACK(name) DEFINE_CALLBACK(name, false)
 }
 #endif
