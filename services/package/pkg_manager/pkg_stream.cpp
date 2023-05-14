@@ -299,7 +299,7 @@ int32_t FlowDataStream::Read(PkgBuffer &data, size_t start, size_t needRead, siz
         return PKG_INVALID_STREAM;
     }
 
-    if (data.capacity < needRead) {
+    if (data.length < needRead) {
         PKG_LOGE("Invalid need length");
         return PKG_INVALID_STREAM;
     }
@@ -339,7 +339,7 @@ int32_t FlowDataStream::ReadFromRingBuf(uint8_t *&buff, const uint32_t needLen, 
         return PKG_INVALID_STREAM;
     }
 
-    // ?á??￡?′ó?o3????áè?
+    // 缓冲区读清，从ringbuf里面读取
     if ((avail_ == 0) && !ringBuf_->Pop(buff_, MAX_FLOW_BUFFER_SIZE, avail_)) {
         PKG_LOGE("read data fail");
         buff = nullptr;

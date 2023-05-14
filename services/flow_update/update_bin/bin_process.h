@@ -42,7 +42,7 @@ private:
     size_t GetFileLength();
     bool ReadFromBinFile(Hpackage::PkgBuffer &buffer, size_t start, size_t &readLen);
 
-    bool isStopRun = false;
+    bool isStopRun_ = false;
     size_t stashDataSize_ = 0;
 };
 } // namespace Updater

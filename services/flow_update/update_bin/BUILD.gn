@@ -47,7 +47,10 @@ ohos_static_library("libBinFlowUpdate") {
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/openssl:ssl_source",
   ]
-  external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+  external_deps = [
+    "init:libbegetutil",
+    "init:libfsmanager_static",
+  ]
   subsystem_name = "updater"
   part_name = "updater"
 }

@@ -173,14 +173,14 @@ struct PkgBuffer {
  */
 class PkgStream {
 public:
-    enum StreamType {
+    enum {
         PkgStreamType_Read = 0,     // common file reading
         PkgStreamType_Write,        // common file writing (A new file is created and the original content is deleted.)
         PkgStreamType_MemoryMap,    // memory mapping
         PkgStreamType_Process,      // processing while parsing
         PkgStreamType_Buffer,       // buffer
-        PkgStreamType_FlowData,     // flow data
         PKgStreamType_FileMap,      // file map to memory
+        PkgStreamType_FlowData,     // flow data
     };
 
     virtual ~PkgStream() = default;
@@ -378,7 +378,7 @@ public:
     virtual int32_t CompressBuffer(FileInfoPtr info, const PkgBuffer &buffer, StreamPtr output) const = 0;
 
     virtual int32_t LoadPackageWithoutUnPack(const std::string &packagePath,
-        std::vector<std::string> &fileIds, PkgStream::StreamType streamType = PkgStream::PkgStreamType_Read) = 0;
+        std::vector<std::string> &fileIds) = 0;
     
     virtual int32_t LoadPackageWithStream(const std::string &packagePath, const std::string &keyPath,
         std::vector<std::string> &fileIds, uint8_t type, StreamPtr stream) = 0;

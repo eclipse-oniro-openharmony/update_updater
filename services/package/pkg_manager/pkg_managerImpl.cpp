@@ -240,10 +240,10 @@ PkgFilePtr PkgManagerImpl::CreatePackage(PkgStreamPtr stream, PkgFile::PkgType t
 }
 
 int32_t PkgManagerImpl::LoadPackageWithoutUnPack(const std::string &packagePath,
-    std::vector<std::string> &fileIds, PkgStream::StreamType streamType)
+    std::vector<std::string> &fileIds)
 {
     PkgFile::PkgType pkgType = GetPkgTypeByName(packagePath);
-    int32_t ret = LoadPackage(packagePath, fileIds, pkgType, streamType);
+    int32_t ret = LoadPackage(packagePath, fileIds, pkgType);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("Parse %s fail ", packagePath.c_str());
         ClearPkgFile();
@@ -374,7 +374,7 @@ int32_t PkgManagerImpl::ExtraAndLoadPackage(const std::string &path, const std::
 }
 
 int32_t PkgManagerImpl::LoadPackage(const std::string &packagePath, std::vector<std::string> &fileIds,
-    PkgFile::PkgType type, PkgStream::StreamType streamType)
+    PkgFile::PkgType type)
 {
     PkgStreamPtr stream = nullptr;
     int32_t ret = CreatePkgStream(stream, packagePath, 0, PkgStream::PKgStreamType_FileMap);
@@ -526,7 +526,7 @@ int32_t PkgManagerImpl::CreatePkgStream(StreamPtr &stream, const std::string &fi
         return PKG_INVALID_FILE;
     }
 
-    PkgStreamPtr pkgStream = new FlowDataStream(this, fileName, info->unpackedSize,
+    PkgStreamPtr pkgStream = new(std::nothrow) FlowDataStream(this, fileName, info->unpackedSize,
         buffer, PkgStream::PkgStreamType_FlowData);
     if (pkgStream == nullptr) {
         PKG_LOGE("Failed to create stream");

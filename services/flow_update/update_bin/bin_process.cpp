@@ -74,7 +74,7 @@ int32_t UScriptInstructionBinFlowWrite::ExtractBinFile(Uscript::UScriptEnv &env,
     PkgManager::StreamPtr stream)
 {
     ON_SCOPE_EXIT(failExecute) {
-        isStopRun = true;
+        isStopRun_ = true;
         stream->Stop();
     };
     std::string upgradeFileName;
@@ -115,7 +115,7 @@ int32_t UScriptInstructionBinFlowWrite::ExtractBinFile(Uscript::UScriptEnv &env,
 int UScriptInstructionBinFlowWrite::UnCompressDataProducer(const PkgBuffer &buffer, size_t size, size_t start,
                                                             bool isFinish, const void* context)
 {
-    if (isStopRun) {
+    if (isStopRun_) {
         LOG(ERROR) << "recive stop single, UnCompressDataProducer stop run";
         return USCRIPT_ERROR_EXECUTE; 
     }
@@ -184,7 +184,7 @@ int32_t UScriptInstructionBinFlowWrite::ProcessBinFile(Uscript::UScriptEnv &env,
     PkgManager::StreamPtr stream)
 {
     ON_SCOPE_EXIT(failExecute) {
-        isStopRun = true;
+        isStopRun_ = true;
         stream->Stop();
     };
     std::string pkgFileName;
@@ -207,7 +207,7 @@ int32_t UScriptInstructionBinFlowWrite::ProcessBinFile(Uscript::UScriptEnv &env,
     }
 
     std::vector<std::string> innerFileNames;
-    ret = manager->LoadPackageWithStream(pkgFileName,  Utils::GetCertName(),
+    ret = manager->LoadPackageWithStream(pkgFileName, Utils::GetCertName(),
         innerFileNames, PkgFile::PKG_TYPE_UPGRADE, stream);
     if (ret != USCRIPT_SUCCESS) {
         LOG(ERROR) << "Error to load flow data stream";

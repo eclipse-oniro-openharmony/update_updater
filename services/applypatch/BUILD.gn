@@ -32,6 +32,7 @@ ohos_static_library("libapplypatch") {
   include_dirs = [
     "${updater_path}/services/include",
     "${updater_path}/services/applypatch",
+    "${updater_path}/services/common",
     "${updater_path}/utils/include",
     "${updater_path}/interfaces/kits/include",
     "${updater_path}/services/include/script",

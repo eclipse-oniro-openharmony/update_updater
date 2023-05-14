@@ -66,8 +66,7 @@ public:
 
     int32_t CompressBuffer(FileInfoPtr info, const PkgBuffer &buffer, StreamPtr stream) const override;
 
-    int32_t LoadPackageWithoutUnPack(const std::string &packagePath, std::vector<std::string> &fileIds,
-        PkgStream::StreamType streamType = PkgStream::PKgStreamType_FileMap) override;
+    int32_t LoadPackageWithoutUnPack(const std::string &packagePath, std::vector<std::string> &fileIds) override;
 
     int32_t LoadPackageWithStream(const std::string &packagePath, const std::string &keyPath,
         std::vector<std::string> &fileIds, uint8_t type, StreamPtr stream) override;
@@ -104,8 +103,7 @@ private:
 
     int32_t ExtraAndLoadPackage(const std::string &path, const std::string &name, PkgFile::PkgType,
         std::vector<std::string> &fileIds);
-    int32_t LoadPackage(const std::string &packagePath, std::vector<std::string> &fileIds, PkgFile::PkgType type,
-        PkgStream::StreamType streamType = PkgStream::PKgStreamType_FileMap);
+    int32_t LoadPackage(const std::string &packagePath, std::vector<std::string> &fileIds, PkgFile::PkgType type);
 
     int32_t LoadPackageWithStream(const std::string &packagePath,
         std::vector<std::string> &fileIds, PkgFile::PkgType type, PkgStreamPtr stream);
@@ -129,9 +127,6 @@ private:
     int32_t DoCreatePkgStream(PkgStreamPtr &stream, const std::string &fileName, int32_t type);
 
     int32_t CreatePkgStream(PkgStreamPtr &stream, const std::string &fileName, size_t size, int32_t type);
-
-    int32_t CreatePkgStream(PkgStreamPtr &stream, const std::string &fileName,
-        PkgStream::ExtractFileProcessor processor, const void *context);
 
     void ClosePkgStream(PkgStreamPtr &stream);
 

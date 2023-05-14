@@ -81,7 +81,7 @@ std::unique_ptr<ComponentProcessor> NewObject(const std::string &name, const uin
     return std::make_unique<SubClassName>(name, len);
 }
 
-#define REGISTER_CLASS(subClassName, ...)                                                  \
+#define REGISTER_PROCESSOR(subClassName, ...)                                                  \
     extern "C" __attribute__((constructor)) void subClassName##_RegisterClass()   \
     {                                                                                 \
         std::vector<std::string> nameList {__VA_ARGS__};                                   \

@@ -65,6 +65,7 @@ ohos_static_library("libupdaterpackage") {
   ]
 
   deps = [
+    "${updater_path}/services/common/ring_buffer:libringbuffer",
     "${updater_path}/services/log:libupdaterlog",
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/openssl:libcrypto_shared",

@@ -27,9 +27,9 @@ using namespace Hpackage;
 using namespace Uscript;
 
 namespace Updater {
-REGISTER_CLASS(VersionCheckProcessor, "/version_list")
-REGISTER_CLASS(BoardIdCheckProcessor, "/board_list")
-REGISTER_CLASS(RawImgProcessor, "/system", "/vendor")
+REGISTER_PROCESSOR(VersionCheckProcessor, "/version_list")
+REGISTER_PROCESSOR(BoardIdCheckProcessor, "/board_list")
+REGISTER_PROCESSOR(RawImgProcessor, "/system", "/vendor")
 
 ComponentProcessorFactory &ComponentProcessorFactory::GetInstance()
 {
@@ -40,19 +40,20 @@ ComponentProcessorFactory &ComponentProcessorFactory::GetInstance()
 void ComponentProcessorFactory::RegisterProcessor(Constructor constructor, std::vector<std::string> &nameList)
 {
     for (auto &iter : nameList) {
-        typename ClassMap::iterator it = m_constructorMap.find(iter);
-        if (it != m_constructorMap.end()) {
+        if (m_constructorMap.find(iter) != m_constructorMap.end()) {
             continue;
         }
-        m_constructorMap.emplace(iter, constructor);
+        if (!m_constructorMap.emplace(iter, constructor).second) {
+            LOG(ERROR) << "emplace: " << iter.c_str() << " fail";
+        }
     }
 }
 
 std::unique_ptr<ComponentProcessor> ComponentProcessorFactory::GetProcessor(const std::string &name,
     const uint8_t len) const
 {
-    typename ClassMap::const_iterator it = m_constructorMap.find(name);
-    if (it == m_constructorMap.end()) {
+    auto it = m_constructorMap.find(name);
+    if (it == m_constructorMap.end() || it->second == nullptr) {
         return nullptr;
     }
     return (*(it->second))(name, len);
@@ -81,7 +82,7 @@ int32_t VersionCheckProcessor::DoProcess(Uscript::UScriptEnv &env)
         LOG(INFO) << "Check version " << targetVersions[i];
         ret = verStr.compare(targetVersions[i]);
         if (ret == 0) {
-            LOG(INFO) << "Check version success ";
+            LOG(INFO) << "Check version success";
             break;
         }
     }

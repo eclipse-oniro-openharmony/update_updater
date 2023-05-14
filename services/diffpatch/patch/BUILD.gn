@@ -24,6 +24,7 @@ config("patch_config") {
   include_dirs = [
     "${updater_path}/interfaces/kits/include/package",
     "${updater_path}/interfaces/kits/include",
+    "${updater_path}/services/common",
     "${updater_path}/services/include/package",
     "${updater_path}/services/include/patch",
     "${updater_path}/services/include",
