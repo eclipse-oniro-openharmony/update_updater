@@ -64,9 +64,9 @@ ohos_unittest("bin_flow_update_test") {
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/bzip2:libbz2",
     "//third_party/cJSON:cjson",
-    "//third_party/openssl:ssl_source",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
+    "//third_party/openssl:ssl_source",
   ]
   external_deps = [
     "hiviewdfx_hilog_native:libhilog",
