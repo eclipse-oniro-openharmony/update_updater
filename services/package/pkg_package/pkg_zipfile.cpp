@@ -115,7 +115,7 @@ int32_t ZipPkgFile::SavePackage(size_t &signOffset)
     return PKG_SUCCESS;
 }
 
-int32_t ZipPkgFile::LoadPackage(std::vector<std::string> &fileNames, const PkgBuffer &buffer,
+int32_t ZipPkgFile::LoadPackage(std::vector<std::string> &fileNames, PkgBuffer &buffer,
     uint32_t endDirLen, size_t endDirPos, size_t &readLen)
 {
     size_t fileLen = pkgStream_->GetFileLength();
@@ -203,7 +203,7 @@ int32_t ZipPkgFile::LoadPackage(std::vector<std::string>& fileNames, VerifyFunct
     uint32_t endDirLen = sizeof(EndCentralDir);
     size_t endDirPos = fileLen - endDirLen;
     size_t readLen = 0;
-    PkgBuffer buffer(buffSize);
+    PkgBuffer buffer(nullptr, buffSize);
     ret = pkgStream_->Read(buffer, endDirPos, sizeof(EndCentralDir), readLen);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("read EOCD struct failed %s", pkgStream_->GetFileName().c_str());
@@ -541,7 +541,7 @@ int32_t ZipFileEntry::DecodeCentralDirEntry(PkgStreamPtr inStream, PkgBuffer &bu
     return DoDecodeCentralDirEntry(buffer, decodeLen, currLen, nameSize, extraSize);
 }
 
-int32_t ZipFileEntry::DecodeLocalFileHeaderCheck(PkgStreamPtr inStream, const PkgBuffer &data,
+int32_t ZipFileEntry::DecodeLocalFileHeaderCheck(PkgStreamPtr inStream, PkgBuffer &data,
     size_t currentPos)
 {
     uint16_t flags = ReadLE16(data.buffer + offsetof(LocalFileHeader, flags));
@@ -587,7 +587,7 @@ int32_t ZipFileEntry::DecodeLocalFileHeaderCheck(PkgStreamPtr inStream, const Pk
     return PKG_SUCCESS;
 }
 
-int32_t ZipFileEntry::DecodeLocalFileHeader(PkgStreamPtr inStream, const PkgBuffer &data, size_t currentPos,
+int32_t ZipFileEntry::DecodeLocalFileHeader(PkgStreamPtr inStream, PkgBuffer &data, size_t currentPos,
     size_t &decodeLen)
 {
     size_t readLen = 0;
@@ -688,7 +688,7 @@ void ZipFileEntry::CombineTimeAndDate(time_t &time, uint16_t modifiedTime, uint1
     time = mktime(&newTime);                      // 将tm结构体转换成time_t格式。
 }
 
-int32_t ZipFileEntry::DecodeHeader(const PkgBuffer &buff, size_t startOffset, size_t dataOffset,
+int32_t ZipFileEntry::DecodeHeader(PkgBuffer &buff, size_t startOffset, size_t dataOffset,
     size_t &decodeLen)
 {
     PkgStreamPtr inStream = pkgFile_->GetPkgStream();

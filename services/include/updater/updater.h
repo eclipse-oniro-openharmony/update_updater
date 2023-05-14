@@ -81,6 +81,9 @@ int ExecUpdate(Hpackage::PkgManager::PkgManagerPtr pkgManager, int retry, const 
     PostMessageFunction postMessage);
 
 UpdaterStatus IsSpaceCapacitySufficient(const std::vector<std::string> &packagePath);
+
+std::vector<uint64_t> GetStashSizeList(const std::vector<std::string> &packagePath);
+
 int CheckStatvfs(const uint64_t totalPkgSize);
 
 bool IsSDCardExist(const std::string &sdcard_path);

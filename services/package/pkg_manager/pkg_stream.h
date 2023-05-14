@@ -32,7 +32,7 @@ public:
 
     virtual ~PkgStreamImpl() {}
 
-    int32_t Read(const PkgBuffer &data, size_t start, size_t needRead, size_t &readLen) override
+    int32_t Read(PkgBuffer &data, size_t start, size_t needRead, size_t &readLen) override
     {
         UNUSED(data);
         UNUSED(start);
@@ -91,7 +91,7 @@ public:
 
     ~FileStream() override;
 
-    int32_t Read(const PkgBuffer &data, size_t start, size_t needRead, size_t &readLen) override;
+    int32_t Read(PkgBuffer &data, size_t start, size_t needRead, size_t &readLen) override;
 
     int32_t Write(const PkgBuffer &data, size_t size, size_t start) override;
 
@@ -119,7 +119,7 @@ public:
         memSize_(buffer.length), currOffset_(0), streamType_(streamType) {}
     ~MemoryMapStream() override;
 
-    int32_t Read(const PkgBuffer &data, size_t start, size_t needRead, size_t &readLen) override;
+    int32_t Read(PkgBuffer &data, size_t start, size_t needRead, size_t &readLen) override;
 
     int32_t Write(const PkgBuffer &data, size_t size, size_t start) override;
 
@@ -169,7 +169,7 @@ public:
 
     ~ProcessorStream() override {}
 
-    int32_t Read(const PkgBuffer &data, size_t start, size_t needRead, size_t &readLen) override
+    int32_t Read(PkgBuffer &data, size_t start, size_t needRead, size_t &readLen) override
     {
         UNUSED(data);
         UNUSED(start);

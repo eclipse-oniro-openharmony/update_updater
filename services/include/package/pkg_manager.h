@@ -139,6 +139,7 @@ struct ZipFileInfo {
 struct PkgBuffer {
     uint8_t *buffer;
     size_t length = 0; // buffer size
+    
     std::vector<uint8_t> data;
 
     PkgBuffer()
@@ -179,6 +180,7 @@ public:
         PkgStreamType_Process,      // processing while parsing
         PkgStreamType_Buffer,       // buffer
         PkgStreamType_FlowData,     // flow data
+        PKgStreamType_FileMap,      // file map to memory
     };
 
     virtual ~PkgStream() = default;
@@ -192,7 +194,7 @@ public:
      * @param readLen               length of the read data
      * @return                      file reading result
      */
-    virtual int32_t Read(const PkgBuffer &data, size_t start, size_t needRead, size_t &readLen) = 0;
+    virtual int32_t Read(PkgBuffer &data, size_t start, size_t needRead, size_t &readLen) = 0;
 
     /**
      * write stream
