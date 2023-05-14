@@ -24,7 +24,6 @@ ohos_static_library("libBinFlowUpdate") {
 
   include_dirs = [
     "${updater_path}/interfaces/kits/include",
-    "${updater_path}/services/updater_image/update_bin",
     "${updater_path}/services/common",
     "${updater_path}/services/include",
     "${updater_path}/services/include/applypatch",
