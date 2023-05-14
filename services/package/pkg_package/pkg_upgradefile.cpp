@@ -260,7 +260,8 @@ int32_t UpgradePkgFile::ReadSignData(std::vector<uint8_t> &signData,
 {
     size_t readBytes = 0;
     size_t signLen = parsedLen;
-    ret = pkgStream_->Read(buffer, parsedLen, buffer.length, readBytes);
+    PkgBuffer buffer(HASH_TLV_SIZE);
+    int32_t ret = pkgStream_->Read(buffer, parsedLen, buffer.length, readBytes);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("read sign data fail");
         UPDATER_LAST_WORD(ret, parsedLen);
