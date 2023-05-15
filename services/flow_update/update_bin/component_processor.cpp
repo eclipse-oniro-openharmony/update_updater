@@ -54,6 +54,7 @@ std::unique_ptr<ComponentProcessor> ComponentProcessorFactory::GetProcessor(cons
 {
     auto it = m_constructorMap.find(name);
     if (it == m_constructorMap.end() || it->second == nullptr) {
+        LOG(ERROR) << "GetProcessor for: " << name.c_str() << " fail";
         return nullptr;
     }
     return (*(it->second))(name, len);
@@ -63,6 +64,7 @@ int32_t VersionCheckProcessor::DoProcess(Uscript::UScriptEnv &env)
 {
     PackagesInfoPtr pkginfomanager = PackagesInfo::GetPackagesInfoInstance();
     if (pkginfomanager == nullptr) {
+        LOG(ERROR) << "Fail to pkginfomanager";
         return PKG_INVALID_VERSION;
     }
 
@@ -97,10 +99,12 @@ int32_t BoardIdCheckProcessor::DoProcess(Uscript::UScriptEnv &env)
 {
     PackagesInfoPtr pkginfomanager = PackagesInfo::GetPackagesInfoInstance();
     if (pkginfomanager == nullptr) {
+        LOG(ERROR) << "Fail to get pkginfomanager";
         return PKG_INVALID_VERSION;
     }
 
-    if (env.GetPkgManager() == nullptr || pkginfomanager == nullptr) {
+    if (env.GetPkgManager() == nullptr) {
+        LOG(ERROR) << "Fail to GetPkgManager";
         return PKG_INVALID_VERSION;
     }
 
@@ -207,7 +211,7 @@ int32_t RawImgProcessor::PostProcess(Uscript::UScriptEnv &env)
 }
 
 int RawImgProcessor::GetWritePathAndOffset(const std::string &partitionName, std::string &writePath,
-    uint64_t &offset, uint64_t &partitionSize)
+                                           uint64_t &offset, uint64_t &partitionSize)
 {
 #ifdef UPDATER_USE_PTABLE
     PackagePtable& packagePtb = PackagePtable::GetInstance();
@@ -244,7 +248,7 @@ int RawImgProcessor::GetWritePathAndOffset(const std::string &partitionName, std
 }
 
 int RawImgProcessor::RawImageWriteProcessor(const PkgBuffer &buffer, size_t size, size_t start,
-                                                            bool isFinish, const void* context)
+                                            bool isFinish, const void* context)
 {
     void *p = const_cast<void *>(context);
     DataWriter *writer = static_cast<DataWriter *>(p);

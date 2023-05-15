@@ -17,10 +17,10 @@
 #include <string>
 #include <thread>
 #include "applypatch/partition_record.h"
-#include "ring_buffer/ring_buffer.h"
 #include "log.h"
 #include "pkg_package/pkg_pkgfile.h"
 #include "pkg_utils.h"
+#include "ring_buffer/ring_buffer.h"
 #include "script_manager.h"
 #include "scope_guard.h"
 #include "securec.h"
@@ -31,6 +31,7 @@ using namespace Uscript;
 
 namespace Updater {
 constexpr uint32_t STASH_BUFFER_SIZE = 4 * 1024 * 1024;
+constexpr uint32_t MAX_BUFFER_NUM = 16;
 
 int32_t UScriptInstructionBinFlowWrite::Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context)
 {
@@ -49,7 +50,7 @@ int32_t UScriptInstructionBinFlowWrite::Execute(Uscript::UScriptEnv &env, Uscrip
     }
 
     RingBuffer ringBuffer;
-    if (!ringBuffer.Init(STASH_BUFFER_SIZE, 8)) {
+    if (!ringBuffer.Init(STASH_BUFFER_SIZE, MAX_BUFFER_NUM)) {
         LOG(ERROR) << "Error to get ringbuffer";
         return USCRIPT_INVALID_PARAM;
     }
@@ -156,7 +157,6 @@ int UScriptInstructionBinFlowWrite::UnCompressDataProducer(const PkgBuffer &buff
             return USCRIPT_ERROR_EXECUTE;
         }
 
-        LOG(ERROR) << "invalid para1, start: " << start << "stashDataSize_: " << stashDataSize_;
         if(flowStream->Write(stashBuffer, STASH_BUFFER_SIZE, start - stashDataSize_) != USCRIPT_SUCCESS) {
             LOG(ERROR) << "UnCompress flowStream write fail";
             return USCRIPT_ERROR_EXECUTE;
