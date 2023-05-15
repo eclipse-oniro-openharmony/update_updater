@@ -44,6 +44,7 @@ private:
 
     bool isStopRun_ = false;
     size_t stashDataSize_ = 0;
+    PkgBuffer stashBuffer_ {};
 };
 } // namespace Updater
 #endif // UPDATE_BIN_PROCESS_H

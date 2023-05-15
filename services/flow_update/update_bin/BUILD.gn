@@ -43,7 +43,7 @@ ohos_static_library("libBinFlowUpdate") {
     "${updater_path}/services/package:libupdaterpackage",
     "${updater_path}/utils:libutils",
     "//third_party/bounds_checking_function:libsec_static",
-    "//third_party/openssl:libcrypto_static",
+    "//third_party/openssl:libcrypto_shared",
   ]
   external_deps = [
     "init:libbegetutil",

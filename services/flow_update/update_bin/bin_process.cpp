@@ -55,6 +55,8 @@ int32_t UScriptInstructionBinFlowWrite::Execute(Uscript::UScriptEnv &env, Uscrip
         return USCRIPT_INVALID_PARAM;
     }
 
+    stashBuffer_.data.resize(STASH_BUFFER_SIZE);
+    stashBuffer_.buffer = stashBuffer_.data.data();
     PkgManager::StreamPtr binFlowStream = nullptr;
     ret = pkgManager->CreatePkgStream(binFlowStream, upgradeFileName, &ringBuffer);
     if (ret != USCRIPT_SUCCESS || binFlowStream == nullptr) {
@@ -121,7 +123,6 @@ int UScriptInstructionBinFlowWrite::UnCompressDataProducer(const PkgBuffer &buff
         return USCRIPT_ERROR_EXECUTE; 
     }
 
-    static PkgBuffer stashBuffer(STASH_BUFFER_SIZE);
     void *p = const_cast<void *>(context);
     PkgStream *flowStream = static_cast<PkgStream *>(p);
     if (flowStream == nullptr) {
@@ -133,7 +134,7 @@ int UScriptInstructionBinFlowWrite::UnCompressDataProducer(const PkgBuffer &buff
         // 最后一块数据
         if (stashDataSize_ != 0) {
             size_t writeOffset = flowStream->GetFileLength() - stashDataSize_;
-            if(flowStream->Write(stashBuffer, stashDataSize_, writeOffset) != USCRIPT_SUCCESS) {
+            if(flowStream->Write(stashBuffer_, stashDataSize_, writeOffset) != USCRIPT_SUCCESS) {
                 LOG(ERROR) << "UnCompress flowStream write fail";
                 return USCRIPT_ERROR_EXECUTE;
             }
@@ -153,11 +154,11 @@ int UScriptInstructionBinFlowWrite::UnCompressDataProducer(const PkgBuffer &buff
     // 缓存4M再写入数据流
     while(size - writeSize > STASH_BUFFER_SIZE + stashDataSize_) {
         copyLen = STASH_BUFFER_SIZE - stashDataSize_;
-        if (memcpy_s(stashBuffer.buffer + stashDataSize_, copyLen, buffer.buffer + writeSize, copyLen) != EOK) {
+        if (memcpy_s(stashBuffer_.buffer + stashDataSize_, copyLen, buffer.buffer + writeSize, copyLen) != EOK) {
             return USCRIPT_ERROR_EXECUTE;
         }
 
-        if(flowStream->Write(stashBuffer, STASH_BUFFER_SIZE, start - stashDataSize_) != USCRIPT_SUCCESS) {
+        if(flowStream->Write(stashBuffer_, STASH_BUFFER_SIZE, start - stashDataSize_) != USCRIPT_SUCCESS) {
             LOG(ERROR) << "UnCompress flowStream write fail";
             return USCRIPT_ERROR_EXECUTE;
         }
@@ -166,12 +167,12 @@ int UScriptInstructionBinFlowWrite::UnCompressDataProducer(const PkgBuffer &buff
     }
 
     copyLen = size - writeSize;
-    if (memcpy_s(stashBuffer.buffer + stashDataSize_, copyLen, buffer.buffer + writeSize, copyLen) != EOK) {
+    if (memcpy_s(stashBuffer_.buffer + stashDataSize_, copyLen, buffer.buffer + writeSize, copyLen) != EOK) {
         return USCRIPT_ERROR_EXECUTE;
     }
     stashDataSize_ += copyLen;
     if (stashDataSize_ == STASH_BUFFER_SIZE) {
-        if(flowStream->Write(stashBuffer, stashDataSize_, start - stashDataSize_ + copyLen) != USCRIPT_SUCCESS) {
+        if(flowStream->Write(stashBuffer_, stashDataSize_, start - stashDataSize_ + copyLen) != USCRIPT_SUCCESS) {
             LOG(ERROR) << "UnCompress flowStream write fail";
             return USCRIPT_ERROR_EXECUTE;
         }

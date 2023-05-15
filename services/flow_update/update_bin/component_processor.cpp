@@ -40,9 +40,6 @@ ComponentProcessorFactory &ComponentProcessorFactory::GetInstance()
 void ComponentProcessorFactory::RegisterProcessor(Constructor constructor, std::vector<std::string> &nameList)
 {
     for (auto &iter : nameList) {
-        if (m_constructorMap.find(iter) != m_constructorMap.end()) {
-            continue;
-        }
         if (!m_constructorMap.emplace(iter, constructor).second) {
             LOG(ERROR) << "emplace: " << iter.c_str() << " fail";
         }
