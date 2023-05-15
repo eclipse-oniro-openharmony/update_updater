@@ -568,6 +568,7 @@ static UpdaterStatus StartUpdaterEntry(UpdaterParams &upParams)
         }
         UPDATER_UI_INSTANCE.ShowLogRes(
             (status != UPDATE_SUCCESS) ? TR(LOGRES_FACTORY_FAIL) : TR(LOGRES_FACTORY_DONE));
+        UpdaterInit::GetInstance().InvokeEvent(UPDATER_RPMB_DATA_CLEAR_EVENT);
     } else if (upParams.userWipeData) {
         UPDATER_UI_INSTANCE.ShowProgressPage();
         LOG(INFO) << "User level FactoryReset begin";
@@ -582,6 +583,7 @@ static UpdaterStatus StartUpdaterEntry(UpdaterParams &upParams)
         if (status != UPDATE_SUCCESS) {
             UPDATER_UI_INSTANCE.ShowLogRes(TR(LOGRES_WIPE_FAIL));
         } else {
+            UpdaterInit::GetInstance().InvokeEvent(UPDATER_RPMB_DATA_CLEAR_EVENT);
             UPDATER_UI_INSTANCE.ShowSuccessPage();
             UPDATER_UI_INSTANCE.ShowLogRes(TR(LOGRES_WIPE_FINISH));
             PostUpdater(true);
