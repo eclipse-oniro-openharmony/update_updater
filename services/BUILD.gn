@@ -87,7 +87,7 @@ ohos_executable("updater") {
     deps += [ "//drivers/peripheral/input/udriver:hdi_input_udriver" ]
   }
 
-  if (defined(updater_only_custom_deps)) {
+  if (defined(updater_only_custom_deps) && updater_ui_support) {
     deps += updater_only_custom_deps
   }
 
