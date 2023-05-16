@@ -137,6 +137,7 @@ ohos_unittest("updater_unittest") {
     "${updater_path}/services/include/fs_manager",
     "${updater_path}/services/fs_manager",
     "${updater_path}/services/applypatch",
+    "${updater_path}/services/common",
     "${updater_path}/services/diffpatch",
     "${updater_path}/services/diffpatch/diff",
     "${updater_path}/services/diffpatch/patch",

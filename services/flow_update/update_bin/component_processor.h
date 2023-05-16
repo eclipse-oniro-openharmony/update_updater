@@ -81,6 +81,7 @@ std::unique_ptr<ComponentProcessor> NewObject(const std::string &name, const uin
     return std::make_unique<SubClassName>(name, len);
 }
 
+#undef REGISTER_PROCESSOR
 #define REGISTER_PROCESSOR(subClassName, ...)                                                  \
     extern "C" __attribute__((constructor)) void subClassName##_RegisterClass()   \
     {                                                                                 \
