@@ -73,10 +73,7 @@ int CheckVersion(PkgManager::PkgManagerPtr pkgManager, PackagesInfoPtr pkginfoma
     }
     std::string verStr(verPtr);
     LOG(INFO) << "current version:" << verStr;
-    std::vector<std::string> targetVersions = pkginfomanager->GetOTAVersion(pkgManager, "version_list", "");
-    if (targetVersions.size() == 0) {
-        targetVersions = pkginfomanager->GetOTAVersion(pkgManager, "/version_list", "");
-    }
+    std::vector<std::string> targetVersions = pkginfomanager->GetOTAVersion(pkgManager, "/version_list", "");
     for (size_t i = 0; i < targetVersions.size(); i++) {
         ret = verStr.compare(targetVersions[i]);
         if (ret == 0) {
@@ -97,10 +94,7 @@ int CheckBoardId(PkgManager::PkgManagerPtr pkgManager, PackagesInfoPtr pkginfoma
     if (localBoardId.empty()) {
         return 0;
     }
-    std::vector<std::string> boardIdList = pkginfomanager->GetBoardID(pkgManager, "board_list", "");
-    if (boardIdList.size() == 0) {
-        boardIdList = pkginfomanager->GetBoardID(pkgManager, "/board_list", "");
-    }
+    std::vector<std::string> boardIdList = pkginfomanager->GetBoardID(pkgManager, "/board_list", "");
     for (size_t i = 0; i < boardIdList.size(); i++) {
         ret = localBoardId.compare(boardIdList[i]);
         if (ret == 0) {

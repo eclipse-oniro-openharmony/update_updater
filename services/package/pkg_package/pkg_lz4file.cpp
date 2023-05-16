@@ -106,7 +106,7 @@ int32_t Lz4FileEntry::Unpack(PkgStreamPtr outStream)
     return PKG_SUCCESS;
 }
 
-int32_t Lz4FileEntry::DecodeHeader(PkgBuffer &buffer, size_t headerOffset, size_t dataOffset,
+int32_t Lz4FileEntry::DecodeHeader(const PkgBuffer &buffer, size_t headerOffset, size_t dataOffset,
     size_t &decodeLen)
 {
     fileInfo_.fileInfo.identity = "lz4_";
@@ -184,7 +184,7 @@ int32_t Lz4PkgFile::LoadPackage(std::vector<std::string> &fileNames, VerifyFunct
 
     size_t srcOffset = 0;
     size_t readLen = 0;
-    PkgBuffer buffer(nullptr, sizeof(PkgAlgorithmLz4::LZ4B_MAGIC_NUMBER));
+    PkgBuffer buffer(sizeof(PkgAlgorithmLz4::LZ4B_MAGIC_NUMBER));
     int32_t ret = pkgStream_->Read(buffer, srcOffset, buffer.length, readLen);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("Fail to read buffer");

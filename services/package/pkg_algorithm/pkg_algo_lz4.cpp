@@ -364,18 +364,18 @@ int32_t PkgAlgorithmLz4::GetUnpackParam(LZ4F_decompressionContext_t &ctx, const 
     }
 
     size_t remainSize = LZ4S_HEADER_LEN;
-    PkgBuffer inbuffer(nullptr, nextToRead);
-    if (ReadData(inStream, srcOffset, inbuffer, remainSize, readLen) != PKG_SUCCESS) {
+    pkgHeader.length = nextToRead;
+    if (ReadData(inStream, srcOffset, pkgHeader, remainSize, readLen) != PKG_SUCCESS) {
         PKG_LOGE("Fail read data ");
         return PKG_INVALID_LZ4;
     }
-    if (readLen != nextToRead) {
-        PKG_LOGE("Invalid len %zu %zu", readLen, nextToRead);
+    if (readLen != pkgHeader.length) {
+        PKG_LOGE("Invalid len %zu %zu", readLen, pkgHeader.length);
         return PKG_INVALID_LZ4;
     }
     srcOffset += readLen;
     sizeCheck = readLen;
-    nextToRead = LZ4F_decompress(ctx, nullptr, &outBuffSize, inbuffer.buffer, &sizeCheck, nullptr);
+    nextToRead = LZ4F_decompress(ctx, nullptr, &outBuffSize, pkgHeader.buffer, &sizeCheck, nullptr);
     errorCode = LZ4F_getFrameInfo(ctx, &frameInfo, nullptr, &inBuffSize);
     if (LZ4F_isError(errorCode)) {
         PKG_LOGE("Fail to decode frame info %s", LZ4F_getErrorName(errorCode));
@@ -473,9 +473,9 @@ int32_t PkgAlgorithmLz4::Unpack(const PkgStreamPtr inStream, const PkgStreamPtr 
     }
     size_t inLength = static_cast<size_t>(inBuffSize);
     size_t outLength = static_cast<size_t>(outBuffSize);
-    PkgBuffer inBuffer(nullptr, inLength);
+    PkgBuffer inBuffer(inLength);
     PkgBuffer outBuffer(outLength);
-    if (outBuffer.buffer == nullptr) {
+    if (inBuffer.buffer == nullptr || outBuffer.buffer == nullptr) {
         (void)LZ4F_freeDecompressionContext(ctx);
         PKG_LOGE("Fail to alloc buffer ");
         return PKG_NONE_MEMORY;
