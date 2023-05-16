@@ -14,7 +14,6 @@
  */
 #include "scanner.h"
 #include "pkg_manager.h"
-#include "securec.h"
 
 using namespace Hpackage;
 
@@ -22,11 +21,8 @@ namespace Uscript {
 int Scanner::LexerInput(char *buf, int maxSize)
 {
     size_t readLen = 0;
-    PkgBuffer data = {};
-    pkgStream_->GetBuffer(data);
-    size_t copyLen = data.length - currPos;
-    readLen = ((copyLen > (size_t)maxSize) ? maxSize : copyLen);
-    memcpy_s(reinterpret_cast<uint8_t*>(buf), maxSize, data.buffer + currPos, readLen);
+    PkgBuffer data = {reinterpret_cast<uint8_t*>(buf), static_cast<size_t>(maxSize)};
+    (void)pkgStream_->Read(data, currPos, maxSize, readLen);
     currPos += readLen;
     return readLen;
 }

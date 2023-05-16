@@ -72,18 +72,5 @@ public:
     virtual ~UScriptInstructionPkgExtract() {}
     int32_t Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context) override;
 };
-
-class UScriptInstructionUpdateFromBin : public Uscript::UScriptInstruction {
-public:
-    UScriptInstructionUpdateFromBin() {}
-    virtual ~UScriptInstructionUpdateFromBin() {}
-    int32_t Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context) override;
-    constexpr static uint32_t STASH_BUFFER_SIZE = 1024 * 1024 * 4;
-    constexpr static uint32_t BUFFER_NUM = 16;
-    static int UnCompressDataProducer(const Hpackage::PkgBuffer &buffer, size_t size, size_t start, bool isFinish,
-        const void* context);
-private:
-    static size_t stashDataSize_;
-};
 } // Updater
 #endif /* UPDATE_PROCESSOR_H */

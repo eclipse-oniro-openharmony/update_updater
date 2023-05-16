@@ -160,14 +160,7 @@ int32_t ScriptManagerImpl::ExtractAndExecuteScript(PkgManager::PkgManagerPtr man
     Updater::UPDATER_INIT_RECORD;
     PkgManager::StreamPtr outStream = nullptr;
     const std::string path = Updater::Utils::IsUpdaterMode() ? "/tmp" : Updater::UPDATER_PATH;
-    const FileInfo *info = manager->GetFileInfo(scriptName);
-    if (info == nullptr) {
-        USCRIPT_LOGE("Error to get file info");
-        UPDATER_LAST_WORD(USCRIPT_INVALID_PARAM);
-        return USCRIPT_INVALID_PARAM;
-    }
-    int32_t ret = manager->CreatePkgStream(outStream, path + "/" + scriptName,
-        info->unpackedSize, PkgStream::PkgStreamType_MemoryMap);
+    int32_t ret = manager->CreatePkgStream(outStream, path + "/" + scriptName, 0, PkgStream::PkgStreamType_Write);
     if (ret != USCRIPT_SUCCESS) {
         USCRIPT_LOGE("Failed to create script stream %s", scriptName.c_str());
         UPDATER_LAST_WORD(ret);

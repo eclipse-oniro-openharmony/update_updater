@@ -13,10 +13,6 @@
  * limitations under the License.
  */
 #include "pkg_stream.h"
-#include <fcntl.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
 #include <cstdio>
 #include "dump.h"
 #include "pkg_manager.h"
@@ -72,7 +68,7 @@ FileStream::~FileStream()
     }
 }
 
-int32_t FileStream::Read(PkgBuffer &data, size_t start, size_t needRead, size_t &readLen)
+int32_t FileStream::Read(const PkgBuffer &data, size_t start, size_t needRead, size_t &readLen)
 {
     Updater::UPDATER_INIT_RECORD;
     if (stream_ == nullptr) {
@@ -81,7 +77,7 @@ int32_t FileStream::Read(PkgBuffer &data, size_t start, size_t needRead, size_t 
         return PKG_INVALID_STREAM;
     }
     if (data.length < needRead) {
-        PKG_LOGE("insufficient buffer capacity");
+        PKG_LOGE("Invalid stream");
         UPDATER_LAST_WORD(PKG_INVALID_STREAM);
         return PKG_INVALID_STREAM;
     }
@@ -95,10 +91,6 @@ int32_t FileStream::Read(PkgBuffer &data, size_t start, size_t needRead, size_t 
         PKG_LOGE("Invalid start");
         UPDATER_LAST_WORD(PKG_INVALID_STREAM);
         return PKG_INVALID_STREAM;
-    }
-    if (data.buffer == nullptr) {
-        data.data.resize(data.length);
-        data.buffer = data.data.data();
     }
     readLen = fread(data.buffer, 1, needRead, stream_);
     if (readLen == 0) {
@@ -206,7 +198,7 @@ MemoryMapStream::~MemoryMapStream()
     }
 }
 
-int32_t MemoryMapStream::Read(PkgBuffer &data, size_t start, size_t needRead, size_t &readLen)
+int32_t MemoryMapStream::Read(const PkgBuffer &data, size_t start, size_t needRead, size_t &readLen)
 {
     if (memMap_ == nullptr) {
         PKG_LOGE("Invalid memory map");
@@ -217,18 +209,16 @@ int32_t MemoryMapStream::Read(PkgBuffer &data, size_t start, size_t needRead, si
         return PKG_INVALID_STREAM;
     }
     if (data.length < needRead) {
-        PKG_LOGE("insufficient buffer capacity");
+        PKG_LOGE("Invalid start");
         return PKG_INVALID_STREAM;
     }
+
+    MemoryMapStream::Seek(start, SEEK_SET);
     size_t copyLen = GetFileLength() - start;
     readLen = ((copyLen > needRead) ? needRead : copyLen);
-    if (data.data.size() == 0) {
-        data.buffer = memMap_ + start;
-    } else {
-        if (memcpy_s(data.buffer, needRead, memMap_ + start, readLen) != EOK) {
-            PKG_LOGE("Memcpy failed size:%zu, start:%zu copyLen:%zu %zu", needRead, start, copyLen, readLen);
-            return PKG_NONE_MEMORY;
-        }
+    if (memcpy_s(data.buffer, needRead, memMap_ + currOffset_, readLen) != EOK) {
+        PKG_LOGE("Memcpy failed size:%zu, start:%zu copyLen:%zu %zu", needRead, start, copyLen, readLen);
+        return PKG_NONE_MEMORY;
     }
     return PKG_SUCCESS;
 }

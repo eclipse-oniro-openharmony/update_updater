@@ -17,7 +17,6 @@
 #include <memory>
 #include <string>
 #include <unistd.h>
-#include "securec.h"
 #include "applypatch/data_writer.h"
 #include "applypatch/partition_record.h"
 #include "dump.h"
@@ -35,7 +34,6 @@
 #include "update_partitions.h"
 #include "updater_main.h"
 #include "updater/updater_const.h"
-#include "ring_buffer.h"
 
 using namespace Uscript;
 using namespace Hpackage;
@@ -44,7 +42,6 @@ using namespace Updater;
 namespace Updater {
 size_t UScriptInstructionRawImageWrite::totalSize_ = 0;
 size_t UScriptInstructionRawImageWrite::readSize_ = 0;
-size_t UScriptInstructionUpdateFromBin::stashDataSize_ = 0;
 
 UpdaterEnv::~UpdaterEnv()
 {
@@ -74,7 +71,7 @@ const std::vector<std::string> UpdaterEnv::GetInstructionNames() const
     static std::vector<std::string> updaterCmds = {
         "sha_check", "first_block_check", "block_update",
         "raw_image_write", "update_partitions", "image_patch",
-        "image_sha_check", "pkg_extract", "update_from_bin"
+        "image_sha_check", "pkg_extract"
     };
     return updaterCmds;
 }
@@ -98,8 +95,6 @@ int32_t UpdaterInstructionFactory::CreateInstructionInstance(UScriptInstructionP
         instr = new USInstrImageShaCheck();
     } else if (name == "pkg_extract") {
         instr = new UScriptInstructionPkgExtract();
-    } else if (name == "update_from_bin") {
-        instr = new UScriptInstructionUpdateFromBin();
     }
     return USCRIPT_SUCCESS;
 }
@@ -281,84 +276,6 @@ int32_t UScriptInstructionPkgExtract::Execute(Uscript::UScriptEnv &env, Uscript:
     manager->ClosePkgStream(outStream);
     LOG(INFO)<<"UScriptInstructionPkgExtract finish";
     return ret;
-}
-
-int32_t UScriptInstructionUpdateFromBin::Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context)
-{
-    std::string upgradeFileName;
-    int32_t ret = context.GetParam(0, upgradeFileName);
-    if (ret != USCRIPT_SUCCESS) {
-        LOG(ERROR) << "Error to get partitionName";
-        return ret;
-    }
-
-    LOG(INFO) << "UScriptInstructionUpdateFromBin::Execute " << upgradeFileName;
-
-    PkgManager::PkgManagerPtr pkgManager = env.GetPkgManager();
-    if (pkgManager == nullptr) {
-        LOG(ERROR) << "Error to get pkg manager";
-        return USCRIPT_INVALID_PARAM;
-    }
-
-    RingBuffer ringBuffer;
-    if (!ringBuffer.Init(STASH_BUFFER_SIZE, BUFFER_NUM)) {
-        LOG(ERROR) << "Error to get ringbuffer";
-        return USCRIPT_INVALID_PARAM;
-    }
-
-    PkgManager::StreamPtr outStream = nullptr;
-    ret = pkgManager->CreatePkgStream(outStream, upgradeFileName, UnCompressDataProducer, &ringBuffer);
-    if (ret != USCRIPT_SUCCESS || outStream == nullptr) {
-        LOG(ERROR) << "Error to create output stream";
-        return USCRIPT_INVALID_PARAM;
-    }
-
-    ret = pkgManager->ExtractFile(upgradeFileName, outStream);
-    if (ret != USCRIPT_SUCCESS) {
-        LOG(ERROR) << "Error to extract" << upgradeFileName;
-        pkgManager->ClosePkgStream(outStream);
-        return USCRIPT_ERROR_EXECUTE;
-    }
-    pkgManager->ClosePkgStream(outStream);
-    return USCRIPT_ERROR_EXECUTE;
-}
-
-int UScriptInstructionUpdateFromBin::UnCompressDataProducer(const PkgBuffer &buffer, size_t size, size_t start,
-                                                            bool isFinish, const void* context)
-{
-    static PkgBuffer stashBuffer(STASH_BUFFER_SIZE);
-    size_t bufferStart = 0;
-    void *p = const_cast<void *>(context);
-    RingBuffer *ringBuffer = static_cast<RingBuffer *>(p);
-    if (ringBuffer == nullptr) {
-        LOG(ERROR) << "ring buffer is nullptr";
-        return PKG_INVALID_STREAM;
-    }
-
-    while (stashDataSize_ + size >= STASH_BUFFER_SIZE) {
-        size_t readLen = STASH_BUFFER_SIZE - stashDataSize_;
-        if (memcpy_s(stashBuffer.buffer + stashDataSize_, readLen, buffer.buffer + bufferStart, readLen) != 0) {
-                return USCRIPT_ERROR_EXECUTE;
-        }
-        ringBuffer->Push(stashBuffer.buffer, STASH_BUFFER_SIZE);
-        stashDataSize_ = 0;
-        size -= readLen;
-        bufferStart += readLen;
-    }
-    if (size == 0 && stashDataSize_ == 0) {
-        return PKG_SUCCESS;
-    } else if (size == 0 || memcpy_s(stashBuffer.buffer + stashDataSize_, STASH_BUFFER_SIZE - stashDataSize_,
-        buffer.buffer + bufferStart, size) == 0) {
-        if (isFinish) {
-            ringBuffer->Push(stashBuffer.buffer, stashDataSize_ + size);
-            stashDataSize_ = 0;
-        } else {
-            stashDataSize_ += size;
-        }
-        return PKG_SUCCESS;
-    } else {
-        return USCRIPT_ERROR_EXECUTE;
-    }
 }
 
 int ExecUpdate(PkgManager::PkgManagerPtr pkgManager, int retry, const std::string &pkgPath,

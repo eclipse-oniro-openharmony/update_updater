@@ -45,7 +45,7 @@ public:
 
     int32_t Unpack(PkgStreamPtr outStream) override;
 
-    int32_t DecodeHeader(PkgBuffer &buffer, size_t, size_t, size_t &decodeLen) override;
+    int32_t DecodeHeader(const PkgBuffer &buffer, size_t, size_t, size_t &decodeLen) override;
 
 private:
     Lz4FileInfo fileInfo_ {};

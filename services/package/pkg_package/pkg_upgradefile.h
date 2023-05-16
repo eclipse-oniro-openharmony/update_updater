@@ -69,7 +69,7 @@ public:
 
     int32_t Pack(PkgStreamPtr inStream, size_t startOffset, size_t &encodeLen) override;
 
-    int32_t DecodeHeader(PkgBuffer &buffer, size_t offset, size_t dataOffset,
+    int32_t DecodeHeader(const PkgBuffer &buffer, size_t offset, size_t dataOffset,
         size_t &decodeLen) override;
 
     int32_t Unpack(PkgStreamPtr outStream) override;
@@ -117,11 +117,11 @@ private:
     int16_t GetPackageTlvType();
     int32_t SaveEntry(const PkgBuffer &buffer, size_t &parsedLen, UpgradeParam &info,
         DigestAlgorithm::DigestAlgorithmPtr algorithm, std::vector<std::string> &fileNames);
-    int32_t ReadComponents(PkgBuffer &buffer, size_t &parsedLen,
+    int32_t ReadComponents(const PkgBuffer &buffer, size_t &parsedLen,
         DigestAlgorithm::DigestAlgorithmPtr algorithm, std::vector<std::string> &fileNames);
 
     void ParsePkgHeaderToTlv(const PkgBuffer &buffer, size_t &currLen, PkgTlv &tlv);
-    int32_t ReadUpgradePkgHeader(PkgBuffer &buffer, size_t &realLen,
+    int32_t ReadUpgradePkgHeader(const PkgBuffer &buffer, size_t &realLen,
         DigestAlgorithm::DigestAlgorithmPtr &algorithm);
 
     int32_t Verify(size_t start, DigestAlgorithm::DigestAlgorithmPtr algorithm,

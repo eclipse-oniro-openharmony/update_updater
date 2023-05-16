@@ -19,7 +19,6 @@
 #include "pkg_manager.h"
 #include "script_instruction.h"
 #include "script_manager.h"
-#include "diffpatch/diffpatch.h"
 
 namespace Updater {
 class USInstrImagePatch : public Uscript::UScriptInstruction {
@@ -38,12 +37,10 @@ public:
     int32_t Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context) override;
 private:
     int32_t GetParam(Uscript::UScriptContext &context, ImagePatchPara &para);
-    int32_t CreatePatchStream(Uscript::UScriptEnv &env, const ImagePatchPara &para,
-         Hpackage::PkgManager::StreamPtr &outstream);
+    std::string GetPatchFile(Uscript::UScriptEnv &env, const ImagePatchPara &para);
     int32_t ExecuteImagePatch(Uscript::UScriptEnv &env, Uscript::UScriptContext &context);
     std::string GetSourceFile(const ImagePatchPara &para);
-    int32_t ApplyPatch(const ImagePatchPara &para, const UpdatePatch::MemMapInfo &srcData,
-        const Hpackage::PkgBuffer &patchData);
+    int32_t ApplyPatch(const ImagePatchPara &para, const std::string &patchFile);
     std::string GetFileHash(const std::string &file);
 };
 
