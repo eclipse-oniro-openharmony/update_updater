@@ -243,8 +243,8 @@ static int32_t ExtractDiffPackageAndLoad(const UpdateBlockInfo &infos, Uscript::
     LOG(DEBUG) << "partitionName is " << infos.partitionName;
     const FileInfo *info = env.GetPkgManager()->GetFileInfo(infos.partitionName);
     if (info == nullptr) {
-        LOG(ERROR) << "Error to get file info";
-        return USCRIPT_ERROR_EXECUTE;
+        LOG(WARNING) << "Error to get file info";
+        return USCRIPT_SUCCESS;
     }
     std::string diffPackage = std::string("/data/updater") + infos.partitionName;
     int32_t ret = env.GetPkgManager()->CreatePkgStream(outStream,
