@@ -131,10 +131,18 @@ private:
     int32_t GetEntryOffset(size_t &dataOffset, const PkgManager::FileInfoPtr file);
     int32_t ReadPackageInfo(std::vector<uint8_t> &signData,
         size_t &parsedLen, DigestAlgorithm::DigestAlgorithmPtr algorithm);
+    int32_t ReadReserveData(size_t &parsedLen, DigestAlgorithm::DigestAlgorithmPtr &algorithm);
+    int32_t ReadImgHashData(size_t &parsedLen, DigestAlgorithm::DigestAlgorithmPtr algorithm);
     int32_t ReadSignData(std::vector<uint8_t> &signData,
         size_t &parsedLen, DigestAlgorithm::DigestAlgorithmPtr algorithm);
-    int32_t VerifyNew(DigestAlgorithm::DigestAlgorithmPtr algorithm, VerifyFunction verifier,
+    int32_t VerifyHeader(DigestAlgorithm::DigestAlgorithmPtr algorithm, VerifyFunction verifier,
         const std::vector<uint8_t> &signData);
+    int32_t VerifyFile(size_t &parsedLen, DigestAlgorithm::DigestAlgorithmPtr algorithm,
+                                   VerifyFunction verifier);
+    int32_t VerifyFileV1(size_t &parsedLen, DigestAlgorithm::DigestAlgorithmPtr algorithm,
+                                   VerifyFunction verifier);
+    int32_t VerifyFileV2(size_t &parsedLen, DigestAlgorithm::DigestAlgorithmPtr algorithm,
+                                   VerifyFunction verifier);
 
 private:
     UpgradePkgInfo pkgInfo_ {};
