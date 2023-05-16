@@ -70,7 +70,7 @@ void UpdaterUnitTest::TearDownTestCase()
 HWTEST_F(UpdaterUnitTest, updater_StartUpdaterProc, TestSize.Level1)
 {
     std::string packagePath = "/data/updater/updater/updater_without_updater_binary.zip";
-    PkgManager::PkgManagerPtr pkgManager = PkgManager::GetPackageInstance();
+    PkgManager::PkgManagerPtr pkgManager = PkgManager::CreatePackageInstance();
     int maxTemperature;
     UpdaterStatus status;
     status = StartUpdaterProc(pkgManager, packagePath, 0, maxTemperature);
@@ -100,7 +100,7 @@ HWTEST_F(UpdaterUnitTest, updater_StartUpdaterProc, TestSize.Level1)
 HWTEST_F(UpdaterUnitTest, updater_GetUpdatePackageInfo, TestSize.Level1)
 {
     // Non-exist file.
-    PkgManager::PkgManagerPtr pkgManager = PkgManager::GetPackageInstance();
+    PkgManager::PkgManagerPtr pkgManager = PkgManager::CreatePackageInstance();
     std::string nonExistPackagePath = "/data/non_exist";
     int ret = GetUpdatePackageInfo(pkgManager, nonExistPackagePath);
     EXPECT_EQ(ret, static_cast<int>(PKG_INVALID_FILE));

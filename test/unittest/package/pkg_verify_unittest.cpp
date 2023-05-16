@@ -204,7 +204,6 @@ public:
     {
         // no hash signed data in pkg
         std::string invalidPkgPath = "updater_full_without_hsd.zip";
-        pkgManager_ = static_cast<PkgManagerImpl*>(PkgManager::GetPackageInstance());
         HashDataVerifier verifier {pkgManager_};
         EXPECT_FALSE(verifier.LoadHashDataAndPkcs7(testPackagePath + invalidPkgPath));
 
@@ -217,7 +216,6 @@ public:
     {
         // invalid hash signed data format
         std::string invalidPkgPath = "updater_full_with_invalid_hsd.zip";
-        pkgManager_ = static_cast<PkgManagerImpl*>(PkgManager::GetPackageInstance());
         std::vector<std::string> fileIds {};
         EXPECT_EQ(PKG_SUCCESS, pkgManager_->LoadPackage(testPackagePath + invalidPkgPath,
             Utils::GetCertName(), fileIds));
@@ -231,7 +229,6 @@ public:
     {
         // invalid pkg footer
         std::string invalidPkgPath = "updater_full_with_invalid_footer.zip";
-        pkgManager_ = static_cast<PkgManagerImpl*>(PkgManager::GetPackageInstance());
         HashDataVerifier verifier {pkgManager_};
         EXPECT_FALSE(verifier.LoadHashDataAndPkcs7(testPackagePath + invalidPkgPath));
         return 0;
@@ -256,7 +253,6 @@ public:
 
     int TestHashDataVerifierSuccess()
     {
-        pkgManager_ = static_cast<PkgManagerImpl*>(PkgManager::GetPackageInstance());
         std::vector<std::string> fileIds {};
         EXPECT_EQ(PKG_SUCCESS, pkgManager_->LoadPackage(testPackagePath + "updater_full_with_hsd.zip",
             Utils::GetCertName(), fileIds));
