@@ -39,7 +39,7 @@ group("unittest") {
   if (updater_ui_support) {
     deps += [
       "test/unittest/service_test:updater_service_unittest",
-      "test/unittest/updater_ui_test:ui_unittest"
+      "test/unittest/updater_ui_test:ui_unittest",
     ]
   }
 }
