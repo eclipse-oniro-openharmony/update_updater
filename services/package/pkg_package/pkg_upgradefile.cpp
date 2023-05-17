@@ -391,7 +391,7 @@ int32_t UpgradePkgFile::VerifyFile(size_t &parsedLen, DigestAlgorithm::DigestAlg
                                    VerifyFunction verifier)
 {
     int32_t ret = PKG_VERIFY_FAIL;
-    switch(pkgInfo_.updateFileVersion) {
+    switch (pkgInfo_.updateFileVersion) {
         case UpgradeFileVersion_V1:
             ret = VerifyFileV1(parsedLen, algorithm, verifier);
             break;
@@ -406,7 +406,7 @@ int32_t UpgradePkgFile::VerifyFile(size_t &parsedLen, DigestAlgorithm::DigestAlg
 }
 
 int32_t UpgradePkgFile::VerifyFileV1(size_t &parsedLen, DigestAlgorithm::DigestAlgorithmPtr algorithm,
-                                   VerifyFunction verifier)
+                                     VerifyFunction verifier)
 {
     std::vector<uint8_t> signData;
     // Read signature information
@@ -420,7 +420,7 @@ int32_t UpgradePkgFile::VerifyFileV1(size_t &parsedLen, DigestAlgorithm::DigestA
 }
 
 int32_t UpgradePkgFile::VerifyFileV2(size_t &parsedLen, DigestAlgorithm::DigestAlgorithmPtr algorithm,
-                                   VerifyFunction verifier)
+                                     VerifyFunction verifier)
 {
     int32_t ret = ReadReserveData(parsedLen, algorithm);
     if (ret != PKG_SUCCESS) {
