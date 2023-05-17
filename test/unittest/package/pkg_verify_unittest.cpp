@@ -221,7 +221,6 @@ public:
             Utils::GetCertName(), fileIds));
         HashDataVerifier verifier {pkgManager_};
         EXPECT_FALSE(verifier.LoadHashDataAndPkcs7(testPackagePath + invalidPkgPath));
-        PkgManager::ReleasePackageInstance(pkgManager_);
         return 0;
     }
 
@@ -265,7 +264,6 @@ public:
         for (const auto &fileName : fileList) {
             EXPECT_EQ(VerifyFileByVerifier(verifier, fileName), 0);
         }
-        PkgManager::ReleasePackageInstance(pkgManager_);
         return 0;
     }
 };

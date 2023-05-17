@@ -172,6 +172,7 @@ protected:
         pkgInfo.pkgType = PKG_PACK_TYPE_ZIP;
         int32_t ret = pkgManager->CreatePackage(packageName, GetTestPrivateKeyName(digestMethod), &pkgInfo, files);
         EXPECT_EQ(ret, 0);
+        PkgManager::ReleasePackageInstance(pkgManager);
         return ret;
     }
     std::vector<std::string> testFileNames_ = {
