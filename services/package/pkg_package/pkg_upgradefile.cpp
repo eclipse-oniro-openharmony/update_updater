@@ -392,10 +392,10 @@ int32_t UpgradePkgFile::VerifyFile(size_t &parsedLen, DigestAlgorithm::DigestAlg
 {
     int32_t ret = PKG_VERIFY_FAIL;
     switch(pkgInfo_.updateFileVersion) {
-        case 1:
+        case UpgradeFileVersion_V1:
             ret = VerifyFileV1(parsedLen, algorithm, verifier);
             break;
-        case 2:
+        case UpgradeFileVersion_V2:
             ret = VerifyFileV2(parsedLen, algorithm, verifier);
             break;
         default:
@@ -425,13 +425,6 @@ int32_t UpgradePkgFile::VerifyFileV2(size_t &parsedLen, DigestAlgorithm::DigestA
     int32_t ret = ReadReserveData(parsedLen, algorithm);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("ReadReserveData fail %d", ret);
-        return ret;
-    }
-
-    // Read image hash information
-    ret = ReadImgHashData(parsedLen, algorithm);
-    if (ret != PKG_SUCCESS) {
-        PKG_LOGE("LoadImgHashData fail %d", ret);
         return ret;
     }
 

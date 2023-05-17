@@ -86,6 +86,11 @@ private:
 
 class UpgradePkgFile : public PkgFile {
 public:
+    enum {
+        UpgradeFileVersion_V1 = 1,     // bin v1 version
+        UpgradeFileVersion_V2,        // bin v2 version
+    };
+
     UpgradePkgFile(PkgManager::PkgManagerPtr manager, PkgStreamPtr stream, PkgManager::PkgInfoPtr header)
         : PkgFile(manager, stream, PkgFile::PKG_TYPE_UPGRADE)
     {
