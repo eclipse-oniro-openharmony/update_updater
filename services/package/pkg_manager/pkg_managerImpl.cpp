@@ -480,7 +480,7 @@ PkgManager::StreamPtr PkgManagerImpl::GetPkgFileStream(const std::string &fileNa
 {
     auto iter = pkgStreams_.find(fileName);
     if (iter != pkgStreams_.end()) {
-        return (*iter).second;;
+        return (*iter).second;
     }
 
     return nullptr;

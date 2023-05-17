@@ -339,7 +339,7 @@ int32_t FlowDataStream::ReadFromRingBuf(uint8_t *&buff, const uint32_t needLen, 
         return PKG_INVALID_STREAM;
     }
 
-    // 缓冲区读清，从ringbuf里面读取
+    // buf_ is empty, read from ringbuf
     if ((avail_ == 0) && !ringBuf_->Pop(buff_, MAX_FLOW_BUFFER_SIZE, avail_)) {
         PKG_LOGE("read data fail");
         buff = nullptr;

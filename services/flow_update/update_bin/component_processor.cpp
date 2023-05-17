@@ -29,7 +29,7 @@ using namespace Uscript;
 namespace Updater {
 REGISTER_PROCESSOR(VersionCheckProcessor, "/version_list")
 REGISTER_PROCESSOR(BoardIdCheckProcessor, "/board_list")
-REGISTER_PROCESSOR(RawImgProcessor,"/uboot", "/boot_linux",
+REGISTER_PROCESSOR(RawImgProcessor, "/uboot", "/boot_linux",
                    "/system", "/vendor", "/resource", "/updater", "/userdata")
 
 ComponentProcessorFactory &ComponentProcessorFactory::GetInstance()
