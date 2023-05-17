@@ -180,7 +180,7 @@ public:
     int32_t CompressData(Hpackage::PkgManager::FileInfoPtr info,
         const BlockBuffer &buffer, std::vector<uint8_t> &outData, size_t &bufferSize)
     {
-        Hpackage::PkgManager *pkgManager = Hpackage::PkgManager::GetPackageInstance();
+        Hpackage::PkgManager *pkgManager = Hpackage::PkgManager::CreatePackageInstance();
         if (pkgManager == nullptr) {
             PATCH_LOGE("Can not get manager ");
             return -1;
@@ -199,9 +199,11 @@ public:
             }, nullptr);
         if (pkgManager->CompressBuffer(info, {buffer.buffer, buffer.length}, stream1) != 0) {
             PATCH_LOGE("Can not Compress buff ");
+            Hpackage::PkgManager::ReleasePackageInstance(pkgManager);
             return -1;
         }
         PATCH_DEBUG("UpdateDiff::MakePatch totalSize: %zu", bufferSize);
+        Hpackage::PkgManager::ReleasePackageInstance(pkgManager);
         return 0;
     }
 

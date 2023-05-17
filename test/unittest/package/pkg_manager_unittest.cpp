@@ -280,7 +280,6 @@ public:
 
     int TestLz4PackageInvalidFile()
     {
-        pkgManager_ = static_cast<PkgManagerImpl*>(PkgManager::GetPackageInstance());
         EXPECT_NE(pkgManager_, nullptr);
 
         std::vector<std::pair<std::string, Lz4FileInfo>> files;
@@ -306,7 +305,6 @@ public:
 
     int TestLz4PackageInvalidPkgType()
     {
-        pkgManager_ = static_cast<PkgManagerImpl*>(PkgManager::GetPackageInstance());
         EXPECT_NE(pkgManager_, nullptr);
 
         std::vector<std::pair<std::string, Lz4FileInfo>> files;
@@ -329,7 +327,6 @@ public:
 
     int TestZipPackageInvalidFile()
     {
-        pkgManager_ = static_cast<PkgManagerImpl*>(PkgManager::GetPackageInstance());
         EXPECT_NE(pkgManager_, nullptr);
 
         std::vector<std::pair<std::string, ZipFileInfo>> files;
@@ -357,7 +354,6 @@ public:
 
     int TestLoadPackageFail()
     {
-        pkgManager_ = static_cast<PkgManagerImpl*>(PkgManager::GetPackageInstance());
         EXPECT_NE(pkgManager_, nullptr);
         std::vector<std::string> components;
         std::string fileName = TEST_PATH_TO;
@@ -369,7 +365,6 @@ public:
 
     void TestDecompressLz4plus(Hpackage::Lz4FileInfo &lz4Info)
     {
-        pkgManager_ = static_cast<PkgManagerImpl*>(PkgManager::GetPackageInstance());
         EXPECT_NE(pkgManager_, nullptr);
         int8_t compressionLevel = 2;
         lz4Info.fileInfo.identity = "Lz4";
@@ -494,7 +489,6 @@ public:
     int CheckDataIntegrityGzip(Hpackage::ZipFileInfo &zipInfo, size_t fileSize,
         PkgManager::StreamPtr stream, void *mappedData, std::vector<uint8_t> &digest)
     {
-        pkgManager_ = static_cast<PkgManagerImpl*>(PkgManager::GetPackageInstance());
         EXPECT_NE(pkgManager_, nullptr);
         size_t offset = 10;
         TestDecompressGzipInitFile(zipInfo, offset, fileSize, mappedData);
@@ -568,7 +562,6 @@ public:
     int TestCompressBuffer(Hpackage::FileInfo &info, std::vector<uint8_t> uncompressedData,
         std::vector<uint8_t> digest)
     {
-        pkgManager_ = static_cast<PkgManagerImpl*>(PkgManager::GetPackageInstance());
         EXPECT_NE(pkgManager_, nullptr);
         // 生成摘要，检查数据完整
         SHA256_CTX sha256Ctx = {};
