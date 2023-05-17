@@ -32,7 +32,8 @@ class BinFlowUpdateTest : public testing::Test {
 public:
     static void SetUpTestCase(void) {}
     static void TearDownTestCase(void) {}
-    void SetUp() {
+    void SetUp()
+    {
         InitUpdaterLogger("UPDATER", "updater_log.log", "updater_status.log", "error_code.log");
     }
     void TearDown() {}

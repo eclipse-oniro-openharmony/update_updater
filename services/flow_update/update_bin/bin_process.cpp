@@ -95,9 +95,10 @@ int32_t UScriptInstructionBinFlowWrite::ExtractBinFile(Uscript::UScriptEnv &env,
     }
 
     PkgManager::StreamPtr processStream = nullptr;
-    PkgStream::ExtractFileProcessor processor = 
-    [this](const PkgBuffer &buffer, size_t size, size_t start, bool isFinish, const void *context) {
-        return this->UnCompressDataProducer(buffer, size, start, isFinish, context); };
+    PkgStream::ExtractFileProcessor processor =
+        [this](const PkgBuffer &buffer, size_t size, size_t start, bool isFinish, const void *context) {
+            return this->UnCompressDataProducer(buffer, size, start, isFinish, context);
+        };
     ret = pkgManager->CreatePkgStream(processStream, upgradeFileName, processor, stream);
     if (ret != USCRIPT_SUCCESS || processStream == nullptr) {
         LOG(ERROR) << "Error to create output stream";
@@ -115,12 +116,12 @@ int32_t UScriptInstructionBinFlowWrite::ExtractBinFile(Uscript::UScriptEnv &env,
     return USCRIPT_SUCCESS;
 }
 
-int UScriptInstructionBinFlowWrite::UnCompressDataProducer(const PkgBuffer &buffer, size_t size, size_t start,
-                                                            bool isFinish, const void* context)
+int32_t UScriptInstructionBinFlowWrite::UnCompressDataProducer(const PkgBuffer &buffer, size_t size, size_t start,
+                                                               bool isFinish, const void *context)
 {
     if (isStopRun_) {
         LOG(ERROR) << "recive stop single, UnCompressDataProducer stop run";
-        return USCRIPT_ERROR_EXECUTE; 
+        return USCRIPT_ERROR_EXECUTE;
     }
 
     void *p = const_cast<void *>(context);
@@ -134,31 +135,31 @@ int UScriptInstructionBinFlowWrite::UnCompressDataProducer(const PkgBuffer &buff
         // 最后一块数据
         if (stashDataSize_ != 0) {
             size_t writeOffset = flowStream->GetFileLength() - stashDataSize_;
-            if(flowStream->Write(stashBuffer_, stashDataSize_, writeOffset) != USCRIPT_SUCCESS) {
+            if (flowStream->Write(stashBuffer_, stashDataSize_, writeOffset) != USCRIPT_SUCCESS) {
                 LOG(ERROR) << "UnCompress flowStream write fail";
                 return USCRIPT_ERROR_EXECUTE;
             }
             stashDataSize_ = 0;
         }
         LOG(INFO) << "extract finished, start";
-        return USCRIPT_SUCCESS; 
+        return USCRIPT_SUCCESS;
     }
 
     if (buffer.buffer == nullptr || size == 0 || start < stashDataSize_) {
         LOG(ERROR) << "invalid para, size: " << size << "start: " << start;
-        return USCRIPT_ERROR_EXECUTE; 
+        return USCRIPT_ERROR_EXECUTE;
     }
 
     size_t writeSize = 0;
     size_t copyLen = 0;
     // 缓存4M再写入数据流
-    while(size - writeSize > STASH_BUFFER_SIZE + stashDataSize_) {
+    while (size - writeSize > STASH_BUFFER_SIZE + stashDataSize_) {
         copyLen = STASH_BUFFER_SIZE - stashDataSize_;
         if (memcpy_s(stashBuffer_.buffer + stashDataSize_, copyLen, buffer.buffer + writeSize, copyLen) != EOK) {
             return USCRIPT_ERROR_EXECUTE;
         }
 
-        if(flowStream->Write(stashBuffer_, STASH_BUFFER_SIZE, start - stashDataSize_) != USCRIPT_SUCCESS) {
+        if (flowStream->Write(stashBuffer_, STASH_BUFFER_SIZE, start - stashDataSize_) != USCRIPT_SUCCESS) {
             LOG(ERROR) << "UnCompress flowStream write fail";
             return USCRIPT_ERROR_EXECUTE;
         }
@@ -172,7 +173,7 @@ int UScriptInstructionBinFlowWrite::UnCompressDataProducer(const PkgBuffer &buff
     }
     stashDataSize_ += copyLen;
     if (stashDataSize_ == STASH_BUFFER_SIZE) {
-        if(flowStream->Write(stashBuffer_, stashDataSize_, start - stashDataSize_ + copyLen) != USCRIPT_SUCCESS) {
+        if (flowStream->Write(stashBuffer_, stashDataSize_, start - stashDataSize_ + copyLen) != USCRIPT_SUCCESS) {
             LOG(ERROR) << "UnCompress flowStream write fail";
             return USCRIPT_ERROR_EXECUTE;
         }
@@ -215,7 +216,7 @@ int32_t UScriptInstructionBinFlowWrite::ProcessBinFile(Uscript::UScriptEnv &env,
         return USCRIPT_ERROR_EXECUTE;
     }
 
-    for(auto &iter : innerFileNames) {
+    for (auto &iter : innerFileNames) {
         // 根据镜像名称获取分区名称和大小
         std::string partitionName = iter;
         const FileInfo *info = manager->GetFileInfo(partitionName);

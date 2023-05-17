@@ -29,7 +29,8 @@ using namespace Uscript;
 namespace Updater {
 REGISTER_PROCESSOR(VersionCheckProcessor, "/version_list")
 REGISTER_PROCESSOR(BoardIdCheckProcessor, "/board_list")
-REGISTER_PROCESSOR(RawImgProcessor, "/system", "/vendor")
+REGISTER_PROCESSOR(RawImgProcessor,"/uboot", "/boot_linux",
+                   "/system", "/vendor", "/resource", "/updater", "/userdata")
 
 ComponentProcessorFactory &ComponentProcessorFactory::GetInstance()
 {
@@ -177,9 +178,10 @@ int32_t RawImgProcessor::DoProcess(Uscript::UScriptEnv &env)
     }
 #endif
 
-    PkgStream::ExtractFileProcessor processor = 
+    PkgStream::ExtractFileProcessor processor =
         [this](const PkgBuffer &buffer, size_t size, size_t start, bool isFinish, const void *context) {
-            return this->RawImageWriteProcessor(buffer, size, start, isFinish, context); };
+            return this->RawImageWriteProcessor(buffer, size, start, isFinish, context);
+        };
 
     Hpackage::PkgManager::StreamPtr outStream = nullptr;
     int ret = env.GetPkgManager()->CreatePkgStream(outStream, partitionName, processor, writer_.get());
@@ -215,7 +217,7 @@ int RawImgProcessor::GetWritePathAndOffset(const std::string &partitionName, std
     Ptable::PtnInfo ptnInfo;
     if (!packagePtb.GetPartionInfoByName(partitionName, ptnInfo)) {
         LOG(ERROR) << "Datawriter: cannot find device path for partition \'" <<
-                partitionName.substr(1, partitionName.size()) << "\'.";
+            partitionName.substr(1, partitionName.size()) << "\'.";
         return USCRIPT_ERROR_EXECUTE;
     }
     char lunIndexName = 'a' + ptnInfo.lun;
