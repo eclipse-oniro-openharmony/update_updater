@@ -54,6 +54,7 @@ private:
     const static std::unordered_map<std::string, Language> LOCALES;
 };
 }
+
 #define TR(tag) Lang::LanguageUI::GetInstance().Translate(STRINGFY(tag))
 } // namespace Updater
 #else
