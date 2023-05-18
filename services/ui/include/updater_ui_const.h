@@ -20,5 +20,14 @@ namespace Updater {
 constexpr const char *DEFAULT_FONT_FILENAME = "HarmonyOS_Sans_SC_Regular_Small.ttf";
 constexpr const char *FB_DEV_PATH = "/dev/graphics/fb0";
 constexpr const char *DRM_DEV_PATH = "/dev/dri/card0";
+
+enum class UpdaterMode {
+    SDCARD = 0,
+    FACTORYRST,
+    REBOOTFACTORYRST,
+    OTA,
+    RECOVER,
+    MODEMAX
+};
 } // namespace Updater
 #endif /* UPDATE_UI_HOS_UPDATER_H */

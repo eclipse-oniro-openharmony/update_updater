@@ -27,7 +27,7 @@ updater_common_include = [
   "${updater_path}/utils/json",
   "//third_party/bounds_checking_function/include",
   ".",
-  "./include",
+  "./ui/include",
   "./ui",
 ]
 

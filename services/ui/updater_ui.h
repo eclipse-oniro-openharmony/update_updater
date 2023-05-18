@@ -19,8 +19,8 @@
 #include <string>
 #include <string_view>
 #include "macros.h"
+#include "updater_ui_const.h"
 #include "updater_ui_traits.h"
-#include "updater/updater.h"
 
 namespace Updater {
 std::ostream &operator<<(std::ostream &os, const ComInfo &com);

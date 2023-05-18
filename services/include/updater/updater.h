@@ -54,15 +54,6 @@ struct UpdaterParams {
     std::function<void(float)> callbackProgress {};
 };
 
-enum class UpdaterMode {
-    SDCARD = 0,
-    FACTORYRST,
-    REBOOTFACTORYRST,
-    OTA,
-    RECOVER,
-    MODEMAX
-};
-
 using CondFunc = std::function<bool(const UpdateMessage &)>;
 
 using EntryFunc = std::function<int(int, char **)>;

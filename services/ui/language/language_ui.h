@@ -22,10 +22,8 @@
 #include "json_visitor.h"
 #include "language_ui_msg_id.h"
 #include "updater_ui_traits.h"
-#endif
 
 namespace Updater {
-#ifdef UPDATER_UI_SUPPORT
 namespace Lang {
 enum class Language {
     CHINESE = 0,
@@ -57,8 +55,8 @@ private:
 };
 }
 #define TR(tag) Lang::LanguageUI::GetInstance().Translate(STRINGFY(tag))
+} // namespace Updater
 #else
 #define TR(tag) ""
 #endif
-} // namespace Updater
 #endif /* UPDATE_UI_HOS_UPDATER_H */
