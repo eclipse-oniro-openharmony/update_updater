@@ -112,7 +112,7 @@ int32_t PkgAlgorithm::Unpack(const PkgStreamPtr inStream, const PkgStreamPtr out
         return PKG_NOT_EXIST_ALGORITHM;
     }
     algorithm->Init();
-    PkgBuffer buffer(nullptr, MAX_BUFFER_SIZE);
+    PkgBuffer buffer(MAX_BUFFER_SIZE);
     int32_t ret = PKG_SUCCESS;
     size_t srcOffset = context.srcOffset;
     size_t destOffset = context.destOffset;

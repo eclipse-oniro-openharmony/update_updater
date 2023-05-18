@@ -254,7 +254,7 @@ void GZipFileEntry::DecodeHeaderCalOffset(uint8_t flags, const PkgBuffer &buffer
     return;
 }
 
-int32_t GZipFileEntry::DecodeHeader(PkgBuffer &buffer, size_t headerOffset, size_t dataOffset,
+int32_t GZipFileEntry::DecodeHeader(const PkgBuffer &buffer, size_t headerOffset, size_t dataOffset,
     size_t &decodeLen)
 {
     Updater::UPDATER_INIT_RECORD;
@@ -362,7 +362,7 @@ int32_t GZipPkgFile::LoadPackage(std::vector<std::string> &fileNames, VerifyFunc
     PKG_LOGI("LoadPackage %s ", pkgStream_->GetFileName().c_str());
     size_t srcOffset = 0;
     size_t readLen = 0;
-    PkgBuffer buffer(nullptr, BUFFER_SIZE);
+    PkgBuffer buffer(BUFFER_SIZE);
     int32_t ret = pkgStream_->Read(buffer, srcOffset, buffer.length, readLen);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("Fail to read file %s", pkgStream_->GetFileName().c_str());
