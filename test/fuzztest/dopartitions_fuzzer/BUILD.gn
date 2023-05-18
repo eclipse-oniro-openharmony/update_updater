@@ -43,6 +43,7 @@ ohos_fuzztest("DoPartitionsFuzzTest") {
     "${updater_path}/services/log:libupdaterlog",
     "${updater_path}/services/package:libupdaterpackage",
     "${updater_path}/services/script:libupdaterscript",
+    "${updater_path}/services/ui:libui",
     "${updater_path}/utils:libutils",
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/bzip2:libbz2",
