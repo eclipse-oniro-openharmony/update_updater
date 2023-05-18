@@ -568,7 +568,7 @@ int32_t Lz4ImageDiff::TestAndSetConfig(const BlockBuffer &buffer, const std::str
 int32_t CompressedImageDiff::CompressData(Hpackage::PkgManager::FileInfoPtr info,
     const BlockBuffer &buffer, std::vector<uint8_t> &outData, size_t &outSize) const
 {
-    Hpackage::PkgManager *pkgManager = Hpackage::PkgManager::GetPackageInstance();
+    Hpackage::PkgManager *pkgManager = Hpackage::PkgManager::CreatePackageInstance();
     if (pkgManager == nullptr) {
         PATCH_LOGE("Can not get manager ");
         return -1;
@@ -589,9 +589,11 @@ int32_t CompressedImageDiff::CompressData(Hpackage::PkgManager::FileInfoPtr info
     int32_t ret = pkgManager->CompressBuffer(info, {buffer.buffer, buffer.length}, stream1);
     if (ret != 0) {
         PATCH_LOGE("Can not Compress buff ");
+        Hpackage::PkgManager::ReleasePackageInstance(pkgManager);
         return -1;
     }
     PATCH_DEBUG("UpdateDiff::MakePatch totalSize: %zu", outSize);
+    Hpackage::PkgManager::ReleasePackageInstance(pkgManager);
     return 0;
 }
 } // namespace UpdatePatch

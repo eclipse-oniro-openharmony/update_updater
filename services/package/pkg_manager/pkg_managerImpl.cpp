@@ -47,15 +47,6 @@ constexpr int32_t DIGEST_FLAGS_HAS_SIGN = 2;
 constexpr int32_t DIGEST_FLAGS_SIGNATURE = 4;
 constexpr uint32_t VERIFY_FINSH_PERCENT = 100;
 
-static thread_local PkgManagerImpl *g_pkgManagerInstance = nullptr;
-PkgManager::PkgManagerPtr PkgManager::GetPackageInstance()
-{
-    if (g_pkgManagerInstance == nullptr) {
-        g_pkgManagerInstance = new PkgManagerImpl();
-    }
-    return g_pkgManagerInstance;
-}
-
 PkgManager::PkgManagerPtr PkgManager::CreatePackageInstance()
 {
     return new(std::nothrow) PkgManagerImpl();
@@ -66,12 +57,7 @@ void PkgManager::ReleasePackageInstance(PkgManager::PkgManagerPtr manager)
     if (manager == nullptr) {
         return;
     }
-    if (g_pkgManagerInstance == manager) {
-        delete g_pkgManagerInstance;
-        g_pkgManagerInstance = nullptr;
-    } else {
-        delete manager;
-    }
+    delete manager;
     manager = nullptr;
 }
 
@@ -663,13 +649,14 @@ int32_t PkgManagerImpl::VerifyPackage(const std::string &packagePath, const std:
     } else if (digest.buffer != nullptr) {
         ret = VerifyBinFile(packagePath, keyPath, version, digest);
     } else {
-        PkgManager::PkgManagerPtr pkgManager = PkgManager::GetPackageInstance();
+        PkgManager::PkgManagerPtr pkgManager = PkgManager::CreatePackageInstance();
         if (pkgManager == nullptr) {
             PKG_LOGE("pkgManager is nullptr");
             return PKG_INVALID_SIGNATURE;
         }
         std::vector<std::string> components;
         ret = pkgManager->LoadPackage(packagePath, keyPath, components);
+        PkgManager::ReleasePackageInstance(pkgManager);
     }
     cb(ret, VERIFY_FINSH_PERCENT);
     if (ret != PKG_SUCCESS) {

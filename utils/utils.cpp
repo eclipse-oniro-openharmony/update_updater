@@ -361,7 +361,7 @@ std::string GetLocalBoardId()
 
 void CompressLogs(const std::string &name)
 {
-    PkgManager::PkgManagerPtr pkgManager = PkgManager::GetPackageInstance();
+    PkgManager::PkgManagerPtr pkgManager = PkgManager::CreatePackageInstance();
     if (pkgManager == nullptr) {
         LOG(ERROR) << "pkgManager is nullptr";
         return;
@@ -395,14 +395,17 @@ void CompressLogs(const std::string &name)
     char pkgName[MAX_LOG_NAME_SIZE];
     if (snprintf_s(pkgName, MAX_LOG_NAME_SIZE, MAX_LOG_NAME_SIZE - 1,
         "/data/updater/log/%s_%s.zip", realName.c_str(), realTime) == -1) {
+        PkgManager::ReleasePackageInstance(pkgManager);
         return;
     }
     int32_t ret = pkgManager->CreatePackage(pkgName, GetCertName(), &pkgInfo, files);
     if (ret != 0) {
         LOG(WARNING) << "CompressLogs failed";
+        PkgManager::ReleasePackageInstance(pkgManager);
         return;
     }
     (void)DeleteFile(name);
+    PkgManager::ReleasePackageInstance(pkgManager);
 }
 
 int GetFileSize(const std::string &dLog)
