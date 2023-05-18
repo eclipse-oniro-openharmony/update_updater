@@ -59,6 +59,7 @@ enum class UpdaterMode {
     FACTORYRST,
     REBOOTFACTORYRST,
     OTA,
+    RECOVER,
     MODEMAX
 };
 
