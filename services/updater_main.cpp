@@ -534,7 +534,7 @@ UpdaterStatus UpdaterFromSdcard(UpdaterParams &upParams)
     return DoUpdatePackages(upParams);
 }
 
-static UpdaterStatus InstallUpdaterPackages(UpdaterParams &upParams)
+UpdaterStatus InstallUpdaterPackages(UpdaterParams &upParams)
 {
     UpdaterStatus status = PreUpdatePackages(upParams);
     if (status == UPDATE_SUCCESS) {
