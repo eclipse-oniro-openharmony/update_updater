@@ -38,7 +38,7 @@ public:
 
     virtual int32_t Pack(PkgStreamPtr inStream, size_t startOffset, size_t &encodeLen) = 0;
 
-    virtual int32_t DecodeHeader(const PkgBuffer &buffer, size_t headerOffset, size_t dataOffset,
+    virtual int32_t DecodeHeader(PkgBuffer &buffer, size_t headerOffset, size_t dataOffset,
         size_t &decodeLen) = 0;
 
     virtual int32_t Unpack(PkgStreamPtr outStream) = 0;

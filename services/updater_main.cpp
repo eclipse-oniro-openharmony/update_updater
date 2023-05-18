@@ -66,14 +66,14 @@ constexpr struct option OPTIONS[] = {
 };
 constexpr float VERIFY_PERCENT = 0.05;
 
-static void SetMessageToMisc(const int message, const std::string headInfo)
+static void SetMessageToMisc(const std::string &miscCmd, const int message, const std::string headInfo)
 {
     if (headInfo.empty()) {
         return;
     }
     std::vector<std::string> args = ParseParams(0, nullptr);
     struct UpdateMessage msg {};
-    if (strncpy_s(msg.command, sizeof(msg.command), "boot_updater", strlen("boot_updater") + 1) != EOK) {
+    if (strncpy_s(msg.command, sizeof(msg.command), miscCmd.c_str(), miscCmd.size() + 1) != EOK) {
         LOG(ERROR) << "SetMessageToMisc strncpy_s failed";
         return;
     }
@@ -300,7 +300,7 @@ static UpdaterStatus InstallUpdaterPackage(UpdaterParams &upParams, PkgManager::
             UPDATER_LAST_WORD(UPDATE_ERROR);
             return UPDATE_ERROR;
         }
-        SetMessageToMisc(upParams.retryCount + 1, "retry_count");
+        SetMessageToMisc(upParams.miscCmd, upParams.retryCount + 1, "retry_count");
     }
     if (upParams.sdcardUpdate) {
         status = DoInstallUpdaterPackage(manager, upParams, SDCARD_UPDATE);
@@ -314,7 +314,7 @@ static UpdaterStatus InstallUpdaterPackage(UpdaterParams &upParams, PkgManager::
         if (status == UPDATE_RETRY && upParams.retryCount < MAX_RETRY_COUNT) {
             upParams.retryCount += 1;
             UPDATER_UI_INSTANCE.ShowFailedPage();
-            SetMessageToMisc(upParams.retryCount, "retry_count");
+            SetMessageToMisc(upParams.miscCmd, upParams.retryCount, "retry_count");
             Utils::UpdaterDoReboot("updater");
         }
     } else {
@@ -449,7 +449,7 @@ static UpdaterStatus DoUpdatePackages(UpdaterParams &upParams)
             " percent:" << upParams.initialProgress << "~" << pkgStartPosition[upParams.pkgLocation + 1];
 
         status = InstallUpdaterPackage(upParams, manager);
-        SetMessageToMisc(upParams.pkgLocation + 1, "upgraded_pkg_num");
+        SetMessageToMisc(upParams.miscCmd, upParams.pkgLocation + 1, "upgraded_pkg_num");
         ProgressSmoothHandler(
             static_cast<int>(upParams.initialProgress * FULL_PERCENT_PROGRESS +
             upParams.currentPercentage * GetTmpProgressValue()),
@@ -504,7 +504,7 @@ static void PostUpdatePackages(UpdaterParams &upParams, bool updateResult)
 UpdaterStatus UpdaterFromSdcard(UpdaterParams &upParams)
 {
     upParams.callbackProgress = [] (float value) { UPDATER_UI_INSTANCE.ShowProgress(value); };
-    SetMessageToMisc(0, "sdcard_update");
+    SetMessageToMisc(upParams.miscCmd, 0, "sdcard_update");
     if (CheckSdcardPkgs(upParams) != UPDATE_SUCCESS) {
         LOG(ERROR) << "can not find sdcard packages";
         return UPDATE_ERROR;
@@ -569,6 +569,7 @@ static UpdaterStatus StartUpdaterEntry(UpdaterParams &upParams)
         }
         UPDATER_UI_INSTANCE.ShowLogRes(
             (status != UPDATE_SUCCESS) ? TR(LOGRES_FACTORY_FAIL) : TR(LOGRES_FACTORY_DONE));
+        UpdaterInit::GetInstance().InvokeEvent(UPDATER_RPMB_DATA_CLEAR_EVENT);
     } else if (upParams.userWipeData) {
         UPDATER_UI_INSTANCE.ShowProgressPage();
         LOG(INFO) << "User level FactoryReset begin";
@@ -583,6 +584,7 @@ static UpdaterStatus StartUpdaterEntry(UpdaterParams &upParams)
         if (status != UPDATE_SUCCESS) {
             UPDATER_UI_INSTANCE.ShowLogRes(TR(LOGRES_WIPE_FAIL));
         } else {
+            UpdaterInit::GetInstance().InvokeEvent(UPDATER_RPMB_DATA_CLEAR_EVENT);
             UPDATER_UI_INSTANCE.ShowSuccessPage();
             UPDATER_UI_INSTANCE.ShowLogRes(TR(LOGRES_WIPE_FINISH));
             PostUpdater(true);

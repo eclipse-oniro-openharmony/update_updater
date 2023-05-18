@@ -72,18 +72,20 @@ protected:
 
     int32_t BuildFileDigest(uint8_t &digest, size_t size, const std::string &packagePath) const
     {
-        PkgManager::PkgManagerPtr pkgManager = PkgManager::GetPackageInstance();
+        PkgManager::PkgManagerPtr pkgManager = PkgManager::CreatePackageInstance();
         PkgManager::StreamPtr stream = nullptr;
         int32_t ret = pkgManager->CreatePkgStream(stream, packagePath, 0, PkgStream::PkgStreamType_Read);
         if (ret != PKG_SUCCESS) {
             LOG(ERROR) << "Create input stream fail " << packagePath;
             pkgManager->ClosePkgStream(stream);
+            PkgManager::ReleasePackageInstance(pkgManager);
             return ret;
         }
         size_t fileLen = stream->GetFileLength();
         if (fileLen == 0 || fileLen > SIZE_MAX) {
             LOG(ERROR) << "invalid file to load " << stream->GetFileName();
             pkgManager->ClosePkgStream(stream);
+            PkgManager::ReleasePackageInstance(pkgManager);
             return PKG_INVALID_FILE;
         }
 
@@ -94,6 +96,7 @@ protected:
         if (algorithm == nullptr) {
             LOG(ERROR) << "Invalid file " << stream->GetFileName();
             pkgManager->ClosePkgStream(stream);
+            PkgManager::ReleasePackageInstance(pkgManager);
             return PKG_NOT_EXIST_ALGORITHM;
         }
         algorithm->Init();
@@ -105,6 +108,7 @@ protected:
             if (ret != PKG_SUCCESS) {
                 LOG(ERROR) << "read buffer fail " << stream->GetFileName();
                 pkgManager->ClosePkgStream(stream);
+                PkgManager::ReleasePackageInstance(pkgManager);
                 return ret;
             }
             algorithm->Update(buff, readLen);
@@ -115,6 +119,7 @@ protected:
         PkgBuffer buffer(&digest, size);
         algorithm->Final(buffer);
         pkgManager->ClosePkgStream(stream);
+        PkgManager::ReleasePackageInstance(pkgManager);
         return PKG_SUCCESS;
     }
 

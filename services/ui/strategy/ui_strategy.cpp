@@ -55,6 +55,7 @@ std::unordered_map<UpdaterMode, std::string> UiStrategy::modeStr_ = {
     {UpdaterMode::FACTORYRST, "factoryRst"},
     {UpdaterMode::REBOOTFACTORYRST, "rebootFactoryRst"},
     {UpdaterMode::OTA, "ota"},
+    {UpdaterMode::RECOVER, "recover"},
 };
 
 const std::unordered_map<UpdaterMode, UiStrategyCfg> &UiStrategy::GetStrategy()
@@ -82,7 +83,7 @@ bool UiStrategy::LoadStrategy(const JsonNode &node)
 {
     std::unordered_map<UpdaterMode, UiStrategyCfg>().swap(strategies_);
     constexpr std::array strategies {UpdaterMode::OTA, UpdaterMode::FACTORYRST,
-        UpdaterMode::SDCARD, UpdaterMode::REBOOTFACTORYRST};
+        UpdaterMode::SDCARD, UpdaterMode::REBOOTFACTORYRST, UpdaterMode::RECOVER};
     for (auto mode : strategies) {
         if (!LoadStrategy(node, mode)) {
             LOG(ERROR) << "load strategy " << modeStr_[mode] << " failed";
