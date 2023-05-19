@@ -34,7 +34,7 @@ bool PtablePreProcess::DoPtableProcess(UpdaterParams &upParams)
 {
     if (helper_ == nullptr) {
         LOG(INFO) << "PtablePreProcess helper_ is null";
-        return -1;
+        return false;
     }
     return helper_(upParams);
 }
