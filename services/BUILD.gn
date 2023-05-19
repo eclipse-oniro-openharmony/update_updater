@@ -27,7 +27,7 @@ updater_common_include = [
   "${updater_path}/utils/json",
   "//third_party/bounds_checking_function/include",
   ".",
-  "./include",
+  "./ui/include",
   "./ui",
 ]
 
@@ -87,7 +87,7 @@ ohos_executable("updater") {
     deps += [ "//drivers/peripheral/input/udriver:hdi_input_udriver" ]
   }
 
-  if (defined(updater_only_custom_deps)) {
+  if (defined(updater_only_custom_deps) && updater_ui_support) {
     deps += updater_only_custom_deps
   }
 
@@ -100,10 +100,11 @@ ohos_executable("updater") {
     ldflags += [ "-Wl,--no-whole-archive" ]
   }
 
-  external_deps = [
-    "init:libbegetutil",
-    "ui_lite:libupdater_layout",
-  ]
+  external_deps = [ "init:libbegetutil" ]
+
+  if (updater_ui_support) {
+    external_deps += [ "ui_lite:libupdater_layout" ]
+  }
 
   if (build_selinux) {
     external_deps += [ "selinux:librestorecon" ]
@@ -158,10 +159,11 @@ ohos_static_library("libupdater") {
     ldflags += [ "-Wl,--no-whole-archive" ]
   }
 
-  external_deps = [
-    "init:libbegetutil",
-    "ui_lite:libupdater_layout",
-  ]
+  external_deps = [ "init:libbegetutil" ]
+
+  if (updater_ui_support) {
+    external_deps += [ "ui_lite:libupdater_layout" ]
+  }
 
   if (build_selinux) {
     external_deps += [ "selinux:librestorecon" ]

@@ -23,6 +23,7 @@ ohos_unittest("ui_unittest") {
   module_out_path = MODULE_OUTPUT_PATH
   defines = [
     "UPDATER_UT",
+    "UPDATER_UI_SUPPORT",
     "ENABLE_BITMAP_FONT = 0",
     "ENABLE_ICU = 0",
     "ENABLE_MULTI_FONT = 0",

@@ -15,6 +15,7 @@
 #ifndef UPDATE_UI_LANGUAGE_UI_H
 #define UPDATE_UI_LANGUAGE_UI_H
 
+#ifdef UPDATER_UI_SUPPORT
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -54,10 +55,9 @@ private:
 };
 }
 
-#ifdef UPDATER_UI_SUPPORT
 #define TR(tag) Lang::LanguageUI::GetInstance().Translate(STRINGFY(tag))
+} // namespace Updater
 #else
 #define TR(tag) ""
 #endif
-} // namespace Updater
 #endif /* UPDATE_UI_HOS_UPDATER_H */

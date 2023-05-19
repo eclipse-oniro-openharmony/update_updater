@@ -32,6 +32,7 @@
 #include "flashd/flashd.h"
 #include "fs_manager/mount.h"
 #include "include/updater/updater.h"
+#include "json_node.h"
 #include "language/language_ui.h"
 #include "log/dump.h"
 #include "log/log.h"
@@ -559,7 +560,7 @@ static UpdaterStatus StartUpdaterEntry(UpdaterParams &upParams)
         UPDATER_UI_INSTANCE.ShowProgressPage();
         LOG(INFO) << "Factory level FactoryReset begin";
         status = UPDATE_SUCCESS;
-#ifndef UPDATER_UT
+#if !defined(UPDATER_UT) && defined(UPDATER_UI_SUPPORT)
         DoProgress();
 #endif
         if (FactoryReset(FACTORY_WIPE_DATA, "/data") != 0) {
@@ -573,7 +574,7 @@ static UpdaterStatus StartUpdaterEntry(UpdaterParams &upParams)
         UPDATER_UI_INSTANCE.ShowProgressPage();
         LOG(INFO) << "User level FactoryReset begin";
         status = UPDATE_SUCCESS;
-#ifndef UPDATER_UT
+#if !defined(UPDATER_UT) && defined(UPDATER_UI_SUPPORT)
         DoProgress();
 #endif
         if (FactoryReset(USER_WIPE_DATA, "/data") != 0) {

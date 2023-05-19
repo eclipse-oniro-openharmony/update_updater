@@ -18,7 +18,7 @@
 #define UPDATER_UI_UPDATER_UI_EMPTY
 
 #include <string>
-#include "updater_ui.h"
+#include "updater_ui_const.h"
 
 namespace Updater {
 class UpdaterUiEmpty {

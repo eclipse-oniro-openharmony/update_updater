@@ -42,6 +42,7 @@ ohos_unittest("updater_service_unittest") {
     "//third_party/bounds_checking_function/include",
     "${updater_path}/services",
     "${updater_path}/services/ui",
+    "${updater_path}/services/ui/include",
     "${updater_path}/services/include",
     "${updater_path}/services/ui/view",
   ]
