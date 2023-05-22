@@ -49,10 +49,12 @@ HWTEST_F(LogUnitTest, log_test_001, TestSize.Level1)
     char ch[100];
     f.getline(ch, 100);
     string result = ch;
-    if (result.find("this is ut") != string::npos) {
+	auto ret = result.find("this is ut");
+    if (ret != string::npos) {
         f.close();
         unlink("/data/updater/m_log.txt");
         unlink("/data/updater/m_stage.txt");
+        EXPECT_NE(ret, string::npos);
         SUCCEED();
     } else {
         f.close();
