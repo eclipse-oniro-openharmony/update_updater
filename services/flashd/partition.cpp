@@ -76,12 +76,12 @@ int Partition::DoFormat() const
 {
     auto name = "/" + devName_;
     if (auto ret = Updater::FormatPartition(name); ret != 0) {
-        FLASHD_LOGE("FormatPartition fail, ret = %d, ret");
+        FLASHD_LOGE("FormatPartition fail, ret = %d", ret);
         return ret;
     }
 
     if (auto ret = Updater::MountForPath(name); ret != 0) {
-        FLASHD_LOGE("MountForPath fail, ret = %d, ret");
+        FLASHD_LOGE("FormatPartition fail, ret = %d", ret);
         return ret;
     }
     return 0;
