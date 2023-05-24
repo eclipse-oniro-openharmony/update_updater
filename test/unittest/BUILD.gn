@@ -57,6 +57,7 @@ ohos_unittest("updater_unittest") {
     "log_test/log_unittest.cpp",
     "misc_info_test/misc_info_unittest.cpp",
     "ptable_parse_test/ptable_manager_unittest.cpp",
+    "ptable_parse_test/ptable_process_unittest.cpp",
     "ptable_parse_test/ptable_unittest.cpp",
     "updaterkits_test/updaterkits_unittest.cpp",
   ]
@@ -93,6 +94,7 @@ ohos_unittest("updater_unittest") {
     "${updater_path}/services/package/pkg_package/pkg_zipfile.cpp",
     "${updater_path}/services/ptable_parse/ptable.cpp",
     "${updater_path}/services/ptable_parse/ptable_manager.cpp",
+    "${updater_path}/services/ptable_parse/ptable_process.cpp",
     "${updater_path}/services/ptable_parse/ufs_ptable.cpp",
     "${updater_path}/services/script/script_instruction/script_basicinstruction.cpp",
     "${updater_path}/services/script/script_instruction/script_instructionhelper.cpp",
