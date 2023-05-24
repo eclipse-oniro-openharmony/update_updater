@@ -223,7 +223,7 @@ public:
     {
         std::string filePath = TEST_PATH_TO;
         filePath += "/4444/";
-        int ret = CheckFile(filePath);
+        int ret = CheckFile(filePath, PkgStream::PkgStreamType_Read);
         EXPECT_EQ(ret, 0);
         return 0;
     }
