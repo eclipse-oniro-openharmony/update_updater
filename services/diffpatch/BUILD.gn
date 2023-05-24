@@ -68,7 +68,7 @@ ohos_executable("diff") {
     "${updater_path}/services/package:libupdaterpackage",
     "//third_party/bzip2:libbz2",
     "//third_party/lz4:liblz4_static",
-    "//third_party/openssl:libcrypto_shared",
+    "//third_party/openssl:libcrypto_static",
     "//third_party/zlib:libz",
   ]
 
