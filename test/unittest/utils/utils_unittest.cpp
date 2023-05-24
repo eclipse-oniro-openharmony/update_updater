@@ -79,7 +79,7 @@ HWTEST_F(UtilsUnitTest, updater_utils_test_006, TestSize.Level0)
 {
     std::vector<std::string> files;
     string path = "/data";
-    Utils::GetFilesFromDirectory(path, files, true);
+    EXPECT_NE(Utils::GetFilesFromDirectory(path, files, true), -1);
 }
 
 HWTEST_F(UtilsUnitTest, RemoveDirTest, TestSize.Level0)

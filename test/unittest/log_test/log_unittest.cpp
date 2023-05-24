@@ -49,10 +49,12 @@ HWTEST_F(LogUnitTest, log_test_001, TestSize.Level1)
     char ch[100];
     f.getline(ch, 100);
     string result = ch;
-    if (result.find("this is ut") != string::npos) {
+    auto ret = result.find("this is ut");
+    if (ret != string::npos) {
         f.close();
         unlink("/data/updater/m_log.txt");
         unlink("/data/updater/m_stage.txt");
+        EXPECT_NE(ret, string::npos);
         SUCCEED();
     } else {
         f.close();
@@ -64,6 +66,7 @@ HWTEST_F(LogUnitTest, log_test_001, TestSize.Level1)
 
 HWTEST_F(LogUnitTest, log_test_002, TestSize.Level0)
 {
+    int ret = 0;
     InitUpdaterLogger("UPDATER_UT", "", "", "");
     SetLogLevel(ERROR);
     LOG(ERROR) << "this is ut";
@@ -75,5 +78,6 @@ HWTEST_F(LogUnitTest, log_test_002, TestSize.Level0)
     LOG(ERROR) << "this is ut";
     STAGE(UPDATE_STAGE_BEGIN) << "this is ut";
     SUCCEED();
+    EXPECT_EQ(ret, 0);
 }
 } // namespace updater_ut

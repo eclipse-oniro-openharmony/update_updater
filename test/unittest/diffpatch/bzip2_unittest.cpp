@@ -395,7 +395,7 @@ HWTEST_F(BZip2AdapterUnitTest, DeflateAdapterTestForLz4Block_4, TestSize.Level1)
     BlockBuffer srcTestData;
     size_t offTest = 0;
     adapterTest.Open();
-    adapterTest.WriteData(srcTestData);
-    adapterTest.FlushData(offTest);
+    EXPECT_EQ(0, adapterTest.WriteData(srcTestData));
+    EXPECT_EQ(0, adapterTest.FlushData(offTest));
 }
 }
