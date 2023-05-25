@@ -143,13 +143,6 @@ ohos_static_library("libupdater") {
     deps += [ "//drivers/peripheral/input/udriver:hdi_input_udriver" ]
   }
 
-  # force link flashd library
-  ldflags = [
-    "-Wl,--whole-archive",
-    rebase_path("${target_out_dir}/flashd/libflashd.a"),
-    "-Wl,--no-whole-archive",
-  ]
-
   # force link invisible function
   if (defined(updater_force_link_libs)) {
     ldflags += [ "-Wl,--whole-archive" ]
