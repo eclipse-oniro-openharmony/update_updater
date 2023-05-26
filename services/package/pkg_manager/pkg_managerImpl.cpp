@@ -526,7 +526,7 @@ int32_t PkgManagerImpl::DoCreatePkgStream(PkgStreamPtr &stream, const std::strin
         UPDATER_LAST_WORD(PKG_INVALID_FILE);
         return PKG_INVALID_FILE;
     }
-    if (CheckFile(fileName) != PKG_SUCCESS) {
+    if (CheckFile(fileName, type) != PKG_SUCCESS) {
         UPDATER_LAST_WORD(PKG_INVALID_FILE);
         PKG_LOGE("Fail to check file %s ", fileName.c_str());
         return PKG_INVALID_FILE;

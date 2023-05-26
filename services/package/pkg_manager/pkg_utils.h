@@ -35,7 +35,7 @@ std::string GetCurrPath();
 size_t GetFileSize(const std::string &fileName);
 std::string GetName(const std::string &filePath);
 std::string GetFilePath(const std::string &fileName);
-int32_t CheckFile(const std::string &fileName);
+int32_t CheckFile(const std::string &fileName, int type);
 uint8_t *AnonymousMap(const std::string &fileName, size_t size);
 uint8_t *FileMap(const std::string &path);
 void ReleaseMemory(uint8_t *memMap, size_t size);
