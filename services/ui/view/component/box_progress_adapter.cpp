@@ -72,9 +72,8 @@ void BoxProgressAdapter::SetValue(float value)
         return;
     }
     auto pos = GetPosOfEp();
-    ep_->SetVisible(false);
     ep_->SetPosition(pos.x, pos.y);
-    ep_->SetVisible(true);
+    ep_->Invalidate();
 }
 
 bool BoxProgressAdapter::InitEp()
