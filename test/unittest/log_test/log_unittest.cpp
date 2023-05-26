@@ -66,7 +66,7 @@ HWTEST_F(LogUnitTest, log_test_001, TestSize.Level1)
 
 HWTEST_F(LogUnitTest, log_test_002, TestSize.Level0)
 {
-    int ret = 0;
+    std::string path = "invalid_test_path";
     InitUpdaterLogger("UPDATER_UT", "", "", "");
     SetLogLevel(ERROR);
     LOG(ERROR) << "this is ut";
@@ -78,6 +78,6 @@ HWTEST_F(LogUnitTest, log_test_002, TestSize.Level0)
     LOG(ERROR) << "this is ut";
     STAGE(UPDATE_STAGE_BEGIN) << "this is ut";
     SUCCEED();
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(access(path.c_str(), F_OK), -1);
 }
 } // namespace updater_ut
