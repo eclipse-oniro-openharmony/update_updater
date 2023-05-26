@@ -143,6 +143,7 @@ ohos_static_library("libupdater") {
   }
 
   ldflags = []
+
   # force link invisible function
   if (defined(updater_force_link_libs)) {
     ldflags += [ "-Wl,--whole-archive" ]
