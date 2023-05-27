@@ -81,7 +81,7 @@ int Partition::DoFormat() const
     }
 
     if (auto ret = Updater::MountForPath(name); ret != 0) {
-        FLASHD_LOGE("FormatPartition fail, ret = %d", ret);
+        FLASHD_LOGE("MountForPath fail, ret = %d", ret);
         return ret;
     }
     return 0;
