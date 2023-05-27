@@ -39,6 +39,18 @@ config("package_config") {
   ]
 }
 
+config("libupdaterpackage_exported_headers") {
+  visibility = [ ":*" ]
+  include_dirs = [
+    "${updater_path}/services/include/package",
+    "${updater_path}/services/include",
+    "${updater_path}/services/package/pkg_manager",
+    "${updater_path}/services/package/pkg_verify",
+    "${updater_path}/services/include/script",
+    "${updater_path}/interfaces/kits/include",
+  ]
+}
+
 ohos_static_library("libupdaterpackage") {
   sources = [
     "./pkg_algorithm/pkg_algo_deflate.cpp",
@@ -75,6 +87,7 @@ ohos_static_library("libupdaterpackage") {
 
   configs = [ ":package_config" ]
 
+  public_configs = [ ":libupdaterpackage_exported_headers" ]
   if (is_mingw) {
     libs = [
       "setupapi",

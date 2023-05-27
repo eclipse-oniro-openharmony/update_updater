@@ -15,6 +15,15 @@ import("//base/update/updater/updater_default_cfg.gni")
 import("//build/ohos.gni")
 
 updater_path = rebase_path("${updater_absolutely_path}", ".")
+
+config("libpackageExt_exported_headers") {
+  visibility = [ ":*" ]
+  include_dirs = [
+    "${updater_path}/interfaces/kits/include",
+    "${updater_path}/services/include/package",
+  ]
+}
+
 ohos_static_library("libpackageExt") {
   sources = [ "package.cpp" ]
 
@@ -24,6 +33,8 @@ ohos_static_library("libpackageExt") {
     "${updater_path}/utils/include",
     "//third_party/bounds_checking_function/include",
   ]
+
+  public_configs = [ ":libpackageExt_exported_headers" ]
 
   deps = [
     "${updater_path}/services/log:libupdaterlog",
