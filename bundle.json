@@ -1,6 +1,6 @@
 {
-    "name": "@ohos/update_updater",
-    "version": "3.1",
+    "name": "@ohos/updater",
+    "version": "3.2",
     "description": "升级包安装组件运行在updater分区，其功能主要包括读取misc分区信息获取升级包状态，对升级包进行校验，确保升级包合法有效；然后从升级包中解析出升级的可执行程序，创建子进程并启动升级程序。具体升级的动作由升级脚本控制。",
     "homePage": "https://gitee.com/openharmony",
     "license": "Apache License 2.0",
@@ -47,22 +47,26 @@
         "ram": "",
         "deps": {
             "components": [
-                "startup_init",
+                "init",
                 "developtools_hdc",
                 "utils_native",
-                "drivers_peripheral"
+                "drivers_peripheral",
+                "c_utils",
+                "hilog_native",
+                "selinux"
             ],
             "third_party": [
-                "third_party_bounds_checking_function",
-                "third_party_bzip2",
-                "third_party_libdrm",
-                "third_party_lz4",
-                "third_party_openssl",
-                "third_party_libusb",
-                "third_party_zlib",
-                "third_party_libuv",
-                "third_party_cJSON",
-                "third_party_libpng"
+                "bounds_checking_function",
+                "bzip2",
+                "libdrm",
+                "lz4",
+                "openssl",
+                "libusb",
+                "zlib",
+                "libuv",
+                "cJSON",
+                "libpng",
+                "thirdparty_selinux"
             ]
         },
         "build": {
@@ -128,6 +132,74 @@
                             "diff_patch/diff_patch_interface.h"
                         ],
                         "header_base": "//base/update/updater/interfaces/kits/include"
+                    }
+                },
+                {
+                    "name": "//base/update/updater/services:libupdater",
+                    "header": {
+                        "header_files": [],
+                        "header_base": [
+                            "//base/update/updater/interfaces/kits/include",
+                            "//base/update/updater/services"
+                        ]
+                    }
+                },
+                {
+                    "name": "//base/update/updater/services/applypatch:libapplypatch",
+                    "header": {
+                        "header_files": [],
+                        "header_base": "//base/update/updater/services/include"
+                    }
+                },
+                {
+                    "name": "//base/update/updater/utils:libutils",
+                    "header": {
+                        "header_files": [],
+                        "header_base": "//base/update/updater/utils/include"
+                    }
+                },
+                {
+                    "name": "//base/update/updater/services/log:libupdaterlog",
+                    "header": {
+                        "header_files": [],
+                        "header_base": [
+                            "//base/update/updater/services/include"
+                        ]
+                    }
+                },
+                {
+                    "name": "//base/update/updater/services/package:libupdaterpackage",
+                    "header": {
+                        "header_files": [],
+                        "header_base": "//base/update/updater/services/include"
+                    }
+                },
+                {
+                    "name": "//base/update/updater/services/fs_manager:libfsmanager",
+                    "header": {
+                        "header_files": [],
+                        "header_base": "//base/update/updater/services/include"
+                    }
+                },
+                {
+                    "name": "//base/update/updater/services/script:libupdaterscript",
+                    "header": {
+                        "header_files": [],
+                        "header_base": "//base/update/updater/services/include"
+                    }
+                },
+                {
+                    "name": "//base/update/updater/services/diffpatch/patch:libpatch",
+                    "header": {
+                        "header_files": [],
+                        "header_base": "//base/update/updater/services/diffpatch/patch"
+                    }
+                },
+                {
+                    "name": "//base/update/updater/services/ptable_parse:libptableparse",
+                    "header": {
+                        "header_files": [],
+                        "header_base": "//base/update/updater/services/ptable_parse"
                     }
                 }
             ],

@@ -119,6 +119,15 @@ ohos_executable("updater") {
   subsystem_name = "updater"
 }
 
+config("libupdater_exported_headers") {
+  visibility = [ ":*" ]
+  include_dirs = [
+    "${updater_path}/services/include",
+    "${updater_path}/interfaces/kits/include",
+    "${updater_path}/services",
+  ]
+}
+
 ohos_static_library("libupdater") {
   defines = [ "BUILD_OHOS" ]
   sources = [
@@ -130,6 +139,8 @@ ohos_static_library("libupdater") {
   include_dirs = updater_common_include
 
   deps = updater_common_deps
+
+  public_configs = [ ":libupdater_exported_headers" ]
 
   if (defined(use_ptable)) {
     include_dirs += [ "${updater_path}/services/ptable_parse" ]

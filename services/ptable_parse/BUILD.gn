@@ -31,6 +31,13 @@ config("updater_config") {
   ]
 }
 
+config("libptableparse_exported_headers") {
+  visibility = [ ":*" ]
+  include_dirs = [
+    "${updater_path}/services/include",
+  ]
+}
+
 ohos_static_library("libptableparse") {
   sources = [
     "./ptable.cpp",
@@ -39,6 +46,8 @@ ohos_static_library("libptableparse") {
     "./ufs_ptable.cpp",
   ]
   configs = [ ":updater_config" ]
+
+  public_configs = [ ":libptableparse_exported_headers" ]
 
   ldflags = [ "-Wl -std=c++11" ]
 
