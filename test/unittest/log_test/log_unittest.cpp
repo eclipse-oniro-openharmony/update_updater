@@ -36,6 +36,18 @@ void LogUnitTest::TearDownTestCase(void)
 
 HWTEST_F(LogUnitTest, log_test_001, TestSize.Level1)
 {
+    InitUpdaterLogger("UPDATER_UT", "", "", "");
+    SetLogLevel(ERROR);
+    LOG(ERROR) << "this is ut";
+    STAGE(UPDATE_STAGE_BEGIN) << "this is ut";
+    ERROR_CODE(CODE_VERIFY_FAIL);
+    SUCCEED();
+
+    SetLogLevel(INFO);
+    LOG(ERROR) << "this is ut";
+    STAGE(UPDATE_STAGE_BEGIN) << "this is ut";
+    SUCCEED();
+
     SetLogLevel(ERROR);
     LOG(ERROR) << "this is ut";
     STAGE(UPDATE_STAGE_BEGIN) << "this is ut";
@@ -62,22 +74,5 @@ HWTEST_F(LogUnitTest, log_test_001, TestSize.Level1)
         unlink("/data/updater/m_stage.txt");
         FAIL();
     }
-}
-
-HWTEST_F(LogUnitTest, log_test_002, TestSize.Level0)
-{
-    std::string path = "invalid_test_path";
-    InitUpdaterLogger("UPDATER_UT", "", "", "");
-    SetLogLevel(ERROR);
-    LOG(ERROR) << "this is ut";
-    STAGE(UPDATE_STAGE_BEGIN) << "this is ut";
-    ERROR_CODE(CODE_VERIFY_FAIL);
-    SUCCEED();
-
-    SetLogLevel(INFO);
-    LOG(ERROR) << "this is ut";
-    STAGE(UPDATE_STAGE_BEGIN) << "this is ut";
-    SUCCEED();
-    EXPECT_EQ(access(path.c_str(), F_OK), -1);
 }
 } // namespace updater_ut
