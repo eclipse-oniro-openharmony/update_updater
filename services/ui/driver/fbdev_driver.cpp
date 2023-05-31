@@ -143,7 +143,7 @@ void FbdevDriver::ReleaseFb(const struct FbBufferObject *fbo)
 bool FbdevDriver::FbPowerContrl(int fd, bool powerOn)
 {
     if (ioctl(fd, FBIOBLANK, powerOn ? FB_BLANK_UNBLANK: FB_BLANK_POWERDOWN) < 0) {
-        LOG(ERROR) << "failed to set fb0 power " powerOn;
+        LOG(ERROR) << "failed to set fb0 power " << powerOn;
         return false;
     }
     return true;
