@@ -1,5 +1,5 @@
 # cat fstab.updater                                                            
-# Android fstab file.
+# fstab file.
 #<src> <mnt_point> <type> <mnt_flags and options> <fs_mgr_flags>
 /dev/block/platform/soc/10100000.himci.eMMC/by-name/system /system ext4 ro,barrier=1 wait
 /dev/block/platform/soc/10100000.himci.eMMC/by-name/vendor /vendor ext4 ro,barrier=1 wait
