@@ -43,6 +43,7 @@ private:
     struct FbBufferObject buff_ {};
     struct fb_fix_screeninfo finfo_ {};
     struct fb_var_screeninfo vinfo_ {};
+    bool FbPowerContrl(int fd, bool powerOn);
 };
 } // namespace Updater
 #endif
