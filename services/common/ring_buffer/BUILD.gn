@@ -15,6 +15,12 @@ import("//base/update/updater/updater_default_cfg.gni")
 import("//build/ohos.gni")
 
 updater_path = rebase_path("${updater_absolutely_path}", ".")
+
+config("libringbuffer_exported_headers") {
+  visibility = [ ":*" ]
+  include_dirs = [ "${updater_path}/services/common/ring_buffer" ]
+}
+
 ohos_static_library("libringbuffer") {
   sources = [ "ring_buffer.cpp" ]
 
@@ -26,6 +32,9 @@ ohos_static_library("libringbuffer") {
     "${updater_path}/services/log:libupdaterlog",
     "//third_party/bounds_checking_function:libsec_static",
   ]
+
+  public_configs = [ ":libringbuffer_exported_headers" ]
+
   external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
   subsystem_name = "updater"
   part_name = "updater"

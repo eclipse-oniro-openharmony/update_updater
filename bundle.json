@@ -201,6 +201,13 @@
                         "header_files": [],
                         "header_base": "//base/update/updater/services/ptable_parse"
                     }
+                },
+                {
+                    "name": "//base/update/updater/services/common/ring_buffer:libringbuffer",
+                    "header": {
+                        "header_files": [],
+                        "header_base": "//base/update/updater/services/common/ring_buffer"
+                    }
                 }
             ],
             "test": [
