@@ -18,9 +18,7 @@ updater_path = rebase_path("${updater_absolutely_path}", ".")
 
 config("libfsmanager_exported_headers") {
   visibility = [ ":*" ]
-  include_dirs = [
-    "${updater_path}/services/include",
-  ]
+  include_dirs = [ "${updater_path}/services/include" ]
 }
 
 ohos_static_library("libfsmanager") {

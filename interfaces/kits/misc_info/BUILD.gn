@@ -18,9 +18,7 @@ updater_path = rebase_path("${updater_absolutely_path}", ".")
 
 config("libmiscinfo_exported_headers") {
   visibility = [ ":*" ]
-  include_dirs = [
-    "${updater_path}/interfaces/kits/include"
-  ]
+  include_dirs = [ "${updater_path}/interfaces/kits/include" ]
 }
 
 ohos_static_library("libmiscinfo") {
