@@ -50,7 +50,7 @@
                 "init",
                 "developtools_hdc",
                 "utils_native",
-                "drivers_peripheral",
+                "drivers_peripheral_input",
                 "c_utils",
                 "hilog_native",
                 "selinux"

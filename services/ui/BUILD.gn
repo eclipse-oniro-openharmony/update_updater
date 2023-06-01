@@ -102,7 +102,7 @@ ohos_static_library("libui") {
   ]
 
   external_deps = [
-    "drivers_peripheral:hdi_input",
+    "drivers_peripheral_input:hdi_input",
   ]
   if (!updater_ui_support) {
     sources = []

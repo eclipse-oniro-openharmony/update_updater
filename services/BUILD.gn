@@ -99,7 +99,7 @@ ohos_executable("updater") {
   # add updater custom library
   if (defined(updater_custom_lib)) {
     deps += updater_custom_lib
-    external_deps += [ "drivers_peripheral:hdi_input_udriver" ]
+    external_deps += [ "drivers_peripheral_input:hdi_input_udriver" ]
   }
 
   if (updater_ui_support) {
@@ -164,7 +164,7 @@ ohos_static_library("libupdater") {
   # add updater custom library
   if (defined(updater_custom_lib)) {
     deps += updater_custom_lib
-    external_deps += [ "drivers_peripheral:hdi_input_udriver" ]
+    external_deps += [ "drivers_peripheral_input:hdi_input_udriver" ]
   }
 
   if (updater_ui_support) {
