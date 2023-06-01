@@ -285,7 +285,7 @@ int FormatPartition(const std::string &path, bool isZeroErase)
     return ((ret != 0) ? -1 : 0);
 }
 
-int SetupPartitions(PackageUpdateMode mode)
+int SetupPartitions(bool isMountData)
 {
     UPDATER_INIT_RECORD;
     if (!Utils::IsUpdaterMode()) {
@@ -306,7 +306,7 @@ int SetupPartitions(PackageUpdateMode mode)
             continue;
         }
 
-        if (mountPoint == "/data" && mode != SDCARD_UPDATE) {
+        if (mountPoint == "/data" && isMountData) {
             if (MountForPath(mountPoint) != 0) {
                 LOG(ERROR) << "Expected partition " << mountPoint << " is not mounted.";
                 UPDATER_LAST_WORD(-1);
