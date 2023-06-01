@@ -43,6 +43,8 @@ namespace Hpackage {
 constexpr int32_t UPGRADE_FILE_HEADER_LEN = 3 * sizeof(PkgTlv) + sizeof(UpgradePkgHeader) + sizeof(UpgradePkgTime);
 constexpr int32_t UPGRADE_FILE_BASIC_LEN = 2 * sizeof(PkgTlv) + sizeof(UpgradePkgHeader) + sizeof(UpgradePkgTime);
 constexpr int32_t HASH_TLV_SIZE = 6;
+constexpr int16_t TLV_TYPE_FOR_HASH_HEADER = 0x0006;
+constexpr int16_t TLV_TYPE_FOR_HASH_DATA = 0x0007;
 constexpr int16_t TLV_TYPE_FOR_SIGN = 0x0008;
 constexpr int32_t UPGRADE_RESERVE_LEN = 16;
 constexpr int16_t TLV_TYPE_FOR_SHA256 = 0x0001;
@@ -297,6 +299,81 @@ int32_t UpgradePkgFile::ReadSignData(std::vector<uint8_t> &signData,
     return PKG_SUCCESS;
 }
 
+int32_t UpgradePkgFile::ReadImgHashTLV(std::vector<uint8_t> &imgHashBuf, size_t &parsedLen,
+                                        DigestAlgorithm::DigestAlgorithmPtr algorithm, uint32_t needType)
+{
+    size_t readBytes = 0;
+    PkgBuffer buffer(HASH_TLV_SIZE);
+    int32_t ret = pkgStream_->Read(buffer, parsedLen, buffer.length, readBytes);
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("read image hash header fail");
+        UPDATER_LAST_WORD(ret);
+        return ret;
+    }
+
+    parsedLen += buffer.length;
+    uint16_t type = ReadLE16(buffer.buffer);
+    uint32_t len = ReadLE32(buffer.buffer + sizeof(uint16_t));
+    if (type != needType) {
+        PKG_LOGE("Invalid tlv type: %d length %u ", type, len);
+        return PKG_INVALID_FILE;
+    }
+    algorithm->Update(buffer, buffer.length);
+    imgHashBuf.insert(imgHashBuf.end(), buffer.data.begin(), buffer.data.end());
+
+    PkgBuffer dataBuf(len);
+    ret = pkgStream_->Read(dataBuf, parsedLen, dataBuf.length, readBytes);
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("read hash data fail");
+        UPDATER_LAST_WORD(ret);
+        return ret;
+    }
+    parsedLen += dataBuf.length;
+    algorithm->Update(dataBuf, dataBuf.length);
+    imgHashBuf.insert(imgHashBuf.end(), dataBuf.data.begin(), dataBuf.data.end());
+    return PKG_SUCCESS;
+}
+
+int32_t UpgradePkgFile::ReadImgHashData(size_t &parsedLen, DigestAlgorithm::DigestAlgorithmPtr algorithm)
+{
+    if (!isSdPackage_) {
+        PKG_LOGI("SDPackage is false, ignore image hash check");
+        return PKG_SUCCESS;
+    }
+
+    std::vector<uint8_t> imgHashBuf;
+    // read hash header
+    int32_t ret = ReadImgHashTLV(imgHashBuf, parsedLen, algorithm, TLV_TYPE_FOR_HASH_HEADER);
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("read image hash info fail");
+        UPDATER_LAST_WORD(ret);
+        return ret;
+    }
+
+    // read hash data
+    ret = ReadImgHashTLV(imgHashBuf, parsedLen, algorithm, TLV_TYPE_FOR_HASH_DATA);
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("read image hash data fail");
+        UPDATER_LAST_WORD(ret);
+        return ret;
+    }
+
+    // refresh component data offset
+    for (auto &it : pkgEntryMapId_) {
+        it.second->AddDataOffset(imgHashBuf.size());
+    }
+
+#ifndef DIFF_PATCH_SDK
+    hashCheck_ = LoadImgHashData(imgHashBuf.data(), imgHashBuf.size());
+    if (hashCheck_ == nullptr) {
+        PKG_LOGE("pause hash data fail");
+        return PKG_INVALID_FILE;
+    }
+#endif
+
+    return PKG_SUCCESS;
+}
+
 int32_t UpgradePkgFile::ReadPackageInfo(std::vector<uint8_t> &signData, size_t &parsedLen,
     DigestAlgorithm::DigestAlgorithmPtr algorithm)
 {
@@ -425,6 +502,13 @@ int32_t UpgradePkgFile::VerifyFileV2(size_t &parsedLen, DigestAlgorithm::DigestA
     int32_t ret = ReadReserveData(parsedLen, algorithm);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("ReadReserveData fail %d", ret);
+        return ret;
+    }
+
+    // Read image hash information
+    ret = ReadImgHashData(parsedLen, algorithm);
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGW("LoadImgHashData fail %d, ignore image hash check", ret);
         return ret;
     }
 
@@ -574,6 +658,9 @@ int32_t UpgradePkgFile::ReadComponents(size_t &parsedLen,
             UPDATER_LAST_WORD(ret);
             return ret;
         }
+    }
+    if (std::find(fileNames.begin(), fileNames.end(), "/userdata") != fileNames.end()) {
+        isSdPackage_ = true;
     }
     parsedLen += info.srcOffset;
     return PKG_SUCCESS;
@@ -834,7 +921,10 @@ int32_t UpgradeFileEntry::Unpack(PkgStreamPtr outStream)
         PKG_LOGE("Fail to memcpy_s ret: %d", ret);
         return ret;
     }
-    ret = algorithm->Unpack(inStream, outStream, context);
+    ret = algorithm->UnpackWithVerify(inStream, outStream, context,
+        [this](PkgBuffer &buffer, size_t len, size_t offset) ->int32_t {
+            return Verify(buffer, len, offset);
+        });
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("Fail Decompress for %s", fileName_.c_str());
         return ret;
@@ -842,6 +932,42 @@ int32_t UpgradeFileEntry::Unpack(PkgStreamPtr outStream)
     PKG_LOGI("Unpack %s data offset:%zu packedSize:%zu unpackedSize:%zu", fileName_.c_str(), dataOffset_,
         fileInfo_.fileInfo.packedSize, fileInfo_.fileInfo.unpackedSize);
     outStream->Flush(fileInfo_.fileInfo.unpackedSize);
+    return PKG_SUCCESS;
+}
+
+int32_t UpgradeFileEntry::Verify(PkgBuffer &buffer, size_t len, size_t offset)
+{
+    UpgradePkgFile *pkgFile = static_cast<UpgradePkgFile*>(GetPkgFile());
+    if (pkgFile == nullptr) {
+        PKG_LOGE("Get pkg file ptr fail: %s", fileName_.c_str());
+        return PKG_INVALID_PARAM;
+    }
+
+    if (pkgFile->GetImgHashData() == nullptr) {
+        PKG_LOGW("Get img hash data null, skip img verify");
+        return PKG_SUCCESS;
+    }
+
+    PkgManager::StreamPtr stream = nullptr;
+    int32_t ret = pkgFile->GetPkgMgr()->CreatePkgStream(stream, fileName_, buffer);
+    if (stream == nullptr) {
+        PKG_LOGE("Failed to create stream");
+        return PKG_INVALID_PARAM;
+    }
+
+    std::vector<uint8_t> hashVal;
+    ret = CalcSha256Digest(PkgStreamImpl::ConvertPkgStream(stream), len, hashVal);
+    if (ret != 0) {
+        PKG_LOGE("cal digest for pkg stream, buffer.length: %zu", buffer.length);
+        return PKG_INVALID_PARAM;
+    }
+#ifndef DIFF_PATCH_SDK
+    uint32_t end = offset + len - 1;
+    if (!check_data_hash(pkgFile->GetImgHashData(), fileName_.c_str(), offset, end, hashVal.data(),  hashVal.size())) {
+        PKG_LOGE("check image hash value fail, name: %s, offset: %zu, end: %u", fileName_.c_str(), offset, end);
+        return PKG_INVALID_PARAM;
+    }
+#endif
     return PKG_SUCCESS;
 }
 
