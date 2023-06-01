@@ -20,6 +20,7 @@
 #include <limits>
 #include <memory>
 #include "dump.h"
+#include "openssl_util.h"
 #include "pkg_lz4file.h"
 #include "pkg_manager.h"
 #include "pkg_pkgfile.h"
