@@ -33,9 +33,7 @@ config("updater_config") {
 
 config("libptableparse_exported_headers") {
   visibility = [ ":*" ]
-  include_dirs = [
-    "${updater_path}/services/include",
-  ]
+  include_dirs = [ "${updater_path}/services/include" ]
 }
 
 ohos_static_library("libptableparse") {
