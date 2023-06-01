@@ -107,6 +107,14 @@ public:
     {
         return PKG_SUCCESS;
     }
+    int32_t CreatePkgStream(StreamPtr &stream, const std::string &fileName, Updater::RingBuffer *buffer) override
+    {
+        return PKG_SUCCESS;
+    }
+    PkgManager::StreamPtr GetPkgFileStream(const std::string &fileName) override
+    {
+        return nullptr;
+    }
 };
 }
 #endif // SCRIPT_UNITTEST_H

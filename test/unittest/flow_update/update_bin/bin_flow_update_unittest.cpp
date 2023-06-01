@@ -16,9 +16,12 @@
 #include <gtest/gtest.h>
 #include <thread>
 
-#include "bin_flow_update.h"
+#include "update_bin/bin_flow_update.h"
+#include "update_bin/bin_process.h"
+#include "log.h"
 
 using namespace testing::ext;
+using namespace Hpackage;
 using namespace Updater;
 
 namespace OHOS {
@@ -29,9 +32,38 @@ class BinFlowUpdateTest : public testing::Test {
 public:
     static void SetUpTestCase(void) {}
     static void TearDownTestCase(void) {}
-    void SetUp() {}
+    void SetUp()
+    {
+        InitUpdaterLogger("UPDATER", "updater_log.log", "updater_status.log", "error_code.log");
+    }
     void TearDown() {}
     void TestBody() {}
+
+    int TestBinFlowUpdater()
+    {
+        LOG(INFO) << "TestBinFlowUpdater start";
+        std::string packagePath = "/data/updater/updater.zip"; // TEST_PATH_TO + testPackageName;
+        PkgManager::PkgManagerPtr pkgManager = PkgManager::CreatePackageInstance();
+        if (pkgManager == nullptr) {
+            LOG(ERROR) << "pkgManager is nullptr";
+            return -1;
+        }
+
+        std::vector<std::string> components;
+        int32_t ret = pkgManager->LoadPackage(packagePath, Utils::GetCertName(), components);
+        if (ret != PKG_SUCCESS) {
+            LOG(ERROR) << "Fail to load package";
+            PkgManager::ReleasePackageInstance(pkgManager);
+            return -1;
+        }
+
+        ret = Updater::ExecUpdate(pkgManager, false, packagePath,
+            [](const char *cmd, const char *content) {
+                LOG(INFO) << "pip msg, " << cmd << ":" << content;
+            });
+        PkgManager::ReleasePackageInstance(pkgManager);
+        return ret;
+    }
 };
 
 HWTEST_F(BinFlowUpdateTest, binFlowUpdateTest01, TestSize.Level0)
@@ -56,5 +88,11 @@ HWTEST_F(BinFlowUpdateTest, binFlowUpdateTest01, TestSize.Level0)
 
     EXPECT_EQ(ret, 0);
     std::cout << "binFlowUpdateTest01 end\n";
+}
+
+HWTEST_F(BinFlowUpdateTest, TestBinFlowUpdater, TestSize.Level0)
+{
+    BinFlowUpdateTest test;
+    EXPECT_EQ(0, test.TestBinFlowUpdater());
 }
 }  // namespace OHOS
