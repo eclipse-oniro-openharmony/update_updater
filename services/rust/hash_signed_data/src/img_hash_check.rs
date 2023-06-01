@@ -14,6 +14,7 @@
  */
 
 use std::collections::HashMap;
+use crate::updaterlog;
 
 const TLV_SIZE:usize = 6;
 const HASH_INFO_SIZE: usize = 16;
@@ -69,7 +70,7 @@ impl TLVStruct for HashInfo {
 
     fn read_from_le_bytes(&mut self, buffer: &[u8]) -> bool {
         if buffer.len() < HASH_INFO_SIZE {
-            println!("{} buffer is too small. {}", line!(), buffer.len());
+            updaterlog!(ERROR, "{} buffer is too small. {}", line!(), buffer.len());
             return false;
         }
 
@@ -90,12 +91,12 @@ impl TLVStruct for HashHeader {
 
     fn read_from_le_bytes(&mut self, buffer: &[u8]) -> bool {
         if buffer.len() < TLV_SIZE {
-            println!("{} buffer is too small. {}", line!(), buffer.len());
+            updaterlog!(ERROR, "{} buffer is too small. {}", line!(), buffer.len());
             return false;
         }
 
         self.image_name = String::from_utf8(Vec::from(&buffer[0..32])).unwrap().trim_end_matches('\0').to_owned();
-        println!("HashHeader  read_from_le_bytes image_name {}", self.image_name);
+        updaterlog!(INFO, "HashHeader  read_from_le_bytes image_name {}", self.image_name);
         self.hash_num = u16::from_le_bytes(buffer[32..34].try_into().unwrap());
         self.img_size = u32::from_le_bytes(buffer[34..].try_into().unwrap());
         true
@@ -109,7 +110,7 @@ impl TLVStruct for HashData {
 
     fn read_from_le_bytes(&mut self, buffer: &[u8]) -> bool {
         if buffer.len() < TLV_SIZE {
-            println!("{} buffer is too small. {}", line!(), buffer.len());
+            updaterlog!(ERROR, "{} buffer is too small. {}", line!(), buffer.len());
             return false;
         }
 
@@ -127,7 +128,7 @@ impl TLVStruct for HashSign {
 
     fn read_from_le_bytes(&mut self, buffer: &[u8]) -> bool {
         if buffer.len() < TLV_SIZE {
-            println!("{} buffer is too small. {}", line!(), buffer.len());
+            updaterlog!(ERROR, "{} buffer is too small. {}", line!(), buffer.len());
             return false;
         }
 
@@ -144,11 +145,9 @@ impl ImgHashData {
         let mut offset = 0usize;
         let mut hash_info = HashInfo::new();
         hash_info.read_from_le_bytes( &buffer[..HASH_INFO_SIZE]);
-        println!("{:?}", hash_info);
 
         offset = HASH_INFO_SIZE + 2;
         let hash_data_len = u32::from_le_bytes(buffer[offset..4 + offset].try_into().unwrap());
-        println!("hash_data_len {}", hash_data_len);
 
         offset += 4;
         if buffer.len() < hash_data_len as usize {
@@ -175,91 +174,33 @@ impl ImgHashData {
 
     pub fn check_img_hash(&self, img_name: String, start: u32, end: u32, hash_value: &[u8]) -> bool
     {
-        println!("check_img_hash start");
         let img_hash_map = match self.data.get(&img_name) {
             Some(img_hash_map)=> img_hash_map,
             _ => {
-               println!("nothing found {}", img_name);
-               return false;
-            }
-        };
-
-        println!("check_img_hash parse img_name {:?}, start: {}, end: {}", img_hash_map, start, end);
-        let hash_data = match img_hash_map.get(&(start, end)) {
-            Some(hash_data)=> hash_data,
-            _ => {
-                println!("nothing found");
+                updaterlog!(ERROR, "nothing found {}", img_name);
                 return false;
             }
         };
 
-        println!("check_img_hash parse hash_data");
+        let hash_data = match img_hash_map.get(&(start, end)) {
+            Some(hash_data)=> hash_data,
+            _ => {
+                updaterlog!(ERROR, "nothing found start: {}, end: {}", start, end);
+                return false;
+            }
+        };
+
         if hash_data.len() != hash_value.len() {
+            updaterlog!(ERROR, "hash value len is invalid {}", hash_value.len());
             return false;
         }
     
         for i in 0..hash_data.len() {
             if hash_data[i] != hash_value[i] {
+                updaterlog!(ERROR, "hash value check fail");
                 return false;
             }
         }
-        println!("check_img_hash end");
         true
     }
 }
-
-// fn main() {
-//         let mut buffer = [0u8; HASH_INFO_SIZE];
-//         let mut file = File::open("d:\\code\\rust_learning\\rust_sample\\hash_check_file_bytes").unwrap();
-    
-//         file.read(&mut buffer).unwrap();
-
-//         let mut hash_info = HashInfo::new();
-//         hash_info.read_from_le_bytes( &buffer[..]);
-//         println!("{:?}", hash_info);
-
-//         // hash_data: HashMap<(u32, u32), Vec<u8>>;
-//         let mut buffer = [0u8; TLV_SIZE];
-//         // file.seek(SeekFrom::Start(HASH_INFO_SIZE as u64)).unwrap();
-//         file.read(& mut buffer).unwrap();
-//         let hash_data_len = u32::from_le_bytes(buffer[2..].try_into().unwrap());
-//         println!("hash_data_len {}", hash_data_len);
-
-//         let mut buffer: Vec<u8> = vec![0u8; hash_data_len as usize];
-//         println!("buffer len is {}.", buffer.len());
-//         // let offset = (HASH_INFO_SIZE + TLV_SIZE) as u64;
-//         // file.seek(SeekFrom::Start(offset)).unwrap();
-//         println!("{} file pos is {}", line!(), file.stream_position().unwrap());
-//         file.read(&mut buffer[..]).unwrap();
-//         if buffer.len() < hash_data_len as usize {
-//             println!("{} buffer is too small. {}", line!(), buffer.len());
-//             return;
-//         }
-
-//         let mut offset: usize = 0;
-//         let mut hash_data_map: HashMap<String, HashMap<(u32, u32), Vec<u8>>> = HashMap::new();
-//         while offset < hash_data_len as usize {
-//             let mut hash_header = HashHeader::new();
-//             hash_header.read_from_le_bytes(&buffer[offset..(HASH_HEADER_SIZE + offset)]);
-//             offset += HASH_HEADER_SIZE;
-
-//             let mut single_data: HashMap<(u32, u32), Vec<u8>> = HashMap::new();
-//             for i in 0..hash_header.hash_num {
-//                 let mut hash_data = HashData::new();
-//                 hash_data.read_from_le_bytes(&buffer[offset.. (offset + 8 + hash_info.algo_size as usize)]);
-//                 single_data.insert((hash_data.addr_star, hash_data.addr_end), hash_data.hash_data);
-//                 offset += (8 + hash_info.algo_size) as usize;
-//             }
-//             hash_data_map.insert(hash_header.image_name, single_data);
-//         }
-//         println!("{:?}", hash_data_map);
-
-//         println!("{} file pos is {}", line!(), file.stream_position().unwrap());
-//         let mut buffer: Vec<u8> = vec![];
-//         println!("{} file pos is {}", line!(), file.stream_position().unwrap());
-//         file.read_to_end(& mut buffer).unwrap();
-//         let mut hash_sign = HashSign::new();
-//         hash_sign.read_from_le_bytes(&buffer[..]);
-
-//         println!("{:?}", hash_sign);
-// }
