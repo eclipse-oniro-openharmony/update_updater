@@ -162,7 +162,7 @@ static int OtaUpdatePreCheck(PkgManager::PkgManagerPtr pkgManager, const std::st
     return PKG_SUCCESS;
 }
 
-static UpdaterStatus VerifyPackages(const UpdaterParams &upParams)
+static UpdaterStatus VerifyPackages(UpdaterParams &upParams)
 {
     LOG(INFO) << "Verify packages start...";
     UPDATER_UI_INSTANCE.ShowProgressPage();
@@ -181,6 +181,7 @@ static UpdaterStatus VerifyPackages(const UpdaterParams &upParams)
         PkgManager::ReleasePackageInstance(manager);
 
         if (verifyret != PKG_SUCCESS) {
+            upParams.pkgLocation = i;
             UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_VERIFYPKGFAIL), true);
             UPDATER_LAST_WORD(UPDATE_CORRUPT);
             return UPDATE_CORRUPT;
@@ -385,6 +386,7 @@ static UpdaterStatus PreUpdatePackages(UpdaterParams &upParams)
         if (ret == 0) {
             LOG(INFO) << upParams.updatePackage[i] << " auth success";
         } else {
+            upParams.pkgLocation = i;
             LOG(ERROR) << upParams.updatePackage[i] << " auth failed";
             UPDATER_LAST_WORD(UPDATE_ERROR);
             return UPDATE_ERROR;
