@@ -152,7 +152,6 @@ private:
 private:
     UpgradePkgInfo pkgInfo_ {};
     size_t packedFileSize_ {0};
-    bool isNewVersion_ = false;
 };
 } // namespace Hpackage
 #endif

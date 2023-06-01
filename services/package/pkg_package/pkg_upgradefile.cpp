@@ -595,9 +595,6 @@ void UpgradePkgFile::ParsePkgHeaderToTlv(const PkgBuffer &buffer, size_t &currLe
     currLen = sizeof(PkgTlv);
     UpgradePkgHeader *header = reinterpret_cast<UpgradePkgHeader *>(buffer.buffer + currLen);
     pkgInfo_.updateFileVersion = ReadLE32(buffer.buffer + currLen + offsetof(UpgradePkgHeader, updateFileVersion));
-    if (pkgInfo_.updateFileVersion > 1) {
-        isNewVersion_ = true;
-    }
     PkgFile::ConvertBufferToString(pkgInfo_.softwareVersion, {header->softwareVersion,
         sizeof(header->softwareVersion)});
     PkgFile::ConvertBufferToString(pkgInfo_.productUpdateId, {header->productUpdateId,
