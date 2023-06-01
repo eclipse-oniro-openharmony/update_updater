@@ -101,9 +101,7 @@ ohos_static_library("libui") {
     "//third_party/libpng:libpng",
   ]
 
-  external_deps = [
-    "drivers_peripheral_input:hdi_input",
-  ]
+  external_deps = [ "drivers_peripheral_input:hdi_input" ]
   if (!updater_ui_support) {
     sources = []
   } else {
