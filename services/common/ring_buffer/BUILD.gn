@@ -18,7 +18,10 @@ updater_path = rebase_path("${updater_absolutely_path}", ".")
 
 config("libringbuffer_exported_headers") {
   visibility = [ ":*" ]
-  include_dirs = [ "${updater_path}/services/common/ring_buffer" ]
+  include_dirs = [
+    "${updater_path}/services/common/ring_buffer",
+    "${updater_path}/services/common",
+  ]
 }
 
 ohos_static_library("libringbuffer") {

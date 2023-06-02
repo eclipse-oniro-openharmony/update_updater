@@ -19,6 +19,7 @@ config("updater_config") {
   visibility = [ ":*" ]
   include_dirs = [
     "${updater_path}/services/include",
+    "${updater_path}/services/include",
     "${updater_path}/utils/include",
     "${updater_path}/utils/json",
     "//third_party/bounds_checking_function/include",

@@ -34,6 +34,7 @@ ohos_static_library("libutils") {
   include_dirs = [
     "include",
     "${updater_path}/interfaces/kits/include/",
+    "${updater_path}/services/common/",
     "${updater_path}/services/include/",
     "//third_party/bounds_checking_function/include",
     "//third_party/cJSON",
