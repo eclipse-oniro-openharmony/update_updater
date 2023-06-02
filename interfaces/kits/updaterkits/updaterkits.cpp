@@ -90,6 +90,9 @@ bool RebootAndInstallUpgradePackage(const std::string &miscFile, const std::vect
     }
 
     for (auto path : packageName) {
+        if (path.find("--force_update_action=") != std::string::npos) {
+            continue;
+        }
         if (access(path.c_str(), R_OK) < 0) {
             LOG(ERROR) << "updaterkits: " << path << " is not readable";
             return false;
