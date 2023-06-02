@@ -139,7 +139,7 @@ struct ZipFileInfo {
 struct PkgBuffer {
     uint8_t *buffer;
     size_t length = 0; // buffer size
-    
+
     std::vector<uint8_t> data;
 
     PkgBuffer()

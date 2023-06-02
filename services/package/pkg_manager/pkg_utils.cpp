@@ -147,11 +147,13 @@ uint8_t *FileMap(const std::string &path)
     }
     size_t size = GetFileSize(path);
     if (size > MAX_FILE_SIZE) {
+        close(fd);
         PKG_LOGE("Size bigger for mmap");
         return nullptr;
     }
     void *mappedData = mmap(nullptr, size, PROT_READ, MAP_PRIVATE, fd, 0);
     if (mappedData == MAP_FAILED) {
+        close(fd);
         PKG_LOGE("Failed to mmap file");
         return nullptr;
     }
