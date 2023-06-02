@@ -38,7 +38,6 @@ ohos_static_library("libringbuffer") {
 
   public_configs = [ ":libringbuffer_exported_headers" ]
 
-  external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
   subsystem_name = "updater"
   part_name = "updater"
 }

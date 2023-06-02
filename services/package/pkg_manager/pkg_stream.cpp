@@ -291,4 +291,85 @@ int32_t MemoryMapStream::Seek(long int offset, int whence)
     }
     return PKG_SUCCESS;
 }
+
+int32_t FlowDataStream::Read(PkgBuffer &data, size_t start, size_t needRead, size_t &readLen)
+{
+    if (readOffset_ != start) {
+        PKG_LOGE("Invalid start, readOffset_: %d, start: %d", readOffset_, start);
+        return PKG_INVALID_STREAM;
+    }
+
+    if (data.length < needRead) {
+        PKG_LOGE("Invalid need length");
+        return PKG_INVALID_STREAM;
+    }
+
+    if (data.buffer == nullptr) {
+        data.data.resize(needRead);
+        data.buffer = data.data.data();
+    }
+
+    readLen = 0;
+    uint8_t *buffer = nullptr;
+    while (needRead - readLen > 0) {
+        uint32_t readOnce = 0;
+        if (ReadFromRingBuf(buffer, needRead - readLen, readOnce) != PKG_SUCCESS) {
+            PKG_LOGE("Fail to read header");
+            return PKG_INVALID_STREAM;
+        }
+        if (buffer == nullptr || readOnce == 0) {
+            PKG_LOGE("Fail to read header, readOnce: %d", readOnce);
+            return PKG_INVALID_STREAM;
+        }
+        if (memcpy_s(data.buffer + readLen, readOnce, buffer, readOnce) != EOK) {
+            PKG_LOGE("Memcpy failed size:%zu, copyLen:%zu", needRead, readOnce);
+            return PKG_NONE_MEMORY;
+        }
+        readLen += readOnce;
+    }
+    readOffset_ += needRead;
+    return PKG_SUCCESS;
+}
+
+int32_t FlowDataStream::ReadFromRingBuf(uint8_t *&buff, const uint32_t needLen, uint32_t &readLen)
+{
+    if (ringBuf_ == nullptr) {
+        PKG_LOGE("ringBuf_ is nullptr");
+        buff = nullptr;
+        return PKG_INVALID_STREAM;
+    }
+
+    // buf_ is empty, read from ringbuf
+    if ((avail_ == 0) && !ringBuf_->Pop(buff_, MAX_FLOW_BUFFER_SIZE, avail_)) {
+        PKG_LOGE("read data fail");
+        buff = nullptr;
+        return PKG_INVALID_STREAM;
+    }
+
+    buff = buff_ + bufOffset_;
+    readLen = needLen <= avail_ ? needLen : avail_;
+    avail_ -= readLen;
+    bufOffset_ = avail_ == 0 ? 0 : bufOffset_ + readLen;
+    return PKG_SUCCESS;
+}
+
+int32_t FlowDataStream::Write(const PkgBuffer &data, size_t size, size_t start)
+{
+    if (ringBuf_ == nullptr) {
+        PKG_LOGE("ringBuf_ is nullptr");
+        return PKG_INVALID_STREAM;
+    }
+
+    if (writeOffset_ != start) {
+        PKG_LOGE("Invalid start, writeOffset: %zu, start: %zu", writeOffset_, start);
+        return PKG_INVALID_STREAM;
+    }
+
+    if (ringBuf_->Push(data.buffer, size)) {
+        writeOffset_ += size;
+        return PKG_SUCCESS;
+    }
+    PKG_LOGE("Write ring buffer fail");
+    return PKG_INVALID_STREAM;
+}
 } // namespace Hpackage

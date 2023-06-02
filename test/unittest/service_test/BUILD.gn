@@ -32,12 +32,13 @@ ohos_unittest("updater_service_unittest") {
   ]
   include_dirs = [
     "include",
-    "${updater_path}/utils/include",
     "${updater_path}/interfaces/kits/include/",
+    "${updater_path}/services/common",
     "${updater_path}/services/include/package",
     "${updater_path}/services/package/pkg_manager",
     "${updater_path}/services/package/pkg_verify",
     "${updater_path}/services/include/log",
+    "${updater_path}/utils/include",
     "${updater_path}/utils/json",
     "//third_party/bounds_checking_function/include",
     "${updater_path}/services",

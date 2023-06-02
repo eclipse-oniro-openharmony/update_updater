@@ -37,7 +37,8 @@ ohos_unittest("binary_unittest") {
   include_dirs = [
     "${updater_path}/interfaces/kits/include",
     "${updater_path}/services",
-    "${updater_path}/services/common/ring_buffer",
+    "${updater_path}/services/common",
+    "${updater_path}/services/flow_update",
     "${updater_path}/services/include/package",
     "${updater_path}/services/include/script",
     "${updater_path}/services/include/log",
@@ -58,6 +59,7 @@ ohos_unittest("binary_unittest") {
     "${updater_path}/services/applypatch:libapplypatch",
     "${updater_path}/services/common/ring_buffer:libringbuffer",
     "${updater_path}/services/diffpatch/patch:libpatch",
+    "${updater_path}/services/flow_update/update_bin:libBinFlowUpdate",
     "${updater_path}/services/fs_manager:libfsmanager",
     "${updater_path}/services/log:libupdaterlog",
     "${updater_path}/services/package:libupdaterpackage",

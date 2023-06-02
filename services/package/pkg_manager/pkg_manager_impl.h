@@ -75,6 +75,11 @@ public:
 
     int32_t CreatePkgStream(StreamPtr &stream, const std::string &fileName, const PkgBuffer &buffer) override;
 
+    int32_t CreatePkgStream(PkgStreamPtr &stream, const std::string &fileName,
+        PkgStream::ExtractFileProcessor processor, const void *context);
+
+    int32_t CreatePkgStream(StreamPtr &stream, const std::string &fileName, Updater::RingBuffer *buffer) override;
+
     int32_t VerifyOtaPackage(const std::string &packagePath) override;
 
     int32_t VerifyBinFile(const std::string &packagePath, const std::string &keyPath,
@@ -86,6 +91,8 @@ public:
     }
 
     void PostDecodeProgress(int type, size_t writeDataLen, const void *context) override;
+
+    PkgManager::StreamPtr GetPkgFileStream(const std::string &fileName) override;
 
 private:
     PkgFilePtr CreatePackage(PkgStreamPtr stream, PkgFile::PkgType type, PkgInfoPtr header = nullptr);
@@ -120,9 +127,6 @@ private:
     int32_t DoCreatePkgStream(PkgStreamPtr &stream, const std::string &fileName, int32_t type);
 
     int32_t CreatePkgStream(PkgStreamPtr &stream, const std::string &fileName, size_t size, int32_t type);
-
-    int32_t CreatePkgStream(PkgStreamPtr &stream, const std::string &fileName,
-        PkgStream::ExtractFileProcessor processor, const void *context);
 
     void ClosePkgStream(PkgStreamPtr &stream);
 

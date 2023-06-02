@@ -666,7 +666,11 @@ int32_t ZipFileEntry::Unpack(PkgStreamPtr outStream)
     }
     PKG_LOGI("packedSize: %zu unpackedSize: %zu  offset header: %zu data: %zu", fileInfo_.fileInfo.packedSize,
         fileInfo_.fileInfo.unpackedSize, fileInfo_.fileInfo.headerOffset, fileInfo_.fileInfo.dataOffset);
-    outStream->Flush(fileInfo_.fileInfo.unpackedSize);
+    ret = outStream->Flush(fileInfo_.fileInfo.unpackedSize);
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("Failed to Flush for %s", fileInfo_.fileInfo.identity.c_str());
+        return ret;
+    }
     algorithm->UpdateFileInfo(&fileInfo_.fileInfo);
     return PKG_SUCCESS;
 }
