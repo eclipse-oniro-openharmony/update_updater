@@ -60,6 +60,11 @@ public:
         return nodeId_;
     }
 
+    void AddDataOffset(size_t offset)
+    {
+        dataOffset_ += offset;
+    }
+
 protected:
     int32_t Init(PkgManager::FileInfoPtr localFileInfo, const PkgManager::FileInfoPtr fileInfo,
         PkgStreamPtr inStream);

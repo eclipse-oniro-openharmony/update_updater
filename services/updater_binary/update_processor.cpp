@@ -35,7 +35,7 @@
 #include "update_partitions.h"
 #include "updater_main.h"
 #include "updater/updater_const.h"
-#include "ring_buffer.h"
+#include "update_bin/bin_process.h"
 
 using namespace Uscript;
 using namespace Hpackage;
@@ -99,7 +99,7 @@ int32_t UpdaterInstructionFactory::CreateInstructionInstance(UScriptInstructionP
     } else if (name == "pkg_extract") {
         instr = new UScriptInstructionPkgExtract();
     } else if (name == "update_from_bin") {
-        instr = new UScriptInstructionUpdateFromBin();
+        instr = new UScriptInstructionBinFlowWrite();
     }
     return USCRIPT_SUCCESS;
 }

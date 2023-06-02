@@ -25,6 +25,7 @@ config("package_config") {
   include_dirs = [
     "${updater_path}/interfaces/kits/include",
     "${updater_path}/utils/include",
+    "${updater_path}/services/common",
     "${updater_path}/services/include",
     "//third_party/zlib",
     "//third_party/lz4/lib",
@@ -76,6 +77,7 @@ ohos_static_library("libupdaterpackage") {
   ]
 
   deps = [
+    "${updater_path}/services/common/ring_buffer:libringbuffer",
     "${updater_path}/services/log:libupdaterlog",
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/openssl:libcrypto_shared",

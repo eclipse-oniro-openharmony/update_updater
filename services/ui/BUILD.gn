@@ -68,6 +68,7 @@ ohos_static_library("libui") {
     "//third_party/libpng",
     "//third_party/libdrm/include/drm",
     "//third_party/libdrm",
+    "${updater_path}/services/common",
     "${updater_path}/services/include/log",
     "${updater_path}/services/include",
     "//drivers/hdf_core/framework/ability/sbuf/include",

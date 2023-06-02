@@ -86,6 +86,11 @@ private:
 
 class UpgradePkgFile : public PkgFile {
 public:
+    enum {
+        UpgradeFileVersion_V1 = 1,     // bin v1 version
+        UpgradeFileVersion_V2,        // bin v2 version
+    };
+
     UpgradePkgFile(PkgManager::PkgManagerPtr manager, PkgStreamPtr stream, PkgManager::PkgInfoPtr header)
         : PkgFile(manager, stream, PkgFile::PKG_TYPE_UPGRADE)
     {
@@ -117,11 +122,11 @@ private:
     int16_t GetPackageTlvType();
     int32_t SaveEntry(const PkgBuffer &buffer, size_t &parsedLen, UpgradeParam &info,
         DigestAlgorithm::DigestAlgorithmPtr algorithm, std::vector<std::string> &fileNames);
-    int32_t ReadComponents(PkgBuffer &buffer, size_t &parsedLen,
+    int32_t ReadComponents(size_t &parsedLen,
         DigestAlgorithm::DigestAlgorithmPtr algorithm, std::vector<std::string> &fileNames);
 
     void ParsePkgHeaderToTlv(const PkgBuffer &buffer, size_t &currLen, PkgTlv &tlv);
-    int32_t ReadUpgradePkgHeader(PkgBuffer &buffer, size_t &realLen,
+    int32_t ReadUpgradePkgHeader(size_t &realLen,
         DigestAlgorithm::DigestAlgorithmPtr &algorithm);
 
     int32_t Verify(size_t start, DigestAlgorithm::DigestAlgorithmPtr algorithm,
@@ -129,7 +134,19 @@ private:
     int32_t WriteBuffer(std::vector<uint8_t> &buffer, size_t &offset, size_t &signOffset);
     int32_t CheckPackageHeader(std::vector<uint8_t> &buffer, size_t &offset);
     int32_t GetEntryOffset(size_t &dataOffset, const PkgManager::FileInfoPtr file);
-    int32_t ReadPackageInfo(PkgBuffer &buffer, std::vector<uint8_t> &signData, size_t &parsedLen);
+    int32_t ReadPackageInfo(std::vector<uint8_t> &signData,
+        size_t &parsedLen, DigestAlgorithm::DigestAlgorithmPtr algorithm);
+    int32_t ReadReserveData(size_t &parsedLen, DigestAlgorithm::DigestAlgorithmPtr &algorithm);
+    int32_t ReadSignData(std::vector<uint8_t> &signData,
+        size_t &parsedLen, DigestAlgorithm::DigestAlgorithmPtr algorithm);
+    int32_t VerifyHeader(DigestAlgorithm::DigestAlgorithmPtr algorithm, VerifyFunction verifier,
+        const std::vector<uint8_t> &signData);
+    int32_t VerifyFile(size_t &parsedLen, DigestAlgorithm::DigestAlgorithmPtr algorithm,
+                                   VerifyFunction verifier);
+    int32_t VerifyFileV1(size_t &parsedLen, DigestAlgorithm::DigestAlgorithmPtr algorithm,
+                                   VerifyFunction verifier);
+    int32_t VerifyFileV2(size_t &parsedLen, DigestAlgorithm::DigestAlgorithmPtr algorithm,
+                                   VerifyFunction verifier);
 
 private:
     UpgradePkgInfo pkgInfo_ {};

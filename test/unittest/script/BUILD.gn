@@ -52,6 +52,7 @@ ohos_unittest("script_unittest") {
   ]
   include_dirs = [
     "${updater_path}/interfaces/kits/include",
+    "${updater_path}/services/common",
     "${updater_path}/services/include/package",
     "${updater_path}/services/include/script",
     "${updater_path}/services/include/log",
@@ -98,10 +99,12 @@ ohos_shared_library("user_instruction") {
   ldflags = [ "-rdynamic" ]
   include_dirs = [
     "${updater_path}/interfaces/kits/include/",
+    "${updater_path}/services/common",
     "${updater_path}/services/include",
     "${updater_path}/services/include/package",
     "${updater_path}/services/include/script",
     "${updater_path}/services/script/script_instruction",
+    "${updater_path}/utils/include",
   ]
   install_enable = true
   subsystem_name = "updater"
@@ -115,10 +118,12 @@ ohos_shared_library("user_instruction_invalid") {
   ldflags = [ "-rdynamic" ]
   include_dirs = [
     "${updater_path}/interfaces/kits/include/",
+    "${updater_path}/services/common",
     "${updater_path}/services/include",
     "${updater_path}/services/include/package",
     "${updater_path}/services/include/script",
     "${updater_path}/services/script/script_instruction",
+    "${updater_path}/utils/include",
   ]
   install_enable = true
   subsystem_name = "updater"
