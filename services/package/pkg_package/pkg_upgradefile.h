@@ -111,7 +111,6 @@ public:
             ReleaseImgHashData(hashCheck_);
         }
 #endif
-
     }
 
     int32_t AddEntry(const PkgManager::FileInfoPtr file, const PkgStreamPtr inStream) override;

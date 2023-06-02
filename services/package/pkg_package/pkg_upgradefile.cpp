@@ -301,7 +301,7 @@ int32_t UpgradePkgFile::ReadSignData(std::vector<uint8_t> &signData,
 }
 
 int32_t UpgradePkgFile::ReadImgHashTLV(std::vector<uint8_t> &imgHashBuf, size_t &parsedLen,
-                                        DigestAlgorithm::DigestAlgorithmPtr algorithm, uint32_t needType)
+                                       DigestAlgorithm::DigestAlgorithmPtr algorithm, uint32_t needType)
 {
     size_t readBytes = 0;
     PkgBuffer buffer(HASH_TLV_SIZE);
