@@ -144,6 +144,7 @@ int32_t USInstrImagePatch::CreatePatchStream(Uscript::UScriptEnv &env, const Ima
 
     ret = env.GetPkgManager()->ExtractFile(patchName, patchStream);
     if (ret != PKG_SUCCESS) {
+        env.GetPkgManager()->ClosePkgStream(patchStream);
         LOG(ERROR) << "Error to extract file " << para.patchFile;
         return -1;
     }
@@ -218,6 +219,7 @@ int32_t USInstrImagePatch::ExecuteImagePatch(Uscript::UScriptEnv &env, Uscript::
     }
 
     PartitionRecord::GetInstance().RecordPartitionUpdateStatus(para.partName, true);
+    env.GetPkgManager()->ClosePkgStream(patchStream);
     unlink(srcFile.c_str());
     LOG(INFO) << "USInstrImageCheck::Execute ret:" << ret;
     return ret;
