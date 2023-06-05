@@ -23,6 +23,8 @@
 #endif
 #include "securec.h"
 
+extern int vsnprintfp_s(char *strDest, size_t destMax, size_t count, int priv, const char *format, va_list arglist);
+
 namespace Updater {
 static std::ofstream g_updaterLog;
 static std::ofstream g_updaterStage;
@@ -121,6 +123,21 @@ void Logger(int level, const char* fileName, int32_t line, const char* format, .
     va_list list;
     va_start(list, format);
     int size = vsnprintf_s(reinterpret_cast<char*>(buff.data()), buff.capacity(), buff.capacity(), format, list);
+    va_end(list);
+    if (size < EOK) {
+        UpdaterLogger(level).OutputUpdaterLog(fileName, line) << "vsnprintf_s failed";
+        return;
+    }
+    std::string str(buff.data(), size);
+    UpdaterLogger(level).OutputUpdaterLog(fileName, line) << str;
+}
+
+void UpdaterHiLogger(int level, const char* fileName, int32_t line, const char* format, ...)
+{
+    static std::vector<char> buff(1024); // 1024 : max length of buff
+    va_list list;
+    va_start(list, format);
+    int size = vsnprintfp_s(reinterpret_cast<char*>(buff.data()), buff.capacity(), buff.capacity(), format, list);
     va_end(list);
     if (size < EOK) {
         UpdaterLogger(level).OutputUpdaterLog(fileName, line) << "vsnprintf_s failed";
