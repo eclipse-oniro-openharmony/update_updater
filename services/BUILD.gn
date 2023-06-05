@@ -82,12 +82,6 @@ ohos_executable("updater") {
     defines += [ "UPDATER_USE_PTABLE" ]
   }
 
-  # add updater custom library
-  if (defined(updater_custom_lib)) {
-    deps += updater_custom_lib
-    deps += [ "//drivers/peripheral/input/udriver:hdi_input_udriver" ]
-  }
-
   if (defined(updater_only_custom_deps) && updater_ui_support) {
     deps += updater_only_custom_deps
   }
@@ -102,6 +96,12 @@ ohos_executable("updater") {
   }
 
   external_deps = [ "init:libbegetutil" ]
+
+  # add updater custom library
+  if (defined(updater_custom_lib)) {
+    deps += updater_custom_lib
+    external_deps += [ "drivers_peripheral_input:hdi_input_udriver" ]
+  }
 
   if (updater_ui_support) {
     external_deps += [ "ui_lite:libupdater_layout" ]
@@ -120,6 +120,15 @@ ohos_executable("updater") {
   subsystem_name = "updater"
 }
 
+config("libupdater_exported_headers") {
+  visibility = [ ":*" ]
+  include_dirs = [
+    "${updater_path}/services/include",
+    "${updater_path}/interfaces/kits/include",
+    "${updater_path}/services",
+  ]
+}
+
 ohos_static_library("libupdater") {
   defines = [ "BUILD_OHOS" ]
   sources = [
@@ -132,16 +141,12 @@ ohos_static_library("libupdater") {
 
   deps = updater_common_deps
 
+  public_configs = [ ":libupdater_exported_headers" ]
+
   if (defined(use_ptable)) {
     include_dirs += [ "${updater_path}/services/ptable_parse" ]
     deps += [ "${updater_path}/services/ptable_parse:libptableparse" ]
     defines += [ "UPDATER_USE_PTABLE" ]
-  }
-
-  # add updater custom library
-  if (defined(updater_custom_lib)) {
-    deps += updater_custom_lib
-    deps += [ "//drivers/peripheral/input/udriver:hdi_input_udriver" ]
   }
 
   ldflags = []
@@ -156,6 +161,12 @@ ohos_static_library("libupdater") {
   }
 
   external_deps = [ "init:libbegetutil" ]
+
+  # add updater custom library
+  if (defined(updater_custom_lib)) {
+    deps += updater_custom_lib
+    external_deps += [ "drivers_peripheral_input:hdi_input_udriver" ]
+  }
 
   if (updater_ui_support) {
     external_deps += [ "ui_lite:libupdater_layout" ]

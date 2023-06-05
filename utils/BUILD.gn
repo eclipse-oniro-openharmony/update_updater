@@ -16,6 +16,15 @@ import("//build/ohos.gni")
 
 updater_path = rebase_path("${updater_absolutely_path}", ".")
 
+config("libutils_exported_headers") {
+  visibility = [ ":*" ]
+  include_dirs = [
+    "${updater_path}/services/include",
+    "${updater_path}/utils/include",
+    "${updater_path}/utils/json",
+  ]
+}
+
 ohos_static_library("libutils") {
   sources = [
     "json/json_node.cpp",
@@ -30,6 +39,8 @@ ohos_static_library("libutils") {
     "//third_party/bounds_checking_function/include",
     "//third_party/cJSON",
   ]
+
+  public_configs = [ ":libutils_exported_headers" ]
 
   deps = [
     "//third_party/bounds_checking_function:libsec_static",

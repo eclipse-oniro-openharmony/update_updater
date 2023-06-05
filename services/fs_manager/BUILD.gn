@@ -15,6 +15,12 @@ import("//base/update/updater/updater_default_cfg.gni")
 import("//build/ohos.gni")
 
 updater_path = rebase_path("${updater_absolutely_path}", ".")
+
+config("libfsmanager_exported_headers") {
+  visibility = [ ":*" ]
+  include_dirs = [ "${updater_path}/services/include" ]
+}
+
 ohos_static_library("libfsmanager") {
   sources = [
     "cmp_partition.cpp",
@@ -31,6 +37,8 @@ ohos_static_library("libfsmanager") {
     "//base/startup/init/interfaces/innerkits/include",
     "//third_party/bounds_checking_function/include",
   ]
+
+  public_configs = [ ":libfsmanager_exported_headers" ]
 
   deps = [
     "${updater_path}/utils:libutils",

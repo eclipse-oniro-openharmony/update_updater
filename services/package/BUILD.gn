@@ -27,6 +27,7 @@ config("package_config") {
     "${updater_path}/utils/include",
     "${updater_path}/services/common",
     "${updater_path}/services/include",
+    "${updater_path}/services/include",
     "//third_party/zlib",
     "//third_party/lz4/lib",
     "${updater_path}/services/include/package",
@@ -37,6 +38,18 @@ config("package_config") {
     "pkg_package",
     "pkg_verify",
     "//third_party/bounds_checking_function/include",
+  ]
+}
+
+config("libupdaterpackage_exported_headers") {
+  visibility = [ ":*" ]
+  include_dirs = [
+    "${updater_path}/services/include/package",
+    "${updater_path}/services/include",
+    "${updater_path}/services/package/pkg_manager",
+    "${updater_path}/services/package/pkg_verify",
+    "${updater_path}/services/include/script",
+    "${updater_path}/interfaces/kits/include",
   ]
 }
 
@@ -77,6 +90,7 @@ ohos_static_library("libupdaterpackage") {
 
   configs = [ ":package_config" ]
 
+  public_configs = [ ":libupdaterpackage_exported_headers" ]
   if (is_mingw) {
     libs = [
       "setupapi",

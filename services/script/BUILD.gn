@@ -58,6 +58,17 @@ config("script_config") {
   configs = [ "//build/config/compiler:exceptions" ]
 }
 
+config("libupdaterscript_exported_headers") {
+  visibility = [ ":*" ]
+  include_dirs = [
+    "${updater_path}/services/include/script",
+    "${updater_path}/services/script/script_instruction",
+    "${updater_path}/services/script/script_interpreter",
+    "${updater_path}/services/script/script_manager",
+    "${updater_path},services/script/threadpool",
+  ]
+}
+
 ohos_static_library("libupdaterscript") {
   sources = [
     "$root_out_dir/updater/updater/yacc/lexer.cpp",
@@ -79,6 +90,8 @@ ohos_static_library("libupdaterscript") {
     "./threadpool/threadpool.cpp",
   ]
   configs = [ ":script_config" ]
+
+  public_configs = [ ":libupdaterscript_exported_headers" ]
 
   external_deps = [ "c_utils:utils" ]
   deps = [
