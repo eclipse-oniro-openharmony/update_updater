@@ -141,7 +141,7 @@ void UpdaterHiLogger(int level, const char* fileName, int32_t line, const char* 
     if (size < EOK) {
         UpdaterLogger(level).OutputUpdaterLog(fileName, line) << "vsnprintfp_s failed " << size;
     } else {
-        UpdaterLogger(level).OutputUpdaterLog(fileName, line) << std::string(buf, MAX_LOG_LEN);
+        UpdaterLogger(level).OutputUpdaterLog(fileName, line) << std::string(buf, size);
     }
 }
 
