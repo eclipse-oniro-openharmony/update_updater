@@ -20,9 +20,9 @@
 #include <vector>
 #ifndef DIFF_PATCH_SDK
 #include "hilog_base/log_base.h"
+#include "vsnprintf_s_p.h"
 #endif
 #include "securec.h"
-#include "vsnprintf_s_p.h"
 
 namespace Updater {
 static std::ofstream g_updaterLog;
