@@ -945,7 +945,6 @@ int32_t UpgradeFileEntry::Verify(PkgBuffer &buffer, size_t len, size_t offset)
     }
 
     if (pkgFile->GetImgHashData() == nullptr) {
-        PKG_LOGW("Get img hash data null, skip img verify");
         return PKG_SUCCESS;
     }
 
