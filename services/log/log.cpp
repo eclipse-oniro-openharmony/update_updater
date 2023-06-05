@@ -133,7 +133,7 @@ void Logger(int level, const char* fileName, int32_t line, const char* format, .
 // used for external module to adapt %{private|public} format log to updater log
 void UpdaterHiLogger(int level, const char* fileName, int32_t line, const char* format, ...)
 {
-    char buf[MAX_LOG_LEN * 2] = {0};
+    char buf[MAX_LOG_LEN] = {0};
     va_list list;
     va_start(list, format);
     int size = vsnprintfp_s(buf, MAX_LOG_LEN, MAX_LOG_LEN - 1, true, format, list);
