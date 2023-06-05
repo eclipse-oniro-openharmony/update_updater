@@ -55,7 +55,7 @@ void UpdatePartitionsUnitTest::TearDownTestCase(void) {}
 HWTEST_F(UpdatePartitionsUnitTest, UpdatePartitions_Unitest01, TestSize.Level1)
 {
     const string packagePath = "/data/updater/updater/parts/updaterpart01.zip";
-    PkgManager::PkgManagerPtr pkgManager = PkgManager::GetPackageInstance();
+    PkgManager::PkgManagerPtr pkgManager = PkgManager::CreatePackageInstance();
     std::vector<std::string> components;
     int partRet = -1;
     int ret = pkgManager->LoadPackage(packagePath, GetTestCertName(), components);
@@ -78,7 +78,7 @@ HWTEST_F(UpdatePartitionsUnitTest, UpdatePartitions_Unitest01, TestSize.Level1)
 HWTEST_F(UpdatePartitionsUnitTest, UpdatePartitions_Unitest02, TestSize.Level1)
 {
     const string packagePath = "/data/updater/updater/parts/updaterpart02.zip";
-    PkgManager::PkgManagerPtr pkgManager = PkgManager::GetPackageInstance();
+    PkgManager::PkgManagerPtr pkgManager = PkgManager::CreatePackageInstance();
     std::vector<std::string> components;
     int partRet = -1;
     int ret = pkgManager->LoadPackage(packagePath, GetTestCertName(), components);

@@ -105,3 +105,8 @@ HWTEST_F(RegisterCmdInstructionUnittest, TestRegisterCmd02, TestSize.Level1)
 {
     RegisterCmdInstructionUnittest {}.TestRegisterCmd02();
 }
+
+HWTEST_F(RegisterCmdInstructionUnittest, TestRegisterCmd03, TestSize.Level1)
+{
+    RegisterCmdInstructionUnittest {}.TestRegisterCmd03();
+}

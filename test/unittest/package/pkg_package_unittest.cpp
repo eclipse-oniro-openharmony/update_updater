@@ -71,7 +71,6 @@ public:
 
     int TestPkgFile()
     {
-        pkgManager_ = static_cast<PkgManagerImpl*>(PkgManager::GetPackageInstance());
         if (pkgManager_ == nullptr) {
             return PKG_SUCCESS;
         }
@@ -94,7 +93,6 @@ public:
 
     int TestPkgFileInvalid()
     {
-        pkgManager_ = static_cast<PkgManagerImpl*>(PkgManager::GetPackageInstance());
         if (pkgManager_ == nullptr) {
             return PKG_SUCCESS;
         }
@@ -116,7 +114,6 @@ public:
 
     int TestBigZipEntry()
     {
-        pkgManager_ = static_cast<PkgManagerImpl*>(PkgManager::GetPackageInstance());
         EXPECT_NE(pkgManager_, nullptr);
         PkgManager::StreamPtr stream = nullptr;
         std::string packagePath = TEST_PATH_TO;
@@ -168,7 +165,7 @@ public:
 
     int TestPackageInfoFail()
     {
-        PkgManager::PkgManagerPtr manager = PkgManager::GetPackageInstance();
+        PkgManager::PkgManagerPtr manager = PkgManager::CreatePackageInstance();
         PackagesInfoPtr pkginfomanager = PackagesInfo::GetPackagesInfoInstance();
         std::vector<std::string> target;
         std::vector<std::string> tmp;
@@ -185,12 +182,13 @@ public:
         bool ret = pkginfomanager->IsAllowRollback();
         EXPECT_EQ(ret, false);
         PackagesInfo::ReleasePackagesInfoInstance(pkginfomanager);
+        PkgManager::ReleasePackageInstance(manager);
         return 0;
     }
 
     int TestUpdaterPreProcess()
     {
-        PkgManager::PkgManagerPtr pkgManager = PkgManager::GetPackageInstance();
+        PkgManager::PkgManagerPtr pkgManager = PkgManager::CreatePackageInstance();
         std::string packagePath = testPackagePath + "test_package.zip";
         std::vector<std::string> components;
         int32_t ret = pkgManager->LoadPackage(packagePath, Utils::GetCertName(), components);
@@ -205,6 +203,7 @@ public:
         std::vector<std::string> boardIdList = pkginfomanager->GetBoardID(pkgManager, "/board_list", "");
         EXPECT_NE(boardIdList, result);
         PackagesInfo::ReleasePackagesInfoInstance(pkginfomanager);
+        PkgManager::ReleasePackageInstance(pkgManager);
         return 0;
     }
 };

@@ -95,11 +95,10 @@ HWTEST_F(UpdaterUiStrategyUnitTest, test_load_strategy_for_each_mode, TestSize.L
     rebootFactoryRstCfg.progressPage = {"upd:reset", "UpdBox_Progress", "bar", "OHOSIcon_Image", "img", ""};
     rebootFactoryRstCfg.resPage = {"upd:reset", "upd:FactoryRstFailed"};
 
-    auto &otaCfg = expected[UpdaterMode::OTA];
-    otaCfg = defaultCfg;
     EXPECT_EQ(UiStrategy::GetStrategy(), (std::unordered_map<Updater::UpdaterMode, Updater::UiStrategyCfg> {
         {UpdaterMode::SDCARD, sdCardCfg}, {UpdaterMode::FACTORYRST, factoryRstCfg},
-        {UpdaterMode::REBOOTFACTORYRST, rebootFactoryRstCfg}, {UpdaterMode::OTA, otaCfg}
+        {UpdaterMode::REBOOTFACTORYRST, rebootFactoryRstCfg}, {UpdaterMode::OTA, defaultCfg},
+        {UpdaterMode::RECOVER, defaultCfg}
     }));
 }
 } // namespace

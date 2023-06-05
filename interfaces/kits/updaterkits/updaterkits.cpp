@@ -52,8 +52,14 @@ static bool AddPkgPath(struct UpdateMessage &msg, size_t updateOffset, const std
             LOG(ERROR) << "updaterkits: updateOffset > msg.update, return false";
             return false;
         }
-        int ret = snprintf_s(msg.update + updateOffset, sizeof(msg.update) - updateOffset,
-            sizeof(msg.update) - 1 - updateOffset, "--update_package=%s\n", path.c_str());
+        int ret;
+        if (path.find("--force_update_action=") != std::string::npos) {
+            ret = snprintf_s(msg.update + updateOffset, sizeof(msg.update) - updateOffset,
+                sizeof(msg.update) - 1 - updateOffset, "%s\n", path.c_str());
+        } else {
+            ret = snprintf_s(msg.update + updateOffset, sizeof(msg.update) - updateOffset,
+                sizeof(msg.update) - 1 - updateOffset, "--update_package=%s\n", path.c_str());
+        }
         if (ret < 0) {
             LOG(ERROR) << "updaterkits: copy updater message failed";
             return false;
@@ -90,6 +96,9 @@ bool RebootAndInstallUpgradePackage(const std::string &miscFile, const std::vect
     }
 
     for (auto path : packageName) {
+        if (path.find("--force_update_action=") != std::string::npos) {
+            continue;
+        }
         if (access(path.c_str(), R_OK) < 0) {
             LOG(ERROR) << "updaterkits: " << path << " is not readable";
             return false;

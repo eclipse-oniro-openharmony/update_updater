@@ -47,6 +47,7 @@ ohos_executable("diff") {
   include_dirs = [
     ".",
     "${updater_path}/interfaces/kits/include",
+    "${updater_path}/services/common",
     "${updater_path}/services/include/package",
     "${updater_path}/services/include/patch",
     "${updater_path}/services/include",
@@ -68,7 +69,7 @@ ohos_executable("diff") {
     "${updater_path}/services/package:libupdaterpackage",
     "//third_party/bzip2:libbz2",
     "//third_party/lz4:liblz4_static",
-    "//third_party/openssl:libcrypto_shared",
+    "//third_party/openssl:libcrypto_static",
     "//third_party/zlib:libz",
   ]
 

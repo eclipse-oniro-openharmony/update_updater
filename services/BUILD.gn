@@ -20,6 +20,7 @@ updater_common_include = [
   "ui/view",
   "${updater_path}/utils/include",
   "${updater_path}/interfaces/kits/include/",
+  "${updater_path}/services/common",
   "${updater_path}/services/include/package",
   "${updater_path}/services/package/pkg_manager",
   "${updater_path}/services/package/pkg_verify",
@@ -27,7 +28,7 @@ updater_common_include = [
   "${updater_path}/utils/json",
   "//third_party/bounds_checking_function/include",
   ".",
-  "./include",
+  "./ui/include",
   "./ui",
 ]
 
@@ -87,7 +88,7 @@ ohos_executable("updater") {
     deps += [ "//drivers/peripheral/input/udriver:hdi_input_udriver" ]
   }
 
-  if (defined(updater_only_custom_deps)) {
+  if (defined(updater_only_custom_deps) && updater_ui_support) {
     deps += updater_only_custom_deps
   }
 
@@ -100,10 +101,11 @@ ohos_executable("updater") {
     ldflags += [ "-Wl,--no-whole-archive" ]
   }
 
-  external_deps = [
-    "init:libbegetutil",
-    "ui_lite:libupdater_layout",
-  ]
+  external_deps = [ "init:libbegetutil" ]
+
+  if (updater_ui_support) {
+    external_deps += [ "ui_lite:libupdater_layout" ]
+  }
 
   if (build_selinux) {
     external_deps += [ "selinux:librestorecon" ]
@@ -142,12 +144,7 @@ ohos_static_library("libupdater") {
     deps += [ "//drivers/peripheral/input/udriver:hdi_input_udriver" ]
   }
 
-  # force link flashd library
-  ldflags = [
-    "-Wl,--whole-archive",
-    rebase_path("${target_out_dir}/flashd/libflashd.a"),
-    "-Wl,--no-whole-archive",
-  ]
+  ldflags = []
 
   # force link invisible function
   if (defined(updater_force_link_libs)) {
@@ -158,10 +155,11 @@ ohos_static_library("libupdater") {
     ldflags += [ "-Wl,--no-whole-archive" ]
   }
 
-  external_deps = [
-    "init:libbegetutil",
-    "ui_lite:libupdater_layout",
-  ]
+  external_deps = [ "init:libbegetutil" ]
+
+  if (updater_ui_support) {
+    external_deps += [ "ui_lite:libupdater_layout" ]
+  }
 
   if (build_selinux) {
     external_deps += [ "selinux:librestorecon" ]

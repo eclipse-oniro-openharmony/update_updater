@@ -22,6 +22,7 @@
 #include <iostream>
 #include <memory>
 #include <vector>
+#include "ring_buffer/ring_buffer.h"
 #include "package/package.h"
 
 namespace Hpackage {
@@ -138,7 +139,7 @@ struct ZipFileInfo {
 struct PkgBuffer {
     uint8_t *buffer;
     size_t length = 0; // buffer size
-    
+
     std::vector<uint8_t> data;
 
     PkgBuffer()
@@ -179,6 +180,7 @@ public:
         PkgStreamType_Process,      // processing while parsing
         PkgStreamType_Buffer,       // buffer
         PKgStreamType_FileMap,      // file map to memory
+        PkgStreamType_FlowData,     // flow data
     };
 
     virtual ~PkgStream() = default;
@@ -193,6 +195,16 @@ public:
      * @return                      file reading result
      */
     virtual int32_t Read(PkgBuffer &data, size_t start, size_t needRead, size_t &readLen) = 0;
+
+    /**
+     * write stream
+     *
+     * @param data                  buffer to hold the output file content
+     * @param size                  size of the data to read
+     * @param start                 start position of reading
+     * @return                      file reading result
+     */
+    virtual int32_t Write(const PkgBuffer &data, size_t size, size_t start) = 0;
 
     virtual int32_t GetBuffer(PkgBuffer &buffer) const = 0;
 
@@ -210,6 +222,16 @@ public:
         buffer = data.buffer;
         size = data.length;
         return ret;
+    }
+
+    virtual int32_t GetReadOffset() const
+    {
+        return 0;
+    }
+
+    void Stop()
+    {
+        return;
     }
 };
 
@@ -336,6 +358,16 @@ public:
     virtual int32_t CreatePkgStream(StreamPtr &stream, const std::string &fileName, const PkgBuffer &buffer) = 0;
 
     /**
+     * Create a package stream that can be processed while parsing.
+     *
+     * @param stream        stream used for io management
+     * @param fileName      file name corresponding to the stream
+     * @param buffer        ringbuffer
+     * @return              creation result
+     */
+    virtual int32_t CreatePkgStream(StreamPtr &stream, const std::string &fileName, Updater::RingBuffer *buffer) = 0;
+
+    /**
      * Close the stream
      *
      * @param stream  stream对象
@@ -356,6 +388,8 @@ public:
     virtual void SetPkgDecodeProgress(PkgDecodeProgress decodeProgress) = 0;
 
     virtual void PostDecodeProgress(int type, size_t writeDataLen, const void *context) = 0;
+
+    virtual StreamPtr GetPkgFileStream(const std::string &fileName) = 0;
 };
 } // namespace Hpackage
 #endif // PKG_MANAGER_H

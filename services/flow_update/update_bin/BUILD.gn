@@ -16,11 +16,15 @@ import("//build/ohos.gni")
 
 updater_path = rebase_path("${updater_absolutely_path}", ".")
 ohos_static_library("libBinFlowUpdate") {
-  sources = [ "bin_flow_update.cpp" ]
+  sources = [
+    "bin_flow_update.cpp",
+    "bin_process.cpp",
+    "component_processor.cpp",
+  ]
 
   include_dirs = [
     "${updater_path}/interfaces/kits/include",
-    "${updater_path}/services/updater_image/update_bin",
+    "${updater_path}/services/common",
     "${updater_path}/services/include",
     "${updater_path}/services/include/applypatch",
     "${updater_path}/services/include/log",
@@ -30,7 +34,6 @@ ohos_static_library("libBinFlowUpdate") {
     "${updater_path}/services/package/pkg_algorithm",
     "${updater_path}/services/package/pkg_manager",
     "${updater_path}/utils/include",
-    "//third_party/openssl/include",
   ]
   deps = [
     "${updater_path}/interfaces/kits/packages:libpackageExt",
@@ -40,9 +43,12 @@ ohos_static_library("libBinFlowUpdate") {
     "${updater_path}/services/package:libupdaterpackage",
     "${updater_path}/utils:libutils",
     "//third_party/bounds_checking_function:libsec_static",
-    "//third_party/openssl:ssl_source",
+    "//third_party/openssl:libcrypto_shared",
   ]
-  external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+  external_deps = [
+    "init:libbegetutil",
+    "init:libfsmanager_static",
+  ]
   subsystem_name = "updater"
   part_name = "updater"
 }

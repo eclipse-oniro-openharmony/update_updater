@@ -40,7 +40,6 @@ constexpr uint32_t TM_MON_BITS = 5;
 constexpr uint32_t TM_MIN_BITS = 5;
 constexpr uint32_t TM_HOUR_BITS = 11;
 constexpr uint32_t BYTE_SIZE = 8;
-constexpr uint32_t MAX_MEM_SIZE = 1 << 29;
 constexpr size_t MAX_FILE_SIZE = 1UL << 31;
 constexpr uint32_t SECOND_BUFFER = 2;
 constexpr uint32_t THIRD_BUFFER = 3;
@@ -95,7 +94,7 @@ std::string GetName(const std::string &filePath)
     return filePath.substr(filePath.find_last_of("/") + 1);
 }
 
-int32_t CheckFile(const std::string &fileName)
+int32_t CheckFile(const std::string &fileName, int type)
 {
     // Check if the directory of @fileName is exist or has write permission
     // If not, Create the directory first.
@@ -110,8 +109,12 @@ int32_t CheckFile(const std::string &fileName)
         mkdir(path.c_str(), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
 #endif
     }
-    // If the path writable
-    int ret = access(path.c_str(), R_OK | W_OK);
+    int ret = -1;
+    if (type == PkgStream::PkgStreamType_Read) {
+        ret = access(path.c_str(), R_OK );
+    } else {
+        ret = access(path.c_str(), R_OK | W_OK);
+    }
     if (ret == -1) {
         PKG_LOGE("file %s no permission ", fileName.c_str());
         return PKG_NONE_PERMISSION;
@@ -121,10 +124,6 @@ int32_t CheckFile(const std::string &fileName)
 
 uint8_t *AnonymousMap(const std::string &fileName, size_t size)
 {
-    if (size > MAX_MEM_SIZE) {
-        PKG_LOGE("Size bigger for alloc memory");
-        return nullptr;
-    }
     void *mappedData = nullptr;
     // Map the file to memory
     mappedData = mmap(nullptr, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_POPULATE | MAP_ANON, -1, 0);
@@ -148,11 +147,13 @@ uint8_t *FileMap(const std::string &path)
     }
     size_t size = GetFileSize(path);
     if (size > MAX_FILE_SIZE) {
+        close(fd);
         PKG_LOGE("Size bigger for mmap");
         return nullptr;
     }
     void *mappedData = mmap(nullptr, size, PROT_READ, MAP_PRIVATE, fd, 0);
     if (mappedData == MAP_FAILED) {
+        close(fd);
         PKG_LOGE("Failed to mmap file");
         return nullptr;
     }

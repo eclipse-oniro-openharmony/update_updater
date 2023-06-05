@@ -25,7 +25,7 @@
 #include "update_processor.h"
 #include "script_manager.h"
 #include "pkg_manager.h"
-#include "ring_buffer.h"
+#include "ring_buffer/ring_buffer.h"
 
 using namespace Updater;
 using namespace std;

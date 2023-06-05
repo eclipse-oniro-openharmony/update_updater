@@ -126,26 +126,27 @@ bool PageManager::IsValidPage(const std::shared_ptr<Page> &pg) const
     return pg != nullptr && pg->IsValid();
 }
 
-void PageManager::ShowPage(const std::string &id)
+bool PageManager::ShowPage(const std::string &id)
 {
     if (!IsValidPage(curPage_)) {
         LOG(ERROR) << "cur page is null";
-        return;
+        return false;
     }
     if (id == curPage_->GetPageId()) {
         curPage_->SetVisible(true);
         LOG(WARNING) << "show cur page again";
-        return;
+        return true;
     }
     auto it = pageMap_.find(id);
     if (it == pageMap_.end()) {
         LOG(ERROR) << "show page failed, id = " << id;
-        return;
+        return false;
     }
     curPage_->SetVisible(false);
     EnQueuePage(curPage_);
     curPage_ = it->second;
     curPage_->SetVisible(true);
+    return true;
 }
 
 void PageManager::ShowMainPage()

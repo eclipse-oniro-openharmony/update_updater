@@ -180,7 +180,7 @@ public:
     int32_t CompressData(Hpackage::PkgManager::FileInfoPtr info,
         const BlockBuffer &buffer, std::vector<uint8_t> &outData, size_t &bufferSize)
     {
-        Hpackage::PkgManager *pkgManager = Hpackage::PkgManager::GetPackageInstance();
+        Hpackage::PkgManager *pkgManager = Hpackage::PkgManager::CreatePackageInstance();
         if (pkgManager == nullptr) {
             PATCH_LOGE("Can not get manager ");
             return -1;
@@ -199,9 +199,11 @@ public:
             }, nullptr);
         if (pkgManager->CompressBuffer(info, {buffer.buffer, buffer.length}, stream1) != 0) {
             PATCH_LOGE("Can not Compress buff ");
+            Hpackage::PkgManager::ReleasePackageInstance(pkgManager);
             return -1;
         }
         PATCH_DEBUG("UpdateDiff::MakePatch totalSize: %zu", bufferSize);
+        Hpackage::PkgManager::ReleasePackageInstance(pkgManager);
         return 0;
     }
 
@@ -393,7 +395,7 @@ HWTEST_F(BZip2AdapterUnitTest, DeflateAdapterTestForLz4Block_4, TestSize.Level1)
     BlockBuffer srcTestData;
     size_t offTest = 0;
     adapterTest.Open();
-    adapterTest.WriteData(srcTestData);
-    adapterTest.FlushData(offTest);
+    EXPECT_EQ(0, adapterTest.WriteData(srcTestData));
+    EXPECT_EQ(0, adapterTest.FlushData(offTest));
 }
 }

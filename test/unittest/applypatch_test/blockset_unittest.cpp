@@ -91,8 +91,9 @@ HWTEST_F(BlockSetUnitTest, blockset_test_003, TestSize.Level1)
         printf("Open file failed");
         return;
     }
-    blk.WriteDataToBlock(fd, buffer);
+    size_t ret = blk.WriteDataToBlock(fd, buffer);
     close(fd);
+    EXPECT_NE(ret, 0);
 }
 
 HWTEST_F(BlockSetUnitTest, blockset_test_004, TestSize.Level1)
@@ -106,6 +107,7 @@ HWTEST_F(BlockSetUnitTest, blockset_test_004, TestSize.Level1)
     std::fill(srcBuffer.begin(), srcBuffer.end(), 0);
     std::fill(tgtBuffer.begin(), tgtBuffer.end(), 0);
     BlockSet::MoveBlock(srcBuffer, blk, tgtBuffer);
+    EXPECT_EQ(tgtBuffer.size(), H_BLOCK_SIZE);
 }
 
 HWTEST_F(BlockSetUnitTest, blockset_test_005, TestSize.Level1)

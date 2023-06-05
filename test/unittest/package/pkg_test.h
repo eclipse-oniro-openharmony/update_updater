@@ -47,11 +47,10 @@ class PkgTest : public ::testing::Test {
 public:
     PkgTest()
     {
-        pkgManager_ = static_cast<PkgManagerImpl*>(PkgManager::GetPackageInstance());
+        pkgManager_ = static_cast<PkgManagerImpl*>(PkgManager::CreatePackageInstance());
     }
     virtual ~PkgTest()
     {
-        pkgManager_ = static_cast<PkgManagerImpl*>(PkgManager::GetPackageInstance());
         PkgManager::ReleasePackageInstance(pkgManager_);
         pkgManager_ = nullptr;
     }
@@ -154,7 +153,7 @@ protected:
     int CreateZipPackage(const std::vector<std::string> &testFileNames,
         const std::string packageName, const std::string &base, int digestMethod)
     {
-        PkgManager::PkgManagerPtr pkgManager = PkgManager::GetPackageInstance();
+        PkgManager::PkgManagerPtr pkgManager = PkgManager::CreatePackageInstance();
         EXPECT_NE(pkgManager, nullptr);
         std::vector<std::pair<std::string, ZipFileInfo>> files;
         // 构建要打包的zip文件
@@ -173,6 +172,7 @@ protected:
         pkgInfo.pkgType = PKG_PACK_TYPE_ZIP;
         int32_t ret = pkgManager->CreatePackage(packageName, GetTestPrivateKeyName(digestMethod), &pkgInfo, files);
         EXPECT_EQ(ret, 0);
+        PkgManager::ReleasePackageInstance(pkgManager);
         return ret;
     }
     std::vector<std::string> testFileNames_ = {

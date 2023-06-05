@@ -68,7 +68,7 @@ void BoxProgressAdapter::SetValue(float value)
     };
 #endif
     OHOS::UIBoxProgress::SetValue(static_cast<int>((value / FULL_PERCENT_PROGRESS) * (progressWidth_ - 1)));
-    if (!hasEp_ || ep_ == nullptr) {
+    if (!hasEp_ || ep_ == nullptr || !ep_->IsVisible()) {
         return;
     }
     auto pos = GetPosOfEp();

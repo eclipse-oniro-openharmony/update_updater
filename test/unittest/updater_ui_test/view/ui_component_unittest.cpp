@@ -183,6 +183,7 @@ HWTEST_F(UpdaterUiComponentUnitTest, test_box_progress_with_ep, TestSize.Level0)
     EXPECT_FALSE(boxProgress.IsVisible());
     EXPECT_FALSE(epView.IsVisible());
 
+    boxProgress.SetVisible(true);
     constexpr float testValue = 50;
     constexpr float halfDivisor = 2.0;
     boxProgress.SetValue(testValue);

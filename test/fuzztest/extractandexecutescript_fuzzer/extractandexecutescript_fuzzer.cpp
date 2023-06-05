@@ -131,12 +131,11 @@ class UScriptTest {
 public:
     UScriptTest()
     {
-        packageManager = PkgManager::GetPackageInstance();
+        packageManager = PkgManager::CreatePackageInstance();
     }
 
     ~UScriptTest()
     {
-        packageManager = PkgManager::GetPackageInstance();
         PkgManager::ReleasePackageInstance(packageManager);
         ScriptManager::ReleaseScriptManager();
     }
@@ -144,7 +143,6 @@ public:
     int TestUscriptExecute(const std::vector<std::string> &inputFile)
     {
         CreatePackageBin(inputFile);
-        packageManager = PkgManager::GetPackageInstance();
         if (packageManager == nullptr) {
             return PKG_SUCCESS;
         }

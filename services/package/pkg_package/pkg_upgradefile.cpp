@@ -608,7 +608,7 @@ int32_t UpgradePkgFile::SaveEntry(const PkgBuffer &buffer, size_t &parsedLen, Up
         PKG_LOGE("Failed to get file info");
         return PKG_INVALID_FILE;
     }
-    
+
     info.dataOffset += entry->GetFileInfo()->packedSize;
     pkgInfo_.pkgInfo.entryCount++;
     PKG_LOGI("Component packedSize %zu unpackedSize %zu %s", entry->GetFileInfo()->packedSize,

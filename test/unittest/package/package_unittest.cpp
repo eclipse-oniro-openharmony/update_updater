@@ -134,7 +134,6 @@ public:
 
     int TestPackageUnpack(int type)
     {
-        pkgManager_ = static_cast<PkgManagerImpl*>(PkgManager::GetPackageInstance());
         EXPECT_NE(pkgManager_, nullptr);
         std::vector<std::string> components;
         // 使用上面打包的包进行解析
@@ -156,7 +155,6 @@ public:
 
     int TestZipPkgDecompress(int digestMethod)
     {
-        pkgManager_ = static_cast<PkgManagerImpl*>(PkgManager::GetPackageInstance());
         EXPECT_NE(pkgManager_, nullptr);
         std::vector<std::string> components;
         int32_t ret = pkgManager_->LoadPackage(TEST_PATH_TO + testZipPackageName,
@@ -174,7 +172,6 @@ public:
     {
         int ret = TestPackagePack();
         EXPECT_EQ(ret, PKG_SUCCESS);
-        pkgManager_ = static_cast<PkgManagerImpl*>(PkgManager::GetPackageInstance());
         EXPECT_NE(pkgManager_, nullptr);
         std::vector<std::pair<std::string, ZipFileInfo>> files;
         ZipFileInfo file;
@@ -232,7 +229,6 @@ public:
     {
         int ret = TestPackagePack();
         EXPECT_EQ(ret, PKG_SUCCESS);
-        pkgManager_ = static_cast<PkgManagerImpl*>(PkgManager::GetPackageInstance());
         EXPECT_NE(pkgManager_, nullptr);
         std::vector<std::pair<std::string, Lz4FileInfo>> files;
         Lz4FileInfo file;

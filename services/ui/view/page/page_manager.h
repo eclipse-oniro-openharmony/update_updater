@@ -32,7 +32,7 @@ class PageManager final {
 public:
     static PageManager &GetInstance();
     bool Init(std::vector<UxPageInfo> &pageInfos, std::string_view entry);
-    void ShowPage(const std::string &id);
+    bool ShowPage(const std::string &id);
     void GoBack();
     bool IsValidCom(const ComInfo &pageComId) const;
     Page &operator[](const std::string &id) const;

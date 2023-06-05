@@ -19,24 +19,59 @@ updater_path = rebase_path("${updater_absolutely_path}", ".")
 
 ohos_unittest("bin_flow_update_test") {
   testonly = true
+  resource_config_file = "${updater_path}/test/unittest/test_data/ohos_test.xml"
   module_out_path = MODULE_OUTPUT_PATH
   sources = [ "bin_flow_update_unittest.cpp" ]
+
+  sources += [
+    "${updater_path}/services/flow_update/update_bin/bin_flow_update.cpp",
+    "${updater_path}/services/flow_update/update_bin/bin_process.cpp",
+    "${updater_path}/services/flow_update/update_bin/component_processor.cpp",
+    "${updater_path}/services/updater_binary/update_image_block.cpp",
+    "${updater_path}/services/updater_binary/update_image_patch.cpp",
+    "${updater_path}/services/updater_binary/update_partitions.cpp",
+    "${updater_path}/services/updater_binary/update_processor.cpp",
+  ]
+
   include_dirs = [
     "${updater_path}/interfaces/kits/include",
+    "${updater_path}/services",
+    "${updater_path}/services/common",
+    "${updater_path}/services/flow_update",
     "${updater_path}/services/include",
+    "${updater_path}/services/include/applypatch",
     "${updater_path}/services/include/log",
     "${updater_path}/services/include/package",
     "${updater_path}/services/include/script",
+    "${updater_path}/services/package",
+    "${updater_path}/services/package/pkg_algorithm",
+    "${updater_path}/services/package/pkg_manager",
+    "${updater_path}/services/script",
     "${updater_path}/services/flow_update/update_bin",
     "${updater_path}/test/unittest",
     "${updater_path}/utils/include",
     "//third_party/googletest/googletest/include",
   ]
+
   deps = [
-    "${updater_path}/services/flow_update/update_bin:libBinFlowUpdate",
+    "${updater_path}/interfaces/kits/packages:libpackageExt",
+    "${updater_path}/interfaces/kits/slot_info:libslotinfo",
+    "${updater_path}/services/applypatch:libapplypatch",
+    "${updater_path}/services/fs_manager:libfsmanager",
     "${updater_path}/services/log:libupdaterlog",
+    "${updater_path}/services/package:libupdaterpackage",
+    "${updater_path}/services/script:libupdaterscript",
+    "${updater_path}/utils:libutils",
+    "//third_party/bounds_checking_function:libsec_static",
+    "//third_party/bzip2:libbz2",
+    "//third_party/cJSON:cjson",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
+    "//third_party/openssl:libcrypto_shared",
+  ]
+  external_deps = [
+    "hiviewdfx_hilog_native:libhilog",
+    "init:libbegetutil",
   ]
   defines = [ "UPDATER_UT" ]
   configs = [ "${updater_path}/test/unittest:utest_config" ]
