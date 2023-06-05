@@ -130,6 +130,7 @@ void Logger(int level, const char* fileName, int32_t line, const char* format, .
     UpdaterLogger(level).OutputUpdaterLog(fileName, line) << str;
 }
 
+#ifndef DIFF_PATCH_SDK
 // used for external module to adapt %{private|public} format log to updater log
 void UpdaterHiLogger(int level, const char* fileName, int32_t line, const char* format, ...)
 {
@@ -144,6 +145,7 @@ void UpdaterHiLogger(int level, const char* fileName, int32_t line, const char* 
         UpdaterLogger(level).OutputUpdaterLog(fileName, line) << std::string(buf, size);
     }
 }
+#endif
 
 std::ostream& ErrorCode::OutputErrorCode(const std::string &path, int line, UpdaterErrorCode code)
 {
