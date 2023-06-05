@@ -259,7 +259,7 @@ public:
         return Hpackage::PKG_INVALID_STREAM;
     }
 
-    int32_t GetReadOffset() const override
+    size_t GetReadOffset() const override
     {
         return readOffset_;
     }

@@ -224,7 +224,7 @@ public:
         return ret;
     }
 
-    virtual int32_t GetReadOffset() const
+    virtual size_t GetReadOffset() const
     {
         return 0;
     }
