@@ -22,8 +22,7 @@
 #include "hilog_base/log_base.h"
 #endif
 #include "securec.h"
-
-extern int vsnprintfp_s(char *strDest, size_t destMax, size_t count, int priv, const char *format, va_list arglist);
+#include "vsnprintf_s_p.h"
 
 namespace Updater {
 static std::ofstream g_updaterLog;
@@ -35,7 +34,6 @@ static int g_logLevel = INFO;
 #ifndef DIFF_PATCH_SDK
 static const unsigned int g_domain = 0XD002E01;
 #endif
-
 
 void InitUpdaterLogger(const std::string &tag, const std::string &logFile, const std::string &stageFile,
     const std::string &errorCodeFile)
@@ -132,19 +130,19 @@ void Logger(int level, const char* fileName, int32_t line, const char* format, .
     UpdaterLogger(level).OutputUpdaterLog(fileName, line) << str;
 }
 
+// used for external module to adapt %{private|public} format log to updater log
 void UpdaterHiLogger(int level, const char* fileName, int32_t line, const char* format, ...)
 {
-    static std::vector<char> buff(1024); // 1024 : max length of buff
+    char buf[MAX_LOG_LEN * 2] = {0};
     va_list list;
     va_start(list, format);
-    int size = vsnprintfp_s(reinterpret_cast<char*>(buff.data()), buff.capacity(), buff.capacity(), format, list);
+    int size = vsnprintfp_s(buf, MAX_LOG_LEN, MAX_LOG_LEN - 1, true, format, list);
     va_end(list);
     if (size < EOK) {
-        UpdaterLogger(level).OutputUpdaterLog(fileName, line) << "vsnprintf_s failed";
-        return;
+        UpdaterLogger(level).OutputUpdaterLog(fileName, line) << "vsnprintfp_s failed " << size;
+    } else {
+        UpdaterLogger(level).OutputUpdaterLog(fileName, line) << std::string(buf, MAX_LOG_LEN);
     }
-    std::string str(buff.data(), size);
-    UpdaterLogger(level).OutputUpdaterLog(fileName, line) << str;
 }
 
 std::ostream& ErrorCode::OutputErrorCode(const std::string &path, int line, UpdaterErrorCode code)
