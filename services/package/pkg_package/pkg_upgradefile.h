@@ -16,6 +16,7 @@
 #define UPGRADE_PKG_FILE_H
 
 #include <map>
+#include "rust/image_hash_check.h"
 #include "pkg_algorithm.h"
 #include "pkg_manager.h"
 #include "pkg_pkgfile.h"
@@ -74,6 +75,8 @@ public:
 
     int32_t Unpack(PkgStreamPtr outStream) override;
 
+    int32_t Verify(PkgBuffer &buffer, size_t len, size_t offset);
+
     const FileInfo *GetFileInfo() const override
     {
         return &fileInfo_.fileInfo;
@@ -101,7 +104,14 @@ public:
         pkgInfo_ = std::move(*info);
     }
 
-    ~UpgradePkgFile() override {}
+    ~UpgradePkgFile() override
+    {
+#ifndef DIFF_PATCH_SDK
+        if (hashCheck_ != nullptr) {
+            ReleaseImgHashData(hashCheck_);
+        }
+#endif
+    }
 
     int32_t AddEntry(const PkgManager::FileInfoPtr file, const PkgStreamPtr inStream) override;
 
@@ -116,6 +126,16 @@ public:
     const PkgInfo *GetPkgInfo() const override
     {
         return &pkgInfo_.pkgInfo;
+    }
+
+    const ImgHashData *GetImgHashData() const
+    {
+        return hashCheck_;
+    }
+
+    PkgManager::PkgManagerPtr GetPkgMgr() const
+    {
+        return pkgManager_;
     }
 
 private:
@@ -137,6 +157,9 @@ private:
     int32_t ReadPackageInfo(std::vector<uint8_t> &signData,
         size_t &parsedLen, DigestAlgorithm::DigestAlgorithmPtr algorithm);
     int32_t ReadReserveData(size_t &parsedLen, DigestAlgorithm::DigestAlgorithmPtr &algorithm);
+    int32_t ReadImgHashTLV(std::vector<uint8_t> &imgHashBuf, size_t &parsedLen,
+                                        DigestAlgorithm::DigestAlgorithmPtr algorithm, uint32_t needType);
+    int32_t ReadImgHashData(size_t &parsedLen, DigestAlgorithm::DigestAlgorithmPtr algorithm);
     int32_t ReadSignData(std::vector<uint8_t> &signData,
         size_t &parsedLen, DigestAlgorithm::DigestAlgorithmPtr algorithm);
     int32_t VerifyHeader(DigestAlgorithm::DigestAlgorithmPtr algorithm, VerifyFunction verifier,
@@ -151,6 +174,8 @@ private:
 private:
     UpgradePkgInfo pkgInfo_ {};
     size_t packedFileSize_ {0};
+    const ImgHashData *hashCheck_ = nullptr;
+    bool isSdPackage_ = false;
 };
 } // namespace Hpackage
 #endif

@@ -70,6 +70,10 @@ int32_t UScriptInstructionBinFlowWrite::Execute(Uscript::UScriptEnv &env, Uscrip
         std::ref(env), std::ref(context), binFlowStream);
     consumer.join();
     producer.join();
+    if (isStopRun_) {
+        LOG(ERROR) << "Error to Execute bin file update";
+        return ret;
+    }
     return USCRIPT_SUCCESS;
 }
 

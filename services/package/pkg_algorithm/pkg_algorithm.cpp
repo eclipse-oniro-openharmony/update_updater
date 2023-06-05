@@ -149,6 +149,61 @@ int32_t PkgAlgorithm::Unpack(const PkgStreamPtr inStream, const PkgStreamPtr out
     return ret;
 }
 
+int32_t PkgAlgorithm::UnpackWithVerify(const PkgStreamPtr inStream, const PkgStreamPtr outStream,
+    PkgAlgorithmContext &context, VerifyFunction verifier)
+{
+    DigestAlgorithm::DigestAlgorithmPtr algorithm = PkgAlgorithmFactory::GetDigestAlgorithm(context.digestMethod);
+    if (algorithm == nullptr) {
+        PKG_LOGE("Can not get digest algor");
+        return PKG_NOT_EXIST_ALGORITHM;
+    }
+    algorithm->Init();
+    PkgBuffer buffer(nullptr, MAX_BUFFER_SIZE);
+
+    int32_t ret = PKG_SUCCESS;
+    size_t srcOffset = context.srcOffset;
+    size_t destOffset = context.destOffset;
+    size_t remainSize = context.packedSize;
+    size_t readLen = 0;
+    while (remainSize > 0) {
+        ret = ReadData(inStream, srcOffset, buffer, remainSize, readLen);
+        if (ret != PKG_SUCCESS) {
+            PKG_LOGE("Fail read data ");
+            break;
+        }
+
+        if (verifier != nullptr) {
+            ret = verifier(buffer, readLen, destOffset);
+            if (ret != PKG_SUCCESS) {
+                PKG_LOGE("Fail verify read data");
+                break;
+            }
+        }
+
+        ret = outStream->Write(buffer, readLen, destOffset);
+        if (ret != PKG_SUCCESS) {
+            PKG_LOGE("Fail write data ");
+            break;
+        }
+
+        algorithm->Update(buffer, readLen);
+        srcOffset += readLen;
+        destOffset += readLen;
+    }
+
+    ret = FinalDigest(algorithm, context, true);
+    if (ret != 0) {
+        PKG_LOGE("Check digest fail");
+        return ret;
+    }
+    if (destOffset - context.destOffset != context.packedSize) {
+        PKG_LOGE("original size error %zu %zu", destOffset, context.packedSize);
+        return PKG_INVALID_DIGEST;
+    }
+    context.unpackedSize = srcOffset - context.srcOffset;
+    return ret;
+}
+
 PkgAlgorithm::PkgAlgorithmPtr PkgAlgorithmFactory::GetAlgorithm(const PkgManager::FileInfoPtr config)
 {
     if (config == nullptr) {

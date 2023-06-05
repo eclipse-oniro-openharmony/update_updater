@@ -63,6 +63,7 @@ struct PkgAlgorithmContext {
 class PkgAlgorithm {
 public:
     using PkgAlgorithmPtr = std::shared_ptr<PkgAlgorithm>;
+    using VerifyFunction = std::function<int32_t(PkgBuffer &buffer, size_t len, size_t offset)>;
 
     PkgAlgorithm() {}
 
@@ -77,6 +78,9 @@ public:
     {
         (void)info;
     }
+
+    int32_t UnpackWithVerify(const PkgStreamPtr inStream, const PkgStreamPtr outStream,
+        PkgAlgorithmContext &context, VerifyFunction verifier = nullptr);
 protected:
     int32_t FinalDigest(DigestAlgorithm::DigestAlgorithmPtr algorithm,
         PkgAlgorithmContext &context, bool check) const;

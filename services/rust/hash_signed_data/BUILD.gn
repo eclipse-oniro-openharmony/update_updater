@@ -18,6 +18,7 @@ ohos_rust_static_ffi("rust_hash_signed_data") {
     "src/evp.rs",
     "src/ffi.rs",
     "src/hsd.rs",
+    "src/img_hash_check.rs",
     "src/lib.rs",
   ]
   part_name = "updater"
