@@ -20,6 +20,7 @@
 #include <vector>
 #ifndef DIFF_PATCH_SDK
 #include "hilog_base/log_base.h"
+#include "vsnprintf_s_p.h"
 #endif
 #include "securec.h"
 
@@ -33,7 +34,6 @@ static int g_logLevel = INFO;
 #ifndef DIFF_PATCH_SDK
 static const unsigned int g_domain = 0XD002E01;
 #endif
-
 
 void InitUpdaterLogger(const std::string &tag, const std::string &logFile, const std::string &stageFile,
     const std::string &errorCodeFile)
@@ -129,6 +129,23 @@ void Logger(int level, const char* fileName, int32_t line, const char* format, .
     std::string str(buff.data(), size);
     UpdaterLogger(level).OutputUpdaterLog(fileName, line) << str;
 }
+
+#ifndef DIFF_PATCH_SDK
+// used for external module to adapt %{private|public} format log to updater log
+void UpdaterHiLogger(int level, const char* fileName, int32_t line, const char* format, ...)
+{
+    char buf[MAX_LOG_LEN] = {0};
+    va_list list;
+    va_start(list, format);
+    int size = vsnprintfp_s(buf, MAX_LOG_LEN, MAX_LOG_LEN - 1, true, format, list);
+    va_end(list);
+    if (size < EOK) {
+        UpdaterLogger(level).OutputUpdaterLog(fileName, line) << "vsnprintfp_s failed " << size;
+    } else {
+        UpdaterLogger(level).OutputUpdaterLog(fileName, line) << std::string(buf, size);
+    }
+}
+#endif
 
 std::ostream& ErrorCode::OutputErrorCode(const std::string &path, int line, UpdaterErrorCode code)
 {
