@@ -72,7 +72,7 @@ int32_t UScriptInstructionBinFlowWrite::Execute(Uscript::UScriptEnv &env, Uscrip
     producer.join();
     if (isStopRun_) {
         LOG(ERROR) << "Error to Execute bin file update";
-        return ret;
+        return USCRIPT_ERROR_EXECUTE;
     }
     return USCRIPT_SUCCESS;
 }
