@@ -251,7 +251,6 @@ public:
     virtual ~PkgManager() = default;
 
     static PkgManagerPtr CreatePackageInstance();
-    static PkgManagerPtr GetPackageInstance();
     static void ReleasePackageInstance(PkgManagerPtr manager);
 
     /**

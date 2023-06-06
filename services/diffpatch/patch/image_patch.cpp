@@ -106,22 +106,23 @@ int32_t CompressedImagePatch::ApplyImagePatch(const PatchParam &param, size_t &s
     size_t offset = startOffset;
     // read header
     PatchHeader header {};
-    int32_t ret = StartReadHeader(param, header, offset);
-    if (ret != 0) {
+    if (StartReadHeader(param, header, offset) != 0) {
         return -1;
     }
     // decompress old data
+    Hpackage::PkgManager::PkgManagerPtr pkgManager = Hpackage::PkgManager::CreatePackageInstance();
     Hpackage::PkgManager::StreamPtr stream = nullptr;
     BlockBuffer oldData = { param.oldBuff + header.srcStart, header.srcLength };
-    ret = DecompressData(oldData, stream, true, header.expandedLen);
-    if (ret != 0) {
+    if (DecompressData(pkgManager, oldData, stream, true, header.expandedLen) != 0) {
         PATCH_LOGE("Failed to decompress data");
+        Hpackage::PkgManager::ReleasePackageInstance(pkgManager);
         return -1;
     }
     // prepare new data
     std::unique_ptr<Hpackage::FileInfo> info = GetFileInfo();
     if (info == nullptr) {
         PATCH_LOGE("Failed to get file info");
+        Hpackage::PkgManager::ReleasePackageInstance(pkgManager);
         return -1;
     }
     info->packedSize = header.targetSize;
@@ -129,13 +130,14 @@ int32_t CompressedImagePatch::ApplyImagePatch(const PatchParam &param, size_t &s
     std::unique_ptr<CompressedFileRestore> zipWriter = std::make_unique<CompressedFileRestore>(info.get(), writer_);
     if (zipWriter == nullptr || zipWriter->Init() != 0) {
         PATCH_LOGE("Failed to create zip writer");
+        Hpackage::PkgManager::ReleasePackageInstance(pkgManager);
         return -1;
     }
     // apply patch
     PatchBuffer patchInfo = {param.patch, header.patchOffset, param.patchSize};
-    ret = UpdateApplyPatch::ApplyBlockPatch(patchInfo, stream, zipWriter.get());
-    if (ret != 0) {
+    if (UpdateApplyPatch::ApplyBlockPatch(patchInfo, stream, zipWriter.get()) != 0) {
         PATCH_LOGE("Failed to apply bsdiff patch");
+        Hpackage::PkgManager::ReleasePackageInstance(pkgManager);
         return -1;
     }
     // compress new data
@@ -145,20 +147,21 @@ int32_t CompressedImagePatch::ApplyImagePatch(const PatchParam &param, size_t &s
     PATCH_LOGI("ApplyImagePatch unpackedSize %zu %zu", originalSize, compressSize);
     if (originalSize != header.targetSize) {
         PATCH_LOGE("Failed to apply bsdiff patch");
+        Hpackage::PkgManager::ReleasePackageInstance(pkgManager);
         return -1;
     }
     startOffset = offset;
+    Hpackage::PkgManager::ReleasePackageInstance(pkgManager);
     return 0;
 }
 
-int32_t CompressedImagePatch::DecompressData(PkgBuffer buffer,
+int32_t CompressedImagePatch::DecompressData( Hpackage::PkgManager::PkgManagerPtr &pkgManager, PkgBuffer buffer,
     Hpackage::PkgManager::StreamPtr &stream, bool memory, size_t expandedLen) const
 {
     if (expandedLen == 0) {
         PATCH_LOGE("Decompress data is null");
         return 0;
     }
-    PkgManager* pkgManager = Hpackage::PkgManager::GetPackageInstance();
     std::unique_ptr<Hpackage::FileInfo> info = GetFileInfo();
     if (pkgManager == nullptr || info == nullptr) {
         PATCH_LOGE("Failed to get pkg manager or file info");

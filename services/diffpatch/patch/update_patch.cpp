@@ -130,7 +130,7 @@ int32_t UpdateApplyPatch::ApplyBlockPatch(const PatchBuffer &patchInfo,
 int32_t UpdateApplyPatch::ApplyBlockPatch(const PatchBuffer &patchInfo,
     const BlockBuffer &oldInfo, UpdatePatchWriterPtr writer)
 {
-    PkgManager* pkgManager = Hpackage::PkgManager::GetPackageInstance();
+    PkgManager* pkgManager = Hpackage::PkgManager::CreatePackageInstance();
     if (pkgManager == nullptr) {
         PATCH_LOGE("Failed to get pkg manager");
         return -1;
@@ -141,6 +141,7 @@ int32_t UpdateApplyPatch::ApplyBlockPatch(const PatchBuffer &patchInfo,
     if (stream == nullptr || ret != PKG_SUCCESS) {
         PATCH_LOGE("Failed to create stream");
         pkgManager->ClosePkgStream(stream);
+        Hpackage::PkgManager::ReleasePackageInstance(pkgManager);
         return -1;
     }
 
@@ -148,10 +149,12 @@ int32_t UpdateApplyPatch::ApplyBlockPatch(const PatchBuffer &patchInfo,
     if (patch == nullptr) {
         PATCH_LOGE("Failed to  creare patch ");
         pkgManager->ClosePkgStream(stream);
+        Hpackage::PkgManager::ReleasePackageInstance(pkgManager);
         return -1;
     }
     ret = patch->ApplyPatch();
     pkgManager->ClosePkgStream(stream);
+    Hpackage::PkgManager::ReleasePackageInstance(pkgManager);
     return ret;
 }
 
@@ -173,7 +176,7 @@ int32_t UpdateApplyPatch::ApplyBlockPatch(const PatchBuffer &patchInfo,
         return -1;
     }
 
-    PkgManager* pkgManager = Hpackage::PkgManager::GetPackageInstance();
+    PkgManager* pkgManager = Hpackage::PkgManager::CreatePackageInstance();
     if (pkgManager == nullptr) {
         PATCH_LOGE("ApplyBlockPatch ::Failed to get pkg manager");
         return -1;
@@ -184,6 +187,7 @@ int32_t UpdateApplyPatch::ApplyBlockPatch(const PatchBuffer &patchInfo,
     if (stream == nullptr) {
         PATCH_LOGE("Failed to create stream");
         pkgManager->ClosePkgStream(stream);
+        Hpackage::PkgManager::ReleasePackageInstance(pkgManager);
         return -1;
     }
 
@@ -192,10 +196,12 @@ int32_t UpdateApplyPatch::ApplyBlockPatch(const PatchBuffer &patchInfo,
     if (patch == nullptr) {
         PATCH_LOGE("Failed to  creare patch ");
         pkgManager->ClosePkgStream(stream);
+        Hpackage::PkgManager::ReleasePackageInstance(pkgManager);
         return -1;
     }
     ret = patch->ApplyPatch();
     pkgManager->ClosePkgStream(stream);
+    Hpackage::PkgManager::ReleasePackageInstance(pkgManager);
     if (ret != 0) {
         PATCH_LOGE("Failed to applay patch ");
         return -1;

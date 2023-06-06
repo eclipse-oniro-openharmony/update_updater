@@ -73,7 +73,7 @@ protected:
     virtual int32_t ReadHeader(const PatchParam &param, PatchHeader &header, size_t &offset) = 0;
     virtual std::unique_ptr<Hpackage::FileInfo> GetFileInfo() const = 0;
     int32_t StartReadHeader(const PatchParam &param, PatchHeader &header, size_t &offset);
-    int32_t DecompressData(Hpackage::PkgBuffer buffer,
+    int32_t DecompressData( Hpackage::PkgManager::PkgManagerPtr &pkgManager, Hpackage::PkgBuffer buffer,
         Hpackage::PkgManager::StreamPtr &stream, bool memory, size_t expandedLen) const;
 
     std::vector<uint8_t> bonusData_ {};
