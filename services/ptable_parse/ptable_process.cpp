@@ -46,13 +46,13 @@ bool PtableProcess(UpdaterParams &upParams)
         std::vector<std::string> components;
         if (pkgManager == nullptr) {
             LOG(ERROR) << "Fail to CreatePackageInstance";
-            return UPDATE_CORRUPT;
+            return false;
         }
         int32_t ret = pkgManager->LoadPackage(path, Utils::GetCertName(), components);
         if (ret != Hpackage::PKG_SUCCESS) {
             LOG(ERROR) << "LoadPackage fail ret:" << ret;
             Hpackage::PkgManager::ReleasePackageInstance(pkgManager);
-            return ret;
+            return false;
         }
         DevicePtable& devicePtb = DevicePtable::GetInstance();
         devicePtb.LoadPartitionInfo();
