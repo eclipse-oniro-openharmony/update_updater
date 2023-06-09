@@ -381,6 +381,12 @@ static UpdaterStatus PreUpdatePackages(UpdaterParams &upParams)
         LOG(INFO) << "deleate last upgrade file";
     }
 
+    // verify packages first
+    if (VerifyPackages(upParams) != UPDATE_SUCCESS) {
+        UPDATER_LAST_WORD(UPDATE_ERROR);
+        return UPDATE_ERROR;
+    }
+
     for (unsigned int i = 0; i < upParams.updatePackage.size(); i++) {
         int ret = PreProcess::GetInstance().DoUpdateAuth(upParams.updatePackage[i]);
         if (ret == 0) {
@@ -391,12 +397,6 @@ static UpdaterStatus PreUpdatePackages(UpdaterParams &upParams)
             UPDATER_LAST_WORD(UPDATE_ERROR);
             return UPDATE_ERROR;
         }
-    }
-
-    // verify packages first
-    if (VerifyPackages(upParams) != UPDATE_SUCCESS) {
-        UPDATER_LAST_WORD(UPDATE_ERROR);
-        return UPDATE_ERROR;
     }
 
     // Only handle UPATE_ERROR and UPDATE_SUCCESS here.Let package verify handle others.
