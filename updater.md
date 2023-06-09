@@ -54,8 +54,11 @@ OpenHarmony使用MISC分区保存启动时的指令，默认的MISC分区的结�
 ```
     struct UpdateMessage {
         char command[32];
-        char update[1280];
-        char reserved[736];
+        char status[32];
+        char update[768];
+        char stage[32];
+        char keyinfo[32];
+        char reserved[224];
     };
 ```
 command为当前的命令，update存放升级包路径，reserved存放保留信息。
