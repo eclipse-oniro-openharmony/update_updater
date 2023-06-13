@@ -40,7 +40,7 @@ constexpr uint32_t TM_MON_BITS = 5;
 constexpr uint32_t TM_MIN_BITS = 5;
 constexpr uint32_t TM_HOUR_BITS = 11;
 constexpr uint32_t BYTE_SIZE = 8;
-constexpr size_t MAX_FILE_SIZE = 1UL << 31;
+constexpr size_t MAX_MEM_SIZE = 0xFFFFFFFF;
 constexpr uint32_t SECOND_BUFFER = 2;
 constexpr uint32_t THIRD_BUFFER = 3;
 constexpr uint8_t SHIFT_RIGHT_FOUR_BITS = 4;
@@ -125,7 +125,11 @@ int32_t CheckFile(const std::string &fileName, int type)
 uint8_t *AnonymousMap(const std::string &fileName, size_t size)
 {
     void *mappedData = nullptr;
-    // Map the file to memory
+    if (size > MAX_MEM_SIZE) {
+        PKG_LOGE("Size bigger for mmap");
+        return nullptr;
+    }
+    // Map memory for file
     mappedData = mmap(nullptr, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_POPULATE | MAP_ANON, -1, 0);
     if (mappedData == MAP_FAILED) {
         PKG_LOGE("Failed to alloc memory for file %s ", fileName.c_str());
@@ -146,7 +150,7 @@ uint8_t *FileMap(const std::string &path)
         return nullptr;
     }
     size_t size = GetFileSize(path);
-    if (size > MAX_FILE_SIZE) {
+    if (size > MAX_MEM_SIZE) {
         close(fd);
         PKG_LOGE("Size bigger for mmap");
         return nullptr;
