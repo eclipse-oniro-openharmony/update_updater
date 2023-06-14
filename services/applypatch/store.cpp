@@ -118,7 +118,7 @@ int32_t Store::WriteDataToStore(const std::string &dirPath, const std::string &f
         LOG(ERROR) << "Failed to create store";
         return -1;
     }
-    LOG(INFO) << "Writing " << size << " blocks to " << path;
+    LOG(DEBUG) << "Writing " << size << " blocks to " << path;
     if (size < 0 || !WriteFully(fd, buffer.data(), static_cast<size_t>(size))) {
         if (errno == EIO) {
             close(fd);

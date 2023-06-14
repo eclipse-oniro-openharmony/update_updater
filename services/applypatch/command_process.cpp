@@ -116,7 +116,7 @@ bool LoadTarget(const Command &params, size_t &pos, std::vector<uint8_t> &buffer
     targetBlock.ParserAndInsert(cmdTmp);
     tgtBlockSize = targetBlock.TotalBlockSize() * H_BLOCK_SIZE;
     buffer.resize(tgtBlockSize);
-    LOG(INFO) << targetBlock.TotalBlockSize() << " blocks' data need to read";
+    LOG(DEBUG) << targetBlock.TotalBlockSize() << " blocks' data need to read";
     if (targetBlock.ReadDataFromBlock(params.GetFileDescriptor(), buffer) == 0) {
         LOG(ERROR) << "Read data from block error";
         result = FAILED;
@@ -161,10 +161,10 @@ CommandResult DiffAndMoveCommandFn::Execute(const Command &params)
     int32_t ret = -1;
     size_t tgtBlockSize = buffer.size() / H_BLOCK_SIZE;
     if (type != CommandType::MOVE) {
-        LOG(INFO) << "Create " << tgtBlockSize << " diff blocks to target position";
+        LOG(DEBUG) << "Create " << tgtBlockSize << " diff blocks to target position";
         ret = targetBlock.WriteDiffToBlock(const_cast<const Command &>(params), buffer, tgtBlockSize, isImgDiff);
     } else {
-        LOG(INFO) << "Moving " << tgtBlockSize << " blocks to target position";
+        LOG(DEBUG) << "Moving " << tgtBlockSize << " blocks to target position";
         ret = targetBlock.WriteDataToBlock(params.GetFileDescriptor(), buffer) == 0 ? -1 : 0;
     }
     if (ret != 0) {

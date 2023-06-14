@@ -116,7 +116,7 @@ bool TransferManager::CommandsParser(int fd, const std::vector<std::string> &con
             globalParams->env->PostMessage("set_progress",
                 std::to_string((static_cast<double>(globalParams->written) - initBlock) / totalSize));
         }
-        LOG(INFO) << "Running command : " << cmd->GetArgumentByPos(0) << " success";
+        LOG(DEBUG) << "Running command : " << cmd->GetArgumentByPos(0) << " success";
     }
     return true;
 }

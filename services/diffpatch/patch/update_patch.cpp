@@ -311,7 +311,7 @@ int32_t ImagePatchWriter::Finish()
     SHA256_Final(digest.data(), &sha256Ctx_);
     BlockBuffer data = {  digest.data(), digest.size() };
     std::string hexDigest = ConvertSha256Hex(data);
-    PATCH_LOGI("VerifySha256 SHA256 : %s expected SHA256 : %s", hexDigest.c_str(), expected_.c_str());
+    PATCH_DEBUG("VerifySha256 SHA256 : %s expected SHA256 : %s", hexDigest.c_str(), expected_.c_str());
     init_ = false;
     return hexDigest.compare(expected_);
 }
