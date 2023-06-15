@@ -47,12 +47,14 @@ void InitUpdaterLogger(const std::string &tag, const std::string &logFile, const
 UpdaterLogger::~UpdaterLogger()
 {
     std::string str = oss_.str();
-    if (g_logLevel > level_) {
-        return;
-    }
 #ifndef DIFF_PATCH_SDK
     HiLogBasePrint(LOG_CORE, (LogLevel)level_, g_domain, g_logTag.c_str(), "%{public}s", str.c_str());
 #endif
+
+    if (level_ <= DEBUG) {
+        return;
+    }
+
     oss_.str("");
     oss_ << std::endl << std::flush;
     if (g_updaterLog.is_open()) {
