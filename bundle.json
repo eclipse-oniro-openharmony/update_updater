@@ -53,7 +53,9 @@
                 "drivers_peripheral_input",
                 "c_utils",
                 "hilog_native",
-                "selinux"
+                "selinux",
+                "common",
+                "ui_lite"
             ],
             "third_party": [
                 "bounds_checking_function",
@@ -64,7 +66,7 @@
                 "libusb",
                 "zlib",
                 "libuv",
-                "cJSON",
+                "cjson",
                 "libpng",
                 "thirdparty_selinux"
             ]
