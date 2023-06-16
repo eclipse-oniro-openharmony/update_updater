@@ -75,6 +75,9 @@ bool FbdevDriver::Init()
             return false;
         }
 
+        (void)FbPowerContrl(fd, false);
+        (void)FbPowerContrl(fd, true);
+
         if (ioctl(fd, FBIOGET_FSCREENINFO, &finfo_) < 0) {
             LOG(ERROR) << "failed to get fb0 info";
             close(fd);
@@ -135,5 +138,14 @@ void FbdevDriver::ReleaseFb(const struct FbBufferObject *fbo)
     munmap(fbo->vaddr, fbo->size);
     close(fd_);
     fd_ = -1;
+}
+
+bool FbdevDriver::FbPowerContrl(int fd, bool powerOn)
+{
+    if (ioctl(fd, FBIOBLANK, powerOn ? FB_BLANK_UNBLANK: FB_BLANK_POWERDOWN) < 0) {
+        LOG(ERROR) << "failed to set fb0 power " << powerOn;
+        return false;
+    }
+    return true;
 }
 } // namespace Updater
