@@ -96,6 +96,6 @@ ohos_executable("diff") {
     ]
   }
   install_enable = false
-  subsystem_name = "developtools"
+  subsystem_name = "updater"
   part_name = "updater"
 }
