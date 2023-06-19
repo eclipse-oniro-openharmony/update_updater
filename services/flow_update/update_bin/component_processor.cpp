@@ -275,4 +275,94 @@ int RawImgProcessor::RawImageWriteProcessor(const PkgBuffer &buffer, size_t size
 
     return PKG_SUCCESS;
 }
+
+int32_t SkipImgProcessor::PreProcess(Uscript::UScriptEnv &env)
+{
+    std::string partitionName = name_;
+    LOG(INFO) << "SkipImgProcessor::PreProcess " << partitionName;
+    if (env.GetPkgManager() == nullptr) {
+        LOG(ERROR) << "Error to get pkg manager";
+        return USCRIPT_ERROR_EXECUTE;
+    }
+
+    std::string writePath;
+    writer_ = DataWriter::CreateDataWriter(WRITE_RAW, writePath,
+        static_cast<UpdaterEnv *>(&env), 0);
+    if (writer_ == nullptr) {
+        LOG(ERROR) << "Error to create writer";
+        return USCRIPT_ERROR_EXECUTE;
+    }
+#ifdef UPDATER_UT
+    int fd = open(writePath.c_str(), O_RDWR | O_CREAT);
+    if (fd >= 0) {
+        close(fd);
+    }
+#endif
+    return USCRIPT_SUCCESS;
+}
+
+int32_t SkipImgProcessor::DoProcess(Uscript::UScriptEnv &env)
+{
+    std::string partitionName = name_;
+    // Extract partition information
+    const FileInfo *info = env.GetPkgManager()->GetFileInfo(partitionName);
+    if (info == nullptr) {
+        LOG(ERROR) << "Error to get file info";
+        return USCRIPT_ERROR_EXECUTE;
+    }
+
+    PkgStream::ExtractFileProcessor processor =
+        [this](const PkgBuffer &buffer, size_t size, size_t start, bool isFinish, const void *context) {
+            return this->SkipImageWriteProcessor(buffer, size, start, isFinish, context);
+        };
+
+    Hpackage::PkgManager::StreamPtr outStream = nullptr;
+    int ret = env.GetPkgManager()->CreatePkgStream(outStream, partitionName, processor, writer_.get());
+    if (ret != USCRIPT_SUCCESS || outStream == nullptr) {
+        LOG(ERROR) << "Error to create output stream";
+        return USCRIPT_ERROR_EXECUTE;
+    }
+
+    ret = env.GetPkgManager()->ExtractFile(partitionName, outStream);
+    if (ret != USCRIPT_SUCCESS) {
+        LOG(ERROR) << "Error to extract file";
+        env.GetPkgManager()->ClosePkgStream(outStream);
+        return USCRIPT_ERROR_EXECUTE;
+    }
+    env.GetPkgManager()->ClosePkgStream(outStream);
+    return USCRIPT_SUCCESS;
+}
+
+int SkipImgProcessor::SkipImageWriteProcessor(const PkgBuffer &buffer, size_t size, [[maybe_unused]]size_t start,
+                                              [[maybe_unused]]bool isFinish, [[maybe_unused]]const void* context)
+{
+    void *p = const_cast<void *>(context);
+    DataWriter *writer = static_cast<DataWriter *>(p);
+    if (writer == nullptr) {
+        LOG(ERROR) << "Data writer is null";
+        return PKG_INVALID_STREAM;
+    }
+
+    // maybe extract from package is finished. just return.
+    if (buffer.buffer == nullptr || size == 0) {
+        return PKG_SUCCESS;
+    }
+
+    if (pkgFileSize_ != 0) {
+        readOffset_ += size;
+        writer->GetUpdaterEnv()->PostMessage("set_progress", std::to_string((float)readOffset_ / pkgFileSize_));
+        LOG(INFO) << "set_progress readsize: " << readOffset_ << " totalsize: " << pkgFileSize_ <<" byte(s)";
+    }
+
+    return PKG_SUCCESS;
+}
+
+int32_t SkipImgProcessor::PostProcess(Uscript::UScriptEnv &env)
+{
+    PartitionRecord::GetInstance().RecordPartitionUpdateStatus(name_, true);
+    DataWriter::ReleaseDataWriter(writer_);
+    totalSize_ = 0;
+    LOG(INFO) << name_ << " SkipImgProcess finish";
+    return USCRIPT_SUCCESS;
+}
 }
