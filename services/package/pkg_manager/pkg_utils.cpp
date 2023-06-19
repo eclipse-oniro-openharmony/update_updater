@@ -144,6 +144,7 @@ uint8_t *FileMap(const std::string &path)
         PKG_LOGE("Failed to open file");
         return nullptr;
     }
+    size_t size = GetFileSize(path);
     void *mappedData = mmap(nullptr, size, PROT_READ, MAP_PRIVATE, fd, 0);
     if (mappedData == MAP_FAILED) {
         close(fd);
