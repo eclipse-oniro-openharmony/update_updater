@@ -19,6 +19,15 @@ config("updater_ui_support_cfg") {
   if (updater_ui_support) {
     defines = [ "UPDATER_UI_SUPPORT" ]
   }
+  include_dirs = [
+    "${updater_path}/interfaces/kits/include",
+    "${updater_path}/services/ui",
+    "${updater_path}/services/ui/include",
+    "${updater_path}/services/ui/control",
+    "${updater_path}/services/ui/driver",
+    "${updater_path}/services/ui/view",
+    "${updater_path}/services/ui/language",
+  ]
 }
 
 ohos_static_library("libui") {
