@@ -425,6 +425,11 @@ bool CopyUpdaterLogs(const std::string &sLog, const std::string &dLog)
         LOG(WARNING) << "MountForPath /data/log failed!";
         return false;
     }
+
+#ifdef WITH_SELINUX
+    Restorecon("/data");
+#endif // WITH_SELINUX
+
     if (access(UPDATER_LOG_DIR, 0) != 0) {
         if (MkdirRecursive(UPDATER_LOG_DIR, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) != 0) {
             LOG(ERROR) << "MkdirRecursive error!";

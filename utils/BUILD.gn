@@ -48,6 +48,13 @@ ohos_static_library("libutils") {
   ]
   external_deps = [ "init:libbegetutil" ]
 
+  if (build_selinux) {
+    external_deps += [ "selinux:librestorecon" ]
+    deps += [ "//third_party/selinux:libselinux" ]
+    include_dirs += [ "//third_party/selinux/libselinux/include" ]
+    cflags = [ "-DWITH_SELINUX" ]
+  }
+
   subsystem_name = "updater"
   part_name = "updater"
 }
