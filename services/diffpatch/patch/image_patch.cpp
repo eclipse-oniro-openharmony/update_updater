@@ -42,9 +42,8 @@ int32_t NormalImagePatch::ApplyImagePatch(const PatchParam &param, size_t &start
     offset += sizeof(int64_t);
     size_t patchOffset = static_cast<size_t>(ReadLE<int64_t>(param.patch + offset));
     offset += sizeof(int64_t);
-    PATCH_DEBUG("ApplyImagePatch srcStart %zu srcLen %zu patchOffset: %zu", srcStart, srcLen, patchOffset);
     if (srcStart + srcLen > param.oldSize) {
-        PATCH_LOGE("Failed to check datalen");
+        PATCH_LOGE("Failed to ApplyImagePatch srcStart %zu srcLen %zu patchOffset: %zu", srcStart, srcLen, patchOffset);
         return -1;
     }
 

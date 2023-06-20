@@ -268,8 +268,8 @@ int32_t BlockSet::LoadSourceBuffer(const Command &cmd, size_t &pos, std::vector<
         srcBlk.ParserAndInsert(targetCmd);
         isOverlap = IsTwoBlocksOverlap(srcBlk, *this);
         // read source data
-        LOG(DEBUG) << "new start to read source block ...";
         if (srcBlk.ReadDataFromBlock(cmd.GetFileDescriptor(), sourceBuffer) == 0) {
+            LOG(ERROR) << "ReadDataFromBlock failed";
             return -1;
         }
         std::string nextArgv = cmd.GetArgumentByPos(pos++);
@@ -404,7 +404,7 @@ int32_t BlockSet::WriteDiffToBlock(const Command &cmd, std::vector<uint8_t> &src
             }, cmd.GetArgumentByPos(pos + 1));
         writer.reset();
         if (ret != 0) {
-            LOG(ERROR) << "Fail to ApplyImagePatch";
+            LOG(ERROR) << "Fail to ApplyImagePatch; offset: " << offset << ", length: " << length;
             return -1;
         }
     } else {

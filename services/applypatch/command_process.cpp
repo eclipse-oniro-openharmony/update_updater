@@ -116,9 +116,8 @@ bool LoadTarget(const Command &params, size_t &pos, std::vector<uint8_t> &buffer
     targetBlock.ParserAndInsert(cmdTmp);
     tgtBlockSize = targetBlock.TotalBlockSize() * H_BLOCK_SIZE;
     buffer.resize(tgtBlockSize);
-    LOG(DEBUG) << targetBlock.TotalBlockSize() << " blocks' data need to read";
     if (targetBlock.ReadDataFromBlock(params.GetFileDescriptor(), buffer) == 0) {
-        LOG(ERROR) << "Read data from block error";
+        LOG(ERROR) << "Read data from block error, TotalBlockSize: " << targetBlock.TotalBlockSize();
         result = FAILED;
         return false;
     }
@@ -168,6 +167,7 @@ CommandResult DiffAndMoveCommandFn::Execute(const Command &params)
         ret = targetBlock.WriteDataToBlock(params.GetFileDescriptor(), buffer) == 0 ? -1 : 0;
     }
     if (ret != 0) {
+        LOG(ERROR) << "tgtBlockSize is : " <<tgtBlockSize << " , type is :" <<type;
         return errno == EIO ? NEED_RETRY : FAILED;
     }
     TransferManager::GetTransferManagerInstance()->GetGlobalParams()->written += targetBlock.TotalBlockSize();

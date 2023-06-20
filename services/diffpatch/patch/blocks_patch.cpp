@@ -59,7 +59,6 @@ static int64_t ReadLE64(const uint8_t *buffer)
 
 int32_t BlocksPatch::ApplyPatch()
 {
-    PATCH_DEBUG("BlocksPatch::ApplyPatch");
     int64_t controlDataSize = 0;
     int64_t diffDataSize = 0;
     int32_t ret = ReadHeader(controlDataSize, diffDataSize, newSize_);
@@ -110,14 +109,13 @@ int32_t BlocksPatch::ApplyPatch()
 
 int32_t BlocksPatch::ReadHeader(int64_t &controlDataSize, int64_t &diffDataSize, int64_t &newSize)
 {
-    PATCH_DEBUG("BlocksPatch::ApplyPatch %zu %zu", patchInfo_.start, patchInfo_.length);
     if (patchInfo_.buffer == nullptr || patchInfo_.length <= PATCH_MIN) {
         PATCH_LOGE("Invalid parm");
         return -1;
     }
     BlockBuffer patchData = {patchInfo_.buffer + patchInfo_.start, patchInfo_.length - patchInfo_.start};
-    PATCH_DEBUG("Restore patch hash %zu %s",
-        patchInfo_.length - patchInfo_.start, GeneraterBufferHash(patchData).c_str());
+    PATCH_DEBUG("Restore patch hash %zu %zu %s",
+        patchInfo_.length , patchInfo_.start, GeneraterBufferHash(patchData).c_str());
     uint8_t *header = patchInfo_.buffer + patchInfo_.start;
     if (memcmp(header, BSDIFF_MAGIC, std::char_traits<char>::length(BSDIFF_MAGIC)) != 0) {
         PATCH_LOGE("Corrupt patch, patch head != BSDIFF40");

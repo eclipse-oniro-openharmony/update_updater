@@ -124,7 +124,7 @@ int32_t Store::WriteDataToStore(const std::string &dirPath, const std::string &f
             close(fd);
             return 1;
         }
-        LOG(ERROR) << "Write to stash failed";
+        LOG(ERROR) << "Write to stash failed, " << size << " blocks to " << path;
         close(fd);
         return -1;
     }
