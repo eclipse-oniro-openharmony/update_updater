@@ -31,6 +31,10 @@
 #include "init_reboot.h"
 #include "log/log.h"
 #include "misc_info/misc_info.h"
+#ifdef WITH_SELINUX
+#include <policycoreutils.h>
+#include "selinux/selinux.h"
+#endif 
 #include "package/pkg_manager.h"
 #include "securec.h"
 #include "updater/updater_const.h"
