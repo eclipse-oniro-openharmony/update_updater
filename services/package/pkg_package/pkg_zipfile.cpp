@@ -702,7 +702,7 @@ int32_t ZipFileEntry::DecodeHeader(PkgBuffer &buffer, size_t headerOffset, size_
         return PKG_INVALID_PKG_FORMAT;
     }
     size_t readLen = 0;
-    int32_t ret = inStream->Read(buffer, headerOffset, buff.length, readLen);
+    int32_t ret = inStream->Read(buffer, headerOffset, buffer.length, readLen);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("parse entry read centralDir failed");
         return ret;
