@@ -158,7 +158,7 @@ std::vector<uint64_t> GetStashSizeList(const std::vector<std::string> &packagePa
         PkgManager::StreamPtr outStream = nullptr;
         ret = pkgManager->CreatePkgStream(outStream, maxStashFileName, info->unpackedSize,
             PkgStream::PkgStreamType_MemoryMap);
-        if (outStream == nullptr) {
+        if (outStream == nullptr || ret != PKG_SUCCESS) {
             LOG(ERROR) << "Create stream fail " << maxStashFileName << " in " << path;
             PkgManager::ReleasePackageInstance(pkgManager);
             UPDATER_LAST_WORD(UPDATE_CORRUPT);

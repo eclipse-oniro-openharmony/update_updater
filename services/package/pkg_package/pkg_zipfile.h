@@ -143,7 +143,7 @@ public:
 
     int32_t Unpack(PkgStreamPtr outStream) override;
 
-    int32_t DecodeHeader(PkgBuffer &buffer, size_t headOffset, size_t dataOffset,
+    int32_t DecodeHeader(PkgBuffer &buff, size_t startOffset, size_t dataOffset,
         size_t &decodeLen) override;
 
     int32_t EncodeCentralDirEntry(const PkgStreamPtr stream, size_t startOffset, size_t &encodeLen);
@@ -191,7 +191,7 @@ public:
     int32_t LoadPackage(std::vector<std::string> &fileNames, VerifyFunction verifier = nullptr) override;
 
 private:
-    int32_t LoadPackage(std::vector<std::string> &fileNames, PkgBuffer &buff,
+    int32_t LoadPackage(std::vector<std::string> &fileNames, PkgBuffer &buffer,
         uint32_t endDirLen, size_t endDirPos, size_t &readLen);
     int32_t ParseFileEntries(std::vector<std::string> &fileNames, const EndCentralDir &endDir,
         size_t currentPos, size_t fileLen);
