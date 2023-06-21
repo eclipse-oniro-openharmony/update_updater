@@ -315,7 +315,7 @@ int32_t ImagePatchWriter::Finish()
     int32_t ret = hexDigest.compare(expected_);
     if (ret != 0) {
         PATCH_LOGE("VerifySha256 SHA256 : %s expected SHA256 : %s", hexDigest.c_str(), expected_.c_str());
-        return ret
+        return ret;
     }
     return 0;
 }
