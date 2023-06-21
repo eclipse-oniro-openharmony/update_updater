@@ -62,7 +62,7 @@ bool CopyFile(const std::string &src, const std::string &dest, bool isAppend = f
 bool WriteStringToFile(int fd, const std::string& content);
 std::string GetLocalBoardId();
 bool CopyUpdaterLogs(const std::string &sLog, const std::string &dLog);
-void CompressLogs(const std::string &logname);
+void CompressLogs(const std::string &name);
 bool CheckDumpResult();
 void WriteDumpResult(const std::string &result);
 bool PathToRealPath(const std::string &path, std::string &realPath);

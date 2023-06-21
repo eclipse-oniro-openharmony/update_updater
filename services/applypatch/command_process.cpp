@@ -160,10 +160,8 @@ CommandResult DiffAndMoveCommandFn::Execute(const Command &params)
     int32_t ret = -1;
     size_t tgtBlockSize = buffer.size() / H_BLOCK_SIZE;
     if (type != CommandType::MOVE) {
-        LOG(DEBUG) << "Create " << tgtBlockSize << " diff blocks to target position";
         ret = targetBlock.WriteDiffToBlock(const_cast<const Command &>(params), buffer, tgtBlockSize, isImgDiff);
     } else {
-        LOG(DEBUG) << "Moving " << tgtBlockSize << " blocks to target position";
         ret = targetBlock.WriteDataToBlock(params.GetFileDescriptor(), buffer) == 0 ? -1 : 0;
     }
     if (ret != 0) {
