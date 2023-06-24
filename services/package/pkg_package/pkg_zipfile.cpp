@@ -688,7 +688,7 @@ void ZipFileEntry::CombineTimeAndDate(time_t &time, uint16_t modifiedTime, uint1
     time = mktime(&newTime);                      // 将tm结构体转换成time_t格式。
 }
 
-int32_t ZipFileEntry::DecodeHeader(PkgBuffer &buff, size_t startOffset, size_t dataOffset,
+int32_t ZipFileEntry::DecodeHeader(PkgBuffer &buffer, size_t headerOffset, size_t dataOffset,
     size_t &decodeLen)
 {
     PkgStreamPtr inStream = pkgFile_->GetPkgStream();
@@ -697,25 +697,25 @@ int32_t ZipFileEntry::DecodeHeader(PkgBuffer &buff, size_t startOffset, size_t d
         return PKG_INVALID_PARAM;
     }
 
-    if (startOffset >= (std::numeric_limits<size_t>::max() - buff.length)) {
+    if (headerOffset >= (std::numeric_limits<size_t>::max() - buffer.length)) {
         PKG_LOGE("check centralDir len failed");
         return PKG_INVALID_PKG_FORMAT;
     }
     size_t readLen = 0;
-    int32_t ret = inStream->Read(buff, startOffset, buff.length, readLen);
+    int32_t ret = inStream->Read(buffer, headerOffset, buffer.length, readLen);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("parse entry read centralDir failed");
         return ret;
     }
-    PkgBuffer centralBuff(buff.buffer, readLen);
-    ret = DecodeCentralDirEntry(inStream, centralBuff, startOffset, decodeLen);
+    PkgBuffer centralBuff(buffer.buffer, readLen);
+    ret = DecodeCentralDirEntry(inStream, centralBuff, headerOffset, decodeLen);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("decode CentralDir failed");
         return ret;
     }
 
     size_t headerLen = 0;
-    ret = DecodeLocalFileHeader(inStream, buff, fileInfo_.fileInfo.headerOffset, headerLen);
+    ret = DecodeLocalFileHeader(inStream, buffer, fileInfo_.fileInfo.headerOffset, headerLen);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("decode LocalFileHeader failed");
         return ret;

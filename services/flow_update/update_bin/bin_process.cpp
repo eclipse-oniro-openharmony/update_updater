@@ -189,6 +189,10 @@ int32_t UScriptInstructionBinFlowWrite::UnCompressDataProducer(const PkgBuffer &
 int32_t UScriptInstructionBinFlowWrite::ProcessBinFile(Uscript::UScriptEnv &env, Uscript::UScriptContext &context,
     PkgManager::StreamPtr stream)
 {
+    if (stream == nullptr) {
+        LOG(ERROR) << "Error to get file stream";
+        return USCRIPT_ERROR_EXECUTE;
+    }
     ON_SCOPE_EXIT(failExecute) {
         isStopRun_ = true;
         stream->Stop();
@@ -206,12 +210,6 @@ int32_t UScriptInstructionBinFlowWrite::ProcessBinFile(Uscript::UScriptEnv &env,
         LOG(ERROR) << "Error to get pkg manager";
         return USCRIPT_INVALID_PARAM;
     }
-
-    if (stream == nullptr) {
-        LOG(ERROR) << "Error to get file stream";
-        return USCRIPT_ERROR_EXECUTE;
-    }
-
     std::vector<std::string> innerFileNames;
     ret = manager->LoadPackageWithStream(pkgFileName, Utils::GetCertName(),
         innerFileNames, PkgFile::PKG_TYPE_UPGRADE, stream);
@@ -220,7 +218,7 @@ int32_t UScriptInstructionBinFlowWrite::ProcessBinFile(Uscript::UScriptEnv &env,
         return USCRIPT_ERROR_EXECUTE;
     }
 
-    for (auto &iter : innerFileNames) {
+    for (const auto &iter : innerFileNames) {
         // 根据镜像名称获取分区名称和大小
         std::string partitionName = iter;
         const FileInfo *info = manager->GetFileInfo(partitionName);

@@ -950,7 +950,7 @@ int32_t UpgradeFileEntry::Verify(PkgBuffer &buffer, size_t len, size_t offset)
 
     PkgManager::StreamPtr stream = nullptr;
     int32_t ret = pkgFile->GetPkgMgr()->CreatePkgStream(stream, fileName_, buffer);
-    if (stream == nullptr) {
+    if (stream == nullptr || ret != PKG_SUCCESS) {
         PKG_LOGE("Failed to create stream");
         return PKG_INVALID_PARAM;
     }
