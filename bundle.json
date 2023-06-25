@@ -52,7 +52,7 @@
                 "utils_native",
                 "drivers_peripheral_input",
                 "c_utils",
-                "hilog_native",
+                "hilog",
                 "selinux",
                 "common",
                 "ui_lite"

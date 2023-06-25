@@ -70,7 +70,7 @@ ohos_unittest("bin_flow_update_test") {
     "//third_party/openssl:libcrypto_shared",
   ]
   external_deps = [
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
     "init:libbegetutil",
   ]
   defines = [ "UPDATER_UT" ]

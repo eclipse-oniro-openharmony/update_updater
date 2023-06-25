@@ -67,7 +67,7 @@ ohos_unittest("updater_service_unittest") {
   ]
 
   external_deps = [
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
     "init:libbegetutil",
     "ui_lite:libupdater_layout",
   ]
