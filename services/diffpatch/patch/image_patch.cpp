@@ -43,7 +43,8 @@ int32_t NormalImagePatch::ApplyImagePatch(const PatchParam &param, size_t &start
     size_t patchOffset = static_cast<size_t>(ReadLE<int64_t>(param.patch + offset));
     offset += sizeof(int64_t);
     if (srcStart + srcLen > param.oldSize) {
-        PATCH_LOGE("Failed to ApplyImagePatch srcStart %zu srcLen %zu patchOffset: %zu", srcStart, srcLen, patchOffset);
+        PATCH_LOGE("error, srcStart: %zu srcLen: %zu , param.oldSize: %zu, patchOffset: %zu",
+            srcStart, srcLen, param.oldSize, patchOffset);
         return -1;
     }
 

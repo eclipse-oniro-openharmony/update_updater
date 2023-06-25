@@ -103,7 +103,6 @@ int32_t BlocksPatch::ApplyPatch()
     controlDataReader_->Close();
     diffDataReader_->Close();
     extraDataReader_->Close();
-    PATCH_DEBUG("BlocksPatch::ApplyPatch %zu newSize: %zu", newOffset_, newSize_);
     return 0;
 }
 
