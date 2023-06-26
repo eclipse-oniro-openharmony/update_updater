@@ -42,7 +42,7 @@ ohos_static_library("libupdaterlog") {
 
   public_configs = [ ":log_config" ]
   if (!is_linux && !is_mingw && !is_mac) {
-    external_deps = [ "hilog_native:libhilog_base" ]
+    external_deps = [ "hilog:libhilog_base" ]
   }
 
   deps = [ "//third_party/bounds_checking_function:libsec_static" ]
