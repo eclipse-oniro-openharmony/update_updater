@@ -87,7 +87,7 @@ ohos_unittest("script_unittest") {
   configs = [ "${updater_path}/test/unittest:utest_config" ]
   external_deps = [
     "c_utils:utils",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
   ]
   install_enable = true
   part_name = "updater"
