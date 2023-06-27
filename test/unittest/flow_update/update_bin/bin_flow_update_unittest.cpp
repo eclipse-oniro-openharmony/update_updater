@@ -42,7 +42,7 @@ public:
     int TestBinFlowUpdater()
     {
         LOG(INFO) << "TestBinFlowUpdater start";
-        std::string packagePath = "/data/updater/updater.zip"; // TEST_PATH_TO + testPackageName;
+        std::string packagePath = "/data/updater/package/updater_flow.zip";
         PkgManager::PkgManagerPtr pkgManager = PkgManager::CreatePackageInstance();
         if (pkgManager == nullptr) {
             LOG(ERROR) << "pkgManager is nullptr";
