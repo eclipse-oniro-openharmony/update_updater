@@ -71,6 +71,10 @@ bool IsUpdaterMode();
 bool RemoveDir(const std::string &path);
 bool IsFileExist(const std::string &path);
 bool IsDirExist(const std::string &path);
+int GetDirSize(const std::string &path);
+bool DeleteOldFile(const std::string dest);
+void SaveLogs();
+void SetLogDir(const std::string dir);
 } // Utils
 } // Updater
 #endif // UPDATER_UTILS_H
