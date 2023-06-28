@@ -510,14 +510,14 @@ bool CheckDumpResult()
 
 void WriteDumpResult(const std::string &result)
 {
-    if (access(UPDATER_PATH, 0) != 0) {
-        if (MkdirRecursive(UPDATER_PATH, 0755) != 0) { // 0755: -rwxr-xr-x
+    if (access(UPDATE_PATH, 0) != 0) {
+        if (MkdirRecursive(UPDATE_PATH, 0755) != 0) { // 0755: -rwxr-xr-x
             LOG(ERROR) << "MkdirRecursive error!";
             return;
         }
     }
     LOG(INFO) << "WriteDumpResult: " << result;
-    const std::string resultPath = std::string(UPDATER_PATH) + "/" + std::string(UPDATER_RESULT_FILE);
+    const std::string resultPath = std::string(UPDATE_PATH) + "/" + std::string(UPDATER_RESULT_FILE);
     FILE *fp = fopen(resultPath.c_str(), "w+");
     if (fp == nullptr) {
         LOG(ERROR) << "open result file failed";
