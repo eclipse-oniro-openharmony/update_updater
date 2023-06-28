@@ -48,13 +48,12 @@
         "deps": {
             "components": [
                 "init",
-                "developtools_hdc",
-                "utils_native",
+                "hdc",
                 "drivers_peripheral_input",
+                "drivers_peripheral_partition_slot",
                 "c_utils",
                 "hilog",
                 "selinux",
-                "common",
                 "ui_lite"
             ],
             "third_party": [
@@ -63,10 +62,9 @@
                 "libdrm",
                 "lz4",
                 "openssl",
-                "libusb",
                 "zlib",
                 "libuv",
-                "cjson",
+                "cJSON",
                 "libpng",
                 "thirdparty_selinux"
             ]
