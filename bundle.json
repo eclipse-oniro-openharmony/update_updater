@@ -49,8 +49,8 @@
             "components": [
                 "init",
                 "developtools_hdc",
-                "utils_native",
                 "drivers_peripheral_input",
+                "drivers_peripheral_partition_slot",
                 "c_utils",
                 "hilog",
                 "selinux",
@@ -63,7 +63,6 @@
                 "libdrm",
                 "lz4",
                 "openssl",
-                "libusb",
                 "zlib",
                 "libuv",
                 "cjson",
