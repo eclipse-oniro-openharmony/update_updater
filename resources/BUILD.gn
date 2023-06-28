@@ -82,6 +82,7 @@ updater_resources_list = [
   "loop00060.png",
   "loop00061.png",
   "font/HarmonyOS_Sans_SC_Regular_Small.ttf",
+  "font/line_cj.brk",
 ]
 
 if (product_name == "rk3568") {
