@@ -18,110 +18,63 @@
 #include <map>
 #include "pkg_algorithm.h"
 #include "pkg_manager.h"
+#include "pkg_info_utils.h"
 #include "pkg_utils.h"
 
 namespace Hpackage {
-class PkgFile;
-class PkgEntry;
-using PkgEntryPtr = PkgEntry *;
-using PkgFilePtr = PkgFile *;
-
-class PkgEntry {
+class PkgFileImpl : public PkgFile{
 public:
-    PkgEntry(PkgFilePtr pkgFile, uint32_t nodeId) : nodeId_(nodeId), pkgFile_(pkgFile) {}
-
-    virtual ~PkgEntry() {}
-
-    virtual int32_t Init(const PkgManager::FileInfoPtr fileInfo, PkgStreamPtr inStream) = 0;
-
-    virtual int32_t EncodeHeader(PkgStreamPtr inStream, size_t startOffset, size_t &encodeLen) = 0;
-
-    virtual int32_t Pack(PkgStreamPtr inStream, size_t startOffset, size_t &encodeLen) = 0;
-
-    virtual int32_t DecodeHeader(PkgBuffer &buffer, size_t headerOffset, size_t dataOffset,
-        size_t &decodeLen) = 0;
-
-    virtual int32_t Unpack(PkgStreamPtr outStream) = 0;
-
-    virtual const std::string GetFileName() const
-    {
-        return fileName_;
-    };
-
-    virtual const FileInfo *GetFileInfo() const = 0;
-
-    PkgFilePtr GetPkgFile() const
-    {
-        return pkgFile_;
-    }
-
-    uint32_t GetNodeId() const
-    {
-        return nodeId_;
-    }
-
-    void AddDataOffset(size_t offset)
-    {
-        dataOffset_ += offset;
-    }
-
-protected:
-    int32_t Init(PkgManager::FileInfoPtr localFileInfo, const PkgManager::FileInfoPtr fileInfo,
-        PkgStreamPtr inStream);
-
-protected:
-    uint32_t nodeId_ {0};
-    PkgFilePtr pkgFile_ {nullptr};
-    size_t headerOffset_ {0};
-    size_t dataOffset_ {0};
-    std::string fileName_ {};
-};
-
-class PkgFile {
-public:
-    enum PkgType {
-        PKG_TYPE_NONE = PKG_PACK_TYPE_NONE,
-        PKG_TYPE_UPGRADE = PKG_PACK_TYPE_UPGRADE, // 升级包
-        PKG_TYPE_ZIP = PKG_PACK_TYPE_ZIP,     // zip压缩包
-        PKG_TYPE_LZ4 = PKG_PACK_TYPE_LZ4,     // lz4压缩包
-        PKG_TYPE_GZIP = PKG_PACK_TYPE_GZIP,     // gzip压缩包
-        PKG_TYPE_MAX
-    };
-    using VerifyFunction = std::function<int(const PkgManager::PkgInfoPtr info,
-        const std::vector<uint8_t> &digest, const std::vector<uint8_t> &signature)>;
-
-public:
-    PkgFile(PkgManager::PkgManagerPtr manager, PkgStreamPtr stream, PkgType type)
+    PkgFileImpl(PkgManager::PkgManagerPtr manager, PkgStreamPtr stream, PkgType type)
         : type_(type), pkgStream_(stream), pkgManager_(manager) {}
 
-    virtual ~PkgFile();
+    virtual ~PkgFileImpl();
 
-    virtual int32_t AddEntry(const PkgManager::FileInfoPtr file, const PkgStreamPtr input) = 0;
+    int32_t AddEntry(const FileInfoPtr file, const PkgStreamPtr input) override
+    {
+        UNUSED(file);
+        UNUSED(input);
+        return PKG_SUCCESS;
+    }
 
-    virtual int32_t SavePackage(size_t &signOffset) = 0;
+    int32_t SavePackage(size_t &signOffset) override
+    {
+        UNUSED(signOffset);
+        return PKG_SUCCESS;
+    }
 
-    virtual int32_t ExtractFile(const PkgEntryPtr node, const PkgStreamPtr output);
+    int32_t ExtractFile(const PkgEntryPtr node, const PkgStreamPtr output) override;
 
-    virtual int32_t LoadPackage(std::vector<std::string> &fileNames, VerifyFunction verifier = nullptr) = 0;
+    int32_t LoadPackage(std::vector<std::string> &fileNames, VerifyFunction verifier = nullptr) override
+    {
+        UNUSED(fileNames);
+        UNUSED(verifier);
+        return PKG_SUCCESS;
+    }
 
-    PkgEntryPtr FindPkgEntry(const std::string &fileName);
+    int32_t ParseComponents(std::vector<std::string> &fileNames) override
+    {
+        UNUSED(fileNames);
+        return PKG_SUCCESS;
+    }
 
-    PkgStreamPtr GetPkgStream() const
+    PkgEntryPtr FindPkgEntry(const std::string &fileName) override;
+
+    PkgStreamPtr GetPkgStream() const override
     {
         return pkgStream_;
     }
 
-    virtual const PkgInfo *GetPkgInfo() const
+    const PkgInfo *GetPkgInfo() const override
     {
         return nullptr;
     }
 
-    PkgType GetPkgType() const
+    PkgType GetPkgType() const override
     {
         return type_;
     }
 
-    void ClearPkgStream()
+    void ClearPkgStream() override
     {
         pkgStream_ = nullptr;
     }

@@ -19,6 +19,7 @@
 #include "rust/image_hash_check.h"
 #include "pkg_algorithm.h"
 #include "pkg_manager.h"
+#include "pkg_info_utils.h"
 #include "pkg_pkgfile.h"
 #include "pkg_utils.h"
 
@@ -82,20 +83,22 @@ public:
         return &fileInfo_.fileInfo;
     }
 
-private:
+protected:
     ComponentInfo fileInfo_ {};
+
+private:
     int32_t GetUpGradeCompInfo(UpgradeCompInfo &comp);
 };
 
-class UpgradePkgFile : public PkgFile {
+class UpgradePkgFile : public PkgFileImpl {
 public:
     enum {
         UpgradeFileVersion_V1 = 1,     // bin v1 version
         UpgradeFileVersion_V2,        // bin v2 version
     };
 
-    UpgradePkgFile(PkgManager::PkgManagerPtr manager, PkgStreamPtr stream, PkgManager::PkgInfoPtr header)
-        : PkgFile(manager, stream, PkgFile::PKG_TYPE_UPGRADE)
+    UpgradePkgFile(PkgManager::PkgManagerPtr manager, PkgStreamPtr stream, PkgInfoPtr header)
+        : PkgFileImpl(manager, stream, PkgFile::PKG_TYPE_UPGRADE)
     {
         if (header == nullptr || header->entryCount == 0) {
             return;

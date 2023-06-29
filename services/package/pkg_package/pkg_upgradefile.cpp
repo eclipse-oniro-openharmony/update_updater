@@ -195,7 +195,7 @@ int32_t UpgradePkgFile::WriteBuffer(std::vector<uint8_t> &buffer, size_t &offset
 
     buffer.assign(buffer.capacity(), 0);
     size_t nameLen = 0;
-    int32_t ret = PkgFile::ConvertStringToBuffer(
+    int32_t ret = PkgFileImpl::ConvertStringToBuffer(
         pkgInfo_.descriptPackageId, {buffer.data(), UPGRADE_RESERVE_LEN}, nameLen);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("Fail write descriptPackageId");
@@ -387,7 +387,7 @@ int32_t UpgradePkgFile::ReadPackageInfo(std::vector<uint8_t> &signData, size_t &
         return ret;
     }
 
-    PkgFile::ConvertBufferToString(pkgInfo_.descriptPackageId, {buffer.buffer, UPGRADE_RESERVE_LEN});
+    PkgFileImpl::ConvertBufferToString(pkgInfo_.descriptPackageId, {buffer.buffer, UPGRADE_RESERVE_LEN});
     if (pkgInfo_.pkgInfo.digestMethod == PKG_DIGEST_TYPE_SHA384) {
         signData.resize(SIGN_SHA384_LEN);
         ret = memcpy_s(signData.data(), signData.size(),
@@ -683,9 +683,9 @@ void UpgradePkgFile::ParsePkgHeaderToTlv(const PkgBuffer &buffer, size_t &currLe
     currLen = sizeof(PkgTlv);
     UpgradePkgHeader *header = reinterpret_cast<UpgradePkgHeader *>(buffer.buffer + currLen);
     pkgInfo_.updateFileVersion = ReadLE32(buffer.buffer + currLen + offsetof(UpgradePkgHeader, updateFileVersion));
-    PkgFile::ConvertBufferToString(pkgInfo_.softwareVersion, {header->softwareVersion,
+    PkgFileImpl::ConvertBufferToString(pkgInfo_.softwareVersion, {header->softwareVersion,
         sizeof(header->softwareVersion)});
-    PkgFile::ConvertBufferToString(pkgInfo_.productUpdateId, {header->productUpdateId,
+    PkgFileImpl::ConvertBufferToString(pkgInfo_.productUpdateId, {header->productUpdateId,
         sizeof(header->productUpdateId)});
 }
 
@@ -699,7 +699,7 @@ int32_t UpgradePkgFile::ReadReserveData(size_t &parsedLen, DigestAlgorithm::Dige
         UPDATER_LAST_WORD(ret);
         return ret;
     }
-    PkgFile::ConvertBufferToString(pkgInfo_.descriptPackageId, {reserve_buf.buffer, UPGRADE_RESERVE_LEN});
+    PkgFileImpl::ConvertBufferToString(pkgInfo_.descriptPackageId, {reserve_buf.buffer, UPGRADE_RESERVE_LEN});
     algorithm->Update(reserve_buf, reserve_buf.length);
     parsedLen += reserve_buf.length;
     return PKG_SUCCESS;
@@ -748,8 +748,8 @@ int32_t UpgradePkgFile::ReadUpgradePkgHeader(size_t &realLen, DigestAlgorithm::D
     TLV_CHECK_AND_RETURN(&tlv, sizeof(uint16_t), sizeof(UpgradePkgTime), fileLen);
     currLen += sizeof(PkgTlv);
     UpgradePkgTime *time = reinterpret_cast<UpgradePkgTime *>(buffer.buffer + currLen);
-    PkgFile::ConvertBufferToString(pkgInfo_.date, {time->date, sizeof(time->date)});
-    PkgFile::ConvertBufferToString(pkgInfo_.time, {time->time, sizeof(time->time)});
+    PkgFileImpl::ConvertBufferToString(pkgInfo_.date, {time->date, sizeof(time->date)});
+    PkgFileImpl::ConvertBufferToString(pkgInfo_.time, {time->time, sizeof(time->time)});
     currLen += tlv.length;
     realLen += currLen;
 
@@ -765,14 +765,14 @@ int32_t UpgradeFileEntry::GetUpGradeCompInfo(UpgradeCompInfo &comp)
         return PKG_NONE_MEMORY;
     }
     size_t len = 0;
-    int32_t ret = PkgFile::ConvertStringToBuffer(
+    int32_t ret = PkgFileImpl::ConvertStringToBuffer(
         fileInfo_.fileInfo.identity, {comp.address, sizeof(comp.address)}, len);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("outStream or inStream null for %s", fileName_.c_str());
         return PKG_INVALID_PARAM;
     }
 
-    ret = PkgFile::ConvertStringToBuffer(fileInfo_.version, {comp.version, sizeof(comp.version)}, len);
+    ret = PkgFileImpl::ConvertStringToBuffer(fileInfo_.version, {comp.version, sizeof(comp.version)}, len);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("outStream or inStream null for %s", fileName_.c_str());
         return PKG_INVALID_PARAM;
@@ -882,8 +882,8 @@ int32_t UpgradeFileEntry::DecodeHeader(PkgBuffer &buffer, size_t headerOffset, s
         PKG_LOGE("Fail to memcpy_s ret: %d", ret);
         return ret;
     }
-    PkgFile::ConvertBufferToString(fileInfo_.fileInfo.identity, {info->address, sizeof(info->address)});
-    PkgFile::ConvertBufferToString(fileInfo_.version, {info->version, sizeof(info->version)});
+    PkgFileImpl::ConvertBufferToString(fileInfo_.fileInfo.identity, {info->address, sizeof(info->address)});
+    PkgFileImpl::ConvertBufferToString(fileInfo_.version, {info->version, sizeof(info->version)});
     fileName_ = fileInfo_.fileInfo.identity;
     fileInfo_.id = ReadLE16(buffer.buffer + offsetof(UpgradeCompInfo, id));
     fileInfo_.resType = info->resType;
