@@ -63,7 +63,7 @@ void GraphicEngine::InitFontEngine(const char *fontPath) const
     static uint8_t icuMemBaseAddr[OHOS::SHAPING_WORD_DICT_LENGTH];
     OHOS::GraphicStartUp::InitFontEngine(reinterpret_cast<uintptr_t>(fontMemBaseAddr), OHOS::MIN_FONT_PSRAM_LENGTH,
         fontPath, DEFAULT_FONT_FILENAME);
-    OHOS::GraphicStartUp::InitLineBreakEngine(reinterpret_cast<uintptr_t>(g_icuMemBaseAddr),
+    OHOS::GraphicStartUp::InitLineBreakEngine(reinterpret_cast<uintptr_t>(icuMemBaseAddr),
         OHOS::SHAPING_WORD_DICT_LENGTH, fontPath, DEFAULT_LINE_BREAK_RULE_FILENAME);
     LOG(INFO) << "fontPath = " << fontPath << ", InitFontEngine DEFAULT_FONT_FILENAME = " << DEFAULT_FONT_FILENAME <<
         ", InitLineBreakEngine DEFAULT_LINE_BREAK_RULE_FILENAME = " << DEFAULT_LINE_BREAK_RULE_FILENAME;
