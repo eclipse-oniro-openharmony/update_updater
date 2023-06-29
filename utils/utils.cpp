@@ -49,7 +49,6 @@ constexpr int NANOSECS_PER_USECONDS = 1000; // 1us = 1000ns
 constexpr int MAX_TIME_SIZE = 20;
 
 static std::string g_logDir = "/data/updater/log";
-static std::string g_logPath = "/data/updater";
 
 void SaveLogs()
 {
@@ -463,11 +462,11 @@ bool CopyUpdaterLogs(const std::string &sLog, const std::string &dLog)
     }
 #endif // WITH_SELINUX
     if (access(g_logDir.c_str(), 0) != 0) {
-        if (MkdirRecursive(UPDATER_LOG_DIR, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) != 0) {
+        if (MkdirRecursive(g_logDir.c_str(), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) != 0) {
             LOG(ERROR) << "MkdirRecursive error!";
             return false;
         }
-        if (chown(g_logDir.c_str(), USER_ROOT_AUTHORITY, GROUP_SYS_AUTHORITY) != EOK &&
+        if (chown(g_logDir.c_str(), USER_UPDATE_AUTHORITY, USER_UPDATE_AUTHORITY) != EOK &&
             chmod(g_logDir.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != EOK) {
                 LOG(ERROR) << "Chmod failed!";
                 return false;
