@@ -54,8 +54,8 @@ OpenHarmony使用MISC分区保存启动时的指令，默认的MISC分区的结�
 ```
     struct UpdateMessage {
         char command[32];
-        char update[768];
         char status[32];
+        char update[768];
         char stage[32];
         char keyinfo[32];
         char reserved[224];
