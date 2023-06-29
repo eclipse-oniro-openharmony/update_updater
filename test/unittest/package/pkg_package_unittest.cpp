@@ -39,17 +39,17 @@ namespace UpdaterUt {
 constexpr uint32_t MAX_FILE_NAME = 256;
 constexpr uint32_t CENTRAL_SIGNATURE = 0x02014b50;
 
-class TestFile : public PkgFile {
+class TestFile : public PkgFileImpl {
 public:
     explicit TestFile(PkgManager::PkgManagerPtr pkgManager, PkgStreamPtr stream)
-        : PkgFile(pkgManager, stream, PKG_TYPE_MAX) {}
+        : PkgFileImpl(pkgManager, stream, PKG_TYPE_MAX) {}
 
     virtual ~TestFile() {}
 
     virtual int32_t AddEntry(const PkgManager::FileInfoPtr file, const PkgStreamPtr inStream)
     {
-        PkgFile::GetPkgInfo();
-        PkgFile::AddPkgEntry(inStream->GetFileName());
+        PkgFileImpl::GetPkgInfo();
+        PkgFileImpl::AddPkgEntry(inStream->GetFileName());
         return 0;
     }
 

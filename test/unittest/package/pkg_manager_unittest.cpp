@@ -472,12 +472,12 @@ public:
         }
         if (header->flags & ORIG_NAME) {
             std::string fileName;
-            PkgFile::ConvertBufferToString(fileName, {buffer + offset, fileSize - offset});
+            PkgFileImpl::ConvertBufferToString(fileName, {buffer + offset, fileSize - offset});
             offset += fileName.size() + 1;
         }
         if (header->flags & COMMENT) {
             std::string comment;
-            PkgFile::ConvertBufferToString(comment, {buffer + offset, fileSize - offset});
+            PkgFileImpl::ConvertBufferToString(comment, {buffer + offset, fileSize - offset});
             offset += comment.size() + 1;
         }
         if (header->flags & HEADER_CRC) { // 暂不校验
