@@ -16,10 +16,9 @@
 #ifndef PKG_INFO_UTILS_H
 #define PKG_INFO_UTILS_H
 
-#include <cstdint>
-#include <cstdio>
 #include <functional>
 #include <string>
+#include <vector>
 #include "package/package.h"
 
 namespace Hpackage {
