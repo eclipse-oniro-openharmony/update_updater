@@ -22,7 +22,7 @@
 #include "pkg_utils.h"
 
 namespace Hpackage {
-class PkgFileImpl : public PkgFile{
+class PkgFileImpl : public PkgFile {
 public:
     PkgFileImpl(PkgManager::PkgManagerPtr manager, PkgStreamPtr stream, PkgType type)
         : type_(type), pkgStream_(stream), pkgManager_(manager) {}

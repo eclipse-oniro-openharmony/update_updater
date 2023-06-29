@@ -16,6 +16,7 @@
 #ifndef PKG_INFO_UTILS_H
 #define PKG_INFO_UTILS_H
 
+#include <cstdint>
 #include <functional>
 #include <string>
 #include "package/package.h"

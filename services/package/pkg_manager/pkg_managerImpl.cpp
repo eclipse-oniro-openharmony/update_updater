@@ -223,7 +223,7 @@ PkgFilePtr PkgManagerImpl::CreatePackage(PkgStreamPtr stream, PkgFile::PkgType t
     UNUSED(type);
     PkgFilePtr pkgFile = nullptr;
     std::string pkgName = stream->GetFileName();
-    std::string pkgType= GetPkgName(pkgName);
+    std::string pkgType = GetPkgName(pkgName);
     auto iter = pkgFileCreator_.find(pkgType);
     if (iter == pkgFileCreator_.end()) {
         LOG(ERROR) << "fileType is not registered: " << pkgType;

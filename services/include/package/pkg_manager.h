@@ -208,7 +208,8 @@ public:
     using PkgInfoPtr = PkgInfo *;
     using StreamPtr = PkgStream *;
     using VerifyCallback = std::function<void(int32_t result, uint32_t percent)>;
-    using PkgFileConstructor = std::function<PkgFilePtr(PkgManagerPtr manager, PkgStreamPtr stream, PkgManager::PkgInfoPtr header)>;
+    using PkgFileConstructor = std::function<PkgFilePtr(
+        PkgManagerPtr manager, PkgStreamPtr stream, PkgManager::PkgInfoPtr header)>;
 
     virtual ~PkgManager() = default;
 
