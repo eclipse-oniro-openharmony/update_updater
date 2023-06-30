@@ -50,7 +50,9 @@ void ComponentProcessorFactory::RegisterProcessor(Constructor constructor, std::
 std::unique_ptr<ComponentProcessor> ComponentProcessorFactory::GetProcessor(const std::string &name,
     const uint8_t len) const
 {
-    auto it = m_constructorMap.find(name);
+    std::string partitionName = name;
+    std::transform(partitionName.begin(), partitionName.end(), partitionName.begin(), ::tolower);
+    auto it = m_constructorMap.find(partitionName);
     if (it == m_constructorMap.end() || it->second == nullptr) {
         LOG(ERROR) << "GetProcessor for: " << name.c_str() << " fail";
         return nullptr;

@@ -93,6 +93,8 @@ public:
 
     void ClosePkgStream(PkgStreamPtr &stream) override;
 
+    int32_t ParseComponents(const std::string &packagePath, std::vector<std::string> &fileName) override;
+
 private:
     PkgFilePtr CreatePackage(PkgStreamPtr stream, PkgFile::PkgType type, PkgInfoPtr header = nullptr);
 

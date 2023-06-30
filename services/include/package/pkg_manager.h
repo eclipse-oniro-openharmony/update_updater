@@ -355,6 +355,8 @@ public:
     virtual void PostDecodeProgress(int type, size_t writeDataLen, const void *context) = 0;
 
     virtual StreamPtr GetPkgFileStream(const std::string &fileName) = 0;
+
+    virtual int32_t ParseComponents(const std::string &packagePath, std::vector<std::string> &fileName) = 0;
 };
 
 template <typename FileClassName>
