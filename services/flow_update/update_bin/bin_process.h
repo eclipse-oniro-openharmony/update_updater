@@ -29,20 +29,23 @@ public:
     virtual ~UScriptInstructionBinFlowWrite() {}
     int32_t Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context) override;
 
+protected:
+    virtual int32_t ProcessBinFile(Uscript::UScriptEnv &env, Uscript::UScriptContext &context,
+        Hpackage::PkgManager::StreamPtr stream);
+
+    bool isStopRun_ = false;
+
 private:
     int32_t ExtractBinFile(Uscript::UScriptEnv &env, Uscript::UScriptContext &context,
         Hpackage::PkgManager::StreamPtr stream);
     int32_t UnCompressDataProducer(const Hpackage::PkgBuffer &buffer, size_t size, size_t start,
         bool isFinish, const void* context);
-    int32_t ProcessBinFile(Uscript::UScriptEnv &env, Uscript::UScriptContext &context,
-        Hpackage::PkgManager::StreamPtr stream);
     int32_t ComponentProcess(Uscript::UScriptEnv &env, Hpackage::PkgManager::StreamPtr stream,
         const std::string &name, const size_t fileSize);
 
     size_t GetFileLength();
     bool ReadFromBinFile(Hpackage::PkgBuffer &buffer, size_t start, size_t &readLen);
 
-    bool isStopRun_ = false;
     size_t stashDataSize_ = 0;
     Hpackage::PkgBuffer stashBuffer_ {};
 };

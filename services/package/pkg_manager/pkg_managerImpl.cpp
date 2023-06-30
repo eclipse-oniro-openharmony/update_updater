@@ -436,6 +436,18 @@ int32_t PkgManagerImpl::ExtractFile(const std::string &path, PkgManager::StreamP
     return ret;
 }
 
+int32_t PkgManagerImpl::ParseComponents(const std::string &packagePath, std::vector<std::string> &fileName)
+{
+    int32_t ret = PKG_INVALID_FILE;
+    for (auto iter : pkgFiles_) {
+        PkgFilePtr pkgFile = iter;
+        if (pkgFile != nullptr && pkgFile->GetPkgType() == PkgFile::PKG_TYPE_UPGRADE) {
+            return pkgFile->ParseComponents(fileName);
+        }
+    }
+    return ret;
+}
+
 const PkgInfo *PkgManagerImpl::GetPackageInfo(const std::string &packagePath)
 {
     for (auto iter : pkgFiles_) {
