@@ -119,6 +119,10 @@ public:
     {
         return;
     }
+    int32_t ParseComponents(const std::string &packagePath, std::vector<std::string> &fileName) override
+    {
+        return PKG_SUCCESS;
+    }
 };
 }
 #endif // SCRIPT_UNITTEST_H
