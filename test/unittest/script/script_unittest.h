@@ -115,6 +115,10 @@ public:
     {
         return nullptr;
     }
+    void RegisterPkgFileCreator(const std::string &fileType, PkgFileConstructor constructor) override
+    {
+        return;
+    }
 };
 }
 #endif // SCRIPT_UNITTEST_H

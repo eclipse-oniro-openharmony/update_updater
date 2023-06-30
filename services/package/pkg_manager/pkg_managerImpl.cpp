@@ -62,6 +62,14 @@ void PkgManager::ReleasePackageInstance(PkgManager::PkgManagerPtr manager)
     manager = nullptr;
 }
 
+PkgManagerImpl::PkgManagerImpl()
+{
+    RegisterPkgFileCreator("bin", NewPkgFile<UpgradePkgFile>);
+    RegisterPkgFileCreator("zip", NewPkgFile<ZipPkgFile>);
+    RegisterPkgFileCreator("lz4", NewPkgFile<Lz4PkgFile>);
+    RegisterPkgFileCreator("gz", NewPkgFile<GZipPkgFile>);
+}
+
 PkgManagerImpl::~PkgManagerImpl()
 {
     ClearPkgFile();
@@ -203,25 +211,25 @@ PkgFilePtr PkgManagerImpl::CreatePackage(const std::string &path, PkgInfoPtr hea
     return pkgFile;
 }
 
+void PkgManagerImpl::RegisterPkgFileCreator(const std::string &fileType, PkgFileConstructor constructor)
+{
+    if (!pkgFileCreator_.emplace(fileType, constructor).second) {
+        LOG(ERROR) << "emplace: " << fileType << " fail";
+    }
+}
+
 PkgFilePtr PkgManagerImpl::CreatePackage(PkgStreamPtr stream, PkgFile::PkgType type, PkgInfoPtr header)
 {
+    UNUSED(type);
     PkgFilePtr pkgFile = nullptr;
-    switch (type) {
-        case PkgFile::PKG_TYPE_UPGRADE:
-            pkgFile = new UpgradePkgFile(this, stream, header);
-            break;
-        case PkgFile::PKG_TYPE_ZIP:
-            pkgFile = new ZipPkgFile(this, stream);
-            break;
-        case PkgFile::PKG_TYPE_LZ4:
-            pkgFile = new Lz4PkgFile(this, stream);
-            break;
-        case PkgFile::PKG_TYPE_GZIP:
-            pkgFile = new GZipPkgFile(this, stream);
-            break;
-        default:
-            return nullptr;
+    std::string pkgName = stream->GetFileName();
+    std::string pkgType = GetPkgName(pkgName);
+    auto iter = pkgFileCreator_.find(pkgType);
+    if (iter == pkgFileCreator_.end()) {
+        LOG(ERROR) << "fileType is not registered: " << pkgType;
+        return pkgFile;
     }
+    pkgFile = iter->second(this, stream, header);
     return pkgFile;
 }
 
@@ -472,18 +480,6 @@ PkgManager::StreamPtr PkgManagerImpl::GetPkgFileStream(const std::string &fileNa
     return nullptr;
 }
 
-int32_t PkgManagerImpl::CreatePkgStream(StreamPtr &stream, const std::string &fileName, size_t size, int32_t type)
-{
-    PkgStreamPtr pkgStream;
-    int32_t ret = CreatePkgStream(pkgStream, fileName, size, type);
-    if (pkgStream == nullptr) {
-        PKG_LOGE("Failed to create stream");
-        return -1;
-    }
-    stream = pkgStream;
-    return ret;
-}
-
 int32_t PkgManagerImpl::CreatePkgStream(StreamPtr &stream, const std::string &fileName, const PkgBuffer &buffer)
 {
     PkgStreamPtr pkgStream = new MemoryMapStream(this, fileName, buffer, PkgStream::PkgStreamType_Buffer);
@@ -493,15 +489,6 @@ int32_t PkgManagerImpl::CreatePkgStream(StreamPtr &stream, const std::string &fi
     }
     stream = pkgStream;
     return PKG_SUCCESS;
-}
-
-int32_t PkgManagerImpl::CreatePkgStream(StreamPtr &stream, const std::string &fileName,
-    PkgStream::ExtractFileProcessor processor, const void *context)
-{
-    PkgStreamPtr pkgStream;
-    int32_t ret = CreatePkgStream(pkgStream, fileName, processor, context);
-    stream = pkgStream;
-    return ret;
 }
 
 int32_t PkgManagerImpl::CreatePkgStream(StreamPtr &stream, const std::string &fileName, RingBuffer *buffer)
@@ -520,13 +507,6 @@ int32_t PkgManagerImpl::CreatePkgStream(StreamPtr &stream, const std::string &fi
     }
     stream = pkgStream;
     return PKG_SUCCESS;
-}
-
-void PkgManagerImpl::ClosePkgStream(StreamPtr &stream)
-{
-    PkgStreamPtr pkgStream = static_cast<PkgStreamPtr>(stream);
-    ClosePkgStream(pkgStream);
-    stream = nullptr;
 }
 
 int32_t PkgManagerImpl::DoCreatePkgStream(PkgStreamPtr &stream, const std::string &fileName, int32_t type)
@@ -640,6 +620,26 @@ void PkgManagerImpl::ClosePkgStream(PkgStreamPtr &stream)
     }
     delete mapStream;
     stream = nullptr;
+}
+
+std::string PkgManagerImpl::GetPkgName(const std::string &path)
+{
+    std::size_t pos = path.find_last_of('.');
+    if (pos == std::string::npos || pos < 1) {
+        return "";
+    }
+    std::string pkgName = path.substr(pos + 1, -1);
+    std::transform(pkgName.begin(), pkgName.end(), pkgName.begin(), ::tolower);
+    if (pkgName.compare("tmp") != 0) {
+        return pkgName;
+    }
+    std::size_t secPos = path.find_last_of('.', pos - 1);
+    if (secPos == std::string::npos) {
+        return "";
+    }
+    std::string secPkgName = path.substr(secPos + 1, pos - secPos - 1);
+    std::transform(secPkgName.begin(), secPkgName.end(), secPkgName.begin(), ::tolower);
+    return secPkgName;
 }
 
 PkgFile::PkgType PkgManagerImpl::GetPkgTypeByName(const std::string &path)

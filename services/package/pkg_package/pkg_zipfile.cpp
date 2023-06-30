@@ -290,7 +290,7 @@ int32_t ZipFileEntry::PackStream(PkgStreamPtr inStream, size_t startOffset, size
     // 为header申请一个buff，先处理到内存，后面在写入文件
     std::vector<uint8_t> buff(MAX_FILE_NAME + sizeof(LocalFileHeader) + ZIP_PKG_ALIGNMENT_DEF);
     size_t nameLen = 0;
-    PkgFile::ConvertStringToBuffer(fileInfo_.fileInfo.identity, {
+    PkgFileImpl::ConvertStringToBuffer(fileInfo_.fileInfo.identity, {
         buff.data() + sizeof(LocalFileHeader), buff.capacity()
     }, nameLen);
 
@@ -366,7 +366,7 @@ int32_t ZipFileEntry::EncodeCentralDirEntry(const PkgStreamPtr stream, size_t st
 {
     std::vector<uint8_t> buff(sizeof(CentralDirEntry) + MAX_FILE_NAME);
     size_t realLen = 0;
-    PkgFile::ConvertStringToBuffer(fileInfo_.fileInfo.identity, {
+    PkgFileImpl::ConvertStringToBuffer(fileInfo_.fileInfo.identity, {
         buff.data() + sizeof(CentralDirEntry), buff.capacity()
     }, realLen);
 

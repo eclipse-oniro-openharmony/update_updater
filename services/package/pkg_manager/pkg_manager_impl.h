@@ -28,9 +28,11 @@
 namespace Hpackage {
 class PkgManagerImpl : public PkgManager {
 public:
-    PkgManagerImpl() {}
+    PkgManagerImpl();
 
     ~PkgManagerImpl() override;
+
+    void RegisterPkgFileCreator(const std::string &fileType, PkgFileConstructor constructor) override;
 
     int32_t CreatePackage(const std::string &path, const std::string &keyName, PkgInfoPtr header,
         std::vector<std::pair<std::string, ZipFileInfo>> &files) override;
@@ -48,13 +50,6 @@ public:
         std::vector<std::string> &fileIds) override;
 
     int32_t ExtractFile(const std::string &path, PkgManager::StreamPtr output) override;
-
-    int32_t CreatePkgStream(StreamPtr &stream, const std::string &, size_t, int32_t) override;
-
-    int32_t CreatePkgStream(StreamPtr &stream, const std::string &fileName,
-        PkgStream::ExtractFileProcessor processor, const void *context) override;
-
-    void ClosePkgStream(StreamPtr &stream) override;
 
     const FileInfo *GetFileInfo(const std::string &path) override;
 
@@ -76,7 +71,7 @@ public:
     int32_t CreatePkgStream(StreamPtr &stream, const std::string &fileName, const PkgBuffer &buffer) override;
 
     int32_t CreatePkgStream(PkgStreamPtr &stream, const std::string &fileName,
-        PkgStream::ExtractFileProcessor processor, const void *context);
+        PkgStream::ExtractFileProcessor processor, const void *context) override;
 
     int32_t CreatePkgStream(StreamPtr &stream, const std::string &fileName, Updater::RingBuffer *buffer) override;
 
@@ -94,6 +89,10 @@ public:
 
     PkgManager::StreamPtr GetPkgFileStream(const std::string &fileName) override;
 
+    int32_t CreatePkgStream(PkgStreamPtr &stream, const std::string &fileName, size_t size, int32_t type) override;
+
+    void ClosePkgStream(PkgStreamPtr &stream) override;
+
 private:
     PkgFilePtr CreatePackage(PkgStreamPtr stream, PkgFile::PkgType type, PkgInfoPtr header = nullptr);
 
@@ -107,6 +106,8 @@ private:
 
     int32_t LoadPackageWithStream(const std::string &packagePath,
         std::vector<std::string> &fileIds, PkgFile::PkgType type, PkgStreamPtr stream);
+
+    std::string GetPkgName(const std::string &path);
 
     PkgFile::PkgType GetPkgTypeByName(const std::string &path);
 
@@ -126,13 +127,10 @@ private:
 
     int32_t DoCreatePkgStream(PkgStreamPtr &stream, const std::string &fileName, int32_t type);
 
-    int32_t CreatePkgStream(PkgStreamPtr &stream, const std::string &fileName, size_t size, int32_t type);
-
-    void ClosePkgStream(PkgStreamPtr &stream);
-
 private:
     bool unzipToFile_ {false};
     std::vector<PkgFilePtr> pkgFiles_ {};
+    std::map<std::string, PkgFileConstructor> pkgFileCreator_ {};
     std::mutex mapLock_ {};
     std::map<std::string, PkgStreamPtr> pkgStreams_ {};
     std::string signVerifyKeyName_ {};
