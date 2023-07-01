@@ -38,8 +38,13 @@ int KeysInputDevice::HandleKeyEvent(const input_event &ev, uint32_t type)
     if (ev.code == BTN_TOUCH || ev.code == BTN_TOOL_FINGER) {
         return 0;
     }
-
-    keyState_ = ev.value;
+    // KEY_VOLUMEDOWN = 114, KEY_VOLUMEUP = 115, KEY_POWER = 116
+    if (!(ev.code == KEY_VOLUMEDOWN || ev.code == KEY_VOLUMEUP || ev.code == KEY_POWER)) {
+        keyState_ = ev.value;
+        lastKeyId_ = ev.code;
+        return 0;
+    }
+    keyState_ = (ev.value == 1) ? OHOS::InputDevice::STATE_PRESS : OHOS::InputDevice::STATE_RELEASE;
     lastKeyId_ = ev.code;
     return 0;
 }
