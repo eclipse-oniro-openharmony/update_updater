@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,85 +13,60 @@
  * limitations under the License.
  */
 #include "input_event.h"
-#include <cstdio>
-#include <cstdlib>
 #include <unistd.h>
-#include "common/input_device_manager.h"
-#include "events/key_event.h"
 #include "log/log.h"
-#include "updater_ui.h"
-#include "updater_ui_const.h"
+#include "keys_input_device.h"
 
 namespace Updater {
-namespace {
-constexpr int MAX_INPUT_DEVICES = 32;
-
-IInputInterface *g_inputInterface;
-InputEventCb g_callback;
-
-bool g_touchFingerDown = false;
-
-// for TouchInputDevice
-int g_touchX;
-int g_touchY;
-
-// for KeysInputDevice
-uint16_t g_lastKeyId;
-uint16_t g_keyState = OHOS::INVALID_KEY_STATE;
-
-void HandleEvAbs(const input_event &ev)
+extern "C" __attribute__((constructor)) void RegisterAddInputDeviceHelper(void)
 {
-    const static std::unordered_map<int, std::function<void(int)>> evMap {
-        {ABS_MT_POSITION_Y, [] (int value) {
-            g_touchY = value;
-            g_touchFingerDown = true;
-        }},
-        {ABS_MT_POSITION_X, [] (int value) {
-            g_touchX = value;
-            g_touchFingerDown = true;
-        }},
-        {ABS_MT_TRACKING_ID, [] (int value) {
-            // Protocol B: -1 marks lifting the contact.
-            if (value < 0) {
-                g_touchFingerDown = false;
-            }
-        }}
-    };
-    if (auto it = evMap.find(ev.code); it != evMap.end()) {
-        it->second(ev.value);
-    }
-}
+    InputEvent::GetInstance().RegisterAddInputDeviceHelper(AddInputDevice);
 }
 
-int HandleInputEvent(const struct input_event *iev)
+void InputEvent::RegisterAddInputDeviceHelper(AddInputDeviceFunc ptr)
+{
+    addInputDeviceHelper_ = std::move(ptr);
+}
+
+extern "C" __attribute__((constructor)) void RegisterHandleEventHelper(void)
+{
+    InputEvent::GetInstance().RegisterHandleEventHelper(HandlePointersEvent);
+}
+
+void InputEvent::RegisterHandleEventHelper(HandlePointersEventFunc ptr)
+{
+    handlePointersEventHelper_ = std::move(ptr);
+}
+
+InputEvent &InputEvent::GetInstance()
+{
+    static InputEvent instance;
+    return instance;
+}
+
+int InputEvent::HandleInputEvent(const struct input_event *iev, uint32_t type)
 {
     struct input_event ev {};
     ev.type = iev->type;
     ev.code = iev->code;
     ev.value = iev->value;
-    if (ev.type == EV_ABS) {
-        HandleEvAbs(ev);
-        return 0;
-    }
-    if (ev.type != EV_KEY || ev.code > KEY_MAX) {
-        return 0;
-    }
-    if (ev.code == BTN_TOUCH) {
-        g_touchFingerDown = (ev.value == 1);
-    }
-    if (ev.code == BTN_TOUCH || ev.code == BTN_TOOL_FINGER) {
-        return 0;
-    }
-    // KEY_VOLUMEDOWN = 114, KEY_VOLUMEUP = 115, KEY_POWER = 116
-    if (!(ev.code == KEY_VOLUMEDOWN || ev.code == KEY_VOLUMEUP || ev.code == KEY_POWER)) {
-        return 0;
-    }
-    g_keyState = (ev.value == 1) ? OHOS::InputDevice::STATE_PRESS : OHOS::InputDevice::STATE_RELEASE;
-    g_lastKeyId = ev.code;
+
+    KeysInputDevice::GetInstance().HandleKeyEvent(ev, type);
+    handlePointersEventHelper_(ev, type);
     return 0;
 }
 
-void ReportEventPkgCallback(const InputEventPackage **pkgs, const uint32_t count, uint32_t devIndex)
+void InputEvent::GetInputDeviceType(uint32_t devIndex, uint32_t &type)
+{
+    auto it = devTypeMap_.find(devIndex);
+    if (it == devTypeMap_.end()) {
+        LOG(ERROR) << "devTypeMap_ devIndex: " << devIndex << "not valid";
+        return;
+    }
+    type = it->second;
+}
+
+void InputEvent::ReportEventPkgCallback(const InputEventPackage **pkgs, const uint32_t count, uint32_t devIndex)
 {
     if (pkgs == nullptr || *pkgs == nullptr) {
         return;
@@ -102,14 +77,16 @@ void ReportEventPkgCallback(const InputEventPackage **pkgs, const uint32_t count
             .code = static_cast<__u16>(pkgs[i]->code),
             .value = pkgs[i]->value,
         };
-        HandleInputEvent(&ev);
+        uint32_t type = 0;
+        InputEvent::GetInstance().GetInputDeviceType(devIndex, type);
+        InputEvent::GetInstance().HandleInputEvent(&ev, type);
     }
     return;
 }
 
-int HdfInit()
+int InputEvent::HdfInit()
 {
-    int ret = GetInputInterface(&g_inputInterface);
+    int ret = GetInputInterface(&inputInterface_);
     if (ret != INPUT_SUCCESS) {
         LOG(ERROR) << "get input driver interface failed";
         return ret;
@@ -118,7 +95,7 @@ int HdfInit()
     sleep(1); // need wait thread running
 
     InputDevDesc sta[MAX_INPUT_DEVICES] = {{0}};
-    ret = g_inputInterface->iInputManager->ScanInputDevice(sta, MAX_INPUT_DEVICES);
+    ret = inputInterface_->iInputManager->ScanInputDevice(sta, MAX_INPUT_DEVICES);
     if (ret != INPUT_SUCCESS) {
         LOG(ERROR) << "scan device failed";
         return ret;
@@ -126,53 +103,27 @@ int HdfInit()
 
     for (int i = 0; i < MAX_INPUT_DEVICES; i++) {
         uint32_t idx = sta[i].devIndex;
-        if ((idx == 0) || (g_inputInterface->iInputManager->OpenInputDevice(idx) == INPUT_FAILURE)) {
+        uint32_t dev = sta[i].devType;
+        if ((idx == 0) || (inputInterface_->iInputManager->OpenInputDevice(idx) == INPUT_FAILURE)) {
             continue;
         }
+        devTypeMap_.insert(std::pair<uint32_t, uint32_t>(idx, dev));
 
-        LOG(INFO) << "hdf devType:" << sta[i].devType << ", devIndex:" << idx;
+        LOG(INFO) << "hdf devType:" << dev << ", devIndex:" << idx;
     }
 
     /* first param not necessary, pass default 1 */
-    g_callback.EventPkgCallback = ReportEventPkgCallback;
-    ret = g_inputInterface->iInputReporter->RegisterReportCallback(1, &g_callback);
+    callback_.EventPkgCallback = ReportEventPkgCallback;
+    ret = inputInterface_->iInputReporter->RegisterReportCallback(1, &callback_);
     if (ret != INPUT_SUCCESS) {
         LOG(ERROR) << "register callback failed for device 1";
         return ret;
     }
 
-    OHOS::InputDeviceManager::GetInstance()->Add(&TouchInputDevice::GetInstance());
     OHOS::InputDeviceManager::GetInstance()->Add(&KeysInputDevice::GetInstance());
+    addInputDeviceHelper_();
     LOG(INFO) << "add InputDevice done";
 
     return 0;
-}
-
-TouchInputDevice &TouchInputDevice::GetInstance()
-{
-    static TouchInputDevice instance;
-    return instance;
-}
-
-bool TouchInputDevice::Read(OHOS::DeviceData& data)
-{
-    data.point.x = g_touchX;
-    data.point.y = g_touchY;
-    data.state = g_touchFingerDown ? OHOS::InputDevice::STATE_PRESS : OHOS::InputDevice::STATE_RELEASE;
-    return false;
-}
-
-KeysInputDevice &KeysInputDevice::GetInstance()
-{
-    static KeysInputDevice instance;
-    return instance;
-}
-
-bool KeysInputDevice::Read(OHOS::DeviceData& data)
-{
-    data.keyId = g_lastKeyId;
-    data.state = g_keyState;
-    g_keyState =  OHOS::INVALID_KEY_STATE;
-    return false;
 }
 } // namespace Updater

@@ -23,9 +23,6 @@
 #include "updater_ui_traits.h"
 
 namespace Updater {
-std::ostream &operator<<(std::ostream &os, const ComInfo &com);
 void DoProgress();
-void StartLongPressTimer();
-void StopLongPressTimer();
 } // namespace Updater
 #endif /* UPDATE_UI_HOS_UPDATER_H */

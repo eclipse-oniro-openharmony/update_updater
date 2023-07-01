@@ -74,7 +74,7 @@ void UpdaterUiEnv::InitEvts()
 
 void UpdaterUiEnv::InitInputDriver()
 {
-    HdfInit();
+    InputEvent::GetInstance().HdfInit();
 }
 
 void UpdaterUiEnv::InitDisplayDriver()

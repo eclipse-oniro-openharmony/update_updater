@@ -18,6 +18,16 @@
 #include "log/log.h"
 
 namespace Updater {
+extern "C" __attribute__((constructor)) void RegisterEventManagerHelper(void)
+{
+    EventManager::GetInstance().RegisterEventManagerHelper(std::make_unique<KeyListener>());
+}
+
+void EventManager::RegisterEventManagerHelper(std::unique_ptr<KeyListener> ptr)
+{
+    helper_ = std::move(ptr);
+}
+
 EventManager::EventManager() : pgMgr_(PageManager::GetInstance())
 {
 }
@@ -71,8 +81,7 @@ void EventManager::Add(const ComInfo &viewId, std::unique_ptr<BtnOnDragListener>
 // key listener is registered at root view, because key event don't has position info and is globally responded
 void EventManager::AddKeyListener()
 {
-    keyListener_ = std::make_unique<KeyListener>();
-    OHOS::RootView::GetInstance()->SetOnKeyActListener(keyListener_.get());
+    OHOS::RootView::GetInstance()->SetOnKeyActListener(helper_.get());
 }
 
 void EventManager::Add(const ComInfo &viewId, EventType evt, Callback cb)

@@ -185,6 +185,8 @@ bool KeyListener::ProcessVolumeKey(OHOS::UIView &view, const OHOS::KeyEvent &eve
     const static std::unordered_map<uint16_t, uint8_t> dirMap {
         {KEY_VOLUMEUP, OHOS::FOCUS_DIRECTION_UP},
         {KEY_VOLUMEDOWN, OHOS::FOCUS_DIRECTION_DOWN},
+        {KEY_UP, OHOS::FOCUS_DIRECTION_UP},
+        {KEY_DOWN, OHOS::FOCUS_DIRECTION_DOWN},
     };
     if (isButtonPressed_) {
         return true;

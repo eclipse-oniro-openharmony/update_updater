@@ -87,13 +87,15 @@ private:
     bool isConsumed_;
 };
 
-class KeyListener final : public OHOS::RootView::OnKeyActListener {
+class KeyListener : public OHOS::RootView::OnKeyActListener {
 public:
+    KeyListener() = default;
+    virtual ~KeyListener() = default;
     bool OnKeyAct(OHOS::UIView &view, const OHOS::KeyEvent &event) override;
     static void SetButtonPressed(bool isPressed);
-private:
     bool ProcessPowerKey(OHOS::UIView &view, const OHOS::KeyEvent &event);
     bool ProcessVolumeKey(OHOS::UIView &view, const OHOS::KeyEvent &event);
+private:
     static bool isButtonPressed_;
 };
 }
