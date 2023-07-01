@@ -112,7 +112,8 @@ bool HashDataVerifier::LoadPkcs7FromPackage(const std::string &pkgPath)
     size_t signatureSize = 0;
     std::vector<uint8_t> signature {};
     uint16_t commentTotalLenAll = 0;
-    ret = verifyUtil.GetSignature(PkgStreamImpl::ConvertPkgStream(pkgStream), signatureSize, signature, commentTotalLenAll);
+    ret = verifyUtil.GetSignature(PkgStreamImpl::ConvertPkgStream(pkgStream),
+        signatureSize, signature, commentTotalLenAll);
     manager_->ClosePkgStream(pkgStream);
     if (ret != PKG_SUCCESS) {
         UPDATER_LAST_WORD(ret);

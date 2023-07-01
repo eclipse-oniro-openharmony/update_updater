@@ -89,7 +89,7 @@ int32_t Pkcs7SignedData::ParsePkcs7Data(const uint8_t *srcData, const size_t dat
 int32_t Pkcs7SignedData::Verify() const
 {
     std::vector<uint8_t> digestForEVP;
-    for (unsigned int i =0; i < signatureInfo.overall.length; i++) {
+    for (unsigned int i = 0; i < signatureInfo.overall.length; i++) {
         digestForEVP.push_back(static_cast<uint8_t>(signatureInfo.overall.buffer[i]));
     }
     if (Verify(digestForEVP, {}, true) == 0) {
@@ -278,21 +278,21 @@ Pkcs7VerifyHelper::~Pkcs7VerifyHelper()
     return;
 }
 
-int32_t Pkcs7VerifyHelper::GetDigestFromSubBlocks(std::vector<uint8_t> &digestBlock, HwSigningBlockHeader &header1,
-    HwSigningSigntureInfo &signatureInfo1, std::vector<HwSigningSubBlock> &subBlockVec1, std::vector<uint8_t> &digest1)
+int32_t Pkcs7VerifyHelper::GetDigestFromSubBlocks(std::vector<uint8_t> &digestBlock, HwSigningBlockHeader &header,
+    HwSigningSigntureInfo &signatureInfo, std::vector<HwSigningSubBlock> &subBlockVec, std::vector<uint8_t> &digest)
 {
     PKG_LOGE("Pkcs7VerifyHelper in");
     return -1;
 }
 
-int32_t Pkcs7SignedData::GetDigest(std::vector<uint8_t> &digestBlock, HwSigningBlockHeader &header1,
-    HwSigningSigntureInfo &signatureInfo1, std::vector<HwSigningSubBlock> &subBlockVec1, std::vector<uint8_t> &digest1)
+int32_t Pkcs7SignedData::GetDigest(std::vector<uint8_t> &digestBlock, HwSigningBlockHeader &header,
+    HwSigningSigntureInfo &signatureInfo, std::vector<HwSigningSubBlock> &subBlockVec, std::vector<uint8_t> &digest)
 {
     if (helper_ == nullptr) {
         PKG_LOGE("helper_ null error");
         return -1;
     }
-    return helper_->GetDigestFromSubBlocks(digestBlock, header1, signatureInfo1, subBlockVec1, digest1);
+    return helper_->GetDigestFromSubBlocks(digestBlock, header, signatureInfo, subBlockVec, digest);
 }
 
 /*
@@ -409,8 +409,6 @@ int32_t Pkcs7SignedData::VerifyDigest(X509 *cert, const Pkcs7SignerInfo &signer,
         UPDATER_LAST_WORD(-1);
         return -1;
     }
-
-
 
     EVP_PKEY *pubKey = X509_get_pubkey(cert);
     if (pubKey == nullptr) {

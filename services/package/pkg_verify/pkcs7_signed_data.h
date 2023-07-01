@@ -42,7 +42,7 @@ using HwSigningSigntureInfo = struct {
 using HwSigningSubBlock = struct {
     unsigned char type;
     unsigned char tag;
-    unsigned short AlgorithmId;
+    unsigned short algorithmId;
     unsigned int digestLen;
     const unsigned char *digestData;
 };
@@ -59,8 +59,9 @@ struct Pkcs7SignerInfo {
 
 class VerifyHelper {
 public:
-    virtual int32_t GetDigestFromSubBlocks(std::vector<uint8_t> &digestBlock, HwSigningBlockHeader &header1,
-        HwSigningSigntureInfo &signatureInfo1, std::vector<HwSigningSubBlock> &subBlockVec1, std::vector<uint8_t> &digest1) = 0;
+    virtual int32_t GetDigestFromSubBlocks(std::vector<uint8_t> &digestBlock, HwSigningBlockHeader &header,
+        HwSigningSigntureInfo &signatureInfo, std::vector<HwSigningSubBlock> &subBlockVec,
+        std::vector<uint8_t> &digest) = 0;
 
     virtual ~VerifyHelper() {}
 };
@@ -84,8 +85,9 @@ public:
 
     static Pkcs7SignedData &GetInstance();
 
-    int32_t GetDigest(std::vector<uint8_t> &digestBlock, HwSigningBlockHeader &header1,
-        HwSigningSigntureInfo &signatureInfo1, std::vector<HwSigningSubBlock> &subBlockVec1, std::vector<uint8_t> &digest1);
+    int32_t GetDigest(std::vector<uint8_t> &digestBlock, HwSigningBlockHeader &header,
+        HwSigningSigntureInfo &signatureInfo, std::vector<HwSigningSubBlock> &subBlockVec,
+        std::vector<uint8_t> &digest);
 private:
     int32_t Init(const uint8_t *sourceData, const uint32_t sourceDataLen);
     int32_t DoParse();
@@ -112,10 +114,11 @@ class Pkcs7VerifyHelper : public VerifyHelper {
 public:
     Pkcs7VerifyHelper() = default;
 
-    virtual ~Pkcs7VerifyHelper();
+    ~Pkcs7VerifyHelper() override;
 
-    int32_t GetDigestFromSubBlocks(std::vector<uint8_t> &digestBlock, HwSigningBlockHeader &header1,
-        HwSigningSigntureInfo &signatureInfo1, std::vector<HwSigningSubBlock> &subBlockVec1, std::vector<uint8_t> &digest1) override;
+    int32_t GetDigestFromSubBlocks(std::vector<uint8_t> &digestBlock, HwSigningBlockHeader &header,
+        HwSigningSigntureInfo &signatureInfo, std::vector<HwSigningSubBlock> &subBlockVec,
+        std::vector<uint8_t> &digest) override;
 };
 } // namespace Hpackage
 #endif
