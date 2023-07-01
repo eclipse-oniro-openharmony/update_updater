@@ -88,6 +88,13 @@ int32_t Pkcs7SignedData::ParsePkcs7Data(const uint8_t *srcData, const size_t dat
 
 int32_t Pkcs7SignedData::Verify() const
 {
+    std::vector<uint8_t> digestForEVP;
+    for (unsigned int i =0; i < signatureInfo.overall.length; i++) {
+        digestForEVP.push_back(static_cast<uint8_t>(signatureInfo.overall.buffer[i]));
+    }
+    if (Verify(digestForEVP, {}, true) == 0) {
+        return 0;
+    }
     return Verify(digest_, {}, true);
 }
 
@@ -175,11 +182,13 @@ int32_t Pkcs7SignedData::DoParse()
         return -1;
     }
 
-    ret = GetDigestFromContentInfo(contentInfo);
-    if (ret != 0) {
-        PKG_LOGE("invalid pkcs7 contentInfo fail");
-        UPDATER_LAST_WORD(-1);
-        return -1;
+    if (GetInstance().GetDigest(contentInfo, header, signatureInfo, subBlockVec, digest_) != 0) {
+        ret = GetDigestFromContentInfo(contentInfo);
+        if (ret != 0) {
+            PKG_LOGE("invalid pkcs7 contentInfo fail");
+            UPDATER_LAST_WORD(-1);
+            return -1;
+        }
     }
 
     return SignerInfosParse();
@@ -245,8 +254,45 @@ int32_t Pkcs7SignedData::GetDigestFromContentInfo(std::vector<uint8_t> &digestBl
         return -1;
     }
     digest_.assign(digestBlock.begin() + offset, digestBlock.end());
-
     return 0;
+}
+
+Pkcs7SignedData &Pkcs7SignedData::GetInstance()
+{
+    static Pkcs7SignedData checkPackagesInfo;
+    return checkPackagesInfo;
+}
+
+extern "C" __attribute__((constructor)) void RegisterVerifyHelper(void)
+{
+    Pkcs7SignedData::GetInstance().RegisterVerifyHelper(std::make_unique<Pkcs7VerifyHelper>());
+}
+
+void Pkcs7SignedData::RegisterVerifyHelper(std::unique_ptr<VerifyHelper> ptr)
+{
+    helper_ = std::move(ptr);
+}
+
+Pkcs7VerifyHelper::~Pkcs7VerifyHelper()
+{
+    return;
+}
+
+int32_t Pkcs7VerifyHelper::GetDigestFromSubBlocks(std::vector<uint8_t> &digestBlock, HwSigningBlockHeader &header1,
+    HwSigningSigntureInfo &signatureInfo1, std::vector<HwSigningSubBlock> &subBlockVec1, std::vector<uint8_t> &digest1)
+{
+    PKG_LOGE("Pkcs7VerifyHelper in");
+    return -1;
+}
+
+int32_t Pkcs7SignedData::GetDigest(std::vector<uint8_t> &digestBlock, HwSigningBlockHeader &header1,
+    HwSigningSigntureInfo &signatureInfo1, std::vector<HwSigningSubBlock> &subBlockVec1, std::vector<uint8_t> &digest1)
+{
+    if (helper_ == nullptr) {
+        PKG_LOGE("helper_ null error");
+        return -1;
+    }
+    return helper_->GetDigestFromSubBlocks(digestBlock, header1, signatureInfo1, subBlockVec1, digest1);
 }
 
 /*
@@ -364,12 +410,7 @@ int32_t Pkcs7SignedData::VerifyDigest(X509 *cert, const Pkcs7SignerInfo &signer,
         return -1;
     }
 
-    size_t digestLen = GetDigestLength(signer.digestNid);
-    if (digestLen == 0 || hash.size() != digestLen) {
-        PKG_LOGE("invalid digest length %zu", digestLen);
-        UPDATER_LAST_WORD(-1, digestLen);
-        return -1;
-    }
+
 
     EVP_PKEY *pubKey = X509_get_pubkey(cert);
     if (pubKey == nullptr) {

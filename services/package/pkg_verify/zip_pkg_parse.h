@@ -26,11 +26,10 @@ public:
 
     ~ZipPkgParse() {};
 
-    int32_t DoParseZipPkg(PkgStreamPtr pkgStream, size_t &signatureStart,
-        size_t &signatureSize, size_t &readLen, uint16_t &signCommentTotalLen) const;
+    int32_t DoParseZipPkg(PkgStreamPtr pkgStream, PkgSignComment &pkgSignComment,
+        size_t &readLen, uint16_t &signCommentTotalLen, uint16_t &signCommentAppendLen) const;
 
-    int32_t ParseZipPkg(Hpackage::PkgStreamPtr pkgStream, size_t &signatureStart,
-        size_t &signatureSize) const;
+    int32_t ParseZipPkg(Hpackage::PkgStreamPtr pkgStream, PkgSignComment &pkgSignComment) const;
 
 private:
     int32_t ParsePkgFooter(const uint8_t *footer, size_t length, uint16_t &signCommentAppendLen,

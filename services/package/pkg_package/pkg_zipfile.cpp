@@ -212,9 +212,10 @@ int32_t ZipPkgFile::LoadPackage(std::vector<std::string>& fileNames, VerifyFunct
     }
     magic = ReadLE32(buffer.buffer);
     if (magic != END_CENTRAL_SIGNATURE) { // 按签名处理
-        size_t signatureStart = 0;
         ZipPkgParse zipParse;
-        ret = zipParse.ParseZipPkg(pkgStream_, signatureStart, signatureLen);
+        PkgSignComment pkgSignComment {};
+        ret = zipParse.ParseZipPkg(pkgStream_, pkgSignComment);
+        signatureLen = pkgSignComment.signCommentTotalLen;
         if (ret != PKG_SUCCESS) {
             PKG_LOGE("Parse zip package signature failed");
             UPDATER_LAST_WORD(ret);
