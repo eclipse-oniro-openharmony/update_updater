@@ -404,13 +404,6 @@ static UpdaterStatus PreUpdatePackages(UpdaterParams &upParams)
         UPDATER_LAST_WORD(status);
         return status;
     }
-    if (upParams.retryCount == 0 && !IsBatteryCapacitySufficient()) {
-        UPDATER_UI_INSTANCE.ShowUpdInfo(TR(LOG_LOWPOWER));
-        UPDATER_UI_INSTANCE.Sleep(UI_SHOW_DURATION);
-        UPDATER_LAST_WORD(UPDATE_ERROR);
-        LOG(ERROR) << "Battery is not sufficient for install package.";
-        return UPDATE_SKIP;
-    }
 
 #ifdef UPDATER_USE_PTABLE
     if (!PtablePreProcess::GetInstance().DoPtableProcess(upParams)) {
