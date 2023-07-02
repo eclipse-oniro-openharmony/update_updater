@@ -19,7 +19,8 @@ namespace Updater {
 enum KeyUpDownEvent {
     EVENT_KEY_UP_VALUE,
     EVENT_KEY_DOWN_VALUE
-}
+};
+
 KeysInputDevice &KeysInputDevice::GetInstance()
 {
     static KeysInputDevice instance;
@@ -42,6 +43,10 @@ int KeysInputDevice::HandleKeyEvent(const input_event &ev, uint32_t type)
     if (ev.code == BTN_TOUCH || ev.code == BTN_TOOL_FINGER) {
         return 0;
     }
+    if (ev.code == BTN_MOUSE || ev.code == BTN_LEFT || ev.code == BTN_RIGHT || ev.code == BTN_MIDDLE) {
+        return 0;
+    }
+
     // KEY_VOLUMEDOWN = 114, KEY_VOLUMEUP = 115, KEY_POWER = 116
     if (ev.code == KEY_VOLUMEDOWN || ev.code == KEY_VOLUMEUP || ev.code == KEY_POWER) {
         keyState_ = (ev.value == 1) ?

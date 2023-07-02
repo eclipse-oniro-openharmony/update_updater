@@ -14,6 +14,7 @@
  */
 
 #include "event_listener.h"
+
 #include <linux/input.h>
 #include <mutex>
 #include <thread>
