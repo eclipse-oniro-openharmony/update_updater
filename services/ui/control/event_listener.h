@@ -98,7 +98,5 @@ public:
 private:
     static bool isButtonPressed_;
 };
-void StartLongPressTimer();
-void StopLongPressTimer();
 }
 #endif
