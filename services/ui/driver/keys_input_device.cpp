@@ -16,6 +16,10 @@
 #include "log/log.h"
 
 namespace Updater {
+enum KeyUpDownEvent {
+    EVENT_KEY_UP_VALUE,
+    EVENT_KEY_DOWN_VALUE
+}
 KeysInputDevice &KeysInputDevice::GetInstance()
 {
     static KeysInputDevice instance;
@@ -39,12 +43,13 @@ int KeysInputDevice::HandleKeyEvent(const input_event &ev, uint32_t type)
         return 0;
     }
     // KEY_VOLUMEDOWN = 114, KEY_VOLUMEUP = 115, KEY_POWER = 116
-    if (!(ev.code == KEY_VOLUMEDOWN || ev.code == KEY_VOLUMEUP || ev.code == KEY_POWER)) {
+    if (ev.code == KEY_VOLUMEDOWN || ev.code == KEY_VOLUMEUP || ev.code == KEY_POWER) {
+        keyState_ = (ev.value == 1) ?
+            OHOS::InputDevice::STATE_PRESS : OHOS::InputDevice::STATE_RELEASE;
+    } else {
         keyState_ = ev.value;
-        lastKeyId_ = ev.code;
-        return 0;
     }
-    keyState_ = (ev.value == 1) ? OHOS::InputDevice::STATE_PRESS : OHOS::InputDevice::STATE_RELEASE;
+
     lastKeyId_ = ev.code;
     return 0;
 }

@@ -27,9 +27,6 @@
 #include "view_api.h"
 
 namespace Updater {
-std::ostream &operator<<(std::ostream &os, const ComInfo &com);
-void StartLongPressTimer();
-void StopLongPressTimer();
 class PageManager final {
     DISALLOW_COPY_MOVE(PageManager);
 public:

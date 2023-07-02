@@ -23,7 +23,6 @@
 #include "pointers_input_device.h"
 
 namespace Updater {
-constexpr const int MAX_INPUT_DEVICES = 32;
 using AddInputDeviceFunc = std::function<void()>;
 using HandlePointersEventFunc = std::function<void(const input_event &ev, uint32_t type)>;
 class InputEvent {

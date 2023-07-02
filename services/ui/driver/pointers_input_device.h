@@ -21,9 +21,6 @@
 #include "dock/input_device.h"
 
 namespace Updater {
-constexpr const char *IMAGE_POINTER_DEFAULT_PATH = "/resources/mouse/Default.png";
-constexpr const int32_t IMAGE_WIDTH = 64;
-constexpr const int32_t IMAGE_HEIGHT = 64;
 void AddInputDevice();
 void HandlePointersEvent(const input_event &ev, uint32_t type);
 class PointersInputDevice : public OHOS::PointerInputDevice {

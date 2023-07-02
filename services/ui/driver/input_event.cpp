@@ -18,6 +18,7 @@
 #include "keys_input_device.h"
 
 namespace Updater {
+constexpr const int MAX_INPUT_DEVICES = 32;
 extern "C" __attribute__((constructor)) void RegisterAddInputDeviceHelper(void)
 {
     InputEvent::GetInstance().RegisterAddInputDeviceHelper(AddInputDevice);

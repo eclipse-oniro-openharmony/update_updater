@@ -88,10 +88,7 @@ int PointersInputDevice::HandlePointEvent(const input_event &ev, uint32_t type)
         HandleEvAbsMt(ev);
         return 0;
     }
-    if (ev.type != EV_KEY || ev.code > KEY_MAX) {
-        return 0;
-    }
-    if (ev.code == BTN_TOUCH) {
+    if (ev.type == EV_KEY && ev.code == BTN_TOUCH) {
         SetFingerDown(ev.value == 1);
     }
     return 0;
