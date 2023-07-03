@@ -182,7 +182,7 @@ int32_t Pkcs7SignedData::DoParse()
         return -1;
     }
 
-    if (GetInstance().GetDigest(contentInfo, header, signatureInfo, subBlockVec, digest_) != 0) {
+    if (GetInstance().GetDigest(contentInfo, signatureInfo, digest_) != 0) {
         ret = GetDigestFromContentInfo(contentInfo);
         if (ret != 0) {
             PKG_LOGE("invalid pkcs7 contentInfo fail");
@@ -278,21 +278,21 @@ Pkcs7VerifyHelper::~Pkcs7VerifyHelper()
     return;
 }
 
-int32_t Pkcs7VerifyHelper::GetDigestFromSubBlocks(std::vector<uint8_t> &digestBlock, HwSigningBlockHeader &header,
-    HwSigningSigntureInfo &signatureInfo, std::vector<HwSigningSubBlock> &subBlockVec, std::vector<uint8_t> &digest)
+int32_t Pkcs7VerifyHelper::GetDigestFromSubBlocks(std::vector<uint8_t> &digestBlock, 
+    HwSigningSigntureInfo &signatureInfo, std::vector<uint8_t> &digest)
 {
     PKG_LOGE("Pkcs7VerifyHelper in");
     return -1;
 }
 
-int32_t Pkcs7SignedData::GetDigest(std::vector<uint8_t> &digestBlock, HwSigningBlockHeader &header,
-    HwSigningSigntureInfo &signatureInfo, std::vector<HwSigningSubBlock> &subBlockVec, std::vector<uint8_t> &digest)
+int32_t Pkcs7SignedData::GetDigest(std::vector<uint8_t> &digestBlock, 
+    HwSigningSigntureInfo &signatureInfo, std::vector<uint8_t> &digest)
 {
     if (helper_ == nullptr) {
         PKG_LOGE("helper_ null error");
         return -1;
     }
-    return helper_->GetDigestFromSubBlocks(digestBlock, header, signatureInfo, subBlockVec, digest);
+    return helper_->GetDigestFromSubBlocks(digestBlock, signatureInfo, digest);
 }
 
 /*
