@@ -65,5 +65,7 @@ private:
     std::unordered_map<UpdaterMode, std::unique_ptr<ProgressStrategy>> progressMap_ {};
     std::unordered_map<UpdaterMode, std::unique_ptr<LogoStrategy>> logoMap_ {};
 };
+void StartLongPressTimer();
+void StopLongPressTimer();
 } // namespace Updater
 #endif

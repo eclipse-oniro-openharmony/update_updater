@@ -30,6 +30,7 @@ updater_common_include = [
   ".",
   "./ui/include",
   "./ui",
+  "./ui/control",
 ]
 
 updater_common_deps = [
@@ -56,6 +57,7 @@ ohos_executable("updater") {
     "updater.cpp",
     "updater_main.cpp",
     "updater_preprocess.cpp",
+    "updater_ui.cpp",
     "updater_utils.cpp",
   ]
 

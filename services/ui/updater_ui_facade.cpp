@@ -21,6 +21,15 @@
 #include "updater_ui_tools.h"
 
 namespace Updater {
+namespace {
+bool g_timerStopped { false };
+
+inline auto &GetFacade()
+{
+    return UpdaterUiFacade::GetInstance();
+}
+}  // namespace
+
 UpdaterUiFacade::UpdaterUiFacade()
     : strategies_ {UpdaterUiConfig::GetStrategy()}, pgMgr_ {PageManager::GetInstance()}, mode_ {UpdaterMode::MODEMAX}
 {
@@ -262,5 +271,41 @@ void UpdaterUiFacade::Sleep(int ms) const
 void UpdaterUiFacade::SaveScreen() const
 {
     UpdaterUiTools::SaveUxBuffToFile("/tmp/mainpage.png");
+}
+
+void StartLongPressTimer()
+{
+    static int downCount { 0 };
+    if (!GetFacade().IsInProgress()) {
+        return;
+    }
+    ++downCount;
+    g_timerStopped = false;
+    using namespace std::literals::chrono_literals;
+    std::thread t { [lastdownCount = downCount] () {
+        constexpr auto threshold = 2s;
+        std::this_thread::sleep_for(threshold);
+        /**
+         * When the downCount of the last power key press changes,
+         * it means that the last press has been released before
+         * the timeout, then you can exit the callback directly
+         */
+        if (g_timerStopped || lastdownCount != downCount) {
+            return;
+        }
+        // show warning
+        GetFacade().ShowProgressWarning(true);
+    }};
+    t.detach();
+}
+
+void StopLongPressTimer()
+{
+    // no need to judge whether in progress page,
+    // because may press power key in progress
+    // page and release power key in other page
+    g_timerStopped = true;
+    // hide warning
+    GetFacade().ShowProgressWarning(false);
 }
 } // namespace Updater
