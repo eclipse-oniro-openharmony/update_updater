@@ -512,7 +512,7 @@ bool CheckDumpResult()
 void WriteDumpResult(const std::string &result)
 {
     if (access(UPDATER_PATH, 0) != 0) {
-        if (MkdirRecursive(UPDATER_PATHR, 0755) != 0) { // 0755: -rwxr-xr-x
+        if (MkdirRecursive(UPDATER_PATH, 0755) != 0) { // 0755: -rwxr-xr-x
             LOG(ERROR) << "MkdirRecursive error!";
             return;
         }
