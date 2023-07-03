@@ -265,7 +265,7 @@ bool GetBatteryCapacity(int &capacity)
 bool IsBatteryCapacitySufficient()
 {
     struct UpdateMessage boot {};
-    if (ReadUpdaterMiscMsg(boot) && boot.command == "boot_updater") {
+    if (ReadUpdaterMiscMsg(boot) && strcmp(boot.command, "boot_updater") == 0) {
         LOG(INFO) << "this is OTA update, on need to determine the battery";
         return true;
     }
