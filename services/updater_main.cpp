@@ -264,6 +264,11 @@ bool GetBatteryCapacity(int &capacity)
 
 bool IsBatteryCapacitySufficient()
 {
+    struct UpdateMessage boot {};
+    if (ReadUpdaterMiscMsg(boot) && boot.command == "boot_updater") {
+        LOG(INFO) << "this is OTA update, on need to determine the battery";
+        return true;
+    }
     static constexpr auto levelIdx = "lowBatteryLevel";
     static constexpr auto jsonPath = "/etc/product_cfg.json";
 
