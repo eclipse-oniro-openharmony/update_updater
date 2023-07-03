@@ -474,6 +474,7 @@ bool CopyUpdaterLogs(const std::string &sLog, const std::string &dLog)
 
     if (Utils::GetFileSize(sLog) > MAX_LOG_SIZE) {
         LOG(ERROR) << "Size bigger for" << sLog;
+        STAGE(UPDATE_STAGE_FAIL) << "Log file error, unable to copy";
         return false;
     }
 

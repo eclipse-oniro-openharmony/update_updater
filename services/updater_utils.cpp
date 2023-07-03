@@ -131,6 +131,7 @@ void PostUpdater(bool clearMisc)
 
     (void)SetupPartitions();
     SetLogDir(UPDATER_LOG_DIR);
+    UpdaterInit::GetInstance().InvokeEvent(UPDATER_POST_INIT_EVENT);
     // clear update misc partition.
     if (clearMisc && !ClearMisc()) {
         LOG(ERROR) << "PostUpdater clear misc failed";
