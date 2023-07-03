@@ -48,7 +48,7 @@ constexpr int USECONDS_PER_SECONDS = 1000000; // 1s = 1000000us
 constexpr int NANOSECS_PER_USECONDS = 1000; // 1us = 1000ns
 constexpr int MAX_TIME_SIZE = 20;
 
-static std::string g_logDir = "/data/updater/log";
+static std::string g_logDir(UPDATER_LOG_DIR);
 
 void SaveLogs()
 {
@@ -456,8 +456,7 @@ bool CopyUpdaterLogs(const std::string &sLog, const std::string &dLog)
         return false;
     }
 #ifdef WITH_SELINUX
-    if (g_logDir == "/data/updater/log")
-    {
+    if (g_logDir == std::string(UPDATER_LOG_DIR)) {
         RestoreconRecurse("/data");
     }
 #endif // WITH_SELINUX
@@ -473,11 +472,13 @@ bool CopyUpdaterLogs(const std::string &sLog, const std::string &dLog)
         }
     }
 
-    std::string updaterLog = g_logDir + "/updater_log";
+    if (Utils::GetFileSize(sLog) > MAX_LOG_SIZE) {
+        LOG(ERROR) << "Size bigger for" << sLog;
+        return false;
+    }
 
-    while (Utils::GetFileSize(sLog) + GetDirSize(g_logDir) > 10 * 1024 * 1024) {
+    while (Utils::GetFileSize(sLog) + GetDirSizeForFile(dLog) > MAX_LOG_DIR_SIZE) {
         if (DeleteOldFile(dLog) != true) {
-            DeleteOldFile(updaterLog);
             break;
         }
     }
@@ -509,14 +510,14 @@ bool CheckDumpResult()
 
 void WriteDumpResult(const std::string &result)
 {
-    if (access(UPDATE_PATH, 0) != 0) {
-        if (MkdirRecursive(UPDATE_PATH, 0755) != 0) { // 0755: -rwxr-xr-x
+    if (access(UPDATER_PATH, 0) != 0) {
+        if (MkdirRecursive(UPDATE_PATHR, 0755) != 0) { // 0755: -rwxr-xr-x
             LOG(ERROR) << "MkdirRecursive error!";
             return;
         }
     }
     LOG(INFO) << "WriteDumpResult: " << result;
-    const std::string resultPath = std::string(UPDATE_PATH) + "/" + std::string(UPDATER_RESULT_FILE);
+    const std::string resultPath = std::string(UPDATER_PATH) + "/" + std::string(UPDATER_RESULT_FILE);
     FILE *fp = fopen(resultPath.c_str(), "w+");
     if (fp == nullptr) {
         LOG(ERROR) << "open result file failed";
@@ -631,58 +632,59 @@ bool IsDirExist(const std::string &path)
     return false;
 }
 
-int GetDirSize(const std::string &path)
+long long int GetDirSize(const std::string &folderPath)
 {
-    int totalSize = 0;
-    struct stat statbuf;
-    struct dirent *entry = nullptr;
-    DIR *dir = opendir(path.c_str());
-    if (dir == nullptr) {
-        LOG(ERROR) << "Cannot open dir " << path;
-        return -1;
-    }
-    lstat(path.c_str(), &statbuf);
-    totalSize += statbuf.st_size;
-    while ((entry = readdir(dir)) != nullptr) {
-        std::string subdir = path + "/" + std::string(entry->d_name);
-        lstat(subdir.c_str(), &statbuf);
-
-        if (S_ISDIR(statbuf.st_mode)) {
-            if (strcmp(".", entry->d_name) == 0 || strcmp("..", entry->d_name) == 0) {
-                continue;
-            }
-
-            long long int subDirSize = GetDirSize(subdir);
-            totalSize += subDirSize;
+    long long totalSize = 0;
+    
+    for (const auto& entry : std::filesystem::directory_iterator(folderPath)) {
+        if (std::filesystem::is_directory(entry.status())) {
+            totalSize += GetDirSize(entry.path().string());
         } else {
-            totalSize += statbuf.st_size;
+            totalSize += std::filesystem::file_size(entry.path());
         }
     }
-    closedir(dir);
+    
     return totalSize;
 }
 
-bool DeleteOldFile(const std::string dest)
+long long int GetDirSizeForFile(const std::string &filePath)
 {
-    std::string path = "";
-    std::vector<std::string> filenames;
-    std::string name = dest.substr(dest.find_last_of("/") + 1);
+    std::size_t found = filePath.find_last_of("/");
+    if (found == std::string::npos) {
+        LOG(ERROR) << "filePath error";
+        return -1;
+    }
+    return GetDirSize(filePath.substr(0, found));
+}
 
-    for (const auto& entry : std::filesystem::directory_iterator(path)) {
-        if (entry.path().filename().string().find(name) != std::string::npos) {
-            filenames.push_back(entry.path().filename().string());
+bool DeleteOldFile(const std::string folderPath)
+{
+    std::filesystem::path folder(folderPath);
+
+    if (!std::filesystem::exists(folder) || !std::filesystem::is_directory(folder)) {
+        LOG(ERROR) << "Folder not exit or folder error";
+        return false;
+    }
+
+    std::filesystem::path oldestFilePath = "";
+    std::filesystem::file_time_type oldestFileTime;
+
+    for (const auto& entry : std::filesystem::directory_iterator(folder)) {
+        const std::filesystem::path& filePath = entry.path();
+        const std::string& fileName = filePath.filename().string();
+        std::filesystem::file_time_type fileTime = std::filesystem::last_write_time(filePath);
+        if (fileTime < oldestFileTime) {
+            oldestFileTime = fileTime;
+            oldestFilePath = filePath;
         }
     }
 
-    std::sort(filenames.begin(), filenames.end());
-
-    if (!filenames.empty()) {
-        std::vector<std::string>::iterator first = filenames.begin();
-        std::string deleteName = path + "/" + first->data();
-        (void)DeleteFile(deleteName);
-        return true;
+    if (oldestFilePath.empty()) {
+        LOG(ERROR) << "Unable to delete file";
+        return false;
     }
-    return false;
+    std::filesystem::remove(oldestFilePath);
+    return true;
 }
 
 void SetLogDir(const std::string dir)

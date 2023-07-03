@@ -130,6 +130,7 @@ void PostUpdater(bool clearMisc)
     STAGE(UPDATE_STAGE_BEGIN) << "PostUpdater";
 
     (void)SetupPartitions();
+    SetLogDir(UPDATER_LOG_DIR);
     // clear update misc partition.
     if (clearMisc && !ClearMisc()) {
         LOG(ERROR) << "PostUpdater clear misc failed";
@@ -180,7 +181,6 @@ void BootMode::InitMode(void) const
     InitUpdaterLogger(modeName, TMP_LOG, TMP_STAGE_LOG, TMP_ERROR_CODE_PATH);
     SetLogLevel(INFO);
 
-    SetLogDir(UPDATER_LOG_DIR);
     LoadFstab();
     STAGE(UPDATE_STAGE_OUT) << "Start " << modeName;
     Flashd::SetParameter(modePara.c_str(), "1");
