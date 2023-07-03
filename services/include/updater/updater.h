@@ -110,5 +110,7 @@ void RegisterMode(const BootMode &mode);
 std::vector<BootMode> &GetBootModes(void);
 
 std::optional<BootMode> SelectMode(const UpdateMessage &boot);
+
+void SetMessageToMisc(const std::string &miscCmd, const int message, const std::string headInfo);
 } // Updater
 #endif /* UPDATER_UPDATER_H */
