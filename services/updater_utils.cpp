@@ -211,7 +211,11 @@ std::vector<std::string> ParseParams(int argc, char **argv)
 void BootMode::InitMode(void) const
 {
     InitUpdaterLogger(modeName, TMP_LOG, TMP_STAGE_LOG, TMP_ERROR_CODE_PATH);
+#ifdef UPDATER_BUILD_VARIANT_USER
     SetLogLevel(INFO);
+#else
+    SetLogLevel(DEBUG);
+#endif
     LoadFstab();
     STAGE(UPDATE_STAGE_OUT) << "Start " << modeName;
     Flashd::SetParameter(modePara.c_str(), "1");

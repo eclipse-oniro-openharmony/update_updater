@@ -107,6 +107,7 @@ bool TransferManager::CommandsParser(int fd, const std::vector<std::string> &con
             }
         }
         if (!CommandsExecute(fd, *cmd)) {
+            LOG(ERROR) << "Running command : " << cmd->GetArgumentByPos(0) << " fail";
             return false;
         }
         if (initBlock == 0) {
@@ -116,7 +117,6 @@ bool TransferManager::CommandsParser(int fd, const std::vector<std::string> &con
             globalParams->env->PostMessage("set_progress",
                 std::to_string((static_cast<double>(globalParams->written) - initBlock) / totalSize));
         }
-        LOG(INFO) << "Running command : " << cmd->GetArgumentByPos(0) << " success";
     }
     return true;
 }
