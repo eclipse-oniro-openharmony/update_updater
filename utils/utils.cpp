@@ -668,7 +668,7 @@ bool DeleteOldFile(const std::string folderPath)
     }
 
     std::filesystem::path oldestFilePath = "";
-    std::filesystem::file_time_type oldestFileTime;
+    std::filesystem::file_time_type oldestFileTime = std::filesystem::last_write_time(TMP_LOG);;
 
     for (const auto& entry : std::filesystem::directory_iterator(folder)) {
         const std::filesystem::path& filePath = entry.path();
