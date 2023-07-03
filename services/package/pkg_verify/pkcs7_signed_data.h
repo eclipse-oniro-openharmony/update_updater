@@ -45,7 +45,7 @@ struct Pkcs7SignerInfo {
 
 class VerifyHelper {
 public:
-    virtual int32_t GetDigestFromSubBlocks(std::vector<uint8_t> &digestBlock, 
+    virtual int32_t GetDigestFromSubBlocks(std::vector<uint8_t> &digestBlock,
         HwSigningSigntureInfo &signatureInfo, std::vector<uint8_t> &digest) = 0;
 
     virtual ~VerifyHelper() {}
