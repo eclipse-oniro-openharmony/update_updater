@@ -113,7 +113,7 @@ ohos_executable("updater") {
   }
 
   if (build_selinux) {
-    external_deps += [ "selinux:librestorecon" ]
+    external_deps += [ "selinux_adapter:librestorecon" ]
     deps += [ "//third_party/selinux:libselinux" ]
     include_dirs += [ "//third_party/selinux/libselinux/include" ]
     cflags = [ "-DWITH_SELINUX" ]
@@ -185,7 +185,7 @@ ohos_static_library("libupdater") {
   }
 
   if (build_selinux) {
-    external_deps += [ "selinux:librestorecon" ]
+    external_deps += [ "selinux_adapter:librestorecon" ]
     deps += [ "//third_party/selinux:libselinux" ]
     include_dirs += [ "//third_party/selinux/libselinux/include" ]
     cflags = [ "-DWITH_SELINUX" ]

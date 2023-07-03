@@ -53,7 +53,7 @@
                 "drivers_peripheral_input",
                 "c_utils",
                 "hilog",
-                "selinux",
+                "selinux_adapter",
                 "common",
                 "ui_lite"
             ],
@@ -68,7 +68,7 @@
                 "libuv",
                 "cjson",
                 "libpng",
-                "thirdparty_selinux"
+                "selinux"
             ]
         },
         "build": {
