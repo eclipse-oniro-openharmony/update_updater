@@ -60,6 +60,11 @@ enum {
     PKG_BUFFER_END,
     PKG_LZ4_FINISH,
 };
+
+struct __attribute__((packed)) PkgSignComment {
+    uint16_t signCommentTotalLen = 0;
+    uint16_t signCommentAppendLen = 0;
+};
 } // namespace Hpackage
 
 #ifdef _WIN32
