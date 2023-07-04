@@ -19,7 +19,11 @@
 #include "applypatch/partition_record.h"
 #include "log.h"
 #include "parameter.h"
+#ifdef UPDATER_USE_PTABLE
+#include "ptable_parse/ptable_manager.h"
+#endif
 #include "slot_info/slot_info.h"
+#include "updater/updater_const.h"
 
 using namespace std;
 using namespace std::placeholders;
@@ -147,6 +151,17 @@ int32_t RawImgProcessor::PreProcess(Uscript::UScriptEnv &env)
             partitionName.substr(1, partitionName.size()) << "\'.";
         return USCRIPT_ERROR_EXECUTE;
     }
+    const FileInfo *info = env.GetPkgManager()->GetFileInfo(partitionName);
+    if (info == nullptr) {
+        LOG(ERROR) << "Error to get file info";
+        return USCRIPT_ERROR_EXECUTE;
+    }
+#ifdef UPDATER_USE_PTABLE
+    if (partitionSize < info->unpackedSize) {
+        LOG(ERROR) << "partition size: " << partitionSize << " is short than image size: " << totalSize_;
+        return USCRIPT_ERROR_EXECUTE;
+    }
+#endif
 
     writer_ = DataWriter::CreateDataWriter(WRITE_RAW, writePath,
         static_cast<UpdaterEnv *>(&env), offset);
@@ -172,13 +187,6 @@ int32_t RawImgProcessor::DoProcess(Uscript::UScriptEnv &env)
         LOG(ERROR) << "Error to get file info";
         return USCRIPT_ERROR_EXECUTE;
     }
-
-#ifdef UPDATER_USE_PTABLE
-    if (partitionSize < totalSize_) {
-        LOG(ERROR) << "partition size: " << partitionSize << " is short than image size: " << totalSize_;
-        return USCRIPT_ERROR_EXECUTE;
-    }
-#endif
 
     PkgStream::ExtractFileProcessor processor =
         [this](const PkgBuffer &buffer, size_t size, size_t start, bool isFinish, const void *context) {
@@ -215,9 +223,9 @@ int RawImgProcessor::GetWritePathAndOffset(const std::string &partitionName, std
                                            uint64_t &offset, uint64_t &partitionSize)
 {
 #ifdef UPDATER_USE_PTABLE
-    PackagePtable& packagePtb = PackagePtable::GetInstance();
+    DevicePtable &devicePtb = DevicePtable::GetInstance();
     Ptable::PtnInfo ptnInfo;
-    if (!packagePtb.GetPartionInfoByName(partitionName, ptnInfo)) {
+    if (!devicePtb.GetPartionInfoByName(partitionName, ptnInfo)) {
         LOG(ERROR) << "Datawriter: cannot find device path for partition \'" <<
             partitionName.substr(1, partitionName.size()) << "\'.";
         return USCRIPT_ERROR_EXECUTE;
