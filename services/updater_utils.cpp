@@ -125,44 +125,13 @@ bool IsSDCardExist(const std::string &sdcardPath)
     }
 }
 
-void SaveLogs()
-{
-    std::string updaterLogPath = UPDATER_LOG;
-    std::string stageLogPath = UPDATER_STAGE_LOG;
-    std::string errorCodePath = ERROR_CODE_PATH;
-
-    // save logs
-    bool ret = CopyUpdaterLogs(TMP_LOG, updaterLogPath);
-    if (!ret) {
-        LOG(ERROR) << "Copy updater log failed!";
-    }
-    ret = CopyUpdaterLogs(TMP_ERROR_CODE_PATH, errorCodePath);
-    if (!ret) {
-        LOG(ERROR) << "Copy error code log failed!";
-    }
-    ret = CopyUpdaterLogs(Flashd::FLASHD_HDC_LOG_PATH, UPDATER_HDC_LOG);
-    if (!ret) {
-        LOG(ERROR) << "Copy error hdc log failed!";
-    }
-
-    mode_t mode = 0640;
-    chmod(updaterLogPath.c_str(), mode);
-    chmod(errorCodePath.c_str(), mode);
-    chmod(UPDATER_HDC_LOG, mode);
-
-    STAGE(UPDATE_STAGE_SUCCESS) << "PostUpdater";
-    ret = CopyUpdaterLogs(TMP_STAGE_LOG, stageLogPath);
-    chmod(stageLogPath.c_str(), mode);
-    if (!ret) {
-        LOG(ERROR) << "Copy stage log failed!";
-    }
-}
-
 void PostUpdater(bool clearMisc)
 {
     STAGE(UPDATE_STAGE_BEGIN) << "PostUpdater";
 
     (void)SetupPartitions();
+    SetLogDir(UPDATER_LOG_DIR);
+    UpdaterInit::GetInstance().InvokeEvent(UPDATER_POST_INIT_EVENT);
     // clear update misc partition.
     if (clearMisc && !ClearMisc()) {
         LOG(ERROR) << "PostUpdater clear misc failed";

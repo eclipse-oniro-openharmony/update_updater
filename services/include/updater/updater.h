@@ -89,8 +89,6 @@ int CheckStatvfs(const uint64_t totalPkgSize);
 
 bool IsSDCardExist(const std::string &sdcard_path);
 
-void SaveLogs();
-
 void PostUpdater(bool clearMisc);
 
 bool DeleteUpdaterPath(const std::string &path);

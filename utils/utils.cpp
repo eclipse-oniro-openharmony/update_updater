@@ -47,6 +47,31 @@ constexpr uint8_t SHIFT_RIGHT_FOUR_BITS = 4;
 constexpr int USECONDS_PER_SECONDS = 1000000; // 1s = 1000000us
 constexpr int NANOSECS_PER_USECONDS = 1000; // 1us = 1000ns
 constexpr int MAX_TIME_SIZE = 20;
+
+static std::string g_logDir(UPDATER_LOG_DIR);
+
+void SaveLogs()
+{
+    std::string updaterLogPath = g_logDir + "/" + std::string(UPDATER_LOG_FILE);
+    std::string stageLogPath = g_logDir + "/" + std::string(UPDATER_STAGE_FILE);
+
+    // save logs
+    bool ret = CopyUpdaterLogs(TMP_LOG, updaterLogPath);
+    if (!ret) {
+        LOG(ERROR) << "Copy updater log failed!";
+    }
+
+    mode_t mode = 0640;
+    chmod(updaterLogPath.c_str(), mode);
+
+    STAGE(UPDATE_STAGE_SUCCESS) << "PostUpdater";
+    ret = CopyUpdaterLogs(TMP_STAGE_LOG, stageLogPath);
+    chmod(stageLogPath.c_str(), mode);
+    if (!ret) {
+        LOG(ERROR) << "Copy stage log failed!";
+    }
+}
+
 int32_t DeleteFile(const std::string& filename)
 {
     if (filename.empty()) {
@@ -363,7 +388,7 @@ std::string GetLocalBoardId()
     return "HI3516";
 }
 
-void CompressLogs(const std::string &name)
+void CompressLogs(const std::string &logName)
 {
     PkgManager::PkgManagerPtr pkgManager = PkgManager::CreatePackageInstance();
     if (pkgManager == nullptr) {
@@ -373,14 +398,15 @@ void CompressLogs(const std::string &name)
     std::vector<std::pair<std::string, ZipFileInfo>> files;
     // Build the zip file to be packaged
     std::vector<std::string> testFileNames;
-    std::string realName = name.substr(name.find_last_of("/") + 1);
+    std::string realName = logName.substr(logName.find_last_of("/") + 1);
+    std::string logPath = logName.substr(0, logName.find_last_of("/"));
     testFileNames.push_back(realName);
     for (auto name : testFileNames) {
         ZipFileInfo file;
         file.fileInfo.identity = name;
         file.fileInfo.packMethod = PKG_COMPRESS_METHOD_ZIP;
         file.fileInfo.digestMethod = PKG_DIGEST_TYPE_CRC;
-        std::string fileName = "/data/updater/log/" + name;
+        std::string fileName = logName;
         files.push_back(std::pair<std::string, ZipFileInfo>(fileName, file));
     }
 
@@ -394,11 +420,11 @@ void CompressLogs(const std::string &name)
     auto currentTime = std::chrono::system_clock::to_time_t(sysTime);
     struct tm *localTime = std::localtime(&currentTime);
     if (localTime != nullptr) {
-        std::strftime(realTime, sizeof(realTime), "%H_%M_%S", localTime);
+        std::strftime(realTime, sizeof(realTime), "%Y%m%d%H%M%S", localTime);
     }
     char pkgName[MAX_LOG_NAME_SIZE];
     if (snprintf_s(pkgName, MAX_LOG_NAME_SIZE, MAX_LOG_NAME_SIZE - 1,
-        "/data/updater/log/%s_%s.zip", realName.c_str(), realTime) == -1) {
+        "%s/%s_%s.zip", logPath.c_str(), realName.c_str(), realTime) == -1) {
         PkgManager::ReleasePackageInstance(pkgManager);
         return;
     }
@@ -408,7 +434,7 @@ void CompressLogs(const std::string &name)
         PkgManager::ReleasePackageInstance(pkgManager);
         return;
     }
-    (void)DeleteFile(name);
+    (void)DeleteFile(logName);
     PkgManager::ReleasePackageInstance(pkgManager);
 }
 
@@ -425,24 +451,36 @@ int GetFileSize(const std::string &dLog)
 
 bool CopyUpdaterLogs(const std::string &sLog, const std::string &dLog)
 {
-    if (MountForPath(UPDATER_LOG_DIR) != 0) {
+    if (MountForPath(g_logDir) != 0) {
         LOG(WARNING) << "MountForPath /data/log failed!";
         return false;
     }
-
 #ifdef WITH_SELINUX
-    Restorecon("/data");
+    if (g_logDir == std::string(UPDATER_LOG_DIR)) {
+        RestoreconRecurse("/data");
+    }
 #endif // WITH_SELINUX
-
-    if (access(UPDATER_LOG_DIR, 0) != 0) {
-        if (MkdirRecursive(UPDATER_LOG_DIR, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) != 0) {
+    if (access(g_logDir.c_str(), 0) != 0) {
+        if (MkdirRecursive(g_logDir.c_str(), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) != 0) {
             LOG(ERROR) << "MkdirRecursive error!";
             return false;
         }
-        if (chown(UPDATER_PATH, USER_ROOT_AUTHORITY, GROUP_SYS_AUTHORITY) != EOK &&
-            chmod(UPDATER_PATH, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != EOK) {
+        if (chown(g_logDir.c_str(), USER_UPDATE_AUTHORITY, USER_UPDATE_AUTHORITY) != EOK &&
+            chmod(g_logDir.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != EOK) {
                 LOG(ERROR) << "Chmod failed!";
                 return false;
+        }
+    }
+
+    if (Utils::GetFileSize(sLog) > MAX_LOG_SIZE) {
+        LOG(ERROR) << "Size bigger for" << sLog;
+        STAGE(UPDATE_STAGE_FAIL) << "Log file error, unable to copy";
+        return false;
+    }
+
+    while (Utils::GetFileSize(sLog) + GetDirSizeForFile(dLog) > MAX_LOG_DIR_SIZE) {
+        if (DeleteOldFile(dLog) != true) {
+            break;
         }
     }
 
@@ -593,6 +631,66 @@ bool IsDirExist(const std::string &path)
         return true;
     }
     return false;
+}
+
+long long int GetDirSize(const std::string &folderPath)
+{
+    long long totalSize = 0;
+    
+    for (const auto& entry : std::filesystem::directory_iterator(folderPath)) {
+        if (std::filesystem::is_directory(entry.status())) {
+            totalSize += GetDirSize(entry.path().string());
+        } else {
+            totalSize += std::filesystem::file_size(entry.path());
+        }
+    }
+    
+    return totalSize;
+}
+
+long long int GetDirSizeForFile(const std::string &filePath)
+{
+    std::size_t found = filePath.find_last_of("/");
+    if (found == std::string::npos) {
+        LOG(ERROR) << "filePath error";
+        return -1;
+    }
+    return GetDirSize(filePath.substr(0, found));
+}
+
+bool DeleteOldFile(const std::string folderPath)
+{
+    std::filesystem::path folder(folderPath);
+
+    if (!std::filesystem::exists(folder) || !std::filesystem::is_directory(folder)) {
+        LOG(ERROR) << "Folder not exit or folder error";
+        return false;
+    }
+
+    std::filesystem::path oldestFilePath = "";
+    std::filesystem::file_time_type oldestFileTime = std::filesystem::last_write_time(TMP_LOG);;
+
+    for (const auto& entry : std::filesystem::directory_iterator(folder)) {
+        const std::filesystem::path& filePath = entry.path();
+        const std::string& fileName = filePath.filename().string();
+        std::filesystem::file_time_type fileTime = std::filesystem::last_write_time(filePath);
+        if (fileTime < oldestFileTime) {
+            oldestFileTime = fileTime;
+            oldestFilePath = filePath;
+        }
+    }
+
+    if (oldestFilePath.empty()) {
+        LOG(ERROR) << "Unable to delete file";
+        return false;
+    }
+    std::filesystem::remove(oldestFilePath);
+    return true;
+}
+
+void SetLogDir(const std::string dir)
+{
+    g_logDir = dir;
 }
 } // Utils
 } // namespace Updater
