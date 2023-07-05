@@ -57,9 +57,12 @@ ohos_executable("updater") {
     "updater.cpp",
     "updater_main.cpp",
     "updater_preprocess.cpp",
-    "updater_ui.cpp",
     "updater_utils.cpp",
   ]
+
+  if (updater_ui_support) {
+    sources += [ "updater_ui.cpp" ]
+  }
 
   include_dirs = updater_common_include
 
