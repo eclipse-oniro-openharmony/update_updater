@@ -268,8 +268,8 @@ int32_t BlockSet::LoadSourceBuffer(const Command &cmd, size_t &pos, std::vector<
         srcBlk.ParserAndInsert(targetCmd);
         isOverlap = IsTwoBlocksOverlap(srcBlk, *this);
         // read source data
-        LOG(INFO) << "new start to read source block ...";
         if (srcBlk.ReadDataFromBlock(cmd.GetFileDescriptor(), sourceBuffer) == 0) {
+            LOG(ERROR) << "ReadDataFromBlock failed";
             return -1;
         }
         std::string nextArgv = cmd.GetArgumentByPos(pos++);
@@ -383,7 +383,6 @@ int32_t BlockSet::WriteDiffToBlock(const Command &cmd, std::vector<uint8_t> &src
     size_t pos = H_MOVE_CMD_ARGS_START;
     size_t offset = Utils::String2Int<size_t>(cmd.GetArgumentByPos(pos++), Utils::N_DEC);
     size_t length = Utils::String2Int<size_t>(cmd.GetArgumentByPos(pos++), Utils::N_DEC);
-    LOG(INFO) << "Get patch data offset: " << offset << ", length: " << length;
     // Get patch buffer
     auto globalParams = TransferManager::GetTransferManagerInstance()->GetGlobalParams();
     auto patchBuff = globalParams->patchDataBuffer + offset;
@@ -404,7 +403,7 @@ int32_t BlockSet::WriteDiffToBlock(const Command &cmd, std::vector<uint8_t> &src
             }, cmd.GetArgumentByPos(pos + 1));
         writer.reset();
         if (ret != 0) {
-            LOG(ERROR) << "Fail to ApplyImagePatch";
+            LOG(ERROR) << "Fail to ApplyImagePatch; offset: " << offset << ", length: " << length;
             return -1;
         }
     } else {

@@ -19,7 +19,11 @@
 #include "applypatch/partition_record.h"
 #include "log.h"
 #include "parameter.h"
+#ifdef UPDATER_USE_PTABLE
+#include "ptable_parse/ptable_manager.h"
+#endif
 #include "slot_info/slot_info.h"
+#include "updater/updater_const.h"
 
 using namespace std;
 using namespace std::placeholders;
@@ -50,7 +54,9 @@ void ComponentProcessorFactory::RegisterProcessor(Constructor constructor, std::
 std::unique_ptr<ComponentProcessor> ComponentProcessorFactory::GetProcessor(const std::string &name,
     const uint8_t len) const
 {
-    auto it = m_constructorMap.find(name);
+    std::string partitionName = name;
+    std::transform(partitionName.begin(), partitionName.end(), partitionName.begin(), ::tolower);
+    auto it = m_constructorMap.find(partitionName);
     if (it == m_constructorMap.end() || it->second == nullptr) {
         LOG(ERROR) << "GetProcessor for: " << name.c_str() << " fail";
         return nullptr;
@@ -145,6 +151,17 @@ int32_t RawImgProcessor::PreProcess(Uscript::UScriptEnv &env)
             partitionName.substr(1, partitionName.size()) << "\'.";
         return USCRIPT_ERROR_EXECUTE;
     }
+    const FileInfo *info = env.GetPkgManager()->GetFileInfo(partitionName);
+    if (info == nullptr) {
+        LOG(ERROR) << "Error to get file info";
+        return USCRIPT_ERROR_EXECUTE;
+    }
+#ifdef UPDATER_USE_PTABLE
+    if (partitionSize < info->unpackedSize) {
+        LOG(ERROR) << "partition size: " << partitionSize << " is short than image size: " << totalSize_;
+        return USCRIPT_ERROR_EXECUTE;
+    }
+#endif
 
     writer_ = DataWriter::CreateDataWriter(WRITE_RAW, writePath,
         static_cast<UpdaterEnv *>(&env), offset);
@@ -170,13 +187,6 @@ int32_t RawImgProcessor::DoProcess(Uscript::UScriptEnv &env)
         LOG(ERROR) << "Error to get file info";
         return USCRIPT_ERROR_EXECUTE;
     }
-
-#ifdef UPDATER_USE_PTABLE
-    if (partitionSize < totalSize_) {
-        LOG(ERROR) << "partition size: " << partitionSize << " is short than image size: " << totalSize_;
-        return USCRIPT_ERROR_EXECUTE;
-    }
-#endif
 
     PkgStream::ExtractFileProcessor processor =
         [this](const PkgBuffer &buffer, size_t size, size_t start, bool isFinish, const void *context) {
@@ -213,9 +223,9 @@ int RawImgProcessor::GetWritePathAndOffset(const std::string &partitionName, std
                                            uint64_t &offset, uint64_t &partitionSize)
 {
 #ifdef UPDATER_USE_PTABLE
-    PackagePtable& packagePtb = PackagePtable::GetInstance();
+    DevicePtable &devicePtb = DevicePtable::GetInstance();
     Ptable::PtnInfo ptnInfo;
-    if (!packagePtb.GetPartionInfoByName(partitionName, ptnInfo)) {
+    if (!devicePtb.GetPartionInfoByName(partitionName, ptnInfo)) {
         LOG(ERROR) << "Datawriter: cannot find device path for partition \'" <<
             partitionName.substr(1, partitionName.size()) << "\'.";
         return USCRIPT_ERROR_EXECUTE;
@@ -274,5 +284,95 @@ int RawImgProcessor::RawImageWriteProcessor(const PkgBuffer &buffer, size_t size
     }
 
     return PKG_SUCCESS;
+}
+
+int32_t SkipImgProcessor::PreProcess(Uscript::UScriptEnv &env)
+{
+    std::string partitionName = name_;
+    LOG(INFO) << "SkipImgProcessor::PreProcess " << partitionName;
+    if (env.GetPkgManager() == nullptr) {
+        LOG(ERROR) << "Error to get pkg manager";
+        return USCRIPT_ERROR_EXECUTE;
+    }
+
+    std::string writePath;
+    writer_ = DataWriter::CreateDataWriter(WRITE_RAW, writePath,
+        static_cast<UpdaterEnv *>(&env), 0);
+    if (writer_ == nullptr) {
+        LOG(ERROR) << "Error to create writer";
+        return USCRIPT_ERROR_EXECUTE;
+    }
+#ifdef UPDATER_UT
+    int fd = open(writePath.c_str(), O_RDWR | O_CREAT);
+    if (fd >= 0) {
+        close(fd);
+    }
+#endif
+    return USCRIPT_SUCCESS;
+}
+
+int32_t SkipImgProcessor::DoProcess(Uscript::UScriptEnv &env)
+{
+    std::string partitionName = name_;
+    // Extract partition information
+    const FileInfo *info = env.GetPkgManager()->GetFileInfo(partitionName);
+    if (info == nullptr) {
+        LOG(ERROR) << "Error to get file info";
+        return USCRIPT_ERROR_EXECUTE;
+    }
+
+    PkgStream::ExtractFileProcessor processor =
+        [this](const PkgBuffer &buffer, size_t size, size_t start, bool isFinish, const void *context) {
+            return this->SkipImageWriteProcessor(buffer, size, start, isFinish, context);
+        };
+
+    Hpackage::PkgManager::StreamPtr outStream = nullptr;
+    int ret = env.GetPkgManager()->CreatePkgStream(outStream, partitionName, processor, writer_.get());
+    if (ret != USCRIPT_SUCCESS || outStream == nullptr) {
+        LOG(ERROR) << "Error to create output stream";
+        return USCRIPT_ERROR_EXECUTE;
+    }
+
+    ret = env.GetPkgManager()->ExtractFile(partitionName, outStream);
+    if (ret != USCRIPT_SUCCESS) {
+        LOG(ERROR) << "Error to extract file";
+        env.GetPkgManager()->ClosePkgStream(outStream);
+        return USCRIPT_ERROR_EXECUTE;
+    }
+    env.GetPkgManager()->ClosePkgStream(outStream);
+    return USCRIPT_SUCCESS;
+}
+
+int SkipImgProcessor::SkipImageWriteProcessor(const PkgBuffer &buffer, size_t size, [[maybe_unused]]size_t start,
+                                              [[maybe_unused]]bool isFinish, [[maybe_unused]]const void* context)
+{
+    void *p = const_cast<void *>(context);
+    DataWriter *writer = static_cast<DataWriter *>(p);
+    if (writer == nullptr) {
+        LOG(ERROR) << "Data writer is null";
+        return PKG_INVALID_STREAM;
+    }
+
+    // maybe extract from package is finished. just return.
+    if (buffer.buffer == nullptr || size == 0) {
+        return PKG_SUCCESS;
+    }
+
+    if (pkgFileSize_ != 0) {
+        readOffset_ += size;
+        writer->GetUpdaterEnv()->PostMessage("set_progress", std::to_string((float)readOffset_ / pkgFileSize_));
+        LOG(INFO) << "set_progress readsize: " << readOffset_ << " totalsize: " << pkgFileSize_ <<" byte(s)";
+    }
+
+    return PKG_SUCCESS;
+}
+
+int32_t SkipImgProcessor::PostProcess(Uscript::UScriptEnv &env)
+{
+    PartitionRecord::GetInstance().RecordPartitionUpdateStatus(name_, true);
+    DataWriter::ReleaseDataWriter(writer_);
+    totalSize_ = 0;
+    LOG(INFO) << name_ << " SkipImgProcess finish";
+    return USCRIPT_SUCCESS;
 }
 }

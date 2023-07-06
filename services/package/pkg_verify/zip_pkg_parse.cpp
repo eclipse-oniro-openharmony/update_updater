@@ -48,8 +48,8 @@ const uint8_t ZIP_EOCD_SIGNATURE_BIG_ENDIAN[4] = {0x50, 0x4b, 0x05, 0x06};
  *     = .ZIP file comment length   2 bytes
  */
 
-int32_t ZipPkgParse::DoParseZipPkg(PkgStreamPtr pkgStream, size_t &signatureStart,
-    size_t &signatureSize, size_t &readLen, uint16_t &signCommentTotalLen) const
+int32_t ZipPkgParse::DoParseZipPkg(PkgStreamPtr pkgStream, PkgSignComment &pkgSignComment,
+    size_t &readLen, uint16_t &signCommentAppendLen, uint16_t &signCommentTotalLen) const
 {
     size_t fileLen = pkgStream->GetFileLength();
     size_t eocdTotalLen = ZIP_EOCD_FIXED_PART_LEN + signCommentTotalLen;
@@ -80,13 +80,13 @@ int32_t ZipPkgParse::DoParseZipPkg(PkgStreamPtr pkgStream, size_t &signatureStar
         UPDATER_LAST_WORD(PKG_INVALID_PKG_FORMAT, fileLen, signCommentTotalLen);
         return PKG_INVALID_FILE;
     }
-    signatureStart = fileLen - signCommentTotalLen;
-    signatureSize = signCommentTotalLen;
+    pkgSignComment.signCommentTotalLen = signCommentTotalLen;
+    pkgSignComment.signCommentAppendLen = signCommentAppendLen;
 
     return PKG_SUCCESS;
 }
 
-int32_t ZipPkgParse::ParseZipPkg(PkgStreamPtr pkgStream, size_t &signatureStart, size_t &signatureSize) const
+int32_t ZipPkgParse::ParseZipPkg(PkgStreamPtr pkgStream, PkgSignComment &pkgSignComment) const
 {
     if (pkgStream == nullptr) {
         UPDATER_LAST_WORD(PKG_INVALID_PARAM);
@@ -117,7 +117,7 @@ int32_t ZipPkgParse::ParseZipPkg(PkgStreamPtr pkgStream, size_t &signatureStart,
         UPDATER_LAST_WORD(ret);
         return ret;
     }
-    return DoParseZipPkg(pkgStream, signatureStart, signatureSize, readLen, signCommentTotalLen);
+    return DoParseZipPkg(pkgStream, pkgSignComment, readLen, signCommentAppendLen, signCommentTotalLen);
 }
 
 int32_t ZipPkgParse::ParsePkgFooter(const uint8_t *footer, size_t length,

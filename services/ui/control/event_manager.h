@@ -28,6 +28,7 @@ namespace Updater {
 class EventManager final {
     DISALLOW_COPY_MOVE(EventManager);
 public:
+    void RegisterEventManagerHelper(std::unique_ptr<KeyListener> ptr);
     EventManager();
     ~EventManager() = default;
     static EventManager &GetInstance();
@@ -38,7 +39,7 @@ public:
     void AddKeyListener();
 private:
     PageManager &pgMgr_;
-    std::unique_ptr<KeyListener> keyListener_;
+    std::unique_ptr<KeyListener> helper_ {};
     std::vector<std::unique_ptr<OHOS::UIView::OnTouchListener>> labelOnTouchListener_;
     std::vector<std::unique_ptr<OHOS::UIView::OnClickListener>> btnOnClickListener_;
     std::vector<std::unique_ptr<OHOS::UIView::OnDragListener>> btnOnDragListener;

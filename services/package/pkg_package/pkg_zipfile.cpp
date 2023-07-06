@@ -212,9 +212,10 @@ int32_t ZipPkgFile::LoadPackage(std::vector<std::string>& fileNames, VerifyFunct
     }
     magic = ReadLE32(buffer.buffer);
     if (magic != END_CENTRAL_SIGNATURE) { // 按签名处理
-        size_t signatureStart = 0;
         ZipPkgParse zipParse;
-        ret = zipParse.ParseZipPkg(pkgStream_, signatureStart, signatureLen);
+        PkgSignComment pkgSignComment {};
+        ret = zipParse.ParseZipPkg(pkgStream_, pkgSignComment);
+        signatureLen = pkgSignComment.signCommentTotalLen;
         if (ret != PKG_SUCCESS) {
             PKG_LOGE("Parse zip package signature failed");
             UPDATER_LAST_WORD(ret);
@@ -290,7 +291,7 @@ int32_t ZipFileEntry::PackStream(PkgStreamPtr inStream, size_t startOffset, size
     // 为header申请一个buff，先处理到内存，后面在写入文件
     std::vector<uint8_t> buff(MAX_FILE_NAME + sizeof(LocalFileHeader) + ZIP_PKG_ALIGNMENT_DEF);
     size_t nameLen = 0;
-    PkgFile::ConvertStringToBuffer(fileInfo_.fileInfo.identity, {
+    PkgFileImpl::ConvertStringToBuffer(fileInfo_.fileInfo.identity, {
         buff.data() + sizeof(LocalFileHeader), buff.capacity()
     }, nameLen);
 
@@ -366,7 +367,7 @@ int32_t ZipFileEntry::EncodeCentralDirEntry(const PkgStreamPtr stream, size_t st
 {
     std::vector<uint8_t> buff(sizeof(CentralDirEntry) + MAX_FILE_NAME);
     size_t realLen = 0;
-    PkgFile::ConvertStringToBuffer(fileInfo_.fileInfo.identity, {
+    PkgFileImpl::ConvertStringToBuffer(fileInfo_.fileInfo.identity, {
         buff.data() + sizeof(CentralDirEntry), buff.capacity()
     }, realLen);
 

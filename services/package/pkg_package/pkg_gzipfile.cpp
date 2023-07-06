@@ -80,7 +80,7 @@ void GZipFileEntry::GetUpGradeCompInfo(size_t &offset, PkgBuffer &buffer)
     header->flags |= ORIG_NAME;
     {
         size_t fileNameLen = 0;
-        PkgFile::ConvertStringToBuffer(
+        PkgFileImpl::ConvertStringToBuffer(
             fileInfo_.fileInfo.identity, {buffer.buffer + offset, buffer.length - offset}, fileNameLen);
         offset += fileNameLen;
         buffer.buffer[offset] = 0;
@@ -90,7 +90,7 @@ void GZipFileEntry::GetUpGradeCompInfo(size_t &offset, PkgBuffer &buffer)
     header->flags |= COMMENT;
     {
         size_t fileNameLen = 0;
-        PkgFile::ConvertStringToBuffer(
+        PkgFileImpl::ConvertStringToBuffer(
             fileInfo_.fileInfo.identity, {buffer.buffer + offset, buffer.length - offset}, fileNameLen);
         offset += fileNameLen;
         buffer.buffer[offset] = 0;
@@ -99,6 +99,7 @@ void GZipFileEntry::GetUpGradeCompInfo(size_t &offset, PkgBuffer &buffer)
 #endif
     return ;
 }
+
 int32_t GZipFileEntry::EncodeHeader(PkgStreamPtr inStream, size_t startOffset, size_t &encodeLen)
 {
     PkgStreamPtr outStream = pkgFile_->GetPkgStream();
@@ -240,12 +241,12 @@ void GZipFileEntry::DecodeHeaderCalOffset(uint8_t flags, const PkgBuffer &buffer
         offset += sizeof(uint16_t) + extLen;
     }
     if (flags & ORIG_NAME) {
-        PkgFile::ConvertBufferToString(fileName, {buffer.buffer + offset, buffer.length - offset});
+        PkgFileImpl::ConvertBufferToString(fileName, {buffer.buffer + offset, buffer.length - offset});
         offset += fileName.size() + 1;
     }
     if (flags & COMMENT) {
         std::string comment;
-        PkgFile::ConvertBufferToString(comment, {buffer.buffer + offset, buffer.length - offset});
+        PkgFileImpl::ConvertBufferToString(comment, {buffer.buffer + offset, buffer.length - offset});
         offset += comment.size() + 1;
     }
     if (flags & HEADER_CRC) { // Skip CRC

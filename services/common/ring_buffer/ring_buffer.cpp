@@ -81,7 +81,7 @@ bool RingBuffer::Push(uint8_t *buf, uint32_t len)
                 LOG(WARNING) << "RingBuffer push stopped";
                 return false;
             }
-            LOG(ERROR) << "RingBuffer full, wait !!!";
+            LOG(DEBUG) << "RingBuffer full, wait !!!";
             notFull_.wait(pushLock);
         }
     }
@@ -112,7 +112,7 @@ bool RingBuffer::Pop(uint8_t *buf, uint32_t maxLen, uint32_t &len)
                 LOG(WARNING) << "RingBuffer pop stopped";
                 return false;
             }
-            LOG(ERROR) << "RingBuffer empty, wait !!!";
+            LOG(DEBUG) << "RingBuffer empty, wait !!!";
             notEmpty_.wait(popLock);
         }
     }

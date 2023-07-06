@@ -22,6 +22,7 @@
 #include "dock/input_device.h"
 #include "page/page_manager.h"
 #include "scope_guard.h"
+#include "updater_ui_facade.h"
 
 namespace Updater {
 std::mutex CallBackDecorator::mtx_;
@@ -185,6 +186,8 @@ bool KeyListener::ProcessVolumeKey(OHOS::UIView &view, const OHOS::KeyEvent &eve
     const static std::unordered_map<uint16_t, uint8_t> dirMap {
         {KEY_VOLUMEUP, OHOS::FOCUS_DIRECTION_UP},
         {KEY_VOLUMEDOWN, OHOS::FOCUS_DIRECTION_DOWN},
+        {KEY_UP, OHOS::FOCUS_DIRECTION_UP},
+        {KEY_DOWN, OHOS::FOCUS_DIRECTION_DOWN},
     };
     if (isButtonPressed_) {
         return true;

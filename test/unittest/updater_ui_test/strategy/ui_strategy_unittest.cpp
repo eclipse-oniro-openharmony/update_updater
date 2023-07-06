@@ -44,12 +44,6 @@ bool operator == (const UiStrategyCfg &lhs, const UiStrategyCfg &rhs)
         lhs.labelLogResId == rhs.labelLogResId && lhs.progressPage == rhs.progressPage &&
         lhs.labelUpdId == rhs.labelUpdId && lhs.resPage == rhs.resPage;
 }
-
-std::ostream &operator<<(std::ostream &os, const ComInfo &com)
-{
-    os << "pageId: " << com.pageId << " comId: " << com.comId;
-    return os;
-}
 }
 
 namespace {

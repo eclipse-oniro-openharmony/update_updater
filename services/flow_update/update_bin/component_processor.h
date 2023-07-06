@@ -119,9 +119,24 @@ public:
     int32_t PostProcess(Uscript::UScriptEnv &env) override;
 private:
     int GetWritePathAndOffset(const std::string &partitionName, std::string &writePath, uint64_t &offset,
-        uint64_t &partitionSize);
+                              uint64_t &partitionSize);
     int RawImageWriteProcessor(const Hpackage::PkgBuffer &buffer, size_t size, size_t start,
-                                                            bool isFinish, const void* context);
+                               bool isFinish, const void* context);
+    std::unique_ptr<DataWriter> writer_ = nullptr;
+};
+
+class SkipImgProcessor : public ComponentProcessor {
+    DISALLOW_COPY_MOVE(SkipImgProcessor);
+public:
+    SkipImgProcessor(const std::string &name, const size_t len)
+        : ComponentProcessor(name, len) {}
+    ~SkipImgProcessor() override {}
+    int32_t PreProcess(Uscript::UScriptEnv &env) override;
+    int32_t DoProcess(Uscript::UScriptEnv &env) override;
+    int32_t PostProcess(Uscript::UScriptEnv &env) override;
+private:
+    int SkipImageWriteProcessor(const Hpackage::PkgBuffer &buffer, size_t size, [[maybe_unused]]size_t start,
+                                [[maybe_unused]]bool isFinish, [[maybe_unused]]const void* context);
     std::unique_ptr<DataWriter> writer_ = nullptr;
 };
 } // namespace Updater

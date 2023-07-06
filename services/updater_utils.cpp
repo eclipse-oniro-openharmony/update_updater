@@ -125,44 +125,13 @@ bool IsSDCardExist(const std::string &sdcardPath)
     }
 }
 
-void SaveLogs()
-{
-    std::string updaterLogPath = UPDATER_LOG;
-    std::string stageLogPath = UPDATER_STAGE_LOG;
-    std::string errorCodePath = ERROR_CODE_PATH;
-
-    // save logs
-    bool ret = CopyUpdaterLogs(TMP_LOG, updaterLogPath);
-    if (!ret) {
-        LOG(ERROR) << "Copy updater log failed!";
-    }
-    ret = CopyUpdaterLogs(TMP_ERROR_CODE_PATH, errorCodePath);
-    if (!ret) {
-        LOG(ERROR) << "Copy error code log failed!";
-    }
-    ret = CopyUpdaterLogs(Flashd::FLASHD_HDC_LOG_PATH, UPDATER_HDC_LOG);
-    if (!ret) {
-        LOG(ERROR) << "Copy error hdc log failed!";
-    }
-
-    mode_t mode = 0640;
-    chmod(updaterLogPath.c_str(), mode);
-    chmod(errorCodePath.c_str(), mode);
-    chmod(UPDATER_HDC_LOG, mode);
-
-    STAGE(UPDATE_STAGE_SUCCESS) << "PostUpdater";
-    ret = CopyUpdaterLogs(TMP_STAGE_LOG, stageLogPath);
-    chmod(stageLogPath.c_str(), mode);
-    if (!ret) {
-        LOG(ERROR) << "Copy stage log failed!";
-    }
-}
-
 void PostUpdater(bool clearMisc)
 {
     STAGE(UPDATE_STAGE_BEGIN) << "PostUpdater";
 
     (void)SetupPartitions();
+    SetLogDir(UPDATER_LOG_DIR);
+    UpdaterInit::GetInstance().InvokeEvent(UPDATER_POST_INIT_EVENT);
     // clear update misc partition.
     if (clearMisc && !ClearMisc()) {
         LOG(ERROR) << "PostUpdater clear misc failed";
@@ -211,7 +180,11 @@ std::vector<std::string> ParseParams(int argc, char **argv)
 void BootMode::InitMode(void) const
 {
     InitUpdaterLogger(modeName, TMP_LOG, TMP_STAGE_LOG, TMP_ERROR_CODE_PATH);
+#ifdef UPDATER_BUILD_VARIANT_USER
     SetLogLevel(INFO);
+#else
+    SetLogLevel(DEBUG);
+#endif
     LoadFstab();
     STAGE(UPDATE_STAGE_OUT) << "Start " << modeName;
     Flashd::SetParameter(modePara.c_str(), "1");
@@ -258,5 +231,49 @@ std::optional<BootMode> SelectMode(const UpdateMessage &boot)
 
     LOG(INFO) << "enter " << it->modeName << " mode";
     return *it;
+}
+
+void SetMessageToMisc(const std::string &miscCmd, const int message, const std::string headInfo)
+{
+    if (headInfo.empty()) {
+        return;
+    }
+    std::vector<std::string> args = ParseParams(0, nullptr);
+    struct UpdateMessage msg {};
+    if (strncpy_s(msg.command, sizeof(msg.command), miscCmd.c_str(), miscCmd.size() + 1) != EOK) {
+        LOG(ERROR) << "SetMessageToMisc strncpy_s failed";
+        return;
+    }
+    for (const auto& arg : args) {
+        if (arg.find(headInfo) == std::string::npos) {
+            if (strncat_s(msg.update, sizeof(msg.update), arg.c_str(), strlen(arg.c_str()) + 1) != EOK) {
+                LOG(ERROR) << "SetMessageToMisc strncat_s failed";
+                return;
+            }
+            if (strncat_s(msg.update, sizeof(msg.update), "\n", strlen("\n") + 1) != EOK) {
+                LOG(ERROR) << "SetMessageToMisc strncat_s failed";
+                return;
+            }
+        }
+    }
+    char buffer[128] {}; // 128 : set headInfo size
+    if (headInfo == "sdcard_update") {
+        if (snprintf_s(buffer, sizeof(buffer), sizeof(buffer) - 1, "--%s", headInfo.c_str()) == -1) {
+            LOG(ERROR) << "SetMessageToMisc snprintf_s failed";
+            return;
+        }
+    } else {
+        if (snprintf_s(buffer, sizeof(buffer), sizeof(buffer) - 1, "--%s=%d", headInfo.c_str(), message) == -1) {
+            LOG(ERROR) << "SetMessageToMisc snprintf_s failed";
+            return;
+        }
+    }
+    if (strncat_s(msg.update, sizeof(msg.update), buffer, strlen(buffer) + 1) != EOK) {
+        LOG(ERROR) << "SetMessageToMisc strncat_s failed";
+        return;
+    }
+    if (WriteUpdaterMiscMsg(msg) != true) {
+        LOG(ERROR) << "Write command to misc failed.";
+    }
 }
 } // namespace Updater

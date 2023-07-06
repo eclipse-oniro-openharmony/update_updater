@@ -22,17 +22,38 @@
 #include "pkg_manager.h"
 
 namespace Hpackage {
+using DataBuffer = struct {
+    const unsigned char *buffer;
+    size_t length;
+};
+
+using HwSigningSigntureInfo = struct {
+    DataBuffer overall;
+    DataBuffer hashResult;
+    int nid;
+};
+
 struct Pkcs7SignerInfo {
     X509_NAME *issuerName = nullptr;
     ASN1_INTEGER *serialNumber = nullptr;
     int32_t digestNid {};
     int32_t digestEncryptNid {};
     std::vector<uint8_t> digestEncryptData;
+    const unsigned char *buffer;
+    size_t length;
+};
+
+class VerifyHelper {
+public:
+    virtual int32_t GetDigestFromSubBlocks(std::vector<uint8_t> &digestBlock,
+        HwSigningSigntureInfo &signatureInfo, std::vector<uint8_t> &digest) = 0;
+
+    virtual ~VerifyHelper() {}
 };
 
 class Pkcs7SignedData {
 public:
-    Pkcs7SignedData() : pkcs7_(nullptr), digest_(), signerInfos_() {}
+    Pkcs7SignedData() : pkcs7_(nullptr), digest_(), signerInfos_(), signatureInfo() {}
 
     ~Pkcs7SignedData();
 
@@ -44,11 +65,19 @@ public:
     int32_t Verify() const;
 
     int32_t Verify(const std::vector<uint8_t> &hash, const std::vector<uint8_t> &sig, bool sigInSignerInfo) const;
+
+    void RegisterVerifyHelper(std::unique_ptr<VerifyHelper> ptr);
+
+    static Pkcs7SignedData &GetInstance();
+
+    int32_t GetDigest(std::vector<uint8_t> &digestBlock,
+        HwSigningSigntureInfo &signatureInfo, std::vector<uint8_t> &digest);
 private:
     int32_t Init(const uint8_t *sourceData, const uint32_t sourceDataLen);
     int32_t DoParse();
     int32_t ParseContentInfo(std::vector<uint8_t> &digestBlock) const;
     int32_t GetDigestFromContentInfo(std::vector<uint8_t> &digestBlock);
+    int32_t DoUpdateVerify(std::vector<uint8_t> &digestBlock);
     int32_t SignerInfosParse();
     int32_t SignerInfoParse(PKCS7_SIGNER_INFO *p7SignerInfo, Pkcs7SignerInfo &signerInfo);
     int32_t Pkcs7SignleSignerVerify(const Pkcs7SignerInfo &signerInfo, const std::vector<uint8_t> &hash,
@@ -59,6 +88,18 @@ private:
     PKCS7 *pkcs7_;
     std::vector<uint8_t> digest_;
     std::vector<Pkcs7SignerInfo> signerInfos_;
+    HwSigningSigntureInfo signatureInfo;
+    std::unique_ptr<VerifyHelper> helper_ {};
+};
+
+class Pkcs7VerifyHelper : public VerifyHelper {
+public:
+    Pkcs7VerifyHelper() = default;
+
+    ~Pkcs7VerifyHelper() override;
+
+    int32_t GetDigestFromSubBlocks(std::vector<uint8_t> &digestBlock,
+        HwSigningSigntureInfo &signatureInfo, std::vector<uint8_t> &digest) override;
 };
 } // namespace Hpackage
 #endif

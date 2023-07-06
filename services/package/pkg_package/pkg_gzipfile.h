@@ -15,6 +15,7 @@
 #ifndef GZIP_PKG_FILE_H
 #define GZIP_PKG_FILE_H
 
+#include "pkg_info_utils.h"
 #include "pkg_pkgfile.h"
 #include "pkg_utils.h"
 #include "pkg_zipfile.h"
@@ -57,11 +58,12 @@ private:
     void GetUpGradeCompInfo(size_t &offset, PkgBuffer &buffer);
 };
 
-class GZipPkgFile : public PkgFile {
+class GZipPkgFile : public PkgFileImpl {
 public:
-    explicit GZipPkgFile(PkgManager::PkgManagerPtr manager, PkgStreamPtr stream)
-        : PkgFile(manager, stream, PkgFile::PKG_TYPE_GZIP)
+    explicit GZipPkgFile(PkgManager::PkgManagerPtr manager, PkgStreamPtr stream, PkgInfoPtr header = nullptr)
+        : PkgFileImpl(manager, stream, PkgFile::PKG_TYPE_GZIP)
     {
+        UNUSED(header);
         pkgInfo_.signMethod = PKG_SIGN_METHOD_RSA;
         pkgInfo_.digestMethod = PKG_DIGEST_TYPE_SHA256;
     }

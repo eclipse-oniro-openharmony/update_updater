@@ -23,8 +23,6 @@
 #include "ring_buffer/ring_buffer.h"
 
 namespace Hpackage {
-class PkgStreamImpl;
-using PkgStreamPtr = PkgStreamImpl *;
 class PkgStreamImpl : public PkgStream {
 public:
     explicit PkgStreamImpl(PkgManager::PkgManagerPtr pkgManager, const std::string fileName)
@@ -58,7 +56,11 @@ public:
 
     virtual int32_t Seek(long int offset, int whence) = 0;
 
-    virtual int32_t Flush(size_t size) = 0;
+    int32_t Flush(size_t size) override
+    {
+        UNUSED(size);
+        return PKG_SUCCESS;
+    }
 
     const std::string GetFileName() const override;
 
@@ -67,11 +69,11 @@ public:
         return PkgStreamType_Read;
     };
 
-    void AddRef();
+    void AddRef() override;
 
-    void DelRef();
+    void DelRef() override;
 
-    bool IsRef() const;
+    bool IsRef() const override;
 
     static PkgStreamPtr ConvertPkgStream(PkgManager::StreamPtr stream);
 

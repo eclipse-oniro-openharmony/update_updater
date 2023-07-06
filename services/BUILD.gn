@@ -30,6 +30,7 @@ updater_common_include = [
   ".",
   "./ui/include",
   "./ui",
+  "./ui/control",
 ]
 
 updater_common_deps = [
@@ -58,6 +59,10 @@ ohos_executable("updater") {
     "updater_preprocess.cpp",
     "updater_utils.cpp",
   ]
+
+  if (updater_ui_support) {
+    sources += [ "updater_ui.cpp" ]
+  }
 
   include_dirs = updater_common_include
 
@@ -111,10 +116,14 @@ ohos_executable("updater") {
   }
 
   if (build_selinux) {
-    external_deps += [ "selinux:librestorecon" ]
+    external_deps += [ "selinux_adapter:librestorecon" ]
     deps += [ "//third_party/selinux:libselinux" ]
     include_dirs += [ "//third_party/selinux/libselinux/include" ]
     cflags = [ "-DWITH_SELINUX" ]
+  }
+
+  if (build_variant == "user") {
+    defines += [ "UPDATER_BUILD_VARIANT_USER" ]
   }
 
   install_images = [ "updater" ]
@@ -179,7 +188,7 @@ ohos_static_library("libupdater") {
   }
 
   if (build_selinux) {
-    external_deps += [ "selinux:librestorecon" ]
+    external_deps += [ "selinux_adapter:librestorecon" ]
     deps += [ "//third_party/selinux:libselinux" ]
     include_dirs += [ "//third_party/selinux/libselinux/include" ]
     cflags = [ "-DWITH_SELINUX" ]

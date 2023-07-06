@@ -143,5 +143,11 @@ DEFINE_STRUCT_TRAIT(CallbackCfg, "",
     (std::string, type),
     (std::string, func)
 );
+
+inline std::ostream &operator<<(std::ostream &os, const ComInfo &com)
+{
+    os << "pageId: " << com.pageId << " comId: " << com.comId;
+    return os;
+}
 }
 #endif

@@ -187,7 +187,7 @@ int32_t UScriptInstructionBinFlowWrite::UnCompressDataProducer(const PkgBuffer &
 }
 
 int32_t UScriptInstructionBinFlowWrite::ProcessBinFile(Uscript::UScriptEnv &env, Uscript::UScriptContext &context,
-    PkgManager::StreamPtr stream)
+                                                       PkgManager::StreamPtr stream)
 {
     if (stream == nullptr) {
         LOG(ERROR) << "Error to get file stream";
@@ -239,20 +239,22 @@ int32_t UScriptInstructionBinFlowWrite::ProcessBinFile(Uscript::UScriptEnv &env,
 }
 
 int32_t UScriptInstructionBinFlowWrite::ComponentProcess(Uscript::UScriptEnv &env, PkgManager::StreamPtr stream,
-    const std::string &name, const size_t fileSize)
+                                                         const std::string &name, const size_t fileSize)
 {
+    // 根据镜像名获取组件处理类名
+    std::unique_ptr<ComponentProcessor> processor =
+        ComponentProcessorFactory::GetInstance().GetProcessor(name, fileSize);
+
     if (env.IsRetry()) {
         LOG(DEBUG) << "Retry updater, check if current partition updated already during last time";
         bool isUpdated = PartitionRecord::GetInstance().IsPartitionUpdated(name);
         if (isUpdated) {
             LOG(INFO) << name << " already updated, skip";
-            return USCRIPT_SUCCESS;
+            processor.reset();
+            processor = std::make_unique<SkipImgProcessor>(name, fileSize);
         }
     }
 
-    // 根据镜像名获取组件处理类名
-    std::unique_ptr<ComponentProcessor> processor =
-        ComponentProcessorFactory::GetInstance().GetProcessor(name, fileSize);
     if (processor == nullptr) {
         LOG(ERROR) << "GetProcessor failed, partition name: " << name;
         return USCRIPT_ERROR_EXECUTE;

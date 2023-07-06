@@ -24,149 +24,15 @@
 #include <vector>
 #include "ring_buffer/ring_buffer.h"
 #include "package/package.h"
+#include "pkg_info_utils.h"
 
 namespace Hpackage {
-/**
- * Error code definition
- */
-enum {
-    PKG_SUCCESS = 0,
-    PKG_ERROR_BASE = 100,
-    PKG_INVALID_NAME,
-    PKG_INVALID_PARAM,
-    PKG_INVALID_FILE,
-    PKG_INVALID_SIGNATURE,
-    PKG_INVALID_PKG_FORMAT,
-    PKG_INVALID_ALGORITHM,
-    PKG_INVALID_DIGEST,
-    PKG_INVALID_STREAM,
-    PKG_INVALID_VERSION,
-    PKG_INVALID_STATE,
-    PKG_INVALID_LZ4,
-    PKG_NONE_PERMISSION,
-    PKG_NONE_MEMORY,
-    PKG_VERIFY_FAIL,
-};
-
-enum {
-    POST_TYPE_UPLOAD_PKG = 0,
-    POST_TYPE_DECODE_PKG,
-    POST_TYPE_VERIFY_PKG,
-    POST_TYPE_WRITE_PARTITION
-};
-
-/**
- * Package information
- */
-struct PkgInfo {
-    uint32_t entryCount = 0;
-    uint32_t updateFileHeadLen = 0;
-    uint8_t signMethod;
-    uint8_t digestMethod;
-    uint8_t pkgType;
-    uint8_t pkgFlags;
-};
-
-/**
- * File information
- */
-struct FileInfo {
-    uint8_t flags = 0;
-    uint8_t digestMethod = 0;
-    uint16_t packMethod = 0;
-    time_t modifiedTime = 0;
-    size_t packedSize = 0;
-    size_t unpackedSize = 0;
-    size_t headerOffset = 0;
-    size_t dataOffset = 0;
-    std::string identity;
-};
-
-/**
- * Header information of the update package
- */
-struct UpgradePkgInfo {
-    PkgInfo pkgInfo;
-    uint32_t updateFileVersion = 0;
-    std::string productUpdateId;
-    std::string softwareVersion;
-    std::string date;
-    std::string time;
-    std::string descriptPackageId;
-};
-
-/**
- * Component information of the update package
- */
-struct ComponentInfo {
-    FileInfo fileInfo;
-    std::string version;
-    uint8_t digest[DIGEST_MAX_LEN];
-    uint16_t id;
-    uint8_t resType;
-    uint8_t type;
-    uint8_t compFlags;
-    size_t originalSize;
-};
-
-/**
- * Lz4 file configuration information
- */
-struct Lz4FileInfo {
-    FileInfo fileInfo;
-    int8_t compressionLevel;
-    int8_t blockIndependence;
-    int8_t contentChecksumFlag;
-    int8_t blockSizeID;
-    int8_t autoFlush = 1;
-};
-
-/**
- * Zip file configuration information
- */
-struct ZipFileInfo {
-    FileInfo fileInfo;
-    int32_t method = -1; // The system automatically uses the default value if the value is -1.
-    int32_t level;
-    int32_t windowBits;
-    int32_t memLevel;
-    int32_t strategy;
-};
-
-/**
- * buff definition used for parsing
- */
-struct PkgBuffer {
-    uint8_t *buffer;
-    size_t length = 0; // buffer size
-
-    std::vector<uint8_t> data;
-
-    PkgBuffer()
-    {
-        this->buffer = nullptr;
-        this->length = 0;
-    }
-
-    PkgBuffer(uint8_t *buffer, size_t bufferSize)
-    {
-        this->buffer = buffer;
-        this->length = bufferSize;
-    }
-
-    PkgBuffer(std::vector<uint8_t> &buffer)
-    {
-        this->buffer = buffer.data();
-        this->length = buffer.capacity();
-    }
-
-    PkgBuffer(size_t bufferSize)
-    {
-        data.resize(bufferSize, 0);
-        this->buffer = data.data();
-        this->length = bufferSize;
-    }
-};
+class PkgFile;
+class PkgStream;
+class PkgEntry;
+using PkgFilePtr = PkgFile *;
+using PkgStreamPtr = PkgStream *;
+using PkgEntryPtr = PkgEntry *;
 
 /**
  * Input and output stream definition
@@ -206,11 +72,17 @@ public:
      */
     virtual int32_t Write(const PkgBuffer &data, size_t size, size_t start) = 0;
 
+    virtual int32_t Flush(size_t size) = 0;
+
     virtual int32_t GetBuffer(PkgBuffer &buffer) const = 0;
 
     virtual size_t GetFileLength() = 0;
     virtual const std::string GetFileName() const = 0;
     virtual int32_t GetStreamType() const = 0;
+
+    virtual void AddRef() = 0;
+    virtual void DelRef() = 0;
+    virtual bool IsRef() const = 0;
 
     using ExtractFileProcessor = std::function<int(const PkgBuffer &data, size_t size, size_t start,
         bool isFinish, const void *context)>;
@@ -235,6 +107,95 @@ public:
     }
 };
 
+class PkgFile {
+public:
+    enum PkgType {
+        PKG_TYPE_NONE = PKG_PACK_TYPE_NONE,
+        PKG_TYPE_UPGRADE = PKG_PACK_TYPE_UPGRADE, // 升级包
+        PKG_TYPE_ZIP = PKG_PACK_TYPE_ZIP,     // zip压缩包
+        PKG_TYPE_LZ4 = PKG_PACK_TYPE_LZ4,     // lz4压缩包
+        PKG_TYPE_GZIP = PKG_PACK_TYPE_GZIP,     // gzip压缩包
+        PKG_TYPE_MAX
+    };
+
+    using VerifyFunction = std::function<int(const PkgInfoPtr info,
+        const std::vector<uint8_t> &digest, const std::vector<uint8_t> &signature)>;
+
+public:
+    virtual ~PkgFile() = default;
+
+    virtual int32_t AddEntry(const FileInfoPtr file, const PkgStreamPtr input) = 0;
+
+    virtual int32_t SavePackage(size_t &signOffset) = 0;
+
+    virtual int32_t ExtractFile(const PkgEntryPtr node, const PkgStreamPtr output) = 0;
+
+    virtual int32_t LoadPackage(std::vector<std::string> &fileNames, VerifyFunction verifier = nullptr) = 0;
+
+    virtual int32_t ParseComponents(std::vector<std::string> &fileNames) = 0;
+
+    virtual PkgEntryPtr FindPkgEntry(const std::string &fileName) = 0;
+
+    virtual PkgStreamPtr GetPkgStream() const = 0;
+
+    virtual const PkgInfo *GetPkgInfo() const = 0;
+
+    virtual PkgType GetPkgType() const = 0;
+
+    virtual void ClearPkgStream() = 0;
+};
+
+class PkgEntry {
+public:
+    PkgEntry(PkgFilePtr pkgFile, uint32_t nodeId) : nodeId_(nodeId), pkgFile_(pkgFile) {}
+
+    virtual ~PkgEntry() {}
+
+    virtual int32_t Init(const FileInfoPtr fileInfo, PkgStreamPtr inStream) = 0;
+
+    virtual int32_t EncodeHeader(PkgStreamPtr inStream, size_t startOffset, size_t &encodeLen) = 0;
+
+    virtual int32_t Pack(PkgStreamPtr inStream, size_t startOffset, size_t &encodeLen) = 0;
+
+    virtual int32_t DecodeHeader(PkgBuffer &buffer, size_t headerOffset, size_t dataOffset,
+        size_t &decodeLen) = 0;
+
+    virtual int32_t Unpack(PkgStreamPtr outStream) = 0;
+
+    virtual const std::string GetFileName() const
+    {
+        return fileName_;
+    };
+
+    virtual const FileInfo *GetFileInfo() const = 0;
+
+    PkgFilePtr GetPkgFile() const
+    {
+        return pkgFile_;
+    }
+
+    uint32_t GetNodeId() const
+    {
+        return nodeId_;
+    }
+
+    void AddDataOffset(size_t offset)
+    {
+        dataOffset_ += offset;
+    }
+
+protected:
+    int32_t Init(FileInfoPtr localFileInfo, const FileInfoPtr fileInfo,
+        PkgStreamPtr inStream);
+
+protected:
+    uint32_t nodeId_ {0};
+    PkgFilePtr pkgFile_ {nullptr};
+    size_t headerOffset_ {0};
+    size_t dataOffset_ {0};
+    std::string fileName_ {};
+};
+
 using PkgDecodeProgress = std::function<void(int type, size_t writeDataLen, const void *context)>;
 
 /**
@@ -247,10 +208,15 @@ public:
     using PkgInfoPtr = PkgInfo *;
     using StreamPtr = PkgStream *;
     using VerifyCallback = std::function<void(int32_t result, uint32_t percent)>;
+    using PkgFileConstructor = std::function<PkgFilePtr(
+        PkgManagerPtr manager, PkgStreamPtr stream, PkgManager::PkgInfoPtr header)>;
 
     virtual ~PkgManager() = default;
 
+    virtual void RegisterPkgFileCreator(const std::string &fileType, PkgFileConstructor constructor) = 0;
+
     static PkgManagerPtr CreatePackageInstance();
+    static PkgManagerPtr GetPackageInstance();
     static void ReleasePackageInstance(PkgManagerPtr manager);
 
     /**
@@ -378,7 +344,7 @@ public:
 
     virtual int32_t LoadPackageWithoutUnPack(const std::string &packagePath,
         std::vector<std::string> &fileIds) = 0;
-    
+
     virtual int32_t LoadPackageWithStream(const std::string &packagePath, const std::string &keyPath,
         std::vector<std::string> &fileIds, uint8_t type, StreamPtr stream) = 0;
 
@@ -389,6 +355,14 @@ public:
     virtual void PostDecodeProgress(int type, size_t writeDataLen, const void *context) = 0;
 
     virtual StreamPtr GetPkgFileStream(const std::string &fileName) = 0;
+
+    virtual int32_t ParseComponents(const std::string &packagePath, std::vector<std::string> &fileName) = 0;
 };
+
+template <typename FileClassName>
+PkgFilePtr NewPkgFile(PkgManager::PkgManagerPtr manager, PkgStreamPtr stream, PkgInfoPtr header)
+{
+    return new FileClassName (manager, stream, header);
+}
 } // namespace Hpackage
 #endif // PKG_MANAGER_H

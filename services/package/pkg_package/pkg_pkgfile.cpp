@@ -25,7 +25,7 @@
 #include "pkg_zipfile.h"
 
 namespace Hpackage {
-PkgFile::~PkgFile()
+PkgFileImpl::~PkgFileImpl()
 {
     auto iter = pkgEntryMapId_.begin();
     while (iter != pkgEntryMapId_.end()) {
@@ -39,7 +39,7 @@ PkgFile::~PkgFile()
     pkgManager_->ClosePkgStream(tmpStream);
 }
 
-PkgEntryPtr PkgFile::AddPkgEntry(const std::string &fileName)
+PkgEntryPtr PkgFileImpl::AddPkgEntry(const std::string &fileName)
 {
     uint32_t nodeId = ++nodeId_;
     PkgEntryPtr entry = nullptr;
@@ -66,7 +66,7 @@ PkgEntryPtr PkgFile::AddPkgEntry(const std::string &fileName)
     return entry;
 }
 
-int32_t PkgFile::ExtractFile(const PkgEntryPtr node, PkgStreamPtr output)
+int32_t PkgFileImpl::ExtractFile(const PkgEntryPtr node, PkgStreamPtr output)
 {
     PKG_LOGI("ExtractFile %s", output->GetFileName().c_str());
     if (!CheckState({PKG_FILE_STATE_WORKING}, PKG_FILE_STATE_WORKING)) {
@@ -83,7 +83,7 @@ int32_t PkgFile::ExtractFile(const PkgEntryPtr node, PkgStreamPtr output)
     return entry->Unpack(output);
 }
 
-PkgEntryPtr PkgFile::FindPkgEntry(const std::string &fileName)
+PkgEntryPtr PkgFileImpl::FindPkgEntry(const std::string &fileName)
 {
     if (!CheckState({PKG_FILE_STATE_WORKING}, PKG_FILE_STATE_WORKING)) {
         PKG_LOGE("error state curr %d ", state_);
@@ -96,7 +96,7 @@ PkgEntryPtr PkgFile::FindPkgEntry(const std::string &fileName)
     return nullptr;
 }
 
-bool PkgFile::CheckState(std::vector<uint32_t> states, uint32_t state)
+bool PkgFileImpl::CheckState(std::vector<uint32_t> states, uint32_t state)
 {
     bool ret = false;
     for (auto s : states) {
@@ -109,7 +109,7 @@ bool PkgFile::CheckState(std::vector<uint32_t> states, uint32_t state)
     return ret;
 }
 
-int32_t PkgFile::ConvertBufferToString(std::string &fileName, const PkgBuffer &buffer)
+int32_t PkgFileImpl::ConvertBufferToString(std::string &fileName, const PkgBuffer &buffer)
 {
     for (uint32_t i = 0; i < buffer.length; ++i) {
         if (buffer.buffer[i] < 32 || buffer.buffer[i] >= 127) { // 32,127 : should be printable character
@@ -120,7 +120,7 @@ int32_t PkgFile::ConvertBufferToString(std::string &fileName, const PkgBuffer &b
     return PKG_SUCCESS;
 }
 
-int32_t PkgFile::ConvertStringToBuffer(const std::string &fileName, const PkgBuffer &buffer, size_t &realLen)
+int32_t PkgFileImpl::ConvertStringToBuffer(const std::string &fileName, const PkgBuffer &buffer, size_t &realLen)
 {
     if (buffer.length < fileName.size()) {
         PKG_LOGE("Invalid buffer");
@@ -167,7 +167,7 @@ int32_t PkgEntry::Init(PkgManager::FileInfoPtr localFileInfo, const PkgManager::
     return PKG_SUCCESS;
 }
 
-void PkgFile::AddSignData(uint8_t digestMethod, size_t currOffset, size_t &signOffset)
+void PkgFileImpl::AddSignData(uint8_t digestMethod, size_t currOffset, size_t &signOffset)
 {
     signOffset = currOffset;
     if (digestMethod == PKG_DIGEST_TYPE_NONE) {

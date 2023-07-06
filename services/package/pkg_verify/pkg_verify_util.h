@@ -30,7 +30,7 @@ public:
     int32_t VerifyPackageSign(const Hpackage::PkgStreamPtr PkgStream) const;
 
     int32_t GetSignature(const PkgStreamPtr pkgStream, size_t &signatureSize,
-        std::vector<uint8_t> &signature) const;
+        std::vector<uint8_t> &signature, uint16_t &commentTotalLenAll) const;
 #ifndef UPDATER_UT
 private:
 #else
@@ -38,7 +38,7 @@ public:
 #endif
 
     int32_t ParsePackage(const PkgStreamPtr pkgStream, size_t &signatureStart,
-        size_t &signatureSize) const;
+        size_t &signatureSize, uint16_t &commentTotalLenAll) const;
 
     int32_t Pkcs7verify(std::vector<uint8_t> &signature, std::vector<uint8_t> &hash) const;
 
