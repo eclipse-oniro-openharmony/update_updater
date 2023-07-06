@@ -51,11 +51,8 @@ ohos_static_library("libBinFlowUpdate") {
     "init:libfsmanager_static",
   ]
   if (defined(use_ptable)) {
-    include_dirs += [ "${updater_path}/services/ptable_parse" ]
-    deps += [
-      "updater:libptableparse",
-      "//third_party/cJSON:cjson_static",
-    ]
+    deps += [ "//third_party/cJSON:cjson_static" ]
+    external_deps += [ "updater:libptableparse" ]
     defines = [ "UPDATER_USE_PTABLE" ]
   }
   subsystem_name = "updater"
