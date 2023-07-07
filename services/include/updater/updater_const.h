@@ -37,23 +37,17 @@ constexpr const char *UPDATER_BINARY = "updater_binary";
 constexpr const char *SDCARD_PATH = "/sdcard";
 constexpr const char *UPDATER_HDC_LOG = "/data/updater/log/flashd_hdc.log";
 constexpr const char *PREFIX_UFS_NODE = "/dev/block/sd";
-constexpr const char *SDCARD_FULL_PACKAGE = "updater.zip";
-constexpr const char *SDCARD_CUST_PACKAGE = "updater_cust.zip";
-constexpr const char *SDCARD_PRELOAD_PACKAGE = "updater_preload.zip";
+constexpr const char *SDCARD_PACKAGE_SUFFIX = ".zip";
 constexpr const char *POWEROFF = "shutdown";
 
 #ifndef UPDATER_UT
 constexpr const char *SDCARD_CARD_PATH = "/sdcard/updater";
-constexpr const char *SDCARD_CARD_PKG_PATH =
-    "/sdcard/updater/updater.zip, /sdcard/updater/updater_cust.zip, /sdcard/updater/updater_preload.zip";
+constexpr const char *SDCARD_CARD_PKG_PATH = "/sdcard/updater/updater.zip";
 constexpr const char *DEFAULT_LOCALE = "en-US";
 constexpr const char *G_WORK_PATH = "/tmp/";
 #else
 constexpr const char *SDCARD_CARD_PATH = "/data/sdcard/updater";
-constexpr const char *SDCARD_CARD_PKG_PATH =
-    "/data/updater/updater/updater_full.zip, "
-    "/data/updater/updater/updater_cust.zip, "
-    "/data/updater/updater/updater_preload.zip";
+constexpr const char *SDCARD_CARD_PKG_PATH = "/data/updater/updater/updater_full.zip";
 constexpr const char *G_WORK_PATH = "/data/updater/src/";
 constexpr const char *UT_VERSION = "OpenHarmony 3.2.9.1";
 #endif

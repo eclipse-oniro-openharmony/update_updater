@@ -53,8 +53,7 @@ bool DeleteUpdaterPath(const std::string &path)
             (currentName.compare(UPDATER_LOCALE_FILE) == 0)) {
             continue;
         }
-        if (sdcardTmp && (currentName.compare(SDCARD_FULL_PACKAGE) == 0 ||
-            currentName.compare(SDCARD_CUST_PACKAGE) == 0 || currentName.compare(SDCARD_PRELOAD_PACKAGE) == 0)) {
+        if (sdcardTmp && currentName.find(SDCARD_PACKAGE_SUFFIX) != std::string::npos) {
             continue;
         }
         std::string tmpName(path);
@@ -122,6 +121,39 @@ bool IsSDCardExist(const std::string &sdcardPath)
     } else {
         errno = save_errno;
         return true;
+    }
+}
+
+void SaveLogs()
+{
+    std::string updaterLogPath = UPDATER_LOG;
+    std::string stageLogPath = UPDATER_STAGE_LOG;
+    std::string errorCodePath = ERROR_CODE_PATH;
+
+    // save logs
+    bool ret = CopyUpdaterLogs(TMP_LOG, updaterLogPath);
+    if (!ret) {
+        LOG(ERROR) << "Copy updater log failed!";
+    }
+    ret = CopyUpdaterLogs(TMP_ERROR_CODE_PATH, errorCodePath);
+    if (!ret) {
+        LOG(ERROR) << "Copy error code log failed!";
+    }
+    ret = CopyUpdaterLogs(Flashd::FLASHD_HDC_LOG_PATH, UPDATER_HDC_LOG);
+    if (!ret) {
+        LOG(ERROR) << "Copy error hdc log failed!";
+    }
+
+    mode_t mode = 0640;
+    chmod(updaterLogPath.c_str(), mode);
+    chmod(errorCodePath.c_str(), mode);
+    chmod(UPDATER_HDC_LOG, mode);
+
+    STAGE(UPDATE_STAGE_SUCCESS) << "PostUpdater";
+    ret = CopyUpdaterLogs(TMP_STAGE_LOG, stageLogPath);
+    chmod(stageLogPath.c_str(), mode);
+    if (!ret) {
+        LOG(ERROR) << "Copy stage log failed!";
     }
 }
 
