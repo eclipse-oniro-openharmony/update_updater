@@ -13,7 +13,10 @@
  * limitations under the License.
  */
 #include "keys_input_device.h"
+
+#include <thread>
 #include "log/log.h"
+#include "updater_event.h"
 
 namespace Updater {
 enum KeyUpDownEvent {
@@ -33,6 +36,52 @@ bool KeysInputDevice::Read(OHOS::DeviceData& data)
     data.state = keyState_;
     keyState_ = OHOS::INVALID_KEY_STATE;
     return false;
+}
+
+void KeysInputDevice::OnLongKeyPressDown()
+{
+    static int downCount = 0;
+    ++downCount;
+    timerStop_ = false;
+    using namespace std::literals::chrono_literals;
+    std::thread t { [this, lastdownCount = downCount] () {
+        constexpr auto threshold = 2s;
+        std::this_thread::sleep_for(threshold);
+        // When the downCount of the last power key press changes,
+        // it means that the last press has been released before
+        // the timeout, then you can exit the callback directly
+        if (timerStop_ || lastdownCount != downCount) {
+            return;
+        }
+        UpdaterEvent::Invoke(UPDATER_POWER_VOLUME_DOWN_EVENT);
+    }};
+    t.detach();
+}
+
+void KeysInputDevice::OnLongKeyPressUp()
+{
+    // no need to judge whether in progress page,
+    // because may press power key in progress
+    // page and release power key in other page
+    timerStop_ = true;
+    UpdaterEvent::Invoke(UPDATER_POWER_VOLUME_UP_EVENT);
+}
+
+void KeysInputDevice::PowerVolumeDownPress(const input_event &ev)
+{
+    static bool powerDown = false;
+    static bool volumeDown = false;
+    bool down = ev.value == EVENT_KEY_DOWN_VALUE;
+    if (ev.code == KEY_POWER) {
+        powerDown = down;
+    } else if (ev.code == KEY_VOLUMEDOWN) {
+        volumeDown = down;
+    }
+    if (powerDown && volumeDown) {
+        OnLongKeyPressDown();
+    } else if (!down && (ev.code == KEY_POWER || ev.code == KEY_VOLUMEDOWN)) {
+        OnLongKeyPressUp();
+    }
 }
 
 int KeysInputDevice::HandleKeyEvent(const input_event &ev, uint32_t type)
@@ -56,6 +105,7 @@ int KeysInputDevice::HandleKeyEvent(const input_event &ev, uint32_t type)
     }
 
     lastKeyId_ = ev.code;
+    PowerVolumeDownPress(ev);
     return 0;
 }
 } // namespace Updater

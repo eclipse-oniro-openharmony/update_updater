@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -155,14 +155,6 @@ bool KeyListener::OnKeyAct(OHOS::UIView &view, const OHOS::KeyEvent &event)
 bool KeyListener::ProcessPowerKey(OHOS::UIView &view, const OHOS::KeyEvent &event)
 {
     OHOS::UIView *pView = OHOS::FocusManager::GetInstance()->GetFocusedView();
-    // detect power key long press
-    ON_SCOPE_EXIT(LongPressPowerKey) {
-        if (event.GetState() == OHOS::InputDevice::STATE_PRESS) {
-            StartLongPressTimer();
-        } else if (event.GetState() == OHOS::InputDevice::STATE_RELEASE) {
-            StopLongPressTimer();
-        }
-    };
     if (pView == nullptr) {
         LOG(ERROR) << "focused view is nullptr";
         return false;

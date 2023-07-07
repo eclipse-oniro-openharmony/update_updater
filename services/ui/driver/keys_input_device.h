@@ -14,6 +14,8 @@
  */
 #ifndef UPDATER_UI_KEYS_INPUT_DEVICE_H
 #define UPDATER_UI_KEYS_INPUT_DEVICE_H
+
+#include <atomic>
 #include <linux/input.h>
 #include "input_manager.h"
 #include "macros.h"
@@ -31,9 +33,13 @@ public:
     int HandleKeyEvent(const input_event &ev, uint32_t type);
 
 private:
+    void PowerVolumeDownPress(const input_event &ev);
+    void OnLongKeyPressUp();
+    void OnLongKeyPressDown();
     /* for KeysInputDevice */
     uint16_t lastKeyId_ { 0 };
     uint16_t keyState_ = OHOS::INVALID_KEY_STATE;
+    std::atomic<bool> timerStop_ {false};
 };
 } // namespace Updater
 #endif // UPDATER_UI_KEYS_INPUT_DEVICE_H
