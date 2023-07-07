@@ -17,9 +17,7 @@ import("//build/ohos.gni")
 updater_path = rebase_path("${updater_absolutely_path}", ".")
 
 ohos_static_library("libsdupdate") {
-  sources = [
-    "sdcard_update.cpp"
-  ]
+  sources = [ "sdcard_update.cpp" ]
 
   include_dirs = [
     "${updater_path}/interfaces/kits/include",
