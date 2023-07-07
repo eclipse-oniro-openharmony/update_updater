@@ -17,6 +17,45 @@ import("//build/ohos.gni")
 HDC_PATH = "//developtools/hdc/src"
 updater_path = rebase_path("${updater_absolutely_path}", ".")
 
+hash_sources = [
+  "${HDC_PATH}/../scripts/hdc_hash_gen.py".
+  "${HDC_PATH}/common/base.cpp",
+  "${HDC_PATH}/common/channel.h",
+  "${HDC_PATH}/common/session.h",
+  "${HDC_PATH}/common/transfer.h",
+]
+
+py_out_dir = "$root_build_dir/gen/" + rebase_path(".", "//")
+
+config("hdc_config") {
+  include_dirs = [
+    "${HDC_PATH}/common",
+    "${py_out_dir}",
+  ]
+  cflags_cc = [ "-std=c++17" ]
+  if (is_mingw) {
+    cflags_cc += [ "-Wno-inconsistent-dllimport" ]  # in mingw some sec api will
+                                                    # overwrite by utilsecurec
+  }
+}
+
+action("hdc_hash_gen") {
+  script = "${HDC_PATH}../scripts/hdc_hash_gen.py"
+  sources = hash_sources
+  outputs = [ "$py_out_dir" ]
+  args = [
+    "-f",
+    "hdc_hash_gen.h",
+    "-i",
+    rebase_path(".", root_build_dir),
+    "-o",
+    rebase_path("$py_out_dir" + "/", root_build_dir),
+  ]
+  public_configs = [ ":hdc_config" ]
+  part_name = updater
+  subsystem_name = updater
+}
+
 common_sources = [
   "${HDC_PATH}/common/async_cmd.cpp",
   "${HDC_PATH}/common/auth.cpp",
@@ -68,7 +107,7 @@ ohos_source_set("flashd_deamon") {
     "//third_party/openssl:libcrypto_shared",
   ]
 
-  deps += [ "//developtools/hdc:hdc_hash_gen" ]
+  deps += [ "${updater_path}/services/flashd:hdc_hash_gen" ]
 
   if (use_musl) {
     external_deps += [ "init:libbegetutil" ]
@@ -149,7 +188,7 @@ ohos_static_library("libflashd") {
     "${updater_path}/services/package:libupdaterpackage",
     "${updater_path}/services/script:libupdaterscript",
     "${updater_path}/utils:libutils",
-    "//developtools/hdc:hdc_hash_gen",
+    "${updater_path}/services/flashd:hdc_hash_gen",
     "//third_party/bzip2:libbz2",
     "//third_party/cJSON:cjson",
     "//third_party/libuv:uv",
