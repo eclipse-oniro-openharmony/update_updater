@@ -29,7 +29,6 @@ ohos_static_library("libsdupdate") {
     "${updater_path}/services/ui",
     "${updater_path}/services/ui/include",
     "${updater_path}/utils/include",
-    "//base/startup/init/interfaces/innerkits/include",
     "//third_party/bounds_checking_function/include",
   ]
 
