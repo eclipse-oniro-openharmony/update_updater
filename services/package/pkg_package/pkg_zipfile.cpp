@@ -575,16 +575,6 @@ int32_t ZipFileEntry::DecodeLocalFileHeaderCheck(PkgStreamPtr inStream, PkgBuffe
         PKG_LOGE("check crc %u %u failed", crc32_, crc32);
         return PKG_INVALID_PKG_FORMAT;
     }
-    if (packedSize != UINT32_MAX) {
-        if (fileInfo_.fileInfo.packedSize != static_cast<size_t>(packedSize)) {
-            PKG_LOGE("check packedSize %zu %u failed", fileInfo_.fileInfo.packedSize, packedSize);
-            return PKG_INVALID_PKG_FORMAT;
-        }
-        if (fileInfo_.fileInfo.unpackedSize != static_cast<size_t>(unpackedSize)) {
-            PKG_LOGE("check unpackedSize %zu %u failed", fileInfo_.fileInfo.unpackedSize, unpackedSize);
-            return PKG_INVALID_PKG_FORMAT;
-        }
-    }
     return PKG_SUCCESS;
 }
 
