@@ -23,7 +23,7 @@ ohos_unittest("updater_service_unittest") {
   resource_config_file = "${updater_path}/test/unittest/test_data/ohos_test.xml"
   module_out_path = MODULE_OUTPUT_PATH
   sources = [
-    "${updater_path}/services/sdcard_update/sdcard_update.cpp"
+    "${updater_path}/services/sdcard_update/sdcard_update.cpp",
     "${updater_path}/services/updater.cpp",
     "${updater_path}/services/updater_main.cpp",
     "${updater_path}/services/updater_preprocess.cpp",
