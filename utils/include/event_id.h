@@ -17,13 +17,13 @@
 
 namespace Updater {
     enum EventId {
-    UPDATER_EVENT_START = 0,
+        UPDATER_EVENT_START = 0,
 
-    // key up down
-    UPDATER_POWER_VOLUME_UP_EVENT,
-    UPDATER_POWER_VOLUME_DOWN_EVENT,
+        // key up down
+        UPDATER_POWER_VOLUME_UP_EVENT,
+        UPDATER_POWER_VOLUME_DOWN_EVENT,
 
-    UPDATER_EVENT_END
+        UPDATER_EVENT_END
     };
 } // Updater
 #endif // UPDATER_EVENT_ID_H

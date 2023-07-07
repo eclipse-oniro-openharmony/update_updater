@@ -105,6 +105,7 @@ int KeysInputDevice::HandleKeyEvent(const input_event &ev, uint32_t type)
     }
 
     lastKeyId_ = ev.code;
+    PowerVolumeDownPress(ev);
     return 0;
 }
 } // namespace Updater
