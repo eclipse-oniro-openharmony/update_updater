@@ -52,8 +52,8 @@ ohos_static_library("libBinFlowUpdate") {
   ]
   if (defined(use_ptable)) {
     deps += [
-      "//third_party/cJSON:cjson_static",
       "${updater_path}/services/ptable_parse:libptableparse",
+      "//third_party/cJSON:cjson_static",
     ]
     defines = [ "UPDATER_USE_PTABLE" ]
   }
