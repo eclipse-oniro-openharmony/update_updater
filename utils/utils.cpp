@@ -479,7 +479,7 @@ bool CopyUpdaterLogs(const std::string &sLog, const std::string &dLog)
     }
 
     while (Utils::GetFileSize(sLog) + GetDirSizeForFile(dLog) > MAX_LOG_DIR_SIZE) {
-        if (DeleteOldFile(dLog) != true) {
+        if (DeleteOldFile(g_logDir) != true) {
             break;
         }
     }
@@ -701,7 +701,9 @@ bool DeleteOldFile(const std::string folderPath)
             LOG(ERROR) << "Failed to get file status: " << filePath;
             continue;
         }
-
+        if (fileName == "." || fileName == "..") {
+            continue;
+        }
         if (fileStat.st_mtime < oldestFileTime) {
             oldestFileTime = fileStat.st_mtime;
             oldestFilePath = filePath;
@@ -714,7 +716,6 @@ bool DeleteOldFile(const std::string folderPath)
         LOG(ERROR) << "Unable to delete file";
         return false;
     }
-
     if (remove(oldestFilePath.c_str()) != 0) {
         LOG(ERROR) << "Failed to delete file: " << oldestFilePath;
         return false;
