@@ -152,7 +152,6 @@ static int MountNtfsWithRetry(std::string source, std::string target)
                 return -1;
             }
         }
-        sleep(3); // 3 : wait 3s;
         num++;
         LOG(ERROR) << "failed to mount " << source << " on " << target << ", errno is " << errno;
     } while (num < 3); // 3 : retry three times
@@ -174,12 +173,12 @@ int MountSdcard(std::string &path, std::string &mountPoint)
     }
     const std::vector<const char *> fileSystemType = {"ext4", "vfat", "exfat"};
     for (auto type : fileSystemType) {
-        if (mount(mountPoint.c_str(), path.c_str(), type, 0, nullptr) == 0) {
+        if (mount(path.c_str(), mountPoint.c_str(), type, 0, nullptr) == 0) {
             LOG(INFO) << "mount success, sdcard type is " << type;
             return 0;
         }
     }
-    if (MountNtfsWithRetry(mountPoint, path) == 0) {
+    if (MountNtfsWithRetry(path, mountPoint) == 0) {
         LOG(INFO) << "mount success, sdcard type is ntfs";
         return 0;
     }
@@ -340,5 +339,28 @@ const std::string GetBlockDeviceByMountPoint(const std::string &mountPoint)
         }
     }
     return blockDevice;
+}
+
+const std::vector<std::string> GetBlockDevicesByMountPoint(const std::string &mountPoint)
+{
+    std::vector<std::string> blockDevices;
+    if (mountPoint.empty() || g_fstab == nullptr) {
+        LOG(ERROR) << "mountPoint or g_fstab empty error.";
+        return blockDevices;
+    }
+    for (FstabItem *item = g_fstab->head; item != NULL; item = item->next) {
+        if ((item->mountPoint != NULL) && item->mountPoint == mountPoint) {
+            blockDevices.push_back(item->deviceName);
+        }
+    }
+
+    if (blockDevices.empty()) {
+        std::string blockDevice = PARTITION_PATH + mountPoint;
+        if (mountPoint[0] != '/') {
+            blockDevice = PARTITION_PATH + "/" + mountPoint;
+        }
+        blockDevices.push_back(blockDevice);
+    }
+    return blockDevices;
 }
 } // updater

@@ -41,6 +41,7 @@
 #include "pkg_manager.h"
 #include "pkg_utils.h"
 #include "ptable_parse/ptable_process.h"
+#include "sdcard_update/sdcard_update.h"
 #include "securec.h"
 #include "updater/updater_const.h"
 #include "updater/updater_preprocess.h"
@@ -146,50 +147,6 @@ static UpdaterStatus VerifyPackages(UpdaterParams &upParams)
 
     ProgressSmoothHandler(0, static_cast<int>(VERIFY_PERCENT * FULL_PERCENT_PROGRESS));
     LOG(INFO) << "Verify packages successfull...";
-    return UPDATE_SUCCESS;
-}
-
-static UpdaterStatus GetSdcardPkgsPath(UpdaterParams &upParams)
-{
-    if (upParams.updatePackage.size() != 0) {
-        LOG(INFO) << "get sdcard packages from misc";
-        return UPDATE_SUCCESS;
-    }
-    LOG(INFO) << "get sdcard packages from default path";
-    std::vector<std::string> sdcardPkgs = Utils::SplitString(SDCARD_CARD_PKG_PATH, ", ");
-    for (auto pkgPath : sdcardPkgs) {
-        if (access(pkgPath.c_str(), 0) == 0) {
-            LOG(INFO) << "find sdcard package : " << pkgPath;
-            upParams.updatePackage.push_back(pkgPath);
-        }
-    }
-    if (upParams.updatePackage.size() == 0) {
-        return UPDATE_ERROR;
-    }
-    return UPDATE_SUCCESS;
-}
-
-static UpdaterStatus CheckSdcardPkgs(UpdaterParams &upParams)
-{
-#ifndef UPDATER_UT
-    auto sdParam = "updater.data.configs";
-    Flashd::SetParameter(sdParam, "1");
-    std::string sdcardStr = GetBlockDeviceByMountPoint(SDCARD_PATH);
-    if (!IsSDCardExist(sdcardStr)) {
-        UPDATER_UI_INSTANCE.ShowLog(
-            (errno == ENOENT) ? TR(LOG_SDCARD_NOTFIND) : TR(LOG_SDCARD_ABNORMAL), true);
-        return UPDATE_ERROR;
-    }
-    std::string sdcardPath = SDCARD_PATH;
-    if (MountSdcard(sdcardPath, sdcardStr) != 0) {
-        LOG(ERROR) << "mount sdcard fail!";
-        return UPDATE_ERROR;
-    }
-#endif
-    if (GetSdcardPkgsPath(upParams) != UPDATE_SUCCESS) {
-        LOG(ERROR) << "there is no package in sdcard/updater, please check";
-        return UPDATE_ERROR;
-    }
     return UPDATE_SUCCESS;
 }
 

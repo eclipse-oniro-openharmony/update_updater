@@ -69,6 +69,7 @@ ohos_executable("updater") {
   deps = updater_common_deps
   deps += [
     "${updater_path}/interfaces/kits/misc_info:libmiscinfo",
+    "${updater_path}/services/sdcard_update:libsdupdate",
     "${updater_path}/services/ui:libui",
     "//third_party/libdrm:libdrm",
     "//third_party/openssl:libcrypto_shared",

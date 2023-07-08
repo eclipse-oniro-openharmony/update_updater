@@ -53,8 +53,7 @@ bool DeleteUpdaterPath(const std::string &path)
             (currentName.compare(UPDATER_LOCALE_FILE) == 0)) {
             continue;
         }
-        if (sdcardTmp && (currentName.compare(SDCARD_FULL_PACKAGE) == 0 ||
-            currentName.compare(SDCARD_CUST_PACKAGE) == 0 || currentName.compare(SDCARD_PRELOAD_PACKAGE) == 0)) {
+        if (sdcardTmp && currentName.find(SDCARD_PACKAGE_SUFFIX) != std::string::npos) {
             continue;
         }
         std::string tmpName(path);
