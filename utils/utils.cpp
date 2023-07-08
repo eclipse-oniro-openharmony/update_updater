@@ -635,16 +635,38 @@ bool IsDirExist(const std::string &path)
 
 long long int GetDirSize(const std::string &folderPath)
 {
-    long long totalSize = 0;
-    
-    for (const auto& entry : std::filesystem::directory_iterator(folderPath)) {
-        if (std::filesystem::is_directory(entry.status())) {
-            totalSize += GetDirSize(entry.path().string());
+    DIR* dir = opendir(folderPath.c_str());
+    if (dir == nullptr) {
+        LOG(ERROR) << "Failed to open folder: " << folderPath << std::endl;
+        return 0;
+    }
+
+    struct dirent* entry;
+    long long int totalSize = 0;
+
+    while ((entry = readdir(dir)) != nullptr) {
+        std::string fileName = entry->d_name;
+        std::string filePath = folderPath + "/" + fileName;
+
+        struct stat fileStat;
+        if (stat(filePath.c_str(), &fileStat) != 0) {
+            LOG(ERROR) << "Failed to get file status: " << filePath << std::endl;
+            continue;
+        }
+
+        if (S_ISDIR(fileStat.st_mode)) {
+            if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+                continue;
+            
+            std::string subFolderPath = filePath;
+            totalSize += GetDirSize(subFolderPath);
         } else {
-            totalSize += std::filesystem::file_size(entry.path());
+            totalSize += fileStat.st_size;
         }
     }
-    
+
+    closedir(dir);
+
     return totalSize;
 }
 
@@ -660,31 +682,44 @@ long long int GetDirSizeForFile(const std::string &filePath)
 
 bool DeleteOldFile(const std::string folderPath)
 {
-    std::filesystem::path folder(folderPath);
-
-    if (!std::filesystem::exists(folder) || !std::filesystem::is_directory(folder)) {
-        LOG(ERROR) << "Folder not exit or folder error";
+    DIR* dir = opendir(folderPath.c_str());
+    if (dir == nullptr) {
+        LOG(ERROR) << "Failed to open folder: " << folderPath << std::endl;
         return false;
     }
 
-    std::filesystem::path oldestFilePath = "";
-    std::filesystem::file_time_type oldestFileTime = std::filesystem::last_write_time(TMP_LOG);;
+    struct dirent* entry;
+    std::string oldestFilePath = "";
+    time_t oldestFileTime = std::numeric_limits<time_t>::max();
 
-    for (const auto& entry : std::filesystem::directory_iterator(folder)) {
-        const std::filesystem::path& filePath = entry.path();
-        const std::string& fileName = filePath.filename().string();
-        std::filesystem::file_time_type fileTime = std::filesystem::last_write_time(filePath);
-        if (fileTime < oldestFileTime) {
-            oldestFileTime = fileTime;
+    while ((entry = readdir(dir)) != nullptr) {
+        std::string fileName = entry->d_name;
+        std::string filePath = folderPath + "/" + fileName;
+
+        struct stat fileStat;
+        if (stat(filePath.c_str(), &fileStat) != 0) {
+            LOG(ERROR) << "Failed to get file status: " << filePath;
+            continue;
+        }
+
+        if (fileStat.st_mtime < oldestFileTime) {
+            oldestFileTime = fileStat.st_mtime;
             oldestFilePath = filePath;
         }
     }
+
+    closedir(dir);
 
     if (oldestFilePath.empty()) {
         LOG(ERROR) << "Unable to delete file";
         return false;
     }
-    std::filesystem::remove(oldestFilePath);
+
+    if (remove(oldestFilePath.c_str()) != 0) {
+        LOG(ERROR) << "Failed to delete file: " << oldestFilePath;
+        return false;
+    }
+
     return true;
 }
 
