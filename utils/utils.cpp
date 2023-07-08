@@ -643,30 +643,25 @@ long long int GetDirSize(const std::string &folderPath)
 
     struct dirent* entry;
     long long int totalSize = 0;
-
     while ((entry = readdir(dir)) != nullptr) {
         std::string fileName = entry->d_name;
         std::string filePath = folderPath + "/" + fileName;
-
         struct stat fileStat;
         if (stat(filePath.c_str(), &fileStat) != 0) {
             LOG(ERROR) << "Failed to get file status: " << filePath << std::endl;
             continue;
         }
-
         if (S_ISDIR(fileStat.st_mode)) {
-            if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+            if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) {
                 continue;
-            
+            }
             std::string subFolderPath = filePath;
             totalSize += GetDirSize(subFolderPath);
         } else {
             totalSize += fileStat.st_size;
         }
     }
-
     closedir(dir);
-
     return totalSize;
 }
 
@@ -691,11 +686,9 @@ bool DeleteOldFile(const std::string folderPath)
     struct dirent* entry;
     std::string oldestFilePath = "";
     time_t oldestFileTime = std::numeric_limits<time_t>::max();
-
     while ((entry = readdir(dir)) != nullptr) {
         std::string fileName = entry->d_name;
         std::string filePath = folderPath + "/" + fileName;
-
         struct stat fileStat;
         if (stat(filePath.c_str(), &fileStat) != 0) {
             LOG(ERROR) << "Failed to get file status: " << filePath;
@@ -709,9 +702,7 @@ bool DeleteOldFile(const std::string folderPath)
             oldestFilePath = filePath;
         }
     }
-
     closedir(dir);
-
     if (oldestFilePath.empty()) {
         LOG(ERROR) << "Unable to delete file";
         return false;
@@ -720,7 +711,6 @@ bool DeleteOldFile(const std::string folderPath)
         LOG(ERROR) << "Failed to delete file: " << oldestFilePath;
         return false;
     }
-
     return true;
 }
 
