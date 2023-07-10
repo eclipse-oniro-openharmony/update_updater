@@ -18,7 +18,7 @@ HDC_PATH = "//developtools/hdc/src"
 updater_path = rebase_path("${updater_absolutely_path}", ".")
 
 hash_sources = [
-  "${hdc_base}/../scripts/hdc_hash_gen.py".
+  "${hdc_base}/scripts/hdc_hash_gen.py".
   "${hdc_base}/src/common/base.cpp",
   "${hdc_base}/src/common/channel.h",
   "${hdc_base}/src/common/session.h",
