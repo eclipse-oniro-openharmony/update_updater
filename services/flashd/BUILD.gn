@@ -40,7 +40,11 @@ config("hdc_config") {
 }
 
 action("hdc_hash_gen") {
+<<<<<<< HEAD
   script = "${hdc_base}/scripts/hdc_hash_gen.py"
+=======
+  script = ""${hdc_base}/scripts/hdc_hash_gen.py"
+>>>>>>> 7c516ff3deafbe1fd3626b3e266fc54267c9ac4d
   sources = hash_sources
   outputs = [ "$py_out_dir" ]
   args = [
