@@ -119,6 +119,30 @@ static int OtaUpdatePreCheck(PkgManager::PkgManagerPtr pkgManager, const std::st
     return PKG_SUCCESS;
 }
 
+static UpdaterStatus UpdatePreCheck(UpdaterParams &upParams, const std::string pkgPath)
+{
+    if (PreProcess::GetInstance().DoUpdateAuth(pkgPath) != 0) {
+        UPDATER_LAST_WORD(UPDATE_ERROR);
+        return UPDATE_ERROR;
+    }
+
+    PkgManager::PkgManagerPtr pkgManager = PkgManager::CreatePackageInstance();
+    if (GetUpdatePackageInfo(pkgManager, pkgPath) != PKG_SUCCESS) {
+        PkgManager::ReleasePackageInstance(pkgManager);
+        LOG(ERROR) << "Verify update bin file Fail!";
+        UPDATER_LAST_WORD(UPDATE_ERROR);
+        return UPDATE_ERROR;
+    }
+    if (PreProcess::GetInstance().DoUpdatePreProcess(pkgManager) != PKG_SUCCESS) {
+        PkgManager::ReleasePackageInstance(pkgManager);
+        LOG(ERROR) << "Version Check Fail!";
+        UPDATER_LAST_WORD(UPDATE_ERROR);
+        return UPDATE_ERROR;
+    }
+    PkgManager::ReleasePackageInstance(pkgManager);
+    return UPDATE_SUCCESS;
+}
+
 static UpdaterStatus VerifyPackages(UpdaterParams &upParams)
 {
     LOG(INFO) << "Verify packages start...";
@@ -137,7 +161,7 @@ static UpdaterStatus VerifyPackages(UpdaterParams &upParams)
         int32_t verifyret = OtaUpdatePreCheck(manager, upParams.updatePackage[i]);
         PkgManager::ReleasePackageInstance(manager);
 
-        if (verifyret != PKG_SUCCESS) {
+        if (verifyret != PKG_SUCCESS || UpdatePreCheck(upParams, upParams.updatePackage[i]) != UPDATE_SUCCESS) {
             upParams.pkgLocation = i;
             UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_VERIFYPKGFAIL), true);
             UPDATER_LAST_WORD(UPDATE_CORRUPT);
@@ -303,18 +327,6 @@ static UpdaterStatus PreUpdatePackages(UpdaterParams &upParams)
     if (VerifyPackages(upParams) != UPDATE_SUCCESS) {
         UPDATER_LAST_WORD(UPDATE_ERROR);
         return UPDATE_ERROR;
-    }
-
-    for (unsigned int i = 0; i < upParams.updatePackage.size(); i++) {
-        int ret = PreProcess::GetInstance().DoUpdateAuth(upParams.updatePackage[i]);
-        if (ret == 0) {
-            LOG(INFO) << upParams.updatePackage[i] << " auth success";
-        } else {
-            upParams.pkgLocation = i;
-            LOG(ERROR) << upParams.updatePackage[i] << " auth failed";
-            UPDATER_LAST_WORD(UPDATE_ERROR);
-            return UPDATE_ERROR;
-        }
     }
 
     // Only handle UPATE_ERROR and UPDATE_SUCCESS here.Let package verify handle others.
