@@ -52,8 +52,8 @@ action("hdc_hash_gen") {
     rebase_path("$py_out_dir" + "/", root_build_dir),
   ]
   public_configs = [ ":hdc_config" ]
-  part_name = updater
-  subsystem_name = updater
+  subsystem_name = "updater"
+  part_name = "updater"
 }
 
 common_sources = [
