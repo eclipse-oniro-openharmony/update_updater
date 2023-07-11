@@ -18,6 +18,7 @@ declare_args() {
     updater_ui_support = false
   }
   updater_absolutely_path = "//base/update/updater"
+  hdc_base = "//developtools/hdc"
 }
 
 if (updater_cfg_file != "") {
