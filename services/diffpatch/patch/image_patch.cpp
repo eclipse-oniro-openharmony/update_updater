@@ -155,7 +155,7 @@ int32_t CompressedImagePatch::ApplyImagePatch(const PatchParam &param, size_t &s
     return 0;
 }
 
-int32_t CompressedImagePatch::DecompressData( Hpackage::PkgManager::PkgManagerPtr &pkgManager, PkgBuffer buffer,
+int32_t CompressedImagePatch::DecompressData(Hpackage::PkgManager::PkgManagerPtr &pkgManager, PkgBuffer buffer,
     Hpackage::PkgManager::StreamPtr &stream, bool memory, size_t expandedLen) const
 {
     if (expandedLen == 0) {
