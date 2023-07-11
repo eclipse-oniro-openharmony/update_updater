@@ -257,19 +257,8 @@ UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, Upda
     if (upParams.retryCount > 0) {
         LOG(INFO) << "Retry for " << upParams.retryCount << " time(s)";
     }
-    int32_t verifyret = GetUpdatePackageInfo(pkgManager, upParams.updatePackage[upParams.pkgLocation]);
-    g_tmpProgressValue = 0;
-    if (verifyret != PKG_SUCCESS) {
-        LOG(ERROR) << "Verify package bin file Fail...";
-        UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_VERIFYFAIL), true);
-        return UPDATE_CORRUPT;
-    }
-    LOG(INFO) << "Package bin file verified. start to install package...";
-    if (PreProcess::GetInstance().DoUpdatePreProcess(pkgManager) != PKG_SUCCESS) {
-        LOG(ERROR) << "Version Check Fail...";
-        return UPDATE_CORRUPT;
-    }
 
+    g_tmpProgressValue = 0;
     int maxTemperature;
     UpdaterStatus updateRet = StartUpdaterProc(pkgManager, upParams, maxTemperature);
     if (updateRet != UPDATE_SUCCESS) {
