@@ -47,7 +47,7 @@ action("hdc_hash_gen") {
     "-f",
     "hdc_hash_gen.h",
     "-i",
-    rebase_path(".", root_build_dir),
+    rebase_path("${hdc_base}", root_build_dir),
     "-o",
     rebase_path("$py_out_dir" + "/", root_build_dir),
   ]
