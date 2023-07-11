@@ -280,7 +280,6 @@ int RawImgProcessor::RawImageWriteProcessor(const PkgBuffer &buffer, size_t size
     if (pkgFileSize_ != 0) {
         readOffset_ += size;
         writer->GetUpdaterEnv()->PostMessage("set_progress", std::to_string((float)readOffset_ / pkgFileSize_));
-        LOG(INFO) << "set_progress readsize: " << readOffset_ << " totalsize: " << pkgFileSize_ <<" byte(s)";
     }
 
     return PKG_SUCCESS;
@@ -361,7 +360,6 @@ int SkipImgProcessor::SkipImageWriteProcessor(const PkgBuffer &buffer, size_t si
     if (pkgFileSize_ != 0) {
         readOffset_ += size;
         writer->GetUpdaterEnv()->PostMessage("set_progress", std::to_string((float)readOffset_ / pkgFileSize_));
-        LOG(INFO) << "set_progress readsize: " << readOffset_ << " totalsize: " << pkgFileSize_ <<" byte(s)";
     }
 
     return PKG_SUCCESS;
