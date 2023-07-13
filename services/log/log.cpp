@@ -18,6 +18,8 @@
 #include <memory>
 #include <unordered_map>
 #include <vector>
+#include <sys/time.h>
+#include <unistd.h>
 #ifndef DIFF_PATCH_SDK
 #include "hilog_base/log_base.h"
 #include "vsnprintf_s_p.h"
@@ -50,14 +52,16 @@ UpdaterLogger::~UpdaterLogger()
     if (g_logLevel > level_) {
         return;
     }
+    pid_t tid = 0;
 #ifndef DIFF_PATCH_SDK
     HiLogBasePrint(LOG_CORE, (LogLevel)level_, g_domain, g_logTag.c_str(), "%{public}s", str.c_str());
+    tid = gettid();
 #endif
     oss_.str("");
     oss_ << std::endl << std::flush;
     if (g_updaterLog.is_open()) {
-        g_updaterLog << realTime_ <<  "  " << "[" << logLevelMap_[level_] << "]" <<
-            g_logTag << " " << str << std::endl << std::flush;
+        g_updaterLog << realTime_ <<  " " << g_logTag << " " <<  tid << " "
+            << logLevelMap_[level_] << " " << str << std::endl << std::flush;
     }
 }
 
@@ -75,14 +79,23 @@ void SetLogLevel(int level)
     g_logLevel = level;
 }
 
+void GetFormatTime(char time[], int size)
+{
+#ifndef DIFF_PATCH_SDK
+    struct timeval tv {};
+    struct tm tm {};
+
+    gettimeofday(&tv, nullptr);
+    localtime_r(&tv.tv_sec, &tm);
+    snprintf_s(time, size, size - 1, "%02d-%02d %02d:%02d:%02d.%03d",
+        tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec,
+        static_cast<int>(tv.tv_usec / 1000)); // need div 1000
+#endif
+}
+
 std::ostream& UpdaterLogger::OutputUpdaterLog(const std::string &path, int line)
 {
-    auto sysTime = std::chrono::system_clock::now();
-    auto currentTime = std::chrono::system_clock::to_time_t(sysTime);
-    struct tm *localTime = std::localtime(&currentTime);
-    if (localTime != nullptr) {
-        std::strftime(realTime_, sizeof(realTime_), "%Y-%m-%d %H:%M:%S", localTime);
-    }
+    GetFormatTime(realTime_, sizeof(realTime_));
     if (g_logLevel <= level_) {
         return oss_ << path << " " << line << " : ";
     }
@@ -98,12 +111,7 @@ std::ostream& StageLogger::OutputUpdaterStage()
         { UPDATE_STAGE_OUT, "OUT" }
     };
     char realTime[MAX_TIME_SIZE] = {0};
-    auto sysTime = std::chrono::system_clock::now();
-    auto currentTime = std::chrono::system_clock::to_time_t(sysTime);
-    struct tm *localTime = std::localtime(&currentTime);
-    if (localTime != nullptr) {
-        std::strftime(realTime, sizeof(realTime), "%Y-%m-%d %H:%M:%S", localTime);
-    }
+    GetFormatTime(realTime, sizeof(realTime));
 
     if (g_updaterLog.is_open()) {
         if (stage_ == UPDATE_STAGE_OUT) {
@@ -150,12 +158,7 @@ void UpdaterHiLogger(int level, const char* fileName, int32_t line, const char* 
 std::ostream& ErrorCode::OutputErrorCode(const std::string &path, int line, UpdaterErrorCode code)
 {
     char realTime[MAX_TIME_SIZE] = {0};
-    auto sysTime = std::chrono::system_clock::now();
-    auto currentTime = std::chrono::system_clock::to_time_t(sysTime);
-    struct tm *localTime = std::localtime(&currentTime);
-    if (localTime != nullptr) {
-        std::strftime(realTime, sizeof(realTime), "%Y-%m-%d %H:%M:%S", localTime);
-    }
+    GetFormatTime(realTime, sizeof(realTime));
     if (g_errorCode.is_open()) {
         return g_errorCode << realTime <<  "  " << path << " " << line << " , error code is : " << code << std::endl;
     }
