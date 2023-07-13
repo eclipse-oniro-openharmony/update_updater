@@ -81,6 +81,7 @@ void SetLogLevel(int level)
 
 void GetFormatTime(char time[], int size)
 {
+#ifndef DIFF_PATCH_SDK
     struct timeval tv {};
     struct tm tm {};
 
@@ -89,6 +90,7 @@ void GetFormatTime(char time[], int size)
     snprintf_s(time, size, size - 1, "%02d-%02d %02d:%02d:%02d.%03d",
         tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec,
         static_cast<int>(tv.tv_usec / 1000)); // need div 1000
+#endif
 }
 
 std::ostream& UpdaterLogger::OutputUpdaterLog(const std::string &path, int line)
