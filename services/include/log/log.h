@@ -71,11 +71,11 @@ private:
     std::stringstream oss_;
     char realTime_[MAX_TIME_SIZE] = {0};
     static inline std::unordered_map<int, std::string> logLevelMap_ = {
-        { DEBUG, "DEBUG" },
-        { INFO, "INFO" },
-        { WARNING, "WARNING" },
-        { ERROR, "ERROR" },
-        { FATAL, "FATAL" }
+        { DEBUG, "D" },
+        { INFO, "I" },
+        { WARNING, "W" },
+        { ERROR, "E" },
+        { FATAL, "F" }
     };
 };
 
