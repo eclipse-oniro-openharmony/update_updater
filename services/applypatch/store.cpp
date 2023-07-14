@@ -46,13 +46,10 @@ int32_t Store::DoFreeSpace(const std::string &directoryPath)
 
 int32_t Store::FreeStore(const std::string &dirPath, const std::string &fileName)
 {
-    if (dirPath.empty()) {
+    if (dirPath.empty() || fileName.empty()) {
         return -1;
     }
-    std::string path;
-    if (!fileName.empty()) {
-        path = dirPath + "/";
-    }
+    std::string path = dirPath + "/" + fileName;
     if (DeleteFile(path.c_str()) != -1) {
         return 0;
     }

@@ -711,8 +711,8 @@ int32_t ZipFileEntry::DecodeHeader(PkgBuffer &buffer, size_t headerOffset, size_
         PKG_LOGE("decode LocalFileHeader failed");
         return ret;
     }
-    fileInfo_.fileInfo.packMethod = PKG_DIGEST_TYPE_CRC;
-    fileInfo_.fileInfo.digestMethod = PKG_COMPRESS_METHOD_ZIP;
+    fileInfo_.fileInfo.packMethod = PKG_COMPRESS_METHOD_ZIP;
+    fileInfo_.fileInfo.digestMethod = PKG_DIGEST_TYPE_CRC;
     fileInfo_.fileInfo.dataOffset = fileInfo_.fileInfo.headerOffset + headerLen;
     PKG_LOGI("packedSize: %zu unpackedSize: %zu  offset header: %zu data: %zu %s",
         fileInfo_.fileInfo.packedSize, fileInfo_.fileInfo.unpackedSize,

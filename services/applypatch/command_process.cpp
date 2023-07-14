@@ -190,7 +190,7 @@ CommandResult FreeCommandFn::Execute(const Command &params)
     std::string shaStr = params.GetArgumentByPos(1);
     blocksetMap.erase(shaStr);
     std::string storeBase = TransferManager::GetTransferManagerInstance()->GetGlobalParams()->storeBase;
-    if (TransferManager::GetTransferManagerInstance()->GetGlobalParams()->storeCreated != 0) {
+    if (TransferManager::GetTransferManagerInstance()->GetGlobalParams()->storeCreated == 0) {
         return CommandResult(Store::FreeStore(storeBase, shaStr));
     }
     return SUCCESS;
