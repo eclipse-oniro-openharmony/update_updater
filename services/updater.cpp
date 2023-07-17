@@ -54,7 +54,6 @@ using Updater::Utils::SplitString;
 using Updater::Utils::Trim;
 using namespace Hpackage;
 
-constexpr uint64_t MIN_STASH_SPACE = 100 * 1024 * 1024;
 int g_percentage;
 int g_tmpProgressValue;
 int g_tmpValue;
@@ -114,7 +113,6 @@ UpdaterStatus IsSpaceCapacitySufficient(const std::vector<std::string> &packageP
     }
     uint64_t maxStashSize =  *max_element(stashSizeList.begin(), stashSizeList.end());
     LOG(INFO) << "get max stash size:" << maxStashSize;
-    maxStashSize = maxStashSize > MIN_STASH_SPACE ? maxStashSize : MIN_STASH_SPACE;
     uint64_t maxLogSpace = MAX_LOG_SPACE * packagePath.size();
     uint64_t totalPkgSize = maxStashSize + maxLogSpace;
 

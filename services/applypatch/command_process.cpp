@@ -149,7 +149,7 @@ CommandResult DiffAndMoveCommandFn::Execute(const Command &params)
     } else if (type == CommandType::IMGDIFF) {
         isImgDiff = true;
     }
-
+    std::string srcHash = params.GetArgumentByPos(pos);
     BlockSet targetBlock;
     std::vector<uint8_t> buffer;
     CommandResult result = FAILED;
@@ -168,6 +168,19 @@ CommandResult DiffAndMoveCommandFn::Execute(const Command &params)
         LOG(ERROR) << "tgtBlockSize is : " <<tgtBlockSize << " , type is :" <<type;
         return errno == EIO ? NEED_RETRY : FAILED;
     }
+    std::string storeBase = TransferManager::GetTransferManagerInstance()->GetGlobalParams()->storeBase;
+    std::string storePath = storeBase + "/" + srcHash;
+    struct stat storePathStat {};
+    if (stat(storePath.c_str(), &storePathStat) == 0) {
+        if (fsync(params.GetFileDescriptor()) != 0) {
+            LOG(ERROR) << "fail to fsync";
+            return FAILED;
+        }
+        if (Store::FreeStore(storeBase, srcHash) != 0) {
+            LOG(ERROR) << "fail to delete file: " << srcHash;
+            return FAILED;
+        }
+    }
     TransferManager::GetTransferManagerInstance()->GetGlobalParams()->written += targetBlock.TotalBlockSize();
     return SUCCESS;
 }
@@ -177,7 +190,7 @@ CommandResult FreeCommandFn::Execute(const Command &params)
     std::string shaStr = params.GetArgumentByPos(1);
     blocksetMap.erase(shaStr);
     std::string storeBase = TransferManager::GetTransferManagerInstance()->GetGlobalParams()->storeBase;
-    if (TransferManager::GetTransferManagerInstance()->GetGlobalParams()->storeCreated != 0) {
+    if (TransferManager::GetTransferManagerInstance()->GetGlobalParams()->storeCreated == 0) {
         return CommandResult(Store::FreeStore(storeBase, shaStr));
     }
     return SUCCESS;
