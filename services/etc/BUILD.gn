@@ -34,6 +34,9 @@ ohos_prebuilt_etc("updater_faultloggerd.cfg") {
 
 ohos_prebuilt_etc("updater_common.cfg") {
   source = "updater_common.cfg"
+  if (build_variant == "user") {
+    source = "updater_common_user.cfg"
+  }
   install_images = [ "updater" ]
   part_name = "updater"
 }
