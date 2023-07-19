@@ -164,7 +164,7 @@ int MountSdcard(std::string &path, std::string &mountPoint)
         LOG(ERROR) << "path or mountPoint is null, mount fail";
         return -1;
     }
-    MountStatus rc = GetMountStatusForMountPoint(path.c_str());
+    MountStatus rc = GetMountStatusForMountPoint(mountPoint.c_str());
     if (rc == MountStatus::MOUNT_ERROR) {
         return -1;
     } else if (rc == MountStatus::MOUNT_MOUNTED) {
