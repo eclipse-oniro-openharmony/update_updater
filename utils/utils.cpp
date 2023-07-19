@@ -48,12 +48,10 @@ constexpr int USECONDS_PER_SECONDS = 1000000; // 1s = 1000000us
 constexpr int NANOSECS_PER_USECONDS = 1000; // 1us = 1000ns
 constexpr int MAX_TIME_SIZE = 20;
 
-static std::string g_logDir(UPDATER_LOG_DIR);
-
 void SaveLogs()
 {
-    std::string updaterLogPath = g_logDir + "/" + std::string(UPDATER_LOG_FILE);
-    std::string stageLogPath = g_logDir + "/" + std::string(UPDATER_STAGE_FILE);
+    std::string updaterLogPath = std::string(UPDATER_LOG);
+    std::string stageLogPath = std::string(UPDATER_STAGE_LOG);
 
     // save logs
     bool ret = CopyUpdaterLogs(TMP_LOG, updaterLogPath);
@@ -451,22 +449,26 @@ int GetFileSize(const std::string &dLog)
 
 bool CopyUpdaterLogs(const std::string &sLog, const std::string &dLog)
 {
-    if (MountForPath(g_logDir) != 0) {
+    std::size_t found = dLog.find_last_of("/");
+    if (found == std::string::npos) {
+        LOG(ERROR) << "Dest filePath error";
+        return false;
+    }
+    std::string destPath = dLog.substr(0, found);
+    if (MountForPath(destPath) != 0) {
         LOG(WARNING) << "MountForPath /data/log failed!";
         return false;
     }
 #ifdef WITH_SELINUX
-    if (g_logDir == std::string(UPDATER_LOG_DIR)) {
-        RestoreconRecurse("/data");
-    }
+    RestoreconRecurse(destPath.c_str());
 #endif // WITH_SELINUX
-    if (access(g_logDir.c_str(), 0) != 0) {
-        if (MkdirRecursive(g_logDir.c_str(), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) != 0) {
+    if (access(destPath.c_str(), 0) != 0) {
+        if (MkdirRecursive(destPath.c_str(), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) != 0) {
             LOG(ERROR) << "MkdirRecursive error!";
             return false;
         }
-        if (chown(g_logDir.c_str(), USER_UPDATE_AUTHORITY, USER_UPDATE_AUTHORITY) != EOK &&
-            chmod(g_logDir.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != EOK) {
+        if (chown(destPath.c_str(), USER_UPDATE_AUTHORITY, USER_UPDATE_AUTHORITY) != EOK &&
+            chmod(destPath.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != EOK) {
                 LOG(ERROR) << "Chmod failed!";
                 return false;
         }
@@ -479,7 +481,7 @@ bool CopyUpdaterLogs(const std::string &sLog, const std::string &dLog)
     }
 
     while (Utils::GetFileSize(sLog) + GetDirSizeForFile(dLog) > MAX_LOG_DIR_SIZE) {
-        if (DeleteOldFile(g_logDir) != true) {
+        if (DeleteOldFile(destPath) != true) {
             break;
         }
     }
@@ -714,9 +716,5 @@ bool DeleteOldFile(const std::string folderPath)
     return true;
 }
 
-void SetLogDir(const std::string dir)
-{
-    g_logDir = dir;
-}
 } // Utils
 } // namespace Updater
