@@ -34,9 +34,12 @@ ohos_prebuilt_etc("updater_faultloggerd.cfg") {
 
 ohos_prebuilt_etc("updater_common.cfg") {
   source = "updater_common.cfg"
-  if (build_variant == "user") {
-    source = "updater_common_user.cfg"
-  }
+  install_images = [ "updater" ]
+  part_name = "updater"
+}
+
+ohos_prebuilt_etc("updater_hdcd.cfg") {
+  source = "updater_hdcd.cfg"
   install_images = [ "updater" ]
   part_name = "updater"
 }
@@ -61,4 +64,7 @@ group("updater_files") {
     ":updater_init_usb.cfg",
     ":updater_init_usb_configfs.cfg",
   ]
+  if (build_variant == "root") {
+    deps += [":updater_hdcd.cfg"]
+  }
 }
