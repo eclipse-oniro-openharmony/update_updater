@@ -71,6 +71,6 @@ group("updater_files") {
     ":updater_init_usb_configfs.cfg",
   ]
   if (build_variant == "root") {
-    deps += [":updater_hdcd.cfg"]
+    deps += [ ":updater_hdcd.cfg" ]
   }
 }
