@@ -255,7 +255,11 @@ UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, Upda
     if (upParams.retryCount > 0) {
         LOG(INFO) << "Retry for " << upParams.retryCount << " time(s)";
     }
-
+    int ret = GetUpdatePackageInfo(pkgManager, upParams.updatePackage[upParams.pkgLocation]);
+    if (ret != 0) {
+        LOG(ERROR) << "get update package info fail";
+        return UPDATE_CORRUPT;
+    }
     g_tmpProgressValue = 0;
     int maxTemperature;
     UpdaterStatus updateRet = StartUpdaterProc(pkgManager, upParams, maxTemperature);
