@@ -54,7 +54,8 @@
                 "c_utils",
                 "hilog",
                 "selinux_adapter",
-                "ui_lite"
+                "ui_lite",
+                "common"
             ],
             "third_party": [
                 "bounds_checking_function",
