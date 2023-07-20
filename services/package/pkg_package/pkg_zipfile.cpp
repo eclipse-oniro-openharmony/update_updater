@@ -547,8 +547,6 @@ int32_t ZipFileEntry::DecodeLocalFileHeaderCheck(PkgStreamPtr inStream, PkgBuffe
 {
     uint16_t flags = ReadLE16(data.buffer + offsetof(LocalFileHeader, flags));
     uint32_t crc32 = ReadLE32(data.buffer + offsetof(LocalFileHeader, crc));
-    uint32_t packedSize = ReadLE32(data.buffer + offsetof(LocalFileHeader, compressedSize));
-    uint32_t unpackedSize = ReadLE32(data.buffer + offsetof(LocalFileHeader, uncompressedSize));
     size_t readLen = 0;
     if ((flags & GPBDD_FLAG_MASK) == GPBDD_FLAG_MASK) {
         currentPos += fileInfo_.fileInfo.packedSize;
@@ -568,8 +566,6 @@ int32_t ZipFileEntry::DecodeLocalFileHeaderCheck(PkgStreamPtr inStream, PkgBuffe
             return PKG_INVALID_PKG_FORMAT;
         }
         crc32 = ReadLE32(data.buffer + offsetof(DataDescriptor, crc));
-        packedSize = ReadLE32(data.buffer + offsetof(DataDescriptor, compressedSize));
-        unpackedSize = ReadLE32(data.buffer + offsetof(DataDescriptor, uncompressedSize));
     }
     if (crc32_ != crc32) {
         PKG_LOGE("check crc %u %u failed", crc32_, crc32);

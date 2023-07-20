@@ -27,7 +27,7 @@ public:
     ~ZipPkgParse() {};
 
     int32_t DoParseZipPkg(PkgStreamPtr pkgStream, PkgSignComment &pkgSignComment,
-        size_t &readLen, uint16_t &signCommentTotalLen, uint16_t &signCommentAppendLen) const;
+        size_t &readLen, const uint16_t &signCommentAppendLen, uint16_t &signCommentTotalLen) const;
 
     int32_t ParseZipPkg(Hpackage::PkgStreamPtr pkgStream, PkgSignComment &pkgSignComment) const;
 
