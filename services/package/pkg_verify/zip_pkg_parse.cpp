@@ -49,7 +49,7 @@ const uint8_t ZIP_EOCD_SIGNATURE_BIG_ENDIAN[4] = {0x50, 0x4b, 0x05, 0x06};
  */
 
 int32_t ZipPkgParse::DoParseZipPkg(PkgStreamPtr pkgStream, PkgSignComment &pkgSignComment,
-    size_t &readLen, uint16_t &signCommentAppendLen, uint16_t &signCommentTotalLen) const
+    size_t &readLen, const uint16_t &signCommentAppendLen, uint16_t &signCommentTotalLen) const
 {
     size_t fileLen = pkgStream->GetFileLength();
     size_t eocdTotalLen = ZIP_EOCD_FIXED_PART_LEN + signCommentTotalLen;

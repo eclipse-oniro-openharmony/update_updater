@@ -571,6 +571,7 @@ int32_t ZipFileEntry::DecodeLocalFileHeaderCheck(PkgStreamPtr inStream, PkgBuffe
         packedSize = ReadLE32(data.buffer + offsetof(DataDescriptor, compressedSize));
         unpackedSize = ReadLE32(data.buffer + offsetof(DataDescriptor, uncompressedSize));
     }
+    PKG_LOGI("DecodeLocalFileHeaderCheck: packedSize: %zu unpackedSize: %zu", packedSize, unpackedSize);
     if (crc32_ != crc32) {
         PKG_LOGE("check crc %u %u failed", crc32_, crc32);
         return PKG_INVALID_PKG_FORMAT;
