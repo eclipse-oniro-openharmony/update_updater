@@ -262,7 +262,6 @@ int32_t UpgradePkgFile::ReadSignData(std::vector<uint8_t> &signData,
     size_t &parsedLen, DigestAlgorithm::DigestAlgorithmPtr algorithm)
 {
     size_t readBytes = 0;
-    size_t signLen = parsedLen;
     PkgBuffer buffer(HASH_TLV_SIZE);
     int32_t ret = pkgStream_->Read(buffer, parsedLen, buffer.length, readBytes);
     if (ret != PKG_SUCCESS) {
@@ -289,19 +288,11 @@ int32_t UpgradePkgFile::ReadSignData(std::vector<uint8_t> &signData,
     parsedLen += signBuf.length;
     signData.resize(dataLen);
     signData.assign(signBuf.data.begin(), signBuf.data.end());
-
-    // refresh component data offset
-    signLen = parsedLen - signLen;
-    for (auto &it : pkgEntryMapId_) {
-        if (it.second != nullptr) {
-            it.second->AddDataOffset(signLen);
-        }
-    }
     return PKG_SUCCESS;
 }
 
-int32_t UpgradePkgFile::ReadImgHashTLV(std::vector<uint8_t> &imgHashBuf, size_t &parsedLen,
-                                       DigestAlgorithm::DigestAlgorithmPtr algorithm, uint32_t needType)
+int32_t UpgradePkgFile::ReadTLVData(std::vector<uint8_t> &TlvDataBuf, size_t &parsedLen,
+                                       DigestAlgorithm::DigestAlgorithmPtr algorithm)
 {
     size_t readBytes = 0;
     PkgBuffer buffer(HASH_TLV_SIZE);
@@ -315,12 +306,9 @@ int32_t UpgradePkgFile::ReadImgHashTLV(std::vector<uint8_t> &imgHashBuf, size_t 
     parsedLen += buffer.length;
     uint16_t type = ReadLE16(buffer.buffer);
     uint32_t len = ReadLE32(buffer.buffer + sizeof(uint16_t));
-    if (type != needType) {
-        PKG_LOGE("Invalid tlv type: %d length %u ", type, len);
-        return PKG_INVALID_FILE;
-    }
+    PKG_LOGI("ReadTLVData tlv type: %hu length %u ", type, len);
     algorithm->Update(buffer, buffer.length);
-    imgHashBuf.insert(imgHashBuf.end(), buffer.data.begin(), buffer.data.end());
+    TlvDataBuf.insert(TlvDataBuf.end(), buffer.data.begin(), buffer.data.end());
 
     PkgBuffer dataBuf(len);
     ret = pkgStream_->Read(dataBuf, parsedLen, dataBuf.length, readBytes);
@@ -331,38 +319,32 @@ int32_t UpgradePkgFile::ReadImgHashTLV(std::vector<uint8_t> &imgHashBuf, size_t 
     }
     parsedLen += dataBuf.length;
     algorithm->Update(dataBuf, dataBuf.length);
-    imgHashBuf.insert(imgHashBuf.end(), dataBuf.data.begin(), dataBuf.data.end());
+    TlvDataBuf.insert(TlvDataBuf.end(), dataBuf.data.begin(), dataBuf.data.end());
     return PKG_SUCCESS;
 }
 
-int32_t UpgradePkgFile::ReadImgHashData(size_t &parsedLen, DigestAlgorithm::DigestAlgorithmPtr algorithm)
+int32_t UpgradePkgFile::ReadImgHashData(std::vector<uint8_t> &hashInfoBuf, size_t &parsedLen,
+                                        DigestAlgorithm::DigestAlgorithmPtr algorithm)
 {
-    if (!isSdPackage_ || pkgInfo_.updateFileVersion != UpgradeFileVersion_V2) {
-        PKG_LOGI("SDPackage is false, ignore image hash check");
-        return PKG_SUCCESS;
-    }
-
     std::vector<uint8_t> imgHashBuf;
     // read hash header
-    int32_t ret = ReadImgHashTLV(imgHashBuf, parsedLen, algorithm, TLV_TYPE_FOR_HASH_HEADER);
-    if (ret != PKG_SUCCESS) {
-        PKG_LOGE("read image hash info fail");
-        UPDATER_LAST_WORD(ret);
-        return ret;
-    }
+    imgHashBuf.insert(imgHashBuf.end(), hashInfoBuf.begin(), hashInfoBuf.end());
 
     // read hash data
-    ret = ReadImgHashTLV(imgHashBuf, parsedLen, algorithm, TLV_TYPE_FOR_HASH_DATA);
+    std::vector<uint8_t> hashDataBuf;
+    int32_t ret = ReadTLVData(hashDataBuf, parsedLen, algorithm);
     if (ret != PKG_SUCCESS) {
-        PKG_LOGE("read image hash data fail");
+        PKG_LOGE("read tlv data fail");
         UPDATER_LAST_WORD(ret);
         return ret;
     }
-
-    // refresh component data offset
-    for (auto &it : pkgEntryMapId_) {
-        it.second->AddDataOffset(imgHashBuf.size());
+    uint16_t type = ReadLE16(hashDataBuf.data());
+    if (type != TLV_TYPE_FOR_HASH_DATA) {
+        PKG_LOGE("image hash data type %hu fail", type);
+        UPDATER_LAST_WORD(ret);
+        return ret;
     }
+    imgHashBuf.insert(imgHashBuf.end(), hashDataBuf.begin(), hashDataBuf.end());
 
 #ifndef DIFF_PATCH_SDK
     hashCheck_ = LoadImgHashData(imgHashBuf.data(), imgHashBuf.size());
@@ -506,19 +488,46 @@ int32_t UpgradePkgFile::VerifyFileV2(size_t &parsedLen, DigestAlgorithm::DigestA
         return ret;
     }
 
-    // Read image hash information
-    ret = ReadImgHashData(parsedLen, algorithm);
+    size_t signLen = parsedLen;
+    std::vector<uint8_t> signData;
+    std::vector<uint8_t> DataBuf;
+    ret = ReadTLVData(DataBuf, parsedLen, algorithm);
     if (ret != PKG_SUCCESS) {
-        PKG_LOGW("LoadImgHashData fail %d, ignore image hash check", ret);
+        PKG_LOGW("ReadTLVData fail %d", ret);
         return ret;
     }
 
-    // Read signature information
-    std::vector<uint8_t> signData;
-    ret = ReadSignData(signData, parsedLen, algorithm);
-    if (ret != PKG_SUCCESS) {
-        PKG_LOGE("ReadSignData fail %d", ret);
-        return ret;
+    uint16_t dataType = ReadLE16(DataBuf.data());
+    uint32_t dataLen = ReadLE32(DataBuf.data() + sizeof(uint16_t));
+    if (dataType == TLV_TYPE_FOR_HASH_HEADER) {
+        // Read image hash information
+        ret = ReadImgHashData(DataBuf, parsedLen, algorithm);
+        if (ret != PKG_SUCCESS) {
+            PKG_LOGW("LoadImgHashData fail %d", ret);
+            return ret;
+        }
+
+        // Read signature information
+        ret = ReadSignData(signData, parsedLen, algorithm);
+        if (ret != PKG_SUCCESS) {
+            PKG_LOGE("ReadSignData fail %d", ret);
+            return ret;
+        }
+    } else if (dataType == TLV_TYPE_FOR_SIGN) {
+        signData.resize(dataLen);
+        signData.assign(DataBuf.begin() + HASH_TLV_SIZE, DataBuf.end());
+    } else {
+        PKG_LOGE("Invalid tlv type: %hu length %u ", dataType, dataLen);
+        UPDATER_LAST_WORD(ret, dataType);
+        return PKG_INVALID_FILE;
+    }
+
+    // refresh component data offset
+    signLen = parsedLen - signLen;
+    for (auto &it : pkgEntryMapId_) {
+        if (it.second != nullptr) {
+            it.second->AddDataOffset(signLen);
+        }
     }
     return VerifyHeader(algorithm, verifier, signData);
 }
@@ -660,9 +669,7 @@ int32_t UpgradePkgFile::ReadComponents(size_t &parsedLen,
             return ret;
         }
     }
-    if (std::find(fileNames.begin(), fileNames.end(), "/userdata") != fileNames.end()) {
-        isSdPackage_ = true;
-    }
+
     parsedLen += info.srcOffset;
     return PKG_SUCCESS;
 }

@@ -160,25 +160,25 @@ private:
     int32_t ReadPackageInfo(std::vector<uint8_t> &signData,
         size_t &parsedLen, DigestAlgorithm::DigestAlgorithmPtr algorithm);
     int32_t ReadReserveData(size_t &parsedLen, DigestAlgorithm::DigestAlgorithmPtr &algorithm);
-    int32_t ReadImgHashTLV(std::vector<uint8_t> &imgHashBuf, size_t &parsedLen,
-                                        DigestAlgorithm::DigestAlgorithmPtr algorithm, uint32_t needType);
-    int32_t ReadImgHashData(size_t &parsedLen, DigestAlgorithm::DigestAlgorithmPtr algorithm);
+    int32_t ReadTLVData(std::vector<uint8_t> &TlvDataBuf, size_t &parsedLen,
+                        DigestAlgorithm::DigestAlgorithmPtr algorithm);
+    int32_t ReadImgHashData(std::vector<uint8_t> &hashInfoBuf, size_t &parsedLen,
+                            DigestAlgorithm::DigestAlgorithmPtr algorithm);
     int32_t ReadSignData(std::vector<uint8_t> &signData,
-        size_t &parsedLen, DigestAlgorithm::DigestAlgorithmPtr algorithm);
+                         size_t &parsedLen, DigestAlgorithm::DigestAlgorithmPtr algorithm);
     int32_t VerifyHeader(DigestAlgorithm::DigestAlgorithmPtr algorithm, VerifyFunction verifier,
         const std::vector<uint8_t> &signData);
     int32_t VerifyFile(size_t &parsedLen, DigestAlgorithm::DigestAlgorithmPtr algorithm,
-                                   VerifyFunction verifier);
+                       VerifyFunction verifier);
     int32_t VerifyFileV1(size_t &parsedLen, DigestAlgorithm::DigestAlgorithmPtr algorithm,
-                                   VerifyFunction verifier);
+                         VerifyFunction verifier);
     int32_t VerifyFileV2(size_t &parsedLen, DigestAlgorithm::DigestAlgorithmPtr algorithm,
-                                   VerifyFunction verifier);
+                         VerifyFunction verifier);
 
 private:
     UpgradePkgInfo pkgInfo_ {};
     size_t packedFileSize_ {0};
     const ImgHashData *hashCheck_ = nullptr;
-    bool isSdPackage_ = false;
 };
 } // namespace Hpackage
 #endif
