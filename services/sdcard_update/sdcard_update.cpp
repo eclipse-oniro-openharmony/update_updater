@@ -56,7 +56,7 @@ UpdaterStatus CheckSdcardPkgs(UpdaterParams &upParams)
 {
 #ifndef UPDATER_UT
     auto sdParam = "updater.data.configs";
-    SetParameter(sdParam, "1");
+    Utils::SetParameter(sdParam, "1");
     std::string mountPoint = std::string(SDCARD_PATH);
     std::vector<std::string> sdcardStr = GetBlockDevicesByMountPoint(mountPoint);
     if (sdcardStr.empty()) {
