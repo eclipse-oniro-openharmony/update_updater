@@ -160,7 +160,7 @@ private:
     int32_t ReadPackageInfo(std::vector<uint8_t> &signData,
         size_t &parsedLen, DigestAlgorithm::DigestAlgorithmPtr algorithm);
     int32_t ReadReserveData(size_t &parsedLen, DigestAlgorithm::DigestAlgorithmPtr &algorithm);
-    int32_t ReadTLVData(std::vector<uint8_t> &TlvDataBuf, size_t &parsedLen,
+    int32_t ReadTLVData(std::vector<uint8_t> &dataBuf, size_t &parsedLen,
                         DigestAlgorithm::DigestAlgorithmPtr algorithm);
     int32_t ReadImgHashData(std::vector<uint8_t> &hashInfoBuf, size_t &parsedLen,
                             DigestAlgorithm::DigestAlgorithmPtr algorithm);

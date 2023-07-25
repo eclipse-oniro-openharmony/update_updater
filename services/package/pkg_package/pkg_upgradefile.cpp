@@ -291,35 +291,33 @@ int32_t UpgradePkgFile::ReadSignData(std::vector<uint8_t> &signData,
     return PKG_SUCCESS;
 }
 
-int32_t UpgradePkgFile::ReadTLVData(std::vector<uint8_t> &TlvDataBuf, size_t &parsedLen,
-                                       DigestAlgorithm::DigestAlgorithmPtr algorithm)
+int32_t UpgradePkgFile::ReadTLVData(std::vector<uint8_t> &dataBuf, size_t &parsedLen,
+                                    DigestAlgorithm::DigestAlgorithmPtr algorithm)
 {
     size_t readBytes = 0;
-    PkgBuffer buffer(HASH_TLV_SIZE);
-    int32_t ret = pkgStream_->Read(buffer, parsedLen, buffer.length, readBytes);
+    PkgBuffer tlBuf(HASH_TLV_SIZE);
+    int32_t ret = pkgStream_->Read(tlBuf, parsedLen, tlBuf.length, readBytes);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("read image hash header fail");
         UPDATER_LAST_WORD(ret);
         return ret;
     }
 
-    parsedLen += buffer.length;
-    uint16_t type = ReadLE16(buffer.buffer);
-    uint32_t len = ReadLE32(buffer.buffer + sizeof(uint16_t));
+    parsedLen += tlBuf.length;
+    uint16_t type = ReadLE16(tlBuf.buffer);
+    uint32_t len = ReadLE32(tlBuf.buffer + sizeof(uint16_t));
     PKG_LOGI("ReadTLVData tlv type: %hu length %u ", type, len);
-    algorithm->Update(buffer, buffer.length);
-    TlvDataBuf.insert(TlvDataBuf.end(), buffer.data.begin(), buffer.data.end());
+    dataBuf.insert(dataBuf.end(), tlBuf.data.begin(), tlBuf.data.end());
 
-    PkgBuffer dataBuf(len);
-    ret = pkgStream_->Read(dataBuf, parsedLen, dataBuf.length, readBytes);
+    PkgBuffer valBuf(len);
+    ret = pkgStream_->Read(valBuf, parsedLen, valBuf.length, readBytes);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("read hash data fail");
         UPDATER_LAST_WORD(ret);
         return ret;
     }
-    parsedLen += dataBuf.length;
-    algorithm->Update(dataBuf, dataBuf.length);
-    TlvDataBuf.insert(TlvDataBuf.end(), dataBuf.data.begin(), dataBuf.data.end());
+    parsedLen += valBuf.length;
+    dataBuf.insert(dataBuf.end(), valBuf.data.begin(), valBuf.data.end());
     return PKG_SUCCESS;
 }
 
@@ -338,6 +336,9 @@ int32_t UpgradePkgFile::ReadImgHashData(std::vector<uint8_t> &hashInfoBuf, size_
         UPDATER_LAST_WORD(ret);
         return ret;
     }
+    PkgBuffer dataBuf(hashDataBuf.data(), hashdataBuf.size());
+    algorithm->Update(dataBuf, dataBuf.length);
+
     uint16_t type = ReadLE16(hashDataBuf.data());
     if (type != TLV_TYPE_FOR_HASH_DATA) {
         PKG_LOGE("image hash data type %hu fail", type);
@@ -490,18 +491,20 @@ int32_t UpgradePkgFile::VerifyFileV2(size_t &parsedLen, DigestAlgorithm::DigestA
 
     size_t signLen = parsedLen;
     std::vector<uint8_t> signData;
-    std::vector<uint8_t> DataBuf;
-    ret = ReadTLVData(DataBuf, parsedLen, algorithm);
+    std::vector<uint8_t> dataBuf;
+    ret = ReadTLVData(dataBuf, parsedLen, algorithm);
     if (ret != PKG_SUCCESS) {
         PKG_LOGW("ReadTLVData fail %d", ret);
         return ret;
     }
 
-    uint16_t dataType = ReadLE16(DataBuf.data());
-    uint32_t dataLen = ReadLE32(DataBuf.data() + sizeof(uint16_t));
+    uint16_t dataType = ReadLE16(dataBuf.data());
+    uint32_t dataLen = ReadLE32(dataBuf.data() + sizeof(uint16_t));
     if (dataType == TLV_TYPE_FOR_HASH_HEADER) {
+        PkgBuffer hashHeadBuf(dataBuf.data(), dataBuf.size());
+        algorithm->Update(hashHeadBuf, hashHeadBuf.length);
         // Read image hash information
-        ret = ReadImgHashData(DataBuf, parsedLen, algorithm);
+        ret = ReadImgHashData(dataBuf, parsedLen, algorithm);
         if (ret != PKG_SUCCESS) {
             PKG_LOGW("LoadImgHashData fail %d", ret);
             return ret;
@@ -515,7 +518,7 @@ int32_t UpgradePkgFile::VerifyFileV2(size_t &parsedLen, DigestAlgorithm::DigestA
         }
     } else if (dataType == TLV_TYPE_FOR_SIGN) {
         signData.resize(dataLen);
-        signData.assign(DataBuf.begin() + HASH_TLV_SIZE, DataBuf.end());
+        signData.assign(dataBuf.begin() + HASH_TLV_SIZE, dataBuf.end());
     } else {
         PKG_LOGE("Invalid tlv type: %hu length %u ", dataType, dataLen);
         UPDATER_LAST_WORD(ret, dataType);
