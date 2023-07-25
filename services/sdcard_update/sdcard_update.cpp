@@ -22,7 +22,6 @@
 #include <thread>
 #include <unistd.h>
 #include <vector>
-#include "flashd/flashd.h"
 #include "language/language_ui.h"
 #include "log/dump.h"
 #include "log/log.h"
@@ -57,7 +56,7 @@ UpdaterStatus CheckSdcardPkgs(UpdaterParams &upParams)
 {
 #ifndef UPDATER_UT
     auto sdParam = "updater.data.configs";
-    Flashd::SetParameter(sdParam, "1");
+    SetParameter(sdParam, "1");
     std::string mountPoint = std::string(SDCARD_PATH);
     std::vector<std::string> sdcardStr = GetBlockDevicesByMountPoint(mountPoint);
     if (sdcardStr.empty()) {

@@ -51,17 +51,5 @@ constexpr const char *FLASHD_HDC_LOG_PATH = "/tmp/flashd_hdc.log";
 constexpr const char *FLASHD_FILE_PATH = "/data/updater/updater/";
 constexpr const char *FLASHD_HDC_LOG_PATH = "/data/updater/flashd_hdc.log";
 #endif
-
-#ifdef __cplusplus
-#if __cplusplus
-extern "C" {
-#endif
-#endif
-int SetParameter(const char *key, const char *value);
-#ifdef __cplusplus
-#if __cplusplus
-}
-#endif
-#endif
 } // namespace Flashd
 #endif /* UPDATER_FLASHING_H */
