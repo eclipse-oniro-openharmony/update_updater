@@ -72,15 +72,15 @@ HWTEST_F(UpdaterUtilUnitTest, IsSDCardExist, TestSize.Level1)
 
 HWTEST_F(UpdaterUtilUnitTest, IsFlashd, TestSize.Level1)
 {
-    EXPECT_EQ(IsFlashd({"boot_updater", "boot_flash", ""}), true);
+    EXPECT_EQ(IsFlashd({"boot_updater", "", "boot_flash"}), true);
     EXPECT_EQ(IsFlashd({"boot_updater", "", ""}), false);
 }
 
 HWTEST_F(UpdaterUtilUnitTest, IsUpdater, TestSize.Level1)
 {
     EXPECT_EQ(IsUpdater({"boot_updater", "", ""}), true);
-    EXPECT_EQ(IsUpdater({"boot_updater", "boot_flash", ""}), false);
-    EXPECT_EQ(IsUpdater({"boot_updater", "xxx", ""}), true);
+    EXPECT_EQ(IsUpdater({"boot_updater", "", "boot_flash"}), false);
+    EXPECT_EQ(IsUpdater({"boot_updater", "", "xxx"}), true);
 }
 
 HWTEST_F(UpdaterUtilUnitTest, SelectMode, TestSize.Level1)
@@ -98,7 +98,7 @@ HWTEST_F(UpdaterUtilUnitTest, SelectMode, TestSize.Level1)
     ASSERT_NE(mode, std::nullopt);
     EXPECT_EQ(mode->modeName, "UPDATER");
 
-    mode = SelectMode({"boot_updater", "boot_flash", ""});
+    mode = SelectMode({"boot_updater", "", "boot_flash"});
     ASSERT_NE(mode, std::nullopt);
     EXPECT_EQ(mode->modeName, "FLASHD");
 
