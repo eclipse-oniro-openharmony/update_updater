@@ -185,7 +185,7 @@ void BootMode::InitMode(void) const
 #endif
     LoadFstab();
     STAGE(UPDATE_STAGE_OUT) << "Start " << modeName;
-    Flashd::SetParameter(modePara.c_str(), "1");
+    SetParameter(modePara.c_str(), "1");
 }
 
 bool IsUpdater(const UpdateMessage &boot)
