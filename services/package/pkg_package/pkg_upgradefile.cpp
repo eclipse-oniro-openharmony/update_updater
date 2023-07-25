@@ -336,7 +336,7 @@ int32_t UpgradePkgFile::ReadImgHashData(std::vector<uint8_t> &hashInfoBuf, size_
         UPDATER_LAST_WORD(ret);
         return ret;
     }
-    PkgBuffer dataBuf(hashDataBuf.data(), hashdataBuf.size());
+    PkgBuffer dataBuf(hashDataBuf.data(), hashDataBuf.size());
     algorithm->Update(dataBuf, dataBuf.length);
 
     uint16_t type = ReadLE16(hashDataBuf.data());
