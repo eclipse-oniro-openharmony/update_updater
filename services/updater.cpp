@@ -173,7 +173,7 @@ std::vector<uint64_t> GetStashSizeList(const std::vector<std::string> &packagePa
         PkgBuffer data {};
         outStream->GetBuffer(data);
         std::string str(reinterpret_cast<char*>(data.buffer), data.length);
-        int max_stash_size = std::stoi(str);
+        int64_t max_stash_size = std::stoll(str);
         stashSizeList.push_back(static_cast<uint64_t>(max_stash_size));
         PkgManager::ReleasePackageInstance(pkgManager);
     }
@@ -255,7 +255,11 @@ UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, Upda
     if (upParams.retryCount > 0) {
         LOG(INFO) << "Retry for " << upParams.retryCount << " time(s)";
     }
-
+    int ret = GetUpdatePackageInfo(pkgManager, upParams.updatePackage[upParams.pkgLocation]);
+    if (ret != 0) {
+        LOG(ERROR) << "get update package info fail";
+        return UPDATE_CORRUPT;
+    }
     g_tmpProgressValue = 0;
     int maxTemperature;
     UpdaterStatus updateRet = StartUpdaterProc(pkgManager, upParams, maxTemperature);
