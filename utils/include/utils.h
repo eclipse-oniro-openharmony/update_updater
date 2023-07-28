@@ -77,6 +77,18 @@ bool DeleteOldFile(const std::string dest);
 void SaveLogs();
 std::vector<std::string> ParseParams(int argc, char **argv);
 bool IsMsgInMisc(const std::string miscMsg);
+
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif
+#endif
+int SetParameter(const char *key, const char *value);
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif
+#endif
 } // Utils
 } // Updater
 #endif // UPDATER_UTILS_H
