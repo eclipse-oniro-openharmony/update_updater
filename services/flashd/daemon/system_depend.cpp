@@ -26,6 +26,7 @@ envirments
 */
 #include "system_depend.h"
 #include "parameter.h"
+#include "utils.h"
 
 namespace Hdc {
 namespace SystemDepend {
