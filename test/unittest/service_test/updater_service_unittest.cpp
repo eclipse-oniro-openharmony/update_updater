@@ -24,6 +24,7 @@
 #include "fs_manager/mount.h"
 #include "misc_info/misc_info.h"
 #include "updater_main.h"
+#include "utils.h"
 
 using namespace Updater;
 using namespace std;
@@ -134,7 +135,7 @@ HWTEST_F(UpdaterUtilUnitTest, ParseParams, TestSize.Level1)
     std::string str = "./UpdaterMain";
     EXPECT_EQ(strncpy_s(argv[0], MAX_ARG_SIZE, str.c_str(), str.size()), 0);
     int argc = 1;
-    std::vector<std::string> args = ParseParams(argc, argv);
+    std::vector<std::string> args = Utils::ParseParams(argc, argv);
     std::string res = "";
     for (auto s : args) {
         res += s;
@@ -148,7 +149,7 @@ HWTEST_F(UpdaterUtilUnitTest, ParseParams, TestSize.Level1)
     bRet = WriteUpdaterMessage(commandFile, boot);
     EXPECT_EQ(bRet, true);
 
-    args = ParseParams(argc, argv);
+    args = Utils::ParseParams(argc, argv);
     res = "";
     for (auto s : args) {
         res += s;

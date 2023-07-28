@@ -160,10 +160,9 @@ private:
     int32_t ReadPackageInfo(std::vector<uint8_t> &signData,
         size_t &parsedLen, DigestAlgorithm::DigestAlgorithmPtr algorithm);
     int32_t ReadReserveData(size_t &parsedLen, DigestAlgorithm::DigestAlgorithmPtr &algorithm);
-    int32_t ReadTLVData(std::vector<uint8_t> &dataBuf, size_t &parsedLen,
-                        DigestAlgorithm::DigestAlgorithmPtr algorithm);
-    int32_t ReadImgHashData(std::vector<uint8_t> &hashInfoBuf, size_t &parsedLen,
-                            DigestAlgorithm::DigestAlgorithmPtr algorithm);
+    int32_t ReadImgHashTLV(std::vector<uint8_t> &imgHashBuf, size_t &parsedLen,
+                                        DigestAlgorithm::DigestAlgorithmPtr algorithm, uint32_t needType);
+    int32_t ReadImgHashData(size_t &parsedLen, DigestAlgorithm::DigestAlgorithmPtr algorithm);
     int32_t ReadSignData(std::vector<uint8_t> &signData,
                          size_t &parsedLen, DigestAlgorithm::DigestAlgorithmPtr algorithm);
     int32_t VerifyHeader(DigestAlgorithm::DigestAlgorithmPtr algorithm, VerifyFunction verifier,

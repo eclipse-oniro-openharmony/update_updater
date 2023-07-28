@@ -33,7 +33,7 @@ int FlashdMain(int argc, char **argv)
     Base::SetLogCache(false);
     UpdaterInit::GetInstance().InvokeEvent(FLAHSD_PRE_INIT_EVENT);
 
-    std::vector<std::string> args = Updater::ParseParams(argc, argv);
+    std::vector<std::string> args = Updater::Utils::ParseParams(argc, argv);
     bool enableUsb = false;
     bool enableTcp = false;
     WRITE_LOG(LOG_DEBUG, "flashd main run %d", argc);
