@@ -54,6 +54,7 @@ ohos_unittest("bin_flow_update_test") {
   ]
 
   deps = [
+    "${updater_path}/interfaces/kits/misc_info:libmiscinfo",
     "${updater_path}/interfaces/kits/packages:libpackageExt",
     "${updater_path}/interfaces/kits/slot_info:libslotinfo",
     "${updater_path}/services/applypatch:libapplypatch",
