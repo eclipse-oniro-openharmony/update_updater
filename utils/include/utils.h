@@ -76,7 +76,7 @@ long long int GetDirSizeForFile(const std::string &filePath);
 bool DeleteOldFile(const std::string dest);
 void SaveLogs();
 std::vector<std::string> ParseParams(int argc, char **argv);
-bool IsMsgInMisc(const std::string miscMsg);
+std::string GetUpdateMode();
 
 #ifdef __cplusplus
 #if __cplusplus

@@ -739,15 +739,17 @@ std::vector<std::string> ParseParams(int argc, char **argv)
     return parseParams;
 }
 
-bool IsMsgInMisc(const std::string miscMsg)
+std::string GetUpdateMode()
 {
     std::vector<std::string> args = ParseParams(0, nullptr);
     for(const auto &arg : args) {
-        if (arg.find(miscMsg) != std::string::npos) {
-            return true;
+        if (arg.find("update_package") != std::string::npos) {
+            return OTA_MODE;
+        } else if (arg.find("sdcard_update") != std::string::npos) {
+            return SDCARD_MODE;
         }
     }
-    return false;
+    return "";
 }
 } // Utils
 } // namespace Updater
