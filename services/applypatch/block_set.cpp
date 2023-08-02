@@ -317,6 +317,7 @@ int32_t BlockSet::LoadTargetBuffer(const Command &cmd, std::vector<uint8_t> &buf
     int res = stat(storePath.c_str(), &storeStat);
     if (VerifySha256(buffer, blockSize, srcHash) == 0) {
         if (isOverlap && res != 0) {
+            TransferManager::GetTransferManagerInstance()->GetGlobalParams()->freeStash = srcHash;
             ret = Store::WriteDataToStore(storeBase, srcHash, buffer, blockSize * H_BLOCK_SIZE);
             if (ret != 0) {
                 LOG(ERROR) << "failed to stash overlapping source blocks";
