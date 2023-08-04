@@ -340,7 +340,7 @@ int32_t UpgradePkgFile::ReadImgHashTLV(std::vector<uint8_t> &imgHashBuf, size_t 
 int32_t UpgradePkgFile::ReadImgHashData(size_t &parsedLen, DigestAlgorithm::DigestAlgorithmPtr algorithm)
 {
 #ifndef DIFF_PATCH_SDK
-    if (Updater::Utils::GetUpdateMode() != Updater::SDCARD_MODE ||
+    if (!Updater::Utils::CheckUpdateMode(Updater::SDCARD_MODE) ||
         pkgInfo_.updateFileVersion != UpgradeFileVersion_V2) {
         PKG_LOGI("SDPackage is false, ignore image hash check");
         return PKG_SUCCESS;

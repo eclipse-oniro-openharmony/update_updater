@@ -201,7 +201,7 @@ bool GetBatteryCapacity(int &capacity)
 
 bool IsBatteryCapacitySufficient()
 {
-    if (Utils::GetUpdateMode() == OTA_MODE) {
+    if (Utils::CheckUpdateMode(OTA_MODE)) {
         LOG(INFO) << "this is OTA update, on need to determine the battery";
         return true;
     }

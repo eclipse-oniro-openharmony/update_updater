@@ -739,17 +739,15 @@ std::vector<std::string> ParseParams(int argc, char **argv)
     return parseParams;
 }
 
-std::string GetUpdateMode()
+bool CheckUpdateMode(const std::string &mode)
 {
     std::vector<std::string> args = ParseParams(0, nullptr);
     for(const auto &arg : args) {
-        if (arg.find("update_package") != std::string::npos) {
-            return OTA_MODE;
-        } else if (arg.find("sdcard_update") != std::string::npos) {
-            return SDCARD_MODE;
+        if (arg.find(mode) != std::string::npos) {
+            return true;
         }
     }
-    return "";
+    return false;
 }
 } // Utils
 } // namespace Updater
