@@ -157,6 +157,7 @@ static UpdaterStatus VerifyPackages(UpdaterParams &upParams)
     upParams.callbackProgress(0.0);
     for (unsigned int i = upParams.pkgLocation; i < upParams.updatePackage.size(); i++) {
         LOG(INFO) << "Verify package:" << upParams.updatePackage[i];
+        auto startTime = std::chrono::system_clock::now();
         PkgManager::PkgManagerPtr manager = PkgManager::CreatePackageInstance();
         int32_t verifyret = OtaUpdatePreCheck(manager, upParams.updatePackage[i]);
         PkgManager::ReleasePackageInstance(manager);
@@ -164,11 +165,15 @@ static UpdaterStatus VerifyPackages(UpdaterParams &upParams)
         if (verifyret != PKG_SUCCESS || UpdatePreCheck(upParams, upParams.updatePackage[i]) != UPDATE_SUCCESS) {
             upParams.pkgLocation = i;
             UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_VERIFYPKGFAIL), true);
+            auto endTime = std::chrono::system_clock::now();
+            upParams.verityTime[i] = endTime - startTime;
             UPDATER_LAST_WORD(UPDATE_CORRUPT);
             return UPDATE_CORRUPT;
         }
     }
 
+    auto endTime = std::chrono::system_clock::now();
+    upParams.verityTime[i] = endTime - startTime;
     ProgressSmoothHandler(0, static_cast<int>(VERIFY_PERCENT * FULL_PERCENT_PROGRESS));
     LOG(INFO) << "Verify packages successfull...";
     return UPDATE_SUCCESS;
@@ -373,6 +378,7 @@ static UpdaterStatus DoUpdatePackages(UpdaterParams &upParams)
     upParams.callbackProgress(updateStartPosition * FULL_PERCENT_PROGRESS);
     for (; upParams.pkgLocation < upParams.updatePackage.size(); upParams.pkgLocation++) {
         PkgManager::PkgManagerPtr manager = PkgManager::CreatePackageInstance();
+        auto startTime = std::chrono::system_clock::now();
         upParams.currentPercentage = pkgStartPosition[upParams.pkgLocation + 1] -
             pkgStartPosition[upParams.pkgLocation];
         upParams.initialProgress = pkgStartPosition[upParams.pkgLocation];
@@ -385,6 +391,8 @@ static UpdaterStatus DoUpdatePackages(UpdaterParams &upParams)
             static_cast<int>(upParams.initialProgress * FULL_PERCENT_PROGRESS +
             upParams.currentPercentage * GetTmpProgressValue()),
             static_cast<int>(pkgStartPosition[upParams.pkgLocation + 1] * FULL_PERCENT_PROGRESS));
+        auto endTime = std::chrono::system_clock::now();
+        upParams.verityTime[i] = endTime - startTime;
         if (status != UPDATE_SUCCESS) {
             LOG(ERROR) << "InstallUpdaterPackage failed! Pkg is " << upParams.updatePackage[upParams.pkgLocation];
             if (!CheckDumpResult()) {
@@ -406,6 +414,7 @@ static void PostUpdatePackages(UpdaterParams &upParams, bool updateResult)
 {
     std::string writeBuffer;
     std::string buf;
+    std::string time;
     if (!updateResult) {
         const std::string resultPath = std::string(UPDATER_PATH) + "/" + std::string(UPDATER_RESULT_FILE);
         std::ifstream fin {resultPath};
@@ -419,9 +428,13 @@ static void PostUpdatePackages(UpdaterParams &upParams, bool updateResult)
     }
 
     for (unsigned int i = 0; i < upParams.pkgLocation; i++) {
-        writeBuffer += upParams.updatePackage[i] + "|pass\n";
+        time = DurationToString(upParams.verityTime[i] + upParams.installTime[i]);
+        writeBuffer += upParams.updatePackage[i] + "|pass|install_time=" + time + "\n";
     }
-    writeBuffer += upParams.updatePackage[upParams.pkgLocation] + "|" + buf + "\n";
+    time = DurationToString(upParams.verityTime[upParams.pkgLocation] +
+                            upParams.installTime[upParams.pkgLocation]);
+
+    writeBuffer += upParams.updatePackage[upParams.pkgLocation] + "|" + buf + "|install_time=" + time + "\n";
     for (unsigned int i = upParams.pkgLocation + 1; i < upParams.updatePackage.size(); i++) {
         writeBuffer += upParams.updatePackage[i] + "\n";
     }
@@ -543,6 +556,8 @@ static UpdaterStatus StartUpdater(const std::vector<std::string> &args,
                 std::string option = OPTIONS[optionIndex].name;
                 if (option == "update_package") {
                     upParams.updatePackage.push_back(optarg);
+                    upParams.verityTime.push_back(std::chrono::duration<double>(0));
+                    upParams.installTime.push_back(std::chrono::duration<double>(0));
                     (void)UPDATER_UI_INSTANCE.SetMode(UpdaterMode::OTA);
                     mode = HOTA_UPDATE;
                 } else if (option == "retry_count") {

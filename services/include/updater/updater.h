@@ -15,6 +15,7 @@
 
 #ifndef UPDATER_UPDATER_H
 #define UPDATER_UPDATER_H
+#include <chrono>
 #include <optional>
 #include <string>
 #include "misc_info/misc_info.h"
@@ -51,6 +52,8 @@ struct UpdaterParams {
     unsigned int pkgLocation = 0;
     std::string miscCmd {"boot_updater"};
     std::vector<std::string> updatePackage {};
+    std::vector<std::chrono::duration<double>> verityTime {};
+    std::vector<std::chrono::duration<double>> installTime {};
     std::function<void(float)> callbackProgress {};
 };
 

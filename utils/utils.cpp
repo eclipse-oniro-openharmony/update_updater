@@ -749,5 +749,12 @@ bool CheckUpdateMode(const std::string &mode)
     }
     return false;
 }
+
+std::string DurationToString(std::chrono::duration<double> duration, int precision)
+{
+    std::ostringstream oss;
+    oss << std::fixed << std::setprecision(precision) << duration.count();
+    return oss.str();
+}
 } // Utils
 } // namespace Updater
