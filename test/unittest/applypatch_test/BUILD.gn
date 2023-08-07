@@ -57,6 +57,7 @@ ohos_unittest("applypatch_unittest") {
     "//third_party/bounds_checking_function/include",
   ]
   deps = [
+    "${updater_path}/interfaces/kits/misc_info:libmiscinfo",
     "${updater_path}/services/applypatch:libapplypatch",
     "${updater_path}/services/fs_manager:libfsmanager",
     "//third_party/googletest:gmock_main",

@@ -28,6 +28,8 @@
 #include "pkg_utils.h"
 #include "pkg_zipfile.h"
 #include "securec.h"
+#include "utils.h"
+#include "updater/updater_const.h"
 
 #define TLV_CHECK_AND_RETURN(tlv, tlvType, len, fileLen)                                         \
     do {                                                                                         \
@@ -337,10 +339,13 @@ int32_t UpgradePkgFile::ReadImgHashTLV(std::vector<uint8_t> &imgHashBuf, size_t 
 
 int32_t UpgradePkgFile::ReadImgHashData(size_t &parsedLen, DigestAlgorithm::DigestAlgorithmPtr algorithm)
 {
-    if (!isSdPackage_ || pkgInfo_.updateFileVersion != UpgradeFileVersion_V2) {
+#ifndef DIFF_PATCH_SDK
+    if (!Updater::Utils::CheckUpdateMode(Updater::SDCARD_MODE) ||
+        pkgInfo_.updateFileVersion != UpgradeFileVersion_V2) {
         PKG_LOGI("SDPackage is false, ignore image hash check");
         return PKG_SUCCESS;
     }
+#endif
 
     std::vector<uint8_t> imgHashBuf;
     // read hash header
@@ -659,9 +664,6 @@ int32_t UpgradePkgFile::ReadComponents(size_t &parsedLen,
             UPDATER_LAST_WORD(ret);
             return ret;
         }
-    }
-    if (std::find(fileNames.begin(), fileNames.end(), "/userdata") != fileNames.end()) {
-        isSdPackage_ = true;
     }
     parsedLen += info.srcOffset;
     return PKG_SUCCESS;

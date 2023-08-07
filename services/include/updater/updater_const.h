@@ -40,6 +40,10 @@ constexpr const char *PREFIX_UFS_NODE = "/dev/block/sd";
 constexpr const char *SDCARD_PACKAGE_SUFFIX = ".zip";
 constexpr const char *POWEROFF = "shutdown";
 
+// update mode
+constexpr const char *SDCARD_MODE = "sdcard_update";
+constexpr const char *OTA_MODE = "update_package";
+
 #ifndef UPDATER_UT
 constexpr const char *SDCARD_CARD_PATH = "/sdcard/updater";
 constexpr const char *SDCARD_CARD_PKG_PATH = "/sdcard/updater/updater.zip";

@@ -152,29 +152,6 @@ void PostUpdater(bool clearMisc)
     SaveLogs();
 }
 
-std::vector<std::string> ParseParams(int argc, char **argv)
-{
-    struct UpdateMessage boot {};
-    // read from misc
-    if (!ReadUpdaterMiscMsg(boot)) {
-        LOG(ERROR) << "ReadUpdaterMessage MISC_FILE failed!";
-    }
-    // if boot.update is empty, read from command.The Misc partition may have dirty data,
-    // so strlen(boot.update) is not used, which can cause system exceptions.
-    if (boot.update[0] == '\0' && !access(COMMAND_FILE, 0)) {
-        if (!ReadUpdaterMessage(COMMAND_FILE, boot)) {
-            LOG(ERROR) << "ReadUpdaterMessage COMMAND_FILE failed!";
-        }
-    }
-    STAGE(UPDATE_STAGE_OUT) << "Init Params: " << boot.update;
-    boot.update[sizeof(boot.update) - 1] = '\0';
-    std::vector<std::string> parseParams = Utils::SplitString(boot.update, "\n");
-    if (argc != 0 && argv != nullptr) {
-        parseParams.insert(parseParams.begin(), argv, argv + argc);
-    }
-    return parseParams;
-}
-
 void BootMode::InitMode(void) const
 {
     InitUpdaterLogger(modeName, TMP_LOG, TMP_STAGE_LOG, TMP_ERROR_CODE_PATH);
@@ -256,7 +233,7 @@ void SetMessageToMisc(const std::string &miscCmd, const int message, const std::
     }
     char buffer[128] {}; // 128 : set headInfo size
     if (headInfo == "sdcard_update") {
-        if (strncpy_s(msg.command, sizeof(msg.command), headInfo.c_str(), headInfo.size() + 1) != EOK) {
+        if (strncpy_s(buffer, sizeof(buffer), headInfo.c_str(), headInfo.size() + 1) != EOK) {
             LOG(ERROR) << "SetMessageToMisc strncpy_s failed";
             return;
         }

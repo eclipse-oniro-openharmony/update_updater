@@ -201,8 +201,7 @@ bool GetBatteryCapacity(int &capacity)
 
 bool IsBatteryCapacitySufficient()
 {
-    struct UpdateMessage boot {};
-    if (ReadUpdaterMiscMsg(boot) && strcmp(boot.command, "boot_updater") == 0) {
+    if (Utils::CheckUpdateMode(OTA_MODE)) {
         LOG(INFO) << "this is OTA update, on need to determine the battery";
         return true;
     }

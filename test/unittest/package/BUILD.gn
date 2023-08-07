@@ -77,6 +77,7 @@ ohos_unittest("package_unittest") {
   ]
 
   deps = [
+    "${updater_path}/interfaces/kits/misc_info:libmiscinfo",
     "${updater_path}/interfaces/kits/packages:libpackageExt",
     "${updater_path}/services/log:libupdaterlog",
     "${updater_path}/utils:libutils",

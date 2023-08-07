@@ -75,6 +75,8 @@ long long int GetDirSize(const std::string &folderPath);
 long long int GetDirSizeForFile(const std::string &filePath);
 bool DeleteOldFile(const std::string dest);
 void SaveLogs();
+std::vector<std::string> ParseParams(int argc, char **argv);
+bool CheckUpdateMode(const std::string &mode);
 
 #ifdef __cplusplus
 #if __cplusplus
