@@ -170,10 +170,10 @@ static UpdaterStatus VerifyPackages(UpdaterParams &upParams)
             UPDATER_LAST_WORD(UPDATE_CORRUPT);
             return UPDATE_CORRUPT;
         }
+        auto endTime = std::chrono::system_clock::now();
+        upParams.verityTime[i] = endTime - startTime;
     }
 
-    auto endTime = std::chrono::system_clock::now();
-    upParams.verityTime[i] = endTime - startTime;
     ProgressSmoothHandler(0, static_cast<int>(VERIFY_PERCENT * FULL_PERCENT_PROGRESS));
     LOG(INFO) << "Verify packages successfull...";
     return UPDATE_SUCCESS;
@@ -387,12 +387,12 @@ static UpdaterStatus DoUpdatePackages(UpdaterParams &upParams)
 
         status = InstallUpdaterPackage(upParams, manager);
         SetMessageToMisc(upParams.miscCmd, upParams.pkgLocation + 1, "upgraded_pkg_num");
+        auto endTime = std::chrono::system_clock::now();
+        upParams.verityTime[upParams.pkgLocation] = endTime - startTime;
         ProgressSmoothHandler(
             static_cast<int>(upParams.initialProgress * FULL_PERCENT_PROGRESS +
             upParams.currentPercentage * GetTmpProgressValue()),
             static_cast<int>(pkgStartPosition[upParams.pkgLocation + 1] * FULL_PERCENT_PROGRESS));
-        auto endTime = std::chrono::system_clock::now();
-        upParams.verityTime[i] = endTime - startTime;
         if (status != UPDATE_SUCCESS) {
             LOG(ERROR) << "InstallUpdaterPackage failed! Pkg is " << upParams.updatePackage[upParams.pkgLocation];
             if (!CheckDumpResult()) {
