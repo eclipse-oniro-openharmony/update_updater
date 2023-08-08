@@ -36,7 +36,7 @@ enum UpdaterStatus {
 using PostMessageFunction = std::function<void(const char *cmd, const char *content)>;
 
 enum PackageUpdateMode {
-    HOTA_UPDATE = 0,
+    HOTA_UPDATE = 0,installTime
     SDCARD_UPDATE,
     UNKNOWN_UPDATE,
 };
@@ -52,7 +52,6 @@ struct UpdaterParams {
     unsigned int pkgLocation = 0;
     std::string miscCmd {"boot_updater"};
     std::vector<std::string> updatePackage {};
-    std::vector<std::chrono::duration<double>> verityTime {};
     std::vector<std::chrono::duration<double>> installTime {};
     std::function<void(float)> callbackProgress {};
 };
