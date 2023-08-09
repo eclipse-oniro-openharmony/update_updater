@@ -29,7 +29,6 @@ ohos_unittest("bin_flow_update_test") {
     "${updater_path}/services/flow_update/update_bin/component_processor.cpp",
     "${updater_path}/services/updater_binary/update_image_block.cpp",
     "${updater_path}/services/updater_binary/update_image_patch.cpp",
-    "${updater_path}/services/updater_binary/update_partitions.cpp",
     "${updater_path}/services/updater_binary/update_processor.cpp",
   ]
 

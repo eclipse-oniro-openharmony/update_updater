@@ -66,6 +66,9 @@ struct BootMode {
     void InitMode(void) const; // mode related initialization
 };
 
+int32_t ExtractUpdaterBinary(PkgManager::PkgManagerPtr manager, std::string &packagePath,
+    const std::string &updaterBinary);
+
 int GetTmpProgressValue();
 
 void ProgressSmoothHandler(int beginProgress, int endProgress);
@@ -84,6 +87,8 @@ int ExecUpdate(Hpackage::PkgManager::PkgManagerPtr pkgManager, int retry, const 
 UpdaterStatus IsSpaceCapacitySufficient(const std::vector<std::string> &packagePath);
 
 std::vector<uint64_t> GetStashSizeList(const std::vector<std::string> &packagePath);
+
+void HandleChildOutput(const std::string &buffer, int32_t bufferLen, bool &retryUpdate, UpdaterParams &upParams);
 
 int CheckStatvfs(const uint64_t totalPkgSize);
 

@@ -217,5 +217,67 @@ HWTEST_F(UpdaterUtilUnitTest, DoInstallUpdaterPackageTest, TestSize.Level1)
     EXPECT_EQ(DoInstallUpdaterPackage(nullptr, upParams, HOTA_UPDATE), UPDATE_CORRUPT);
     upParams.callbackProgress = [] (float value) {};
     EXPECT_EQ(DoInstallUpdaterPackage(nullptr, upParams, HOTA_UPDATE), UPDATE_CORRUPT);
+    upParams.retryCount = 0;
+    EXPECT_EQ(DoInstallUpdaterPackage(nullptr, upParams, HOTA_UPDATE), UPDATE_CORRUPT);
+    upParams.retryCount = 1;
+    EXPECT_EQ(DoInstallUpdaterPackage(nullptr, upParams, HOTA_UPDATE), UPDATE_CORRUPT);
+}
+
+HWTEST_F(UpdaterUnitTest, updater_ExtractUpdaterBinary, TestSize.Level1)
+{
+    PkgManager::PkgManagerPtr pkgManager = PkgManager::CreatePackageInstance();
+    std::string path = "xxx";
+    int32_t ret = ExtractUpdaterBinary(pkgManager, path, UPDATER_BINARY);
+    EXPECT_EQ(ret, 1);
+    path = "/data/updater/updater/updater_full.zip";
+    ret = ExtractUpdaterBinary(pkgManager, path, UPDATER_BINARY);
+    PkgManager::ReleasePackageInstance(pkgManager);
+    EXPECT_EQ(ret, 1);
+}
+
+HWTEST_F(UpdaterUnitTest, updater_IsSpaceCapacitySufficient, TestSize.Level1)
+{
+    std::vectot<std::string> packagePath;
+    UpdaterStatus status = IsSpaceCapacitySufficient(packagePath);
+    EXPECT_EQ(status, UPDATE_ERROR);
+    packagePath.push_back("/data/updater/updater/updater_full.zip");
+    status = IsSpaceCapacitySufficient(packagePath);
+    EXPECT_EQ(status, UPDATE_SUCCESS);
+    packagePath.push_back("xxx");
+    ProgressSmoothHandler(0, 0);
+    status = IsSpaceCapacitySufficient(packagePath);
+    EXPECT_EQ(status, UPDATE_ERROR);
+}
+
+HWTEST_F(UpdaterUnitTest, updater_IsSpaceCapacitySufficient, TestSize.Level1)
+{
+    std::string buf = "xxx";
+    bool retryUpdate = false;
+    UpdaterParams upParams;
+    HandleChildOutput(buf, 0, retryUpdate, upParams);
+    EXPECT_EQ(retryUpdate, false);
+    HandleChildOutput(buf, buf.size(), retryUpdate, upParams);
+    EXPECT_EQ(retryUpdate, false);
+    buf = "write_log:xxx";
+    HandleChildOutput(buf, buf.size(), retryUpdate, upParams);
+    EXPECT_EQ(retryUpdate, false);
+    buf = "retry_update:xxx";
+    HandleChildOutput(buf, buf.size(), retryUpdate, upParams);
+    EXPECT_EQ(retryUpdate, true);
+    buf = "ui_log:xxx";
+    HandleChildOutput(buf, buf.size(), retryUpdate, upParams);
+    EXPECT_EQ(retryUpdate, true);
+    buf = "show_progress:xxx";
+    HandleChildOutput(buf, buf.size(), retryUpdate, upParams);
+    EXPECT_EQ(retryUpdate, true);
+    buf = "show_progress:xxx:xxx";
+    HandleChildOutput(buf, buf.size(), retryUpdate, upParams);
+    EXPECT_EQ(retryUpdate, true);
+    buf = "set_progress:xxx";
+    HandleChildOutput(buf, buf.size(), retryUpdate, upParams);
+    EXPECT_EQ(retryUpdate, true);
+    buf = "xxx:xxx";
+    HandleChildOutput(buf, buf.size(), retryUpdate, upParams);
+    EXPECT_EQ(retryUpdate, true);
 }
 }
