@@ -237,7 +237,7 @@ HWTEST_F(UpdaterUtilUnitTest, updater_ExtractUpdaterBinary, TestSize.Level1)
 
 HWTEST_F(UpdaterUtilUnitTest, updater_IsSpaceCapacitySufficient, TestSize.Level1)
 {
-    std::vectot<std::string> packagePath;
+    std::vector<std::string> packagePath;
     UpdaterStatus status = IsSpaceCapacitySufficient(packagePath);
     EXPECT_EQ(status, UPDATE_ERROR);
     packagePath.push_back("/data/updater/updater/updater_full.zip");
@@ -249,7 +249,7 @@ HWTEST_F(UpdaterUtilUnitTest, updater_IsSpaceCapacitySufficient, TestSize.Level1
     EXPECT_EQ(status, UPDATE_ERROR);
 }
 
-HWTEST_F(UpdaterUtilUnitTest, updater_IsSpaceCapacitySufficient, TestSize.Level1)
+HWTEST_F(UpdaterUtilUnitTest, updater_HandleChildOutput, TestSize.Level1)
 {
     std::string buf = "xxx";
     bool retryUpdate = false;
