@@ -225,13 +225,13 @@ HWTEST_F(UpdaterUtilUnitTest, DoInstallUpdaterPackageTest, TestSize.Level1)
 
 HWTEST_F(UpdaterUnitTest, updater_ExtractUpdaterBinary, TestSize.Level1)
 {
-    PkgManager::PkgManagerPtr pkgManager = PkgManager::CreatePackageInstance();
+    Hpackage::PkgManager::PkgManagerPtr pkgManager = Hpackage::PkgManager::CreatePackageInstance();
     std::string path = "xxx";
     int32_t ret = ExtractUpdaterBinary(pkgManager, path, UPDATER_BINARY);
     EXPECT_EQ(ret, 1);
     path = "/data/updater/updater/updater_full.zip";
     ret = ExtractUpdaterBinary(pkgManager, path, UPDATER_BINARY);
-    PkgManager::ReleasePackageInstance(pkgManager);
+    Hpackage::PkgManager::ReleasePackageInstance(pkgManager);
     EXPECT_EQ(ret, 1);
 }
 

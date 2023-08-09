@@ -66,7 +66,7 @@ struct BootMode {
     void InitMode(void) const; // mode related initialization
 };
 
-int32_t ExtractUpdaterBinary(PkgManager::PkgManagerPtr manager, std::string &packagePath,
+int32_t ExtractUpdaterBinary(Hpackage::PkgManager::PkgManagerPtr manager, std::string &packagePath,
     const std::string &updaterBinary);
 
 int GetTmpProgressValue();
