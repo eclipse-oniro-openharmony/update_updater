@@ -54,7 +54,7 @@ ohos_fuzztest("UpdaterMountForPathFuzzTest") {
     "-fno-omit-frame-pointer",
   ]
     sources = [
-    "//base/update/updater/test/fuzztest/fuzz_utils.cpp",
+    "/${updater_path}/test/fuzztest/fuzz_utils.cpp",
     "updatermountforpath_fuzzer.cpp"
   ]
 }
