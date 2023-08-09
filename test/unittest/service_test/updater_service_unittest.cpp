@@ -223,7 +223,7 @@ HWTEST_F(UpdaterUtilUnitTest, DoInstallUpdaterPackageTest, TestSize.Level1)
     EXPECT_EQ(DoInstallUpdaterPackage(nullptr, upParams, HOTA_UPDATE), UPDATE_CORRUPT);
 }
 
-HWTEST_F(UpdaterUnitTest, updater_ExtractUpdaterBinary, TestSize.Level1)
+HWTEST_F(UpdaterUtilUnitTest, updater_ExtractUpdaterBinary, TestSize.Level1)
 {
     Hpackage::PkgManager::PkgManagerPtr pkgManager = Hpackage::PkgManager::CreatePackageInstance();
     std::string path = "xxx";
@@ -235,7 +235,7 @@ HWTEST_F(UpdaterUnitTest, updater_ExtractUpdaterBinary, TestSize.Level1)
     EXPECT_EQ(ret, 1);
 }
 
-HWTEST_F(UpdaterUnitTest, updater_IsSpaceCapacitySufficient, TestSize.Level1)
+HWTEST_F(UpdaterUtilUnitTest, updater_IsSpaceCapacitySufficient, TestSize.Level1)
 {
     std::vectot<std::string> packagePath;
     UpdaterStatus status = IsSpaceCapacitySufficient(packagePath);
@@ -249,7 +249,7 @@ HWTEST_F(UpdaterUnitTest, updater_IsSpaceCapacitySufficient, TestSize.Level1)
     EXPECT_EQ(status, UPDATE_ERROR);
 }
 
-HWTEST_F(UpdaterUnitTest, updater_IsSpaceCapacitySufficient, TestSize.Level1)
+HWTEST_F(UpdaterUtilUnitTest, updater_IsSpaceCapacitySufficient, TestSize.Level1)
 {
     std::string buf = "xxx";
     bool retryUpdate = false;
