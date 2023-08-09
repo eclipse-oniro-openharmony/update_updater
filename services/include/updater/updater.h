@@ -36,7 +36,7 @@ enum UpdaterStatus {
 using PostMessageFunction = std::function<void(const char *cmd, const char *content)>;
 
 enum PackageUpdateMode {
-    HOTA_UPDATE = 0,installTime
+    HOTA_UPDATE = 0,
     SDCARD_UPDATE,
     UNKNOWN_UPDATE,
 };
