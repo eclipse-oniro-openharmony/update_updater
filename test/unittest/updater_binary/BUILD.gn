@@ -30,6 +30,7 @@ ohos_unittest("binary_unittest") {
     "${updater_path}/services/applypatch/block_set.cpp",
     "${updater_path}/services/updater_binary/update_image_block.cpp",
     "${updater_path}/services/updater_binary/update_image_patch.cpp",
+    "${updater_path}/services/updater_binary/update_partitions.cpp",
     "${updater_path}/services/updater_binary/update_processor.cpp",
   ]
 
