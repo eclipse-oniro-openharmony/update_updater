@@ -22,7 +22,7 @@ group("fuzztest") {
     "test/fuzztest/readfstabfromfile_fuzzer:ReadFstabFromFileFuzzTest",
     "test/fuzztest/updaterfactoryreset_fuzzer:UpdaterFactoryResetFuzzTest",
     "test/fuzztest/UpdaterFormatPartition_fuzzer:UpdaterFormatPartitionFuzzTest",
-    "test/fuzztest/UpdaterMountForpath_fuzzer:UpdaterMountForPathFuzzTest",
+    "test/fuzztest/UpdaterMountForPath_fuzzer:UpdaterMountForPathFuzzTest",
     "test/fuzztest/UpdaterStartUpdaterProc_fuzzer:UpdaterStartUpdaterProcFuzzTest",
   ]
 }
