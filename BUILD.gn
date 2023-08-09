@@ -17,8 +17,13 @@ import("//build/ohos.gni")
 group("fuzztest") {
   testonly = true
   deps = [
+    "test/fuzztest/updaterformatpartition_fuzzer:UpdaterFormatPartitionFuzzTest",
+    "test/fuzztest/updatermountforpath_fuzzer:UpdaterMountForPathFuzzTest",
+    "test/fuzztest/updaterstartupdaterproc_fuzzer:UpdaterStartUpdaterProcFuzzTest",
     "test/fuzztest/dopartitions_fuzzer:DoPartitionsFuzzTest",
+    "test/fuzztest/extractandexecutescript_fuzzer:ExtractAndExecuteScriptFuzzTest",
     "test/fuzztest/readfstabfromfile_fuzzer:ReadFstabFromFileFuzzTest",
+    "test/fuzztest/updaterfactoryreset_fuzzer:UpdaterFactoryResetFuzzTest",
   ]
 }
 

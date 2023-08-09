@@ -171,7 +171,7 @@ static int StartUpdaterProcFun(const std::string &patch)
 }
 
 namespace OHOS {
-    bool FuzzStartUpdaterProc(const uint8_t* data, size_t size)
+    void FuzzStartUpdaterProc(const uint8_t* data, size_t size)
     {
         FILE *pFile;
         std::vector<std::string> fstabFile = {
@@ -182,7 +182,7 @@ namespace OHOS {
         pFile = fopen("updater.txt", "w+");
         if (pFile == nullptr) {
             LOG(ERROR) << "[fuzz]open file failed";
-            return false;
+            return;
         }
 
         fwrite(data, 1, size, pFile);
@@ -193,8 +193,6 @@ namespace OHOS {
 
         remove("updater.txt");
         remove("test_package.zip");
-
-        return true;
     }
 }
 

@@ -42,6 +42,7 @@ ohos_fuzztest("UpdaterFactoryResetFuzzTest") {
     "${updater_path}/services/ui/driver",
     "${updater_path}/services/ui/view",
     "${updater_path}/services/ui/language",
+    "${updater_path}/test/fuzztest/utils",
   ]
 
   deps = [
@@ -75,17 +76,7 @@ ohos_fuzztest("UpdaterFactoryResetFuzzTest") {
   ]
   sources = [
     "${updater_path}/services/updater_main.cpp",
+    "${updater_path}/test/fuzztest/fuzz_utils.cpp",
     "updaterfactoryreset_fuzzer.cpp",
   ]
 }
-
-###############################################################################
-group("fuzztest") {
-  testonly = true
-  deps = []
-  deps += [
-    # deps file
-    ":UpdaterFactoryResetFuzzTest",
-  ]
-}
-###############################################################################

@@ -27,7 +27,7 @@
 using namespace Updater;
 
 namespace OHOS {
-    bool FuzzReadFstabFromFile(const uint8_t* data, size_t size)
+    void FuzzReadFstabFromFile(const uint8_t* data, size_t size)
     {
         FILE *pFile;
         Fstab *fstab = NULL;
@@ -36,7 +36,7 @@ namespace OHOS {
         pFile = fopen("ReadFstabFromFile.txt", "w+");
         if (pFile == nullptr) {
             LOG(ERROR) << "[fuzz]open file failed";
-            return false;
+            return;
         }
 
         (void)fwrite(data, 1, size, pFile);
@@ -44,7 +44,6 @@ namespace OHOS {
         fstab = ReadFstabFromFile(fstabFile.c_str(), false);
         (void)remove("ReadFstabFromFile.txt");
         ReleaseFstab(fstab);
-        return true;
     }
 }
 

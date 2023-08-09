@@ -294,7 +294,7 @@ static void ExtractAndExecuteScriptFun(const std::vector<std::string> &inputFile
 }
 
 namespace OHOS {
-    bool FuzzExtractAndExecuteScript(const uint8_t* data, size_t size)
+    void FuzzExtractAndExecuteScript(const uint8_t* data, size_t size)
     {
         FILE *pFile;
         std::vector<std::string> inputFile = {
@@ -313,7 +313,7 @@ namespace OHOS {
         pFile = fopen("test_script.us", "w+");
         if (pFile == nullptr) {
             LOG(ERROR) << "[fuzz]open file failed";
-            return false;
+            return;
         }
 
         (void)fwrite(data, 1, size, pFile);
@@ -321,7 +321,6 @@ namespace OHOS {
 
         ExtractAndExecuteScriptFun(inputFile);
         (void)remove("test_script.us");
-        return true;
     }
 }
 

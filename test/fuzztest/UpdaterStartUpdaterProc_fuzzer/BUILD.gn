@@ -23,7 +23,10 @@ updater_path = rebase_path("${updater_absolutely_path}", ".")
 ##############################fuzztest##########################################
 ohos_fuzztest("UpdaterStartUpdaterProcFuzzTest") {
   module_out_path = module_output_path
-
+  resource_config_file =
+      "${updater_path}/test/fuzztest/fuzz_src_data/ohos_test.xml"
+  fuzz_config_file =
+      "${updater_path}/test/fuzztest/updaterstartupdaterproc_fuzzer"
   include_dirs = [
     "${updater_path}/interfaces/kits/include/",
     "${updater_path}/services/include/updater",
@@ -34,8 +37,18 @@ ohos_fuzztest("UpdaterStartUpdaterProcFuzzTest") {
     "${updater_path}/services/include",
     "${updater_path}/services/include/package",
     "${updater_path}/services/ui",
+    "${updater_path}/services/ui/control",
+    "${updater_path}/services/ui/driver",
+    "${updater_path}/services/ui/include",
+    "${updater_path}/services/ui/view",
+    "${updater_path}/services/ui/language",
     "${updater_path}/utils/include",
     "${updater_path}/utils/json/",
+    "//foundation/graphic/ui/frameworks",
+    "//foundation/graphic/ui/interfaces/kits",
+    "//foundation/graphic/ui/interfaces/innerkits",
+    "//foundation/graphic/utils/interfaces/kits",
+    "//foundation/graphic/utils/interfaces/innerkits",
   ]
 
   deps = [
@@ -47,9 +60,11 @@ ohos_fuzztest("UpdaterStartUpdaterProcFuzzTest") {
     "${updater_path}/services/log:libupdaterlog",
     "${updater_path}/services/package:libupdaterpackage",
     "${updater_path}/services/ui:libui",
+    "${updater_path}/services:libupdater",
     "${updater_path}/utils:libutils",
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/bzip2:libbz2",
+    "//third_party/cJSON:cjson_static",
     "//third_party/libdrm:libdrm",
     "//third_party/libpng:libpng",
     "//third_party/lz4:liblz4_static",
@@ -73,14 +88,3 @@ ohos_fuzztest("UpdaterStartUpdaterProcFuzzTest") {
     "UpdaterStartUpdaterProc_fuzzer.cpp",
   ]
 }
-
-###############################################################################
-group("fuzztest") {
-  testonly = true
-  deps = []
-  deps += [
-    # deps file
-    ":UpdaterStartUpdaterProcFuzzTest",
-  ]
-}
-###############################################################################
