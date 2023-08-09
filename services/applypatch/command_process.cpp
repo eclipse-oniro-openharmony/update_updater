@@ -168,7 +168,14 @@ CommandResult DiffAndMoveCommandFn::Execute(const Command &params)
         LOG(ERROR) << "tgtBlockSize is : " <<tgtBlockSize << " , type is :" <<type;
         return errno == EIO ? NEED_RETRY : FAILED;
     }
-
+    std::string storeBase = TransferManager::GetTransferManagerInstance()->GetGlobalParams()->storeBase;
+    std::string freeStash = TransferManager::GetTransferManagerInstance()->GetGlobalParams()->freeStash;
+    if (!freeStash.empty()) {
+        if (Store::FreeStore(storeBase, freeStash) != 0) {
+            LOG(WARNING) << "fail to delete file: " << freeStash;
+        }
+        TransferManager::GetTransferManagerInstance()->GetGlobalParams()->freeStash.clear();
+    }
     TransferManager::GetTransferManagerInstance()->GetGlobalParams()->written += targetBlock.TotalBlockSize();
     return SUCCESS;
 }
@@ -178,7 +185,7 @@ CommandResult FreeCommandFn::Execute(const Command &params)
     std::string shaStr = params.GetArgumentByPos(1);
     blocksetMap.erase(shaStr);
     std::string storeBase = TransferManager::GetTransferManagerInstance()->GetGlobalParams()->storeBase;
-    if (TransferManager::GetTransferManagerInstance()->GetGlobalParams()->storeCreated != 0) {
+    if (TransferManager::GetTransferManagerInstance()->GetGlobalParams()->storeCreated == 0) {
         return CommandResult(Store::FreeStore(storeBase, shaStr));
     }
     return SUCCESS;
