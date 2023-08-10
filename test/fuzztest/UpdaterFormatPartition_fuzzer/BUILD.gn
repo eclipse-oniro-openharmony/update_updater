@@ -46,7 +46,7 @@ ohos_fuzztest("UpdaterFormatPartitionFuzzTest") {
     "${updater_path}/services/log:libupdaterlog",
   ]
 
-  external_deps += [ "init:libbegetutil" ]
+  external_deps = [ "init:libbegetutil" ]
 
   cflags = [
     "-g",
