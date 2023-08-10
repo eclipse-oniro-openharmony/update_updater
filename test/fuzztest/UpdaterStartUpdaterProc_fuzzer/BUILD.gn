@@ -44,11 +44,6 @@ ohos_fuzztest("UpdaterStartUpdaterProcFuzzTest") {
     "${updater_path}/services/ui/language",
     "${updater_path}/utils/include",
     "${updater_path}/utils/json/",
-    "//foundation/graphic/ui/frameworks",
-    "//foundation/graphic/ui/interfaces/kits",
-    "//foundation/graphic/ui/interfaces/innerkits",
-    "//foundation/graphic/utils/interfaces/kits",
-    "//foundation/graphic/utils/interfaces/innerkits",
   ]
 
   deps = [
@@ -73,7 +68,10 @@ ohos_fuzztest("UpdaterStartUpdaterProcFuzzTest") {
     "//third_party/zlib:libz",
   ]
 
-  external_deps = [ "init:libbegetutil" ]
+  external_deps = [
+    "init:libbegetutil",
+    "ui_lite:libupdater_layout",
+  ]
 
   cflags = [
     "-g",
