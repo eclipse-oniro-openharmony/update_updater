@@ -58,7 +58,6 @@ int g_percentage;
 int g_tmpProgressValue;
 int g_tmpValue;
 
-namespace {
 int32_t ExtractUpdaterBinary(PkgManager::PkgManagerPtr manager, std::string &packagePath,
     const std::string &updaterBinary)
 {
@@ -84,7 +83,6 @@ int32_t ExtractUpdaterBinary(PkgManager::PkgManagerPtr manager, std::string &pac
     }
     manager->ClosePkgStream(outStream);
     return UPDATE_SUCCESS;
-}
 }
 
 int GetUpdatePackageInfo(PkgManager::PkgManagerPtr pkgManager, const std::string &path)
@@ -303,6 +301,7 @@ void SetProgress(const std::vector<std::string> &output, UpdaterParams &upParams
     upParams.callbackProgress(g_tmpProgressValue *
         upParams.currentPercentage + upParams.initialProgress * FULL_PERCENT_PROGRESS);
 }
+}
 
 void HandleChildOutput(const std::string &buffer, int32_t bufferLen, bool &retryUpdate, UpdaterParams &upParams)
 {
@@ -352,7 +351,6 @@ void HandleChildOutput(const std::string &buffer, int32_t bufferLen, bool &retry
     } else {
         LOG(WARNING) << "Child process returns unexpected message.";
     }
-}
 }
 
 void ExcuteSubProc(const UpdaterParams &upParams, const std::string &fullPath, int pipeWrite)
