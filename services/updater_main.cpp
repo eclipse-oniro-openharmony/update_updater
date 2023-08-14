@@ -166,12 +166,12 @@ static UpdaterStatus VerifyPackages(UpdaterParams &upParams)
             upParams.pkgLocation = i;
             UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_VERIFYPKGFAIL), true);
             auto endTime = std::chrono::system_clock::now();
-            upParams.installTime[i] = endTime - startTime;
+            upParams.installTime.push_back(endTime - startTime);
             UPDATER_LAST_WORD(UPDATE_CORRUPT);
             return UPDATE_CORRUPT;
         }
         auto endTime = std::chrono::system_clock::now();
-        upParams.installTime[i] = endTime - startTime;
+        upParams.installTime.push_back(endTime - startTime);
     }
 
     ProgressSmoothHandler(0, static_cast<int>(VERIFY_PERCENT * FULL_PERCENT_PROGRESS));
@@ -555,7 +555,6 @@ static UpdaterStatus StartUpdater(const std::vector<std::string> &args,
                 std::string option = OPTIONS[optionIndex].name;
                 if (option == "update_package") {
                     upParams.updatePackage.push_back(optarg);
-                    upParams.installTime.push_back(std::chrono::duration<double>(0));
                     (void)UPDATER_UI_INSTANCE.SetMode(UpdaterMode::OTA);
                     mode = HOTA_UPDATE;
                 } else if (option == "retry_count") {
