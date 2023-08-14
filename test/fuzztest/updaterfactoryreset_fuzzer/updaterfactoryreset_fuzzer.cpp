@@ -21,6 +21,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include "fuzz_utils.h"
 #include "mount.h"
 #include "updater_main.h"
 

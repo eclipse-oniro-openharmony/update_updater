@@ -55,14 +55,14 @@ static int32_t BuildFileDigest(uint8_t &digest, size_t size, const std::string &
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("Create input stream fail %s", packagePath.c_str());
         packageManager->ClosePkgStream(stream);
-        PkgManager::ReleasePackageInstance(pkgManager);
+        PkgManager::ReleasePackageInstance(packageManager);
         return ret;
     }
     size_t fileLen = stream->GetFileLength();
     if (fileLen <= 0 || fileLen > SIZE_MAX) {
         PKG_LOGE("Invalid file len %zu to load %s", fileLen, stream->GetFileName().c_str());
         packageManager->ClosePkgStream(stream);
-        PkgManager::ReleasePackageInstance(pkgManager);
+        PkgManager::ReleasePackageInstance(packageManager);
         return PKG_INVALID_FILE;
     }
 
@@ -73,7 +73,7 @@ static int32_t BuildFileDigest(uint8_t &digest, size_t size, const std::string &
     if (algorithm == nullptr) {
         PKG_LOGE("Invalid file %s", stream->GetFileName().c_str());
         packageManager->ClosePkgStream(stream);
-        PkgManager::ReleasePackageInstance(pkgManager);
+        PkgManager::ReleasePackageInstance(packageManager);
         return PKG_NOT_EXIST_ALGORITHM;
     }
     algorithm->Init();
@@ -85,7 +85,7 @@ static int32_t BuildFileDigest(uint8_t &digest, size_t size, const std::string &
         if (ret != PKG_SUCCESS) {
             PKG_LOGE("read buffer fail %s", stream->GetFileName().c_str());
             packageManager->ClosePkgStream(stream);
-            PkgManager::ReleasePackageInstance(pkgManager);
+            PkgManager::ReleasePackageInstance(packageManager);
             return ret;
         }
         algorithm->Update(buff, readLen);
@@ -96,7 +96,7 @@ static int32_t BuildFileDigest(uint8_t &digest, size_t size, const std::string &
     PkgBuffer signBuffer(&digest, size);
     algorithm->Final(signBuffer);
     packageManager->ClosePkgStream(stream);
-    PkgManager::ReleasePackageInstance(pkgManager);
+    PkgManager::ReleasePackageInstance(packageManager);
     return PKG_SUCCESS;
 }
 
@@ -164,7 +164,10 @@ static int StartUpdaterProcFun(const std::string &patch)
     PkgManager::PkgManagerPtr pkgManager = PkgManager::CreatePackageInstance();
 
     pkgManager->LoadPackage(patch, GetTestCertName(), components);
-    status = StartUpdaterProc(pkgManager, patch, 0, maxTemperature);
+    UpdaterParams upParams;
+    upParams.updatePackage.push_back(patch);
+    upParams.retryCount = 0;
+    status = StartUpdaterProc(pkgManager, upParams, maxTemperature);
     LOG(INFO) << "[fuzz] status " << status;
     PkgManager::ReleasePackageInstance(pkgManager);
     return status;

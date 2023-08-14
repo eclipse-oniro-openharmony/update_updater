@@ -218,7 +218,8 @@
                 }
             ],
             "test": [
-                "//base/update/updater:unittest"
+                "//base/update/updater:unittest",
+                "//base/update/updater:fuzztest"
             ]
         }
     }

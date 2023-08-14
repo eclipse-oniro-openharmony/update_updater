@@ -30,6 +30,7 @@
 #include "pkg_utils.h"
 #include "script_instructionhelper.h"
 #include "script_manager_impl.h"
+#include "script_manager.h"
 #include "script_utils.h"
 
 
@@ -154,7 +155,8 @@ public:
         }
 
         UTestScriptEnv* env = new UTestScriptEnv(packageManager);
-        ScriptManager* manager = ScriptManager::GetScriptManager(env);
+        Hpackage::HashDataVerifier scriptVerifier {packageManager};
+        ScriptManager* manager = ScriptManager::GetScriptManager(env, &scriptVerifier);
         if (manager == nullptr) {
             USCRIPT_LOGI("create manager fail ret:%d", ret);
             delete env;

@@ -26,7 +26,7 @@ ohos_fuzztest("UpdaterFormatPartitionFuzzTest") {
   resource_config_file =
       "${updater_path}/test/fuzztest/fuzz_src_data/ohos_test.xml"
   fuzz_config_file =
-      "${updater_path}/test/fuzztest/updaterformatpartition_fuzzer"
+      "${updater_path}/test/fuzztest/UpdaterFormatPartition_fuzzer"
 
   include_dirs = [
     "${updater_path}/utils/include",
@@ -56,7 +56,7 @@ ohos_fuzztest("UpdaterFormatPartitionFuzzTest") {
   ]
   sources = [
     "${updater_path}/services/fs_manager/mount.cpp",
-    "${updater_path}/test/fuzztest/fuzz_utils.cpp",
+    "${updater_path}/test/fuzztest/utils/fuzz_utils.cpp",
     "UpdaterFormatPartition_fuzzer.cpp",
   ]
 }
