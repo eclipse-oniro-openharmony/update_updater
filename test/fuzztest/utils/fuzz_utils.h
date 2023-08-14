@@ -15,8 +15,8 @@
 
 #ifndef FUZZ_UTILS_H
 #define FUZZ_UTILS_H
-#include <stdint.h>
-#include <stdlib.h>
+#include <cstdint>
+#include <cstdlib>
 
 void CloseStdout(void);
 #endif
