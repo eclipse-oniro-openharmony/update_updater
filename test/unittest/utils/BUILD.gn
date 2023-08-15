@@ -47,6 +47,7 @@ ohos_unittest("utils_test") {
   ]
   deps = [
     "${updater_path}/services/log:libupdaterlog",
+    "${updater_path}/utils:libutils",
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/cJSON:cjson",
     "//third_party/googletest:gmock_main",
