@@ -20,6 +20,7 @@ group("fuzztest") {
     "test/fuzztest/UpdaterFormatPartition_fuzzer:UpdaterFormatPartitionFuzzTest",
     "test/fuzztest/UpdaterMountForPath_fuzzer:UpdaterMountForPathFuzzTest",
     "test/fuzztest/UpdaterStartUpdaterProc_fuzzer:UpdaterStartUpdaterProcFuzzTest",
+    "test/fuzztest/applypatch_fuzzer:ApplyPatchFuzzTest",
     "test/fuzztest/dopartitions_fuzzer:DoPartitionsFuzzTest",
     "test/fuzztest/extractandexecutescript_fuzzer:ExtractAndExecuteScriptFuzzTest",
     "test/fuzztest/readfstabfromfile_fuzzer:ReadFstabFromFileFuzzTest",

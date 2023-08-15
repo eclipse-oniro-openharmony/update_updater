@@ -227,13 +227,11 @@ int32_t UpdateApplyPatch::ApplyPatch(const std::string &patchName,
     std::vector<uint8_t> empty;
     MemMapInfo patchData {};
     MemMapInfo oldData {};
-    int32_t ret = PatchMapFile(patchName, patchData);
-    if (ret != 0) {
+    if (PatchMapFile(patchName, patchData) != 0) {
         PATCH_LOGE("ApplyPatch : Failed to read patch file");
         return -1;
     }
-    ret = PatchMapFile(oldName, oldData);
-    if (ret != 0) {
+    if (PatchMapFile(oldName, oldData) != 0) {
         PATCH_LOGE("ApplyPatch : Failed to read old file");
         return -1;
     }
@@ -246,22 +244,24 @@ int32_t UpdateApplyPatch::ApplyPatch(const std::string &patchName,
     writer->Init();
 
     // check if image patch
+    if (patchData.length < std::char_traits<char>::length(PKGDIFF_MAGIC)) {
+        PATCH_LOGE("length error");
+        return -1;
+    }
     if (memcmp(patchData.memory, PKGDIFF_MAGIC, std::char_traits<char>::length(PKGDIFF_MAGIC)) == 0) {
         PatchParam param {};
         param.patch = patchData.memory;
         param.patchSize = patchData.length;
         param.oldBuff = oldData.memory;
         param.oldSize = oldData.length;
-        ret = UpdatePatch::UpdateApplyPatch::ApplyImagePatch(param, writer.get(), empty);
-        if (ret != 0) {
+        if (UpdatePatch::UpdateApplyPatch::ApplyImagePatch(param, writer.get(), empty) != 0) {
             PATCH_LOGE("Failed to apply image patch file");
             return -1;
         }
     } else if (memcmp(patchData.memory, BSDIFF_MAGIC, std::char_traits<char>::length(BSDIFF_MAGIC)) == 0) { // bsdiff
         PatchBuffer patchInfo = {patchData.memory, 0, patchData.length};
         BlockBuffer oldInfo = {oldData.memory, oldData.length};
-        ret = ApplyBlockPatch(patchInfo, oldInfo, writer.get());
-        if (ret != 0) {
+        if (ApplyBlockPatch(patchInfo, oldInfo, writer.get()) != 0) {
             PATCH_LOGE("Failed to apply block patch");
             return -1;
         }
