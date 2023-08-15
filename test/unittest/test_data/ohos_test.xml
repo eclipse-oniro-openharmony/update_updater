@@ -218,6 +218,11 @@
             <option name="push" value="updater/etc/fstab.ut.updater -> /data/updater/updater/etc" src="res"/>
         </preparer>
     </target>
+    <target name="utils_test">
+        <preparer>
+            <option name="push" value="updater/etc/fstab.ut.updater -> /data/updater/updater/etc" src="res"/>
+        </preparer>
+    </target>
     <target name="bin_flow_update_test">
         <preparer>
             <option name="push" value="updater/update.bin -> /data/updater/package" src="res"/>

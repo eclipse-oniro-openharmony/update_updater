@@ -79,6 +79,8 @@ HWTEST_F(UtilsUnitTest, updater_utils_test_006, TestSize.Level0)
 {
     std::vector<std::string> files;
     string path = "/data";
+    SaveLogs();
+    CompressLogs();
     EXPECT_NE(Utils::GetFilesFromDirectory(path, files, true), -1);
 }
 
@@ -118,4 +120,27 @@ HWTEST_F(UtilsUnitTest, IsDirExist, TestSize.Level0)
     EXPECT_EQ(Utils::IsDirExist("/bin"), true);
     EXPECT_EQ(Utils::IsDirExist("/bin/"), true);
 }
+
+HWTEST_F(UtilsUnitTest, CopyUpdaterLogsTest, TestSize.Level0)
+{
+    const std::string sLog = "/data/updater/main_data/updater.tab";
+    const std::string dLog = "/data/updater/main_data/ut_dLog.txt";
+    bool ret = CopyUpdaterLogs(sLog, dLog);
+    EXPECT_EQ(ret, true);
+    unlink(dLog.c_str());
+}
+
+HWTEST_F(UtilsUnitTest, GetDirSizeForFileTest, TestSize.Level0)
+{
+    const std::string TestNoPath = "xxx";
+    long long int ret = GetDirSizeForFile(TestPath);
+    EXPECT_EQ(ret, -1);
+    const std::string TestVaildPath = "xxx/xxx";
+    ret = GetDirSizeForFile(TestVaildPath);
+    EXPECT_EQ(ret, 0);
+    const std::string TestPath = "/data/updater/updater/etc/fstab.ut.updater";
+    ret = GetDirSizeForFile(TestPath);
+    EXPECT_EQ(ret, 827); // 827 : dir size
+}
+
 } // updater_ut
