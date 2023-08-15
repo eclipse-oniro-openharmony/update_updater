@@ -38,10 +38,13 @@ ohos_fuzztest("UpdaterFactoryResetFuzzTest") {
     "${updater_path}/services/include/fs_manager",
     "${updater_path}/services/ui",
     "${updater_path}/services/ui/include",
+    "${updater_path}/services/common",
+    "${updater_path}/services/sdcard_update",
     "${updater_path}/services/ui/control",
     "${updater_path}/services/ui/driver",
     "${updater_path}/services/ui/view",
     "${updater_path}/services/ui/language",
+    "${updater_path}/test/fuzztest/utils",
   ]
 
   deps = [
@@ -53,6 +56,7 @@ ohos_fuzztest("UpdaterFactoryResetFuzzTest") {
     "${updater_path}/services/fs_manager:libfsmanager",
     "${updater_path}/services/log:libupdaterlog",
     "${updater_path}/services/package:libupdaterpackage",
+    "${updater_path}/services/sdcard_update:libsdupdate",
     "${updater_path}/services/ui:libui",
     "${updater_path}/utils:libutils",
     "//third_party/bounds_checking_function:libsec_static",
@@ -65,7 +69,10 @@ ohos_fuzztest("UpdaterFactoryResetFuzzTest") {
     "//third_party/zlib:libz",
   ]
 
-  external_deps = [ "init:libbegetutil" ]
+  external_deps = [
+    "init:libbegetutil",
+    "ui_lite:libupdater_layout",
+  ]
 
   cflags = [
     "-g",
@@ -75,17 +82,8 @@ ohos_fuzztest("UpdaterFactoryResetFuzzTest") {
   ]
   sources = [
     "${updater_path}/services/updater_main.cpp",
+    "${updater_path}/services/updater_ui.cpp",
+    "${updater_path}/test/fuzztest/utils/fuzz_utils.cpp",
     "updaterfactoryreset_fuzzer.cpp",
   ]
 }
-
-###############################################################################
-group("fuzztest") {
-  testonly = true
-  deps = []
-  deps += [
-    # deps file
-    ":UpdaterFactoryResetFuzzTest",
-  ]
-}
-###############################################################################

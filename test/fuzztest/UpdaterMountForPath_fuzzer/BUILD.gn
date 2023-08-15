@@ -23,7 +23,9 @@ updater_path = rebase_path("${updater_absolutely_path}", ".")
 ##############################fuzztest##########################################
 ohos_fuzztest("UpdaterMountForPathFuzzTest") {
   module_out_path = module_output_path
-
+  resource_config_file =
+      "${updater_path}/test/fuzztest/fuzz_src_data/ohos_test.xml"
+  fuzz_config_file = "${updater_path}/test/fuzztest/UpdaterMountForPath_fuzzer"
   include_dirs = [
     "${updater_path}/utils/include",
     "${updater_path}/interfaces/kits/include",
@@ -34,6 +36,7 @@ ohos_fuzztest("UpdaterMountForPathFuzzTest") {
     "${updater_path}/services",
     "${updater_path}/services/ui",
     "${updater_path}/services/include",
+    "${updater_path}/test/fuzztest/utils",
   ]
 
   deps = [
@@ -41,7 +44,7 @@ ohos_fuzztest("UpdaterMountForPathFuzzTest") {
     "${updater_path}/services/log:libupdaterlog",
   ]
 
-  external_deps += [ "init:libbegetutil" ]
+  external_deps = [ "init:libbegetutil" ]
 
   cflags = [
     "-g",
@@ -49,16 +52,8 @@ ohos_fuzztest("UpdaterMountForPathFuzzTest") {
     "-Wno-unused-variable",
     "-fno-omit-frame-pointer",
   ]
-  sources = [ "UpdaterMountForPath_fuzzer.cpp" ]
-}
-
-###############################################################################
-group("fuzztest") {
-  testonly = true
-  deps = []
-  deps += [
-    # deps file
-    ":UpdaterMountForPathFuzzTest",
+  sources = [
+    "${updater_path}/test/fuzztest/utils/fuzz_utils.cpp",
+    "UpdaterMountForPath_fuzzer.cpp",
   ]
 }
-###############################################################################

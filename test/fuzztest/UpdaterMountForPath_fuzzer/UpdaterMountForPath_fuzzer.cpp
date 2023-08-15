@@ -21,19 +21,17 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include "fuzz_utils.h"
 #include "mount.h"
 
 using namespace Updater;
 
 namespace OHOS {
-    bool FuzzMountForPath(const uint8_t* data, size_t size)
+    void FuzzMountForPath(const uint8_t* data, size_t size)
     {
-        if (size < 20) { // 20 : fstable name length
-            LoadSpecificFstab("/data/fuzz/test/MountForPath_fuzzer.fstable");
-            MountForPath(reinterpret_cast<const char*>(data));
-        }
-
-        return 0;
+        CloseStdout();
+        LoadSpecificFstab("/data/fuzz/test/MountForPath_fuzzer.fstable");
+        MountForPath(reinterpret_cast<const char*>(data));
     }
 }
 

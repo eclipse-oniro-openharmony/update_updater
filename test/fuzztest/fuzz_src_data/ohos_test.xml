@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration ver="2.0">
+    <target name="ExtractAndExecuteScriptFuzzTest">
+        <preparer>
+            <option name="push" value="loadScript.us -> /data/fuzz/test" src="res"/>
+            <option name="push" value="registerCmd.us -> /data/fuzz/test" src="res"/>
+            <option name="push" value="test_function.us -> /data/fuzz/test" src="res"/>
+            <option name="push" value="test_if.us -> /data/fuzz/test" src="res"/>
+            <option name="push" value="test_logic.us -> /data/fuzz/test" src="res"/>
+            <option name="push" value="test_math.us -> /data/fuzz/test" src="res"/>
+            <option name="push" value="test_native.us -> /data/fuzz/test" src="res"/>
+            <option name="push" value="testscript.us -> /data/fuzz/test" src="res"/>
+            <option name="push" value="Verse-script.us -> /data/fuzz/test" src="res"/>
+            <option name="push" value="libthirdInstruction.z.so -> /data/fuzz/test" src="out"/>
+        </preparer>
+    </target>
+    <target name="UpdaterFactoryResetFuzzTest">
+        <preparer>
+            <option name="push" value="FormatPartition_fuzzer.fstable -> /data/fuzz/test" src="res"/>
+        </preparer>
+    </target>
+    <target name="UpdaterFormatPartitionFuzzTest">
+        <preparer>
+            <option name="push" value="FormatPartition_fuzzer.fstable -> /data/fuzz/test" src="res"/>
+        </preparer>
+    </target>
+    <target name="UpdaterMountForPathFuzzTest">
+        <preparer>
+            <option name="push" value="MountForPath_fuzzer.fstable -> /data/fuzz/test" src="res"/>
+        </preparer>
+    </target>
+    <target name="UpdaterStartUpdaterProcFuzzTest">
+        <preparer>
+            <option name="push" value="signing_cert.crt -> /data/fuzz/test" src="res"/>
+            <option name="push" value="rsa_private_key2048.pem -> /data/fuzz/test" src="res"/>
+            <option name="push" value="build_tools.zip -> /data/fuzz/test" src="res"/>
+        </preparer>
+    </target>
+</configuration>

@@ -30,6 +30,7 @@
 #include "pkg_utils.h"
 #include "script_instructionhelper.h"
 #include "script_manager_impl.h"
+#include "script_manager.h"
 #include "script_utils.h"
 
 
@@ -154,7 +155,8 @@ public:
         }
 
         UTestScriptEnv* env = new UTestScriptEnv(packageManager);
-        ScriptManager* manager = ScriptManager::GetScriptManager(env);
+        Hpackage::HashDataVerifier scriptVerifier {packageManager};
+        ScriptManager* manager = ScriptManager::GetScriptManager(env, &scriptVerifier);
         if (manager == nullptr) {
             USCRIPT_LOGI("create manager fail ret:%d", ret);
             delete env;
@@ -294,7 +296,7 @@ static void ExtractAndExecuteScriptFun(const std::vector<std::string> &inputFile
 }
 
 namespace OHOS {
-    bool FuzzExtractAndExecuteScript(const uint8_t* data, size_t size)
+    void FuzzExtractAndExecuteScript(const uint8_t* data, size_t size)
     {
         FILE *pFile;
         std::vector<std::string> inputFile = {
@@ -313,7 +315,7 @@ namespace OHOS {
         pFile = fopen("test_script.us", "w+");
         if (pFile == nullptr) {
             LOG(ERROR) << "[fuzz]open file failed";
-            return false;
+            return;
         }
 
         (void)fwrite(data, 1, size, pFile);
@@ -321,7 +323,6 @@ namespace OHOS {
 
         ExtractAndExecuteScriptFun(inputFile);
         (void)remove("test_script.us");
-        return true;
     }
 }
 

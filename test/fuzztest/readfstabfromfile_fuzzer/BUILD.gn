@@ -50,14 +50,3 @@ ohos_fuzztest("ReadFstabFromFileFuzzTest") {
     "-fno-omit-frame-pointer",
   ]
 }
-
-###############################################################################
-group("fuzztest") {
-  testonly = true
-  deps = []
-  deps += [
-    # deps file
-    ":ReadFstabFromFileFuzzTest",
-  ]
-}
-###############################################################################

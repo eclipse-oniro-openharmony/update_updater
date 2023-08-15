@@ -30,6 +30,7 @@ ohos_fuzztest("ExtractAndExecuteScriptFuzzTest") {
   include_dirs = [
     "${updater_path}/utils/include",
     "${updater_path}/interfaces/kits/include/",
+    "${updater_path}/services/common",
     "${updater_path}/services/include/package",
     "${updater_path}/services/package/pkg_manager",
     "${updater_path}/services/package/pkg_algorithm",
@@ -73,14 +74,3 @@ ohos_fuzztest("ExtractAndExecuteScriptFuzzTest") {
   ]
   sources = [ "extractandexecutescript_fuzzer.cpp" ]
 }
-
-###############################################################################
-group("fuzztest") {
-  testonly = true
-  deps = []
-  deps += [
-    # deps file
-    ":ExtractAndExecuteScriptFuzzTest",
-  ]
-}
-###############################################################################

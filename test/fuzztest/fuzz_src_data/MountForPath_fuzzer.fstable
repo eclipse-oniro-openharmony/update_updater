@@ -11,7 +11,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-/dev/block/platform/soc/10100000.himci.eMMC/by-name/system /system ext4 ro,barrier=1 wait
-/dev/block/platform/soc/10100000.himci.eMMC/by-name/vendor /vendor ext4 ro,barrier=1 wait
-/dev/block/platform/soc/10100000.himci.eMMC/by-name/misc /misc ext4 ro,barrier=1 wait
-/dev/block/platform/soc/10100000.himci.eMMC/by-name/userdata /data1 ntfs nosuid,nodev,noatime,barrier=1,data=ordered,noauto_da_alloc wait,reservedsize=104857600
+/dev/block/by-name/misc /misc none none wait
