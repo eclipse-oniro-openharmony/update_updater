@@ -80,7 +80,7 @@ HWTEST_F(UtilsUnitTest, updater_utils_test_006, TestSize.Level0)
     std::vector<std::string> files;
     string path = "/data";
     Utils::SaveLogs();
-    Utils::CompressLogs();
+    Utils::CompressLogs("/data/updater/log/updater_log_test");
     EXPECT_NE(Utils::GetFilesFromDirectory(path, files, true), -1);
 }
 
@@ -133,7 +133,7 @@ HWTEST_F(UtilsUnitTest, CopyUpdaterLogsTest, TestSize.Level0)
 HWTEST_F(UtilsUnitTest, GetDirSizeForFileTest, TestSize.Level0)
 {
     const std::string TestNoPath = "xxx";
-    long long int ret = Utils::GetDirSizeForFile(TestPath);
+    long long int ret = Utils::GetDirSizeForFile(TestNoPath);
     EXPECT_EQ(ret, -1);
     const std::string TestVaildPath = "xxx/xxx";
     ret = Utils::GetDirSizeForFile(TestVaildPath);
