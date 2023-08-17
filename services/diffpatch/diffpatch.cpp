@@ -72,7 +72,6 @@ int32_t PatchMapFile(const std::string &fileName, MemMapInfo &info)
         PATCH_LOGE("Failed to memory map");
         return -1;
     }
-    close(info.fd);
     info.memory = static_cast<uint8_t*>(mappedData);
     info.length = static_cast<size_t>(st.st_size);
     return PATCH_SUCCESS;
