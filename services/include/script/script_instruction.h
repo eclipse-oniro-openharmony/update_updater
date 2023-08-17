@@ -17,6 +17,7 @@
 
 #include <string>
 #include "pkg_manager.h"
+#include "updater/updater.h"
 
 namespace Uscript {
 class UScriptInstructionFactory;
@@ -46,6 +47,7 @@ public:
     virtual UScriptInstructionFactoryPtr GetInstructionFactory() = 0;
     virtual const std::vector<std::string> GetInstructionNames() const = 0;
     virtual bool IsRetry() const = 0;
+    virtual Updater::PostMessageFunction GetPostmsgFunc() = 0;
 private:
     Hpackage::PkgManager::PkgManagerPtr pkgManager_ = nullptr;
     int32_t state_ = 0;

@@ -234,7 +234,7 @@ void SetMessageToMisc(const std::string &miscCmd, const int message, const std::
     char buffer[128] {}; // 128 : set headInfo size
     if (headInfo == "sdcard_update") {
         if (snprintf_s(buffer, sizeof(buffer), sizeof(buffer) - 1, "--%s", headInfo.c_str()) == -1) {
-            LOG(ERROR) << "SetMessageToMisc strncpy_s failed";
+            LOG(ERROR) << "SetMessageToMisc snprintf_s failed";
             return;
         }
     } else {

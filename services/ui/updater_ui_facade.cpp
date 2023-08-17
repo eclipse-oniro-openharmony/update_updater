@@ -23,7 +23,7 @@
 
 namespace Updater {
 UpdaterUiFacade::UpdaterUiFacade()
-    : strategies_ {UpdaterUiConfig::GetStrategy()}, pgMgr_ {PageManager::GetInstance()}, mode_ {UpdaterMode::MODEMAX}
+    : strategies_ {UpdaterUiConfig::GetStrategy()}, pgMgr_ {PageManager::GetInstance()}, mode_ {""}
 {
 }
 
@@ -40,12 +40,8 @@ void UpdaterUiFacade::InitEnv() const
     UpdaterEvent::Subscribe(UPDATER_POWER_VOLUME_DOWN_EVENT, OnKeyDownEvent);
 }
 
-[[nodiscard]] bool UpdaterUiFacade::SetMode(UpdaterMode mode)
+[[nodiscard]] bool UpdaterUiFacade::SetMode(std::string mode)
 {
-    if (mode < UpdaterMode::SDCARD || mode >= UpdaterMode::MODEMAX) {
-        LOG(ERROR) << "updater mode invalid";
-        return false;
-    }
     if (mode == mode_) {
         return true;
     }
@@ -54,20 +50,16 @@ void UpdaterUiFacade::InitEnv() const
     return true;
 }
 
-UpdaterMode UpdaterUiFacade::GetMode() const
+std::string UpdaterUiFacade::GetMode() const
 {
     return mode_;
 }
 
 std::pair<bool, UpdaterUiFacade::StrategyMap::const_iterator> UpdaterUiFacade::CheckMode() const
 {
-    if (mode_ < UpdaterMode::SDCARD || mode_ >= UpdaterMode::MODEMAX) {
-        LOG(ERROR) << "mode invalid";
-        return {false, strategies_.cend()};
-    }
     auto it = strategies_.find(mode_);
     if (it == strategies_.end()) {
-        LOG(ERROR) << "mode has not a strategy for it";
+        LOG(ERROR) << "mode has not a strategy for it " << mode_;
         return {false, strategies_.cend()};
     }
     return {true, it};

@@ -68,31 +68,31 @@ HWTEST_F(UpdaterUiStrategyUnitTest, test_load_strategy_for_each_mode, TestSize.L
         "ProgressUpdBoxDark_Progress", "bar", "OHOSIconDark_Image", "img", "PowerLongPressWarning_Image"},
         ResPage {"upd:updateSuccess", "upd:normalUpdateFailed"}
     };
-    std::unordered_map<Updater::UpdaterMode, Updater::UiStrategyCfg> expected {};
-    auto &sdCardCfg = expected[UpdaterMode::SDCARD];
+    std::unordered_map<std::string, Updater::UiStrategyCfg> expected {};
+    auto &sdCardCfg = expected[UPDATREMODE_SDCARD];
     sdCardCfg = defaultCfg;
     sdCardCfg.progressPage = ProgressPage {"upd:sdUpdate", "UpdBox_Progress", "bar",
         "OHOSIcon_Image", "img", "PowerLongPressWarning_Image"};
     sdCardCfg.labelLogResId = {"upd", "UpdateInfoDark_Label"};
     sdCardCfg.resPage = {"upd:updateSuccess", "upd:updateFailedNoButton"};
 
-    auto &factoryRstCfg = expected[UpdaterMode::FACTORYRST];
+    auto &factoryRstCfg = expected[UPDATREMODE_FACTORYRST];
     factoryRstCfg = defaultCfg;
     factoryRstCfg.progressPage = ProgressPage {"upd:reset", "UpdBox_Progress", "bar", "OHOSIcon_Image", "img", ""};
     factoryRstCfg.labelLogResId = {"upd", "UpdateInfoDark_Label"};
     factoryRstCfg.labelUpdId = {"upd", "RstInfo_Label"};
     factoryRstCfg.resPage = {"menu:normal", "upd:FactoryRstFailed"};
 
-    auto &rebootFactoryRstCfg = expected[UpdaterMode::REBOOTFACTORYRST];
+    auto &rebootFactoryRstCfg = expected[UPDATREMODE_REBOOTFACTORYRST];
     rebootFactoryRstCfg = defaultCfg;
     rebootFactoryRstCfg.labelLogResId = {"upd", "RstInfo_Label"};
     rebootFactoryRstCfg.progressPage = {"upd:reset", "UpdBox_Progress", "bar", "OHOSIcon_Image", "img", ""};
     rebootFactoryRstCfg.resPage = {"upd:reset", "upd:FactoryRstFailed"};
 
-    EXPECT_EQ(UiStrategy::GetStrategy(), (std::unordered_map<Updater::UpdaterMode, Updater::UiStrategyCfg> {
-        {UpdaterMode::SDCARD, sdCardCfg}, {UpdaterMode::FACTORYRST, factoryRstCfg},
-        {UpdaterMode::REBOOTFACTORYRST, rebootFactoryRstCfg}, {UpdaterMode::OTA, defaultCfg},
-        {UpdaterMode::RECOVER, defaultCfg}
+    EXPECT_EQ(UiStrategy::GetStrategy(), (std::unordered_map<std::string, Updater::UiStrategyCfg> {
+        {UPDATREMODE_SDCARD, sdCardCfg}, {UPDATREMODE_FACTORYRST, factoryRstCfg},
+        {UPDATREMODE_REBOOTFACTORYRST, rebootFactoryRstCfg}, {UPDATREMODE_OTA, defaultCfg},
+        {UPDATREMODE_RECOVER, defaultCfg}
     }));
 }
 } // namespace

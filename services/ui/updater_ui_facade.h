@@ -23,7 +23,7 @@
 namespace Updater {
 class UpdaterUiFacade {
     DISALLOW_COPY_MOVE(UpdaterUiFacade);
-    using StrategyMap = std::unordered_map<UpdaterMode, UiStrategyCfg>;
+    using StrategyMap = std::unordered_map<std::string, UiStrategyCfg>;
 public:
     UpdaterUiFacade();
     ~UpdaterUiFacade() = default;
@@ -31,8 +31,8 @@ public:
 
     void InitEnv() const;
 
-    [[nodiscard]] bool SetMode(UpdaterMode mode);
-    UpdaterMode GetMode() const;
+    [[nodiscard]] bool SetMode(std::string mode);
+    std::string GetMode() const;
 
     void ShowLog(const std::string &tag, bool isClear = false) const;
     void ShowLogRes(const std::string &tag, bool isClear = false) const;
@@ -61,9 +61,9 @@ private:
     void SetLogoProgress();
     const StrategyMap &strategies_;
     PageManager &pgMgr_;
-    UpdaterMode mode_;
-    std::unordered_map<UpdaterMode, std::unique_ptr<ProgressStrategy>> progressMap_ {};
-    std::unordered_map<UpdaterMode, std::unique_ptr<LogoStrategy>> logoMap_ {};
+    std::string mode_;
+    std::unordered_map<std::string, std::unique_ptr<ProgressStrategy>> progressMap_ {};
+    std::unordered_map<std::string, std::unique_ptr<LogoStrategy>> logoMap_ {};
 };
 void OnKeyUpEvent();
 void OnKeyDownEvent();

@@ -503,15 +503,10 @@ int32_t PkgManagerImpl::CreatePkgStream(StreamPtr &stream, const std::string &fi
     return PKG_SUCCESS;
 }
 
-int32_t PkgManagerImpl::CreatePkgStream(StreamPtr &stream, const std::string &fileName, RingBuffer *buffer)
+int32_t PkgManagerImpl::CreatePkgStream(StreamPtr &stream, const std::string &fileName,
+    uint64_t fileLen, RingBuffer *buffer)
 {
-    const FileInfo *info = GetFileInfo(fileName);
-    if (info == nullptr) {
-        PKG_LOGE("Get file info fail %s", fileName.c_str());
-        return PKG_INVALID_FILE;
-    }
-
-    PkgStreamPtr pkgStream = new(std::nothrow) FlowDataStream(this, fileName, info->unpackedSize,
+    PkgStreamPtr pkgStream = new(std::nothrow) FlowDataStream(this, fileName, fileLen,
         buffer, PkgStream::PkgStreamType_FlowData);
     if (pkgStream == nullptr) {
         PKG_LOGE("Failed to create stream");

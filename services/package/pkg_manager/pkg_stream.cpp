@@ -372,4 +372,12 @@ int32_t FlowDataStream::Write(const PkgBuffer &data, size_t size, size_t start)
     PKG_LOGE("Write ring buffer fail");
     return PKG_INVALID_STREAM;
 }
+
+void FlowDataStream::Stop()
+{
+    PKG_LOGI("FlowDataStream stop");
+    if (ringBuf_ != nullptr) {
+        ringBuf_->Stop();
+    }
+}
 } // namespace Hpackage

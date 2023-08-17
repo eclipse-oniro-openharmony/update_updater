@@ -63,7 +63,7 @@ bool PtableProcess(UpdaterParams &upParams)
             Hpackage::PkgManager::ReleasePackageInstance(pkgManager);
             continue;
         }
-        if (!upParams.sdcardUpdate) {
+        if (upParams.updateMode != SDCARD_UPDATE) {
             if (devicePtb.ComparePartition(packagePtb, "USERDATA")) {
                 LOG(ERROR) << "Hota update not allow userdata partition change!";
                 Hpackage::PkgManager::ReleasePackageInstance(pkgManager);

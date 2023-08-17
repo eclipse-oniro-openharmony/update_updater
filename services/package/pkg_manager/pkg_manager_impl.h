@@ -73,7 +73,8 @@ public:
     int32_t CreatePkgStream(PkgStreamPtr &stream, const std::string &fileName,
         PkgStream::ExtractFileProcessor processor, const void *context) override;
 
-    int32_t CreatePkgStream(StreamPtr &stream, const std::string &fileName, Updater::RingBuffer *buffer) override;
+    int32_t CreatePkgStream(StreamPtr &stream, const std::string &fileName,
+        uint64_t fileLen, Updater::RingBuffer *buffer) override;
 
     int32_t VerifyOtaPackage(const std::string &packagePath) override;
 
