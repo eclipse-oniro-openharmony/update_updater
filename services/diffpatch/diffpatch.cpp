@@ -24,6 +24,7 @@
 #include <unistd.h>
 #include <vector>
 #include "openssl/sha.h"
+#include "pkg_utils.h"
 
 namespace UpdatePatch {
 int32_t WriteDataToFile(const std::string &fileName, const std::vector<uint8_t> &data, size_t dataSize)
@@ -65,11 +66,14 @@ int32_t PatchMapFile(const std::string &fileName, MemMapInfo &info)
         lseek(info.fd, 0, SEEK_SET);
     }
 
-    info.memory = static_cast<uint8_t*>(mmap(nullptr, st.st_size, PROT_READ, MAP_PRIVATE, info.fd, 0));
-    if (info.memory == nullptr) {
+    void *mappedData = mmap(nullptr, st.st_size, PROT_READ, MAP_PRIVATE, info.fd, 0);
+    if (mappedData == MAP_FAILED) {
+        close(info.fd);
         PATCH_LOGE("Failed to memory map");
         return -1;
     }
+    close(info.fd);
+    info.memory = static_cast<uint8_t*>(mappedData);
     info.length = static_cast<size_t>(st.st_size);
     return PATCH_SUCCESS;
 }

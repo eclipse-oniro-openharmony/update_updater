@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration ver="2.0">
+    <target name="ApplyPatchFuzzTest">
+        <preparer>
+            <option name="push" value="MountForPath_fuzzer.fstable -> /data/fuzz/test" src="res"/>
+        </preparer>
+    </target>
     <target name="ExtractAndExecuteScriptFuzzTest">
         <preparer>
             <option name="push" value="loadScript.us -> /data/fuzz/test" src="res"/>
