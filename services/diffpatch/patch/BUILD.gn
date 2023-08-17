@@ -32,6 +32,7 @@ config("patch_config") {
     "${updater_path}/services/diffpatch/bzip2",
     "${updater_path}/services/diffpatch/patch",
     "${updater_path}/services/diffpatch",
+    "${updater_path}/services/package/pkg_manager",
     "//third_party/bounds_checking_function/include",
     "//third_party/bzip2",
     "//third_party/zlib",
