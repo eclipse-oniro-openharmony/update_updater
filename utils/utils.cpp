@@ -504,7 +504,7 @@ bool CheckDumpResult()
     const std::string resultPath = std::string(UPDATER_PATH) + "/" + std::string(UPDATER_RESULT_FILE);
     ifs.open(resultPath, std::ios::in);
     std::string buff;
-    if (ifs.is_open() && getline(ifs, buff) && buff.find("fail:") != std::string::npos) {
+    if (ifs.is_open() && getline(ifs, buff) && buff.find("fail|") != std::string::npos) {
         return true;
     }
     LOG(ERROR) << "open result file failed";
