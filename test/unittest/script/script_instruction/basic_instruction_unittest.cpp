@@ -43,7 +43,7 @@ namespace {
 class MockUScriptEnv : public UScriptEnv {
 public:
     explicit MockUScriptEnv(Hpackage::PkgManager::PkgManagerPtr pkgManager) : UScriptEnv(pkgManager) {}
-    virtual PostMessageFunction GetPostmsgFunc() override
+    virtual PostMessageFunction GetPostmsgFunc()
     {
         return nullptr;
     }

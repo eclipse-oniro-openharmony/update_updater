@@ -39,7 +39,7 @@ public:
         return isRetry;
     }
 
-    virtual PostMessageFunction GetPostmsgFunc() override
+    virtual Updater::PostMessageFunction GetPostmsgFunc()
     {
         return nullptr;
     }
