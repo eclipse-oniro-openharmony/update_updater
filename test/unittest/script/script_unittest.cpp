@@ -205,7 +205,8 @@ public:
     {
         return isRetry;
     }
-    virtual PostMessageFunction GetPostmsgFunc()
+
+    virtual PostMessageFunction GetPostmsgFunc() override
     {
         return nullptr;
     }

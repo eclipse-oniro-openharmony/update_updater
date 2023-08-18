@@ -124,6 +124,11 @@ public:
     {
         return isRetry;
     }
+
+    virtual PostMessageFunction GetPostmsgFunc() override
+    {
+        return nullptr;
+    }
 private:
     bool isRetry = false;
 };

@@ -38,6 +38,11 @@ public:
     {
         return isRetry;
     }
+
+    virtual PostMessageFunction GetPostmsgFunc() override
+    {
+        return nullptr;
+    }
     UScriptInstructionFactory *factory_ = nullptr;
 private:
     bool isRetry = false;
