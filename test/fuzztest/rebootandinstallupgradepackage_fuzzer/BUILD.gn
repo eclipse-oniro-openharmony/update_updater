@@ -31,7 +31,8 @@ ohos_fuzztest("RebootAndInstallUpgradePackageFuzzTest") {
   ]
   #configs = [ "${updater_path}/test/unittest:utest_config" ]
   module_out_path = module_output_path
-  fuzz_config_file = "${updater_path}/test/fuzztest/rebootandinstallupgradepackage_fuzzer"
+  fuzz_config_file =
+      "${updater_path}/test/fuzztest/rebootandinstallupgradepackage_fuzzer"
   include_dirs = [
     "${updater_path}/interfaces/kits/include",
     "${updater_path}/services/include/log",
