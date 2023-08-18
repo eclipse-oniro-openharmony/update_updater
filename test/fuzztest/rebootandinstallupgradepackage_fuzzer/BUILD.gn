@@ -29,6 +29,7 @@ ohos_fuzztest("RebootAndInstallUpgradePackageFuzzTest") {
     "HDC_SUPPORT_FLASHD",
     "HARMONY_PROJECT",
   ]
+
   #configs = [ "${updater_path}/test/unittest:utest_config" ]
   module_out_path = module_output_path
   fuzz_config_file =
