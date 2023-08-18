@@ -25,7 +25,6 @@ ohos_fuzztest("WriteUpdaterMsgFuzzTest") {
   module_out_path = module_output_path
   fuzz_config_file = "${updater_path}/test/fuzztest/writeupdatermsg_fuzzer"
   include_dirs = [
-    "//base/startup/init/interfaces/innerkits/include",
     "${updater_path}/interfaces/kits/include",
     "${updater_path}/services/common",
     "${updater_path}/services/include",
