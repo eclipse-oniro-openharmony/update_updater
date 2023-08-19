@@ -420,20 +420,20 @@ static void PostUpdatePackages(UpdaterParams &upParams, bool updateResult)
         std::ifstream fin {resultPath};
         if (!fin.is_open() || !std::getline(fin, buf)) {
             LOG(ERROR) << "read result file error " << resultPath;
-            buf = "fail";
+            buf = "fail|";
         }
     } else {
-        buf = "pass";
+        buf = "pass|";
         upParams.pkgLocation = upParams.pkgLocation == 0 ? upParams.pkgLocation : (upParams.pkgLocation - 1);
     }
 
     for (unsigned int i = 0; i < upParams.pkgLocation; i++) {
         time = DurationToString(upParams.installTime[i]);
-        writeBuffer += upParams.updatePackage[i] + "|pass|install_time=" + time + "\n";
+        writeBuffer += upParams.updatePackage[i] + "|pass||install_time=" + time + "|\n";
     }
     time = DurationToString(upParams.installTime[upParams.pkgLocation]);
 
-    writeBuffer += upParams.updatePackage[upParams.pkgLocation] + "|" + buf + "|install_time=" + time + "\n";
+    writeBuffer += upParams.updatePackage[upParams.pkgLocation] + "|" + buf + "|install_time=" + time + "|\n";
     for (unsigned int i = upParams.pkgLocation + 1; i < upParams.updatePackage.size(); i++) {
         writeBuffer += upParams.updatePackage[i] + "\n";
     }
