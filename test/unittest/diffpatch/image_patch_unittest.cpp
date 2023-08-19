@@ -57,7 +57,6 @@ protected:
         ZipFileInfo *fileInfo = new(std::nothrow) ZipFileInfo;
         return std::unique_ptr<FileInfo>((FileInfo *)fileInfo);
     }
-
 };
 
 class CompressedImagePatchUnitTest : public testing::Test {
