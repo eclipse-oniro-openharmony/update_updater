@@ -140,6 +140,6 @@ HWTEST_F(UtilsUnitTest, GetDirSizeForFileTest, TestSize.Level0)
     EXPECT_EQ(ret, 0);
     const std::string testPath = "/data/updater/updater/etc/fstab.ut.updater";
     ret = Utils::GetDirSizeForFile(testPath);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, 827); // 827 : file size
 }
 } // updater_ut
