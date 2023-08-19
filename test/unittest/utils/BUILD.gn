@@ -46,11 +46,20 @@ ohos_unittest("utils_test") {
     "init:libbegetutil",
   ]
   deps = [
+    "${updater_path}/interfaces/kits/misc_info:libmiscinfo",
+    "${updater_path}/services/fs_manager:libfsmanager",
     "${updater_path}/services/log:libupdaterlog",
+    "${updater_path}/services/package:libupdaterpackage",
+    "${updater_path}/utils:libutils",
     "//third_party/bounds_checking_function:libsec_static",
+    "//third_party/bzip2:libbz2",
     "//third_party/cJSON:cjson",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
+    "//third_party/lz4:liblz4_static",
+    "//third_party/openssl:libcrypto_shared",
+    "//third_party/openssl:libssl_static",
+    "//third_party/zlib:libz",
   ]
   configs = [ "${updater_path}/test/unittest:utest_config" ]
   install_enable = true
