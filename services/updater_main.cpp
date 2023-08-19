@@ -420,10 +420,10 @@ static void PostUpdatePackages(UpdaterParams &upParams, bool updateResult)
         std::ifstream fin {resultPath};
         if (!fin.is_open() || !std::getline(fin, buf)) {
             LOG(ERROR) << "read result file error " << resultPath;
-            buf = "fail";
+            buf = "fail|";
         }
     } else {
-        buf = "pass";
+        buf = "pass|";
         upParams.pkgLocation = upParams.pkgLocation == 0 ? upParams.pkgLocation : (upParams.pkgLocation - 1);
     }
 
