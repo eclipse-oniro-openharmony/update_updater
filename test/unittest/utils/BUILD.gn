@@ -46,6 +46,7 @@ ohos_unittest("utils_test") {
     "init:libbegetutil",
   ]
   deps = [
+    "${updater_path}/interfaces/kits/misc_info:libmiscinfo",
     "${updater_path}/services/fs_manager:libfsmanager",
     "${updater_path}/services/log:libupdaterlog",
     "${updater_path}/services/package:libupdaterpackage",
