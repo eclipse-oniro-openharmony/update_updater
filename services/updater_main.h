@@ -17,6 +17,7 @@
 
 #include <iostream>
 #include <string>
+#include "pkg_manager.h"
 #include "updater/updater.h"
 #include "updater_init.h"
 
@@ -29,6 +30,12 @@ enum FactoryResetMode {
 int UpdaterMain(int argc, char **argv);
 
 int FactoryReset(FactoryResetMode mode, const std::string &path);
+
+UpdaterStatus InstallUpdaterPackage(UpdaterParams &upParams, Hpackage::PkgManager::PkgManagerPtr manager);
+
+UpdaterStatus DoUpdatePackages(UpdaterParams &upParams);
+
+UpdaterStatus StartUpdaterEntry(UpdaterParams &upParams);
 
 UpdaterStatus UpdaterFromSdcard(UpdaterParams &upParams);
 

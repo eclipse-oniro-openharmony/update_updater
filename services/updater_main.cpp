@@ -236,7 +236,7 @@ bool IsBatteryCapacitySufficient()
     return capacity > lowLevel;
 }
 
-static UpdaterStatus InstallUpdaterPackage(UpdaterParams &upParams, PkgManager::PkgManagerPtr manager)
+UpdaterStatus InstallUpdaterPackage(UpdaterParams &upParams, PkgManager::PkgManagerPtr manager)
 {
     UpdaterStatus status = UPDATE_UNKNOWN;
     STAGE(UPDATE_STAGE_BEGIN) << "Install package";
@@ -356,7 +356,7 @@ static UpdaterStatus PreUpdatePackages(UpdaterParams &upParams)
     return UPDATE_SUCCESS;
 }
 
-static UpdaterStatus DoUpdatePackages(UpdaterParams &upParams)
+UpdaterStatus DoUpdatePackages(UpdaterParams &upParams)
 {
     UPDATER_INIT_RECORD;
     UpdaterStatus status = UPDATE_UNKNOWN;
@@ -488,7 +488,7 @@ UpdaterStatus InstallUpdaterPackages(UpdaterParams &upParams)
     return status;
 }
 
-static UpdaterStatus StartUpdaterEntry(UpdaterParams &upParams)
+UpdaterStatus StartUpdaterEntry(UpdaterParams &upParams)
 {
     UpdaterStatus status = UPDATE_UNKNOWN;
     if (upParams.sdcardUpdate) {

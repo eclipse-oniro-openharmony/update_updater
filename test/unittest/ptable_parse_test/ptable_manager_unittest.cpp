@@ -116,6 +116,8 @@ public:
         devicePtnInfo[0].dispName = "TestIsPtableChanged1";
         ret = context.TestIsPtableChanged(devicePtnInfo, pkgPtnInfo);
         ASSERT_EQ(ret, true);
+        ret = context.WritePtableToDevice();
+        ASSERT_EQ(ret, false);
     }
 
     void TestInitPtableManagerAndSetDeviceStorageType()
@@ -146,6 +148,8 @@ public:
         ASSERT_EQ(ret, false);
         partitionName = "testPartition";
         ret = context.GetPartionInfoByName(partitionName, ptnInfo);
+        ASSERT_EQ(ret, false);
+        ret = context.WritePartitionTable();
         ASSERT_EQ(ret, false);
     }
 
