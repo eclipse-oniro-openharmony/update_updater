@@ -291,10 +291,10 @@ HWTEST_F(UpdaterUtilUnitTest, InstallUpdaterPackageTest, TestSize.Level1)
     upParams.callbackProgress = [] (float value) { UPDATER_UI_INSTANCE.ShowProgress(value); };
     upParams.updatePackage.push_back("/data/updater/updater/updater_full.zip");
     Hpackage::PkgManager::PkgManagerPtr pkgManager = Hpackage::PkgManager::CreatePackageInstance();
-    EXPECT_EQ(InstallUpdaterPackage(upParams, pkgManager), UPDATE_CORRUPT);
+    EXPECT_EQ(InstallUpdaterPackage(upParams, pkgManager), UPDATE_ERROR);
     upParams.sdcardUpdate = true;
     upParams.retryCount = 1;
-    EXPECT_EQ(InstallUpdaterPackage(upParams, pkgManager), UPDATE_CORRUPT);
+    EXPECT_EQ(InstallUpdaterPackage(upParams, pkgManager), UPDATE_ERROR);
 }
 
 HWTEST_F(UpdaterUtilUnitTest, DoUpdatePackagesTest, TestSize.Level1)
@@ -305,7 +305,7 @@ HWTEST_F(UpdaterUtilUnitTest, DoUpdatePackagesTest, TestSize.Level1)
     EXPECT_EQ(DoUpdatePackages(upParams), UPDATE_CORRUPT);
     upParams.callbackProgress = [] (float value) { UPDATER_UI_INSTANCE.ShowProgress(value); };
     upParams.installTime.push_back(std::chrono::duration<double>(0));
-    EXPECT_EQ(DoUpdatePackages(upParams), UPDATE_CORRUPT);
+    EXPECT_EQ(DoUpdatePackages(upParams), UPDATE_ERROR);
 }
 
 HWTEST_F(UpdaterUtilUnitTest, StartUpdaterEntryTest, TestSize.Level1)
