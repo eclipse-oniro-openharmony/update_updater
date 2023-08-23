@@ -142,7 +142,7 @@ int32_t PkgVerifyUtil::HashCheck(const PkgStreamPtr srcData, const size_t dataLe
     }
 
     if (memcmp(hash.data(), sourceDigest.data(), digestLen) != EOK) {
-        PKG_LOGE("Failed to memcmp data.");
+        PKG_LOGW("Failed to memcmp data.");
         UPDATER_LAST_WORD(PKG_INVALID_DIGEST);
         return PKG_INVALID_DIGEST;
     }
