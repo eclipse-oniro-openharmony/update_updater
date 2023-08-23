@@ -24,6 +24,7 @@
 #include "fs_manager/mount.h"
 #include "misc_info/misc_info.h"
 #include "updater_main.h"
+#include "updater_ui_stub.h"
 #include "utils.h"
 
 using namespace Updater;
@@ -245,6 +246,8 @@ HWTEST_F(UpdaterUtilUnitTest, updater_IsSpaceCapacitySufficient, TestSize.Level1
     EXPECT_EQ(status, UPDATE_SUCCESS);
     packagePath.push_back("xxx");
     ProgressSmoothHandler(0, 0);
+    ProgressSmoothHandler(-1, 0);
+    ProgressSmoothHandler(0, 1);
     status = IsSpaceCapacitySufficient(packagePath);
     EXPECT_EQ(status, UPDATE_ERROR);
 }

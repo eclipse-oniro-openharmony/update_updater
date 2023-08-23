@@ -117,6 +117,7 @@
             <option name="push" value="src/test_function.us -> /data/updater/src" src="res"/>
             <option name="push" value="src/loadScript.us -> /data/updater/src" src="res"/>
             <option name="push" value="src/Verse-script.us -> /data/updater/src" src="res"/>
+            <option name="push" value="src/updater_log_test -> /data/updater/log" src="res"/>
         </preparer>
     </target>
     <target name="applypatch_unittest">
@@ -215,6 +216,11 @@
         <preparer>
             <option name="push" value="updater/updater_full.zip -> /data/updater/updater" src="res"/>
             <option name="push" value="src/signing_cert.crt -> /data/updater/src" src="res"/>
+            <option name="push" value="updater/etc/fstab.ut.updater -> /data/updater/updater/etc" src="res"/>
+        </preparer>
+    </target>
+    <target name="utils_test">
+        <preparer>
             <option name="push" value="updater/etc/fstab.ut.updater -> /data/updater/updater/etc" src="res"/>
         </preparer>
     </target>

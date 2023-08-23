@@ -23,8 +23,12 @@ group("fuzztest") {
     "test/fuzztest/applypatch_fuzzer:ApplyPatchFuzzTest",
     "test/fuzztest/dopartitions_fuzzer:DoPartitionsFuzzTest",
     "test/fuzztest/extractandexecutescript_fuzzer:ExtractAndExecuteScriptFuzzTest",
+    "test/fuzztest/getupdatepackageinfo_fuzzer:GetUpdatePackageInfoFuzzTest",
+    "test/fuzztest/package_fuzzer:PackageFuzzTest",
     "test/fuzztest/readfstabfromfile_fuzzer:ReadFstabFromFileFuzzTest",
+    "test/fuzztest/rebootandinstallupgradepackage_fuzzer:RebootAndInstallUpgradePackageFuzzTest",
     "test/fuzztest/updaterfactoryreset_fuzzer:UpdaterFactoryResetFuzzTest",
+    "test/fuzztest/writeupdatermsg_fuzzer:WriteUpdaterMsgFuzzTest",
   ]
 }
 
@@ -34,7 +38,6 @@ group("unittest") {
     "test/unittest:updater_unittest",
     "test/unittest/applypatch_test:applypatch_unittest",
     "test/unittest/common/ring_buffer:ring_buffer_test",
-    "test/unittest/flow_update/update_bin:bin_flow_update_test",
     "test/unittest/package:package_unittest",
     "test/unittest/script:script_unittest",
     "test/unittest/script:user_instruction",
