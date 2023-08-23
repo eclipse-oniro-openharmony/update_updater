@@ -24,6 +24,7 @@
 #include "fs_manager/mount.h"
 #include "misc_info/misc_info.h"
 #include "updater_main.h"
+#include "updater_ui_stub.h"
 #include "utils.h"
 
 using namespace Updater;
@@ -245,6 +246,8 @@ HWTEST_F(UpdaterUtilUnitTest, updater_IsSpaceCapacitySufficient, TestSize.Level1
     EXPECT_EQ(status, UPDATE_SUCCESS);
     packagePath.push_back("xxx");
     ProgressSmoothHandler(0, 0);
+    ProgressSmoothHandler(-1, 0);
+    ProgressSmoothHandler(0, 1);
     status = IsSpaceCapacitySufficient(packagePath);
     EXPECT_EQ(status, UPDATE_ERROR);
 }
@@ -279,5 +282,50 @@ HWTEST_F(UpdaterUtilUnitTest, updater_HandleChildOutput, TestSize.Level1)
     buf = "xxx:xxx";
     HandleChildOutput(buf, buf.size(), retryUpdate, upParams);
     EXPECT_EQ(retryUpdate, true);
+}
+
+HWTEST_F(UpdaterUtilUnitTest, InstallUpdaterPackageTest, TestSize.Level1)
+{
+    UpdaterParams upParams;
+    upParams.retryCount = 0;
+    upParams.callbackProgress = [] (float value) { UPDATER_UI_INSTANCE.ShowProgress(value); };
+    upParams.updatePackage.push_back("/data/updater/updater/updater_full.zip");
+    Hpackage::PkgManager::PkgManagerPtr pkgManager = Hpackage::PkgManager::CreatePackageInstance();
+    EXPECT_EQ(InstallUpdaterPackage(upParams, pkgManager), UPDATE_ERROR);
+    upParams.sdcardUpdate = true;
+    upParams.retryCount = 1;
+    EXPECT_EQ(InstallUpdaterPackage(upParams, pkgManager), UPDATE_ERROR);
+}
+
+HWTEST_F(UpdaterUtilUnitTest, DoUpdatePackagesTest, TestSize.Level1)
+{
+    UpdaterParams upParams;
+    EXPECT_EQ(DoUpdatePackages(upParams), UPDATE_ERROR);
+    upParams.updatePackage.push_back("/data/updater/updater/updater_full.zip");
+    EXPECT_EQ(DoUpdatePackages(upParams), UPDATE_CORRUPT);
+    upParams.callbackProgress = [] (float value) { UPDATER_UI_INSTANCE.ShowProgress(value); };
+    upParams.installTime.push_back(std::chrono::duration<double>(0));
+    EXPECT_EQ(DoUpdatePackages(upParams), UPDATE_ERROR);
+}
+
+HWTEST_F(UpdaterUtilUnitTest, StartUpdaterEntryTest, TestSize.Level1)
+{
+    UpdaterParams upParams;
+    upParams.factoryWipeData = true;
+    EXPECT_EQ(DoUpdatePackages(upParams), UPDATE_ERROR);
+    upParams.factoryWipeData = false;
+    upParams.userWipeData = true;
+    EXPECT_EQ(DoUpdatePackages(upParams), UPDATE_ERROR);
+    upParams.userWipeData = false;
+    EXPECT_EQ(DoUpdatePackages(upParams), UPDATE_ERROR);
+}
+
+HWTEST_F(UpdaterUtilUnitTest, StartUpdaterProcTest, TestSize.Level1)
+{
+    Hpackage::PkgManager::PkgManagerPtr pkgManager = Hpackage::PkgManager::CreatePackageInstance();
+    UpdaterParams upParams;
+    int maxTemperature = 0;
+    EXPECT_EQ(StartUpdaterProc(nullptr, upParams, maxTemperature), UPDATE_CORRUPT);
+    EXPECT_EQ(StartUpdaterProc(pkgManager, upParams, maxTemperature), UPDATE_ERROR);
 }
 }
