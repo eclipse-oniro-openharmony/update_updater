@@ -78,7 +78,7 @@ HWTEST_F(UtilsUnitTest, updater_utils_test_005, TestSize.Level0)
 HWTEST_F(UtilsUnitTest, updater_utils_test_006, TestSize.Level0)
 {
     std::vector<std::string> files;
-    string path = "/data";
+    string path = "/data/updater/log";
     Utils::SaveLogs();
     Utils::CompressLogs("/data/updater/log/updater_log_test");
     EXPECT_NE(Utils::GetFilesFromDirectory(path, files, true), -1);

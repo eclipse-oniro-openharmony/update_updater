@@ -221,6 +221,7 @@
     </target>
     <target name="utils_test">
         <preparer>
+            <option name="push" value="src/updater_log_test -> /data/updater/log" src="res"/>
             <option name="push" value="updater/etc/fstab.ut.updater -> /data/updater/updater/etc" src="res"/>
         </preparer>
     </target>
