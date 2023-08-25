@@ -17,6 +17,7 @@ import("//build/ohos.gni")
 updater_path = rebase_path("${updater_absolutely_path}", ".")
 ohos_static_library("libBinFlowUpdate") {
   sources = [
+    "bin_flow_update.cpp",
     "bin_process.cpp",
     "component_processor.cpp",
   ]
