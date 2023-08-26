@@ -238,17 +238,17 @@ HWTEST_F(UpdaterUtilUnitTest, updater_ExtractUpdaterBinary, TestSize.Level1)
 
 HWTEST_F(UpdaterUtilUnitTest, updater_IsSpaceCapacitySufficient, TestSize.Level1)
 {
-    std::vector<std::string> packagePath;
-    UpdaterStatus status = IsSpaceCapacitySufficient(packagePath);
+    UpdaterParams upParams {};
+    UpdaterStatus status = IsSpaceCapacitySufficient(upParams);
     EXPECT_EQ(status, UPDATE_ERROR);
-    packagePath.push_back("/data/updater/updater/updater_full.zip");
-    status = IsSpaceCapacitySufficient(packagePath);
+    upParams.updatePackage.push_back("/data/updater/updater/updater_full.zip");
+    status = IsSpaceCapacitySufficient(upParams);
     EXPECT_EQ(status, UPDATE_SUCCESS);
-    packagePath.push_back("xxx");
+    upParams.updatePackage.push_back("xxx");
     ProgressSmoothHandler(0, 0);
     ProgressSmoothHandler(-1, 0);
     ProgressSmoothHandler(0, 1);
-    status = IsSpaceCapacitySufficient(packagePath);
+    status = IsSpaceCapacitySufficient(upParams);
     EXPECT_EQ(status, UPDATE_ERROR);
 }
 

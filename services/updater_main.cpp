@@ -334,7 +334,7 @@ static UpdaterStatus PreUpdatePackages(UpdaterParams &upParams)
     }
 
     // Only handle UPATE_ERROR and UPDATE_SUCCESS here.Let package verify handle others.
-    if (IsSpaceCapacitySufficient(upParams.updatePackage) == UPDATE_ERROR) {
+    if (IsSpaceCapacitySufficient(upParams) == UPDATE_ERROR) {
         UPDATER_LAST_WORD(status);
         return status;
     }
