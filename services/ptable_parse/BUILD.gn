@@ -40,11 +40,11 @@ config("libptableparse_exported_headers") {
 
 ohos_static_library("libptableparse") {
   sources = [
+    "./emmc_ptable.cpp",
     "./ptable.cpp",
     "./ptable_manager.cpp",
     "./ptable_process.cpp",
     "./ufs_ptable.cpp",
-    "./emmc_ptable.cpp",
   ]
   configs = [ ":updater_config" ]
 
