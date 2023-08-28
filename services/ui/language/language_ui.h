@@ -21,6 +21,7 @@
 #include <vector>
 #include "json_visitor.h"
 #include "language_ui_msg_id.h"
+#include "language/language_ui.h"
 #include "updater_ui_traits.h"
 
 namespace Updater {

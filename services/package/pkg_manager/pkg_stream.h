@@ -266,6 +266,8 @@ public:
         return readOffset_;
     }
 
+    void Stop() override;
+
 private:
     int32_t ReadFromRingBuf(uint8_t *&buff, const uint32_t needLen, uint32_t &readLen);
 

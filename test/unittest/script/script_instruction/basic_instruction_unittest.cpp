@@ -43,6 +43,10 @@ namespace {
 class MockUScriptEnv : public UScriptEnv {
 public:
     explicit MockUScriptEnv(Hpackage::PkgManager::PkgManagerPtr pkgManager) : UScriptEnv(pkgManager) {}
+    virtual PostMessageFunction GetPostmsgFunc()
+    {
+        return nullptr;
+    }
     MOCK_CONST_METHOD0(IsRetry, bool());
     MOCK_METHOD2(PostMessage, void(const std::string &cmd, std::string content));
     MOCK_METHOD0(GetInstructionFactory, UScriptInstructionFactoryPtr());

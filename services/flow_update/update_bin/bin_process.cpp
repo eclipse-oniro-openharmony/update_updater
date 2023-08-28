@@ -18,6 +18,7 @@
 #include <thread>
 #include "applypatch/partition_record.h"
 #include "log.h"
+#include "pkg_manager_impl.h"
 #include "pkg_package/pkg_pkgfile.h"
 #include "pkg_utils.h"
 #include "ring_buffer/ring_buffer.h"
@@ -58,7 +59,12 @@ int32_t UScriptInstructionBinFlowWrite::Execute(Uscript::UScriptEnv &env, Uscrip
     stashBuffer_.data.resize(STASH_BUFFER_SIZE);
     stashBuffer_.buffer = stashBuffer_.data.data();
     PkgManager::StreamPtr binFlowStream = nullptr;
-    ret = pkgManager->CreatePkgStream(binFlowStream, upgradeFileName, &ringBuffer);
+    const FileInfo *info = pkgManager->GetFileInfo(upgradeFileName);
+    if (info == nullptr) {
+        LOG(ERROR) << "Get file info fail " << upgradeFileName;
+        return PKG_INVALID_FILE;
+    }
+    ret = pkgManager->CreatePkgStream(binFlowStream, upgradeFileName, info->unpackedSize, &ringBuffer);
     if (ret != USCRIPT_SUCCESS || binFlowStream == nullptr) {
         LOG(ERROR) << "Error to create output stream";
         return USCRIPT_INVALID_PARAM;

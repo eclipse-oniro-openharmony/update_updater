@@ -101,7 +101,7 @@ public:
         return 0;
     }
 
-    void Stop()
+    virtual void Stop()
     {
         return;
     }
@@ -330,7 +330,8 @@ public:
      * @param buffer        ringbuffer
      * @return              creation result
      */
-    virtual int32_t CreatePkgStream(StreamPtr &stream, const std::string &fileName, Updater::RingBuffer *buffer) = 0;
+    virtual int32_t CreatePkgStream(StreamPtr &stream, const std::string &fileName,
+        uint64_t fileLen, Updater::RingBuffer *buffer) = 0;
 
     /**
      * Close the stream

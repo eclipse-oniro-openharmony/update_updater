@@ -48,6 +48,11 @@ public:
         return isRetry_ = retry;
     }
 
+    virtual Updater::PostMessageFunction GetPostmsgFunc()
+    {
+        return nullptr;
+    }
+
     Uscript::UScriptInstructionFactory *factory_ = nullptr;
 private:
     bool isRetry_ = false;

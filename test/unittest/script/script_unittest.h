@@ -107,7 +107,8 @@ public:
     {
         return PKG_SUCCESS;
     }
-    int32_t CreatePkgStream(StreamPtr &stream, const std::string &fileName, Updater::RingBuffer *buffer) override
+    int32_t CreatePkgStream(StreamPtr &stream, const std::string &fileName,
+        uint64_t fileLen, Updater::RingBuffer *buffer) override
     {
         return PKG_SUCCESS;
     }

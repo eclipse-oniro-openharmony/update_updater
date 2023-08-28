@@ -44,8 +44,8 @@ enum PackageUpdateMode {
 struct UpdaterParams {
     bool factoryWipeData = false;
     bool userWipeData = false;
-    bool sdcardUpdate = false;
     bool forceUpdate = false;
+    PackageUpdateMode updateMode = HOTA_UPDATE;
     int retryCount = 0;
     float initialProgress = 0; /* The upgrade starts at the progress bar location */
     float currentPercentage = 0; /* The proportion of progress bars occupied by the upgrade process */
@@ -72,6 +72,7 @@ int32_t ExtractUpdaterBinary(Hpackage::PkgManager::PkgManagerPtr manager, std::s
     const std::string &updaterBinary);
 
 int GetTmpProgressValue();
+void SetTmpProgressValue(int value);
 
 void ProgressSmoothHandler(int beginProgress, int endProgress);
 

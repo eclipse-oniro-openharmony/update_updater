@@ -130,7 +130,7 @@ class SkipImgProcessor : public ComponentProcessor {
 public:
     SkipImgProcessor(const std::string &name, const size_t len)
         : ComponentProcessor(name, len) {}
-    ~SkipImgProcessor() override {}
+    virtual ~SkipImgProcessor() override {}
     int32_t PreProcess(Uscript::UScriptEnv &env) override;
     int32_t DoProcess(Uscript::UScriptEnv &env) override;
     int32_t PostProcess(Uscript::UScriptEnv &env) override;

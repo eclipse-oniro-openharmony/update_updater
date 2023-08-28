@@ -29,13 +29,13 @@ public:
         return instance;
     }
     void InitEnv() const {}
-    [[nodiscard]] bool SetMode(UpdaterMode mode)
+    [[nodiscard]] bool SetMode(std::string mode)
     {
         return true;
     }
-    UpdaterMode GetMode() const
+    std::string GetMode() const
     {
-        return UpdaterMode::MODEMAX;
+        return "";
     }
     void ShowLog(const std::string &tag, bool isClear = false) const {}
     void ShowLogRes(const std::string &tag, bool isClear = false) const {}

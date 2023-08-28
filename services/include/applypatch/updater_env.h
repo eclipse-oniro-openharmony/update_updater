@@ -42,6 +42,10 @@ public:
     {
         return isRetry_;
     }
+    virtual PostMessageFunction GetPostmsgFunc()
+    {
+        return postMessage_;
+    }
 private:
     UScriptInstructionFactoryPtr factory_ = nullptr;
     PostMessageFunction postMessage_ = nullptr;

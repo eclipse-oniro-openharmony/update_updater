@@ -26,7 +26,7 @@ namespace Updater {
 class UpdaterUiConfig {
 public:
     static bool Init();
-    static const std::unordered_map<UpdaterMode, UiStrategyCfg> &GetStrategy();
+    static const std::unordered_map<std::string, UiStrategyCfg> &GetStrategy();
     static bool GetFocusCfg();
 private:
     static bool Init(const JsonNode &node);

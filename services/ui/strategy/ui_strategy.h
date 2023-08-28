@@ -29,13 +29,14 @@ std::ostream &operator<<(std::ostream &os, const ProgressPage &info);
 
 class UiStrategy {
 public:
-    static const std::unordered_map<UpdaterMode, UiStrategyCfg> &GetStrategy();
+    static const std::unordered_map<std::string, UiStrategyCfg> &GetStrategy();
     static bool LoadStrategy(const JsonNode &node);
+    static void RegisterUiMode(const std::string &mode);
 private:
-    static bool LoadStrategy(const JsonNode &node, UpdaterMode mode);
+    static bool LoadStrategy(const JsonNode &node, const std::string &mode);
     static constexpr auto DEFAULT_KEY = "default";
-    static std::unordered_map<UpdaterMode, UiStrategyCfg> strategies_;
-    static std::unordered_map<UpdaterMode, std::string> modeStr_;
+    static std::unordered_map<std::string, UiStrategyCfg> strategies_;
+    static std::vector<std::string> modeStr_;
 };
 } // namespace Updater
 #endif

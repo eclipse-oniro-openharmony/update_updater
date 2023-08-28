@@ -249,7 +249,7 @@ UpdaterStatus InstallUpdaterPackage(UpdaterParams &upParams, PkgManager::PkgMana
         }
         SetMessageToMisc(upParams.miscCmd, upParams.retryCount + 1, "retry_count");
     }
-    if (upParams.sdcardUpdate) {
+    if (upParams.updateMode == SDCARD_UPDATE) {
         status = DoInstallUpdaterPackage(manager, upParams, SDCARD_UPDATE);
     } else {
         status = DoInstallUpdaterPackage(manager, upParams, HOTA_UPDATE);
@@ -491,7 +491,7 @@ UpdaterStatus InstallUpdaterPackages(UpdaterParams &upParams)
 UpdaterStatus StartUpdaterEntry(UpdaterParams &upParams)
 {
     UpdaterStatus status = UPDATE_UNKNOWN;
-    if (upParams.sdcardUpdate) {
+    if (upParams.updateMode == SDCARD_UPDATE) {
         LOG(INFO) << "start sdcard update";
         UPDATER_UI_INSTANCE.ShowProgressPage();
         status = UpdaterFromSdcard(upParams);
@@ -555,20 +555,20 @@ static UpdaterStatus StartUpdater(const std::vector<std::string> &args,
                 std::string option = OPTIONS[optionIndex].name;
                 if (option == "update_package") {
                     upParams.updatePackage.push_back(optarg);
-                    (void)UPDATER_UI_INSTANCE.SetMode(UpdaterMode::OTA);
+                    (void)UPDATER_UI_INSTANCE.SetMode(UPDATREMODE_OTA);
                     mode = HOTA_UPDATE;
                 } else if (option == "retry_count") {
                     upParams.retryCount = atoi(optarg);
                 } else if (option == "factory_wipe_data") {
-                    (void)UPDATER_UI_INSTANCE.SetMode(UpdaterMode::REBOOTFACTORYRST);
+                    (void)UPDATER_UI_INSTANCE.SetMode(UPDATREMODE_REBOOTFACTORYRST);
                     upParams.factoryWipeData = true;
                 } else if (option == "user_wipe_data") {
-                    (void)UPDATER_UI_INSTANCE.SetMode(UpdaterMode::REBOOTFACTORYRST);
+                    (void)UPDATER_UI_INSTANCE.SetMode(UPDATREMODE_REBOOTFACTORYRST);
                     upParams.userWipeData = true;
                 } else if (option == "upgraded_pkg_num") {
                     upParams.pkgLocation = static_cast<unsigned int>(atoi(optarg));
                 } else if (option == "sdcard_update") {
-                    upParams.sdcardUpdate = true;
+                    upParams.updateMode = SDCARD_UPDATE;
                 } else if (option == "force_update_action" && std::string(optarg) == POWEROFF) { /* Only for OTA. */
                     upParams.forceUpdate = true;
                 }
@@ -581,8 +581,8 @@ static UpdaterStatus StartUpdater(const std::vector<std::string> &args,
     }
     optind = 1;
     // Sanity checks
-    if (upParams.sdcardUpdate) {
-        (void)UPDATER_UI_INSTANCE.SetMode(UpdaterMode::SDCARD);
+    if (upParams.updateMode == SDCARD_UPDATE) {
+        (void)UPDATER_UI_INSTANCE.SetMode(UPDATREMODE_SDCARD);
         mode = SDCARD_UPDATE;
     }
     if (upParams.factoryWipeData && upParams.userWipeData) {

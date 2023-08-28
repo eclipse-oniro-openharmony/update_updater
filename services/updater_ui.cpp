@@ -46,7 +46,7 @@ void DoProgress()
     constexpr int progressValueStep = static_cast<int>(0.3 * ratio);
     constexpr int maxProgressValue = static_cast<int>(100 * ratio);
     int progressvalueTmp = 0;
-    if (GetFacade().GetMode() != UpdaterMode::FACTORYRST && GetFacade().GetMode() != UpdaterMode::REBOOTFACTORYRST) {
+    if (GetFacade().GetMode() != UPDATREMODE_FACTORYRST && GetFacade().GetMode() != UPDATREMODE_REBOOTFACTORYRST) {
         return;
     }
     GetFacade().ShowProgress(0);
@@ -71,7 +71,7 @@ DEFINE_ASYN_CALLBACK(OnRebootEvt)
 DEFINE_SYNC_CALLBACK(OnLabelResetEvt)
 {
     LOG(INFO) << "On Label Reset";
-    if (!GetFacade().SetMode(UpdaterMode::FACTORYRST)) {
+    if (!GetFacade().SetMode(UPDATREMODE_FACTORYRST)) {
         return;
     }
     GetFacade().ShowFactoryConfirmPage();
@@ -80,7 +80,7 @@ DEFINE_SYNC_CALLBACK(OnLabelResetEvt)
 DEFINE_ASYN_CALLBACK(OnLabelSDCardEvt)
 {
     LOG(INFO) << "On Label SDCard";
-    if (!GetFacade().SetMode(UpdaterMode::SDCARD)) {
+    if (!GetFacade().SetMode(UPDATREMODE_SDCARD)) {
         return;
     }
     Utils::UsSleep(CALLBACK_DELAY);
@@ -89,7 +89,7 @@ DEFINE_ASYN_CALLBACK(OnLabelSDCardEvt)
     GetFacade().ShowLog(TR(LOG_SDCARD_NOTMOVE));
     Utils::UsSleep(DISPLAY_TIME);
     UpdaterParams upParams;
-    upParams.sdcardUpdate = true;
+    upParams.updateMode = SDCARD_UPDATE;
     if (UpdaterFromSdcard(upParams) != UPDATE_SUCCESS) {
         GetFacade().ShowMainpage();
         return;
@@ -101,12 +101,12 @@ DEFINE_ASYN_CALLBACK(OnLabelSDCardEvt)
 DEFINE_ASYN_CALLBACK(OnLabelSDCardNoDelayEvt)
 {
     LOG(INFO) << "On Label SDCard";
-    if (!GetFacade().SetMode(UpdaterMode::SDCARD)) {
+    if (!GetFacade().SetMode(UPDATREMODE_SDCARD)) {
         return;
     }
     Utils::UsSleep(CALLBACK_DELAY);
     UpdaterParams upParams;
-    upParams.sdcardUpdate = true;
+    upParams.updateMode = SDCARD_UPDATE;
     if (auto res = UpdaterFromSdcard(upParams); res != UPDATE_SUCCESS) {
         GetFacade().ShowLogRes(res == UPDATE_CORRUPT ? TR(LOGRES_VERIFY_FAILED) : TR(LOGRES_UPDATE_FAILED));
         GetFacade().ShowFailedPage();
@@ -134,7 +134,7 @@ DEFINE_ASYN_CALLBACK(OnLabelOkEvt)
     GetFacade().ShowMainpage();
     GetFacade().ClearText();
     GetFacade().ShowLog(TR(LOG_WIPE_DATA));
-    if (!GetFacade().SetMode(UpdaterMode::FACTORYRST)) {
+    if (!GetFacade().SetMode(UPDATREMODE_FACTORYRST)) {
         return;
     }
     GetFacade().ShowProgress(0);
@@ -152,7 +152,7 @@ DEFINE_ASYN_CALLBACK(OnLabelOkEvt)
 DEFINE_ASYN_CALLBACK(OnConfirmRstEvt)
 {
     LOG(INFO) << "On Label Ok";
-    if (!GetFacade().SetMode(UpdaterMode::FACTORYRST)) {
+    if (!GetFacade().SetMode(UPDATREMODE_FACTORYRST)) {
         return;
     }
     GetFacade().ShowUpdInfo(TR(LABEL_RESET_PROGRESS_INFO));
@@ -180,7 +180,7 @@ DEFINE_ASYN_CALLBACK(OnMenuClearCacheEvt)
 {
     LOG(INFO) << "On clear cache";
     GetFacade().ClearText();
-    if (!GetFacade().SetMode(UpdaterMode::FACTORYRST)) {
+    if (!GetFacade().SetMode(UPDATREMODE_FACTORYRST)) {
         return;
     }
     Utils::UsSleep(CALLBACK_DELAY);

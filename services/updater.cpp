@@ -210,6 +210,11 @@ int GetTmpProgressValue()
     return g_tmpProgressValue;
 }
 
+void SetTmpProgressValue(int value)
+{
+    g_tmpProgressValue = value;
+}
+
 void ProgressSmoothHandler(int beginProgress, int endProgress)
 {
     if (endProgress < 0 || endProgress > FULL_PERCENT_PROGRESS || beginProgress < 0) {

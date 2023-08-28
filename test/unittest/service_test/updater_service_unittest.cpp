@@ -292,7 +292,7 @@ HWTEST_F(UpdaterUtilUnitTest, InstallUpdaterPackageTest, TestSize.Level1)
     upParams.updatePackage.push_back("/data/updater/updater/updater_full.zip");
     Hpackage::PkgManager::PkgManagerPtr pkgManager = Hpackage::PkgManager::CreatePackageInstance();
     EXPECT_EQ(InstallUpdaterPackage(upParams, pkgManager), UPDATE_ERROR);
-    upParams.sdcardUpdate = true;
+    upParams.updateMode = SDCARD_UPDATE;
     upParams.retryCount = 1;
     EXPECT_EQ(InstallUpdaterPackage(upParams, pkgManager), UPDATE_ERROR);
 }

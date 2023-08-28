@@ -21,13 +21,10 @@ constexpr const char *DEFAULT_FONT_FILENAME = "HarmonyOS_Sans_SC_Regular_Small.t
 constexpr const char *FB_DEV_PATH = "/dev/graphics/fb0";
 constexpr const char *DRM_DEV_PATH = "/dev/dri/card0";
 
-enum class UpdaterMode {
-    SDCARD = 0,
-    FACTORYRST,
-    REBOOTFACTORYRST,
-    OTA,
-    RECOVER,
-    MODEMAX
-};
+constexpr const char *UPDATREMODE_SDCARD = "sdcard";
+constexpr const char *UPDATREMODE_FACTORYRST = "factoryRst";
+constexpr const char *UPDATREMODE_REBOOTFACTORYRST = "rebootFactoryRst";
+constexpr const char *UPDATREMODE_OTA = "ota";
+constexpr const char *UPDATREMODE_RECOVER = "recover";
 } // namespace Updater
 #endif /* UPDATE_UI_HOS_UPDATER_H */

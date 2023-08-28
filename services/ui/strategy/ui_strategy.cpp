@@ -49,45 +49,49 @@ std::ostream &operator<<(std::ostream &os, const ProgressPage &info)
     return os;
 }
 
-std::unordered_map<UpdaterMode, UiStrategyCfg> UiStrategy::strategies_;
-std::unordered_map<UpdaterMode, std::string> UiStrategy::modeStr_ = {
-    {UpdaterMode::SDCARD, "sdcard"},
-    {UpdaterMode::FACTORYRST, "factoryRst"},
-    {UpdaterMode::REBOOTFACTORYRST, "rebootFactoryRst"},
-    {UpdaterMode::OTA, "ota"},
-    {UpdaterMode::RECOVER, "recover"},
+std::unordered_map<std::string, UiStrategyCfg> UiStrategy::strategies_;
+std::vector<std::string> UiStrategy::modeStr_ = {
+    {UPDATREMODE_SDCARD},
+    {UPDATREMODE_FACTORYRST},
+    {UPDATREMODE_REBOOTFACTORYRST},
+    {UPDATREMODE_OTA},
+    {UPDATREMODE_RECOVER},
 };
 
-const std::unordered_map<UpdaterMode, UiStrategyCfg> &UiStrategy::GetStrategy()
+void UiStrategy::RegisterUiMode(const std::string &mode)
+{
+    LOG(INFO) << "RegisterUiMode " << mode;
+    modeStr_.emplace_back(mode);
+}
+
+const std::unordered_map<std::string, UiStrategyCfg> &UiStrategy::GetStrategy()
 {
     return strategies_;
 }
 
-bool UiStrategy::LoadStrategy(const JsonNode &node, UpdaterMode mode)
+bool UiStrategy::LoadStrategy(const JsonNode &node, const std::string &mode)
 {
-    auto it = modeStr_.find(mode);
+    auto it = std::find(modeStr_.begin(), modeStr_.end(), mode);
     if (it == modeStr_.end()) {
         return false;
     }
     const JsonNode &defaultNode = node[Traits<UiStrategyCfg>::STRUCT_KEY][DEFAULT_KEY];
-    const JsonNode &specificNode = node[Traits<UiStrategyCfg>::STRUCT_KEY][it->second];
+    const JsonNode &specificNode = node[Traits<UiStrategyCfg>::STRUCT_KEY][*it];
     if (!Visit<SETVAL>(specificNode, defaultNode, strategies_[mode])) {
         LOG(ERROR) << "parse strategy config error";
         return false;
     }
-    LOG(DEBUG) << "mode " << modeStr_[mode] << ":\n" << strategies_[mode];
+    LOG(DEBUG) << "mode " << mode << "\n" << strategies_[mode];
     return true;
 }
 
 bool UiStrategy::LoadStrategy(const JsonNode &node)
 {
-    std::unordered_map<UpdaterMode, UiStrategyCfg>().swap(strategies_);
-    constexpr std::array strategies {UpdaterMode::OTA, UpdaterMode::FACTORYRST,
-        UpdaterMode::SDCARD, UpdaterMode::REBOOTFACTORYRST, UpdaterMode::RECOVER};
-    for (auto mode : strategies) {
+    std::unordered_map<std::string, UiStrategyCfg>().swap(strategies_);
+    for (auto mode : modeStr_) {
         if (!LoadStrategy(node, mode)) {
-            LOG(ERROR) << "load strategy " << modeStr_[mode] << " failed";
-            std::unordered_map<UpdaterMode, UiStrategyCfg>().swap(strategies_);
+            LOG(ERROR) << "load strategy " << mode << " failed";
+            std::unordered_map<std::string, UiStrategyCfg>().swap(strategies_);
             return false;
         }
     }
