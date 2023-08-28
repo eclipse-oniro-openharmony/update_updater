@@ -44,6 +44,7 @@ ohos_static_library("libptableparse") {
     "./ptable_manager.cpp",
     "./ptable_process.cpp",
     "./ufs_ptable.cpp",
+    "./emmc_ptable.cpp",
   ]
   configs = [ ":updater_config" ]
 

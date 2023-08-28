@@ -17,6 +17,7 @@
 
 #include "log/log.h"
 #include "securec.h"
+#include "updater/updater_const.h"
 
 namespace Updater {
 std::string PtableManager::ptbImgTag_ = "";
@@ -48,7 +49,20 @@ void PtableManager::SetDeviceStorageType()
 
 bool PtableManager::IsUfsDevice()
 {
-    return true;
+    std::string filePath = std::string(BOOTDEV_TYPE);
+    if (filePath.empty()) {
+        LOG(ERROR) << "filePath is empty or lunCapacity is nullptr";
+        return false;
+    }
+    std::ifstream fin(filePath, std::ios::in);
+    if (!fin.is_open()) {
+        LOG(ERROR) << "open " << filePath << " fail";
+        return false;
+    }
+    uint64_t type = 0;
+    fin >> type;
+    fin.close();
+    return type != 0;
 }
 
 void PtableManager::ReloadDevicePartition(Hpackage::PkgManager *pkgManager)
@@ -63,7 +77,7 @@ void PtableManager::InitPtablePtr()
         if (GetDeviceStorageType() == StorageType::STORAGE_UFS) {
             pPtable_ = std::make_unique<UfsPtable>();
         } else {
-            pPtable_ = nullptr;
+            pPtable_ = std::make_unique<EmmcPtable>();
         }
     }
 }
