@@ -44,9 +44,9 @@ private:
     static constexpr uint32_t EMMC_BLOCK_SIZE = 512;
 
     struct EmmcPartitionDataInfo {
-        bool isGptVaild;
-        uint32_t writeDataLen; // data len written to emmc
-        uint8_t data[GPT_PARTITION_SIZE]; // ptable image data
+        bool isGptVaild = false;
+        uint32_t writeDataLen = 0; // data len written to emmc
+        uint8_t data[GPT_PARTITION_SIZE] = {0}; // ptable image data
     };
 
     struct EmmcPartitionDataInfo emmcPtnDataInfo_;
