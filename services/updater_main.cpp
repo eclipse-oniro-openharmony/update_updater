@@ -280,9 +280,9 @@ static UpdaterStatus CalcProgress(const UpdaterParams &upParams,
     for (const auto &path : upParams.updatePackage) {
         char realPath[PATH_MAX + 1] = {0};
         if (realpath(path.c_str(), realPath) == nullptr) {
-            LOG(ERROR) << "Can not find updatePackage : " << path;
-            UPDATER_LAST_WORD(UPDATE_ERROR);
-            return UPDATE_ERROR;
+            LOG(WARNING) << "Can not find updatePackage : " << path;
+            everyPkgSize.push_back(0);
+            continue;
         }
         struct stat st {};
         if (stat(realPath, &st) == 0) {
