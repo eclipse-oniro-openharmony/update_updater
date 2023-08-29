@@ -155,6 +155,7 @@ static UpdaterStatus VerifyPackages(UpdaterParams &upParams)
         return UPDATE_CORRUPT;
     }
     upParams.callbackProgress(0.0);
+    upParams.installTime.resize(upParams.updatePackage.size(), std::chrono::duration<double>(0));
     for (unsigned int i = upParams.pkgLocation; i < upParams.updatePackage.size(); i++) {
         LOG(INFO) << "Verify package:" << upParams.updatePackage[i];
         auto startTime = std::chrono::system_clock::now();
@@ -166,12 +167,12 @@ static UpdaterStatus VerifyPackages(UpdaterParams &upParams)
             upParams.pkgLocation = i;
             UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_VERIFYPKGFAIL), true);
             auto endTime = std::chrono::system_clock::now();
-            upParams.installTime.push_back(endTime - startTime);
+            upParams.installTime[i] = endTime - startTime;
             UPDATER_LAST_WORD(UPDATE_CORRUPT);
             return UPDATE_CORRUPT;
         }
         auto endTime = std::chrono::system_clock::now();
-        upParams.installTime.push_back(endTime - startTime);
+        upParams.installTime[i] = endTime - startTime;
     }
 
     ProgressSmoothHandler(0, static_cast<int>(VERIFY_PERCENT * FULL_PERCENT_PROGRESS));
@@ -460,7 +461,7 @@ UpdaterStatus UpdaterFromSdcard(UpdaterParams &upParams)
         return UPDATE_SKIP;
     }
 
-    if (upParams.pkgLocation == 0 && VerifyPackages(upParams) != UPDATE_SUCCESS) {
+    if (VerifyPackages(upParams) != UPDATE_SUCCESS) {
         return UPDATE_ERROR;
     }
 #ifdef UPDATER_USE_PTABLE
