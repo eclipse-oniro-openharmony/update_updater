@@ -171,8 +171,8 @@ std::vector<uint64_t> GetStashSizeList(const UpdaterParams &upParams)
         PkgBuffer data {};
         outStream->GetBuffer(data);
         std::string str(reinterpret_cast<char*>(data.buffer), data.length);
-        int64_t max_stash_size = std::stoll(str);
-        stashSizeList.push_back(static_cast<uint64_t>(max_stash_size));
+        int64_t maxStashSize = std::stoll(str);
+        stashSizeList.push_back(static_cast<uint64_t>(maxStashSize));
         PkgManager::ReleasePackageInstance(pkgManager);
     }
     return stashSizeList;
