@@ -39,6 +39,7 @@ constexpr const char *UPDATER_HDC_LOG = "/data/updater/log/flashd_hdc.log";
 constexpr const char *PREFIX_UFS_NODE = "/dev/block/sd";
 constexpr const char *SDCARD_PACKAGE_SUFFIX = ".zip";
 constexpr const char *POWEROFF = "shutdown";
+constexpr const char *BOOTDEV_TYPE = "/proc/bootdevice/type";
 
 // update mode
 constexpr const char *SDCARD_MODE = "sdcard_update";
@@ -49,11 +50,15 @@ constexpr const char *SDCARD_CARD_PATH = "/sdcard/updater";
 constexpr const char *SDCARD_CARD_PKG_PATH = "/sdcard/updater/updater.zip";
 constexpr const char *DEFAULT_LOCALE = "en-US";
 constexpr const char *G_WORK_PATH = "/tmp/";
+constexpr const char *MMC_BLOCK_DEV_NAME = "/dev/block/mmcblk0";
+constexpr const char *MMC_SIZE_FILE = "/sys/class/block/mmcblk0/size";
 #else
 constexpr const char *SDCARD_CARD_PATH = "/data/sdcard/updater";
 constexpr const char *SDCARD_CARD_PKG_PATH = "/data/updater/updater/updater_full.zip";
 constexpr const char *G_WORK_PATH = "/data/updater/src/";
 constexpr const char *UT_VERSION = "OpenHarmony 3.2.9.1";
+constexpr const char *MMC_BLOCK_DEV_NAME = "/data/block/mmcblk0";
+constexpr const char *MMC_SIZE_FILE = "/data/class/block/mmcblk0/size";
 #endif
 constexpr int MAX_RETRY_COUNT = 4;
 constexpr int MINIMAL_ARGC_LIMIT = 2;

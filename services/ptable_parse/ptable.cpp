@@ -367,7 +367,7 @@ bool Ptable::CheckGptHeader(uint8_t *buffer, const uint32_t bufferLen, const uin
         LOG(ERROR) << "starting LBA mismatch";
         return false;
     }
-    LOG(INFO) << "ufs gpt header check ok";
+    LOG(INFO) << "gpt header check ok";
     return true;
 }
 
@@ -375,7 +375,8 @@ bool Ptable::PartitionCheckGptHeader(const uint8_t *gptImage, const uint32_t len
     const uint32_t blockSize, GPTHeaderInfo& gptHeaderInfo)
 {
     if (len < ptableData_.writeDeviceLunSize || lbaNum == 0) {
-        LOG(ERROR) << "len < ptableData_.writeDeviceLunSize || lbaNum == 0";
+        LOG(ERROR) << "len" << len << "ptableData_.writeDeviceLunSize" << ptableData_.writeDeviceLunSize
+          << "lbaNum" << lbaNum;
         return false;
     }
 
@@ -407,7 +408,7 @@ bool Ptable::PartitionCheckGptHeader(const uint8_t *gptImage, const uint32_t len
             orgCrcVal << std::dec;
         return false;
     }
-    LOG(INFO) << "UfsPartitionCheckGptHeader ok";
+    LOG(INFO) << "PartitionCheckGptHeader ok";
     return true;
 }
 

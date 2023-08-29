@@ -18,6 +18,7 @@
 
 #include "package/pkg_manager.h"
 #include "ufs_ptable.h"
+#include "emmc_ptable.h"
 
 namespace Updater {
 class PtableManager {
