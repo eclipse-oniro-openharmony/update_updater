@@ -155,6 +155,7 @@ static UpdaterStatus VerifyPackages(UpdaterParams &upParams)
         return UPDATE_CORRUPT;
     }
     upParams.callbackProgress(0.0);
+    upParams.installTime.resize(upParams.updatePackage.size(), std::chrono::duration<double>(0));
     for (unsigned int i = upParams.pkgLocation; i < upParams.updatePackage.size(); i++) {
         LOG(INFO) << "Verify package:" << upParams.updatePackage[i];
         auto startTime = std::chrono::system_clock::now();
@@ -166,12 +167,12 @@ static UpdaterStatus VerifyPackages(UpdaterParams &upParams)
             upParams.pkgLocation = i;
             UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_VERIFYPKGFAIL), true);
             auto endTime = std::chrono::system_clock::now();
-            upParams.installTime.push_back(endTime - startTime);
+            upParams.installTime[i] = endTime - startTime;
             UPDATER_LAST_WORD(UPDATE_CORRUPT);
             return UPDATE_CORRUPT;
         }
         auto endTime = std::chrono::system_clock::now();
-        upParams.installTime.push_back(endTime - startTime);
+        upParams.installTime[i] = endTime - startTime;
     }
 
     ProgressSmoothHandler(0, static_cast<int>(VERIFY_PERCENT * FULL_PERCENT_PROGRESS));
@@ -280,9 +281,9 @@ static UpdaterStatus CalcProgress(const UpdaterParams &upParams,
     for (const auto &path : upParams.updatePackage) {
         char realPath[PATH_MAX + 1] = {0};
         if (realpath(path.c_str(), realPath) == nullptr) {
-            LOG(ERROR) << "Can not find updatePackage : " << path;
-            UPDATER_LAST_WORD(UPDATE_ERROR);
-            return UPDATE_ERROR;
+            LOG(WARNING) << "Can not find updatePackage : " << path;
+            everyPkgSize.push_back(0);
+            continue;
         }
         struct stat st {};
         if (stat(realPath, &st) == 0) {
@@ -334,7 +335,7 @@ static UpdaterStatus PreUpdatePackages(UpdaterParams &upParams)
     }
 
     // Only handle UPATE_ERROR and UPDATE_SUCCESS here.Let package verify handle others.
-    if (IsSpaceCapacitySufficient(upParams.updatePackage) == UPDATE_ERROR) {
+    if (IsSpaceCapacitySufficient(upParams) == UPDATE_ERROR) {
         UPDATER_LAST_WORD(status);
         return status;
     }
@@ -460,7 +461,7 @@ UpdaterStatus UpdaterFromSdcard(UpdaterParams &upParams)
         return UPDATE_SKIP;
     }
 
-    if (upParams.pkgLocation == 0 && VerifyPackages(upParams) != UPDATE_SUCCESS) {
+    if (VerifyPackages(upParams) != UPDATE_SUCCESS) {
         return UPDATE_ERROR;
     }
 #ifdef UPDATER_USE_PTABLE

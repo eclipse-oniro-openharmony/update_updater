@@ -87,9 +87,9 @@ int GetUpdatePackageInfo(Hpackage::PkgManager::PkgManagerPtr pkgManager, const s
 int ExecUpdate(Hpackage::PkgManager::PkgManagerPtr pkgManager, int retry, const std::string &pkgPath,
     PostMessageFunction postMessage);
 
-UpdaterStatus IsSpaceCapacitySufficient(const std::vector<std::string> &packagePath);
+UpdaterStatus IsSpaceCapacitySufficient(const UpdaterParams &upParams);
 
-std::vector<uint64_t> GetStashSizeList(const std::vector<std::string> &packagePath);
+std::vector<uint64_t> GetStashSizeList(const UpdaterParams &upParams);
 
 void HandleChildOutput(const std::string &buffer, int32_t bufferLen, bool &retryUpdate, UpdaterParams &upParams);
 
