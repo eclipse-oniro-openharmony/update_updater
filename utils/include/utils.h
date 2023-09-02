@@ -77,7 +77,8 @@ bool DeleteOldFile(const std::string dest);
 void SaveLogs();
 std::vector<std::string> ParseParams(int argc, char **argv);
 bool CheckUpdateMode(const std::string &mode);
-std::string DurationToString(std::chrono::duration<double> duration, int precision = 2);
+std::string DurationToString(std::vector<std::chrono::duration<double>> &durations, std::size_t pkgPosition,
+    int precision = 2);
 
 #ifdef __cplusplus
 #if __cplusplus
