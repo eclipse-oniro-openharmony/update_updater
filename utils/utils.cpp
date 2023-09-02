@@ -750,10 +750,15 @@ bool CheckUpdateMode(const std::string &mode)
     return false;
 }
 
-std::string DurationToString(std::chrono::duration<double> duration, int precision)
+std::string DurationToString(std::vector<std::chrono::duration<double>> &durations, std::size_t pkgPosition,
+    int precision)
 {
+    if (pkgPosition >= durations.size()) {
+        LOG(ERROR) << "pkg position is " << pkgPosition << ", duration's size is " << durations.size();
+        return "0";
+    }
     std::ostringstream oss;
-    oss << std::fixed << std::setprecision(precision) << duration.count();
+    oss << std::fixed << std::setprecision(precision) << durations[pkgPosition].count();
     return oss.str();
 }
 } // Utils

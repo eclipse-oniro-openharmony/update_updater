@@ -278,6 +278,10 @@ static UpdaterStatus CalcProgress(const UpdaterParams &upParams,
     UPDATER_INIT_RECORD;
     int64_t allPkgSize = 0;
     std::vector<int64_t> everyPkgSize;
+    if (upParams.pkgLocation == upParams.updatePackage.size()) {
+        updateStartPosition = VERIFY_PERCENT;
+        return UPDATE_SUCCESS;
+    }
     for (const auto &path : upParams.updatePackage) {
         char realPath[PATH_MAX + 1] = {0};
         if (realpath(path.c_str(), realPath) == nullptr) {
@@ -317,6 +321,8 @@ static UpdaterStatus PreUpdatePackages(UpdaterParams &upParams)
     LOG(INFO) << "start to update packages, start index:" << upParams.pkgLocation;
 
     UpdaterStatus status = UPDATE_UNKNOWN;
+
+    upParams.installTime.resize(upParams.updatePackage.size(), std::chrono::duration<double>(0));
     if (SetupPartitions() != 0) {
         UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_SETPART_FAIL), true);
         UPDATER_LAST_WORD(UPDATE_ERROR);
@@ -326,6 +332,11 @@ static UpdaterStatus PreUpdatePackages(UpdaterParams &upParams)
     if (access(resultPath.c_str(), F_OK) != -1) {
         (void)DeleteFile(resultPath);
         LOG(INFO) << "deleate last upgrade file";
+    }
+
+    if(upParams.pkgLocation == upParams.updatePackage.size()) {
+        LOG(WARNING) << "all package has been upgraded, skip pre process";
+        return UPDATE_SUCCESS;
     }
 
     // verify packages first
@@ -357,12 +368,50 @@ static UpdaterStatus PreUpdatePackages(UpdaterParams &upParams)
     return UPDATE_SUCCESS;
 }
 
+static UpdaterStatus DoInstallPackages(UpdaterParams &upParams, std::vector<double> &pkgStartPosition)
+{
+    UpdaterStatus status = UPDATE_UNKNOWN;
+    if (upParams.pkgLocation == upParams.updatePackage.size()) {
+        LOG(WARNING) << "all packages has been installed, directly return success";
+        upParams.callbackProgress(FULL_PERCENT_PROGRESS);
+        return UPDATE_SUCCESS;
+    }
+    for (; upParams.pkgLocation < upParams.updatePackage.size(); upParams.pkgLocation++) {
+        PkgManager::PkgManagerPtr manager = PkgManager::CreatePackageInstance();
+        auto startTime = std::chrono::system_clock::now();
+        upParams.currentPercentage = pkgStartPosition[upParams.pkgLocation + 1] -
+            pkgStartPosition[upParams.pkgLocation];
+        upParams.initialProgress = pkgStartPosition[upParams.pkgLocation];
+        LOG(INFO) << "InstallUpdaterPackage pkg is " << upParams.updatePackage[upParams.pkgLocation] <<
+            " percent:" << upParams.initialProgress << "~" << pkgStartPosition[upParams.pkgLocation + 1];
+
+        status = InstallUpdaterPackage(upParams, manager);
+        SetMessageToMisc(upParams.miscCmd, upParams.pkgLocation + 1, "upgraded_pkg_num");
+        ProgressSmoothHandler(
+            static_cast<int>(upParams.initialProgress * FULL_PERCENT_PROGRESS +
+            upParams.currentPercentage * GetTmpProgressValue()),
+            static_cast<int>(pkgStartPosition[upParams.pkgLocation + 1] * FULL_PERCENT_PROGRESS));
+        auto endTime = std::chrono::system_clock::now();
+        upParams.installTime[upParams.pkgLocation] = upParams.installTime[upParams.pkgLocation] + endTime - startTime;
+        if (status != UPDATE_SUCCESS) {
+            LOG(ERROR) << "InstallUpdaterPackage failed! Pkg is " << upParams.updatePackage[upParams.pkgLocation];
+            if (!CheckDumpResult()) {
+                UPDATER_LAST_WORD(status);
+            }
+            PkgManager::ReleasePackageInstance(manager);
+            return status;
+        }
+        PkgManager::ReleasePackageInstance(manager);
+    }
+    return status;
+}
+
 UpdaterStatus DoUpdatePackages(UpdaterParams &upParams)
 {
     UPDATER_INIT_RECORD;
     UpdaterStatus status = UPDATE_UNKNOWN;
     std::vector<double> pkgStartPosition {};
-    double updateStartPosition;
+    double updateStartPosition = 0.0;
     status = CalcProgress(upParams, pkgStartPosition, updateStartPosition);
     if (status != UPDATE_SUCCESS) {
         UPDATER_LAST_WORD(status);
@@ -377,32 +426,10 @@ UpdaterStatus DoUpdatePackages(UpdaterParams &upParams)
         return UPDATE_CORRUPT;
     }
     upParams.callbackProgress(updateStartPosition * FULL_PERCENT_PROGRESS);
-    for (; upParams.pkgLocation < upParams.updatePackage.size(); upParams.pkgLocation++) {
-        PkgManager::PkgManagerPtr manager = PkgManager::CreatePackageInstance();
-        auto startTime = std::chrono::system_clock::now();
-        upParams.currentPercentage = pkgStartPosition[upParams.pkgLocation + 1] -
-            pkgStartPosition[upParams.pkgLocation];
-        upParams.initialProgress = pkgStartPosition[upParams.pkgLocation];
-        LOG(INFO) << "InstallUpdaterPackage pkg is " << upParams.updatePackage[upParams.pkgLocation] <<
-            " percent:" << upParams.initialProgress << "~" << pkgStartPosition[upParams.pkgLocation + 1];
-
-        status = InstallUpdaterPackage(upParams, manager);
-        SetMessageToMisc(upParams.miscCmd, upParams.pkgLocation + 1, "upgraded_pkg_num");
-        auto endTime = std::chrono::system_clock::now();
-        upParams.installTime[upParams.pkgLocation] = upParams.installTime[upParams.pkgLocation] + endTime - startTime;
-        ProgressSmoothHandler(
-            static_cast<int>(upParams.initialProgress * FULL_PERCENT_PROGRESS +
-            upParams.currentPercentage * GetTmpProgressValue()),
-            static_cast<int>(pkgStartPosition[upParams.pkgLocation + 1] * FULL_PERCENT_PROGRESS));
-        if (status != UPDATE_SUCCESS) {
-            LOG(ERROR) << "InstallUpdaterPackage failed! Pkg is " << upParams.updatePackage[upParams.pkgLocation];
-            if (!CheckDumpResult()) {
-                UPDATER_LAST_WORD(status);
-            }
-            PkgManager::ReleasePackageInstance(manager);
-            return status;
-        }
-        PkgManager::ReleasePackageInstance(manager);
+    status = DoInstallPackages(upParams, pkgStartPosition);
+    if (status != UPDATE_SUCCESS) {
+        UPDATER_LAST_WORD(status);
+        return status;
     }
     if (upParams.forceUpdate) {
         UPDATER_UI_INSTANCE.ShowLogRes(TR(LABEL_UPD_OK_SHUTDOWN));
@@ -429,10 +456,10 @@ static void PostUpdatePackages(UpdaterParams &upParams, bool updateResult)
     }
 
     for (unsigned int i = 0; i < upParams.pkgLocation; i++) {
-        time = DurationToString(upParams.installTime[i]);
+        time = DurationToString(upParams.installTime, i);
         writeBuffer += upParams.updatePackage[i] + "|pass||install_time=" + time + "|\n";
     }
-    time = DurationToString(upParams.installTime[upParams.pkgLocation]);
+    time = DurationToString(upParams.installTime, upParams.pkgLocation);
 
     writeBuffer += upParams.updatePackage[upParams.pkgLocation] + "|" + buf + "|install_time=" + time + "|\n";
     for (unsigned int i = upParams.pkgLocation + 1; i < upParams.updatePackage.size(); i++) {
@@ -453,6 +480,7 @@ UpdaterStatus UpdaterFromSdcard(UpdaterParams &upParams)
         LOG(ERROR) << "can not find sdcard packages";
         return UPDATE_ERROR;
     }
+    upParams.installTime.resize(upParams.updatePackage.size(), std::chrono::duration<double>(0));
     // verify packages first
     if (upParams.retryCount == 0 && !IsBatteryCapacitySufficient()) {
         UPDATER_UI_INSTANCE.ShowUpdInfo(TR(LOG_LOWPOWER));
