@@ -47,6 +47,7 @@
 #include "updater/updater_preprocess.h"
 #include "updater_ui_stub.h"
 #include "utils.h"
+#include "write_state/write_state.h"
 
 namespace Updater {
 using Utils::String2Int;
@@ -399,9 +400,17 @@ static UpdaterStatus DoInstallPackages(UpdaterParams &upParams, std::vector<doub
                 UPDATER_LAST_WORD(status);
             }
             PkgManager::ReleasePackageInstance(manager);
+            if (WriteResult(upParams.updatePackage[upParams.pkgLocation], "verify_faile") != UPDATE_SUCCESS) {
+                LOG(ERROR) << "write update result fail";
+                return UPDATE_ERROR;
+            }
             return status;
         }
         PkgManager::ReleasePackageInstance(manager);
+        if (WriteResult(upParams.updatePackage[upParams.pkgLocation], "verify_success") != UPDATE_SUCCESS) {
+            LOG(ERROR) << "write update result fail";
+            return UPDATE_ERROR;
+        }
     }
     return status;
 }
