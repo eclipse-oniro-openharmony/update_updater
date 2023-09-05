@@ -45,6 +45,16 @@ static bool WriteToMiscAndRebootToUpdater(const struct UpdateMessage &updateMsg)
 #endif
 }
 
+
+bool IsUpdateCommand(const std::string &path)
+{
+    if (path.find("--force_update_action=") != std::string::npos ||
+        path.find("--night_update") != std::string::npos) {
+            return true;
+        }
+    return false;
+}
+
 static bool AddPkgPath(struct UpdateMessage &msg, size_t updateOffset, const std::vector<std::string> &packageName)
 {
     for (auto path : packageName) {
@@ -53,8 +63,7 @@ static bool AddPkgPath(struct UpdateMessage &msg, size_t updateOffset, const std
             return false;
         }
         int ret;
-        if (path.find("--force_update_action=") != std::string::npos ||
-            path.find("--night_update") != std::string::npos) {
+        if (IsUpdateCommand(path)) {
             ret = snprintf_s(msg.update + updateOffset, sizeof(msg.update) - updateOffset,
                 sizeof(msg.update) - 1 - updateOffset, "%s\n", path.c_str());
         } else {
@@ -97,8 +106,7 @@ bool RebootAndInstallUpgradePackage(const std::string &miscFile, const std::vect
     }
 
     for (auto path : packageName) {
-        if (path.find("--force_update_action=") != std::string::npos ||
-            path.find("--night_update") != std::string::npos) {
+        if (IsUpdateCommand(path)) {
             continue;
         }
         if (access(path.c_str(), R_OK) < 0) {
