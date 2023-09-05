@@ -51,11 +51,12 @@ std::ostream &operator<<(std::ostream &os, const ProgressPage &info)
 
 std::unordered_map<std::string, UiStrategyCfg> UiStrategy::strategies_;
 std::vector<std::string> UiStrategy::modeStr_ = {
-    {UPDATREMODE_SDCARD},
-    {UPDATREMODE_FACTORYRST},
-    {UPDATREMODE_REBOOTFACTORYRST},
-    {UPDATREMODE_OTA},
-    {UPDATREMODE_RECOVER},
+    {UPDATERMODE_SDCARD},
+    {UPDATERMODE_FACTORYRST},
+    {UPDATERMODE_REBOOTFACTORYRST},
+    {UPDATERMODE_OTA},
+    {UPDATERMODE_RECOVER},
+    {UPDATERMODE_NIGHTUPDATE},
 };
 
 void UiStrategy::RegisterUiMode(const std::string &mode)

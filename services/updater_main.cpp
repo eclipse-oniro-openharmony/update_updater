@@ -584,15 +584,15 @@ static UpdaterStatus StartUpdater(const std::vector<std::string> &args,
                 std::string option = OPTIONS[optionIndex].name;
                 if (option == "update_package") {
                     upParams.updatePackage.push_back(optarg);
-                    (void)UPDATER_UI_INSTANCE.SetMode(UPDATREMODE_OTA);
+                    (void)UPDATER_UI_INSTANCE.SetMode(UPDATERMODE_OTA);
                     mode = HOTA_UPDATE;
                 } else if (option == "retry_count") {
                     upParams.retryCount = atoi(optarg);
                 } else if (option == "factory_wipe_data") {
-                    (void)UPDATER_UI_INSTANCE.SetMode(UPDATREMODE_REBOOTFACTORYRST);
+                    (void)UPDATER_UI_INSTANCE.SetMode(UPDATERMODE_REBOOTFACTORYRST);
                     upParams.factoryWipeData = true;
                 } else if (option == "user_wipe_data") {
-                    (void)UPDATER_UI_INSTANCE.SetMode(UPDATREMODE_REBOOTFACTORYRST);
+                    (void)UPDATER_UI_INSTANCE.SetMode(UPDATERMODE_REBOOTFACTORYRST);
                     upParams.userWipeData = true;
                 } else if (option == "upgraded_pkg_num") {
                     upParams.pkgLocation = static_cast<unsigned int>(atoi(optarg));
@@ -600,6 +600,9 @@ static UpdaterStatus StartUpdater(const std::vector<std::string> &args,
                     upParams.updateMode = SDCARD_UPDATE;
                 } else if (option == "force_update_action" && std::string(optarg) == POWEROFF) { /* Only for OTA. */
                     upParams.forceUpdate = true;
+                } else if (option == "night_update") {
+                    (void)UPDATER_UI_INSTANCE.SetMode(UPDATERMODE_NIGHTUPDATE);
+                    upParams.forceReboot = true;
                 }
                 break;
             }
@@ -611,7 +614,7 @@ static UpdaterStatus StartUpdater(const std::vector<std::string> &args,
     optind = 1;
     // Sanity checks
     if (upParams.updateMode == SDCARD_UPDATE) {
-        (void)UPDATER_UI_INSTANCE.SetMode(UPDATREMODE_SDCARD);
+        (void)UPDATER_UI_INSTANCE.SetMode(UPDATERMODE_SDCARD);
         mode = SDCARD_UPDATE;
     }
     if (upParams.factoryWipeData && upParams.userWipeData) {
@@ -644,6 +647,12 @@ int UpdaterMain(int argc, char **argv)
     if (status != UPDATE_SUCCESS && status != UPDATE_SKIP) {
         if (mode == HOTA_UPDATE) {
             UPDATER_UI_INSTANCE.ShowFailedPage();
+            if (upParams.forceReboot == true) {
+                Utils::UsSleep(5 * DISPLAY_TIME);
+                PostUpdater(true);
+                Utils::UpdaterDoReboot("");
+                return 0;
+            }
         } else if (mode == SDCARD_UPDATE) {
             UPDATER_UI_INSTANCE.ShowLogRes(
                 status == UPDATE_CORRUPT ? TR(LOGRES_VERIFY_FAILED) : TR(LOGRES_UPDATE_FAILED));
