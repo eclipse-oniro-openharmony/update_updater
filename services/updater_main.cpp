@@ -400,7 +400,7 @@ static UpdaterStatus DoInstallPackages(UpdaterParams &upParams, std::vector<doub
                 UPDATER_LAST_WORD(status);
             }
             PkgManager::ReleasePackageInstance(manager);
-            if (WriteResult(upParams.updatePackage[upParams.pkgLocation], "verify_faile") != UPDATE_SUCCESS) {
+            if (WriteResult(upParams.updatePackage[upParams.pkgLocation], "verify_fail") != UPDATE_SUCCESS) {
                 LOG(ERROR) << "write update result fail";
                 return UPDATE_ERROR;
             }
