@@ -69,30 +69,30 @@ HWTEST_F(UpdaterUiStrategyUnitTest, test_load_strategy_for_each_mode, TestSize.L
         ResPage {"upd:updateSuccess", "upd:normalUpdateFailed"}
     };
     std::unordered_map<std::string, Updater::UiStrategyCfg> expected {};
-    auto &sdCardCfg = expected[UPDATREMODE_SDCARD];
+    auto &sdCardCfg = expected[UPDATERMODE_SDCARD];
     sdCardCfg = defaultCfg;
     sdCardCfg.progressPage = ProgressPage {"upd:sdUpdate", "UpdBox_Progress", "bar",
         "OHOSIcon_Image", "img", "PowerLongPressWarning_Image"};
     sdCardCfg.labelLogResId = {"upd", "UpdateInfoDark_Label"};
     sdCardCfg.resPage = {"upd:updateSuccess", "upd:updateFailedNoButton"};
 
-    auto &factoryRstCfg = expected[UPDATREMODE_FACTORYRST];
+    auto &factoryRstCfg = expected[UPDATERMODE_FACTORYRST];
     factoryRstCfg = defaultCfg;
     factoryRstCfg.progressPage = ProgressPage {"upd:reset", "UpdBox_Progress", "bar", "OHOSIcon_Image", "img", ""};
     factoryRstCfg.labelLogResId = {"upd", "UpdateInfoDark_Label"};
     factoryRstCfg.labelUpdId = {"upd", "RstInfo_Label"};
     factoryRstCfg.resPage = {"menu:normal", "upd:FactoryRstFailed"};
 
-    auto &rebootFactoryRstCfg = expected[UPDATREMODE_REBOOTFACTORYRST];
+    auto &rebootFactoryRstCfg = expected[UPDATERMODE_REBOOTFACTORYRST];
     rebootFactoryRstCfg = defaultCfg;
     rebootFactoryRstCfg.labelLogResId = {"upd", "RstInfo_Label"};
     rebootFactoryRstCfg.progressPage = {"upd:reset", "UpdBox_Progress", "bar", "OHOSIcon_Image", "img", ""};
     rebootFactoryRstCfg.resPage = {"upd:reset", "upd:FactoryRstFailed"};
 
     EXPECT_EQ(UiStrategy::GetStrategy(), (std::unordered_map<std::string, Updater::UiStrategyCfg> {
-        {UPDATREMODE_SDCARD, sdCardCfg}, {UPDATREMODE_FACTORYRST, factoryRstCfg},
-        {UPDATREMODE_REBOOTFACTORYRST, rebootFactoryRstCfg}, {UPDATREMODE_OTA, defaultCfg},
-        {UPDATREMODE_RECOVER, defaultCfg}
+        {UPDATERMODE_SDCARD, sdCardCfg}, {UPDATERMODE_FACTORYRST, factoryRstCfg},
+        {UPDATERMODE_REBOOTFACTORYRST, rebootFactoryRstCfg}, {UPDATERMODE_OTA, defaultCfg},
+        {UPDATERMODE_RECOVER, defaultCfg}
     }));
 }
 } // namespace

@@ -45,6 +45,7 @@ struct UpdaterParams {
     bool factoryWipeData = false;
     bool userWipeData = false;
     bool forceUpdate = false;
+    bool forceReboot = false;
     PackageUpdateMode updateMode = HOTA_UPDATE;
     int retryCount = 0;
     float initialProgress = 0; /* The upgrade starts at the progress bar location */

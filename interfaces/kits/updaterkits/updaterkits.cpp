@@ -53,7 +53,8 @@ static bool AddPkgPath(struct UpdateMessage &msg, size_t updateOffset, const std
             return false;
         }
         int ret;
-        if (path.find("--force_update_action=") != std::string::npos) {
+        if (path.find("--force_update_action=") != std::string::npos ||
+            path.find("--night_update") != std::string::npos) {
             ret = snprintf_s(msg.update + updateOffset, sizeof(msg.update) - updateOffset,
                 sizeof(msg.update) - 1 - updateOffset, "%s\n", path.c_str());
         } else {
@@ -96,7 +97,8 @@ bool RebootAndInstallUpgradePackage(const std::string &miscFile, const std::vect
     }
 
     for (auto path : packageName) {
-        if (path.find("--force_update_action=") != std::string::npos) {
+        if (path.find("--force_update_action=") != std::string::npos ||
+            path.find("--night_update") != std::string::npos) {
             continue;
         }
         if (access(path.c_str(), R_OK) < 0) {
