@@ -48,6 +48,7 @@
 #include "updater_main.h"
 #include "updater_ui_stub.h"
 #include "utils.h"
+#include "write_state/write_state.h"
 
 namespace Updater {
 using Updater::Utils::SplitString;

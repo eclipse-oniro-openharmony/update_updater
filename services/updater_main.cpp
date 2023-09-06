@@ -47,7 +47,6 @@
 #include "updater/updater_preprocess.h"
 #include "updater_ui_stub.h"
 #include "utils.h"
-#include "write_state/write_state.h"
 
 namespace Updater {
 using Utils::String2Int;
