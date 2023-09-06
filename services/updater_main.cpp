@@ -63,6 +63,7 @@ constexpr struct option OPTIONS[] = {
     { "sdcard_update", no_argument, nullptr, 0 },
     { "upgraded_pkg_num", required_argument, nullptr, 0 },
     { "force_update_action", required_argument, nullptr, 0 },
+    { "night_update", no_argument, nullptr, 0 },
     { nullptr, 0, nullptr, 0 },
 };
 constexpr float VERIFY_PERCENT = 0.05;
