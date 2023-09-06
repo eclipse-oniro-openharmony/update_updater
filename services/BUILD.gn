@@ -41,6 +41,7 @@ updater_common_deps = [
   "${updater_path}/services/fs_manager:libfsmanager",
   "${updater_path}/services/log:libupdaterlog",
   "${updater_path}/services/package:libupdaterpackage",
+  "${updater_path}/services/write_state:libwritestate",
   "//third_party/bounds_checking_function:libsec_shared",
   "//third_party/bounds_checking_function:libsec_static",
   "//third_party/bzip2:libbz2",
@@ -71,7 +72,6 @@ ohos_executable("updater") {
     "${updater_path}/interfaces/kits/misc_info:libmiscinfo",
     "${updater_path}/services/sdcard_update:libsdupdate",
     "${updater_path}/services/ui:libui",
-    "${updater_path}/services/write_state:libwritestate",
     "//third_party/libdrm:libdrm",
     "//third_party/openssl:libcrypto_shared",
   ]

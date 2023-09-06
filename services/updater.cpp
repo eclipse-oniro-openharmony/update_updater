@@ -430,6 +430,24 @@ UpdaterStatus CheckProcStatus(pid_t pid, bool retryUpdate)
     return UPDATE_SUCCESS;
 }
 
+static UpdaterStatus PostUpdaterProc(UpdaterParams &upParams, int &pipeRead, pid_t &pid)
+{
+    bool retryUpdate = false;
+    if (HandlePipeMsg(upParams, pipeRead, retryUpdate) != UPDATE_SUCCESS) {
+        if (WriteResult(upParams.updatePackage[upParams.pkgLocation], "verify_fail") != UPDATE_SUCCESS) {
+            LOG(ERROR) << "write update result fail";
+            return UPDATE_ERROR;
+        }
+        return UPDATE_ERROR;
+    }
+    if (WriteResult(upParams.updatePackage[upParams.pkgLocation], "verify_success") != UPDATE_SUCCESS) {
+        LOG(ERROR) << "write update result fail";
+        return UPDATE_ERROR;
+    }
+
+    return CheckProcStatus(pid, retryUpdate);
+}
+
 UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, UpdaterParams &upParams, int &maxTemperature)
 {
     UPDATER_INIT_RECORD;
@@ -483,12 +501,7 @@ UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, UpdaterPara
     }
 
     close(pipeWrite); // close write endpoint
-    bool retryUpdate = false;
-    if (HandlePipeMsg(upParams, pipeRead, retryUpdate) != UPDATE_SUCCESS) {
-        return UPDATE_ERROR;
-    }
-
-    return CheckProcStatus(pid, retryUpdate);
+    return PostUpdaterProc(upParams, pipeRead, pid);
 }
 
 std::string GetWorkPath()
