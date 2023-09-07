@@ -274,7 +274,6 @@ UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, Upda
     if (WriteResult(upParams.updatePackage[upParams.pkgLocation],
         updateRet == UPDATE_SUCCESS ? "verify_success" : "verify_fail") != UPDATE_SUCCESS) {
         LOG(ERROR) << "write update state fail";
-        return UPDATE_ERROR;
     }
     return updateRet;
 }
