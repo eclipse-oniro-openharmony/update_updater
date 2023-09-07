@@ -41,6 +41,7 @@ updater_common_deps = [
   "${updater_path}/services/fs_manager:libfsmanager",
   "${updater_path}/services/log:libupdaterlog",
   "${updater_path}/services/package:libupdaterpackage",
+  "${updater_path}/services/write_state:libwritestate",
   "//third_party/bounds_checking_function:libsec_shared",
   "//third_party/bounds_checking_function:libsec_static",
   "//third_party/bzip2:libbz2",

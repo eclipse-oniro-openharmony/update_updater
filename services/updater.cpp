@@ -48,6 +48,7 @@
 #include "updater_main.h"
 #include "updater_ui_stub.h"
 #include "utils.h"
+#include "write_state/write_state.h"
 
 namespace Updater {
 using Updater::Utils::SplitString;
@@ -269,6 +270,10 @@ UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, Upda
     if (updateRet != UPDATE_SUCCESS) {
         UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_INSTALL_FAIL));
         LOG(ERROR) << "Install package failed.";
+    }
+    if (WriteResult(upParams.updatePackage[upParams.pkgLocation],
+        updateRet == UPDATE_SUCCESS ? "verify_success" : "verify_fail") != UPDATE_SUCCESS) {
+        LOG(ERROR) << "write update state fail";
     }
     return updateRet;
 }
