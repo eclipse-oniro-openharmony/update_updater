@@ -567,12 +567,57 @@ UpdaterStatus StartUpdaterEntry(UpdaterParams &upParams)
     return status;
 }
 
+
+std::unordered_map<std::string, std::function<void (UpdaterParams&)>> InitOptionsTab(char* &optarg, PackageUpdateMode &mode)
+{
+    std::unordered_map<std::string, std::function<void (UpdaterParams&)>> optionsFuncTab {
+        {"update_package", [&mode, &optarg](UpdaterParams &upParams) -> void
+        {
+            upParams.updatePackage.push_back(optarg);
+            (void)UPDATER_UI_INSTANCE.SetMode(UPDATREMODE_OTA);
+            mode = HOTA_UPDATE;
+        }},
+        {"retry_count", [&optarg](UpdaterParams &upParams) -> void
+        {
+            upParams.retryCount = atoi(optarg);
+        }},
+        {"factory_wipe_data", [](UpdaterParams &upParams) -> void
+        {
+            (void)UPDATER_UI_INSTANCE.SetMode(UPDATREMODE_REBOOTFACTORYRST);
+            upParams.factoryWipeData = true;
+        }},
+        {"user_wipe_data", [](UpdaterParams &upParams) -> void
+        {
+            (void)UPDATER_UI_INSTANCE.SetMode(UPDATREMODE_REBOOTFACTORYRST);
+            upParams.userWipeData = true;
+        }},
+        {"upgraded_pkg_num", [&optarg](UpdaterParams &upParams) -> void
+        {
+            upParams.pkgLocation = static_cast(atoi(optarg));
+        }},
+        {"sdcard_update", [](UpdaterParams &upParams) -> void
+        {
+            upParams.updateMode = SDCARD_UPDATE;
+        }},
+        {"force_update_action", [](UpdaterParams &upParams) -> void
+        {
+            upParams.forceUpdate = true;
+        }},
+        {"night_update", [](UpdaterParams &upParams) -> void
+        {
+            (void)UPDATER_UI_INSTANCE.SetMode(UPDATREMODE_NIGHTUPDATE);
+            upParams.forceReboot = true;
+        }}
+    };
+    return optionsFuncTab;
+}
 static UpdaterStatus StartUpdater(const std::vector<std::string> &args,
     char **argv, PackageUpdateMode &mode, UpdaterParams &upParams)
 {
     std::vector<char *> extractedArgs;
     int rc;
     int optionIndex;
+    auto optionsFuncTab = InitOptionsTab(optarg, mode);
 
     for (const auto &arg : args) {
         extractedArgs.push_back(const_cast<char *>(arg.c_str()));
@@ -583,27 +628,9 @@ static UpdaterStatus StartUpdater(const std::vector<std::string> &args,
         switch (rc) {
             case 0: {
                 std::string option = OPTIONS[optionIndex].name;
-                if (option == "update_package") {
-                    upParams.updatePackage.push_back(optarg);
-                    (void)UPDATER_UI_INSTANCE.SetMode(UPDATERMODE_OTA);
-                    mode = HOTA_UPDATE;
-                } else if (option == "retry_count") {
-                    upParams.retryCount = atoi(optarg);
-                } else if (option == "factory_wipe_data") {
-                    (void)UPDATER_UI_INSTANCE.SetMode(UPDATERMODE_REBOOTFACTORYRST);
-                    upParams.factoryWipeData = true;
-                } else if (option == "user_wipe_data") {
-                    (void)UPDATER_UI_INSTANCE.SetMode(UPDATERMODE_REBOOTFACTORYRST);
-                    upParams.userWipeData = true;
-                } else if (option == "upgraded_pkg_num") {
-                    upParams.pkgLocation = static_cast<unsigned int>(atoi(optarg));
-                } else if (option == "sdcard_update") {
-                    upParams.updateMode = SDCARD_UPDATE;
-                } else if (option == "force_update_action" && std::string(optarg) == POWEROFF) { /* Only for OTA. */
-                    upParams.forceUpdate = true;
-                } else if (option == "night_update") {
-                    (void)UPDATER_UI_INSTANCE.SetMode(UPDATERMODE_NIGHTUPDATE);
-                    upParams.forceReboot = true;
+                if (optionsFuncTab.find(option) != optionsFuncTab.end()) {
+                    auto optionsFunc = optionsFuncTab.at(option);
+                    optionsFunc(upParams);
                 }
                 break;
             }
@@ -648,8 +675,8 @@ int UpdaterMain(int argc, char **argv)
     if (status != UPDATE_SUCCESS && status != UPDATE_SKIP) {
         if (mode == HOTA_UPDATE) {
             UPDATER_UI_INSTANCE.ShowFailedPage();
-            if (upParams.forceReboot == true) {
-                Utils::UsSleep(5 * DISPLAY_TIME);
+            if (upParams.forceReboot) {
+                Utils::UsSleep(5 * DISPLAY_TIME); // 5 : 5s
                 PostUpdater(true);
                 Utils::UpdaterDoReboot("");
                 return 0;

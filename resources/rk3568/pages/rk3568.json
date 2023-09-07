@@ -93,12 +93,6 @@
                 "successPageId" : "upd:reset",
                 "failPageId" : "upd:FactoryRstFailed"
             }
-        },
-        "night_update" : {
-            "resPage" : {
-                "successPageId" : "upd:updateSuccess",
-                "failPageId" : "upd:updateFailedNoButton"
-            }
         }
     },
     "locale" : {

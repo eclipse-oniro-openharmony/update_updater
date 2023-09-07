@@ -45,14 +45,13 @@ static bool WriteToMiscAndRebootToUpdater(const struct UpdateMessage &updateMsg)
 #endif
 }
 
-
-bool IsUpdateCommand(const std::string &path)
+bool IsPackagePath(const std::string &path)
 {
     if (path.find("--force_update_action=") != std::string::npos ||
         path.find("--night_update") != std::string::npos) {
-            return true;
+            return false;
         }
-    return false;
+    return true;
 }
 
 static bool AddPkgPath(struct UpdateMessage &msg, size_t updateOffset, const std::vector<std::string> &packageName)
@@ -63,12 +62,12 @@ static bool AddPkgPath(struct UpdateMessage &msg, size_t updateOffset, const std
             return false;
         }
         int ret;
-        if (IsUpdateCommand(path)) {
-            ret = snprintf_s(msg.update + updateOffset, sizeof(msg.update) - updateOffset,
-                sizeof(msg.update) - 1 - updateOffset, "%s\n", path.c_str());
-        } else {
+        if (IsPackagePath(path)) {
             ret = snprintf_s(msg.update + updateOffset, sizeof(msg.update) - updateOffset,
                 sizeof(msg.update) - 1 - updateOffset, "--update_package=%s\n", path.c_str());
+        } else {
+            ret = snprintf_s(msg.update + updateOffset, sizeof(msg.update) - updateOffset,
+                sizeof(msg.update) - 1 - updateOffset, "%s\n", path.c_str());
         }
         if (ret < 0) {
             LOG(ERROR) << "updaterkits: copy updater message failed";
@@ -106,12 +105,11 @@ bool RebootAndInstallUpgradePackage(const std::string &miscFile, const std::vect
     }
 
     for (auto path : packageName) {
-        if (IsUpdateCommand(path)) {
-            continue;
-        }
-        if (access(path.c_str(), R_OK) < 0) {
+        if (IsPackagePath) {
+            if (access(path.c_str(), R_OK) < 0) {
             LOG(ERROR) << "updaterkits: " << path << " is not readable";
             return false;
+        }
         }
     }
     struct UpdateMessage updateMsg {};
