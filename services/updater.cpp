@@ -271,6 +271,11 @@ UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, Upda
         UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_INSTALL_FAIL));
         LOG(ERROR) << "Install package failed.";
     }
+    if (WriteResult(upParams.updatePackage[upParams.pkgLocation],
+        updateRet == UPDATE_SUCCESS ? "verify_success" : "verify_fail") != UPDATE_SUCCESS) {
+        LOG(ERROR) << "write update state fail";
+        return UPDATE_ERROR;
+    }
     return updateRet;
 }
 
@@ -502,7 +507,12 @@ UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, UpdaterPara
     }
 
     close(pipeWrite); // close write endpoint
-    return PostUpdaterProc(upParams, pipeRead, pid);
+    bool retryUpdate = false;
+    if (HandlePipeMsg(upParams, pipeRead, retryUpdate) != UPDATE_SUCCESS) {
+        return UPDATE_ERROR;
+    }
+
+    return CheckProcStatus(pid, retryUpdate);
 }
 
 std::string GetWorkPath()
