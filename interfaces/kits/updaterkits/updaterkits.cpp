@@ -109,7 +109,7 @@ bool RebootAndInstallUpgradePackage(const std::string &miscFile, const std::vect
             if (access(path.c_str(), R_OK) < 0) {
             LOG(ERROR) << "updaterkits: " << path << " is not readable";
             return false;
-        }
+            }
         }
     }
     struct UpdateMessage updateMsg {};

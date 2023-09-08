@@ -568,42 +568,43 @@ UpdaterStatus StartUpdaterEntry(UpdaterParams &upParams)
 }
 
 
-std::unordered_map<std::string, std::function<void (UpdaterParams&)>> InitOptionsTab(char* &optarg, PackageUpdateMode &mode)
+std::unordered_map<std::string, std::function<void ()>> InitOptionsTab(char* &optarg,
+    PackageUpdateMode &mode, UpdaterParams &upParams)
 {
-    std::unordered_map<std::string, std::function<void (UpdaterParams&)>> optionsFuncTab {
-        {"update_package", [&mode, &optarg](UpdaterParams &upParams) -> void
+    std::unordered_map<std::string, std::function<void ()>> optionsFuncTab {
+        {"update_package", [&]() -> void
         {
             upParams.updatePackage.push_back(optarg);
             (void)UPDATER_UI_INSTANCE.SetMode(UPDATREMODE_OTA);
             mode = HOTA_UPDATE;
         }},
-        {"retry_count", [&optarg](UpdaterParams &upParams) -> void
+        {"retry_count", [&]() -> void
         {
             upParams.retryCount = atoi(optarg);
         }},
-        {"factory_wipe_data", [](UpdaterParams &upParams) -> void
+        {"factory_wipe_data", [&]() -> void
         {
             (void)UPDATER_UI_INSTANCE.SetMode(UPDATREMODE_REBOOTFACTORYRST);
             upParams.factoryWipeData = true;
         }},
-        {"user_wipe_data", [](UpdaterParams &upParams) -> void
+        {"user_wipe_data", [&]() -> void
         {
             (void)UPDATER_UI_INSTANCE.SetMode(UPDATREMODE_REBOOTFACTORYRST);
             upParams.userWipeData = true;
         }},
-        {"upgraded_pkg_num", [&optarg](UpdaterParams &upParams) -> void
+        {"upgraded_pkg_num", [&]() -> void
         {
             upParams.pkgLocation = static_cast(atoi(optarg));
         }},
-        {"sdcard_update", [](UpdaterParams &upParams) -> void
+        {"sdcard_update", []() -> void
         {
             upParams.updateMode = SDCARD_UPDATE;
         }},
-        {"force_update_action", [](UpdaterParams &upParams) -> void
+        {"force_update_action", [&]() -> void
         {
             upParams.forceUpdate = true;
         }},
-        {"night_update", [](UpdaterParams &upParams) -> void
+        {"night_update", [&]() -> void
         {
             (void)UPDATER_UI_INSTANCE.SetMode(UPDATREMODE_NIGHTUPDATE);
             upParams.forceReboot = true;
@@ -617,7 +618,7 @@ static UpdaterStatus StartUpdater(const std::vector<std::string> &args,
     std::vector<char *> extractedArgs;
     int rc;
     int optionIndex;
-    auto optionsFuncTab = InitOptionsTab(optarg, mode);
+    auto optionsFuncTab = InitOptionsTab(optarg, mode, upParams);
 
     for (const auto &arg : args) {
         extractedArgs.push_back(const_cast<char *>(arg.c_str()));
@@ -630,7 +631,7 @@ static UpdaterStatus StartUpdater(const std::vector<std::string> &args,
                 std::string option = OPTIONS[optionIndex].name;
                 if (optionsFuncTab.find(option) != optionsFuncTab.end()) {
                     auto optionsFunc = optionsFuncTab.at(option);
-                    optionsFunc(upParams);
+                    optionsFunc();
                 }
                 break;
             }
