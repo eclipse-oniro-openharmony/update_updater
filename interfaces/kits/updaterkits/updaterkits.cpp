@@ -105,7 +105,7 @@ bool RebootAndInstallUpgradePackage(const std::string &miscFile, const std::vect
     }
 
     for (auto path : packageName) {
-        if (IsPackagePath) {
+        if (IsPackagePath(path)) {
             if (access(path.c_str(), R_OK) < 0) {
             LOG(ERROR) << "updaterkits: " << path << " is not readable";
             return false;
