@@ -574,7 +574,7 @@ std::unordered_map<std::string, std::function<void ()>> InitOptionsFuncTab(char*
         {"update_package", [&]() -> void
         {
             upParams.updatePackage.push_back(optarg);
-            (void)UPDATER_UI_INSTANCE.SetMode(UPDATREMODE_OTA);
+            (void)UPDATER_UI_INSTANCE.SetMode(UPDATERMODE_OTA);
             mode = HOTA_UPDATE;
         }},
         {"retry_count", [&]() -> void
@@ -583,19 +583,19 @@ std::unordered_map<std::string, std::function<void ()>> InitOptionsFuncTab(char*
         }},
         {"factory_wipe_data", [&]() -> void
         {
-            (void)UPDATER_UI_INSTANCE.SetMode(UPDATREMODE_REBOOTFACTORYRST);
+            (void)UPDATER_UI_INSTANCE.SetMode(UPDATERMODE_REBOOTFACTORYRST);
             upParams.factoryWipeData = true;
         }},
         {"user_wipe_data", [&]() -> void
         {
-            (void)UPDATER_UI_INSTANCE.SetMode(UPDATREMODE_REBOOTFACTORYRST);
+            (void)UPDATER_UI_INSTANCE.SetMode(UPDATERMODE_REBOOTFACTORYRST);
             upParams.userWipeData = true;
         }},
         {"upgraded_pkg_num", [&]() -> void
         {
             upParams.pkgLocation = static_cast(atoi(optarg));
         }},
-        {"sdcard_update", []() -> void
+        {"sdcard_update", [&]() -> void
         {
             upParams.updateMode = SDCARD_UPDATE;
         }},
@@ -605,7 +605,7 @@ std::unordered_map<std::string, std::function<void ()>> InitOptionsFuncTab(char*
         }},
         {"night_update", [&]() -> void
         {
-            (void)UPDATER_UI_INSTANCE.SetMode(UPDATREMODE_NIGHTUPDATE);
+            (void)UPDATER_UI_INSTANCE.SetMode(UPDATERMODE_NIGHTUPDATE);
             upParams.forceReboot = true;
         }}
     };
