@@ -567,7 +567,7 @@ UpdaterStatus StartUpdaterEntry(UpdaterParams &upParams)
     return status;
 }
 
-std::unordered_map<std::string, std::function<void ()>> InitOptionsFuncTab(char* &optarg,
+std::unordered_map<std::string, std::function<void ()>> InitOptionsFuncTab(std::string &optarg,
     PackageUpdateMode &mode, UpdaterParams &upParams)
 {
     std::unordered_map<std::string, std::function<void ()>> optionsFuncTab {
