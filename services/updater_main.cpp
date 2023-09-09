@@ -63,6 +63,7 @@ constexpr struct option OPTIONS[] = {
     { "sdcard_update", no_argument, nullptr, 0 },
     { "upgraded_pkg_num", required_argument, nullptr, 0 },
     { "force_update_action", required_argument, nullptr, 0 },
+    { "night_update", no_argument, nullptr, 0 },
     { nullptr, 0, nullptr, 0 },
 };
 constexpr float VERIFY_PERCENT = 0.05;
@@ -566,12 +567,58 @@ UpdaterStatus StartUpdaterEntry(UpdaterParams &upParams)
     return status;
 }
 
+std::unordered_map<std::string, std::function<void ()>> InitOptionsFuncTab(char* &optarg,
+    PackageUpdateMode &mode, UpdaterParams &upParams)
+{
+    std::unordered_map<std::string, std::function<void ()>> optionsFuncTab {
+        {"update_package", [&]() -> void
+        {
+            upParams.updatePackage.push_back(optarg);
+            (void)UPDATER_UI_INSTANCE.SetMode(UPDATERMODE_OTA);
+            mode = HOTA_UPDATE;
+        }},
+        {"retry_count", [&]() -> void
+        {
+            upParams.retryCount = atoi(optarg);
+        }},
+        {"factory_wipe_data", [&]() -> void
+        {
+            (void)UPDATER_UI_INSTANCE.SetMode(UPDATERMODE_REBOOTFACTORYRST);
+            upParams.factoryWipeData = true;
+        }},
+        {"user_wipe_data", [&]() -> void
+        {
+            (void)UPDATER_UI_INSTANCE.SetMode(UPDATERMODE_REBOOTFACTORYRST);
+            upParams.userWipeData = true;
+        }},
+        {"upgraded_pkg_num", [&]() -> void
+        {
+            upParams.pkgLocation = static_cast<unsigned int>(atoi(optarg));
+        }},
+        {"sdcard_update", [&]() -> void
+        {
+            upParams.updateMode = SDCARD_UPDATE;
+        }},
+        {"force_update_action", [&]() -> void
+        {
+            upParams.forceUpdate = true;
+        }},
+        {"night_update", [&]() -> void
+        {
+            (void)UPDATER_UI_INSTANCE.SetMode(UPDATERMODE_NIGHTUPDATE);
+            upParams.forceReboot = true;
+        }}
+    };
+    return optionsFuncTab;
+}
+
 static UpdaterStatus StartUpdater(const std::vector<std::string> &args,
     char **argv, PackageUpdateMode &mode, UpdaterParams &upParams)
 {
     std::vector<char *> extractedArgs;
     int rc;
     int optionIndex;
+    auto optionsFuncTab = InitOptionsFuncTab(optarg, mode, upParams);
 
     for (const auto &arg : args) {
         extractedArgs.push_back(const_cast<char *>(arg.c_str()));
@@ -582,24 +629,9 @@ static UpdaterStatus StartUpdater(const std::vector<std::string> &args,
         switch (rc) {
             case 0: {
                 std::string option = OPTIONS[optionIndex].name;
-                if (option == "update_package") {
-                    upParams.updatePackage.push_back(optarg);
-                    (void)UPDATER_UI_INSTANCE.SetMode(UPDATREMODE_OTA);
-                    mode = HOTA_UPDATE;
-                } else if (option == "retry_count") {
-                    upParams.retryCount = atoi(optarg);
-                } else if (option == "factory_wipe_data") {
-                    (void)UPDATER_UI_INSTANCE.SetMode(UPDATREMODE_REBOOTFACTORYRST);
-                    upParams.factoryWipeData = true;
-                } else if (option == "user_wipe_data") {
-                    (void)UPDATER_UI_INSTANCE.SetMode(UPDATREMODE_REBOOTFACTORYRST);
-                    upParams.userWipeData = true;
-                } else if (option == "upgraded_pkg_num") {
-                    upParams.pkgLocation = static_cast<unsigned int>(atoi(optarg));
-                } else if (option == "sdcard_update") {
-                    upParams.updateMode = SDCARD_UPDATE;
-                } else if (option == "force_update_action" && std::string(optarg) == POWEROFF) { /* Only for OTA. */
-                    upParams.forceUpdate = true;
+                if (optionsFuncTab.find(option) != optionsFuncTab.end()) {
+                    auto optionsFunc = optionsFuncTab.at(option);
+                    optionsFunc();
                 }
                 break;
             }
@@ -611,7 +643,7 @@ static UpdaterStatus StartUpdater(const std::vector<std::string> &args,
     optind = 1;
     // Sanity checks
     if (upParams.updateMode == SDCARD_UPDATE) {
-        (void)UPDATER_UI_INSTANCE.SetMode(UPDATREMODE_SDCARD);
+        (void)UPDATER_UI_INSTANCE.SetMode(UPDATERMODE_SDCARD);
         mode = SDCARD_UPDATE;
     }
     if (upParams.factoryWipeData && upParams.userWipeData) {
@@ -644,6 +676,12 @@ int UpdaterMain(int argc, char **argv)
     if (status != UPDATE_SUCCESS && status != UPDATE_SKIP) {
         if (mode == HOTA_UPDATE) {
             UPDATER_UI_INSTANCE.ShowFailedPage();
+            if (upParams.forceReboot) {
+                Utils::UsSleep(5 * DISPLAY_TIME); // 5 : 5s
+                PostUpdater(true);
+                Utils::UpdaterDoReboot("");
+                return 0;
+            }
         } else if (mode == SDCARD_UPDATE) {
             UPDATER_UI_INSTANCE.ShowLogRes(
                 status == UPDATE_CORRUPT ? TR(LOGRES_VERIFY_FAILED) : TR(LOGRES_UPDATE_FAILED));
