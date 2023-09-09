@@ -593,7 +593,7 @@ std::unordered_map<std::string, std::function<void ()>> InitOptionsFuncTab(char*
         }},
         {"upgraded_pkg_num", [&]() -> void
         {
-            upParams.pkgLocation = static_cast(atoi(optarg));
+            upParams.pkgLocation = static_cast<unsigned int>(atoi(optarg));
         }},
         {"sdcard_update", [&]() -> void
         {
