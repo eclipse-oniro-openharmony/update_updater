@@ -567,7 +567,7 @@ UpdaterStatus StartUpdaterEntry(UpdaterParams &upParams)
     return status;
 }
 
-std::unordered_map<std::string, std::function<void ()>> InitOptionsFuncTab(char* &optarg,
+std::unordered_map<std::string, std::function<void ()>> InitOptionsFuncTab(std::string &optarg,
     PackageUpdateMode &mode, UpdaterParams &upParams)
 {
     std::unordered_map<std::string, std::function<void ()>> optionsFuncTab {
@@ -579,7 +579,7 @@ std::unordered_map<std::string, std::function<void ()>> InitOptionsFuncTab(char*
         }},
         {"retry_count", [&]() -> void
         {
-            upParams.retryCount = atoi(optarg);
+            upParams.retryCount = atoi(optarg.c_str());
         }},
         {"factory_wipe_data", [&]() -> void
         {
@@ -593,7 +593,7 @@ std::unordered_map<std::string, std::function<void ()>> InitOptionsFuncTab(char*
         }},
         {"upgraded_pkg_num", [&]() -> void
         {
-            upParams.pkgLocation = static_cast<unsigned int>(atoi(optarg));
+            upParams.pkgLocation = static_cast<unsigned int>(atoi(optarg.c_str()));
         }},
         {"sdcard_update", [&]() -> void
         {
