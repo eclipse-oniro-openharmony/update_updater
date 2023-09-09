@@ -567,7 +567,7 @@ UpdaterStatus StartUpdaterEntry(UpdaterParams &upParams)
     return status;
 }
 
-std::unordered_map<std::string, std::function<void ()>> InitOptionsTab(char* &optarg,
+std::unordered_map<std::string, std::function<void ()>> InitOptionsFuncTab(char* &optarg,
     PackageUpdateMode &mode, UpdaterParams &upParams)
 {
     std::unordered_map<std::string, std::function<void ()>> optionsFuncTab {
@@ -618,7 +618,7 @@ static UpdaterStatus StartUpdater(const std::vector<std::string> &args,
     std::vector<char *> extractedArgs;
     int rc;
     int optionIndex;
-    auto optionsFuncTab = InitOptionsTab(optarg, mode, upParams);
+    auto optionsFuncTab = InitOptionsFuncTab(optarg, mode, upParams);
 
     for (const auto &arg : args) {
         extractedArgs.push_back(const_cast<char *>(arg.c_str()));
