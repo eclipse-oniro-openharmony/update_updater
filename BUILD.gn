@@ -53,3 +53,8 @@ group("unittest") {
     ]
   }
 }
+
+group("benchmarktest") {
+  testonly = true
+  deps = [ "test/benchmarktest:updater_benchmark_test" ]
+}
