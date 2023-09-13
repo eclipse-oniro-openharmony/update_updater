@@ -42,5 +42,19 @@ UpdaterStatus UpdaterFromSdcard(UpdaterParams &upParams);
 bool IsBatteryCapacitySufficient();
 
 UpdaterStatus InstallUpdaterPackages(UpdaterParams &upParams);
+
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif
+#endif /* __cplusplus */
+bool IsSupportOption([[maybe_unused]] const std::string &option);
+UpdaterStatus ProcessOtherOption([[maybe_unused]] const std::string &option,
+    [[maybe_unused]] UpdaterParams &upParams);
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif
+#endif /* __cplusplus */
 } // namespace Updater
 #endif // UPDATER_MAIN_H
