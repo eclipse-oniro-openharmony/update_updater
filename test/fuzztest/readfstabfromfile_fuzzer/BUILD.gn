@@ -17,7 +17,7 @@ import("//base/update/updater/updater_default_cfg.gni")
 import("//build/config/features.gni")
 import("//build/ohos.gni")
 import("//build/test.gni")
-module_output_path = "updater/read_fstab_from_file"
+module_output_path = "updater/updater"
 updater_path = rebase_path("${updater_absolutely_path}", ".")
 
 ##############################fuzztest##########################################

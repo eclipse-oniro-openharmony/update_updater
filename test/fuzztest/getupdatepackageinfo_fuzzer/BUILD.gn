@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-module_output_path = "updater/get_update_package_info"
+module_output_path = "updater/updater"
 
 import("//base/update/updater/updater_default_cfg.gni")
 
