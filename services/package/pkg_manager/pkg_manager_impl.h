@@ -130,6 +130,8 @@ private:
 
     int32_t DoCreatePkgStream(PkgStreamPtr &stream, const std::string &fileName, int32_t type);
 
+    const std::string GetExtraPath(const std::string &path);
+
 private:
     bool unzipToFile_ {false};
     std::vector<PkgFilePtr> pkgFiles_ {};

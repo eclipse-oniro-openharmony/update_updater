@@ -195,9 +195,9 @@ public:
         // verifier with null pkg manager
         HashDataVerifier verifier {nullptr};
         EXPECT_FALSE(verifier.LoadHashDataAndPkcs7(""));
-        EXPECT_FALSE(verifier.VerifyHashData("updater_binary", nullptr));
+        EXPECT_FALSE(verifier.VerifyHashData("build_tools/", "updater_binary", nullptr));
         FileStream filestream(nullptr, "", nullptr, PkgStream::PkgStreamType_Read);
-        EXPECT_FALSE(verifier.VerifyHashData("updater_binary", &filestream));
+        EXPECT_FALSE(verifier.VerifyHashData("build_tools/", "updater_binary", &filestream));
         return 0;
     }
 
@@ -245,8 +245,8 @@ public:
         PkgBuffer buffer{info->unpackedSize};
         EXPECT_EQ(PKG_SUCCESS, pkgManager_->CreatePkgStream(outStream, fileName, buffer)) << fileName;
         EXPECT_EQ(PKG_SUCCESS, pkgManager_->ExtractFile(fileName, outStream)) << fileName;
-        EXPECT_TRUE(verifier.VerifyHashData(fileName, outStream));
-        EXPECT_FALSE(verifier.VerifyHashData("invalid", outStream));
+        EXPECT_TRUE(verifier.VerifyHashData("build_tools/", fileName, outStream));
+        EXPECT_FALSE(verifier.VerifyHashData("build_tools/", "invalid", outStream));
         pkgManager_->ClosePkgStream(outStream);
         return 0;
     }

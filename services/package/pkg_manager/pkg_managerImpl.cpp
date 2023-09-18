@@ -326,6 +326,17 @@ int32_t PkgManagerImpl::LoadPackage(const std::string &packagePath, const std::s
     return PKG_SUCCESS;
 }
 
+const std::string PkgManagerImpl::GetExtraPath(const std::string &path)
+{
+    if (path.find(Updater::SDCARD_CARD_PATH) != string::npos) {
+        return path;
+    } else if (path == UPDATRE_SCRIPT_ZIP) {
+        return "/tmp/";
+    }
+
+    return string(Updater::UPDATER_PATH) + "/";
+}
+
 int32_t PkgManagerImpl::ExtraAndLoadPackage(const std::string &path, const std::string &name,
     PkgFile::PkgType type, std::vector<std::string> &fileIds)
 {
@@ -338,8 +349,7 @@ int32_t PkgManagerImpl::ExtraAndLoadPackage(const std::string &path, const std::
 
     PkgStreamPtr stream = nullptr;
     struct stat st {};
-    const std::string tempPath = path.find(Updater::SDCARD_CARD_PATH) != string::npos ?
-        path : (string(Updater::UPDATER_PATH) + "/");
+    const std::string tempPath = GetExtraPath(path);
     if (stat(tempPath.c_str(), &st) != 0) {
 #ifndef __WIN32
         (void)mkdir(tempPath.c_str(), 0775); // 0775 : rwxrwxr-x

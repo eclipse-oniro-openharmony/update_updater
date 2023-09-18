@@ -64,6 +64,7 @@ constexpr struct option OPTIONS[] = {
     { "upgraded_pkg_num", required_argument, nullptr, 0 },
     { "force_update_action", required_argument, nullptr, 0 },
     { "night_update", no_argument, nullptr, 0 },
+    { USB_MODE, no_argument, nullptr, 0 },
     { nullptr, 0, nullptr, 0 },
 };
 constexpr float VERIFY_PERCENT = 0.05;
@@ -612,6 +613,18 @@ std::unordered_map<std::string, std::function<void ()>> InitOptionsFuncTab(char*
     return optionsFuncTab;
 }
 
+__attribute__((weak)) bool IsSupportOption([[maybe_unused]] const std::string &option)
+{
+    LOG(INFO) << "option: " << option;
+    return false;
+}
+
+__attribute__((weak)) UpdaterStatus ProcessOtherOption([[maybe_unused]] const std::string &option,
+    [[maybe_unused]] UpdaterParams &upParams)
+{
+    return UPDATE_UNKNOWN;
+}
+
 static UpdaterStatus StartUpdater(const std::vector<std::string> &args,
     char **argv, PackageUpdateMode &mode, UpdaterParams &upParams)
 {
@@ -629,9 +642,12 @@ static UpdaterStatus StartUpdater(const std::vector<std::string> &args,
         switch (rc) {
             case 0: {
                 std::string option = OPTIONS[optionIndex].name;
+                LOG(INFO) << "option: " << option;
                 if (optionsFuncTab.find(option) != optionsFuncTab.end()) {
                     auto optionsFunc = optionsFuncTab.at(option);
                     optionsFunc();
+                } else if (IsSupportOption(option)) {
+                    return ProcessOtherOption(option, upParams);
                 }
                 break;
             }

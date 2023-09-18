@@ -77,7 +77,8 @@ int32_t ExtractUpdaterBinary(PkgManager::PkgManagerPtr manager, std::string &pac
         return UPDATE_CORRUPT;
     }
     HashDataVerifier verifier {manager};
-    if (!verifier.LoadHashDataAndPkcs7(packagePath) || !verifier.VerifyHashData(updaterBinary, outStream)) {
+    if (!verifier.LoadHashDataAndPkcs7(packagePath) ||
+        !verifier.VerifyHashData("build_tools/", updaterBinary, outStream)) {
         LOG(ERROR) << "verify updater_binary failed";
         UPDATER_LAST_WORD(UPDATE_CORRUPT);
         return UPDATE_CORRUPT;

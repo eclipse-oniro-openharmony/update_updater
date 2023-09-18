@@ -38,6 +38,10 @@ HashDataVerifier::~HashDataVerifier()
 bool HashDataVerifier::LoadHashDataAndPkcs7(const std::string &pkgPath)
 {
     Updater::UPDATER_INIT_RECORD;
+    if (pkgPath == UPDATRE_SCRIPT_ZIP) {
+        isNeedVerify_ = false;
+        return true;
+    }
     // only allow loading once
     if (hsd_ != nullptr) {
         PKG_LOGW("hash signed data has been loaded before");
@@ -59,6 +63,16 @@ bool HashDataVerifier::LoadHashDataAndPkcs7(const std::string &pkgPath)
         UPDATER_LAST_WORD(PKG_INVALID_FILE, pkgPath);
         return false;
     }
+    return true;
+}
+
+bool HashDataVerifier::LoadHashDataFromPackage(const std::string &buffer)
+{
+    if (buffer.length() == 0) {
+        PKG_LOGE("buffer is empty");
+        return false;
+    }
+    hsd_ = LoadHashSignedData(reinterpret_cast<const char *>(buffer.data()));
     return true;
 }
 
@@ -122,8 +136,12 @@ bool HashDataVerifier::LoadPkcs7FromPackage(const std::string &pkgPath)
     return pkcs7_ != nullptr && pkcs7_->ParsePkcs7Data(signature.data(), signature.size()) == 0;
 }
 
-bool HashDataVerifier::VerifyHashData(const std::string &fileName, PkgManager::StreamPtr stream) const
+bool HashDataVerifier::VerifyHashData(const std::string &preName,
+    const std::string &fileName, PkgManager::StreamPtr stream) const
 {
+    if (!isNeedVerify_) {
+        return true;
+    }
     Updater::UPDATER_INIT_RECORD;
     if (stream == nullptr) {
         PKG_LOGE("stream is null");
@@ -141,7 +159,7 @@ bool HashDataVerifier::VerifyHashData(const std::string &fileName, PkgManager::S
     }
 
     // get sig from hash data
-    std::string name = std::string("build_tools/") + fileName;
+    std::string name = preName + fileName;
     std::vector<uint8_t> sig(MAX_SIG_SIZE, 0);
     auto sigLen = GetSigFromHashData(hsd_, sig.data(), sig.size(), name.c_str());
     if (sigLen == 0 || sig.size() < sigLen) {

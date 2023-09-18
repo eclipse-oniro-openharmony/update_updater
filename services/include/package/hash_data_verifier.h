@@ -27,14 +27,16 @@ class HashDataVerifier final {
 public:
     HashDataVerifier(PkgManager::PkgManagerPtr manager);
     bool LoadHashDataAndPkcs7(const std::string &pkgPath);
-    bool VerifyHashData(const std::string &fileName, PkgManager::StreamPtr stream) const;
+    bool VerifyHashData(const std::string &preName, const std::string &fileName, PkgManager::StreamPtr stream) const;
+    bool LoadPkcs7FromPackage(const std::string &pkgPath);
+    bool LoadHashDataFromPackage(const std::string &buffer);
     ~HashDataVerifier();
 private:
-    bool LoadPkcs7FromPackage(const std::string &pkgPath);
     bool LoadHashDataFromPackage(void);
     PkgManager::PkgManagerPtr manager_ {nullptr};
     std::unique_ptr<Pkcs7SignedData> pkcs7_ {nullptr};
     const HashSignedData *hsd_ {nullptr};
+    bool isNeedVerify_ = true;
 };
 }
 
