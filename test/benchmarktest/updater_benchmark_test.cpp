@@ -28,12 +28,12 @@ constexpr uint32_t BYTE_SIZE = 255;
 
 class UpdaterBenchmarkTest : public benchmark::Fixture {
 public:
-     UpdaterBenchmarkTest() = default;
-     ~UpdaterBenchmarkTest() override = default;
-     void SetUp(const ::benchmark::State &state) override
-     {}
-     void TearDown(const ::benchmark::State &state) override
-     {}
+    UpdaterBenchmarkTest() = default;
+    ~UpdaterBenchmarkTest() override = default;
+    void SetUp(const ::benchmark::State &state) override
+    {}
+    void TearDown(const ::benchmark::State &state) override
+    {}
 };
 
 void ProducerTask(RingBuffer *ringBuffer)
