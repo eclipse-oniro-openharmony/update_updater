@@ -396,7 +396,7 @@ static UpdaterStatus DoInstallPackages(UpdaterParams &upParams, std::vector<doub
         upParams.installTime[upParams.pkgLocation] = upParams.installTime[upParams.pkgLocation] + endTime - startTime;
         if (status != UPDATE_SUCCESS) {
             LOG(ERROR) << "InstallUpdaterPackage failed! Pkg is " << upParams.updatePackage[upParams.pkgLocation];
-            if (!CheckDumpResult()) {
+            if (!CheckResultFail()) {
                 UPDATER_LAST_WORD(status);
             }
             PkgManager::ReleasePackageInstance(manager);

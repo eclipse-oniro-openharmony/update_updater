@@ -63,7 +63,7 @@ bool WriteStringToFile(int fd, const std::string& content);
 std::string GetLocalBoardId();
 bool CopyUpdaterLogs(const std::string &sLog, const std::string &dLog);
 void CompressLogs(const std::string &name);
-bool CheckDumpResult();
+bool CheckResultFail();
 void WriteDumpResult(const std::string &result);
 bool PathToRealPath(const std::string &path, std::string &realPath);
 void UsSleep(int usec);

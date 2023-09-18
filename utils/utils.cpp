@@ -378,6 +378,7 @@ bool CopyFile(const std::string &src, const std::string &dest, bool isAppend)
         return false;
     }
     fout.flush();
+    SetFileAttributes(dest);
     return true;
 }
 
@@ -432,6 +433,7 @@ void CompressLogs(const std::string &logName)
         PkgManager::ReleasePackageInstance(pkgManager);
         return;
     }
+    SetFileAttributes(pkgName);
     (void)DeleteFile(logName);
     PkgManager::ReleasePackageInstance(pkgManager);
 }
@@ -498,14 +500,17 @@ bool CopyUpdaterLogs(const std::string &sLog, const std::string &dLog)
     return true;
 }
 
-bool CheckDumpResult()
+bool CheckResultFail()
 {
     std::ifstream ifs;
     const std::string resultPath = std::string(UPDATER_PATH) + "/" + std::string(UPDATER_RESULT_FILE);
     ifs.open(resultPath, std::ios::in);
     std::string buff;
-    if (ifs.is_open() && getline(ifs, buff) && buff.find("fail|") != std::string::npos) {
-        return true;
+    while (ifs.is_open() && getline(ifs, buff)) {
+        if (buff.find("fail|") != std::string::npos) {
+            ifs.close();
+            return true;
+        }
     }
     LOG(ERROR) << "open result file failed";
     return false;
@@ -760,6 +765,17 @@ std::string DurationToString(std::vector<std::chrono::duration<double>> &duratio
     std::ostringstream oss;
     oss << std::fixed << std::setprecision(precision) << durations[pkgPosition].count();
     return oss.str();
+}
+
+void SetFileAttributes(const std::string& file)
+{
+#ifdef WITH_SELINUX
+    RestoreconRecurse(destPath.c_str());
+#endif // WITH_SELINUX
+    if (chown(file.c_str(), USER_UPDATE_AUTHORITY, USER_UPDATE_AUTHORITY) != 0 &&
+        chmod(file.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != EOK) {
+                LOG(ERROR) << "Chmod failed!";
+    }
 }
 } // Utils
 } // namespace Updater
