@@ -36,7 +36,7 @@ private:
     PkgManager::PkgManagerPtr manager_ {nullptr};
     std::unique_ptr<Pkcs7SignedData> pkcs7_ {nullptr};
     const HashSignedData *hsd_ {nullptr};
-    bool isNeedVerify = true;
+    bool isNeedVerify_ = true;
 };
 }
 
