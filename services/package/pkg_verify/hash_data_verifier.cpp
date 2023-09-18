@@ -39,7 +39,7 @@ bool HashDataVerifier::LoadHashDataAndPkcs7(const std::string &pkgPath)
 {
     Updater::UPDATER_INIT_RECORD;
     if (pkgPath == UPDATRE_SCRIPT_ZIP) {
-        isNeedVerify = false;
+        isNeedVerify_ = false;
         return true;
     }
     // only allow loading once
@@ -139,7 +139,7 @@ bool HashDataVerifier::LoadPkcs7FromPackage(const std::string &pkgPath)
 bool HashDataVerifier::VerifyHashData(const std::string &preName,
     const std::string &fileName, PkgManager::StreamPtr stream) const
 {
-    if (!isNeedVerify) {
+    if (!isNeedVerify_) {
         return true;
     }
     Updater::UPDATER_INIT_RECORD;
