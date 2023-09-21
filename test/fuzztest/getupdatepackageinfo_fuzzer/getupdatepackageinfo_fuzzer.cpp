@@ -28,7 +28,7 @@ namespace OHOS {
     void FuzzGetUpdatePackageInfo(const uint8_t* data, size_t size)
     {
         Hpackage::PkgManager::PkgManagerPtr pkgManager = Hpackage::PkgManager::CreatePackageInstance();
-        GetUpdatePackageInfo(pkgManager, std::string(reinterpret_cast<const char*>(data)));
+        GetUpdatePackageInfo(pkgManager, std::string(reinterpret_cast<const char*>(data), size));
         Hpackage::PkgManager::ReleasePackageInstance(pkgManager);
     }
 }

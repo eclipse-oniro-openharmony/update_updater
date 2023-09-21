@@ -31,7 +31,7 @@ namespace OHOS {
     {
         CloseStdout();
         LoadSpecificFstab("/data/fuzz/test/MountForPath_fuzzer.fstable");
-        MountForPath(reinterpret_cast<const char*>(data));
+        MountForPath(std::string(reinterpret_cast<const char*>(data), size));
     }
 }
 

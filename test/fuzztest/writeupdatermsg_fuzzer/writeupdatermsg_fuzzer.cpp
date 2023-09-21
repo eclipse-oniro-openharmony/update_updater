@@ -28,7 +28,7 @@ namespace OHOS {
     void FuzzWriteUpdaterMsg(const uint8_t* data, size_t size)
     {
         UpdateMessage boot;
-        if (strcpy_s(boot.update, MAX_UPDATE_SIZE - 1, reinterpret_cast<const char*>(data)) != EOK) {
+        if (memcpy_s(boot.update, MAX_UPDATE_SIZE - 1, reinterpret_cast<const char*>(data), size) != EOK) {
             return;
         }
         ReadUpdaterMiscMsg(boot);
