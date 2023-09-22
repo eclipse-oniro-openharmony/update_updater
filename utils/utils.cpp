@@ -432,7 +432,8 @@ void CompressLogs(const std::string &logName)
         PkgManager::ReleasePackageInstance(pkgManager);
         return;
     }
-    SetFileAttributes(pkgName, USER_UPDATE_AUTHORITY, GROUP_UPDATE_AUTHORITY, 0640);
+    mode_t mode = 0640;
+    SetFileAttributes(pkgName, USER_UPDATE_AUTHORITY, GROUP_UPDATE_AUTHORITY, mode);
     (void)DeleteFile(logName);
     PkgManager::ReleasePackageInstance(pkgManager);
 }
