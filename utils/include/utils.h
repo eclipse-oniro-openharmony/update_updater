@@ -79,6 +79,7 @@ std::vector<std::string> ParseParams(int argc, char **argv);
 bool CheckUpdateMode(const std::string &mode);
 std::string DurationToString(std::vector<std::chrono::duration<double>> &durations, std::size_t pkgPosition,
     int precision = 2);
+void SetFileAttributes(const std::string& file, uid_t owner, gid_t group, mode_t mode);
 
 #ifdef __cplusplus
 #if __cplusplus

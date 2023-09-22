@@ -378,7 +378,6 @@ bool CopyFile(const std::string &src, const std::string &dest, bool isAppend)
         return false;
     }
     fout.flush();
-    SetFileAttributes(dest);
     return true;
 }
 
@@ -433,7 +432,7 @@ void CompressLogs(const std::string &logName)
         PkgManager::ReleasePackageInstance(pkgManager);
         return;
     }
-    SetFileAttributes(pkgName);
+    SetFileAttributes(pkgName, USER_UPDATE_AUTHORITY, GROUP_UPDATE_AUTHORITY, 0640);
     (void)DeleteFile(logName);
     PkgManager::ReleasePackageInstance(pkgManager);
 }
@@ -767,13 +766,13 @@ std::string DurationToString(std::vector<std::chrono::duration<double>> &duratio
     return oss.str();
 }
 
-void SetFileAttributes(const std::string& file)
+void SetFileAttributes(const std::string& file, uid_t owner, gid_t group, mode_t mode)
 {
 #ifdef WITH_SELINUX
-    RestoreconRecurse(destPath.c_str());
+    RestoreconRecurse(file.c_str());
 #endif // WITH_SELINUX
-    if (chown(file.c_str(), USER_UPDATE_AUTHORITY, USER_UPDATE_AUTHORITY) != 0 &&
-        chmod(file.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != EOK) {
+    if (chown(file.c_str(), owner, group) != 0 &&
+        chmod(file.c_str(), mode) != EOK) {
                 LOG(ERROR) << "Chmod failed!";
     }
 }
