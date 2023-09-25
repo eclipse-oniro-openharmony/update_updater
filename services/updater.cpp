@@ -492,6 +492,6 @@ std::string GetWorkPath()
         return G_WORK_PATH;
     }
 
-    return std::string(UPDATER_PATH) + "/";
+    return std::string(SYS_INSTALLER_PATH) + "/";
 }
 } // namespace Updater
