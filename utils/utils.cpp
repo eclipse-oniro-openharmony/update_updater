@@ -433,7 +433,9 @@ void CompressLogs(const std::string &logName)
         return;
     }
     mode_t mode = 0640;
+#ifndef __WIN32
     SetFileAttributes(pkgName, USER_UPDATE_AUTHORITY, GROUP_UPDATE_AUTHORITY, mode);
+#endif
     (void)DeleteFile(logName);
     PkgManager::ReleasePackageInstance(pkgManager);
 }
@@ -767,6 +769,7 @@ std::string DurationToString(std::vector<std::chrono::duration<double>> &duratio
     return oss.str();
 }
 
+#ifndef __WIN32
 void SetFileAttributes(const std::string& file, uid_t owner, gid_t group, mode_t mode)
 {
 #ifdef WITH_SELINUX
@@ -777,5 +780,6 @@ void SetFileAttributes(const std::string& file, uid_t owner, gid_t group, mode_t
                 LOG(ERROR) << "Chmod failed!";
     }
 }
+#endif
 } // Utils
 } // namespace Updater
