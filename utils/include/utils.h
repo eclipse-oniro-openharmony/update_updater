@@ -63,7 +63,7 @@ bool WriteStringToFile(int fd, const std::string& content);
 std::string GetLocalBoardId();
 bool CopyUpdaterLogs(const std::string &sLog, const std::string &dLog);
 void CompressLogs(const std::string &name);
-bool CheckDumpResult();
+bool CheckResultFail();
 void WriteDumpResult(const std::string &result);
 bool PathToRealPath(const std::string &path, std::string &realPath);
 void UsSleep(int usec);
@@ -79,6 +79,9 @@ std::vector<std::string> ParseParams(int argc, char **argv);
 bool CheckUpdateMode(const std::string &mode);
 std::string DurationToString(std::vector<std::chrono::duration<double>> &durations, std::size_t pkgPosition,
     int precision = 2);
+#ifndef __WIN32
+void SetFileAttributes(const std::string& file, uid_t owner, gid_t group, mode_t mode);
+#endif
 
 #ifdef __cplusplus
 #if __cplusplus

@@ -432,6 +432,10 @@ void CompressLogs(const std::string &logName)
         PkgManager::ReleasePackageInstance(pkgManager);
         return;
     }
+    mode_t mode = 0640;
+#ifndef __WIN32
+    SetFileAttributes(pkgName, USER_UPDATE_AUTHORITY, GROUP_UPDATE_AUTHORITY, mode);
+#endif
     (void)DeleteFile(logName);
     PkgManager::ReleasePackageInstance(pkgManager);
 }
@@ -498,14 +502,17 @@ bool CopyUpdaterLogs(const std::string &sLog, const std::string &dLog)
     return true;
 }
 
-bool CheckDumpResult()
+bool CheckResultFail()
 {
     std::ifstream ifs;
     const std::string resultPath = std::string(UPDATER_PATH) + "/" + std::string(UPDATER_RESULT_FILE);
     ifs.open(resultPath, std::ios::in);
     std::string buff;
-    if (ifs.is_open() && getline(ifs, buff) && buff.find("fail|") != std::string::npos) {
-        return true;
+    while (ifs.is_open() && getline(ifs, buff)) {
+        if (buff.find("fail|") != std::string::npos) {
+            ifs.close();
+            return true;
+        }
     }
     LOG(ERROR) << "open result file failed";
     return false;
@@ -761,5 +768,17 @@ std::string DurationToString(std::vector<std::chrono::duration<double>> &duratio
     oss << std::fixed << std::setprecision(precision) << durations[pkgPosition].count();
     return oss.str();
 }
+
+#ifndef __WIN32
+void SetFileAttributes(const std::string& file, uid_t owner, gid_t group, mode_t mode)
+{
+#ifdef WITH_SELINUX
+    RestoreconRecurse(file.c_str());
+#endif // WITH_SELINUX
+    if (chown(file.c_str(), owner, group) != 0 && chmod(file.c_str(), mode) != EOK) {
+        LOG(ERROR) << "Chmod failed!";
+    }
+}
+#endif
 } // Utils
 } // namespace Updater
