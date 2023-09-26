@@ -31,7 +31,7 @@ namespace OHOS {
     {
         CloseStdout();
         LoadSpecificFstab("/data/fuzz/test/FormatPartition_fuzzer.fstable");
-        FormatPartition(reinterpret_cast<const char*>(data));
+        FormatPartition(std::string(reinterpret_cast<const char*>(data), size), false);
     }
 }
 

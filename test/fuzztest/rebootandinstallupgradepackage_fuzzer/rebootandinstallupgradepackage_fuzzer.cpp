@@ -28,9 +28,9 @@ namespace OHOS {
     void FuzzUpdaterKits(const uint8_t* data, size_t size)
     {
         // const std::string miscFile = "/dev/block/by_name/misc";
-        const std::vector<std::string> packageName {std::string(reinterpret_cast<const char*>(data))};
+        const std::vector<std::string> packageName {std::string(reinterpret_cast<const char*>(data), size)};
         RebootAndInstallUpgradePackage("", packageName);
-        RebootAndCleanUserData("", std::string(reinterpret_cast<const char*>(data)));
+        RebootAndCleanUserData("", std::string(reinterpret_cast<const char*>(data), size));
     }
 }
 

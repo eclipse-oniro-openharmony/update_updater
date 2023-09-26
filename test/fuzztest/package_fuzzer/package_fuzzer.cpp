@@ -33,27 +33,26 @@ namespace OHOS {
         const std::string keyPath = "/data/fuzz/test/signing_cert.crt";
         const std::string pkgPath = "/data/fuzz/test/updater.zip";
         const std::string pkgDir = "/data/fuzz/test";
-        VerifyPackage(reinterpret_cast<const char*>(data), keyPath.c_str(), "", digest.data(), digest.capacity());
-        VerifyPackage(pkgPath.c_str(), reinterpret_cast<const char*>(data), "", digest.data(), digest.capacity());
-        VerifyPackage(pkgPath.c_str(), keyPath.c_str(), reinterpret_cast<const char*>(data),
-            digest.data(), digest.capacity());
+        const std::string dataInfo = std::string(reinterpret_cast<const char*>(data), size);
+        VerifyPackage(dataInfo.c_str(), keyPath.c_str(), "", digest.data(), digest.capacity());
+        VerifyPackage(pkgPath.c_str(), dataInfo.c_str(), "", digest.data(), digest.capacity());
+        VerifyPackage(pkgPath.c_str(), keyPath.c_str(), dataInfo.c_str(), digest.data(), digest.capacity());
         VerifyPackage(pkgPath.c_str(), keyPath.c_str(), "", data, size);
 
-        VerifyPackageWithCallback(reinterpret_cast<const char*>(data), keyPath.c_str(),
+        VerifyPackageWithCallback(dataInfo.c_str(), keyPath.c_str(),
             [](int32_t result, uint32_t percent) {});
-        VerifyPackageWithCallback(pkgPath, reinterpret_cast<const char*>(data),
-            [](int32_t result, uint32_t percent) {});
+        VerifyPackageWithCallback(pkgPath, dataInfo.c_str(), [](int32_t result, uint32_t percent) {});
 
-        ExtraPackageDir(reinterpret_cast<const char*>(data), keyPath.c_str(), nullptr, pkgDir.c_str());
-        ExtraPackageDir(pkgPath.c_str(), reinterpret_cast<const char*>(data), nullptr, pkgDir.c_str());
-        ExtraPackageDir(pkgPath.c_str(), keyPath.c_str(), reinterpret_cast<const char*>(data), pkgDir.c_str());
-        ExtraPackageDir(pkgPath.c_str(), keyPath.c_str(), nullptr, reinterpret_cast<const char*>(data));
+        ExtraPackageDir(dataInfo.c_str(), keyPath.c_str(), nullptr, pkgDir.c_str());
+        ExtraPackageDir(pkgPath.c_str(), dataInfo.c_str(), nullptr, pkgDir.c_str());
+        ExtraPackageDir(pkgPath.c_str(), keyPath.c_str(), dataInfo.c_str(), pkgDir.c_str());
+        ExtraPackageDir(pkgPath.c_str(), keyPath.c_str(), nullptr, dataInfo.c_str());
 
         const std::string file = "updater.bin";
-        ExtraPackageFile(reinterpret_cast<const char*>(data), keyPath.c_str(), file.c_str(), pkgDir.c_str());
-        ExtraPackageFile(pkgPath.c_str(), reinterpret_cast<const char*>(data), file.c_str(), pkgDir.c_str());
-        ExtraPackageFile(pkgPath.c_str(), keyPath.c_str(), reinterpret_cast<const char*>(data), pkgDir.c_str());
-        ExtraPackageFile(pkgPath.c_str(), keyPath.c_str(), file.c_str(), reinterpret_cast<const char*>(data));
+        ExtraPackageFile(dataInfo.c_str(), keyPath.c_str(), file.c_str(), pkgDir.c_str());
+        ExtraPackageFile(pkgPath.c_str(), dataInfo.c_str(), file.c_str(), pkgDir.c_str());
+        ExtraPackageFile(pkgPath.c_str(), keyPath.c_str(), dataInfo.c_str(), pkgDir.c_str());
+        ExtraPackageFile(pkgPath.c_str(), keyPath.c_str(), file.c_str(), dataInfo.c_str());
     }
 }
 
