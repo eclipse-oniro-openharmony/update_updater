@@ -79,6 +79,8 @@ std::vector<std::string> ParseParams(int argc, char **argv);
 bool CheckUpdateMode(const std::string &mode);
 std::string DurationToString(std::vector<std::chrono::duration<double>> &durations, std::size_t pkgPosition,
     int precision = 2);
+std::string GetRealPath(const std::string &path);
+std::string GetPartitionRealPath(const std::string &name);
 #ifndef __WIN32
 void SetFileAttributes(const std::string& file, uid_t owner, gid_t group, mode_t mode);
 #endif

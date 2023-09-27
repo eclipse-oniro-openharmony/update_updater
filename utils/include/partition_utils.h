@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,19 +13,24 @@
  * limitations under the License.
  */
 
-#ifndef FLASHD_UTILS_H
-#define FLASHD_UTILS_H
+#ifndef PARTITION_UTILS_H
+#define PARTITION_UTILS_H
 
 #include <string>
-#include <vector>
+#include <unistd.h>
 
-namespace Flashd {
-std::string GetPathRoot(const std::string &path);
+namespace Updater {
+namespace Utils {
+class PartitionUtils {
+public:
+    explicit PartitionUtils(const std::string &devName) : devName_(devName) {}
+    ~PartitionUtils() {};
+    int WipeBlockPartition() const;
+    uint64_t GetBlockDeviceSize(int fd) const;
 
-std::string GetFileName(const std::string &path);
-
-std::vector<std::string> Split(const std::string &src, const std::vector<std::string> &filter);
-
-void SafeCloseFile(int &fd);
-} // namespace Flashd
-#endif
+private:
+    std::string devName_ = "";
+};
+} // Utils
+} // Updater
+#endif // PARTITION_UTILS_H

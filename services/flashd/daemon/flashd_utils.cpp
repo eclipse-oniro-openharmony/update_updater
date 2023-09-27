@@ -20,20 +20,6 @@
 #include "securec.h"
 
 namespace Flashd {
-constexpr const char *PREFIX_PARTITION_NODE = "/dev/block/by-name/";
-
-std::string GetRealPath(const std::string &path)
-{
-    char realPath[PATH_MAX + 1] = {0};
-    auto ret = realpath(path.c_str(), realPath);
-    return (ret == nullptr) ? "" : ret;
-}
-
-std::string GetPartitionRealPath(const std::string &name)
-{
-    return GetRealPath(PREFIX_PARTITION_NODE + name);
-}
-
 std::string GetPathRoot(const std::string &path)
 {
     auto pos = path.find_first_of('/', 1);
