@@ -54,12 +54,12 @@ updater_common_deps = [
 ohos_executable("updater") {
   defines = [ "BUILD_OHOS" ]
   sources = [
+    "factory_reset/factory_reset.cpp",
     "main.cpp",
     "updater.cpp",
     "updater_main.cpp",
     "updater_preprocess.cpp",
     "updater_utils.cpp",
-    "factory_reset/factory_reset.cpp",
   ]
 
   if (updater_ui_support) {
@@ -147,10 +147,10 @@ config("libupdater_exported_headers") {
 ohos_static_library("libupdater") {
   defines = [ "BUILD_OHOS" ]
   sources = [
+    "factory_reset/factory_reset.cpp",
     "updater.cpp",
     "updater_preprocess.cpp",
     "updater_utils.cpp",
-    "factory_reset/factory_reset.cpp",
   ]
 
   include_dirs = updater_common_include
