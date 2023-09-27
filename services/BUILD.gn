@@ -59,6 +59,7 @@ ohos_executable("updater") {
     "updater_main.cpp",
     "updater_preprocess.cpp",
     "updater_utils.cpp",
+    "factory_reset/factory_reset.cpp",
   ]
 
   if (updater_ui_support) {
@@ -149,6 +150,7 @@ ohos_static_library("libupdater") {
     "updater.cpp",
     "updater_preprocess.cpp",
     "updater_utils.cpp",
+    "factory_reset/factory_reset.cpp",
   ]
 
   include_dirs = updater_common_include

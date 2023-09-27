@@ -47,6 +47,7 @@
 #include "updater/updater_preprocess.h"
 #include "updater_ui_stub.h"
 #include "utils.h"
+#include "factory_reset/factory_reset.h"
 
 namespace Updater {
 using Utils::String2Int;
@@ -69,26 +70,10 @@ constexpr struct option OPTIONS[] = {
 };
 constexpr float VERIFY_PERCENT = 0.05;
 
-static int DoFactoryReset(FactoryResetMode mode, const std::string &path)
-{
-    if (mode == USER_WIPE_DATA) {
-        STAGE(UPDATE_STAGE_BEGIN) << "User FactoryReset";
-        LOG(INFO) << "Begin erasing /data";
-        if (FormatPartition(path, true) != 0) {
-            LOG(ERROR) << "User level FactoryReset failed";
-            STAGE(UPDATE_STAGE_FAIL) << "User FactoryReset";
-            ERROR_CODE(CODE_FACTORY_RESET_FAIL);
-            return 1;
-        }
-        LOG(INFO) << "User level FactoryReset success";
-        STAGE(UPDATE_STAGE_SUCCESS) << "User FactoryReset";
-    }
-    return 0;
-}
-
 int FactoryReset(FactoryResetMode mode, const std::string &path)
 {
-    return DoFactoryReset(mode, path);
+    UpdaterInit::GetInstance().InvokeEvent(FACTORY_RESET_INIT_EVENT);
+    return FactoryResetFunc(mode, path);
 }
 
 static int OtaUpdatePreCheck(PkgManager::PkgManagerPtr pkgManager, const std::string &packagePath)
@@ -586,6 +571,7 @@ std::unordered_map<std::string, std::function<void ()>> InitOptionsFuncTab(char*
         {
             (void)UPDATER_UI_INSTANCE.SetMode(UPDATERMODE_REBOOTFACTORYRST);
             upParams.factoryWipeData = true;
+            upParams.factoryReset = true;
         }},
         {"user_wipe_data", [&]() -> void
         {
@@ -672,6 +658,14 @@ static UpdaterStatus StartUpdater(const std::vector<std::string> &args,
 // add updater mode
 REGISTER_MODE(Updater, "updater.hdc.configfs");
 
+static void SetDeviceStatus(UpdaterParams &upParams)
+{
+    if (upParams.factoryReset) {
+        Utils::UsSleep(120 * DISPLAY_TIME); // 120 : 120s
+    }
+    upParams.forceUpdate || upParams.factoryReset ? Utils::DoShutdown() : Utils::UpdaterDoReboot("");
+}
+
 int UpdaterMain(int argc, char **argv)
 {
     [[maybe_unused]] UpdaterStatus status = UPDATE_UNKNOWN;
@@ -717,7 +711,7 @@ int UpdaterMain(int argc, char **argv)
     }
 #endif
     PostUpdater(true);
-    upParams.forceUpdate ? Utils::DoShutdown() : Utils::UpdaterDoReboot("");
+    SetDeviceStatus(upParams);
     return 0;
 }
 } // Updater
