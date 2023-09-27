@@ -20,6 +20,12 @@
 #include "securec.h"
 
 namespace Flashd {
+std::string GetPathRoot(const std::string &path)
+{
+    auto pos = path.find_first_of('/', 1);
+    return path.substr(0, pos);
+}
+
 std::string GetFileName(const std::string &path)
 {
     auto pos = path.find_last_of('/');
