@@ -38,6 +38,9 @@ enum UpdaterInitEvent {
     // rpmmb
     UPDATER_RPMB_DATA_CLEAR_EVENT,
 
+    // factory reset
+    FACTORY_RESET_INIT_EVENT,
+
     UPDATER_INIT_EVENT_BUTT
 };
 

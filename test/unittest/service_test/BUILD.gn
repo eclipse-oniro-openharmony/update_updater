@@ -23,6 +23,7 @@ ohos_unittest("updater_service_unittest") {
   resource_config_file = "${updater_path}/test/unittest/test_data/ohos_test.xml"
   module_out_path = MODULE_OUTPUT_PATH
   sources = [
+    "${updater_path}/services/factory_reset/factory_reset.cpp",
     "${updater_path}/services/sdcard_update/sdcard_update.cpp",
     "${updater_path}/services/updater.cpp",
     "${updater_path}/services/updater_main.cpp",
@@ -33,6 +34,7 @@ ohos_unittest("updater_service_unittest") {
   ]
   include_dirs = [
     "include",
+    "${updater_path}/services/factory_reset/",
     "${updater_path}/interfaces/kits/include/",
     "${updater_path}/services/common",
     "${updater_path}/services/include/package",
