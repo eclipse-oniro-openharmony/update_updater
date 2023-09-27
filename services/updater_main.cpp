@@ -135,7 +135,7 @@ static UpdaterStatus UpdatePreCheck(UpdaterParams &upParams, const std::string p
         UPDATER_LAST_WORD(UPDATE_ERROR);
         return UPDATE_ERROR;
     }
-    if (PreProcess::GetInstance().DoUpdatePreProcess(pkgManager) != PKG_SUCCESS) {
+    if (PreProcess::GetInstance().DoUpdatePreProcess(upParams, pkgManager) != PKG_SUCCESS) {
         PkgManager::ReleasePackageInstance(pkgManager);
         LOG(ERROR) << "Version Check Fail!";
         UPDATER_LAST_WORD(UPDATE_ERROR);

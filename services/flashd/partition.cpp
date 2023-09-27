@@ -41,7 +41,7 @@ int Partition::DoFlash(const uint8_t *buffer, int bufferSize) const
 
 int Partition::DoErase() const
 {
-    auto fd = open(GetPartitionRealPath(devName_).c_str(), O_RDWR);
+    auto fd = open(Updater::Utils::GetPartitionRealPath(devName_).c_str(), O_RDWR);
     if (fd < 0) {
         FLASHD_LOGE("open partition %s fail, error = %d", devName_.c_str(), errno);
         return FLASHING_OPEN_PART_ERROR;

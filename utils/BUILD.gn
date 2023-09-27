@@ -28,6 +28,7 @@ config("libutils_exported_headers") {
 ohos_static_library("libutils") {
   sources = [
     "json/json_node.cpp",
+    "partition_utils.cpp",
     "utils.cpp",
   ]
 

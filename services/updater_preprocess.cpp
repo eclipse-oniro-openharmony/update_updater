@@ -46,13 +46,13 @@ PreProcess &PreProcess::GetInstance()
     return checkPackagesInfo;
 }
 
-int32_t PreProcess::DoUpdatePreProcess(PkgManager::PkgManagerPtr pkgManager)
+int32_t PreProcess::DoUpdatePreProcess(UpdaterParams &upParams, PkgManager::PkgManagerPtr pkgManager)
 {
     if (helper_ == nullptr) {
         LOG(INFO) << "PreProcess helper_ is null";
         return -1;
     }
-    return helper_(pkgManager);
+    return helper_(upParams, pkgManager);
 }
 
 int32_t PreProcess::DoUpdateAuth(std::string path)
@@ -111,7 +111,7 @@ int CheckBoardId(PkgManager::PkgManagerPtr pkgManager, PackagesInfoPtr pkginfoma
     return ret;
 }
 
-int32_t UpdatePreProcess(PkgManager::PkgManagerPtr pkgManager)
+int32_t UpdatePreProcess(UpdaterParams &upParams, PkgManager::PkgManagerPtr pkgManager)
 {
     int ret = -1;
     if (pkgManager == nullptr) {

@@ -29,17 +29,6 @@ std::string GetRealPath(const std::string &path)
     return (ret == nullptr) ? "" : ret;
 }
 
-std::string GetPartitionRealPath(const std::string &name)
-{
-    return GetRealPath(PREFIX_PARTITION_NODE + name);
-}
-
-std::string GetPathRoot(const std::string &path)
-{
-    auto pos = path.find_first_of('/', 1);
-    return path.substr(0, pos);
-}
-
 std::string GetFileName(const std::string &path)
 {
     auto pos = path.find_last_of('/');

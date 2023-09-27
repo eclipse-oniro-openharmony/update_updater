@@ -47,6 +47,7 @@ constexpr uint8_t SHIFT_RIGHT_FOUR_BITS = 4;
 constexpr int USECONDS_PER_SECONDS = 1000000; // 1s = 1000000us
 constexpr int NANOSECS_PER_USECONDS = 1000; // 1us = 1000ns
 constexpr int MAX_TIME_SIZE = 20;
+constexpr const char *PREFIX_PARTITION_NODE = "/dev/block/by-name/";
 
 void SaveLogs()
 {
@@ -767,6 +768,18 @@ std::string DurationToString(std::vector<std::chrono::duration<double>> &duratio
     std::ostringstream oss;
     oss << std::fixed << std::setprecision(precision) << durations[pkgPosition].count();
     return oss.str();
+}
+
+std::string GetRealPath(const std::string &path)
+{
+    char realPath[PATH_MAX + 1] = {0};
+    auto ret = realpath(path.c_str(), realPath);
+    return (ret == nullptr) ? "" : ret;
+}
+ 
+std::string GetPartitionRealPath(const std::string &name)
+{
+    return GetRealPath(PREFIX_PARTITION_NODE + name);
 }
 
 #ifndef __WIN32
