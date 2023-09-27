@@ -658,14 +658,6 @@ static UpdaterStatus StartUpdater(const std::vector<std::string> &args,
 // add updater mode
 REGISTER_MODE(Updater, "updater.hdc.configfs");
 
-static void SetDeviceStatus(UpdaterParams &upParams)
-{
-    if (upParams.factoryReset) {
-        Utils::UsSleep(120 * DISPLAY_TIME); // 120 : 120s
-    }
-    upParams.forceUpdate || upParams.factoryReset ? Utils::DoShutdown() : Utils::UpdaterDoReboot("");
-}
-
 int UpdaterMain(int argc, char **argv)
 {
     [[maybe_unused]] UpdaterStatus status = UPDATE_UNKNOWN;
@@ -711,7 +703,7 @@ int UpdaterMain(int argc, char **argv)
     }
 #endif
     PostUpdater(true);
-    SetDeviceStatus(upParams);
+    upParams.forceUpdate || upParams.factoryReset ? Utils::DoShutdown() : Utils::UpdaterDoReboot("");
     return 0;
 }
 } // Updater
