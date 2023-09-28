@@ -207,48 +207,4 @@ std::optional<BootMode> SelectMode(const UpdateMessage &boot)
     LOG(INFO) << "enter " << it->modeName << " mode";
     return *it;
 }
-
-void SetMessageToMisc(const std::string &miscCmd, const int message, const std::string headInfo)
-{
-    if (headInfo.empty()) {
-        return;
-    }
-    std::vector<std::string> args = ParseParams(0, nullptr);
-    struct UpdateMessage msg {};
-    if (strncpy_s(msg.command, sizeof(msg.command), miscCmd.c_str(), miscCmd.size() + 1) != EOK) {
-        LOG(ERROR) << "SetMessageToMisc strncpy_s failed";
-        return;
-    }
-    for (const auto& arg : args) {
-        if (arg.find(headInfo) == std::string::npos) {
-            if (strncat_s(msg.update, sizeof(msg.update), arg.c_str(), strlen(arg.c_str()) + 1) != EOK) {
-                LOG(ERROR) << "SetMessageToMisc strncat_s failed";
-                return;
-            }
-            if (strncat_s(msg.update, sizeof(msg.update), "\n", strlen("\n") + 1) != EOK) {
-                LOG(ERROR) << "SetMessageToMisc strncat_s failed";
-                return;
-            }
-        }
-    }
-    char buffer[128] {}; // 128 : set headInfo size
-    if (headInfo == "sdcard_update") {
-        if (snprintf_s(buffer, sizeof(buffer), sizeof(buffer) - 1, "--%s", headInfo.c_str()) == -1) {
-            LOG(ERROR) << "SetMessageToMisc snprintf_s failed";
-            return;
-        }
-    } else {
-        if (snprintf_s(buffer, sizeof(buffer), sizeof(buffer) - 1, "--%s=%d", headInfo.c_str(), message) == -1) {
-            LOG(ERROR) << "SetMessageToMisc snprintf_s failed";
-            return;
-        }
-    }
-    if (strncat_s(msg.update, sizeof(msg.update), buffer, strlen(buffer) + 1) != EOK) {
-        LOG(ERROR) << "SetMessageToMisc strncat_s failed";
-        return;
-    }
-    if (WriteUpdaterMiscMsg(msg) != true) {
-        LOG(ERROR) << "Write command to misc failed.";
-    }
-}
 } // namespace Updater
