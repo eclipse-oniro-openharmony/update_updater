@@ -37,8 +37,8 @@ public:
     int DoUserReset(const std::string &path);
 
 private:
-    FactoryResetPreFunc FactoryResetPreFunc_;
-    FactoryResetPostFunc FactoryResetPostFunc_;
+    FactoryResetPreFunc FactoryResetPreFunc_ = nullptr;
+    FactoryResetPostFunc FactoryResetPostFunc_ = nullptr;
 };
 
 int FactoryResetFunc(FactoryResetMode mode, const std::string &path);
