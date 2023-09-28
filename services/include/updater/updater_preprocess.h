@@ -18,7 +18,7 @@
 #include "macros.h"
 #include "pkg_manager.h"
 #include "package/packages_info.h"
-#include "include/updater/updater.h"
+#include "updater/updater.h"
 
 namespace Updater {
 typedef int32_t (*PreProcessFunc)(UpdaterParams &upParams, Hpackage::PkgManager::PkgManagerPtr pkgManager);
