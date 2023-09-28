@@ -86,7 +86,8 @@
                 "//base/update/updater/services/diffpatch/patch:libpatch",
                 "//base/update/updater/services/diffpatch/diff:libdiff",
                 "//base/update/updater/services/diffpatch:diff(//build/toolchain/linux:clang_x64)",
-                "//base/update/updater/services/ui:libui"
+                "//base/update/updater/services/ui:libui",
+                "//base/update/updater/services/flow_update/update_bin:libBinFlowUpdate"
             ],
             "inner_kits": [
                 {
@@ -214,6 +215,13 @@
                     "header": {
                         "header_files": [],
                         "header_base": "//base/update/updater/services/ui"
+                    }
+                },
+                {
+                    "name": "//base/update/updater/services/flow_update/update_bin:libBinFlowUpdate",
+                    "header": {
+                        "header_files": [],
+                        "header_base": "//base/update/updater/services/flow_update/update_bin"
                     }
                 }
             ],

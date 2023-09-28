@@ -81,6 +81,7 @@ std::string DurationToString(std::vector<std::chrono::duration<double>> &duratio
     int precision = 2);
 std::string GetRealPath(const std::string &path);
 std::string GetPartitionRealPath(const std::string &name);
+void SetMessageToMisc(const std::string &miscCmd, const int message, const std::string headInfo);
 #ifndef __WIN32
 void SetFileAttributes(const std::string& file, uid_t owner, gid_t group, mode_t mode);
 #endif
