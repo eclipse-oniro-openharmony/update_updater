@@ -67,7 +67,7 @@ int FactoryResetProcess::DoFactoryReset(const std::string &path)
 {
     int resetStatus = 0;
     STAGE(UPDATE_STAGE_BEGIN) << "Factory FactoryReset";
-    if (FactoryResetPreFunc_() != 0) {
+    if (FactoryResetPreFunc_ == nullptr || FactoryResetPreFunc_() != 0) {
         LOG(INFO) << "FactoryResetPreFunc_ fail";
     }
     LOG(INFO) << "Begin erasing data";
@@ -78,7 +78,7 @@ int FactoryResetProcess::DoFactoryReset(const std::string &path)
     }
 
     LOG(INFO) << "Factory level FactoryReset status:" << resetStatus;
-    if (FactoryResetPostFunc_(resetStatus) != 0) {
+    if (FactoryResetPostFunc_ == nullptr || FactoryResetPostFunc_(resetStatus) != 0) {
         LOG(INFO) << "FactoryResetPostFunc_ fail";
     }
     return resetStatus;
