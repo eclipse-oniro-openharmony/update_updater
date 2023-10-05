@@ -55,6 +55,7 @@ ohos_executable("updater") {
   defines = [ "BUILD_OHOS" ]
   sources = [
     "factory_reset/factory_reset.cpp",
+    "hwfault_repair/updater_hwfault_retry.cpp",
     "main.cpp",
     "updater.cpp",
     "updater_main.cpp",
@@ -148,6 +149,7 @@ ohos_static_library("libupdater") {
   defines = [ "BUILD_OHOS" ]
   sources = [
     "factory_reset/factory_reset.cpp",
+    "hwfault_repair/updater_hwfault_retry.cpp",
     "updater.cpp",
     "updater_preprocess.cpp",
     "updater_utils.cpp",

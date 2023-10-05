@@ -43,6 +43,7 @@
 #ifdef UPDATER_USE_PTABLE
 #include "ptable_parse/ptable_manager.h"
 #endif
+#include "updater/updater_hwfault_retry.h"
 #include "updater/updater_preprocess.h"
 #include "updater/updater_const.h"
 #include "updater_main.h"
@@ -321,31 +322,21 @@ void HandleChildOutput(const std::string &buffer, int32_t bufferLen, bool &retry
     }
     std::string str = buffer;
     std::vector<std::string> output = SplitString(str, ":");
-    if (output.size() < 1) {
+    if (output.size() < DEFAULT_PROCESS_NUM) {
         LOG(ERROR) << "check output fail";
         return;
     }
     auto outputHeader = Trim(output[0]);
     if (outputHeader == "write_log") {
-        if (output.size() < DEFAULT_PROCESS_NUM) {
-            LOG(ERROR) << "check output fail";
-            return;
-        }
         auto outputInfo = Trim(output[1]);
         LOG(INFO) << outputInfo;
     } else if (outputHeader == "retry_update") {
         retryUpdate = true;
+        auto outputInfo = Trim(output[1]);
+        HwFaultRetry::GetInstance().SetFaultInfo(outputInfo);
     } else if (outputHeader == "ui_log") {
-        if (output.size() < DEFAULT_PROCESS_NUM) {
-            LOG(ERROR) << "check output fail";
-            return;
-        }
         auto outputInfo = Trim(output[1]);
     } else if (outputHeader == "show_progress") {
-        if (output.size() < DEFAULT_PROCESS_NUM) {
-            LOG(ERROR) << "check output fail";
-            return;
-        }
         g_tmpValue = g_tmpProgressValue;
         auto outputInfo = Trim(output[1]);
         float frac;

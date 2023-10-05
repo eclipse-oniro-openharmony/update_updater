@@ -46,7 +46,7 @@ struct UpdateMessage {
     char status[MAX_STATUS_SIZE];
     char update[MAX_UPDATE_SIZE];
     char stage[MAX_STAGE_SIZE];
-    char keyinfo[MAX_KEYINFO_SIZE];
+    char faultinfo[MAX_KEYINFO_SIZE];
     char reserved[MAX_RESERVED_SIZE];
 };
 

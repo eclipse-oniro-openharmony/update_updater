@@ -63,6 +63,12 @@ constexpr const char *UT_VERSION = "OpenHarmony 3.2.9.1";
 constexpr const char *MMC_BLOCK_DEV_NAME = "/data/block/mmcblk0";
 constexpr const char *MMC_SIZE_FILE = "/data/class/block/mmcblk0/size";
 #endif
+
+// update retry
+constexpr const char *UPDATER_RETRY_TAG = "retry_update";
+constexpr const char *VERIFY_FAILED_REBOOT = "reboot_verify_failed";
+constexpr const char *IO_FAILED_REBOOT = "reboot_IO_failed";
+
 constexpr int MAX_RETRY_COUNT = 4;
 constexpr int MINIMAL_ARGC_LIMIT = 2;
 constexpr int MAX_LOG_BUF_SIZE = 4096;

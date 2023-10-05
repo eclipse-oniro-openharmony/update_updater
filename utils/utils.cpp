@@ -789,10 +789,16 @@ void SetMessageToMisc(const std::string &miscCmd, const int message, const std::
     }
     std::vector<std::string> args = ParseParams(0, nullptr);
     struct UpdateMessage msg {};
+    if (!ReadUpdaterMiscMsg(msg)) {
+        LOG(ERROR) << "SetMessageToMisc read misc failed";
+        return;
+    }
+    (void)memset_s(msg.command, sizeof(msg.command), 0, sizeof(msg.command));
     if (strncpy_s(msg.command, sizeof(msg.command), miscCmd.c_str(), miscCmd.size() + 1) != EOK) {
         LOG(ERROR) << "SetMessageToMisc strncpy_s failed";
         return;
     }
+    (void)memset_s(msg.update, sizeof(msg.update), 0, sizeof(msg.update));
     for (const auto& arg : args) {
         if (arg.find(headInfo) == std::string::npos) {
             if (strncat_s(msg.update, sizeof(msg.update), arg.c_str(), strlen(arg.c_str()) + 1) != EOK) {
@@ -824,6 +830,20 @@ void SetMessageToMisc(const std::string &miscCmd, const int message, const std::
     if (WriteUpdaterMiscMsg(msg) != true) {
         LOG(ERROR) << "Write command to misc failed.";
     }
+}
+
+bool CheckFaultInfo(const std::string &faultInfo)
+{
+    struct UpdateMessage msg = {};
+    if (!ReadUpdaterMiscMsg(msg)) {
+        LOG(ERROR) << "read misc data failed";
+        return false;
+    }
+
+    if (strcmp(msg.faultinfo, faultInfo.c_str()) == 0) {
+        return true;
+    }
+    return false;
 }
 
 #ifndef __WIN32
