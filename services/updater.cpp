@@ -43,7 +43,7 @@
 #ifdef UPDATER_USE_PTABLE
 #include "ptable_parse/ptable_manager.h"
 #endif
-#include "updater/updater_hwfault_retry.h"
+#include "updater/hwfault_retry.h"
 #include "updater/updater_preprocess.h"
 #include "updater/updater_const.h"
 #include "updater_main.h"

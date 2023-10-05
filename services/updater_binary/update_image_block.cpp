@@ -28,7 +28,7 @@
 #include "log/dump.h"
 #include "log/log.h"
 #include "updater/updater_const.h"
-#include "updater/updater_hwfault_retry.h"
+#include "updater/hwfault_retry.h"
 #include "utils.h"
 
 using namespace Uscript;

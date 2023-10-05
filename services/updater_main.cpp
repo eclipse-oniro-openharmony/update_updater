@@ -44,7 +44,7 @@
 #include "sdcard_update/sdcard_update.h"
 #include "securec.h"
 #include "updater/updater_const.h"
-#include "updater/updater_hwfault_retry.h"
+#include "updater/hwfault_retry.h"
 #include "updater/updater_preprocess.h"
 #include "updater_ui_stub.h"
 #include "utils.h"

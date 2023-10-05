@@ -12,6 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef UPDATER_HWFAULT_RETRY_H
+#define UPDATER_HWFAULT_RETRY_H
+
 #include "log/log.h"
 #include <unordered_map>
 #include <vector>
@@ -40,3 +43,4 @@ private:
     uint32_t retryCount_ {};
 };
 } // Updater
+#endif // UPDATER_HWFAULT_RETRY_H

@@ -58,6 +58,7 @@ ohos_unittest("updater_unittest") {
     "log_test/log_unittest.cpp",
     "misc_info_test/misc_info_unittest.cpp",
     "updaterkits_test/updaterkits_unittest.cpp",
+    "updater_test/hwfault_retry_unittest.cpp",
   ]
 
   sources += [
@@ -105,6 +106,7 @@ ohos_unittest("updater_unittest") {
     "${updater_path}/services/script/script_manager/script_managerImpl.cpp",
     "${updater_path}/services/script/script_manager/script_utils.cpp",
     "${updater_path}/services/script/threadpool/threadpool.cpp",
+    "${updater_path}/services/hwfault_retry/hwfault_retry.cpp",
     "${updater_path}/services/updater_utils.cpp",
     "${updater_path}/utils/utils.cpp",
   ]
