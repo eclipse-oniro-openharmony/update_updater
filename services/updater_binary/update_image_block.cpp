@@ -558,6 +558,5 @@ int32_t UScriptInstructionShaCheck::Execute(Uscript::UScriptEnv &env, Uscript::U
     }
     ret = ExecReadShaInfo(env, devPath, blockPairs, contrastSha);
     return ReturnAndPushParam(ret, context);
-
 }
 }

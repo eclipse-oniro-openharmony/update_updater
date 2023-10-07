@@ -38,7 +38,8 @@ public:
     ~HwfaultRetryUnitTest() {}
 
     static void SetUpTestCase(void) {}
-    static void TearDownTestCase(void) {
+    static void TearDownTestCase(void)
+    {
         (void)ClearMisc();
     }
     void SetUp() {}
