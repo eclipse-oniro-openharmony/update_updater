@@ -141,17 +141,17 @@ size_t FileStream::GetFileLength()
     if (fileLength_ == 0) {
         if (Seek(0, SEEK_END) != 0) {
             PKG_LOGE("Invalid stream");
-            return -1;
+            return 0;
         }
         off64_t ret = ftello64(stream_);
         if (ret < 0) {
             PKG_LOGE("ftell64 failed");
-            return PKG_INVALID_STREAM;
+            return 0;
         }
         fileLength_ = static_cast<size_t>(ret);
         if (fseek(stream_, 0, SEEK_SET) != 0) {
             PKG_LOGE("fseek failed");
-            return PKG_INVALID_STREAM;
+            return 0;
         }
     }
     return fileLength_;
