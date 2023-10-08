@@ -73,10 +73,8 @@ void HwFaultRetry::RebootRetry()
         return;
     }
 
-    Utils::SetMessageToMisc("boot_updater", retryCount_ + 1, "retry_count");
-    if (!SetInfoToMisc()) {
-        LOG(WARNING) << "UpdaterDoReboot set misc failed";
-    }
+    Utils::AddUpdateInfoToMisc("retry_count", retryCount_ + 1);
+    Utils::SetFaultInfoToMisc(faultInfo_);
 
     PostUpdater(false);
     sync();
@@ -86,27 +84,5 @@ void HwFaultRetry::RebootRetry()
         pause();
     }
 #endif
-}
-
-bool HwFaultRetry::SetInfoToMisc()
-{
-    struct UpdateMessage msg = {};
-    if (!ReadUpdaterMiscMsg(msg)) {
-        LOG(ERROR) << "UpdaterDoReboot read misc failed";
-        return false;
-    }
-
-    (void)memset_s(msg.faultinfo, sizeof(msg.faultinfo), 0, sizeof(msg.faultinfo));
-    if (strcpy_s(msg.faultinfo, sizeof(msg.faultinfo) - 1, faultInfo_.c_str()) != EOK) {
-        LOG(ERROR) << "failed to copy update";
-        return false;
-    }
-    LOG(INFO) << "UpdaterDoReboot msg keyinfo: " << msg.faultinfo;
-
-    if (!WriteUpdaterMiscMsg(msg)) {
-        LOG(ERROR) << "UpdaterDoReboot: WriteUpdaterMiscMsg error";
-        return false;
-    }
-    return true;
 }
 } // Updater

@@ -36,7 +36,6 @@ public:
 
 private:
     void RebootRetry();
-    bool SetInfoToMisc();
 
     std::unordered_map<std::string, RetryFunc> retryMap_;
     std::string faultInfo_;
