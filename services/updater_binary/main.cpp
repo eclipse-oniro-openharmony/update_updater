@@ -30,7 +30,7 @@ int main(int argc, char **argv)
     if (Utils::IsUpdaterMode()) {
         InitUpdaterLogger("UPDATER_BINARY", TMP_LOG, TMP_STAGE_LOG, TMP_ERROR_CODE_PATH);
     } else {
-        InitUpdaterLogger("UPDATER_BINARY", UPDATER_LOG, UPDATER_STAGE_LOG, ERROR_CODE_PATH);
+        InitUpdaterLogger("UPDATER_BINARY", SYS_INSTALLER_LOG, UPDATER_STAGE_LOG, ERROR_CODE_PATH);
     }
     if (argc < MINIMAL_ARGC_LIMIT) {
         LOG(ERROR) << "Invalid arguments.";
