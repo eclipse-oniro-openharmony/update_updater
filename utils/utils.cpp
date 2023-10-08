@@ -913,7 +913,7 @@ void SetFaultInfoToMisc(const std::string &faultInfo)
     }
 
     if (WriteUpdaterMiscMsg(msg) != true) {
-        LOG(ERROR) << "Write command to misc failed.";
+        LOG(ERROR) << "Write fault info to misc failed.";
     }
 }
 
