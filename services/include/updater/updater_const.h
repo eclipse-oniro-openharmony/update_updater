@@ -25,6 +25,7 @@ constexpr const char *TMP_ERROR_CODE_PATH = "/tmp/error_code.log";
 constexpr const char *ERROR_CODE_PATH = "/data/updater/log/error_code.log";
 constexpr const char *UPDATER_LOG_DIR = "/data/updater/log";
 constexpr const char *UPDATER_LOG = "/data/updater/log/updater_log";
+constexpr const char *SYS_INSTALLER_LOG = "/data/updater/log/sys_installer.log";
 constexpr const char *UPDATER_STAGE_LOG = "/data/updater/log/updater_stage_log";
 constexpr const char *UPDATER_LOG_FILE = "updater_log";
 constexpr const char *UPDATER_STAGE_FILE = "updater_stage_log";
