@@ -223,6 +223,13 @@
                         "header_files": [],
                         "header_base": "//base/update/updater/services/flow_update/update_bin"
                     }
+                },
+                {
+                    "name": "//base/update/updater/interfaces/kits/slot_info:libslotinfo",
+                    "header": {
+                        "header_files": [],
+                        "header_base": "//base/update/updater/interfaces/kits/include"
+                    }
                 }
             ],
             "test": [
