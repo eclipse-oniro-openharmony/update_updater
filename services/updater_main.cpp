@@ -48,6 +48,7 @@
 #include "updater_ui_stub.h"
 #include "utils.h"
 #include "factory_reset/factory_reset.h"
+#include "write_state/write_state.h"
 
 namespace Updater {
 using Utils::String2Int;
@@ -66,6 +67,8 @@ constexpr struct option OPTIONS[] = {
     { "force_update_action", required_argument, nullptr, 0 },
     { "night_update", no_argument, nullptr, 0 },
     { USB_MODE, no_argument, nullptr, 0 },
+    { "UPDATE:MAINIMG", no_argument, nullptr, 0 },
+    { "UPDATE:SD", no_argument, nullptr, 0 },
     { nullptr, 0, nullptr, 0 },
 };
 constexpr float VERIFY_PERCENT = 0.05;
@@ -507,6 +510,28 @@ UpdaterStatus InstallUpdaterPackages(UpdaterParams &upParams)
 UpdaterStatus StartUpdaterEntry(UpdaterParams &upParams)
 {
     UpdaterStatus status = UPDATE_UNKNOWN;
+    status = PreStartUpdaterEntry(upParams, status);
+    if (status != UPDATE_SUCCESS) {
+        LOG(ERROR) << "PreStartUpdaterEntry failed";
+        return status;
+    }
+
+    status = DoUpdaterEntry(upParams);
+    if (status != UPDATE_SUCCESS) {
+        LOG(ERROR) << "DoUpdaterEntry failed";
+        return status;
+    }
+
+    status = PostStartUpdaterEntry(upParams, status);
+    if (status != UPDATE_SUCCESS) {
+        LOG(ERROR) << "PostStartUpdaterEntry failed";
+    }
+    return status;
+}
+
+UpdaterStatus DoUpdaterEntry(UpdaterParams &upParams)
+{
+    UpdaterStatus status = UPDATE_UNKNOWN;
     if (upParams.updateMode == SDCARD_UPDATE) {
         LOG(INFO) << "start sdcard update";
         UPDATER_UI_INSTANCE.ShowProgressPage();
@@ -585,6 +610,16 @@ std::unordered_map<std::string, std::function<void ()>> InitOptionsFuncTab(char*
         {"sdcard_update", [&]() -> void
         {
             upParams.updateMode = SDCARD_UPDATE;
+        }},
+        {"UPDATE:MAINIMG", [&]() -> void
+        {
+            upParams.updateMode = SDCARD_UPDATE;
+            upParams.mainUpdate = true;
+        }},
+        {"UPDATE:SD", [&]() -> void
+        {
+            upParams.updateMode = SDCARD_UPDATE;
+            upParams.sdUpdate = true;
         }},
         {"force_update_action", [&]() -> void
         {
