@@ -20,4 +20,12 @@ __attribute__((weak)) UpdaterStatus WriteResult(std::string &path, const std::st
 {
     return UPDATE_SUCCESS;
 }
+__attribute__((weak)) UpdaterStatus PreStartUpdaterEntry(UpdaterParams &upParams, UpdaterStatus status)
+{
+    return UPDATE_SUCCESS;
+}
+__attribute__((weak)) UpdaterStatus PostStartUpdaterEntry(UpdaterParams &upParams, UpdaterStatus status)
+{
+    return UPDATE_SUCCESS;
+}
 } // Updater

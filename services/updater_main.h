@@ -37,6 +37,8 @@ UpdaterStatus DoUpdatePackages(UpdaterParams &upParams);
 
 UpdaterStatus StartUpdaterEntry(UpdaterParams &upParams);
 
+UpdaterStatus DoUpdaterEntry(UpdaterParams &upParams);
+
 UpdaterStatus UpdaterFromSdcard(UpdaterParams &upParams);
 
 bool IsBatteryCapacitySufficient();
