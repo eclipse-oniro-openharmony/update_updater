@@ -57,6 +57,7 @@ ohos_unittest("updater_unittest") {
     "diffpatch/image_patch_unittest.cpp",
     "log_test/log_unittest.cpp",
     "misc_info_test/misc_info_unittest.cpp",
+    "updater_test/hwfault_retry_unittest.cpp",
     "updaterkits_test/updaterkits_unittest.cpp",
   ]
 
@@ -76,6 +77,7 @@ ohos_unittest("updater_unittest") {
     "${updater_path}/services/diffpatch/patch/blocks_patch.cpp",
     "${updater_path}/services/diffpatch/patch/image_patch.cpp",
     "${updater_path}/services/diffpatch/patch/update_patch.cpp",
+    "${updater_path}/services/hwfault_retry/hwfault_retry.cpp",
     "${updater_path}/services/log/log.cpp",
     "${updater_path}/services/package/pkg_algorithm/pkg_algo_deflate.cpp",
     "${updater_path}/services/package/pkg_algorithm/pkg_algo_digest.cpp",

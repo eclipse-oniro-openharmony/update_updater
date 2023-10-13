@@ -44,6 +44,7 @@
 #include "sdcard_update/sdcard_update.h"
 #include "securec.h"
 #include "updater/updater_const.h"
+#include "updater/hwfault_retry.h"
 #include "updater/updater_preprocess.h"
 #include "updater_ui_stub.h"
 #include "utils.h"
@@ -246,11 +247,9 @@ UpdaterStatus InstallUpdaterPackage(UpdaterParams &upParams, PkgManager::PkgMana
         UPDATER_UI_INSTANCE.Sleep(UI_SHOW_DURATION);
         UPDATER_UI_INSTANCE.ShowLog(TR(LOG_UPDFAIL));
         STAGE(UPDATE_STAGE_FAIL) << "Install failed";
-        if (status == UPDATE_RETRY && upParams.retryCount < MAX_RETRY_COUNT) {
-            upParams.retryCount += 1;
+        if (status == UPDATE_RETRY) {
+            HwFaultRetry::GetInstance().DoRetryAction();
             UPDATER_UI_INSTANCE.ShowFailedPage();
-            SetMessageToMisc(upParams.miscCmd, upParams.retryCount, "retry_count");
-            Utils::UpdaterDoReboot("updater");
         }
     } else {
         LOG(INFO) << "Install package success.";
@@ -566,6 +565,7 @@ std::unordered_map<std::string, std::function<void ()>> InitOptionsFuncTab(char*
         {"retry_count", [&]() -> void
         {
             upParams.retryCount = atoi(optarg);
+            HwFaultRetry::GetInstance().SetRetryCount(upParams.retryCount);
         }},
         {"factory_wipe_data", [&]() -> void
         {

@@ -43,8 +43,8 @@ public:
     virtual ~UScriptInstructionShaCheck() {}
     int32_t Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context) override;
 private:
-    int ExecReadShaInfo(const std::string &devPath, const std::string &blockPairs,
-        const std::string &contrastSha, Uscript::UScriptContext &context);
+    int ExecReadShaInfo(Uscript::UScriptEnv &env, const std::string &devPath, const std::string &blockPairs,
+        const std::string &contrastSha);
 };
 }
 

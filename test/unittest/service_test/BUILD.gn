@@ -24,6 +24,7 @@ ohos_unittest("updater_service_unittest") {
   module_out_path = MODULE_OUTPUT_PATH
   sources = [
     "${updater_path}/services/factory_reset/factory_reset.cpp",
+    "${updater_path}/services/hwfault_retry/hwfault_retry.cpp",
     "${updater_path}/services/sdcard_update/sdcard_update.cpp",
     "${updater_path}/services/updater.cpp",
     "${updater_path}/services/updater_main.cpp",

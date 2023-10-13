@@ -27,6 +27,8 @@
 #include "fs_manager/mount.h"
 #include "log/dump.h"
 #include "log/log.h"
+#include "updater/updater_const.h"
+#include "updater/hwfault_retry.h"
 #include "utils.h"
 
 using namespace Uscript;
@@ -466,15 +468,15 @@ int32_t UScriptInstructionBlockCheck::Execute(Uscript::UScriptEnv &env, Uscript:
     return USCRIPT_SUCCESS;
 }
 
-int UScriptInstructionShaCheck::ExecReadShaInfo(const std::string &devPath, const std::string &blockPairs,
-    const std::string &contrastSha, Uscript::UScriptContext &context)
+int UScriptInstructionShaCheck::ExecReadShaInfo(Uscript::UScriptEnv &env, const std::string &devPath,
+    const std::string &blockPairs, const std::string &contrastSha)
 {
     UPDATER_INIT_RECORD;
     int fd = open(devPath.c_str(), O_RDWR | O_LARGEFILE);
     if (fd == -1) {
         LOG(ERROR) << "Failed to open file";
         UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE);
-        return ReturnAndPushParam(USCRIPT_ERROR_EXECUTE, context);
+        return USCRIPT_ERROR_EXECUTE;
     }
 
     BlockSet blk;
@@ -488,14 +490,14 @@ int UScriptInstructionShaCheck::ExecReadShaInfo(const std::string &devPath, cons
             LOG(ERROR) << "Failed to seek";
             close(fd);
             UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE);
-            return ReturnAndPushParam(USCRIPT_ERROR_EXECUTE, context);
+            return USCRIPT_ERROR_EXECUTE;
         }
         for (size_t i = it->first; i < it->second; ++i) {
             if (!Utils::ReadFully(fd, block_buff.data(), H_BLOCK_SIZE)) {
                 LOG(ERROR) << "Failed to read";
                 close(fd);
                 UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE);
-                return ReturnAndPushParam(USCRIPT_ERROR_EXECUTE, context);
+                return USCRIPT_ERROR_EXECUTE;
             }
             SHA256_Update(&ctx, block_buff.data(), H_BLOCK_SIZE);
         }
@@ -508,10 +510,10 @@ int UScriptInstructionShaCheck::ExecReadShaInfo(const std::string &devPath, cons
     if (resultSha != contrastSha) {
         LOG(ERROR) << "Different sha256, cannot continue";
         UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE);
-        return ReturnAndPushParam(USCRIPT_ERROR_EXECUTE, context);
+        env.PostMessage(UPDATER_RETRY_TAG, VERIFY_FAILED_REBOOT);
+        return USCRIPT_ERROR_EXECUTE;
     }
     LOG(INFO) << "UScriptInstructionShaCheck::Execute Success";
-    context.PushParam(USCRIPT_SUCCESS);
     return USCRIPT_SUCCESS;
 }
 
@@ -522,7 +524,7 @@ int32_t UScriptInstructionShaCheck::Execute(Uscript::UScriptEnv &env, Uscript::U
         UPDATER_LAST_WORD(USCRIPT_INVALID_PARAM);
         return ReturnAndPushParam(USCRIPT_INVALID_PARAM, context);
     }
-    if (env.IsRetry()) {
+    if (env.IsRetry() && !Utils::CheckFaultInfo(VERIFY_FAILED_REBOOT)) {
         return ReturnAndPushParam(USCRIPT_SUCCESS, context);
     }
 
@@ -554,6 +556,7 @@ int32_t UScriptInstructionShaCheck::Execute(Uscript::UScriptEnv &env, Uscript::U
         UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE);
         return ReturnAndPushParam(USCRIPT_ERROR_EXECUTE, context);
     }
-    return ExecReadShaInfo(devPath, blockPairs, contrastSha, context);
+    ret = ExecReadShaInfo(env, devPath, blockPairs, contrastSha);
+    return ReturnAndPushParam(ret, context);
 }
 }
