@@ -54,6 +54,8 @@
                 "c_utils",
                 "hilog",
                 "selinux_adapter",
+                "build_framework",
+                "updater_ext",
                 "ui_lite"
             ],
             "third_party": [

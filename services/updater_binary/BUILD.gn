@@ -71,10 +71,6 @@ ohos_executable("updater_binary") {
     "//third_party/zlib:libz",
   ]
 
-  if (defined(binary_custom_lib)) {
-    deps += binary_custom_lib
-  }
-
   defines = [ "OPENSSL_SUPPRESS_DEPRECATED" ]
 
   if (defined(use_ptable)) {
@@ -84,6 +80,10 @@ ohos_executable("updater_binary") {
   }
 
   external_deps = [ "init:libfsmanager_static" ]
+
+  if (defined(binary_custom_external_deps)) {
+    external_deps += binary_custom_external_deps
+  }
 
   install_enable = true
   install_images = [
