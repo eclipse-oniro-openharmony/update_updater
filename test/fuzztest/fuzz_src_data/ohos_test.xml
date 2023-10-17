@@ -41,4 +41,9 @@
             <option name="push" value="build_tools.zip -> /data/fuzz/test" src="res"/>
         </preparer>
     </target>
+    <target name="BinFlowFuzzTest">
+        <preparer>
+            <option name="push" value="updater_flow.zip -> /data/fuzz/test" src="res"/>
+        </preparer>
+    </target>
 </configuration>

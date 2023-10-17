@@ -1,0 +1,91 @@
+# Copyright (c) 2023 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+module_output_path = "updater/updater"
+
+import("//base/update/updater/updater_default_cfg.gni")
+
+#####################hydra-fuzz###################
+import("//build/config/features.gni")
+import("//build/test.gni")
+updater_path = rebase_path("${updater_absolutely_path}", ".")
+
+##############################fuzztest##########################################
+ohos_fuzztest("BinFlowFuzzTest") {
+  module_out_path = module_output_path
+  resource_config_file =
+      "${updater_path}/test/fuzztest/fuzz_src_data/ohos_test.xml"
+  fuzz_config_file = "${updater_path}/test/fuzztest/binflow_fuzzer"
+  sources = [ "binflow_fuzzer.cpp" ]
+
+  sources += [
+    "${updater_path}/services/flow_update/update_bin/bin_flow_update.cpp",
+    "${updater_path}/services/flow_update/update_bin/bin_process.cpp",
+    "${updater_path}/services/flow_update/update_bin/component_processor.cpp",
+    "${updater_path}/services/updater_binary/update_image_block.cpp",
+    "${updater_path}/services/updater_binary/update_image_patch.cpp",
+    "${updater_path}/services/updater_binary/update_partitions.cpp",
+    "${updater_path}/services/updater_binary/update_processor.cpp",
+  ]
+
+  include_dirs = [
+    "${updater_path}/interfaces/kits/include",
+    "${updater_path}/services",
+    "${updater_path}/services/common",
+    "${updater_path}/services/flow_update",
+    "${updater_path}/services/include",
+    "${updater_path}/services/include/applypatch",
+    "${updater_path}/services/include/log",
+    "${updater_path}/services/include/package",
+    "${updater_path}/services/include/script",
+    "${updater_path}/services/package",
+    "${updater_path}/services/package/pkg_algorithm",
+    "${updater_path}/services/package/pkg_manager",
+    "${updater_path}/services/package/pkg_package",
+    "${updater_path}/services/script",
+    "${updater_path}/services/flow_update/update_bin",
+    "${updater_path}/test/unittest",
+    "${updater_path}/utils/include",
+  ]
+
+  deps = [
+    "${updater_path}/interfaces/kits/misc_info:libmiscinfo",
+    "${updater_path}/interfaces/kits/packages:libpackageExt",
+    "${updater_path}/interfaces/kits/slot_info:libslotinfo",
+    "${updater_path}/services/applypatch:libapplypatch",
+    "${updater_path}/services/fs_manager:libfsmanager",
+    "${updater_path}/services/log:libupdaterlog",
+    "${updater_path}/services/package:libupdaterpackage",
+    "${updater_path}/services/script:libupdaterscript",
+    "${updater_path}/utils:libutils",
+    "//third_party/bounds_checking_function:libsec_static",
+    "//third_party/bzip2:libbz2",
+    "//third_party/cJSON:cjson",
+    "//third_party/openssl:libcrypto_shared",
+  ]
+  external_deps = [
+    "hilog:libhilog",
+    "init:libbegetutil",
+  ]
+
+  cflags = [
+    "-g",
+    "-O0",
+    "-Wno-unused-variable",
+    "-fno-omit-frame-pointer",
+  ]
+
+  defines = [ "UPDATER_UT" ]
+  subsystem_name = "updater"
+  part_name = "updater"
+}

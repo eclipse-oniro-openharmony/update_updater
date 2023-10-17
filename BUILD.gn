@@ -29,6 +29,7 @@ group("fuzztest") {
     "test/fuzztest/rebootandinstallupgradepackage_fuzzer:RebootAndInstallUpgradePackageFuzzTest",
     "test/fuzztest/updaterfactoryreset_fuzzer:UpdaterFactoryResetFuzzTest",
     "test/fuzztest/writeupdatermsg_fuzzer:WriteUpdaterMsgFuzzTest",
+    "test/fuzztest/binflow_fuzzer:BinFlowFuzzTest",
   ]
 }
 
