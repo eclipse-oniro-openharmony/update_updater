@@ -29,8 +29,8 @@ ohos_static_library("libslotinfo") {
   deps = [ "${updater_path}/services/log:libupdaterlog" ]
   if (enable_ohos_startup_init_feature_ab_partition) {
     defines = [ "UPDATER_AB_SUPPORT" ]
-    deps +=
-        [ "//drivers/peripheral/partitionslot/hal:libpartition_slot_manager" ]
+    external_deps +=
+        [ "drivers_peripheral_partitionslot:libpartition_slot_manager" ]
   }
 
   subsystem_name = "updater"
