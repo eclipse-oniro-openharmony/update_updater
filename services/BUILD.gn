@@ -107,10 +107,10 @@ ohos_executable("updater") {
 
   # add updater custom library
   if (defined(updater_only_custom_external_deps)) {
-    deps += updater_only_custom_external_deps
+    external_deps += updater_only_custom_external_deps
   }
   if (defined(updater_custom_external_deps)) {
-    deps += updater_custom_external_deps
+    external_deps += updater_custom_external_deps
   }
 
   if (updater_ui_support) {
