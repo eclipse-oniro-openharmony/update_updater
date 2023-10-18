@@ -29,8 +29,8 @@ template<typename T>
 inline constexpr bool G_IS_BOOL = std::is_same_v<bool, T>;
 
 template<typename T>
-inline constexpr bool G_IS_STR = (std::is_same_v<char *, std::decay_t<T>> || std::is_same_v<const char *, std::decay_t<T>> ||
-                        std::is_same_v<std::string, T>);
+inline constexpr bool G_IS_STR = (std::is_same_v<char *, std::decay_t<T>> ||
+    std::is_same_v<const char *, std::decay_t<T>> || std::is_same_v<std::string, T>);
 
 template<typename T>
 inline constexpr bool G_IS_PRINTABLE = (G_IS_NUM<T> || G_IS_BOOL<T> || G_IS_STR<T>);
