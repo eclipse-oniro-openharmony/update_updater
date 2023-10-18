@@ -21,6 +21,7 @@ group("fuzztest") {
     "test/fuzztest/UpdaterMountForPath_fuzzer:UpdaterMountForPathFuzzTest",
     "test/fuzztest/UpdaterStartUpdaterProc_fuzzer:UpdaterStartUpdaterProcFuzzTest",
     "test/fuzztest/applypatch_fuzzer:ApplyPatchFuzzTest",
+    "test/fuzztest/binflow_fuzzer:BinFlowFuzzTest",
     "test/fuzztest/dopartitions_fuzzer:DoPartitionsFuzzTest",
     "test/fuzztest/extractandexecutescript_fuzzer:ExtractAndExecuteScriptFuzzTest",
     "test/fuzztest/getupdatepackageinfo_fuzzer:GetUpdatePackageInfoFuzzTest",
