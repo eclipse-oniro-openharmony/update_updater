@@ -107,11 +107,14 @@ ohos_executable("updater") {
   external_deps = [ "init:libbegetutil" ]
 
   # add updater custom library
-  if (defined(updater_custom_lib)) {
-    deps += updater_custom_lib
+  if (defined(updater_only_custom_external_deps)) {
+    external_deps += updater_only_custom_external_deps
+  }
+  if (defined(updater_custom_external_deps)) {
+    external_deps += updater_custom_external_deps
   }
 
-  if (updater_ui_support && defined(updater_custom_lib)) {
+  if (updater_ui_support) {
     external_deps += [ "drivers_peripheral_input:hdi_input_udriver" ]
   }
 
@@ -181,11 +184,11 @@ ohos_static_library("libupdater") {
   external_deps = [ "init:libbegetutil" ]
 
   # add updater custom library
-  if (defined(updater_custom_lib)) {
-    deps += updater_custom_lib
+  if (defined(updater_custom_external_deps)) {
+    deps += updater_custom_external_deps
   }
 
-  if (updater_ui_support && defined(updater_custom_lib)) {
+  if (updater_ui_support) {
     external_deps += [ "drivers_peripheral_input:hdi_input_udriver" ]
   }
 

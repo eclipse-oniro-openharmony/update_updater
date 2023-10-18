@@ -195,10 +195,6 @@ ohos_static_library("libflashd") {
     "//third_party/zlib:libz",
   ]
 
-  if (defined(binary_custom_lib)) {
-    deps += binary_custom_lib
-  }
-
   include_dirs = [
     "${HDC_PATH}/daemon",
     "${HDC_PATH}/common",
@@ -241,6 +237,10 @@ ohos_static_library("libflashd") {
     "c_utils:utils",
     "init:libbegetutil",
   ]
+
+  if (defined(binary_custom_external_deps)) {
+    external_deps += binary_custom_external_deps
+  }
 
   part_name = "updater"
   subsystem_name = "updater"
