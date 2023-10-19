@@ -92,7 +92,7 @@ HWTEST_F(UpdaterUiStrategyUnitTest, test_load_strategy_for_each_mode, TestSize.L
     EXPECT_EQ(UiStrategy::GetStrategy(), (std::unordered_map<std::string, Updater::UiStrategyCfg> {
         {UPDATERMODE_SDCARD, sdCardCfg}, {UPDATERMODE_FACTORYRST, factoryRstCfg},
         {UPDATERMODE_REBOOTFACTORYRST, rebootFactoryRstCfg}, {UPDATERMODE_OTA, defaultCfg},
-        {UPDATERMODE_RECOVER, defaultCfg}
+        {UPDATERMODE_RECOVER, defaultCfg}, {UPDATERMODE_NIGHTUPDATE, defaultCfg}
     }));
 }
 } // namespace
