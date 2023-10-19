@@ -185,7 +185,7 @@ ohos_static_library("libupdater") {
 
   # add updater custom library
   if (defined(updater_custom_external_deps)) {
-    deps += updater_custom_external_deps
+    external_deps += updater_custom_external_deps
   }
 
   if (updater_ui_support) {
