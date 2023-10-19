@@ -213,4 +213,72 @@ HWTEST_F(UtilsJsonNodeUnitTest, TestInvalidPath2, TestSize.Level0)
     EXPECT_EQ(node.Type(), NodeType::UNKNOWN);
     DeleteFile(invalidJsonPath);
 }
+
+HWTEST_F(UtilsJsonNodeUnitTest, TestVectorAssign, TestSize.Level0)
+{
+    std::string str = R"({"key":[1, true, "value"]})";
+    JsonNode node {str};
+    constexpr int intVal = 2;
+    constexpr bool boolVal = false;
+    const char *strVal = "newValue";
+    int idx = 0;
+    node["key"][idx++] = intVal;
+    node["key"][idx++] = boolVal;
+    node["key"][idx++] = strVal;
+    EXPECT_EQ(node["key"][--idx], strVal);
+    EXPECT_EQ(node["key"][--idx], boolVal);
+    EXPECT_EQ(node["key"][--idx], intVal);
+}
+
+HWTEST_F(UtilsJsonNodeUnitTest, TestIntAssign, TestSize.Level0)
+{
+    std::string str = R"({"key":1})";
+    JsonNode node {str};
+    constexpr int intVal = 2;
+    node["key"] = intVal;
+    EXPECT_EQ(node["key"], intVal);
+}
+
+HWTEST_F(UtilsJsonNodeUnitTest, TestBoolAssign, TestSize.Level0)
+{
+    std::string str = R"({"key":true})";
+    JsonNode node {str};
+    constexpr bool boolVal = false;
+    node["key"] = boolVal;
+    EXPECT_EQ(node["key"], boolVal);
+}
+
+HWTEST_F(UtilsJsonNodeUnitTest, TestStrAssign, TestSize.Level0)
+{
+    std::string str = R"({"key":"value"})";
+    JsonNode node {str};
+    const char *strVal = "newValue";
+    node["key"] = strVal;
+    EXPECT_EQ(node["key"], strVal);
+}
+
+HWTEST_F(UtilsJsonNodeUnitTest, TestMultiLevelAssign, TestSize.Level0)
+{
+    std::string str = R"({"key1":{
+        "key2":1,
+        "key3":"value"
+    }})";
+    JsonNode node {str};
+    constexpr int newValue = 2;
+    node["key1"]["key2"] = newValue;
+    node["key1"]["key3"] = "value2";
+    EXPECT_EQ(node["key1"]["key2"], newValue);
+    EXPECT_EQ(node["key1"]["key3"], "value2");
+}
+
+HWTEST_F(UtilsJsonNodeUnitTest, TestInvalidAssign, TestSize.Level0)
+{
+    std::string str = R"({"key" : 1})";
+    JsonNode node {str};
+    constexpr int value = 1;
+    node["key"] = false;
+    EXPECT_EQ(node["key"], value);
+    node["key"] = "newValue";
+    EXPECT_EQ(node["key"], value);
+}
 } // namespace UpdaterUt

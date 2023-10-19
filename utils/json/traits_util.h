@@ -16,6 +16,7 @@
 #ifndef TRAITS_UTIL_H
 #define TRAITS_UTIL_H
 
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -28,8 +29,8 @@ template<typename T>
 inline constexpr bool G_IS_BOOL = std::is_same_v<bool, T>;
 
 template<typename T>
-inline constexpr bool G_IS_STR = (std::is_same_v<char *, T> || std::is_same_v<const char *, T> ||
-                        std::is_same_v<std::string, T>);
+inline constexpr bool G_IS_STR = (std::is_same_v<char *, std::decay_t<T>> ||
+    std::is_same_v<const char *, std::decay_t<T>> || std::is_same_v<std::string, T>);
 
 template<typename T>
 inline constexpr bool G_IS_PRINTABLE = (G_IS_NUM<T> || G_IS_BOOL<T> || G_IS_STR<T>);
@@ -50,6 +51,9 @@ template<bool b, typename T>
 using isMatch = typename std::enable_if_t<b, T>;
 
 template<typename T>
+using RemoveCvRef = std::remove_cv_t<std::remove_reference_t<T>>;
+
+template<typename T>
 struct StandardTypeHelper {
     static_assert(G_IS_BASE_TYPE<T>);
     using type = std::conditional_t<G_IS_NUM<T>, int, std::conditional_t<G_IS_STR<T>, std::string, bool>>;
@@ -57,6 +61,9 @@ struct StandardTypeHelper {
 
 template<typename T>
 using StandardType = typename StandardTypeHelper<T>::type;
+
+template<typename T>
+using OptStandardType = std::optional<StandardType<RemoveCvRef<T>>>;
 
 template<std::size_t idx, typename...T>
 inline auto &Get(T &&...t)

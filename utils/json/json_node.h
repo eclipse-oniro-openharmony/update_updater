@@ -27,6 +27,7 @@
 #include <vector>
 
 #include "cJSON.h"
+#include "log/log.h"
 #include "macros.h"
 #include "traits_util.h"
 
@@ -53,6 +54,8 @@ public:
 
     const JsonNode &operator[](int idx) const;
     const JsonNode &operator[](const std::string &key) const;
+    JsonNode &operator[](int idx);
+    JsonNode &operator[](const std::string &key);
 
     template<typename T>
     std::optional<T> As() const
@@ -86,19 +89,23 @@ public:
     }
     std::list<std::reference_wrapper<JsonNode>>::const_iterator begin() const;
     std::list<std::reference_wrapper<JsonNode>>::const_iterator end() const;
+    template<typename T>
+    void operator=(T &&rhs)
+    {
+        static_assert(Detail::G_IS_BASE_TYPE<Detail::RemoveCvRef<T>>, "only allow change int, string, bool value");
+        if (innerObj_.valueless_by_exception()) {
+            innerObj_ = Detail::OptStandardType<T>(rhs);
+        }
+        if (auto optPtr = std::get_if<Detail::OptStandardType<T>>(&innerObj_); optPtr) {
+            *optPtr = Detail::OptStandardType<T>(rhs);
+        } else {
+            LOG(ERROR) << "assign json node failed, key is " << key_.value_or("null") << ", type is "
+                << static_cast<int>(type_) << ", rhs is " << rhs;
+        }
+    }
 private:
     void Parse(const cJSON *root);
     void Init(const cJSON *root, bool needDelete);
-    template<typename T>
-    void Assign(T rhs) const
-    {
-        if (innerObj_.valueless_by_exception()) {
-            innerObj_ = std::optional<T>(rhs);
-        }
-        if (auto optPtr = std::get_if<std::optional<T>>(&innerObj_); optPtr) {
-            *optPtr = std::optional<T>(rhs);
-        }
-    }
     int size_ {1};
     NodeType type_ {NodeType::UNKNOWN};         /* json node type */
     std::optional<std::string> key_ {std::nullopt}; /* key for object items */
@@ -106,10 +113,38 @@ private:
     std::list<std::reference_wrapper<JsonNode>> innerNodesList_ {};
 };
 
-inline const JsonNode &GetInvalidNode()
+inline JsonNode &GetInvalidNode()
 {
     static JsonNode emptyNode;  // used for invalid json node
     return emptyNode;
+}
+
+template<typename T>
+inline JsonNode &GetNodeByIdx(T &innerObj, int size, int idx)
+{
+    auto optVec = std::get_if<std::optional<NodeVec>>(&innerObj);
+    if (optVec == nullptr || *optVec == std::nullopt) {
+        return GetInvalidNode(); // type not matched
+    }
+    auto &nodeVec = **optVec;
+    if (idx < 0 || idx >= size) {
+        return GetInvalidNode();
+    }
+    return *nodeVec[idx];
+}
+
+template<typename T>
+inline JsonNode &GetNodeByKey(T &innerObj, const std::string &key)
+{
+    auto optMap = std::get_if<std::optional<NodeMap>>(&innerObj);
+    if (optMap == nullptr || *optMap == std::nullopt) {
+        return GetInvalidNode(); // type not matched
+    }
+    auto &nodeMap = **optMap;
+    if (auto it = nodeMap.find(key); it != nodeMap.end()) {
+        return *(it->second);
+    }
+    return GetInvalidNode();
 }
 }
 #endif // NODE_H

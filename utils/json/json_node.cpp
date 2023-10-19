@@ -139,30 +139,24 @@ void JsonNode::Parse(const cJSON *root)
 
 JsonNode::~JsonNode() = default;
 
+JsonNode &JsonNode::operator[](int idx)
+{
+    return GetNodeByIdx(innerObj_, size_, idx);
+}
+
+JsonNode &JsonNode::operator[](const std::string &key)
+{
+    return GetNodeByKey(innerObj_, key);
+}
+
 const JsonNode &JsonNode::operator[](int idx) const
 {
-    auto optVec = std::get_if<std::optional<NodeVec>>(&innerObj_);
-    if (optVec == nullptr || *optVec == std::nullopt) {
-        return GetInvalidNode(); // type not matched
-    }
-    const NodeVec &nodeVec = **optVec;
-    if (idx < 0 || idx >= size_) {
-        return GetInvalidNode();
-    }
-    return *nodeVec[idx];
+    return GetNodeByIdx(innerObj_, size_, idx);
 }
 
 const JsonNode &JsonNode::operator[](const std::string &key) const
 {
-    auto optMap = std::get_if<std::optional<NodeMap>>(&innerObj_);
-    if (optMap == nullptr || *optMap == std::nullopt) {
-        return GetInvalidNode(); // type not matched
-    }
-    const NodeMap &nodeMap = **optMap;
-    if (auto it = nodeMap.find(key); it != nodeMap.end()) {
-        return *(it->second);
-    }
-    return GetInvalidNode();
+    return GetNodeByKey(innerObj_, key);
 }
 
 std::list<std::reference_wrapper<JsonNode>>::const_iterator JsonNode::begin() const
