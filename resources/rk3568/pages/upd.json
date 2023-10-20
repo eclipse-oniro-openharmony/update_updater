@@ -64,9 +64,10 @@
             "id": "FactoryRstFailed",
             "coms": [
                 "FailIcon_Image",
-                "FactoryRstFailedRes_Label"
+                "FactoryRstFailedRes_Label",
+                "ReturnToMain_Button"
             ],
-            "bgColor" : "#000000ff"
+            "bgColor" : "#f1f3f5ff"
         }
     ],
     "default": {
@@ -173,6 +174,16 @@
             "type": "UILabelButton",
             "id": "FailReboot_Button",
             "text": "[LABEL_UPD_FAIL_REBOOT]",
+            "x": 48,
+            "y": 1136,
+            "w": 624,
+            "h": 80,
+            "fontSize": 32
+        },
+        {
+            "type": "UILabelButton",
+            "id": "ReturnToMain_Button",
+            "text": "[LABEL_RETURN_TO_MAIN]",
             "x": 48,
             "y": 1136,
             "w": 624,

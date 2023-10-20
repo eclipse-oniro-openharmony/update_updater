@@ -149,6 +149,12 @@
         "en":"",
         "spa":""
     },
+    "LABEL_RETURN_TO_MAIN" : {
+        "type": "UIString",
+        "zh":"返回主界面",
+        "en":"",
+        "spa":""
+    },
     "DEFAULT_STRING" : {
         "type": "UIString",
         "zh":"*",

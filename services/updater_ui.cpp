@@ -127,6 +127,12 @@ DEFINE_SYNC_CALLBACK(OnLabelCancelEvt)
     PageManager::GetInstance().GoBack();
 }
 
+DEFINE_SYNC_CALLBACK(OnReturnToMainEvt)
+{
+    LOG(INFO) << "On Return To Main";
+    PageManager::GetInstance().ShowMainpage();
+}
+
 DEFINE_ASYN_CALLBACK(OnLabelOkEvt)
 {
     LOG(INFO) << "On Label Ok";

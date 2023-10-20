@@ -158,6 +158,12 @@
             "comId" : "FailReboot_Button",
             "type" : "CLICKEVENT",
             "func" : "OnRebootEvt"
+        },
+        {
+            "pageId" : "upd",
+            "comId" : "ReturnToMain_Button",
+            "type" : "CLICKEVENT",
+            "func" : "OnReturnToMainEvt"
         }
     ]
 }
