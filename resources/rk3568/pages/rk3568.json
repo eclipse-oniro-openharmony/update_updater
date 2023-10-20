@@ -72,7 +72,7 @@
                 "warningComId" : ""
             },
             "resPage" : {
-                "successPageId" : "menu:normal",
+                "successPageId" : "upd:FactoryRstSucc",
                 "failPageId" : "upd:FactoryRstFailed"
             }
         },
@@ -90,7 +90,7 @@
                 "warningComId" : ""
             },
             "resPage" : {
-                "successPageId" : "upd:reset",
+                "successPageId" : "upd:FactoryRstSucc",
                 "failPageId" : "upd:FactoryRstFailed"
             }
         }

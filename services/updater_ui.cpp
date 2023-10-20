@@ -130,7 +130,7 @@ DEFINE_SYNC_CALLBACK(OnLabelCancelEvt)
 DEFINE_SYNC_CALLBACK(OnReturnToMainEvt)
 {
     LOG(INFO) << "On Return To Main";
-    PageManager::GetInstance().ShowMainpage();
+    PageManager::GetInstance().ShowMainPage();
 }
 
 DEFINE_ASYN_CALLBACK(OnLabelOkEvt)
@@ -167,12 +167,11 @@ DEFINE_ASYN_CALLBACK(OnConfirmRstEvt)
     if (FactoryReset(USER_WIPE_DATA, "/data") != 0) {
         GetFacade().ShowLogRes(TR(LOG_WIPE_FAIL));
         GetFacade().ShowFailedPage();
-        Utils::UsSleep(FAIL_DELAY);
-        GetFacade().ShowMainpage();
     } else {
-        GetFacade().ShowUpdInfo(TR(LOGRES_WIPE_FINISH));
-        Utils::UsSleep(DISPLAY_TIME);
         GetFacade().ShowSuccessPage();
+        Utils::UsSleep(SUCCESS_DELAY);
+        PostUpdater(true);
+        Utils::UpdaterDoReboot("");
     }
 }
 
