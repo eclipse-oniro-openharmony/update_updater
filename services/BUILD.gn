@@ -91,10 +91,6 @@ ohos_executable("updater") {
     defines += [ "UPDATER_USE_PTABLE" ]
   }
 
-  if (defined(updater_only_custom_deps) && updater_ui_support) {
-    deps += updater_only_custom_deps
-  }
-
   # force link invisible function
   if (defined(updater_force_link_libs)) {
     ldflags += [ "-Wl,--whole-archive" ]
@@ -112,6 +108,9 @@ ohos_executable("updater") {
   }
   if (defined(updater_custom_external_deps)) {
     external_deps += updater_custom_external_deps
+  }
+  if (defined(updater_ui_external_deps) && updater_ui_support) {
+    external_deps += updater_ui_external_deps
   }
 
   if (updater_ui_support) {
