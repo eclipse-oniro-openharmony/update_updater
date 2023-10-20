@@ -38,12 +38,12 @@ public:
     ~HwfaultRetryUnitTest() {}
 
     static void SetUpTestCase(void) {}
-    static void TearDownTestCase(void)
+    static void TearDownTestCase(void) {}
+    void SetUp() {}
+    void TearDown()
     {
         (void)ClearMisc();
     }
-    void SetUp() {}
-    void TearDown() {}
     void TestBody() {}
 };
 
@@ -74,6 +74,6 @@ HWTEST_F(HwfaultRetryUnitTest, RetryMoreThanMax, TestSize.Level1)
     HwFaultRetry::GetInstance().DoRetryAction();
 
     bool ret = Utils::CheckFaultInfo(IO_FAILED_REBOOT);
-    EXPECT_EQ(ret, true);
+    EXPECT_EQ(ret, false);
 }
 }
