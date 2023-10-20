@@ -108,9 +108,6 @@ ohos_executable("updater") {
   if (defined(updater_custom_external_deps)) {
     external_deps += updater_custom_external_deps
   }
-  if (defined(updater_only_custom_external_deps)) {
-    external_deps += updater_only_custom_external_deps
-  }
   if (defined(updater_ui_external_deps) && updater_ui_support) {
     external_deps += updater_ui_external_deps
   }
