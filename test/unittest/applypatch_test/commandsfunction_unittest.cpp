@@ -62,13 +62,13 @@ void CommandFunctionUnitTest::TearDown()
 HWTEST_F(CommandFunctionUnitTest, command_function_test_001, TestSize.Level1)
 {
     std::string filePath = "/data/updater/updater/allCmdUnitTest.bin";
+    std::unique_ptr<TransferManager> tm = std::make_unique<TransferManager>();
     std::shared_ptr<Command> cmd;
-    cmd = std::make_shared<Command>();
-    TransferManagerPtr tm = TransferManager::GetTransferManagerInstance();
+    cmd = std::make_shared<Command>(tm);
     mode_t dirMode = S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH;
-    tm->GetGlobalParams()->storeBase = "data/updater/updater/tmp/cmdtest";
-    Store::DoFreeSpace(TransferManager::GetTransferManagerInstance()->GetGlobalParams()->storeBase);
-    Utils::MkdirRecursive(TransferManager::GetTransferManagerInstance()->GetGlobalParams()->storeBase, dirMode);
+    tm->GetTransferParams()->storeBase = "data/updater/updater/tmp/cmdtest";
+    Store::DoFreeSpace(tm->GetTransferParams()->storeBase);
+    Utils::MkdirRecursive(tm->GetTransferParams()->storeBase, dirMode);
     int fd = open(filePath.c_str(), O_RDWR | O_CREAT, dirMode);
     if (fd < 0) {
         printf("Failed to open block %s, errno: %d\n", filePath.c_str(), errno);
@@ -81,7 +81,7 @@ HWTEST_F(CommandFunctionUnitTest, command_function_test_001, TestSize.Level1)
     EXPECT_EQ(ret, 0);
     cmdLine = "free 2,0,1";
     ret = CommandFunctionUnitTest::TestCommandFnExec(cmd, cmdLine);
-    tm->GetGlobalParams()->storeCreated = 0;
+    tm->GetTransferParams()->storeCreated = 0;
     EXPECT_EQ(ret, 0);
     cmdLine = "move ad7facb2586fc6e966c004d7d1d16b024f5805ff7cb47c7a85dabd8b48892ca7 2,3,4 1 2,1,2";
     lseek64(fd, 0, SEEK_SET);

@@ -20,6 +20,7 @@
 #include <vector>
 #include <sys/time.h>
 #include <unistd.h>
+#include <mutex>
 #ifndef DIFF_PATCH_SDK
 #include "hilog_base/log_base.h"
 #include "vsnprintf_s_p.h"
@@ -28,6 +29,7 @@
 
 namespace Updater {
 static std::ofstream g_updaterLog;
+static std::mutex g_updaterLogLock;
 static std::ofstream g_updaterStage;
 static std::ofstream g_errorCode;
 static std::ofstream g_nullStream;
@@ -60,8 +62,10 @@ UpdaterLogger::~UpdaterLogger()
     oss_.str("");
     oss_ << std::endl << std::flush;
     if (g_updaterLog.is_open()) {
+        g_updaterLogLock.lock();
         g_updaterLog << realTime_ <<  " " << g_logTag << " " <<  tid << " "
             << logLevelMap_[level_] << " " << str << std::endl << std::flush;
+        g_updaterLogLock.unlock();
     }
 }
 

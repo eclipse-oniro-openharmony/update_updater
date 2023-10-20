@@ -50,16 +50,14 @@ void TransferManagerUnitTest::TearDown()
 
 HWTEST_F(TransferManagerUnitTest, transfer_manager_test_001, TestSize.Level1)
 {
-    TransferManagerPtr tm = TransferManager::GetTransferManagerInstance();
+    std::unique_ptr<TransferManager> tm = std::make_unique<TransferManager>();
     std::string cmd = "zero 2,0,1";
     tm->CheckResult(CommandResult::NEED_RETRY, cmd, CommandType::ZERO);
-    TransferManager::ReleaseTransferManagerInstance(tm);
 }
 
 HWTEST_F(TransferManagerUnitTest, transfer_manager_test_002, TestSize.Level1)
 {
-    TransferManagerPtr tm = TransferManager::GetTransferManagerInstance();
+    std::unique_ptr<TransferManager> tm = std::make_unique<TransferManager>();
     tm->ReloadForRetry();
-    TransferManager::ReleaseTransferManagerInstance(tm);
 }
 } // updater_ut

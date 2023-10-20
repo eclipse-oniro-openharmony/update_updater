@@ -31,7 +31,7 @@ namespace Uscript {
 static std::set<std::string> g_reservedInstructions = {
     "LoadScript", "RegisterCmd", "abort", "assert", "concat",
     "is_substring", "stdout", "sleep", "set_progress", "ui_print",
-    "show_progress"
+    "show_progress", "set_proportion"
     };
 
 static ScriptInstructionHelper* g_instructionHelper = nullptr;
@@ -78,6 +78,7 @@ int32_t ScriptInstructionHelper::RegisterInstructions() const
     scriptManager_->AddInstruction("ui_print", new UScriptInstructionUiPrint());
     scriptManager_->AddInstruction("DeleteFile", new UScriptInstructionDeleteFile());
     scriptManager_->AddInstruction("DeleteDir", new UScriptInstructionDeleteDir());
+    scriptManager_->AddInstruction("set_proportion", new UScriptInstructionSetProportion());
     return USCRIPT_SUCCESS;
 }
 

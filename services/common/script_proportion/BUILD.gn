@@ -1,0 +1,33 @@
+# Copyright (c) 2023 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//base/update/updater/updater_default_cfg.gni")
+import("//build/ohos.gni")
+
+updater_path = rebase_path("${updater_absolutely_path}", ".")
+
+config("libscript_proportion_exported_headers") {
+  visibility = [ ":*" ]
+  include_dirs = [
+    "${updater_path}/services/common/script_proportion",
+  ]
+}
+
+ohos_static_library("libscript_proportion") {
+  sources = [ "script_proportion.cpp" ]
+
+  public_configs = [ ":libscript_proportion_exported_headers" ]
+
+  subsystem_name = "updater"
+  part_name = "updater"
+}

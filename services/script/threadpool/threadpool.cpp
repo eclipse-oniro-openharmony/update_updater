@@ -22,10 +22,6 @@ static std::mutex g_initMutex;
 
 ThreadPool* ThreadPool::CreateThreadPool(int number)
 {
-    if (number <= 1) {
-        USCRIPT_LOGE("Invalid number %d", number);
-        return nullptr;
-    }
     std::lock_guard<std::mutex> lock(g_initMutex);
     if (g_threadPool != nullptr) {
         return g_threadPool;
@@ -56,7 +52,7 @@ void ThreadPool::Init(int32_t numberThread)
         }
     }
     // Create workers
-    for (int32_t threadIndex = 1; threadIndex < threadNumber_; ++threadIndex) {
+    for (int32_t threadIndex = 0; threadIndex < threadNumber_; ++threadIndex) {
         workers_.emplace_back(std::thread(ThreadPool::ThreadExecute, this, threadIndex));
     }
 }
@@ -103,30 +99,30 @@ void ThreadPool::AddNewTask(Task &&task)
     int32_t index = AcquireWorkIndex();
     USCRIPT_LOGI("ThreadPool::AddNewTask %d ", index);
 
-    // If there are no multi-works
-    // Do not need to enqueue, execute it immediately
-    if (task.workSize <= 1 || index < 0) {
-        for (int32_t i = 0; i < task.workSize; ++i) {
-            task.processor(i);
-        }
-        return;
-    }
+    // // If there are no multi-works
+    // // Do not need to enqueue, execute it immediately
+    // if (task.workSize <= 1 || index < 0) {
+    //     for (int32_t i = 0; i < task.workSize; ++i) {
+    //         task.processor(i);
+    //     }
+    //     return;
+    // }
 
-    int32_t workSize = task.workSize;
-    // If too much works, Create new task to do the work.
-    if (workSize > threadNumber_) {
-        Task newTask;
-        newTask.workSize = threadNumber_;
-        newTask.processor = [workSize, &task, this](int tId) {
-            for (int v = tId; v < workSize; v += threadNumber_) {
-                task.processor(v);
-            }
-        };
-        RunTask(std::move(newTask), index);
-    } else {
-        RunTask(std::move(task), index);
-    }
-
+    // int32_t workSize = task.workSize;
+    // // If too much works, Create new task to do the work.
+    // if (workSize > threadNumber_) {
+    //     Task newTask;
+    //     newTask.workSize = threadNumber_;
+    //     newTask.processor = [workSize, &task, this](int tId) {
+    //         for (int v = tId; v < workSize; v += threadNumber_) {
+    //             task.processor(v);
+    //         }
+    //     };
+    //     RunTask(std::move(newTask), index);
+    // } else {
+    //     RunTask(std::move(task), index);
+    // }
+    RunTask(std::move(task), index);
     // Works done. make this task available
     std::lock_guard<std::mutex> lock(queueMutex_);
     taskQueue_[index].available = true;
@@ -147,20 +143,20 @@ int32_t ThreadPool::AcquireWorkIndex()
 void ThreadPool::RunTask(Task &&task, int32_t index)
 {
     taskQueue_[index].task = std::move(task);
-    int32_t workSize = task.workSize;
+    // int32_t workSize = task.workSize;
     // Mark each task should be executed
-    for (int32_t i = 1; i < workSize; ++i) {
+    for (int32_t i = 0; i < threadNumber_; ++i) {
         *taskQueue_[index].subTaskFlag[i] = true;
     }
 
     // Execute first task
-    taskQueue_[index].task.processor(0);
+    // taskQueue_[index].task.processor(0);
     bool complete = true;
     do {
         std::this_thread::yield();
         complete = true;
         // 检查是否所有子任务执行结束
-        for (int32_t i = 1; i < workSize; ++i) {
+        for (int32_t i = 0; i < threadNumber_; ++i) {
             if (*taskQueue_[index].subTaskFlag[i]) {
                 complete = false;
                 break;

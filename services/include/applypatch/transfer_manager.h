@@ -19,14 +19,13 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include "applypatch/command_const.h"
 #include "applypatch/command.h"
-#include "command.h"
 #include "script_instruction.h"
 #include "script_manager.h"
 
 
 namespace Updater {
-static std::unordered_map<std::string, BlockSet> blocksetMap;
 
 struct WriterThreadInfo {
     pthread_mutex_t mutex;
@@ -55,22 +54,19 @@ struct TransferParams {
     uint8_t *patchDataBuffer;
     size_t patchDataSize;
 };
-using GlobalParams = TransferParams;
+
 class TransferManager;
 using TransferManagerPtr = TransferManager *;
 class TransferManager {
 public:
-    TransferManager() {}
-    static TransferManagerPtr GetTransferManagerInstance();
-    static void ReleaseTransferManagerInstance(TransferManagerPtr transferManager);
-    virtual ~TransferManager();
+    TransferManager();
+    virtual ~TransferManager() {};
 
-    void Init();
     bool CommandsParser(int fd, const std::vector<std::string> &context);
 
-    GlobalParams* GetGlobalParams()
+    TransferParams* GetTransferParams()
     {
-        return globalParams.get();
+        return transferParams_.get();
     }
     std::string ReloadForRetry() const;
     bool CheckResult(const CommandResult result, const std::string &cmd, const CommandType &type);
@@ -79,7 +75,7 @@ public:
 private:
     bool RegisterForRetry(const std::string &cmd);
     bool CommandsExecute(int fd, Command &cmd);
-    std::unique_ptr<GlobalParams> globalParams;
+    std::unique_ptr<TransferParams> transferParams_;
 };
 } // namespace Updater
 #endif

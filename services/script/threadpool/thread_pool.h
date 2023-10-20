@@ -63,7 +63,7 @@ private:
     ~ThreadPool();
 
 private:
-    static const int32_t THREAD_POOL_MAX_TASKS = 2;
+    static const int32_t THREAD_POOL_MAX_TASKS = 1;
     std::vector<std::thread> workers_;
     std::atomic<bool> stop_ = { false };
 

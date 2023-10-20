@@ -100,7 +100,7 @@ bool AllCmdUnitTest::WriteTestBin(int fd, const uint8_t &data, size_t size) cons
 // Leave new command to be covered by update_image_block test.
 HWTEST_F(AllCmdUnitTest, allCmd_test_001, TestSize.Level1)
 {
-    TransferManager *tm = TransferManager::GetTransferManagerInstance();
+    std::unique_ptr<TransferManager> tm = std::make_unique<TransferManager>();
     // Read source
 
     char filename[] = {"/data/updater/updater/allCmdUnitTest.bin"};
@@ -121,7 +121,7 @@ HWTEST_F(AllCmdUnitTest, allCmd_test_001, TestSize.Level1)
         std::cout << line << std::endl;
     }
     std::cout << "Dump transfer line done." << std::endl;
-    TransferManager::GetTransferManagerInstance()->GetGlobalParams()->storeBase = "/data/updater/update_tmp";
+    tm->GetTransferParams()->storeBase = "/data/updater/update_tmp";
     std::string storePath = "/data/updater/update_tmp";
     Store::CreateNewSpace(storePath, false);
     rc = tm->CommandsParser(fd, transferLines);
@@ -166,14 +166,14 @@ int AllCmdUnitTest::AllCmdUnitTestMove(int &fd, std::vector<std::string> &allCmd
 
 HWTEST_F(AllCmdUnitTest, allCmd_test_002, TestSize.Level1)
 {
-    TransferManagerPtr tm = TransferManager::GetTransferManagerInstance();
+    std::unique_ptr<TransferManager> tm = std::make_unique<TransferManager>();
     std::string filePath = "/tmp/test.bin";
     size_t bufferSize = 4096;
     size_t count = 10;
     mode_t dirMode = S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH;
-    TransferManager::GetTransferManagerInstance()->GetGlobalParams()->storeBase = "/tmp/cmdtest";
-    Store::DoFreeSpace(TransferManager::GetTransferManagerInstance()->GetGlobalParams()->storeBase);
-    Utils::MkdirRecursive(TransferManager::GetTransferManagerInstance()->GetGlobalParams()->storeBase, dirMode);
+    tm->GetTransferParams()->storeBase = "/tmp/cmdtest";
+    Store::DoFreeSpace(tm->GetTransferParams()->storeBase);
+    Utils::MkdirRecursive(tm->GetTransferParams()->storeBase, dirMode);
     std::vector<uint8_t> buffer(bufferSize, 0);
     int fd = open(filePath.c_str(), O_RDWR | O_CREAT, dirMode);
     if (fd < 0) {
@@ -195,8 +195,8 @@ HWTEST_F(AllCmdUnitTest, allCmd_test_002, TestSize.Level1)
     allCmd.push_back("stash ad7facb2586fc6e966c004d7d1d16b024f5805ff7cb47c7a85dabd8b48892ca7 2,0,1");  // 清第一块
     result = tm->CommandsParser(fd, allCmd);
     EXPECT_TRUE(result);
-    Store::DoFreeSpace(TransferManager::GetTransferManagerInstance()->GetGlobalParams()->storeBase);
-    Utils::MkdirRecursive(TransferManager::GetTransferManagerInstance()->GetGlobalParams()->storeBase, mode);
+    Store::DoFreeSpace(tm->GetTransferParams()->storeBase);
+    Utils::MkdirRecursive(tm->GetTransferParams()->storeBase, mode);
 
     EXPECT_EQ(AllCmdUnitTestMove(fd, allCmd, *tm), 0);
     unlink(filePath.c_str());

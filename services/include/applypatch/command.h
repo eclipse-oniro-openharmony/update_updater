@@ -20,33 +20,18 @@
 #include <pthread.h>
 #include "applypatch/block_set.h"
 #include "applypatch/block_writer.h"
+#include "applypatch/command_const.h"
+#include "applypatch/transfer_manager.h"
 #include "pkg_manager.h"
 #include "script_instruction.h"
 #include "script_manager.h"
 
 namespace Updater {
-enum CommandType {
-    ABORT,
-    BSDIFF,
-    IMGDIFF,
-    ERASE,
-    FREE,
-    MOVE,
-    NEW,
-    STASH,
-    ZERO,
-    LAST,
-};
-
-enum CommandResult {
-    FAILED = -1,
-    SUCCESS = 0,
-    NEED_RETRY = 1
-};
-
+class TransferManager;
+using TransferManagerPtr = TransferManager *;
 class Command {
 public:
-    Command() {}
+    explicit Command(TransferManagerPtr tm): tm_(tm) {}
     virtual ~Command();
 
     virtual bool Init(const std::string &cmd_line);
@@ -54,6 +39,7 @@ public:
     std::string GetArgumentByPos(size_t pos) const;
     void SetFileDescriptor(int fd);
     int GetFileDescriptor() const;
+    TransferManagerPtr GetTransferManagerInstance() const;
     std::string GetCommandLine() const;
 private:
     CommandType ParseCommandType(const std::string &first_cmd);
@@ -62,6 +48,7 @@ private:
     std::string cmdLine_ {};
     std::vector<std::string> tokens_ {};
     std::unique_ptr<int> fd_ {};
+    TransferManagerPtr tm_;
 };
 } // namespace Updater
 #endif

@@ -34,6 +34,10 @@
 
 using namespace Hpackage;
 namespace Updater {
+
+static std::unordered_map<std::string, BlockSet> blocksetMap;
+static pthread_mutex_t stash_block_set_mutex = PTHREAD_MUTEX_INITIALIZER;
+
 CommandResult AbortCommandFn::Execute(const Command &params)
 {
     return SUCCESS;
@@ -44,7 +48,7 @@ CommandResult NewCommandFn::Execute(const Command &params)
     BlockSet bs;
     bs.ParserAndInsert(params.GetArgumentByPos(1));
     LOG(INFO) << " writing " << bs.TotalBlockSize() << " blocks of new data";
-    auto writerThreadInfo = TransferManager::GetTransferManagerInstance()->GetGlobalParams()->writerThreadInfo.get();
+    auto writerThreadInfo = params.GetTransferManagerInstance()->GetTransferParams()->writerThreadInfo.get();
     pthread_mutex_lock(&writerThreadInfo->mutex);
     writerThreadInfo->writer = std::make_unique<BlockWriter>(params.GetFileDescriptor(), bs);
     pthread_cond_broadcast(&writerThreadInfo->cond);
@@ -64,7 +68,7 @@ CommandResult NewCommandFn::Execute(const Command &params)
     pthread_mutex_unlock(&writerThreadInfo->mutex);
 
     writerThreadInfo->writer.reset();
-    TransferManager::GetTransferManagerInstance()->GetGlobalParams()->written += bs.TotalBlockSize();
+    params.GetTransferManagerInstance()->GetTransferParams()->written += bs.TotalBlockSize();
     return SUCCESS;
 }
 
@@ -94,7 +98,7 @@ CommandResult ZeroAndEraseCommandFn::Execute(const Command &params)
     LOG(INFO) << "Parser params to block set";
     auto ret = CommandResult(blk.WriteZeroToBlock(params.GetFileDescriptor(), isErase));
     if (ret == SUCCESS) {
-        TransferManager::GetTransferManagerInstance()->GetGlobalParams()->written += blk.TotalBlockSize();
+        params.GetTransferManagerInstance()->GetTransferParams()->written += blk.TotalBlockSize();
     }
     return ret;
 }
@@ -168,24 +172,27 @@ CommandResult DiffAndMoveCommandFn::Execute(const Command &params)
         LOG(ERROR) << "tgtBlockSize is : " <<tgtBlockSize << " , type is :" <<type;
         return errno == EIO ? NEED_RETRY : FAILED;
     }
-    std::string storeBase = TransferManager::GetTransferManagerInstance()->GetGlobalParams()->storeBase;
-    std::string freeStash = TransferManager::GetTransferManagerInstance()->GetGlobalParams()->freeStash;
+    std::string storeBase = params.GetTransferManagerInstance()->GetTransferParams()->storeBase;
+    std::string freeStash = params.GetTransferManagerInstance()->GetTransferParams()->freeStash;
     if (!freeStash.empty()) {
         if (Store::FreeStore(storeBase, freeStash) != 0) {
             LOG(WARNING) << "fail to delete file: " << freeStash;
         }
-        TransferManager::GetTransferManagerInstance()->GetGlobalParams()->freeStash.clear();
+        params.GetTransferManagerInstance()->GetTransferParams()->freeStash.clear();
     }
-    TransferManager::GetTransferManagerInstance()->GetGlobalParams()->written += targetBlock.TotalBlockSize();
+    params.GetTransferManagerInstance()->GetTransferParams()->written += targetBlock.TotalBlockSize();
     return SUCCESS;
 }
 
 CommandResult FreeCommandFn::Execute(const Command &params)
 {
     std::string shaStr = params.GetArgumentByPos(1);
-    blocksetMap.erase(shaStr);
-    std::string storeBase = TransferManager::GetTransferManagerInstance()->GetGlobalParams()->storeBase;
-    if (TransferManager::GetTransferManagerInstance()->GetGlobalParams()->storeCreated == 0) {
+    std::string storeBase = params.GetTransferManagerInstance()->GetTransferParams()->storeBase;
+    std::string blocksetId = storeBase + "/" + shaStr;
+    pthread_mutex_lock(&stash_block_set_mutex);
+    blocksetMap.erase(blocksetId);
+    pthread_mutex_unlock(&stash_block_set_mutex);
+    if (params.GetTransferManagerInstance()->GetTransferParams()->storeCreated == 0) {
         return CommandResult(Store::FreeStore(storeBase, shaStr));
     }
     return SUCCESS;
@@ -201,7 +208,7 @@ CommandResult StashCommandFn::Execute(const Command &params)
     size_t srcBlockSize = srcBlk.TotalBlockSize();
     std::vector<uint8_t> buffer;
     buffer.resize(srcBlockSize * H_BLOCK_SIZE);
-    std::string storeBase = TransferManager::GetTransferManagerInstance()->GetGlobalParams()->storeBase;
+    std::string storeBase = params.GetTransferManagerInstance()->GetTransferParams()->storeBase;
     LOG(INFO) << "Confirm whether the block is stored";
     if (Store::LoadDataFromStore(storeBase, shaStr, buffer) == 0) {
         LOG(INFO) << "The stash has been stored, skipped";
@@ -212,11 +219,14 @@ CommandResult StashCommandFn::Execute(const Command &params)
         LOG(ERROR) << "Error to load block data";
         return FAILED;
     }
-    blocksetMap[shaStr] = srcBlk;
+    std::string blocksetId = storeBase + "/" + shaStr;
+    pthread_mutex_lock(&stash_block_set_mutex);
+    blocksetMap[blocksetId] = srcBlk;
+    pthread_mutex_unlock(&stash_block_set_mutex);
     if (srcBlk.VerifySha256(buffer, srcBlockSize, shaStr) != 0) {
         return FAILED;
     }
-    LOG(INFO) << "store " << srcBlockSize << " blocks to " << shaStr;
+    LOG(INFO) << "store " << srcBlockSize << " blocks to " << blocksetId;
     int ret = Store::WriteDataToStore(storeBase, shaStr, buffer, srcBlockSize * H_BLOCK_SIZE);
     return CommandResult(ret);
 }

@@ -65,7 +65,7 @@ config("libupdaterscript_exported_headers") {
     "${updater_path}/services/script/script_instruction",
     "${updater_path}/services/script/script_interpreter",
     "${updater_path}/services/script/script_manager",
-    "${updater_path},services/script/threadpool",
+    "${updater_path}/services/script/threadpool",
   ]
 }
 
@@ -86,7 +86,7 @@ ohos_static_library("libupdaterscript") {
     "./script_interpreter/script_scanner.cpp",
     "./script_interpreter/script_statement.cpp",
     "./script_manager/script_managerImpl.cpp",
-    "./script_manager/script_utils.cpp",
+    "./script_manager/script_utils.cpp", 
     "./threadpool/threadpool.cpp",
   ]
   configs = [ ":script_config" ]
@@ -96,6 +96,7 @@ ohos_static_library("libupdaterscript") {
   external_deps = [ "c_utils:utils" ]
   deps = [
     "${updater_path}/services/script:gen_yacc",
+    "${updater_path}/services/common/script_proportion:libscript_proportion",
     "//third_party/bounds_checking_function:libsec_static",
   ]
 

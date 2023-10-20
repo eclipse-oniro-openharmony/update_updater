@@ -38,5 +38,12 @@ public:
     virtual ~UScriptInstructionUiPrint() {}
     int32_t Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context) override;
 };
+
+class UScriptInstructionSetProportion : public Uscript::UScriptInstruction {
+public:
+    UScriptInstructionSetProportion() {}
+    virtual ~UScriptInstructionSetProportion() {}
+    int32_t Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context) override;
+};
 } // namespace BasicInstruction
 #endif // USCRIPT_UPDATE_PROCESSOR_H

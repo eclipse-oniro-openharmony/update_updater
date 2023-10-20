@@ -89,16 +89,16 @@ static inline void CondBroadcast(WriterThreadInfo *info)
 
 void* UnpackNewData(void *arg)
 {
-    WriterThreadInfo *info = static_cast<WriterThreadInfo *>(arg);
+    TransferManagerPtr tm = static_cast<TransferManagerPtr>(arg);
+    WriterThreadInfo *info = tm->GetTransferParams()->writerThreadInfo.get();
     Hpackage::PkgManager::StreamPtr stream = nullptr;
-    TransferManagerPtr tm = TransferManager::GetTransferManagerInstance();
     if (info->newPatch.empty()) {
         LOG(ERROR) << "new patch file name is empty. thread quit.";
         CondBroadcast(info);
         return nullptr;
     }
     LOG(DEBUG) << "new patch file name: " << info->newPatch;
-    auto env = tm->GetGlobalParams()->env;
+    auto env = tm->GetTransferParams()->env;
     const FileInfo *file = env->GetPkgManager()->GetFileInfo(info->newPatch);
     if (file == nullptr) {
         LOG(ERROR) << "Cannot get file info of :" << info->newPatch;
@@ -180,22 +180,21 @@ static int32_t GetUpdateBlockInfo(struct UpdateBlockInfo &infos, Uscript::UScrip
     return USCRIPT_SUCCESS;
 }
 
-static int32_t ExecuteTransferCommand(int fd, const std::vector<std::string> &lines, Uscript::UScriptEnv &env,
+static int32_t ExecuteTransferCommand(int fd, const std::vector<std::string> &lines, TransferManagerPtr tm,
     Uscript::UScriptContext &context, const std::string &partitionName)
 {
-    TransferManagerPtr tm = TransferManager::GetTransferManagerInstance();
-    auto globalParams = tm->GetGlobalParams();
-    auto writerThreadInfo = globalParams->writerThreadInfo.get();
+    auto transferParams = tm->GetTransferParams();
+    auto writerThreadInfo = transferParams->writerThreadInfo.get();
 
-    globalParams->storeBase = "/data/updater/update_tmp";
-    globalParams->retryFile = std::string("/data/updater") + partitionName + "_retry";
-    LOG(INFO) << "Store base path is " << globalParams->storeBase;
-    int32_t ret = Store::CreateNewSpace(globalParams->storeBase, !globalParams->env->IsRetry());
+    transferParams->storeBase = "/data/updater/update" + partitionName + "_tmp";
+    transferParams->retryFile = std::string("/data/updater") + partitionName + "_retry";
+    LOG(INFO) << "Store base path is " << transferParams->storeBase;
+    int32_t ret = Store::CreateNewSpace(transferParams->storeBase, !transferParams->env->IsRetry());
     if (ret == -1) {
         LOG(ERROR) << "Error to create new store space";
         return ReturnAndPushParam(USCRIPT_ERROR_EXECUTE, context);
     }
-    globalParams->storeCreated = ret;
+    transferParams->storeCreated = ret;
 
     if (!tm->CommandsParser(fd, lines)) {
         return USCRIPT_ERROR_EXECUTE;
@@ -208,23 +207,22 @@ static int32_t ExecuteTransferCommand(int fd, const std::vector<std::string> &li
     writerThreadInfo->readyToWrite = false;
     pthread_cond_broadcast(&writerThreadInfo->cond);
     pthread_mutex_unlock(&writerThreadInfo->mutex);
-    ret = pthread_join(globalParams->thread, nullptr);
+    ret = pthread_join(transferParams->thread, nullptr);
     std::ostringstream logMessage;
     logMessage << "pthread join returned with " << ret;
     if (ret != 0) {
         LOG(WARNING) << logMessage.str();
     }
-    if (globalParams->storeCreated != -1) {
-        Store::DoFreeSpace(globalParams->storeBase);
+    if (transferParams->storeCreated != -1) {
+        Store::DoFreeSpace(transferParams->storeBase);
     }
     return USCRIPT_SUCCESS;
 }
 
-static int InitThread(const struct UpdateBlockInfo &infos, Uscript::UScriptEnv &env, Uscript::UScriptContext &context)
+static int InitThread(const struct UpdateBlockInfo &infos, TransferManagerPtr tm)
 {
-    TransferManagerPtr tm = TransferManager::GetTransferManagerInstance();
-    auto globalParams = tm->GetGlobalParams();
-    auto writerThreadInfo = globalParams->writerThreadInfo.get();
+    auto transferParams = tm->GetTransferParams();
+    auto writerThreadInfo = transferParams->writerThreadInfo.get();
     writerThreadInfo->readyToWrite = true;
     pthread_mutex_init(&writerThreadInfo->mutex, nullptr);
     pthread_cond_init(&writerThreadInfo->cond, nullptr);
@@ -232,7 +230,7 @@ static int InitThread(const struct UpdateBlockInfo &infos, Uscript::UScriptEnv &
     pthread_attr_init(&attr);
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
     writerThreadInfo->newPatch = infos.newDataName;
-    int error = pthread_create(&globalParams->thread, &attr, UnpackNewData, writerThreadInfo);
+    int error = pthread_create(&transferParams->thread, &attr, UnpackNewData, tm);
     return error;
 }
 
@@ -276,20 +274,21 @@ static int32_t ExtractDiffPackageAndLoad(const UpdateBlockInfo &infos, Uscript::
     return USCRIPT_SUCCESS;
 }
 
-static int32_t DoExecuteUpdateBlock(const UpdateBlockInfo &infos, Uscript::UScriptEnv &env,
+static int32_t DoExecuteUpdateBlock(const UpdateBlockInfo &infos, TransferManagerPtr tm,
     Hpackage::PkgManager::StreamPtr &outStream, const std::vector<std::string> &lines, Uscript::UScriptContext &context)
 {
     int fd = open(infos.devPath.c_str(), O_RDWR | O_LARGEFILE);
+    auto env = tm->GetTransferParams()->env;
     if (fd == -1) {
         LOG(ERROR) << "Failed to open block";
-        env.GetPkgManager()->ClosePkgStream(outStream);
+        env->GetPkgManager()->ClosePkgStream(outStream);
         return USCRIPT_ERROR_EXECUTE;
     }
-    int32_t ret = ExecuteTransferCommand(fd, lines, env, context, infos.partitionName);
+    int32_t ret = ExecuteTransferCommand(fd, lines, tm, context, infos.partitionName);
     fsync(fd);
     close(fd);
     fd = -1;
-    env.GetPkgManager()->ClosePkgStream(outStream);
+    env->GetPkgManager()->ClosePkgStream(outStream);
     if (ret == USCRIPT_SUCCESS) {
         PartitionRecord::GetInstance().RecordPartitionUpdateStatus(infos.partitionName, true);
     }
@@ -353,10 +352,11 @@ static int32_t ExecuteUpdateBlock(Uscript::UScriptEnv &env, Uscript::UScriptCont
         return USCRIPT_ERROR_EXECUTE;
     }
 
-    TransferManagerPtr tm = TransferManager::GetTransferManagerInstance();
-    auto globalParams = tm->GetGlobalParams();
+    std::unique_ptr<TransferManager> tm = std::make_unique<TransferManager>();
+
+    auto transferParams = tm->GetTransferParams();
     /* Save Script Env to transfer manager */
-    globalParams->env = &env;
+    transferParams->env = &env;
 
     std::vector<std::string> lines =
         Updater::Utils::SplitString(std::string(reinterpret_cast<const char*>(transferListBuffer)), "\n");
@@ -365,19 +365,18 @@ static int32_t ExecuteUpdateBlock(Uscript::UScriptEnv &env, Uscript::UScriptCont
 
     LOG(INFO) << "Start unpack new data thread done. Get patch data: " << infos.patchDataName;
     if (ExtractFileByName(env, infos.patchDataName, outStream,
-        globalParams->patchDataBuffer, globalParams->patchDataSize) != USCRIPT_SUCCESS) {
+        transferParams->patchDataBuffer, transferParams->patchDataSize) != USCRIPT_SUCCESS) {
         return USCRIPT_ERROR_EXECUTE;
     }
 
     LOG(INFO) << "Ready to start a thread to handle new data processing";
-    if (InitThread(infos, env, context) != 0) {
+    if (InitThread(infos, tm.get()) != 0) {
         LOG(ERROR) << "Failed to create pthread";
         env.GetPkgManager()->ClosePkgStream(outStream);
         return USCRIPT_ERROR_EXECUTE;
     }
 
-    int32_t ret = DoExecuteUpdateBlock(infos, env, outStream, lines, context);
-    TransferManager::ReleaseTransferManagerInstance(tm);
+    int32_t ret = DoExecuteUpdateBlock(infos, tm.get(), outStream, lines, context);
     return ret;
 }
 

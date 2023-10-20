@@ -20,6 +20,7 @@
 #include "securec.h"
 #include "applypatch/data_writer.h"
 #include "applypatch/partition_record.h"
+#include "applypatch/update_progress.h"
 #include "dump.h"
 #include "log.h"
 #include "package/hash_data_verifier.h"
@@ -388,6 +389,16 @@ int ExecUpdate(PkgManager::PkgManagerPtr pkgManager, int retry, const std::strin
 
     UpdaterInit::GetInstance().InvokeEvent(UPDATER_BINARY_INIT_DONE_EVENT);
 
+    ret = CreateProgressThread(env);
+    if (ret != 0) {
+        LOG(ERROR) << "Fail to create progress thread";
+        ScriptManager::ReleaseScriptManager();
+        delete env;
+        env = nullptr;
+        UPDATER_LAST_WORD(USCRIPT_ERROR_CREATE_THREAD);
+        return USCRIPT_ERROR_CREATE_THREAD;
+    }
+
     for (int32_t i = 0; i < ScriptManager::MAX_PRIORITY; i++) {
         ret = scriptManager->ExecuteScript(i);
         if (ret != USCRIPT_SUCCESS) {
@@ -396,8 +407,10 @@ int ExecUpdate(PkgManager::PkgManagerPtr pkgManager, int retry, const std::strin
             break;
         }
     }
+    setProgressExitFlag(true);
     ScriptManager::ReleaseScriptManager();
     delete env;
+    env = nullptr;
     return ret;
 }
 
@@ -477,6 +490,7 @@ int ProcessUpdater(bool retry, int pipeFd, const std::string &packagePath, const
         [&pipeWrite](const char *cmd, const char *content) {
             if (pipeWrite != nullptr) {
                 fprintf(pipeWrite, "%s:%s\n", cmd, content);
+                fflush(pipeWrite);
             }
         });
     PkgManager::ReleasePackageInstance(pkgManager);
