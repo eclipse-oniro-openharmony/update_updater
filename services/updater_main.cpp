@@ -725,7 +725,7 @@ int UpdaterMain(int argc, char **argv)
             UPDATER_UI_INSTANCE.ShowFailedPage();
             Utils::UsSleep(5 * DISPLAY_TIME); // 5 : 5s
             UPDATER_UI_INSTANCE.ShowMainpage();
-        } else if(upParams.userWipeData || upParams.factoryWipeData) {
+        } else if (upParams.userWipeData || upParams.factoryWipeData) {
             UPDATER_UI_INSTANCE.ShowFailedPage();
         } else {
             UPDATER_UI_INSTANCE.ShowMainpage();
