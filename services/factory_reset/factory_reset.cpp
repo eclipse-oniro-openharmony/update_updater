@@ -93,11 +93,11 @@ int FactoryResetFunc(FactoryResetMode mode, const std::string &path)
 {
     auto iter = resetTab.find(mode);
     if (iter == resetTab.end()) {
-        LOG(ERROR) << "Invalid oeminfo tag: " << mode;
+        LOG(ERROR) << "Invalid factory reset tag: " << mode;
         return 1;
     }
     if (iter->second(path) != 0) {
-        LOG(ERROR) << "Read oeminfo failed! tag: " << mode;
+        LOG(ERROR) << "Do factory reset failed! tag: " << mode;
         return 1;
     }
 

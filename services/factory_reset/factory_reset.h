@@ -34,7 +34,7 @@ public:
     static FactoryResetProcess &GetInstance();
 
     int DoFactoryReset(const std::string &path);
-    int DoUserReset(const std::string &path);
+    static int DoUserReset(const std::string &path);
 
 private:
     FactoryResetPreFunc FactoryResetPreFunc_ = nullptr;
