@@ -125,7 +125,7 @@ public:
         file = fopen(realPath, "rb");
         if (file != nullptr) {
             stream = new FileStream(this, realFileName, file, PkgStream::PkgStreamType_Read);
-            return USCRIPT_SUCCESS;    
+            return USCRIPT_SUCCESS;
         }
         PKG_LOGE("Fail to open file %s ", realFileName.c_str());
         return PKG_INVALID_FILE;
