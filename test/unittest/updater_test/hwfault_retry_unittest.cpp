@@ -38,12 +38,12 @@ public:
     ~HwfaultRetryUnitTest() {}
 
     static void SetUpTestCase(void) {}
-    static void TearDownTestCase(void)
+    static void TearDownTestCase(void) {}
+    void SetUp() {}
+    void TearDown()
     {
         (void)ClearMisc();
     }
-    void SetUp() {}
-    void TearDown() {}
     void TestBody() {}
 };
 
