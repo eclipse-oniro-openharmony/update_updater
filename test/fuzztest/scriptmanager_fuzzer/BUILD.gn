@@ -25,8 +25,7 @@ ohos_fuzztest("ScriptManagerFuzzTest") {
   module_out_path = module_output_path
   resource_config_file =
       "${updater_path}/test/fuzztest/fuzz_src_data/ohos_test.xml"
-  fuzz_config_file =
-      "${updater_path}/test/fuzztest/scriptmanager_fuzzer"
+  fuzz_config_file = "${updater_path}/test/fuzztest/scriptmanager_fuzzer"
   include_dirs = [
     "${updater_path}/utils/include",
     "${updater_path}/interfaces/kits/include/",
