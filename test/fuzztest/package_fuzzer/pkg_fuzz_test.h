@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PKG_TEST
-#define PKG_TEST
+#ifndef PKG_FUZZ_TEST
+#define PKG_FUZZ_TEST
 
 #include <cstring>
 #include <fcntl.h>
@@ -215,4 +215,4 @@ protected:
     std::string testGZipPackageName = "test_package.gz";
 };
 }
-#endif // PKG_TEST
+#endif // PKG_FUZZ_TEST
