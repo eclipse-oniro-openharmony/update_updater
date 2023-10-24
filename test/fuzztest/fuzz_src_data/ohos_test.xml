@@ -41,6 +41,32 @@
             <option name="push" value="build_tools.zip -> /data/fuzz/test" src="res"/>
         </preparer>
     </target>
+    <target name="PackageFuzzTest">
+        <preparer>
+            <option name="push" value="signing_cert.crt -> /data/fuzz/test" src="res"/>
+            <option name="push" value="rsa_private_key2048.pem -> /data/fuzz/test" src="res"/>
+            <option name="push" value="build_tools.zip -> /data/fuzz/test" src="res"/>
+            <option name="push" value="test_package.zip -> /data/updater/package" src="res"/>
+            <option name="push" value="signing_cert.crt -> /data/updater/src" src="res"/>
+            <option name="push" value="signing_cert384.crt -> /data/updater/src" src="res"/>
+            <option name="push" value="TestDecompressGzip.new.gz -> /data/updater/applypatch" src="res"/>
+            <option name="push" value="PatchLz4test_new.lz4 -> /data/updater/diffpatch" src="res"/>
+            <option name="push" value="libcrypto.a -> /data/updater/src" src="res"/>
+            <option name="push" value="ggg.zip -> /data/updater/src" src="res"/>
+            <option name="push" value="test_math.us -> /data/updater/src" src="res"/>
+            <option name="push" value="test_if.us -> /data/updater/src" src="res"/>
+            <option name="push" value="registerCmd.us -> /data/updater/src" src="res"/>
+            <option name="push" value="test_native.us -> /data/updater/src" src="res"/>
+            <option name="push" value="testscript.us -> /data/updater/src" src="res"/>
+            <option name="push" value="loadScript.us -> /data/updater/src" src="res"/>
+            <option name="push" value="Verse-script.us -> /data/updater/src" src="res"/>
+            <option name="push" value="test_function.us -> /data/updater/src" src="res"/>
+            <option name="push" value="test_logic.us -> /data/updater/src" src="res"/>
+            <option name="push" value="rsa_private_key384.pem -> /data/updater/src" src="res"/>
+            <option name="push" value="rsa_private_key2048.pem -> /data/updater/src" src="res"/>
+            <option name="push" value="test_gzip_package.gz -> /data/updater/src" src="res"/>
+        </preparer>
+    </target>
     <target name="BinFlowFuzzTest">
         <preparer>
             <option name="push" value="updater_flow.zip -> /data/fuzz/test" src="res"/>
