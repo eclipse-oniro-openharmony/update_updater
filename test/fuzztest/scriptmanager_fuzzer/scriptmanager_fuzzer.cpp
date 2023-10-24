@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,14 +15,9 @@
 
 #include "scriptmanager_fuzzer.h"
 
-#include <array>
-#include <cstddef>
-#include <cstdint>
 #include <fcntl.h>
 #include <iostream>
-#include <string>
 #include <sys/mman.h>
-#include <sys/stat.h>
 #include <unistd.h>
 #include <vector>
 #include "hash_data_verifier.h"
@@ -136,10 +131,34 @@ public:
     }
 };
 
-class TestScriptInstructionFactory : public UScriptInstructionFactory {
+class FuzzTestScriptInstructionSparseImageWrite : public Uscript::UScriptInstruction {
+public:
+    FuzzTestScriptInstructionSparseImageWrite() {}
+    virtual ~FuzzTestScriptInstructionSparseImageWrite() {}
+    int32_t Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context) override
+    {
+        std::string partitionName = {};
+        int32_t ret = context.GetParam(0, partitionName);
+        if (ret != USCRIPT_SUCCESS) {
+            LOG(ERROR) << "Error to get param";
+            return ret;
+        }
+        LOG(INFO) << "UScriptInstructionSparseImageWrite::Execute " << partitionName;
+        if (env.GetPkgManager() != nullptr) {
+            return ret;
+        }
+        LOG(ERROR) << "Error to get pkg manager";
+        return USCRIPT_ERROR_EXECUTE;
+    }
+};
+
+class FuzzTestScriptInstructionFactory : public UScriptInstructionFactory {
 public:
     virtual int32_t CreateInstructionInstance(UScriptInstructionPtr& instr, const std::string& name)
     {
+        if (name == "sparse_image_write") {
+            instr = new (std::nothrow) FuzzTestScriptInstructionSparseImageWrite();
+        }
         return USCRIPT_SUCCESS;
     }
     virtual void DestoryInstructionInstance(UScriptInstructionPtr& instr)
@@ -147,8 +166,8 @@ public:
         delete instr;
         instr = nullptr;
     }
-    TestScriptInstructionFactory() {}
-    virtual ~TestScriptInstructionFactory() {}
+    FuzzTestScriptInstructionFactory() {}
+    virtual ~FuzzTestScriptInstructionFactory() {}
 };
 
 class FuzzTestScriptEnv : public UScriptEnv {
@@ -162,19 +181,19 @@ public:
         }
     }
 
-    virtual void PostMessage(const std::string &cmd, std::string content) {}
-
     virtual UScriptInstructionFactoryPtr GetInstructionFactory()
     {
         if (factory_ == nullptr) {
-            factory_ = new TestScriptInstructionFactory();
+            factory_ = new FuzzTestScriptInstructionFactory();
         }
         return factory_;
     }
 
+    virtual void PostMessage(const std::string &cmd, std::string content) {}
+
     virtual const std::vector<std::string> GetInstructionNames() const
     {
-        return {};
+        return {"sparse_image_write"};
     }
 
     virtual bool IsRetry() const
@@ -215,15 +234,10 @@ public:
             USCRIPT_LOGI("create manager fail ret:%d", ret);
             return USCRIPT_INVALID_SCRIPT;
         }
-        int32_t priority = SCRIPT_TEST_PRIORITY_NUM;
-        ret = manager->ExecuteScript(priority);
-        USCRIPT_LOGI("ExecuteScript ret:%d", ret);
-        priority = 0;
-        ret = manager->ExecuteScript(priority);
-        priority = 1;
-        ret = manager->ExecuteScript(priority);
-        priority = SCRIPT_TEST_LAST_PRIORITY;
-        ret = manager->ExecuteScript(priority);
+        for (auto priority : {SCRIPT_TEST_PRIORITY_NUM, 0, 1, SCRIPT_TEST_LAST_PRIORITY}) {
+            ret = manager->ExecuteScript(priority);
+            USCRIPT_LOGI("ExecuteScript ret:%d", ret);
+        }
         ScriptManager::ReleaseScriptManager();
         return ret;
     }
@@ -238,11 +252,11 @@ private:
         "loadScript.us",
         "registerCmd.us",
         "test_function.us",
-        "test_if.us",
-        "test_logic.us",
         "test_math.us",
+        "test_logic.us",
         "test_native.us",
         "test_script.us"
+        "test_if.us",
         "testscript.us",
         "Verse-script.us",
     };
