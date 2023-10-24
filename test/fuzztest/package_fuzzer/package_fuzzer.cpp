@@ -31,7 +31,7 @@
 #include "pkg_algorithm.h"
 #include "pkg_manager.h"
 #include "pkg_manager_impl.h"
-#include "pkg_test.h"
+#include "pkg_fuzz_test.h"
 #include "pkg_utils.h"
 
 using namespace Updater;
