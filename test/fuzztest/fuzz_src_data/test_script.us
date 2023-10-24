@@ -1,0 +1,210 @@
+function Add(a, b, c)
+{
+    Stdout("Test Add ", a, b, c);
+    a = a + b;
+    c = a + c;
+    return a, c;
+}
+
+Stdout("Test Add-int ", Add(100, 200, 10.0));
+Stdout("Test Add-float ", Add(100.0, 200.0, 10));
+// 失败
+#Stdout("Test Add-string ", Add(100.0, 200.0, "1000"));
+Stdout("Test Add-string ", Add("100.0 + ", 200.0, "++++"));
+
+function Sub(a, b, c)
+{
+    Stdout("Test Sub ", a, b, c);
+    a = a - b;
+    c = a - c;
+    return a, c;
+}
+
+Stdout("Test Sub-int ", Sub(100, 200, 10.0));
+Stdout("Test Sub-float ", Sub(100.0, 200.0, 10));
+
+function Mul(a, b, c)
+{
+    Stdout("Test Mul ", a, b, c);
+    a = a * b;
+    c = a * c;
+    return a, c;
+}
+
+Stdout("Test Mul-int ", Mul(100, 200, 10.0));
+Stdout("Test Mul-float ", Mul(100.0, 200.0, 10));
+
+function Div(a, b, c)
+{
+    Stdout("Test Div ", a, b, c);
+    a = a / b;
+    c = a / c;
+    return a, c;
+}
+
+Stdout("Test Div-int ", Div(100, 200, 10.0));
+Stdout("Test Div-float ", Div(100.0, 200.0, 10));
+
+function EQ(a, b, c)
+{
+    Stdout("Test EQ ", a, b, c);
+    d = a == b;
+    e = a == c;
+    return d, e;
+}
+
+Stdout("Test EQ-int ", EQ(100, 100, 10.0));
+Stdout("Test EQ-float ", EQ(100.1, 200.1, 200));
+Stdout("Test EQ-float ", EQ(100.1, 200, 200));
+// string 只支持和str比较
+#Stdout("Test EQ-string ", EQ("200.0", 200.0, 10));
+Stdout("Test EQ-string ", EQ("200.0", "200.0", "10"));
+
+function NE(a, b, c)
+{
+    Stdout("Test NE ", a, b, c);
+    d = a != b;
+    e = a != c;
+    return d, e;
+}
+
+Stdout("Test NE-int ", NE(100, 100, 10.0));
+Stdout("Test NE-float ", NE(100.1, 200.1, 200));
+Stdout("Test NE-float ", NE(100.1, 200, 200));
+// string 只支持和str比较
+#Stdout("Test NE-string ", NE("200.0", 200.0, 10));
+Stdout("Test NE-string ", NE("200.0", "200.0", "10"));
+
+Stdout("Test NE-int ", NE(100, 100, 10.0));
+Stdout("Test NE-float ", NE(100.1, 200.1, 200));
+Stdout("Test NE-float ", NE(100.1, 200, 200));
+// string 只支持和str比较
+#Stdout("Test NE-string ", NE("200.0", 200.0, 10));
+Stdout("Test NE-string ", NE("200.0", "200.0", "10"));
+
+function GT(a, b, c)
+{
+    Stdout("Test GT ", a, b, c);
+    d = a > b;
+    e = a > c;
+    return d, e;
+}
+
+Stdout("Test GT-int ", GT(100, 100, 10.0));
+Stdout("Test GT-float ", GT(100.1, 200.1, 200));
+Stdout("Test GT-float ", GT(100.1, 200, 200));
+// string 只支持和str比较
+#Stdout("Test GT-string ", GT("200.0", 200.0, 10));
+Stdout("Test GT-string ", GT("200.0", "200.0", "10"));
+
+function GE(a, b, c)
+{
+    Stdout("Test GE ", a, b, c);
+    d = a >= b;
+    e = a >= c;
+    return d, e;
+}
+
+Stdout("Test GE-int ", GE(100, 100, 10.0));
+Stdout("Test GE-float ", GE(100.1, 200.1, 200));
+Stdout("Test GE-float ", GE(100.1, 200, 200));
+// string 只支持和str比较
+#Stdout("Test GE-string ", GE("200.0", 200.0, 10));
+Stdout("Test GE-string ", GE("200.0", "200.0", "10"));
+
+function LT(a, b, c)
+{
+    Stdout("Test LT ", a, b, c);
+    d = a < b;
+    e = a < c;
+    return d, e;
+}
+
+Stdout("Test LT-int ", LT(100, 100, 10.0));
+Stdout("Test LT-float ", LT(100.1, 200.1, 200));
+Stdout("Test LT-float ", LT(100.1, 200, 200));
+// string 只支持和str比较
+#Stdout("Test LT-string ", LT("200.0", 200.0, 10));
+Stdout("Test LT-string ", LT("200.0", "200.0", "10"));
+
+function LE(a, b, c)
+{
+    Stdout("Test LE ", a, b, c);
+    d = a <= b;
+    e = a <= c;
+    return d, e;
+}
+
+Stdout("Test LE-int ", LE(100, 100, 10.0));
+Stdout("Test LE-float ", LE(100.1, 200.1, 200));
+Stdout("Test LE-float ", LE(100.1, 200, 200));
+// string 只支持和str比较
+#Stdout("Test LE-string ", LE("200.0", 200.0, 10));
+Stdout("Test LE-string ", LE("200.0", "200.0", "10"));
+
+// 测试if语句
+function TestIf(a, b, c)
+{
+    if (a > b) {
+        return a, c;
+    } else {
+        return b, c;
+    }
+}
+
+Stdout("TestIf ", TestIf(100, 10, 10.0));
+Stdout("TestIf ", TestIf(200, 100, 10.0));
+Stdout("TestIf ", TestIf(100, 10 + 200, 10.0));
+
+// 测试for
+function TestFor(a, b, c)
+{
+    for (i = 0; i < a; i = i + 1) {
+        Stdout("TestFor i = ", i);
+        if (i > b) {
+            Stdout("TestFor return");
+            return i;
+        }
+        if (i == b) {
+            Stdout("TestFor continue");
+            continue;
+        }
+        if (i == c) {
+            Stdout("TestFor break");
+            break;
+        }
+    }
+    return c;
+}
+
+Stdout("TestFor ", TestFor(10, 5, 10));
+Stdout("TestFor ", TestFor(10, 5, 10));
+Stdout("TestFor ", TestFor(10, 5, 3));
+
+// 测试while 循环
+function TestWhile(a, b, c)
+{
+    i = 0;
+    while (i < a) {
+        Stdout("TestWhile i = ", i);
+        if (i > b) {
+            Stdout("TestWhile return");
+            return i;
+        }
+        if (i == b) {
+            Stdout("TestWhile continue i= ", i);
+            i = i + 2;
+            continue;
+        }
+        if (i == c) {
+            Stdout("TestWhile break");
+            break;
+        }
+        i = i + 1;
+    }
+    return c;
+}
+
+Stdout("TestWhile ", TestWhile(10, 5, 10));
+Stdout("TestWhile ", TestWhile(10, 5, 10));
+Stdout("TestWhile ", TestWhile(10, 5, 3));

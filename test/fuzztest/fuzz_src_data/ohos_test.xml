@@ -19,6 +19,22 @@
             <option name="push" value="libthirdInstruction.z.so -> /data/fuzz/test" src="out"/>
         </preparer>
     </target>
+    <target name="ScriptManagerFuzzTest">
+        <preparer>
+            <option name="push" value="test_math.us -> /data/fuzz/test" src="res"/>
+            <option name="push" value="test_script.us -> /data/fuzz/test" src="res"/>
+            <option name="push" value="test_if.us -> /data/fuzz/test" src="res"/>
+            <option name="push" value="registerCmd.us -> /data/fuzz/test" src="res"/>
+            <option name="push" value="test_native.us -> /data/fuzz/test" src="res"/>
+            <option name="push" value="testscript.us -> /data/fuzz/test" src="res"/>
+            <option name="push" value="loadScript.us -> /data/fuzz/test" src="res"/>
+            <option name="push" value="Verse-script.us -> /data/fuzz/test" src="res"/>
+            <option name="push" value="test_function.us -> /data/fuzz/test" src="res"/>
+            <option name="push" value="test_logic.us -> /data/fuzz/test" src="res"/>
+            <option name="push" value="hash_signed_data -> /data/fuzz/test" src="res"/>
+            <option name="push" value="libthirdInstruction.z.so -> /data/fuzz/test" src="out"/>
+        </preparer>
+    </target>
     <target name="UpdaterFactoryResetFuzzTest">
         <preparer>
             <option name="push" value="FormatPartition_fuzzer.fstable -> /data/fuzz/test" src="res"/>
