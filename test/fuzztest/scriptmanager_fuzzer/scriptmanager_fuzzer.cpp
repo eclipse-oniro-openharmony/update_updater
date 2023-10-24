@@ -44,7 +44,7 @@ using namespace Updater;
 namespace OHOS {
 constexpr int32_t SCRIPT_TEST_PRIORITY_NUM = 3;
 constexpr int32_t SCRIPT_TEST_LAST_PRIORITY = 2;
-const std::string TEST_PATH_FROM = "/data/fuzz/test/";
+const std::string FUZZ_TEST_PATH_FROM = "/data/fuzz/test/";
 
 class TestPkgManager : public TestScriptPkgManager {
 public:
@@ -56,23 +56,24 @@ public:
             "test_function.us",
             "test_if.us",
             "test_logic.us",
+            "testscript.us",
             "test_math.us",
             "test_native.us",
-            "testscript.us",
             "Verse-script.us",
             "test_script.us"
         };
-        if (fileId == "hash_signed_data") {
-            fileInfo.unpackedSize = GetFileSize(TEST_PATH_FROM + fileId);
+        if (std::find(testFileNames.begin(), testFileNames.end(), fileId) != testFileNames.end()) {
             return &fileInfo;
         }
-        if (std::find(testFileNames.begin(), testFileNames.end(), fileId) != testFileNames.end()) {
+        if (fileId == "hash_signed_data") {
+            fileInfo.unpackedSize = GetFileSize(FUZZ_TEST_PATH_FROM + fileId);
             return &fileInfo;
         }
         return nullptr;
     }
     int32_t CreatePkgStream(StreamPtr &stream, const std::string &fileName, const PkgBuffer &buffer) override
     {
+        PKG_LOGI("create pkg stream success for %s ", fileName.c_str());
         stream = new MemoryMapStream(this, fileName, buffer, PkgStream::PkgStreamType_Buffer);
         return PKG_SUCCESS;
     }
@@ -84,10 +85,9 @@ public:
         if (output == nullptr) {
             return PKG_INVALID_STREAM;
         }
-        auto stream = static_cast<MemoryMapStream *>(output);
-        auto fd = open((TEST_PATH_FROM + fileId).c_str(), O_RDWR);
+        auto fd = open((FUZZ_TEST_PATH_FROM + fileId).c_str(), O_RDWR);
         if (fd == -1) {
-            PKG_LOGE("file %s not existed", (TEST_PATH_FROM + fileId).c_str());
+            PKG_LOGE("file %s not existed", (FUZZ_TEST_PATH_FROM + fileId).c_str());
             return PKG_INVALID_FILE;
         }
         ON_SCOPE_EXIT(close) {
@@ -98,7 +98,8 @@ public:
             PKG_LOGE("read file to string failed");
             return PKG_INVALID_FILE;
         }
-        PkgBuffer buffer {};
+        auto stream = static_cast<MemoryMapStream *>(output);
+        PkgBuffer buffer = {};
         stream->GetBuffer(buffer);
         if (content.size() + 1 != buffer.length) {
             PKG_LOGE("content size is not valid, %u != %u", content.size(), buffer.data.size());
@@ -111,50 +112,27 @@ public:
          size_t size, int32_t type) override
     {
         FILE *file = nullptr;
-        std::string fileNameReal = fileName;
+        std::string realFileName = fileName;
         auto pos = fileName.rfind('/');
         if (pos != std::string::npos) {
-            fileNameReal = fileName.substr(pos + 1);
+            realFileName = fileName.substr(pos + 1);
         }
         char realPath[PATH_MAX + 1] = {};
-        if (realpath((TEST_PATH_FROM + fileNameReal).c_str(), realPath) == nullptr) {
-            LOG(ERROR) << (TEST_PATH_FROM + fileNameReal) << " realpath failed";
+        if (realpath((FUZZ_TEST_PATH_FROM + realFileName).c_str(), realPath) == nullptr) {
+            LOG(ERROR) << (FUZZ_TEST_PATH_FROM + realFileName) << " realpath failed";
             return PKG_INVALID_FILE;
         }
         file = fopen(realPath, "rb");
-        if (file == nullptr) {
-            PKG_LOGE("Fail to open file %s ", fileNameReal.c_str());
-            return PKG_INVALID_FILE;
+        if (file != nullptr) {
+            stream = new FileStream(this, realFileName, file, PkgStream::PkgStreamType_Read);
+            return USCRIPT_SUCCESS;    
         }
-        stream = new FileStream(this, fileNameReal, file, PkgStream::PkgStreamType_Read);
-        return USCRIPT_SUCCESS;
+        PKG_LOGE("Fail to open file %s ", realFileName.c_str());
+        return PKG_INVALID_FILE;
     }
     void ClosePkgStream(StreamPtr &stream) override
     {
         delete stream;
-    }
-};
-
-
-class TestScriptInstructionSparseImageWrite : public Uscript::UScriptInstruction {
-public:
-    TestScriptInstructionSparseImageWrite() {}
-    virtual ~TestScriptInstructionSparseImageWrite() {}
-    int32_t Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context) override
-    {
-        // 从参数中获取分区信息
-        std::string partitionName;
-        int32_t ret = context.GetParam(0, partitionName);
-        if (ret != USCRIPT_SUCCESS) {
-            LOG(ERROR) << "Error to get param";
-            return ret;
-        }
-        LOG(INFO) << "UScriptInstructionSparseImageWrite::Execute " << partitionName;
-        if (env.GetPkgManager() == nullptr) {
-            LOG(ERROR) << "Error to get pkg manager";
-            return USCRIPT_ERROR_EXECUTE;
-        }
-        return ret;
     }
 };
 
@@ -173,10 +151,10 @@ public:
     virtual ~TestScriptInstructionFactory() {}
 };
 
-class UTestScriptEnv : public UScriptEnv {
+class FuzzTestScriptEnv : public UScriptEnv {
 public:
-    explicit UTestScriptEnv(Hpackage::PkgManager::PkgManagerPtr pkgManager) : UScriptEnv(pkgManager) {}
-    ~UTestScriptEnv()
+    explicit FuzzTestScriptEnv(Hpackage::PkgManager::PkgManagerPtr pkgManager) : UScriptEnv(pkgManager) {}
+    ~FuzzTestScriptEnv()
     {
         if (factory_ != nullptr) {
             delete factory_;
@@ -213,11 +191,14 @@ private:
     bool isRetry = false;
 };
 
-class UScriptTest {
+class FuzzScriptTest {
 public:
-    UScriptTest() {}
+    FuzzScriptTest()
+    {
+        InitUpdaterLogger("UPDATER", "updater_log.log", "updater_status.log", "error_code.log");
+    }
 
-    ~UScriptTest()
+    ~FuzzScriptTest()
     {
         ScriptManager::ReleaseScriptManager();
     }
@@ -226,13 +207,12 @@ public:
     {
         int32_t ret {};
         TestPkgManager packageManager;
-        UTestScriptEnv *env = new UTestScriptEnv(&packageManager);
+        auto env = std::make_unique<FuzzTestScriptEnv>(&packageManager);
         HashDataVerifier verifier {&packageManager};
-        verifier.LoadHashDataAndPkcs7(TEST_PATH_FROM + "updater_fake_pkg.zip");
-        ScriptManager *manager = ScriptManager::GetScriptManager(env, &verifier);
+        verifier.LoadHashDataAndPkcs7(FUZZ_TEST_PATH_FROM + "updater_fake_pkg.zip");
+        ScriptManager *manager = ScriptManager::GetScriptManager(env.get(), &verifier);
         if (manager == nullptr) {
             USCRIPT_LOGI("create manager fail ret:%d", ret);
-            delete env;
             return USCRIPT_INVALID_SCRIPT;
         }
         int32_t priority = SCRIPT_TEST_PRIORITY_NUM;
@@ -244,7 +224,6 @@ public:
         ret = manager->ExecuteScript(priority);
         priority = SCRIPT_TEST_LAST_PRIORITY;
         ret = manager->ExecuteScript(priority);
-        delete env;
         ScriptManager::ReleaseScriptManager();
         return ret;
     }
@@ -263,15 +242,15 @@ private:
         "test_logic.us",
         "test_math.us",
         "test_native.us",
+        "test_script.us"
         "testscript.us",
         "Verse-script.us",
-        "test_script.us"
     };
 };
 
 void FuzzScriptManager(const uint8_t *data, size_t size)
 {
-    UScriptTest test;
+    FuzzScriptTest test;
     test.TestUscriptExecute();
 }
 }
