@@ -28,6 +28,7 @@ group("fuzztest") {
     "test/fuzztest/package_fuzzer:PackageFuzzTest",
     "test/fuzztest/readfstabfromfile_fuzzer:ReadFstabFromFileFuzzTest",
     "test/fuzztest/rebootandinstallupgradepackage_fuzzer:RebootAndInstallUpgradePackageFuzzTest",
+    "test/fuzztest/scriptmanager_fuzzer:ScriptManagerFuzzTest",
     "test/fuzztest/updaterfactoryreset_fuzzer:UpdaterFactoryResetFuzzTest",
     "test/fuzztest/writeupdatermsg_fuzzer:WriteUpdaterMsgFuzzTest",
   ]
