@@ -66,7 +66,7 @@ inline std::string GetFuzzCertName(int type = 0)
     return name;
 }
 
-class FuzzPkgTest{
+class FuzzPkgTest {
 public:
     FuzzPkgTest()
     {
@@ -98,9 +98,9 @@ protected:
             PKG_LOGE("Create input stream fail %s", pkgPath.c_str());
             return ret;
         }
-        size_t FileLength = stream->GetFileLength();
-        if (FileLength <= 0 || FileLength > SIZE_MAX) {
-            PKG_LOGE("Invalid file len %zu to load %s", FileLength, stream->GetFileName().c_str());
+        size_t fileLength = stream->GetFileLength();
+        if (fileLength <= 0 || fileLength > SIZE_MAX) {
+            PKG_LOGE("Invalid file len %zu to load %s", fileLength, stream->GetFileName().c_str());
             pkgManager_->ClosePkgStream(stream);
             return -1;
         }
@@ -119,7 +119,7 @@ protected:
 
         size_t offset = 0;
         size_t readLen = 0;
-        while (offset < FileLength) {
+        while (offset < fileLength) {
             ret = stream->Read(buff, offset, bufSize, readLen);
             if (ret != 0) {
                 PKG_LOGE("read buffer fail %s", stream->GetFileName().c_str());
