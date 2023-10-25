@@ -27,20 +27,25 @@ using FactoryResetPostFunc = std::function<int(int)>;
 class FactoryResetProcess {
     DISALLOW_COPY_MOVE(FactoryResetProcess);
 public:
+    FactoryResetProcess();
+    virtual ~FactoryResetProcess() = default;
+
+    static FactoryResetProcess &GetInstance();
+    using ResetFunc = std::function<int(const std::string &)>;
+    void RegisterFunc(FactoryResetMode mode, ResetFunc func);
     void RegisterFactoryResetPreFunc(FactoryResetPreFunc ptr);
     void RegisterFactoryResetPostFunc(FactoryResetPostFunc ptr);
-    FactoryResetProcess() = default;
-    virtual ~FactoryResetProcess() = default;
-    static FactoryResetProcess &GetInstance();
+    int FactoryResetFunc(FactoryResetMode mode, const std::string &path);
 
     int DoFactoryReset(const std::string &path);
-    int DoUserReset(const std::string &path);
 
 private:
     FactoryResetPreFunc FactoryResetPreFunc_ = nullptr;
     FactoryResetPostFunc FactoryResetPostFunc_ = nullptr;
+    std::unordered_map<FactoryResetMode, ResetFunc> resetTab_;
+
+    int DoUserReset(const std::string &path);
 };
 
-int FactoryResetFunc(FactoryResetMode mode, const std::string &path);
 } // namespace Updater
 #endif // FACTORY_RESET_H
