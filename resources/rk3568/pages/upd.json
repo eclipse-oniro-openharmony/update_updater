@@ -64,9 +64,19 @@
             "id": "FactoryRstFailed",
             "coms": [
                 "FailIcon_Image",
-                "FactoryRstFailedRes_Label"
+                "FactoryRstFailedRes_Label",
+                "ReturnToMain_Button"
             ],
-            "bgColor" : "#000000ff"
+            "bgColor" : "#f1f3f5ff"
+        },
+        {
+            "id": "FactoryRstSucc",
+            "coms": [
+                "SuccessIcon_Image",
+                "FactoryRstSuccRes_Label",
+                "FactoryRstSuccReboot_Label"
+            ],
+            "bgColor" : "#f1f3f5ff"
         }
     ],
     "default": {
@@ -180,6 +190,16 @@
             "fontSize": 32
         },
         {
+            "type": "UILabelButton",
+            "id": "ReturnToMain_Button",
+            "text": "[LABEL_RETURN_TO_MAIN]",
+            "x": 48,
+            "y": 1136,
+            "w": 624,
+            "h": 80,
+            "fontSize": 32
+        },
+        {
             "type": "UILabel",
             "id": "UpdateFailedRes_Label",
             "text": "[LABEL_UPD_FAIL_TIP]",
@@ -201,6 +221,30 @@
         },
         {
             "type": "UILabel",
+            "id": "FactoryRstSuccRes_Label",
+            "text": "[LOGRES_WIPE_FINISH]",
+            "x": 120,
+            "y": 1037,
+            "w": 480,
+            "h": 43,
+            "fontSize": 32,
+            "bgColor":"#f1f3f5ff",
+            "fontColor":"#000000e6"
+        },
+        {
+            "type": "UILabel",
+            "id": "FactoryRstSuccReboot_Label",
+            "text": "[LABEL_UPD_OK_REBOOT]",
+            "x": 218,
+            "y": 1096,
+            "w": 282,
+            "h": 38,
+            "fontSize": 28,
+            "bgColor":"#f1f3f5ff",
+            "fontColor":"#00000099"
+        },
+        {
+            "type": "UILabel",
             "id": "UpdateAutoReboot_Label",
             "text": "[LABEL_UPD_OK_REBOOT]",
             "x": 218,
@@ -218,7 +262,9 @@
             "y": 1037,
             "w": 480,
             "h": 43,
-            "fontSize": 32
+            "fontSize": 32,
+            "bgColor" : "#f1f3f5ff",
+            "fontColor": "#000000e6"
         },
         {
             "type": "UIImageView",
@@ -256,8 +302,8 @@
             "id": "FlashPoint_Image",
             "x": 805,
             "y": 595,
-            "w": 90,
-            "h": 90,
+            "w": 45,
+            "h": 45,
             "resPath": "/resources/images/progress/",
             "filePrefix": "flash_",
             "imgCnt" : 22,

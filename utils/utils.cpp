@@ -789,10 +789,16 @@ void SetMessageToMisc(const std::string &miscCmd, const int message, const std::
     }
     std::vector<std::string> args = ParseParams(0, nullptr);
     struct UpdateMessage msg {};
+    if (!ReadUpdaterMiscMsg(msg)) {
+        LOG(ERROR) << "SetMessageToMisc read misc failed";
+        return;
+    }
+    (void)memset_s(msg.command, sizeof(msg.command), 0, sizeof(msg.command));
     if (strncpy_s(msg.command, sizeof(msg.command), miscCmd.c_str(), miscCmd.size() + 1) != EOK) {
         LOG(ERROR) << "SetMessageToMisc strncpy_s failed";
         return;
     }
+    (void)memset_s(msg.update, sizeof(msg.update), 0, sizeof(msg.update));
     for (const auto& arg : args) {
         if (arg.find(headInfo) == std::string::npos) {
             if (strncat_s(msg.update, sizeof(msg.update), arg.c_str(), strlen(arg.c_str()) + 1) != EOK) {
@@ -824,6 +830,105 @@ void SetMessageToMisc(const std::string &miscCmd, const int message, const std::
     if (WriteUpdaterMiscMsg(msg) != true) {
         LOG(ERROR) << "Write command to misc failed.";
     }
+}
+
+void SetCmdToMisc(const std::string &miscCmd)
+{
+    struct UpdateMessage msg {};
+    if (!ReadUpdaterMiscMsg(msg)) {
+        LOG(ERROR) << "SetMessageToMisc read misc failed";
+        return;
+    }
+
+    (void)memset_s(msg.command, sizeof(msg.command), 0, sizeof(msg.command));
+    if (strncpy_s(msg.command, sizeof(msg.command), miscCmd.c_str(), miscCmd.size() + 1) != EOK) {
+        LOG(ERROR) << "SetMessageToMisc strncpy_s failed";
+        return;
+    }
+
+    if (WriteUpdaterMiscMsg(msg) != true) {
+        LOG(ERROR) << "Write command to misc failed.";
+    }
+}
+
+void AddUpdateInfoToMisc(const std::string headInfo, const std::optional<int> message)
+{
+    if (headInfo.empty()) {
+        return;
+    }
+    std::vector<std::string> args = ParseParams(0, nullptr);
+    struct UpdateMessage msg {};
+    if (!ReadUpdaterMiscMsg(msg)) {
+        LOG(ERROR) << "SetMessageToMisc read misc failed";
+        return;
+    }
+
+    (void)memset_s(msg.update, sizeof(msg.update), 0, sizeof(msg.update));
+    for (const auto& arg : args) {
+        if (arg.find(headInfo) == std::string::npos) {
+            if (strncat_s(msg.update, sizeof(msg.update), arg.c_str(), strlen(arg.c_str()) + 1) != EOK) {
+                LOG(ERROR) << "SetMessageToMisc strncat_s failed";
+                return;
+            }
+            if (strncat_s(msg.update, sizeof(msg.update), "\n", strlen("\n") + 1) != EOK) {
+                LOG(ERROR) << "SetMessageToMisc strncat_s failed";
+                return;
+            }
+        }
+    }
+    char buffer[128] {}; // 128 : set headInfo size
+    if (!message.has_value()) {
+        if (snprintf_s(buffer, sizeof(buffer), sizeof(buffer) - 1, "--%s", headInfo.c_str()) == -1) {
+            LOG(ERROR) << "SetMessageToMisc snprintf_s failed";
+            return;
+        }
+    } else {
+        if (snprintf_s(buffer, sizeof(buffer), sizeof(buffer) - 1, "--%s=%d",
+            headInfo.c_str(), message.value()) == -1) {
+            LOG(ERROR) << "SetMessageToMisc snprintf_s failed";
+            return;
+        }
+    }
+    if (strncat_s(msg.update, sizeof(msg.update), buffer, strlen(buffer) + 1) != EOK) {
+        LOG(ERROR) << "SetMessageToMisc strncat_s failed";
+        return;
+    }
+    if (WriteUpdaterMiscMsg(msg) != true) {
+        LOG(ERROR) << "Write command to misc failed.";
+    }
+}
+
+void SetFaultInfoToMisc(const std::string &faultInfo)
+{
+    struct UpdateMessage msg {};
+    if (!ReadUpdaterMiscMsg(msg)) {
+        LOG(ERROR) << "SetMessageToMisc read misc failed";
+        return;
+    }
+
+    (void)memset_s(msg.faultinfo, sizeof(msg.faultinfo), 0, sizeof(msg.faultinfo));
+    if (strncpy_s(msg.faultinfo, sizeof(msg.faultinfo), faultInfo.c_str(), faultInfo.size() + 1) != EOK) {
+        LOG(ERROR) << "SetMessageToMisc strncpy_s failed";
+        return;
+    }
+
+    if (WriteUpdaterMiscMsg(msg) != true) {
+        LOG(ERROR) << "Write fault info to misc failed.";
+    }
+}
+
+bool CheckFaultInfo(const std::string &faultInfo)
+{
+    struct UpdateMessage msg = {};
+    if (!ReadUpdaterMiscMsg(msg)) {
+        LOG(ERROR) << "read misc data failed";
+        return false;
+    }
+
+    if (strcmp(msg.faultinfo, faultInfo.c_str()) == 0) {
+        return true;
+    }
+    return false;
 }
 
 #ifndef __WIN32

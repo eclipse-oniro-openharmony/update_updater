@@ -44,10 +44,12 @@
 #include "sdcard_update/sdcard_update.h"
 #include "securec.h"
 #include "updater/updater_const.h"
+#include "updater/hwfault_retry.h"
 #include "updater/updater_preprocess.h"
 #include "updater_ui_stub.h"
 #include "utils.h"
 #include "factory_reset/factory_reset.h"
+#include "write_state/write_state.h"
 
 namespace Updater {
 using Utils::String2Int;
@@ -66,6 +68,8 @@ constexpr struct option OPTIONS[] = {
     { "force_update_action", required_argument, nullptr, 0 },
     { "night_update", no_argument, nullptr, 0 },
     { USB_MODE, no_argument, nullptr, 0 },
+    { "UPDATE:MAINIMG", no_argument, nullptr, 0 },
+    { "UPDATE:SD", no_argument, nullptr, 0 },
     { nullptr, 0, nullptr, 0 },
 };
 constexpr float VERIFY_PERCENT = 0.05;
@@ -73,7 +77,7 @@ constexpr float VERIFY_PERCENT = 0.05;
 int FactoryReset(FactoryResetMode mode, const std::string &path)
 {
     UpdaterInit::GetInstance().InvokeEvent(FACTORY_RESET_INIT_EVENT);
-    return FactoryResetFunc(mode, path);
+    return FactoryResetProcess::GetInstance().FactoryResetFunc(mode, path);
 }
 
 static int OtaUpdatePreCheck(PkgManager::PkgManagerPtr pkgManager, const std::string &packagePath)
@@ -246,11 +250,9 @@ UpdaterStatus InstallUpdaterPackage(UpdaterParams &upParams, PkgManager::PkgMana
         UPDATER_UI_INSTANCE.Sleep(UI_SHOW_DURATION);
         UPDATER_UI_INSTANCE.ShowLog(TR(LOG_UPDFAIL));
         STAGE(UPDATE_STAGE_FAIL) << "Install failed";
-        if (status == UPDATE_RETRY && upParams.retryCount < MAX_RETRY_COUNT) {
-            upParams.retryCount += 1;
+        if (status == UPDATE_RETRY) {
+            HwFaultRetry::GetInstance().DoRetryAction();
             UPDATER_UI_INSTANCE.ShowFailedPage();
-            SetMessageToMisc(upParams.miscCmd, upParams.retryCount, "retry_count");
-            Utils::UpdaterDoReboot("updater");
         }
     } else {
         LOG(INFO) << "Install package success.";
@@ -507,6 +509,28 @@ UpdaterStatus InstallUpdaterPackages(UpdaterParams &upParams)
 UpdaterStatus StartUpdaterEntry(UpdaterParams &upParams)
 {
     UpdaterStatus status = UPDATE_UNKNOWN;
+    status = PreStartUpdaterEntry(upParams, status);
+    if (status != UPDATE_SUCCESS) {
+        LOG(ERROR) << "PreStartUpdaterEntry failed";
+        return status;
+    }
+
+    status = DoUpdaterEntry(upParams);
+    if (status != UPDATE_SUCCESS) {
+        LOG(ERROR) << "DoUpdaterEntry failed";
+        return status;
+    }
+
+    status = PostStartUpdaterEntry(upParams, status);
+    if (status != UPDATE_SUCCESS) {
+        LOG(ERROR) << "PostStartUpdaterEntry failed";
+    }
+    return status;
+}
+
+UpdaterStatus DoUpdaterEntry(UpdaterParams &upParams)
+{
+    UpdaterStatus status = UPDATE_UNKNOWN;
     if (upParams.updateMode == SDCARD_UPDATE) {
         LOG(INFO) << "start sdcard update";
         UPDATER_UI_INSTANCE.ShowProgressPage();
@@ -566,6 +590,7 @@ std::unordered_map<std::string, std::function<void ()>> InitOptionsFuncTab(char*
         {"retry_count", [&]() -> void
         {
             upParams.retryCount = atoi(optarg);
+            HwFaultRetry::GetInstance().SetRetryCount(upParams.retryCount);
         }},
         {"factory_wipe_data", [&]() -> void
         {
@@ -585,6 +610,16 @@ std::unordered_map<std::string, std::function<void ()>> InitOptionsFuncTab(char*
         {"sdcard_update", [&]() -> void
         {
             upParams.updateMode = SDCARD_UPDATE;
+        }},
+        {"UPDATE:MAINIMG", [&]() -> void
+        {
+            upParams.updateMode = SDCARD_UPDATE;
+            upParams.mainUpdate = true;
+        }},
+        {"UPDATE:SD", [&]() -> void
+        {
+            upParams.updateMode = SDCARD_UPDATE;
+            upParams.sdUpdate = true;
         }},
         {"force_update_action", [&]() -> void
         {
@@ -690,6 +725,8 @@ int UpdaterMain(int argc, char **argv)
             UPDATER_UI_INSTANCE.ShowFailedPage();
             Utils::UsSleep(5 * DISPLAY_TIME); // 5 : 5s
             UPDATER_UI_INSTANCE.ShowMainpage();
+        } else if (upParams.userWipeData || upParams.factoryWipeData) {
+            UPDATER_UI_INSTANCE.ShowFailedPage();
         } else {
             UPDATER_UI_INSTANCE.ShowMainpage();
             UPDATER_UI_INSTANCE.Sleep(50); /* wait for page flush 50ms */

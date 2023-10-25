@@ -274,6 +274,9 @@ int RawImgProcessor::RawImageWriteProcessor(const PkgBuffer &buffer, size_t size
     bool ret = writer->Write(const_cast<uint8_t*>(buffer.buffer), size, nullptr);
     if (!ret) {
         LOG(ERROR) << "Write " << size << " byte(s) failed";
+        if (errno == EIO) {
+            writer->GetUpdaterEnv()->PostMessage(UPDATER_RETRY_TAG, IO_FAILED_REBOOT);
+        }
         return PKG_INVALID_STREAM;
     }
  

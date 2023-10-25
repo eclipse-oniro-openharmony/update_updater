@@ -16,6 +16,7 @@
 #define UPDATER_UTILS_H
 
 #include <cerrno>
+#include <optional>
 #include <string>
 #include <sys/types.h>
 #include <vector>
@@ -82,6 +83,10 @@ std::string DurationToString(std::vector<std::chrono::duration<double>> &duratio
 std::string GetRealPath(const std::string &path);
 std::string GetPartitionRealPath(const std::string &name);
 void SetMessageToMisc(const std::string &miscCmd, const int message, const std::string headInfo);
+bool CheckFaultInfo(const std::string &faultInfo);
+void SetCmdToMisc(const std::string &miscCmd);
+void AddUpdateInfoToMisc(const std::string headInfo, const std::optional<int> message);
+void SetFaultInfoToMisc(const std::string &faultInfo);
 #ifndef __WIN32
 void SetFileAttributes(const std::string& file, uid_t owner, gid_t group, mode_t mode);
 #endif

@@ -33,6 +33,7 @@
 #include "log/log.h"
 #include "patch/update_patch.h"
 #include "updater/updater_const.h"
+#include "updater/hwfault_retry.h"
 #include "utils.h"
 
 using namespace Uscript;
@@ -279,7 +280,7 @@ int32_t USInstrImageShaCheck::CheckHash(const CheckPara &para)
 int32_t USInstrImageShaCheck::ExecuteShaCheck(Uscript::UScriptEnv &env, Uscript::UScriptContext &context)
 {
     UPDATER_INIT_RECORD;
-    if (env.IsRetry()) {
+    if (env.IsRetry() && !Utils::CheckFaultInfo(VERIFY_FAILED_REBOOT)) {
         return USCRIPT_SUCCESS;
     }
 
@@ -294,6 +295,7 @@ int32_t USInstrImageShaCheck::ExecuteShaCheck(Uscript::UScriptEnv &env, Uscript:
     ret = CheckHash(para);
     if (ret != USCRIPT_SUCCESS) {
         UPDATER_LAST_WORD(ret);
+        env.PostMessage(UPDATER_RETRY_TAG, VERIFY_FAILED_REBOOT);
         LOG(ERROR) << "CheckHash error";
         return ret;
     }

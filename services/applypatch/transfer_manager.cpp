@@ -19,6 +19,7 @@
 #include <sys/types.h>
 #include "applypatch/command_function.h"
 #include "log/log.h"
+#include "updater/updater_const.h"
 #include "utils.h"
 #include "applypatch/update_progress.h"
 #include "script_proportion.h"
@@ -159,7 +160,7 @@ bool TransferManager::CheckResult(const CommandResult result, const std::string 
         case NEED_RETRY:
             LOG(INFO) << "Running command need retry!";
             if (transferParams_->env != nullptr) {
-                transferParams_->env->PostMessage("retry_update", cmd);
+                transferParams_->env->PostMessage("retry_update", IO_FAILED_REBOOT);
             }
             return false;
         case FAILED:

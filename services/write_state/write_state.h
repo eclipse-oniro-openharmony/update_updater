@@ -26,6 +26,8 @@ extern "C" {
 #endif
 #endif
 UpdaterStatus WriteResult(std::string &path, const std::string &result);
+UpdaterStatus PreStartUpdaterEntry(UpdaterParams &upParams, UpdaterStatus status);
+UpdaterStatus PostStartUpdaterEntry(UpdaterParams &upParams, UpdaterStatus status);
 #ifdef __cplusplus
 #if __cplusplus
 }

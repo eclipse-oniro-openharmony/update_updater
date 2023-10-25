@@ -25,7 +25,7 @@ constexpr int MAX_COMMAND_SIZE = 32;
 constexpr int MAX_STATUS_SIZE = 32;
 constexpr int MAX_UPDATE_SIZE = 768;
 constexpr int MAX_STAGE_SIZE = 32;
-constexpr int MAX_KEYINFO_SIZE = 32;
+constexpr int MAX_FAULTINFO_SIZE = 32;
 constexpr int MAX_RESERVED_SIZE = 224;
 
 // misc partition offset definition. max size of misc is 2MB, do not overflow.
@@ -33,7 +33,7 @@ constexpr off_t MISC_BASE_OFFSET = 0;
 
 constexpr off_t MISC_UPDATE_MESSAGE_OFFSET = MISC_BASE_OFFSET;
 constexpr off_t MISC_UPDATE_MESSAGE_SIZE = MAX_COMMAND_SIZE + MAX_STATUS_SIZE + MAX_UPDATE_SIZE +
-    MAX_STAGE_SIZE + MAX_KEYINFO_SIZE + MAX_RESERVED_SIZE;
+    MAX_STAGE_SIZE + MAX_FAULTINFO_SIZE + MAX_RESERVED_SIZE;
 
 constexpr off_t MISC_PARTITION_RECORD_OFFSET = MISC_UPDATE_MESSAGE_OFFSET + MISC_UPDATE_MESSAGE_SIZE;
 constexpr off_t MISC_PARTITION_RECORD_SIZE = 1024;
@@ -46,7 +46,7 @@ struct UpdateMessage {
     char status[MAX_STATUS_SIZE];
     char update[MAX_UPDATE_SIZE];
     char stage[MAX_STAGE_SIZE];
-    char keyinfo[MAX_KEYINFO_SIZE];
+    char faultinfo[MAX_FAULTINFO_SIZE];
     char reserved[MAX_RESERVED_SIZE];
 };
 

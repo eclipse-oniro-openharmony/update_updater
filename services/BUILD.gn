@@ -55,6 +55,7 @@ ohos_executable("updater") {
   defines = [ "BUILD_OHOS" ]
   sources = [
     "factory_reset/factory_reset.cpp",
+    "hwfault_retry/hwfault_retry.cpp",
     "main.cpp",
     "updater.cpp",
     "updater_main.cpp",
@@ -90,10 +91,6 @@ ohos_executable("updater") {
     defines += [ "UPDATER_USE_PTABLE" ]
   }
 
-  if (defined(updater_only_custom_deps) && updater_ui_support) {
-    deps += updater_only_custom_deps
-  }
-
   # force link invisible function
   if (defined(updater_force_link_libs)) {
     ldflags += [ "-Wl,--whole-archive" ]
@@ -106,11 +103,17 @@ ohos_executable("updater") {
   external_deps = [ "init:libbegetutil" ]
 
   # add updater custom library
-  if (defined(updater_custom_lib)) {
-    deps += updater_custom_lib
+  if (defined(updater_only_custom_external_deps)) {
+    external_deps += updater_only_custom_external_deps
+  }
+  if (defined(updater_custom_external_deps)) {
+    external_deps += updater_custom_external_deps
+  }
+  if (defined(updater_ui_external_deps) && updater_ui_support) {
+    external_deps += updater_ui_external_deps
   }
 
-  if (updater_ui_support && defined(updater_custom_lib)) {
+  if (updater_ui_support) {
     external_deps += [ "drivers_peripheral_input:hdi_input_udriver" ]
   }
 
@@ -148,6 +151,7 @@ ohos_static_library("libupdater") {
   defines = [ "BUILD_OHOS" ]
   sources = [
     "factory_reset/factory_reset.cpp",
+    "hwfault_retry/hwfault_retry.cpp",
     "updater.cpp",
     "updater_preprocess.cpp",
     "updater_utils.cpp",
@@ -179,11 +183,11 @@ ohos_static_library("libupdater") {
   external_deps = [ "init:libbegetutil" ]
 
   # add updater custom library
-  if (defined(updater_custom_lib)) {
-    deps += updater_custom_lib
+  if (defined(updater_custom_external_deps)) {
+    external_deps += updater_custom_external_deps
   }
 
-  if (updater_ui_support && defined(updater_custom_lib)) {
+  if (updater_ui_support) {
     external_deps += [ "drivers_peripheral_input:hdi_input_udriver" ]
   }
 

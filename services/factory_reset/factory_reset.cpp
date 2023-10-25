@@ -25,6 +25,33 @@ FactoryResetProcess &FactoryResetProcess::GetInstance()
     return resetProcessor;
 }
 
+FactoryResetProcess::FactoryResetProcess()
+{
+    RegisterFunc(USER_WIPE_DATA, [this](const std::string &path) { return DoUserReset(path); });
+    RegisterFunc(FACTORY_WIPE_DATA, [this](const std::string &path) { return DoFactoryReset(path); });
+}
+
+void FactoryResetProcess::RegisterFunc(FactoryResetMode mode, ResetFunc func)
+{
+    if (!resetTab_.emplace(mode, func).second) {
+        LOG(ERROR) << "emplace: " << mode << " fail";
+    }
+}
+
+int FactoryResetProcess::FactoryResetFunc(FactoryResetMode mode, const std::string &path)
+{
+    auto iter = resetTab_.find(mode);
+    if (iter == resetTab_.end() || iter->second == nullptr) {
+        LOG(ERROR) << "Invalid factory reset tag: " << mode;
+        return 1;
+    }
+    if (iter->second(path) != 0) {
+        LOG(ERROR) << "Do factory reset failed! tag: " << mode;
+        return 1;
+    }
+    return 0;
+}
+
 static int FactoryResetPre()
 {
     LOG(INFO) << "FactoryResetPre";
@@ -82,26 +109,6 @@ int FactoryResetProcess::DoFactoryReset(const std::string &path)
         LOG(INFO) << "FactoryResetPostFunc_ fail";
     }
     return resetStatus;
-}
-
-const std::unordered_map<FactoryResetMode, std::function<int(const std::string &path)>> resetTab = {
-    {USER_WIPE_DATA, [](const std::string &path) { return FactoryResetProcess::GetInstance().DoUserReset(path); }},
-    {FACTORY_WIPE_DATA, [](const std::string &path) { return FactoryResetProcess::GetInstance().DoFactoryReset(path); }}
-};
-
-int FactoryResetFunc(FactoryResetMode mode, const std::string &path)
-{
-    auto iter = resetTab.find(mode);
-    if (iter == resetTab.end()) {
-        LOG(ERROR) << "Invalid oeminfo tag: " << mode;
-        return 1;
-    }
-    if (iter->second(path) != 0) {
-        LOG(ERROR) << "Read oeminfo failed! tag: " << mode;
-        return 1;
-    }
-
-    return 0;
 }
 
 extern "C" __attribute__((constructor)) void RegisterFactoryResetPreFunc(void)
