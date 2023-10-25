@@ -1,0 +1,72 @@
+# Copyright (c) 2023 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+module_output_path = "updater/updater"
+
+import("//base/update/updater/updater_default_cfg.gni")
+
+#####################hydra-fuzz###################
+import("//build/config/features.gni")
+import("//build/test.gni")
+updater_path = rebase_path("${updater_absolutely_path}", ".")
+
+##############################fuzztest##########################################
+ohos_fuzztest("UpdaterMainFuzzTest") {
+  module_out_path = module_output_path
+  fuzz_config_file = "${updater_path}/test/fuzztest/updatermain_fuzzer"
+  include_dirs = [
+    "${updater_path}/utils/include",
+    "${updater_path}/interfaces/kits/include",
+    "${updater_path}/services/include/fs_manager",
+    "${updater_path}/services/include/log",
+    "${updater_path}/services",
+    "${updater_path}/services/common",
+    "${updater_path}/services/include",
+  ]
+
+  deps = [
+    "${updater_path}/interfaces/kits/misc_info:libmiscinfo",
+    "${updater_path}/interfaces/kits/packages:libpackageExt",
+    "${updater_path}/services:libupdater",
+    "${updater_path}/services/applypatch:libapplypatch",
+    "${updater_path}/services/diffpatch/patch:libpatch",
+    "${updater_path}/services/fs_manager:libfsmanager",
+    "${updater_path}/services/log:libupdaterlog",
+    "${updater_path}/services/package:libupdaterpackage",
+    "${updater_path}/services/script:libupdaterscript",
+    "${updater_path}/services/sdcard_update:libsdupdate",
+    "${updater_path}/services/ui:libui",
+    "${updater_path}/utils:libutils",
+    "//third_party/bounds_checking_function:libsec_static",
+    "//third_party/bzip2:libbz2",
+    "//third_party/cJSON:cjson",
+    "//third_party/libdrm:libdrm",
+    "//third_party/lz4:liblz4_static",
+    "//third_party/openssl:libcrypto_shared",
+    "//third_party/openssl:libssl_shared",
+    "//third_party/zlib:libz",
+  ]
+
+  external_deps = [ "init:libbegetutil" ]
+  if (updater_ui_support) {
+    external_deps += [ "ui_lite:libupdater_layout" ]
+  }
+
+  cflags = [
+    "-g",
+    "-O0",
+    "-Wno-unused-variable",
+    "-fno-omit-frame-pointer",
+  ]
+  sources = [ "updatermain_fuzzer.cpp" ]
+}
