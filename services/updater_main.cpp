@@ -77,7 +77,7 @@ constexpr float VERIFY_PERCENT = 0.05;
 int FactoryReset(FactoryResetMode mode, const std::string &path)
 {
     UpdaterInit::GetInstance().InvokeEvent(FACTORY_RESET_INIT_EVENT);
-    return FactoryResetFunc(mode, path);
+    return FactoryResetProcess::GetInstance().FactoryResetFunc(mode, path);
 }
 
 static int OtaUpdatePreCheck(PkgManager::PkgManagerPtr pkgManager, const std::string &packagePath)
