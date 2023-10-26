@@ -34,6 +34,7 @@ ohos_unittest("script_unittest") {
   sources += [
     "$root_out_dir/updater/updater/yacc/lexer.cpp",
     "$root_out_dir/updater/updater/yacc/parser.cpp",
+    "${updater_path}/services/common/script_proportion/script_proportion.cpp",
     "${updater_path}/services/script/script_instruction/script_basicinstruction.cpp",
     "${updater_path}/services/script/script_instruction/script_instructionhelper.cpp",
     "${updater_path}/services/script/script_instruction/script_loadscript.cpp",
@@ -53,6 +54,7 @@ ohos_unittest("script_unittest") {
   include_dirs = [
     "${updater_path}/interfaces/kits/include",
     "${updater_path}/services/common",
+    "${updater_path}/services/common/script_proportion",
     "${updater_path}/services/include/package",
     "${updater_path}/services/include/script",
     "${updater_path}/services/include/log",
