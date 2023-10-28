@@ -52,7 +52,7 @@ private:
     struct fb_var_screeninfo vinfo_ {};
     bool FbPowerContrl(int fd, bool powerOn);
     static inline std::string devPath_ = FB_DEV_PATH;
-    static inline FBBlankHook blankHook_ {};
+    static inline FbBlankHook blankHook_ {};
 };
 } // namespace Updater
 #endif
