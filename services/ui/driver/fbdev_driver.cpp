@@ -130,7 +130,7 @@ void FbdevDriver::GetGrSurface(GrSurface &surface)
 
 void FbdevDriver::Blank(bool blank)
 {
-    FbPowerContrl(!blank);
+    FbPowerContrl(fd_, !blank);
     if (blankHook_ != nullptr) {
         blankHook_(fd_, blank);
     }
@@ -168,7 +168,7 @@ void FbdevDriver::ReleaseFb(const struct FbBufferObject *fbo)
 bool FbdevDriver::FbPowerContrl(int fd, bool powerOn)
 {
     if (fd_ < 0) {
-        return;
+        return false;
     }
     if (ioctl(fd, FBIOBLANK, powerOn ? FB_BLANK_UNBLANK: FB_BLANK_POWERDOWN) < 0) {
         LOG(ERROR) << "failed to set fb0 power " << powerOn;
