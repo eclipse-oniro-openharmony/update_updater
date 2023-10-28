@@ -47,6 +47,8 @@ public:
     ~DrmDriver() override;
     bool Init() override;
     void Flip(const uint8_t *buf) override;
+    void Blank(bool blank) override;
+    void Exit(void) override;
     void GetGrSurface(GrSurface &surface) override;
 private:
     int ModesetCreateFb(struct BufferObject *bo);

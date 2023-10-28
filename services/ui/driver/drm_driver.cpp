@@ -29,6 +29,16 @@ void DrmDriver::Flip(const uint8_t *buf)
     }
 }
 
+void DrmDriver::Blank(bool blank)
+{
+    LOG(INFO) << "drm blank";
+}
+
+void DrmDriver::Exit(void)
+{
+    ModesetDestroyFb(&buff_);
+}
+
 void DrmDriver::GetGrSurface(GrSurface &surface)
 {
     surface.width = static_cast<int>(buff_.width);

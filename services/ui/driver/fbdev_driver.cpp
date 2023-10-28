@@ -25,6 +25,7 @@
 #include <unistd.h>
 #include "log/log.h"
 #include "securec.h"
+#include "surface_dev.h"
 #include "updater_ui_const.h"
 
 namespace Updater {
@@ -68,44 +69,45 @@ void FbdevDriver::FBLog() const
 
 bool FbdevDriver::Init()
 {
-    static bool res = [this] () {
-        int fd = open(FB_DEV_PATH, O_RDWR | O_CLOEXEC);
-        if (fd < 0) {
-            LOG(ERROR) << "cannot open fb0";
-            return false;
-        }
+    if (devPath_.empty()) {
+        LOG(ERROR) << "dev path is empty, init failed, check whether SetDevPath correctly called";
+        return false;
+    }
+    int fd = open(devPath_.c_str(), O_RDWR | O_CLOEXEC);
+    if (fd < 0) {
+        LOG(ERROR) << "cannot open fb0";
+        return false;
+    }
 
-        (void)FbPowerContrl(fd, false);
-        (void)FbPowerContrl(fd, true);
+    (void)FbPowerContrl(fd, false);
+    (void)FbPowerContrl(fd, true);
 
-        if (ioctl(fd, FBIOGET_FSCREENINFO, &finfo_) < 0) {
-            LOG(ERROR) << "failed to get fb0 info";
-            close(fd);
-            return false;
-        }
+    if (ioctl(fd, FBIOGET_FSCREENINFO, &finfo_) < 0) {
+        LOG(ERROR) << "failed to get fb0 info";
+        close(fd);
+        return false;
+    }
 
-        if (ioctl(fd, FBIOGET_VSCREENINFO, &vinfo_) < 0) {
-            LOG(ERROR) << "failed to get fb0 info";
-            close(fd);
-            return false;
-        }
+    if (ioctl(fd, FBIOGET_VSCREENINFO, &vinfo_) < 0) {
+        LOG(ERROR) << "failed to get fb0 info";
+        close(fd);
+        return false;
+    }
 
-        FBLog();
+    FBLog();
 
-        buff_.width = vinfo_.xres;
-        buff_.height = vinfo_.yres;
-        buff_.size = finfo_.line_length * vinfo_.yres;
-        buff_.vaddr = mmap(nullptr, finfo_.smem_len, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
-        if (buff_.vaddr == MAP_FAILED) {
-            LOG(ERROR) << "failed to mmap framebuffer";
-            close(fd);
-            return false;
-        }
-        (void)memset_s(buff_.vaddr, finfo_.smem_len, 0, finfo_.smem_len);
-        fd_ = fd;
-        return true;
-    } ();
-    return res;
+    buff_.width = vinfo_.xres;
+    buff_.height = vinfo_.yres;
+    buff_.size = finfo_.line_length * vinfo_.yres;
+    buff_.vaddr = mmap(nullptr, finfo_.smem_len, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+    if (buff_.vaddr == MAP_FAILED) {
+        LOG(ERROR) << "failed to mmap framebuffer";
+        close(fd);
+        return false;
+    }
+    (void)memset_s(buff_.vaddr, finfo_.smem_len, 0, finfo_.smem_len);
+    fd_ = fd;
+    return true;
 }
 
 void FbdevDriver::Flip(const uint8_t *buf)
@@ -126,6 +128,29 @@ void FbdevDriver::GetGrSurface(GrSurface &surface)
     surface.pixelBytes = vinfo_.bits_per_pixel / 8; // 8: byte bit len
 }
 
+void FbdevDriver::Blank(bool blank)
+{
+    FbPowerContrl(!blank);
+    if (blankHook_ != nullptr) {
+        blankHook_(fd_, blank);
+    }
+}
+
+void FbdevDriver::Exit(void)
+{
+    ReleaseFb(&buff_);
+}
+
+void FbdevDriver::SetDevPath(const std::string &devPath)
+{
+    devPath_ = devPath;
+}
+
+void FbdevDriver::RegisterBlankHook(FbBlankHook blankHook)
+{
+    blankHook_ = blankHook;
+}
+
 void FbdevDriver::ReleaseFb(const struct FbBufferObject *fbo)
 {
     /*
@@ -142,6 +167,9 @@ void FbdevDriver::ReleaseFb(const struct FbBufferObject *fbo)
 
 bool FbdevDriver::FbPowerContrl(int fd, bool powerOn)
 {
+    if (fd_ < 0) {
+        return;
+    }
     if (ioctl(fd, FBIOBLANK, powerOn ? FB_BLANK_UNBLANK: FB_BLANK_POWERDOWN) < 0) {
         LOG(ERROR) << "failed to set fb0 power " << powerOn;
         return false;

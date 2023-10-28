@@ -39,6 +39,11 @@ constexpr std::array BRIGHTNESS_FILES {
 constexpr uint32_t WHITE_BGCOLOR = 0x000000ff;
 }
 
+__attribute__((weak)) void InitDisplayDriverExt(void)
+{
+    LOG(INFO) << "InitDisplayDriver extension function";
+}
+
 void UpdaterUiEnv::Init()
 {
     [[maybe_unused]] static bool initOnce = [] () {
@@ -79,6 +84,7 @@ void UpdaterUiEnv::InitInputDriver()
 
 void UpdaterUiEnv::InitDisplayDriver()
 {
+    InitDisplayDriverExt();
     static_cast<void>(std::find_if(std::begin(BRIGHTNESS_FILES), std::end(BRIGHTNESS_FILES), [] (auto filePair) {
         return InitBrightness(filePair.first, filePair.second);
     }));
