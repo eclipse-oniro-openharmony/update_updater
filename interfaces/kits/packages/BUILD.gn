@@ -24,6 +24,46 @@ config("libpackageExt_exported_headers") {
   ]
 }
 
+ohos_shared_library("libpackage_shared") {
+  sources = [ "package.cpp" ]
+
+  include_dirs = [
+    "${updater_path}/interfaces/kits/include",
+    "${updater_path}/services/common",
+    "${updater_path}/services/include",
+    "${updater_path}/utils/include",
+    "//third_party/bounds_checking_function/include",
+  ]
+
+  public_configs = [ ":libpackageExt_exported_headers" ]
+
+  deps = [
+    "${updater_path}/interfaces/kits/misc_info:libmiscinfo",
+    "${updater_path}/services/fs_manager:libfsmanager",
+    "${updater_path}/services/log:libupdaterlog",
+    "${updater_path}/services/package:libupdaterpackage",
+    "${updater_path}/utils:libutils",
+    "//third_party/bounds_checking_function:libsec_static",
+    "//third_party/lz4:liblz4_static",
+    "//third_party/openssl:libcrypto_shared",
+    "//third_party/openssl:libssl_shared",
+    "//third_party/zlib:libz",
+  ]
+
+  innerapi_tags = [
+    "platformsdk",
+    "sasdk",
+  ]
+
+  installer_enable = true
+  installer_images = [
+    "system",
+    "updater",
+  ]
+  subsystem_name = "updater"
+  part_name = "updater"
+}
+
 ohos_static_library("libpackageExt") {
   sources = [ "package.cpp" ]
 
