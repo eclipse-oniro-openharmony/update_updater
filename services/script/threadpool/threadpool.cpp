@@ -70,7 +70,7 @@ void ThreadPool::ThreadRun(int32_t threadIndex)
                 *taskQueue_[k].subTaskFlag[threadIndex] = false;
             }
         }
-        std::this_thread::yield();
+        std::this_thread::sleep_for(std::chrono::milliseconds(50)); // 50ms
     }
     printf("ThreadPool::ThreadRun %d exit \n", threadIndex);
 }
@@ -157,7 +157,7 @@ void ThreadPool::RunTask(Task &&task, int32_t index)
     taskQueue_[index].task.processor(0);
     bool complete = true;
     do {
-        std::this_thread::yield();
+        std::this_thread::sleep_for(std::chrono::milliseconds(50)); // 50ms
         complete = true;
         // 检查是否所有子任务执行结束
         for (int32_t i = 1; i < workSize; ++i) {
