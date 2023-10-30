@@ -25,7 +25,6 @@
 #include <unistd.h>
 #include "log/log.h"
 #include "securec.h"
-#include "surface_dev.h"
 #include "updater_ui_const.h"
 
 namespace Updater {
