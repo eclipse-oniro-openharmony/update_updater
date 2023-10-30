@@ -235,6 +235,12 @@ void ProgressSmoothHandler(int beginProgress, int endProgress)
     }
 }
 
+__attribute__((weak)) bool PreStartBinaryEntry([[maybe_unused]] const std::string &path)
+{
+    LOG(INFO) << "pre binary process";
+    return true;
+}
+
 UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, UpdaterParams &upParams,
     PackageUpdateMode updateMode)
 {
@@ -266,6 +272,11 @@ UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, Upda
         LOG(ERROR) << "get update package info fail";
         return UPDATE_CORRUPT;
     }
+    if (!PreStartBinaryEntry(upParams.updatePackage[upParams.pkgLocation])) {
+        LOG(ERROR) << "pre binary process failed";
+        return UPDATE_ERROR;
+    }
+
     g_tmpProgressValue = 0;
     int maxTemperature;
     UpdaterStatus updateRet = StartUpdaterProc(pkgManager, upParams, maxTemperature);

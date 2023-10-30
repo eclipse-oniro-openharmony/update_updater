@@ -53,6 +53,7 @@ extern "C" {
 bool IsSupportOption([[maybe_unused]] const std::string &option);
 UpdaterStatus ProcessOtherOption([[maybe_unused]] const std::string &option,
     [[maybe_unused]] UpdaterParams &upParams);
+bool PreStartBinaryEntry([[maybe_unused]] const std::string &path);
 #ifdef __cplusplus
 #if __cplusplus
 }
