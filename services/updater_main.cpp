@@ -517,8 +517,7 @@ UpdaterStatus StartUpdaterEntry(UpdaterParams &upParams)
 
     status = DoUpdaterEntry(upParams);
     if (status != UPDATE_SUCCESS) {
-        LOG(ERROR) << "DoUpdaterEntry failed";
-        return status;
+        LOG(WARNING) << "DoUpdaterEntry failed";
     }
 
     status = PostStartUpdaterEntry(upParams, status);
