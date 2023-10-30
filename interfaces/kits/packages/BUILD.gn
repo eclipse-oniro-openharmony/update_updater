@@ -55,8 +55,8 @@ ohos_shared_library("libpackage_shared") {
     "sasdk",
   ]
 
-  installer_enable = true
-  installer_images = [
+  install_enable = true
+  install_images = [
     "system",
     "updater",
   ]
