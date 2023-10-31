@@ -111,7 +111,25 @@
                     }
                 },
                 {
+                    "name": "//base/update/updater/interfaces/kits/packages:libpackage_shared",
+                    "header": {
+                        "header_files": [
+                            "package/package.h"
+                        ],
+                        "header_base": "//base/update/updater/interfaces/kits/include"
+                    }
+                },
+                {
                     "name": "//base/update/updater/interfaces/kits/updaterkits:libupdaterkits",
+                    "header": {
+                        "header_files": [
+                            "updaterkits/updaterkits.h"
+                        ],
+                        "header_base": "//base/update/updater/interfaces/kits/include"
+                    }
+                },
+                {
+                    "name": "//base/update/updater/interfaces/kits/updaterkits:libupdater_shared",
                     "header": {
                         "header_files": [
                             "updaterkits/updaterkits.h"
@@ -163,6 +181,15 @@
                 },
                 {
                     "name": "//base/update/updater/services/log:libupdaterlog",
+                    "header": {
+                        "header_files": [],
+                        "header_base": [
+                            "//base/update/updater/services/include"
+                        ]
+                    }
+                },
+                {
+                    "name": "//base/update/updater/services/log:libupdaterlog_shared",
                     "header": {
                         "header_files": [],
                         "header_base": [

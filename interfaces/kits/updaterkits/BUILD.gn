@@ -15,6 +15,45 @@ import("//base/update/updater/updater_default_cfg.gni")
 import("//build/ohos.gni")
 
 updater_path = rebase_path("${updater_absolutely_path}", ".")
+
+ohos_shared_library("libupdater_shared") {
+  sources = [ "updaterkits.cpp" ]
+
+  include_dirs = [
+    "../include",
+    "${updater_path}/services/include/log",
+    "${updater_path}/utils/include",
+    "//third_party/bounds_checking_function/include",
+  ]
+
+  deps = [
+    "${updater_path}/interfaces/kits/misc_info:libmiscinfo",
+    "${updater_path}/services/log:libupdaterlog",
+    "${updater_path}/services/package:libupdaterpackage",
+    "${updater_path}/utils:libutils",
+    "//third_party/bounds_checking_function:libsec_static",
+    "//third_party/lz4:liblz4_static",
+    "//third_party/openssl:libcrypto_shared",
+    "//third_party/openssl:libssl_shared",
+    "//third_party/zlib:libz",
+  ]
+
+  external_deps = [ "init:libbegetutil" ]
+
+  innerapi_tags = [
+    "platformsdk",
+    "sasdk",
+  ]
+
+  install_enable = true
+  install_images = [
+    "system",
+    "updater",
+  ]
+  subsystem_name = "updater"
+  part_name = "updater"
+}
+
 ohos_static_library("libupdaterkits") {
   sources = [ "updaterkits.cpp" ]
 

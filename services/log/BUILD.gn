@@ -28,6 +28,39 @@ config("log_config") {
   ]
 }
 
+ohos_shared_library("libupdaterlog_shared") {
+  sources = [
+    "dump.cpp",
+    "log.cpp",
+  ]
+
+  include_dirs = [
+    "${updater_path}/services/include",
+    "${updater_path}/utils/include",
+    "//third_party/bounds_checking_function/include",
+  ]
+
+  public_configs = [ ":log_config" ]
+  if (!is_linux && !is_mingw && !is_mac) {
+    external_deps = [ "hilog:libhilog_base" ]
+  }
+
+  deps = [ "//third_party/bounds_checking_function:libsec_static" ]
+
+  innerapi_tags = [
+    "platformsdk",
+    "sasdk",
+  ]
+
+  install_enable = true
+  install_images = [
+    "system",
+    "updater",
+  ]
+  subsystem_name = "updater"
+  part_name = "updater"
+}
+
 ohos_static_library("libupdaterlog") {
   sources = [
     "dump.cpp",
