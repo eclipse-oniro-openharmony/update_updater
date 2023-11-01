@@ -34,6 +34,8 @@ public:
     void Flip(const uint8_t* buf) const;
     void GetScreenSize(uint16_t &w, uint16_t &h) const;
     bool Init();
+    void Blank(bool blank);
+    void Exit(void);
 private:
     DevType GetDevType() const;
     std::unique_ptr<GraphicDrv> MakeDevDrv(DevType devType);

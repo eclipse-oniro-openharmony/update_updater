@@ -18,8 +18,10 @@
 
 #include <cstdint>
 #include <linux/fb.h>
-#include "macros.h"
+#include <string>
 #include "graphic_drv.h"
+#include "macros.h"
+#include "updater_ui_const.h"
 
 namespace Updater {
 struct FbBufferObject {
@@ -31,12 +33,17 @@ struct FbBufferObject {
 
 class FbdevDriver : public GraphicDrv {
     DISALLOW_COPY_MOVE(FbdevDriver);
+    using FbBlankHook = std::function<void(int, bool)>;
 public:
     FbdevDriver() = default;
     ~FbdevDriver() override;
     bool Init() override;
     void Flip(const uint8_t *buf) override;
     void GetGrSurface(GrSurface &surface) override;
+    void Blank(bool blank) override;
+    void Exit(void) override;
+    static void SetDevPath(const std::string &devPath);
+    static void RegisterBlankHook(FbBlankHook blankHook);
 private:
     void FBLog() const;
     void ReleaseFb(const struct FbBufferObject *fbo);
@@ -44,6 +51,8 @@ private:
     struct fb_fix_screeninfo finfo_ {};
     struct fb_var_screeninfo vinfo_ {};
     bool FbPowerContrl(int fd, bool powerOn);
+    static inline std::string devPath_ = FB_DEV_PATH;
+    static inline FbBlankHook blankHook_ {};
 };
 } // namespace Updater
 #endif

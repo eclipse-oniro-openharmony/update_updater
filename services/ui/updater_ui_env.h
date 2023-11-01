@@ -22,6 +22,18 @@
 #include "updater_ui.h"
 #include "view_api.h"
 
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif
+#endif /* __cplusplus */
+void InitDisplayDriverExt(void);
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif
+#endif /* __cplusplus */
+
 namespace Updater {
 class UpdaterUiEnv {
 public:

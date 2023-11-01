@@ -26,6 +26,6 @@ __attribute__((weak)) UpdaterStatus PreStartUpdaterEntry(UpdaterParams &upParams
 }
 __attribute__((weak)) UpdaterStatus PostStartUpdaterEntry(UpdaterParams &upParams, UpdaterStatus status)
 {
-    return UPDATE_SUCCESS;
+    return status;
 }
 } // Updater

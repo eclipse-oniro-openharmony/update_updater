@@ -30,6 +30,8 @@ public:
     virtual bool Init() = 0;
     virtual void Flip(const uint8_t *buf) = 0;
     virtual void GetGrSurface(GrSurface &surface) = 0;
+    virtual void Blank(bool blank) = 0;
+    virtual void Exit(void) = 0;
 protected:
     int fd_;
 };
