@@ -33,6 +33,7 @@ constexpr const char *UPDATER_PATH = "/data/updater";
 constexpr const char *SYS_INSTALLER_PATH = "/mnt/sys_installer";
 constexpr const char *UPDATER_LOCALE_FILE = "locale";
 constexpr const char *UPDATER_RESULT_FILE = "updater_result";
+constexpr const char *MODULE_UPDATE_RESULT_FILE = "module_update_result";
 constexpr const char *MISC_FILE = "/dev/block/platform/soc/10100000.himci.eMMC/by-name/misc";
 constexpr const char *MISC_PATH = "/misc";
 constexpr const char *UPDATER_BINARY = "updater_binary";
