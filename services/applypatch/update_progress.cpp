@@ -20,7 +20,7 @@
 namespace Updater {
 static float g_totalProgress = 0.0f;
 static std::mutex g_totalProgressLock;
-static bool g_progressExitFlag = false; 
+static bool g_progressExitFlag = false;
 void SetUpdateProgress(float step)
 {
     std::lock_guard<std::mutex> guard(g_totalProgressLock);
