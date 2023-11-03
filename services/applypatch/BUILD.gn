@@ -35,6 +35,7 @@ ohos_static_library("libapplypatch") {
     "${updater_path}/services/applypatch",
     "${updater_path}/services/common",
     "${updater_path}/services/script/script_manager",
+    "${updater_path}/services/script/threadpool",
     "${updater_path}/utils/include",
     "${updater_path}/interfaces/kits/include",
     "${updater_path}/services/include/script",
@@ -46,9 +47,9 @@ ohos_static_library("libapplypatch") {
   ]
 
   deps = [
-    "${updater_path}/services/common/script_proportion:libscript_proportion",
     "${updater_path}/services/diffpatch/patch:libpatch",
     "${updater_path}/services/fs_manager:libfsmanager",
+    "${updater_path}/services/script:libthreadpool",
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/bzip2:libbz2",
     "//third_party/openssl:libcrypto_shared",

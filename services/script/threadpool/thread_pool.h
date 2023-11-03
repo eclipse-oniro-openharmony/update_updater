@@ -32,6 +32,9 @@ struct TaskNode {
     std::vector<std::atomic_bool*> subTaskFlag;
 };
 
+void SetScriptProportion(float proportion);
+float GetScriptProportion();
+
 class ThreadPool {
 public:
     static ThreadPool* CreateThreadPool(int32_t number);

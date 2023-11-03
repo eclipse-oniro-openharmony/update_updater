@@ -16,6 +16,7 @@
 #include "applypatch/update_progress.h"
 #include <thread>
 #include <mutex>
+#include <chrono>
 namespace Updater {
 static float g_totalProgress = 0.0f;
 static std::mutex g_totalProgressLock;
@@ -23,16 +24,14 @@ static bool g_progressExitFlag = false;
 
 void SetUpdateProgress(float step)
 {
-    g_totalProgressLock.lock();
+    std::lock_guard<std::mutex> guard(g_totalProgressLock);
     g_totalProgress += step;
-    g_totalProgressLock.unlock();
 }
 
 float GetUpdateProress()
 {
-    g_totalProgressLock.lock();
+    std::lock_guard<std::mutex> guard(g_totalProgressLock);
     float progress = g_totalProgress;
-    g_totalProgressLock.unlock();
     return progress;
 }
 
@@ -54,6 +53,7 @@ static void *OtaUpdateProgressThread(Uscript::UScriptEnv *env)
         if (g_progressExitFlag == true) {
             break;
         }
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
     return nullptr;
 }

@@ -63,8 +63,7 @@ HWTEST_F(CommandFunctionUnitTest, command_function_test_001, TestSize.Level1)
 {
     std::string filePath = "/data/updater/updater/allCmdUnitTest.bin";
     std::unique_ptr<TransferManager> tm = std::make_unique<TransferManager>();
-    std::shared_ptr<Command> cmd;
-    cmd = std::make_shared<Command>(tm);
+    std::shared_ptr<Command> cmd = std::make_shared<Command>(tm.get());
     mode_t dirMode = S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH;
     tm->GetTransferParams()->storeBase = "data/updater/updater/tmp/cmdtest";
     Store::DoFreeSpace(tm->GetTransferParams()->storeBase);

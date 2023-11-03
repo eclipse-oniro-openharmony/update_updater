@@ -120,7 +120,8 @@ HWTEST_F(BlockSetUnitTest, blockset_test_005, TestSize.Level1)
         printf("Open file failed");
         return;
     }
-    Command *cmd = new Command();
+    std::unique_ptr<TransferManager> tm = std::make_unique<TransferManager>();
+    Command *cmd = new Command(tm.get());
     cmd->Init(cmdLine);
     cmd->SetFileDescriptor(fd);
     BlockSet targetBlock;

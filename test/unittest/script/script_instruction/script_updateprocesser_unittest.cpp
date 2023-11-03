@@ -23,7 +23,7 @@
 #include "script_updateprocesser.h"
 #include "script_manager_impl.h"
 #include "script/script_unittest.h"
-#include "script_proportion.h"
+#include "thread_pool.h"
 
 using namespace Uscript;
 using namespace BasicInstruction;

@@ -34,10 +34,6 @@
 
 using namespace Hpackage;
 namespace Updater {
-
-static std::unordered_map<std::string, BlockSet> blocksetMap;
-static pthread_mutex_t stash_block_set_mutex = PTHREAD_MUTEX_INITIALIZER;
-
 CommandResult AbortCommandFn::Execute(const Command &params)
 {
     return SUCCESS;
@@ -188,10 +184,6 @@ CommandResult FreeCommandFn::Execute(const Command &params)
 {
     std::string shaStr = params.GetArgumentByPos(1);
     std::string storeBase = params.GetTransferManagerInstance()->GetTransferParams()->storeBase;
-    std::string blocksetId = storeBase + "/" + shaStr;
-    pthread_mutex_lock(&stash_block_set_mutex);
-    blocksetMap.erase(blocksetId);
-    pthread_mutex_unlock(&stash_block_set_mutex);
     if (params.GetTransferManagerInstance()->GetTransferParams()->storeCreated == 0) {
         return CommandResult(Store::FreeStore(storeBase, shaStr));
     }
@@ -219,14 +211,10 @@ CommandResult StashCommandFn::Execute(const Command &params)
         LOG(ERROR) << "Error to load block data";
         return FAILED;
     }
-    std::string blocksetId = storeBase + "/" + shaStr;
-    pthread_mutex_lock(&stash_block_set_mutex);
-    blocksetMap[blocksetId] = srcBlk;
-    pthread_mutex_unlock(&stash_block_set_mutex);
     if (srcBlk.VerifySha256(buffer, srcBlockSize, shaStr) != 0) {
         return FAILED;
     }
-    LOG(INFO) << "store " << srcBlockSize << " blocks to " << blocksetId;
+    LOG(INFO) << "store " << srcBlockSize << " blocks to " << storeBase << "/" << shaStr;
     int ret = Store::WriteDataToStore(storeBase, shaStr, buffer, srcBlockSize * H_BLOCK_SIZE);
     return CommandResult(ret);
 }

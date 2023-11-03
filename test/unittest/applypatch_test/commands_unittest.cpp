@@ -54,7 +54,8 @@ HWTEST_F(CommandsUnitTest, command_test_001, TestSize.Level0)
     std::string hashValue = "5aa246ebe8e817740f12cc0f6e536c5ea22e5db177563a1caea5a86614275546";
     std::string blockInfo = "2,20755,21031 276 2,20306,20582";
     std::string cmdLine = std::string("move ") + hashValue + " " + blockInfo;
-    Command *cmd = new Command();
+    std::unique_ptr<TransferManager> tm = std::make_unique<TransferManager>();
+    Command *cmd = new Command(tm.get());
     cmd->Init(cmdLine);
     auto type = cmd->GetCommandType();
     EXPECT_EQ(type, CommandType::MOVE);
@@ -70,7 +71,8 @@ HWTEST_F(CommandsUnitTest, command_test_002, TestSize.Level0)
     std::string hashValue = "5aa246ebe8e817740f12cc0f6e536c5ea22e5db177563a1caea5a86614275546";
     std::string blockInfo = "2,20755,21031 276 2,20306,20582";
     std::string cmdLine = std::string("move ") + hashValue + " " + blockInfo;
-    Command *cmd = new Command();
+    std::unique_ptr<TransferManager> tm = std::make_unique<TransferManager>();
+    Command *cmd = new Command(tm.get());
     EXPECT_EQ(cmd->Init(cmdLine), true);
     cmdLine = "abort";
     EXPECT_EQ(cmd->Init(cmdLine), true);

@@ -58,6 +58,7 @@ UpdaterEnv::~UpdaterEnv()
 void UpdaterEnv::PostMessage(const std::string &cmd, std::string content)
 {
     if (postMessage_ != nullptr) {
+        std::lock_guard<std::mutex> lock(messageLock_);
         postMessage_(cmd.c_str(), content.c_str());
     }
 }

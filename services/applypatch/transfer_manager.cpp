@@ -22,7 +22,7 @@
 #include "updater/updater_const.h"
 #include "utils.h"
 #include "applypatch/update_progress.h"
-#include "script_proportion.h"
+#include "thread_pool.h"
 
 namespace Updater {
 using namespace Updater::Utils;
