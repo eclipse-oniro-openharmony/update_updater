@@ -225,7 +225,7 @@ bool IsBatteryCapacitySufficient()
 
     LOG(INFO) << "current capacity:" << capacity << ", low level:" << lowLevel;
 
-    return capacity > lowLevel;
+    return capacity >= lowLevel;
 }
 
 UpdaterStatus InstallUpdaterPackage(UpdaterParams &upParams, PkgManager::PkgManagerPtr manager)
