@@ -70,6 +70,7 @@ ohos_prebuilt_etc("updater_normal.cfg") {
   source = "${updater_normal_path}"
   module_install_dir = "etc/init"
   install_images = [ "system" ]
+  subsystem_name = "updater"
   part_name = "updater"
 }
 

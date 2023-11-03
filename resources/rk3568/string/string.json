@@ -134,7 +134,7 @@
     "LOGRES_WIPE_FINISH" : {
         "type": "UIString",
         "zh":"恢复出厂设置成功!",
-        "en":"Reset successful",
+        "en":"Reset successful!",
         "spa":""
     },
     "LOG_CLEAR_CAHCE" : {

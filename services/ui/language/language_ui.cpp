@@ -173,7 +173,7 @@ Language LanguageUI::ParseLanguage() const
     constexpr const char *ENGLISH_LANGUAGE_PREFIX = "en";
     struct UpdaterPara para {};
     if (!ReadUpdaterParaMisc(para)) {
-        LOG(ERROR) << "ReadUpdaterParaMisc faied";
+        LOG(ERROR) << "ReadUpdaterParaMisc failed";
         return DEFAULT_LOCALE;
     }
     if (strncmp(para.language, CHINSES_LANGUAGE_PREFIX, strlen(CHINSES_LANGUAGE_PREFIX)) == 0) {
