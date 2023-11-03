@@ -28,6 +28,9 @@ constexpr int MAX_STAGE_SIZE = 32;
 constexpr int MAX_FAULTINFO_SIZE = 32;
 constexpr int MAX_RESERVED_SIZE = 224;
 
+constexpr int MAX_PARA_SIZE = 32;
+constexpr int MAX_RESERVED_SIZE_PARA = 224;
+
 // misc partition offset definition. max size of misc is 2MB, do not overflow.
 constexpr off_t MISC_BASE_OFFSET = 0;
 
@@ -41,6 +44,8 @@ constexpr off_t MISC_PARTITION_RECORD_SIZE = 1024;
 constexpr off_t MISC_RECORD_UPDATE_PARTITIONS_OFFSET = MISC_PARTITION_RECORD_OFFSET + MISC_PARTITION_RECORD_SIZE;
 constexpr off_t MISC_RECORD_UPDATE_PARTITIONS_SIZE = 256;
 
+constexpr off_t MISC_UPDATER_PARA_OFFSET = 1024 * 1024;
+
 struct UpdateMessage {
     char command[MAX_COMMAND_SIZE];
     char status[MAX_STATUS_SIZE];
@@ -50,9 +55,16 @@ struct UpdateMessage {
     char reserved[MAX_RESERVED_SIZE];
 };
 
+struct UpdaterPara {
+    char language[MAX_PARA_SIZE];
+    char reserved[MAX_RESERVED_SIZE_PARA];
+};
+
 bool WriteUpdaterMessage(const std::string &path, const UpdateMessage &boot);
 bool ReadUpdaterMessage(const std::string &path, UpdateMessage &boot);
 bool WriteUpdaterMiscMsg(const UpdateMessage &boot);
 bool ReadUpdaterMiscMsg(UpdateMessage &boot);
+bool WriteUpdaterParaMisc(const UpdaterPara &para);
+bool ReadUpdaterParaMisc(UpdaterPara &para);
 } // Updater
 #endif /* MISC_INFO_H */

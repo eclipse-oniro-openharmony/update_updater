@@ -104,4 +104,74 @@ bool ReadUpdaterMiscMsg(UpdateMessage &boot)
     }
     return ReadUpdaterMessage(path, boot);
 }
+
+bool WriteUpdaterParaMisc(const UpdaterPara &para)
+{
+    auto path = GetBlockDeviceByMountPoint(MISC_PATH);
+    if (path.empty()) {
+        LOG(INFO) << "WriteUpdaterParaMisc cannot get block device of partition";
+        path = MISC_FILE;
+    }
+
+    char *realPath = realpath(path.c_str(), NULL);
+    if (realPath == nullptr) {
+        LOG(ERROR) << "WriteUpdaterParaMisc realPath is NULL" << ":" << strerror(errno);
+        return false;
+    }
+    FILE *fp = fopen(realPath, "rb+");
+    free(realPath);
+    if (fp == nullptr) {
+        LOG(ERROR) << "WriteUpdaterParaMisc fopen failed" << ":" << strerror(errno);
+        return false;
+    }
+
+    if (lseek(fileno(fp), MISC_UPDATER_PARA_OFFSET, SEEK_SET) == -1) {
+        LOG(INFO) << "lseek fp failed";
+        return false;
+    }
+    size_t ret = fwrite(&para, sizeof(UpdaterPara), 1, fp);
+    if (ret != 1) {
+        LOG(ERROR) << "WriteUpdaterParaMisc fwrite failed" << " : " << strerror(errno);
+        fclose(fp);
+        return false;
+    }
+
+    fclose(fp);
+    return true;
+}
+
+bool ReadUpdaterParaMisc(UpdaterPara &para)
+{
+    auto path = GetBlockDeviceByMountPoint(MISC_PATH);
+    if (path.empty()) {
+        LOG(INFO) << "ReadUpdaterParaMisc cannot get block device of partition";
+        path = MISC_FILE;
+    }
+
+    char *realPath = realpath(path.c_str(), NULL);
+    if (realPath == nullptr) {
+        LOG(ERROR) << "ReadUpdaterParaMisc realPath is NULL" << ":" << strerror(errno);
+        return false;
+    }
+    FILE *fp = fopen(realPath, "rb");
+    free(realPath);
+    if (fp == nullptr) {
+        LOG(ERROR) << "ReadUpdaterParaMisc fopen failed" << ":" << strerror(errno);
+        return false;
+    }
+
+    if (lseek(fileno(fp), MISC_UPDATER_PARA_OFFSET, SEEK_SET) == -1) {
+        LOG(INFO) << "lseek fp failed";
+        return false;
+    }
+    size_t ret = fread(&para, sizeof(UpdaterPara), 1, fp);
+    if (ret != 1) {
+        LOG(ERROR) << "ReadUpdaterParaMisc fwrite failed" << " : " << strerror(errno);
+        fclose(fp);
+        return false;
+    }
+
+    fclose(fp);
+    return true;
+}
 } // Updater
