@@ -73,6 +73,7 @@ public:
     bool NeedSetProgress(const CommandType &type);
 
 private:
+    void UpdateProgress(size_t &initBlock, size_t totalSize);
     bool RegisterForRetry(const std::string &cmd);
     bool CommandsExecute(int fd, Command &cmd);
     std::unique_ptr<TransferParams> transferParams_;

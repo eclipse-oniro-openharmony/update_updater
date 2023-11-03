@@ -97,14 +97,20 @@ bool TransferManager::CommandsParser(int fd, const std::vector<std::string> &con
             initBlock = transferParams_->written;
         }
         if (totalSize != 0 && NeedSetProgress(cmd->GetCommandType())) {
-            float p = static_cast<float>(transferParams_->written - initBlock) / totalSize * Uscript::GetScriptProportion();
-            if (p >= 0.01f) {
-                SetUpdateProgress(p);
-                initBlock = transferParams_->written;
-            }
+            UpdateProgress(initBlock, totalSize);
         }
     }
     return true;
+}
+
+void TransferManager::UpdateProgress(size_t &initBlock, size_t totalSize)
+{
+    float p = static_cast<float>(transferParams_->written - initBlock) / totalSize\
+                                    * Uscript::GetScriptProportion();
+    if (p >= 0.01f) {
+        SetUpdateProgress(p);
+        initBlock = transferParams_->written;
+    }
 }
 
 bool TransferManager::RegisterForRetry(const std::string &cmd)

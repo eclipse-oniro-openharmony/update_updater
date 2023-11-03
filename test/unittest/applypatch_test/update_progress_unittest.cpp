@@ -65,6 +65,6 @@ HWTEST_F(UpdateProgressTest, UpdateProgressTest01, TestSize.Level1)
     std::stringstream ss;
     ss << "set_progress " << progress;
     EXPECT_EQ(env.GetPostMessage(), ss.str());
-    setProgressExitFlag(true);
+    SetProgressExitFlag(true);
 }
 }

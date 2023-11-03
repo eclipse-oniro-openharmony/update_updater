@@ -408,7 +408,7 @@ int ExecUpdate(PkgManager::PkgManagerPtr pkgManager, int retry, const std::strin
             break;
         }
     }
-    setProgressExitFlag(true);
+    SetProgressExitFlag(true);
     ScriptManager::ReleaseScriptManager();
     delete env;
     env = nullptr;

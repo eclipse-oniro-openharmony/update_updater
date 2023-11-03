@@ -21,7 +21,6 @@ namespace Updater {
 static float g_totalProgress = 0.0f;
 static std::mutex g_totalProgressLock;
 static bool g_progressExitFlag = false; 
-
 void SetUpdateProgress(float step)
 {
     std::lock_guard<std::mutex> guard(g_totalProgressLock);
@@ -35,7 +34,7 @@ float GetUpdateProress()
     return progress;
 }
 
-void setProgressExitFlag(bool exitFlag)
+void SetProgressExitFlag(bool exitFlag)
 {
     g_progressExitFlag = exitFlag;
 }
@@ -53,7 +52,7 @@ static void *OtaUpdateProgressThread(Uscript::UScriptEnv *env)
         if (g_progressExitFlag == true) {
             break;
         }
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        std::this_thread::sleep_for(std::chrono::milliseconds(50)); // 50ms
     }
     return nullptr;
 }

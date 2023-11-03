@@ -15,7 +15,7 @@
 
 #include <gtest/gtest.h>
 #include <vector>
-#include <math.h>
+#include <cmath>
 #include "script_context.h"
 #include "script_instruction.h"
 #include "script_instruction_unittest.h"

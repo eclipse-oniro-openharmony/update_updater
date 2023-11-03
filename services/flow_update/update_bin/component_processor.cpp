@@ -360,10 +360,10 @@ int SkipImgProcessor::SkipImageWriteProcessor(const PkgBuffer &buffer, size_t si
         return PKG_SUCCESS;
     }
 
-    // if (pkgFileSize_ != 0) {
-    //     readOffset_ += size;
-    //     writer->GetUpdaterEnv()->PostMessage("set_progress", std::to_string((float)readOffset_ / pkgFileSize_));
-    // }
+    if (pkgFileSize_ != 0) {
+        readOffset_ += size;
+        writer->GetUpdaterEnv()->PostMessage("set_progress", std::to_string((float)readOffset_ / pkgFileSize_));
+    }
 
     return PKG_SUCCESS;
 }

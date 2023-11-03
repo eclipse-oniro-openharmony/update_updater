@@ -18,18 +18,18 @@
 #include <unistd.h>
 
 namespace Uscript {
-static thread_local float scriptProportion = 1.0f;
+static thread_local float g_scriptProportion = 1.0f;
 static ThreadPool* g_threadPool = nullptr;
 static std::mutex g_initMutex;
 
 void SetScriptProportion(float proportion)
 {
-    scriptProportion = proportion;
+    g_scriptProportion = proportion;
 }
 
 float GetScriptProportion()
 {
-    return scriptProportion;
+    return g_scriptProportion;
 }
 
 ThreadPool* ThreadPool::CreateThreadPool(int number)
@@ -135,14 +135,11 @@ int32_t ThreadPool::AcquireWorkIndex()
 void ThreadPool::RunTask(Task &&task, int32_t index)
 {
     taskQueue_[index].task = std::move(task);
-    // int32_t workSize = task.workSize;
     // Mark each task should be executed
     for (int32_t i = 0; i < threadNumber_; ++i) {
         *taskQueue_[index].subTaskFlag[i] = true;
     }
 
-    // Execute first task
-    // taskQueue_[index].task.processor(0);
     bool complete = true;
     do {
         std::this_thread::yield();

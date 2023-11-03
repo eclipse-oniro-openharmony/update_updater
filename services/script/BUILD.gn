@@ -105,7 +105,7 @@ ohos_static_library("libupdaterscript") {
     "./script_interpreter/script_scanner.cpp",
     "./script_interpreter/script_statement.cpp",
     "./script_manager/script_managerImpl.cpp",
-    "./script_manager/script_utils.cpp", 
+    "./script_manager/script_utils.cpp",
   ]
   configs = [ ":script_config" ]
 
