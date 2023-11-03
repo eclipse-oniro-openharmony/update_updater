@@ -11,9 +11,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//base/update/updater/updater_default_cfg.gni")
 import("//build/ohos.gni")
 
-updater_normal_path = "//base/update/updater/services/etc/updater_normal.cfg"
+updater_path = rebase_path("${updater_absolutely_path}", ".")
+
+updater_normal_path = "${updater_path}/services/etc/updater_normal.cfg"
 updater_usb_init_cfg_path = "//base/startup/init/services/etc/init.usb.cfg"
 updater_init_usb_configfs_path_cfg =
     "//drivers/peripheral/usb/cfg/init.usb.configfs.cfg"
@@ -63,7 +66,7 @@ ohos_prebuilt_etc("updater_init_usb_configfs.cfg") {
   part_name = "updater"
 }
 
-ohos_prebuilt_etc("updater_normal.cfg) {
+ohos_prebuilt_etc("updater_normal.cfg") {
   source = "${updater_normal_path}"
   module_install_dir = "etc/init"
   install_images = [ "system" ]
