@@ -166,7 +166,7 @@ void FbdevDriver::ReleaseFb(const struct FbBufferObject *fbo)
 
 bool FbdevDriver::FbPowerContrl(int fd, bool powerOn)
 {
-    if (fd_ < 0) {
+    if (fd < 0) {
         return false;
     }
     if (ioctl(fd, FBIOBLANK, powerOn ? FB_BLANK_UNBLANK: FB_BLANK_POWERDOWN) < 0) {
