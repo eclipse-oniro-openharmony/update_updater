@@ -44,7 +44,7 @@
     "LABEL_MENU_TITLE" : {
         "type": "UIString",
         "zh":"系统恢复",
-        "en":"",
+        "en":"System recovery",
         "spa":""
     },
     "LABEL_MENU_USAGE" : {
