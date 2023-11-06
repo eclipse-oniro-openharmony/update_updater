@@ -66,6 +66,7 @@ ohos_static_library("libui") {
     "view/component/img_view_adapter.cpp",
     "view/component/label_btn_adapter.cpp",
     "view/component/text_label_adapter.cpp",
+    "view/layout/auto_layout.cpp",
     "view/layout/layout_parser.cpp",
     "view/page/base_page.cpp",
     "view/page/page.cpp",

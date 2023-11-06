@@ -19,6 +19,7 @@
 #include "json_visitor.h"
 #include "log/log.h"
 #include "view_api.h"
+#include "auto_layout.h"
 
 namespace Updater {
 namespace {
@@ -30,9 +31,11 @@ constexpr auto COMMON_TYPE = "type";
 
 class LayoutParser::Impl {
     using cJSONPtr = std::unique_ptr<cJSON, decltype(&cJSON_Delete)>;
+    AutoLayout &layout = AutoLayout::GetInstance();
 public:
     bool LoadLayout(const std::vector<std::string> &layoutFiles, std::vector<UxPageInfo> &vec) const
     {
+        layout.Init();
         std::vector<UxPageInfo>().swap(vec);
         UxPageInfo pageInfo = {};
         for (const auto &file : layoutFiles) {
@@ -48,7 +51,7 @@ public:
     bool LoadLayout(const std::string &filename, UxPageInfo &pageInfo) const
     {
         JsonNode node {std::filesystem::path {filename}};
-
+        layout.SetJsonLocation(node);
         // parse color, id, subpages
         if (!Visit<SETVAL>(node, pageInfo)) {
             LOG(ERROR) << "get page info (id, color, subpages) failed";
