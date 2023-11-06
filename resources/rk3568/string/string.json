@@ -92,7 +92,7 @@
     "LABEL_UPD_SDCARD_INFO" : {
         "type": "UIString",
         "zh":"SD卡升级 请勿重启",
-        "en":"Updating via SD card. Donot restart the device",
+        "en":"Updating via SD card. Do not restart the device",
         "spa":""
     },
     "LABEL_RESET_PROGRESS_INFO" : {

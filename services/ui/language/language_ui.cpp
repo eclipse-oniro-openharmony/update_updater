@@ -167,7 +167,7 @@ bool LanguageUI::LoadLangRes(const JsonNode &node)
 
 Language LanguageUI::ParseLanguage() const
 {
-    constexpr Language DEFAULT_LOCALE = Language::CHINESE;
+    constexpr Language DEFAULT_LOCALE = Language::ENGLISH;
     //read language type(en-Latn-US/zh-Hans) from misc
     constexpr const char *CHINSES_LANGUAGE_PREFIX = "zh";
     constexpr const char *ENGLISH_LANGUAGE_PREFIX = "en";
@@ -181,7 +181,21 @@ Language LanguageUI::ParseLanguage() const
     } else if (strncmp(para.language, ENGLISH_LANGUAGE_PREFIX, strlen(ENGLISH_LANGUAGE_PREFIX)) == 0) {
         return Language::ENGLISH;
     } else {
-        return Language::ENGLISH;
+        constexpr size_t localeLen = 2; // zh|es|en
+        std::string realPath {};
+        if (!Utils::PathToRealPath(langRes_.localeFile, realPath)) {
+            LOG(ERROR) << "get real path failed";
+            return DEFAULT_LOCALE;
+        }
+
+        std::ifstream ifs(realPath);
+        std::string content {std::istreambuf_iterator<char> {ifs}, {}};
+        const std::string &locale = content.substr(0, localeLen);
+        if (auto it = LOCALES.find(locale); it != LOCALES.end()) {
+            return it->second;
+        }
+        LOG(ERROR) << "locale " << locale << " not recognized";
+        return DEFAULT_LOCALE;
     }
 }
 }

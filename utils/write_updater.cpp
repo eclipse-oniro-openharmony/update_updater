@@ -31,7 +31,7 @@ static void PrintPrompts()
     cout << "updater_para  : write_updater updater_para zh-Hans" << endl;
 }
 
-int ErrorUpdater(int argc, char **argv, UpdateMessage &boot)
+static int ExceptionUpdater(int argc, char **argv, UpdateMessage &boot)
 {
     if (argc < BINARY_MAX_ARGS) {
         cout << "Please input correct updater command!" << endl;
@@ -47,7 +47,7 @@ int ErrorUpdater(int argc, char **argv, UpdateMessage &boot)
     return 0;
 }
 
-int ErrorUpdaterPara(int argc, char **argv, UpdaterPara &para)
+static int ExceptionWriteUpdaterPara(int argc, char **argv, UpdaterPara &para)
 {
     if (argc != 3) { // 3 : Less than 3 is an invalid input
         cout << "please input correct updater command!" << endl;
@@ -75,7 +75,7 @@ int main(int argc, char **argv)
     struct UpdateMessage boot {};
     struct UpdaterPara para {};
     if (strcmp(argv[1], "updater") == 0) {
-        if (ErrorUpdater(argc, argv, boot) == -1) {
+        if (ExceptionUpdater(argc, argv, boot) == -1) {
             return -1;
         }
     } else if (strcmp(argv[1], "user_factory_reset") == 0) {
@@ -96,7 +96,7 @@ int main(int argc, char **argv)
             return -1;
         }
     } else if (strcmp(argv[1], "updater_para") == 0) {
-        if (ErrorUpdaterPara(argc, argv, para) == -1) {
+        if (ExceptionWriteUpdaterPara(argc, argv, para) == -1) {
             return -1;
         }
         return 0;
