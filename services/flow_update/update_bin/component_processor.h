@@ -63,7 +63,7 @@ public:
 
     void UpdateProgress(size_t writeSize)
     {
-        SetUpdateProgress((float)writeSize / pkgFileSize_ * proportion_);
+        SetUpdateProgress(static_cast<float>(writeSize) / pkgFileSize_ * proportion_);
     }
 protected:
     std::string name_;

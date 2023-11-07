@@ -188,7 +188,7 @@ static int32_t ExecuteTransferCommand(int fd, const std::vector<std::string> &li
     auto transferParams = tm->GetTransferParams();
     auto writerThreadInfo = transferParams->writerThreadInfo.get();
 
-    transferParams->storeBase = "/data/updater/update" + partitionName + "_tmp";
+    transferParams->storeBase = std::string("/data/updater") + partitionName + "_tmp";
     transferParams->retryFile = std::string("/data/updater") + partitionName + "_retry";
     LOG(INFO) << "Store base path is " << transferParams->storeBase;
     int32_t ret = Store::CreateNewSpace(transferParams->storeBase, !transferParams->env->IsRetry());

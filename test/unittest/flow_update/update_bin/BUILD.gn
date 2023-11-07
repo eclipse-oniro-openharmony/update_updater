@@ -48,6 +48,7 @@ ohos_unittest("bin_flow_update_test") {
     "${updater_path}/services/package/pkg_manager",
     "${updater_path}/services/package/pkg_package",
     "${updater_path}/services/script",
+    "${updater_path}/services/script/threadpool",
     "${updater_path}/services/flow_update/update_bin",
     "${updater_path}/test/unittest",
     "${updater_path}/utils/include",
