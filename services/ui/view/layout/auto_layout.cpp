@@ -31,6 +31,7 @@ void AutoLayout::Init()
 {
     if (helper_ == nullptr) {
         LOG(ERROR) << "helper_ null error";
+        return;
     }
     helper_->Init();
 }
@@ -39,6 +40,7 @@ void AutoLayout::SetJsonLocation(JsonNode &root)
 {
     if (helper_ == nullptr) {
         LOG(ERROR) << "helper_ null error";
+        return;
     }
     helper_->SetJsonLocation(root);
 }
