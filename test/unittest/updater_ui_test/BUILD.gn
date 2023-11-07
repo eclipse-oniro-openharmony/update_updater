@@ -48,6 +48,7 @@ ohos_unittest("ui_unittest") {
     "${updater_path}/services/ui/view/component/img_view_adapter.cpp",
     "${updater_path}/services/ui/view/component/label_btn_adapter.cpp",
     "${updater_path}/services/ui/view/component/text_label_adapter.cpp",
+    "${updater_path}/services/ui/view/layout/auto_layout.cpp",
     "${updater_path}/services/ui/view/layout/layout_parser.cpp",
     "${updater_path}/services/ui/view/page/base_page.cpp",
     "${updater_path}/services/ui/view/page/page.cpp",
