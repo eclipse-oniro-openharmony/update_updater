@@ -45,11 +45,26 @@ int FactoryResetProcess::FactoryResetFunc(FactoryResetMode mode, const std::stri
         LOG(ERROR) << "Invalid factory reset tag: " << mode;
         return 1;
     }
+    if (CommonResetPreFunc_ == nullptr || CommonResetPreFunc_() != 0) {
+        LOG(ERROR) << "Failed to erase the security status";
+        return -1;
+    }
     if (iter->second(path) != 0) {
         LOG(ERROR) << "Do factory reset failed! tag: " << mode;
         return 1;
     }
     return 0;
+}
+
+static int CommonResetPre()
+{
+    LOG(INFO) << "CommonResetPre";
+    return 0;
+}
+
+void FactoryResetProcess::RegisterCommonResetPreFunc(CommonResetPreFunc ptr)
+{
+    CommonResetPreFunc_ = std::move(ptr);
 }
 
 static int FactoryResetPre()
@@ -95,20 +110,25 @@ int FactoryResetProcess::DoFactoryReset(const std::string &path)
     int resetStatus = 0;
     STAGE(UPDATE_STAGE_BEGIN) << "Factory FactoryReset";
     if (FactoryResetPreFunc_ == nullptr || FactoryResetPreFunc_() != 0) {
-        LOG(INFO) << "FactoryResetPreFunc_ fail";
+        LOG(ERROR) << "FactoryResetPreFunc_ fail";
     }
     LOG(INFO) << "Begin erasing data";
     if (FormatPartition(path, true) != 0) {
-        STAGE(UPDATE_STAGE_FAIL) << "User FactoryReset";
+        STAGE(UPDATE_STAGE_FAIL) << "Factory FactoryReset";
         ERROR_CODE(CODE_FACTORY_RESET_FAIL);
         resetStatus = 1;
     }
 
     LOG(INFO) << "Factory level FactoryReset status:" << resetStatus;
     if (FactoryResetPostFunc_ == nullptr || FactoryResetPostFunc_(resetStatus) != 0) {
-        LOG(INFO) << "FactoryResetPostFunc_ fail";
+        LOG(ERROR) << "FactoryResetPostFunc_ fail";
     }
     return resetStatus;
+}
+
+extern "C" __attribute__((constructor)) void RegisterCommonResetPreFunc(void)
+{
+    FactoryResetProcess::GetInstance().RegisterCommonResetPreFunc(CommonResetPre);
 }
 
 extern "C" __attribute__((constructor)) void RegisterFactoryResetPreFunc(void)
