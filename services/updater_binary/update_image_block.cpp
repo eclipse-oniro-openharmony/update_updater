@@ -378,8 +378,7 @@ static int32_t ExecuteUpdateBlock(Uscript::UScriptEnv &env, Uscript::UScriptCont
         return USCRIPT_ERROR_EXECUTE;
     }
 
-    int32_t ret = DoExecuteUpdateBlock(infos, tm.get(), outStream, lines, context);
-    return ret;
+    return DoExecuteUpdateBlock(infos, tm.get(), outStream, lines, context);
 }
 
 int32_t UScriptInstructionBlockUpdate::Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context)
