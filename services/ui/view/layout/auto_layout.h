@@ -18,6 +18,7 @@
 #include "layout_interface.h"
 namespace Updater {
 class AutoLayout {
+    DISALLOW_COPY_MOVE(AutoLayout);
 public:
     void RegisterHelper(std::unique_ptr<LayoutInterface> ptr);
     static AutoLayout &GetInstance();

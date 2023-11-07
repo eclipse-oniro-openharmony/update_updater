@@ -20,7 +20,6 @@ namespace Updater {
 class LayoutInterface {
 public:
     virtual void Init() = 0;
-    virtual void InitParams(int width, int height, const std::string &deviceType, const std::string &ruleFilePath) = 0;
     virtual void SetJsonLocation(JsonNode &root) = 0;
     virtual ~LayoutInterface() {}
 };
