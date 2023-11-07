@@ -71,7 +71,7 @@ void ThreadPool::Init(int32_t numberThread)
 
 void ThreadPool::ThreadRun(int32_t threadIndex)
 {
-    USCRIPT_LOGI("Thread start running, tid: %d", gettid());
+    USCRIPT_LOGI("Create new thread successfully, tid: %d", gettid());
     while (!stop_) {
         for (int32_t k = 0; k < THREAD_POOL_MAX_TASKS; ++k) {
             if (*taskQueue_[k].subTaskFlag[threadIndex]) {

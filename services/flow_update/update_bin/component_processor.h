@@ -22,6 +22,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #include "applypatch/data_writer.h"
+#include "applypatch/update_progress.h"
 #include "macros.h"
 #include "pkg_manager.h"
 #include "script_instruction.h"
@@ -53,11 +54,23 @@ public:
         pkgFileSize_ = fileSize;
     }
 
+    void SetPkgFileInfo(size_t offset, size_t fileSize, float proportion)
+    {
+        readOffset_ = offset;
+        pkgFileSize_ = fileSize;
+        proportion_ = proportion;
+    }
+
+    void UpdateProgress(size_t writeSize)
+    {
+        SetUpdateProgress((float)writeSize / pkgFileSize_ * proportion_);
+    }
 protected:
     std::string name_;
     size_t totalSize_ {};
     size_t readOffset_ {};
     size_t pkgFileSize_ {};
+    float proportion_ {};
 };
 
 class ComponentProcessorFactory {

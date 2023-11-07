@@ -35,6 +35,7 @@ ohos_static_library("libBinFlowUpdate") {
     "${updater_path}/services/package/pkg_algorithm",
     "${updater_path}/services/package/pkg_manager",
     "${updater_path}/services/package/pkg_package",
+    "${updater_path}/services/script/threadpool",
     "${updater_path}/utils/include",
   ]
   deps = [

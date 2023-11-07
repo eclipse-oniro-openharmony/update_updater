@@ -43,7 +43,7 @@ private:
         bool isFinish, const void* context);
     size_t GetFileLength();
     bool ReadFromBinFile(Hpackage::PkgBuffer &buffer, size_t start, size_t &readLen);
-
+    float fullUpdateProportion_ = 1.0f;
     size_t stashDataSize_ = 0;
     Hpackage::PkgBuffer stashBuffer_ {};
 };

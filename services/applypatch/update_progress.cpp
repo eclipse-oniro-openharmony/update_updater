@@ -43,8 +43,14 @@ static void *OtaUpdateProgressThread(Uscript::UScriptEnv *env)
 {
     float totalProgress = 0.0f;
     float curProgress = 0.0f;
-    while (totalProgress <= 1.0f) {
+    while (true) {
         totalProgress = GetUpdateProress();
+        if (totalProgress > 1.0f) {
+            std::lock_guard<std::mutex> guard(g_totalProgressLock);
+            g_totalProgress = 0.0f;
+            totalProgress -= 1.0f;
+            curProgress = 0.0f;
+        }
         if (curProgress < totalProgress && env != nullptr) {
             env->PostMessage("set_progress", std::to_string(totalProgress));
             curProgress = totalProgress;

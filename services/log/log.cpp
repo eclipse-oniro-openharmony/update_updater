@@ -62,10 +62,9 @@ UpdaterLogger::~UpdaterLogger()
     oss_.str("");
     oss_ << std::endl << std::flush;
     if (g_updaterLog.is_open()) {
-        g_updaterLogLock.lock();
+        std::lock_guard<std::mutex> lock(g_updaterLogLock);
         g_updaterLog << realTime_ <<  " " << g_logTag << " " <<  tid << " "
             << logLevelMap_[level_] << " " << str << std::endl << std::flush;
-        g_updaterLogLock.unlock();
     }
 }
 
@@ -129,7 +128,7 @@ std::ostream& StageLogger::OutputUpdaterStage()
 
 void Logger(int level, const char* fileName, int32_t line, const char* format, ...)
 {
-    static std::vector<char> buff(1024); // 1024 : max length of buff
+    std::vector<char> buff(1024); // 1024 : max length of buff
     va_list list;
     va_start(list, format);
     int size = vsnprintf_s(reinterpret_cast<char*>(buff.data()), buff.capacity(), buff.capacity(), format, list);

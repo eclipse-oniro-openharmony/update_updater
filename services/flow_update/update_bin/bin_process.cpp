@@ -23,6 +23,7 @@
 #include "pkg_utils.h"
 #include "ring_buffer/ring_buffer.h"
 #include "script_manager.h"
+#include "thread_pool.h"
 #include "scope_guard.h"
 #include "securec.h"
 
@@ -56,6 +57,7 @@ int32_t UScriptInstructionBinFlowWrite::Execute(Uscript::UScriptEnv &env, Uscrip
         return USCRIPT_INVALID_PARAM;
     }
 
+    fullUpdateProportion_ = GetScriptProportion();
     stashBuffer_.data.resize(STASH_BUFFER_SIZE);
     stashBuffer_.buffer = stashBuffer_.data.data();
     PkgManager::StreamPtr binFlowStream = nullptr;
@@ -265,7 +267,7 @@ int32_t UScriptInstructionBinFlowWrite::ComponentProcess(Uscript::UScriptEnv &en
         LOG(ERROR) << "GetProcessor failed, partition name: " << name;
         return USCRIPT_ERROR_EXECUTE;
     }
-    processor->SetPkgFileSize(stream->GetReadOffset(), stream->GetFileLength());
+    processor->SetPkgFileInfo(stream->GetReadOffset(), stream->GetFileLength(), fullUpdateProportion_);
     LOG(INFO) << "component read offset " << stream->GetReadOffset();
 
     if (processor->PreProcess(env) != USCRIPT_SUCCESS) {
