@@ -86,12 +86,6 @@ int32_t ScriptManagerImpl::Init()
         return USCRIPT_INVALID_PARAM;
     }
 
-    threadPool_ = ThreadPool::CreateThreadPool(MAX_PRIORITY);
-    if (threadPool_ == nullptr) {
-        USCRIPT_LOGE("Failed to create thread pool");
-        return USCRIPT_INVALID_PARAM;
-    }
-
     // Register system reserved instructions
     ScriptInstructionHelper* helper = ScriptInstructionHelper::GetBasicInstructionHelper(this);
     if (helper == nullptr) {
@@ -125,6 +119,16 @@ int32_t ScriptManagerImpl::Init()
     if (ret != USCRIPT_SUCCESS) {
         USCRIPT_LOGE("Failed to extract and execute script ");
         return ret;
+    }
+
+    int threadnum = 0;
+    for (int32_t i = 0; i < ScriptManager::MAX_PRIORITY; i++) {
+        threadnum = threadnum > scriptFiles_[i].size() ? threadnum : scriptFiles_[i].size();
+    }
+    threadPool_ = ThreadPool::CreateThreadPool(threadnum > MAX_THREAD_POOL ? MAX_THREAD_POOL : threadnum);
+    if (threadPool_ == nullptr) {
+        USCRIPT_LOGE("Failed to create thread pool");
+        return USCRIPT_INVALID_PARAM;
     }
     return USCRIPT_SUCCESS;
 }
@@ -217,7 +221,7 @@ int32_t ScriptManagerImpl::ExecuteScript(int32_t priority)
     Task task;
     int32_t ret = USCRIPT_SUCCESS;
     int32_t retCode = USCRIPT_SUCCESS;
-    task.workSize = threadNumber;
+    task.workSize = scriptFiles_[priority].size();
     task.processor = [&](int iter) {
         for (size_t i = static_cast<size_t>(iter); i < scriptFiles_[priority].size();
             i += static_cast<size_t>(threadNumber)) {

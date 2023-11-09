@@ -17,6 +17,7 @@
 
 #include <cstdio>
 #include <string>
+#include <mutex>
 #include <sys/wait.h>
 #include <unistd.h>
 #include "package/pkg_manager.h"
@@ -50,6 +51,7 @@ private:
     UScriptInstructionFactoryPtr factory_ = nullptr;
     PostMessageFunction postMessage_ = nullptr;
     bool isRetry_ = false;
+    std::mutex messageLock_;
 };
 }
 #endif /* UPDATE_ENV_H */

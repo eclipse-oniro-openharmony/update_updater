@@ -30,6 +30,7 @@ ohos_unittest("applypatch_unittest") {
     "partition_update_record_unittest.cpp",
     "store_unittest.cpp",
     "transfer_manager_unittest.cpp",
+    "update_progress_unittest.cpp",
   ]
   sources += [
     "${updater_path}/services/applypatch/block_set.cpp",
@@ -42,6 +43,7 @@ ohos_unittest("applypatch_unittest") {
     "${updater_path}/services/applypatch/raw_writer.cpp",
     "${updater_path}/services/applypatch/store.cpp",
     "${updater_path}/services/applypatch/transfer_manager.cpp",
+    "${updater_path}/services/applypatch/update_progress.cpp",
   ]
   include_dirs = [
     "${updater_path}/interfaces/kits/include",
@@ -51,8 +53,10 @@ ohos_unittest("applypatch_unittest") {
     "${updater_path}/services/include/log",
     "${updater_path}/services/include/package",
     "${updater_path}/services/include/script",
+    "${updater_path}/services/script/threadpool",
     "${updater_path}/services/package/pkg_manager",
     "${updater_path}/test/unittest",
+    "${updater_path}/test/unittest/script",
     "${updater_path}/utils/include",
     "//third_party/bounds_checking_function/include",
   ]

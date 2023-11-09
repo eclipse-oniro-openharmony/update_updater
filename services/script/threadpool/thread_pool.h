@@ -32,6 +32,9 @@ struct TaskNode {
     std::vector<std::atomic_bool*> subTaskFlag;
 };
 
+void SetScriptProportion(float proportion);
+float GetScriptProportion();
+
 class ThreadPool {
 public:
     static ThreadPool* CreateThreadPool(int32_t number);
@@ -63,7 +66,7 @@ private:
     ~ThreadPool();
 
 private:
-    static const int32_t THREAD_POOL_MAX_TASKS = 2;
+    static const int32_t THREAD_POOL_MAX_TASKS = 1;
     std::vector<std::thread> workers_;
     std::atomic<bool> stop_ = { false };
 

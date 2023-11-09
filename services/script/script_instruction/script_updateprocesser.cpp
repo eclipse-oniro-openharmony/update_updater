@@ -17,6 +17,7 @@
 #include "script_instruction.h"
 #include "script_manager.h"
 #include "script_utils.h"
+#include "thread_pool.h"
 
 using namespace Uscript;
 
@@ -70,6 +71,18 @@ int32_t UScriptInstructionUiPrint::Execute(Uscript::UScriptEnv &env, Uscript::US
         return ret;
     }
     env.PostMessage("ui_log", message);
+    return USCRIPT_SUCCESS;
+}
+
+int32_t UScriptInstructionSetProportion::Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context)
+{
+    float proportion = 0.0f;
+    int32_t ret = context.GetParam(0, proportion);
+    if (ret != USCRIPT_SUCCESS) {
+        USCRIPT_LOGE("Failed to get proportion param");
+        return ret;
+    }
+    SetScriptProportion(proportion);
     return USCRIPT_SUCCESS;
 }
 } // namespace BasicInstruction

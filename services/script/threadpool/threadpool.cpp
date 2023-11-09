@@ -15,17 +15,25 @@
 #include "thread_pool.h"
 #include <cstring>
 #include "script_utils.h"
+#include <unistd.h>
 
 namespace Uscript {
+static thread_local float g_scriptProportion = 1.0f;
 static ThreadPool* g_threadPool = nullptr;
 static std::mutex g_initMutex;
 
+void SetScriptProportion(float proportion)
+{
+    g_scriptProportion = proportion;
+}
+
+float GetScriptProportion()
+{
+    return g_scriptProportion;
+}
+
 ThreadPool* ThreadPool::CreateThreadPool(int number)
 {
-    if (number <= 1) {
-        USCRIPT_LOGE("Invalid number %d", number);
-        return nullptr;
-    }
     std::lock_guard<std::mutex> lock(g_initMutex);
     if (g_threadPool != nullptr) {
         return g_threadPool;
@@ -56,13 +64,14 @@ void ThreadPool::Init(int32_t numberThread)
         }
     }
     // Create workers
-    for (int32_t threadIndex = 1; threadIndex < threadNumber_; ++threadIndex) {
+    for (int32_t threadIndex = 0; threadIndex < threadNumber_; ++threadIndex) {
         workers_.emplace_back(std::thread(ThreadPool::ThreadExecute, this, threadIndex));
     }
 }
 
 void ThreadPool::ThreadRun(int32_t threadIndex)
 {
+    USCRIPT_LOGI("Create new thread successfully, tid: %d", gettid());
     while (!stop_) {
         for (int32_t k = 0; k < THREAD_POOL_MAX_TASKS; ++k) {
             if (*taskQueue_[k].subTaskFlag[threadIndex]) {
@@ -72,7 +81,6 @@ void ThreadPool::ThreadRun(int32_t threadIndex)
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(50)); // 50ms
     }
-    printf("ThreadPool::ThreadRun %d exit \n", threadIndex);
 }
 
 ThreadPool::~ThreadPool()
@@ -101,32 +109,12 @@ void ThreadPool::AddTask(Task &&task)
 void ThreadPool::AddNewTask(Task &&task)
 {
     int32_t index = AcquireWorkIndex();
-    USCRIPT_LOGI("ThreadPool::AddNewTask %d ", index);
-
-    // If there are no multi-works
-    // Do not need to enqueue, execute it immediately
-    if (task.workSize <= 1 || index < 0) {
-        for (int32_t i = 0; i < task.workSize; ++i) {
-            task.processor(i);
-        }
+    if (index < 0) {
+        USCRIPT_LOGI("ThreadPool::AddNewTask Failed");
         return;
     }
 
-    int32_t workSize = task.workSize;
-    // If too much works, Create new task to do the work.
-    if (workSize > threadNumber_) {
-        Task newTask;
-        newTask.workSize = threadNumber_;
-        newTask.processor = [workSize, &task, this](int tId) {
-            for (int v = tId; v < workSize; v += threadNumber_) {
-                task.processor(v);
-            }
-        };
-        RunTask(std::move(newTask), index);
-    } else {
-        RunTask(std::move(task), index);
-    }
-
+    RunTask(std::move(task), index);
     // Works done. make this task available
     std::lock_guard<std::mutex> lock(queueMutex_);
     taskQueue_[index].available = true;
@@ -146,21 +134,20 @@ int32_t ThreadPool::AcquireWorkIndex()
 
 void ThreadPool::RunTask(Task &&task, int32_t index)
 {
-    taskQueue_[index].task = std::move(task);
     int32_t workSize = task.workSize;
+    taskQueue_[index].task = std::move(task);
     // Mark each task should be executed
-    for (int32_t i = 1; i < workSize; ++i) {
+    int32_t num = workSize > threadNumber_ ? threadNumber_ : workSize;
+    for (int32_t i = 0; i < num; ++i) {
         *taskQueue_[index].subTaskFlag[i] = true;
     }
 
-    // Execute first task
-    taskQueue_[index].task.processor(0);
     bool complete = true;
     do {
         std::this_thread::sleep_for(std::chrono::milliseconds(50)); // 50ms
         complete = true;
         // 检查是否所有子任务执行结束
-        for (int32_t i = 1; i < workSize; ++i) {
+        for (int32_t i = 0; i < num; ++i) {
             if (*taskQueue_[index].subTaskFlag[i]) {
                 complete = false;
                 break;

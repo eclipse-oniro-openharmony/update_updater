@@ -21,34 +21,16 @@
 #include "log/log.h"
 #include "updater/updater_const.h"
 #include "utils.h"
+#include "applypatch/update_progress.h"
+#include "thread_pool.h"
 
 namespace Updater {
 using namespace Updater::Utils;
-static TransferManagerPtr g_transferManagerInstance = nullptr;
-TransferManagerPtr TransferManager::GetTransferManagerInstance()
-{
-    if (g_transferManagerInstance == nullptr) {
-        g_transferManagerInstance = new TransferManager();
-        g_transferManagerInstance->Init();
-    }
-    return g_transferManagerInstance;
-}
 
-void TransferManager::ReleaseTransferManagerInstance(TransferManagerPtr transferManager)
+TransferManager::TransferManager()
 {
-    delete transferManager;
-    g_transferManagerInstance = nullptr;
-    transferManager = nullptr;
-}
-
-TransferManager::~TransferManager()
-{
-    if (globalParams != nullptr) {
-        if (globalParams->writerThreadInfo != nullptr) {
-            globalParams->writerThreadInfo.reset();
-        }
-        globalParams.reset();
-    }
+    transferParams_ = std::make_unique<TransferParams>();
+    transferParams_->writerThreadInfo = std::make_unique<WriterThreadInfo>();
 }
 
 bool TransferManager::CommandsExecute(int fd, Command &cmd)
@@ -73,32 +55,32 @@ bool TransferManager::CommandsParser(int fd, const std::vector<std::string> &con
         LOG(ERROR) << "too small context in transfer file";
         return false;
     }
-    if (globalParams == nullptr) {
-        LOG(ERROR) << "globalParams is nullptr";
+    if (transferParams_ == nullptr) {
+        LOG(ERROR) << "transferParams_ is nullptr";
         return false;
     }
 
     std::vector<std::string>::const_iterator ct = context.begin();
-    globalParams->version = Utils::String2Int<size_t>(*ct++, Utils::N_DEC);
-    globalParams->blockCount = Utils::String2Int<size_t>(*ct++, Utils::N_DEC);
-    globalParams->maxEntries = Utils::String2Int<size_t>(*ct++, Utils::N_DEC);
-    globalParams->maxBlocks = Utils::String2Int<size_t>(*ct++, Utils::N_DEC);
-    size_t totalSize = globalParams->blockCount;
+    transferParams_->version = Utils::String2Int<size_t>(*ct++, Utils::N_DEC);
+    transferParams_->blockCount = Utils::String2Int<size_t>(*ct++, Utils::N_DEC);
+    transferParams_->maxEntries = Utils::String2Int<size_t>(*ct++, Utils::N_DEC);
+    transferParams_->maxBlocks = Utils::String2Int<size_t>(*ct++, Utils::N_DEC);
+    size_t totalSize = transferParams_->blockCount;
     std::string retryCmd = "";
-    if (globalParams->env != nullptr && globalParams->env->IsRetry()) {
+    if (transferParams_->env != nullptr && transferParams_->env->IsRetry()) {
         retryCmd = ReloadForRetry();
     }
     size_t initBlock = 0;
     for (; ct != context.end(); ct++) {
-        std::unique_ptr<Command> cmd = std::make_unique<Command>();
+        std::unique_ptr<Command> cmd = std::make_unique<Command>(transferParams_.get());
         if (cmd == nullptr) {
             LOG(ERROR) << "Failed to parse command line.";
             return false;
         }
-        if (!cmd->Init(*ct) || cmd->GetCommandType() == CommandType::LAST || globalParams->env == nullptr) {
+        if (!cmd->Init(*ct) || cmd->GetCommandType() == CommandType::LAST || transferParams_->env == nullptr) {
             continue;
         }
-        if (!retryCmd.empty() && globalParams->env->IsRetry()) {
+        if (!retryCmd.empty() && transferParams_->env->IsRetry()) {
             if (*ct == retryCmd) {
                 retryCmd.clear();
             }
@@ -112,26 +94,26 @@ bool TransferManager::CommandsParser(int fd, const std::vector<std::string> &con
             return false;
         }
         if (initBlock == 0) {
-            initBlock = globalParams->written;
+            initBlock = transferParams_->written;
         }
-        if (totalSize != 0 && globalParams->env != nullptr && NeedSetProgress(cmd->GetCommandType())) {
-            globalParams->env->PostMessage("set_progress",
-                std::to_string((static_cast<double>(globalParams->written) - initBlock) / totalSize));
+        if (totalSize != 0 && NeedSetProgress(cmd->GetCommandType())) {
+            UpdateProgress(initBlock, totalSize);
         }
     }
     return true;
 }
 
-void TransferManager::Init()
+void TransferManager::UpdateProgress(size_t &initBlock, size_t totalSize)
 {
-    globalParams = std::make_unique<GlobalParams>();
-    globalParams->writerThreadInfo = std::make_unique<WriterThreadInfo>();
-    blocksetMap.clear();
+    float p = static_cast<float>(transferParams_->written - initBlock) / totalSize\
+                                    * Uscript::GetScriptProportion();
+    SetUpdateProgress(p);
+    initBlock = transferParams_->written;
 }
 
 bool TransferManager::RegisterForRetry(const std::string &cmd)
 {
-    std::string path = globalParams->retryFile;
+    std::string path = transferParams_->retryFile;
     int fd = open(path.c_str(), O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
     if (fd == -1) {
         LOG(ERROR) << "Failed to create";
@@ -148,7 +130,7 @@ bool TransferManager::RegisterForRetry(const std::string &cmd)
 
 std::string TransferManager::ReloadForRetry() const
 {
-    std::string path = globalParams->retryFile;
+    std::string path = transferParams_->retryFile;
     int fd = open(path.c_str(), O_RDONLY);
     if (fd < 0) {
         LOG(ERROR) << "Failed to open";
@@ -181,8 +163,8 @@ bool TransferManager::CheckResult(const CommandResult result, const std::string 
             break;
         case NEED_RETRY:
             LOG(INFO) << "Running command need retry!";
-            if (globalParams->env != nullptr) {
-                globalParams->env->PostMessage("retry_update", IO_FAILED_REBOOT);
+            if (transferParams_->env != nullptr) {
+                transferParams_->env->PostMessage("retry_update", IO_FAILED_REBOOT);
             }
             return false;
         case FAILED:

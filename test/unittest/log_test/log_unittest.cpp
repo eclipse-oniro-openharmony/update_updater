@@ -58,6 +58,9 @@ HWTEST_F(LogUnitTest, log_test_001, TestSize.Level1)
     ERROR_CODE(CODE_VERIFY_FAIL);
     fstream f;
     f.open("/data/updater/m_log.txt", ios::in);
+    if (!f) {
+        SUCCEED();
+    };
     char ch[100];
     f.getline(ch, 100);
     string result = ch;

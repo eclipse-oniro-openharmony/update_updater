@@ -20,6 +20,7 @@
 #include <vector>
 #include <sys/time.h>
 #include <unistd.h>
+#include <mutex>
 #ifndef DIFF_PATCH_SDK
 #include "hilog_base/log_base.h"
 #include "vsnprintf_s_p.h"
@@ -28,6 +29,7 @@
 
 namespace Updater {
 static std::ofstream g_updaterLog;
+static std::mutex g_updaterLogLock;
 static std::ofstream g_updaterStage;
 static std::ofstream g_errorCode;
 static std::ofstream g_nullStream;
@@ -60,6 +62,7 @@ UpdaterLogger::~UpdaterLogger()
     oss_.str("");
     oss_ << std::endl << std::flush;
     if (g_updaterLog.is_open()) {
+        std::lock_guard<std::mutex> lock(g_updaterLogLock);
         g_updaterLog << realTime_ <<  " " << g_logTag << " " <<  tid << " "
             << logLevelMap_[level_] << " " << str << std::endl << std::flush;
     }
@@ -125,7 +128,7 @@ std::ostream& StageLogger::OutputUpdaterStage()
 
 void Logger(int level, const char* fileName, int32_t line, const char* format, ...)
 {
-    static std::vector<char> buff(1024); // 1024 : max length of buff
+    std::vector<char> buff(1024); // 1024 : max length of buff
     va_list list;
     va_start(list, format);
     int size = vsnprintf_s(reinterpret_cast<char*>(buff.data()), buff.capacity(), buff.capacity(), format, list);

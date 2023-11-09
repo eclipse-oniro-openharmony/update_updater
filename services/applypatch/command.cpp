@@ -62,6 +62,11 @@ int Command::GetFileDescriptor() const
     return *fd_;
 }
 
+TransferParams* Command::GetTransferParams() const
+{
+    return transferParams_;
+}
+
 CommandType Command::ParseCommandType(const std::string &firstCmd)
 {
     if (firstCmd == "abort") {

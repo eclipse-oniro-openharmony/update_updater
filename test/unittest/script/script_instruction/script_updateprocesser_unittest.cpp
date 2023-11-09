@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 #include <vector>
+#include <cmath>
 #include "script_context.h"
 #include "script_instruction.h"
 #include "script_instruction_unittest.h"
@@ -22,6 +23,7 @@
 #include "script_updateprocesser.h"
 #include "script_manager_impl.h"
 #include "script/script_unittest.h"
+#include "thread_pool.h"
 
 using namespace Uscript;
 using namespace BasicInstruction;
@@ -169,6 +171,34 @@ public:
         }
         ScriptInstructionHelper::ReleaseBasicInstructionHelper();
     }
+    void TestUpdateProcesserSetProportion() const
+    {
+        TestPkgManager pkgManager;
+        UTestProcessorScriptEnv env {&pkgManager};
+        ScriptManagerImpl scriptManager {&env};
+        ScriptInstructionHelper::GetBasicInstructionHelper(&scriptManager);
+        {
+            UScriptInstructionContext context {};
+            context.AddInputParam(std::make_shared<IntegerValue>(1));
+            auto instruction = std::make_unique<UScriptInstructionSetProportion>();
+            EXPECT_EQ(instruction->Execute(env, context), USCRIPT_INVALID_PARAM);
+            std::vector<UScriptValuePtr> output = context.GetOutVar();
+            EXPECT_EQ(output.size(), 0);
+            bool ret = fabs(GetScriptProportion() - 1.0f) < 1e-6;
+            EXPECT_TRUE(ret);
+        }
+        {
+            UScriptInstructionContext context {};
+            context.AddInputParam(std::make_shared<FloatValue>(0.5f));
+            auto instruction = std::make_unique<UScriptInstructionSetProportion>();
+            EXPECT_EQ(instruction->Execute(env, context), USCRIPT_SUCCESS);
+            std::vector<UScriptValuePtr> output = context.GetOutVar();
+            EXPECT_EQ(output.size(), 0);
+            bool ret = fabs(GetScriptProportion() - 0.5f) < 1e-6;
+            EXPECT_TRUE(ret);
+        }
+        ScriptInstructionHelper::ReleaseBasicInstructionHelper();
+    }
 protected:
     void SetUp() {}
     void TearDown() {}
@@ -188,5 +218,9 @@ HWTEST_F(UpdateProcesserInstructionUnittest, TestUpdateProcesserShowProcess, Tes
 HWTEST_F(UpdateProcesserInstructionUnittest, TestUpdateProcesserPrint, TestSize.Level1)
 {
     UpdateProcesserInstructionUnittest {}.TestUpdateProcesserPrint();
+}
+HWTEST_F(UpdateProcesserInstructionUnittest, TestUpdateProcesserSetProportion, TestSize.Level1)
+{
+    UpdateProcesserInstructionUnittest {}.TestUpdateProcesserSetProportion();
 }
 }
