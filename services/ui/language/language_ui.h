@@ -40,6 +40,7 @@ public:
     const std::string &Translate(const std::string &key) const;
     [[nodiscard]] bool LoadLangRes(const JsonNode &node);
     Language ParseLanguage() const;
+    Language GetCurLanguage() const;
 private:
     ~LanguageUI() = default;
     LanguageUI();
