@@ -97,6 +97,9 @@ bool ClearMisc()
         return false;
     }
 
+    // Clear para including language of misc
+    ClearUpdaterParaMisc();
+
     struct PartitionRecordInfo cleanPartition {};
     for (size_t tmpOffset = 0; tmpOffset < PARTITION_UPDATER_RECORD_MSG_SIZE; tmpOffset +=
         sizeof(PartitionRecordInfo)) {

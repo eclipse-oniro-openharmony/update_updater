@@ -174,4 +174,12 @@ bool ReadUpdaterParaMisc(UpdaterPara &para)
     fclose(fp);
     return true;
 }
+
+void ClearUpdaterParaMisc(void)
+{
+    struct UpdaterPara cleanPara {};
+    if (!WriteUpdaterParaMisc(cleanPara)) {
+        LOG(ERROR) << "Clear para including language of misc failed";
+    }
+}
 } // Updater

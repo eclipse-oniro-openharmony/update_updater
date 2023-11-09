@@ -66,5 +66,6 @@ bool WriteUpdaterMiscMsg(const UpdateMessage &boot);
 bool ReadUpdaterMiscMsg(UpdateMessage &boot);
 bool WriteUpdaterParaMisc(const UpdaterPara &para);
 bool ReadUpdaterParaMisc(UpdaterPara &para);
+void ClearUpdaterParaMisc(void);
 } // Updater
 #endif /* MISC_INFO_H */
