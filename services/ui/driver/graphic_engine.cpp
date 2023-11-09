@@ -131,6 +131,7 @@ void GraphicEngine::Flush(const OHOS::Rect& flushRect)
         LOG(ERROR) << "null error";
         return;
     }
+    std::lock_guard<std::mutex> lock {mtx_};
     UiRotation::GetInstance().SetFlushRange(flushRect);
     sfDev_->Flip(reinterpret_cast<uint8_t *>(buffInfo_->virAddr));
 }

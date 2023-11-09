@@ -121,7 +121,7 @@ void UiRotation::RotateBuffer(const uint8_t *origBuf, uint8_t *dstBuf, uint32_t 
     }
 }
 
-std::pair<int,int> UiRotation::RotateXY(int x, int y)
+std::pair<int, int> UiRotation::RotateXY(int x, int y)
 {
     if (degree_ == UI_ROTATION_DEGREE::UI_ROTATION_0) {
         return {x, y};

@@ -41,7 +41,7 @@ public:
     int GetHeight(void);
     void RotateBuffer(const uint8_t *origBuf, uint8_t *dstBuf, uint32_t size);
     void SetFlushRange(const OHOS::Rect &rect);
-    std::pair<int,int> RotateXY(int x, int y);
+    std::pair<int, int> RotateXY(int x, int y);
 private:
     void RotateWidthHeight(int realWidth, int realHeight);
     int width_ {};

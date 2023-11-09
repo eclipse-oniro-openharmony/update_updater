@@ -17,6 +17,7 @@
 #define UPDATER_UI_GRAPHIC_ENGINE_H
 
 #include <memory>
+#include <mutex>
 #include <thread>
 #include "engines/gfx/soft_engine.h"
 #include "macros.h"
@@ -50,6 +51,7 @@ private:
     uint16_t width_ = 0;
     uint8_t colorMode_ = 0;
     bool flushStop_ = true;
+    std::mutex mtx_ {};
 };
 } // namespace Updater
 #endif
