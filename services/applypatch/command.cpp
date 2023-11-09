@@ -62,9 +62,9 @@ int Command::GetFileDescriptor() const
     return *fd_;
 }
 
-TransferManagerPtr Command::GetTransferManagerInstance() const
+TransferParams* Command::GetTransferParams() const
 {
-    return tm_;
+    return transferParams_.get();
 }
 
 CommandType Command::ParseCommandType(const std::string &firstCmd)

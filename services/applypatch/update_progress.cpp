@@ -17,21 +17,20 @@
 #include <thread>
 #include <mutex>
 #include <chrono>
+#include <atomic>
 namespace Updater {
-static float g_totalProgress = 0.0f;
-static std::mutex g_totalProgressLock;
+static std::atomic<float> g_totalProgress(0.0f);
 static bool g_progressExitFlag = false;
 void SetUpdateProgress(float step)
 {
-    std::lock_guard<std::mutex> guard(g_totalProgressLock);
-    g_totalProgress += step;
+    float totalProgress = g_totalProgress.load();
+    totalProgress += step;
+    g_totalProgress.store(totalProgress);
 }
 
 float GetUpdateProress()
 {
-    std::lock_guard<std::mutex> guard(g_totalProgressLock);
-    float progress = g_totalProgress;
-    return progress;
+    return g_totalProgress.load();
 }
 
 void SetProgressExitFlag(bool exitFlag)
@@ -46,8 +45,7 @@ static void *OtaUpdateProgressThread(Uscript::UScriptEnv *env)
     while (true) {
         totalProgress = GetUpdateProress();
         if (totalProgress > 1.0f) {
-            std::lock_guard<std::mutex> guard(g_totalProgressLock);
-            g_totalProgress = 0.0f;
+            g_totalProgress.store(0.0f);
             totalProgress -= 1.0f;
             curProgress = 0.0f;
         }

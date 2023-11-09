@@ -27,11 +27,10 @@
 #include "script_manager.h"
 
 namespace Updater {
-class TransferManager;
-using TransferManagerPtr = TransferManager *;
+struct TransferParams;
 class Command {
 public:
-    explicit Command(TransferManagerPtr tm): tm_(tm) {}
+    explicit Command(std::shared_ptr<TransferParams> transferParams):transferParams_(transferParams) {}
     virtual ~Command();
 
     virtual bool Init(const std::string &cmd_line);
@@ -39,7 +38,7 @@ public:
     std::string GetArgumentByPos(size_t pos) const;
     void SetFileDescriptor(int fd);
     int GetFileDescriptor() const;
-    TransferManagerPtr GetTransferManagerInstance() const;
+    TransferParams* GetTransferParams() const;
     std::string GetCommandLine() const;
 private:
     CommandType ParseCommandType(const std::string &first_cmd);
@@ -48,7 +47,7 @@ private:
     std::string cmdLine_ {};
     std::vector<std::string> tokens_ {};
     std::unique_ptr<int> fd_ {};
-    TransferManagerPtr tm_;
+    std::shared_ptr<TransferParams> transferParams_;
 };
 } // namespace Updater
 #endif

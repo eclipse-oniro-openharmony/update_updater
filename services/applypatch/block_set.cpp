@@ -262,7 +262,7 @@ int32_t BlockSet::LoadSourceBuffer(const Command &cmd, size_t &pos, std::vector<
     srcBlockSize = String2Int<size_t>(blockLen, N_DEC);
     sourceBuffer.resize(srcBlockSize * H_BLOCK_SIZE);
     std::string targetCmd = cmd.GetArgumentByPos(pos++);
-    std::string storeBase = cmd.GetTransferManagerInstance()->GetTransferParams()->storeBase;
+    std::string storeBase = cmd.GetTransferParams()->storeBase;
     if (targetCmd != "-") {
         BlockSet srcBlk;
         srcBlk.ParserAndInsert(targetCmd);
@@ -311,13 +311,13 @@ int32_t BlockSet::LoadTargetBuffer(const Command &cmd, std::vector<uint8_t> &buf
     if (ret != 1) {
         return ret;
     }
-    std::string storeBase = cmd.GetTransferManagerInstance()->GetTransferParams()->storeBase;
+    std::string storeBase = cmd.GetTransferParams()->storeBase;
     std::string storePath = storeBase + "/" + srcHash;
     struct stat storeStat {};
     int res = stat(storePath.c_str(), &storeStat);
     if (VerifySha256(buffer, blockSize, srcHash) == 0) {
         if (isOverlap && res != 0) {
-            cmd.GetTransferManagerInstance()->GetTransferParams()->freeStash = srcHash;
+            cmd.GetTransferParams()->freeStash = srcHash;
             ret = Store::WriteDataToStore(storeBase, srcHash, buffer, blockSize * H_BLOCK_SIZE);
             if (ret != 0) {
                 LOG(ERROR) << "failed to stash overlapping source blocks";
@@ -385,7 +385,7 @@ int32_t BlockSet::WriteDiffToBlock(const Command &cmd, std::vector<uint8_t> &src
     size_t offset = Utils::String2Int<size_t>(cmd.GetArgumentByPos(pos++), Utils::N_DEC);
     size_t length = Utils::String2Int<size_t>(cmd.GetArgumentByPos(pos++), Utils::N_DEC);
     // Get patch buffer
-    auto transferParams = cmd.GetTransferManagerInstance()->GetTransferParams();
+    auto transferParams = cmd.GetTransferParams();
     auto patchBuff = transferParams->patchDataBuffer + offset;
     size_t srcBuffSize =  srcBlockSize * H_BLOCK_SIZE;
     if (isImgDiff) {

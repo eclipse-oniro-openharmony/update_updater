@@ -279,7 +279,7 @@ int RawImgProcessor::RawImageWriteProcessor(const PkgBuffer &buffer, size_t size
         }
         return PKG_INVALID_STREAM;
     }
- 
+
     if (pkgFileSize_ != 0) {
         readOffset_ += size;
         writer->GetUpdaterEnv()->PostMessage("set_progress", std::to_string((float)readOffset_ / pkgFileSize_));
