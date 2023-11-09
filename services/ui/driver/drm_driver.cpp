@@ -17,8 +17,8 @@
 #include <unistd.h>
 #include "log/log.h"
 #include "securec.h"
-#include "updater_ui_const.h"
 #include "ui_rotation.h"
+#include "updater_ui_const.h"
 
 namespace Updater {
 void DrmDriver::Flip(const uint8_t *buf)
