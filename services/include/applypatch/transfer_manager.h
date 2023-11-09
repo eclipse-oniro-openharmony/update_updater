@@ -76,7 +76,7 @@ private:
     void UpdateProgress(size_t &initBlock, size_t totalSize);
     bool RegisterForRetry(const std::string &cmd);
     bool CommandsExecute(int fd, Command &cmd);
-    std::shared_ptr<TransferParams> transferParams_;
+    std::unique_ptr<TransferParams> transferParams_;
 };
 } // namespace Updater
 #endif

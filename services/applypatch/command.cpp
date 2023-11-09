@@ -64,7 +64,7 @@ int Command::GetFileDescriptor() const
 
 TransferParams* Command::GetTransferParams() const
 {
-    return transferParams_.get();
+    return transferParams_;
 }
 
 CommandType Command::ParseCommandType(const std::string &firstCmd)

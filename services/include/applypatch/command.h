@@ -30,7 +30,7 @@ namespace Updater {
 struct TransferParams;
 class Command {
 public:
-    explicit Command(std::shared_ptr<TransferParams> transferParams):transferParams_(transferParams) {}
+    explicit Command(TransferParams* transferParams):transferParams_(transferParams) {}
     virtual ~Command();
 
     virtual bool Init(const std::string &cmd_line);
@@ -47,7 +47,7 @@ private:
     std::string cmdLine_ {};
     std::vector<std::string> tokens_ {};
     std::unique_ptr<int> fd_ {};
-    std::shared_ptr<TransferParams> transferParams_;
+    TransferParams* transferParams_;
 };
 } // namespace Updater
 #endif

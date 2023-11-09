@@ -29,7 +29,7 @@ using namespace Updater::Utils;
 
 TransferManager::TransferManager()
 {
-    transferParams_ = std::make_shared<TransferParams>();
+    transferParams_ = std::make_unique<TransferParams>();
     transferParams_->writerThreadInfo = std::make_unique<WriterThreadInfo>();
 }
 
@@ -72,7 +72,7 @@ bool TransferManager::CommandsParser(int fd, const std::vector<std::string> &con
     }
     size_t initBlock = 0;
     for (; ct != context.end(); ct++) {
-        std::unique_ptr<Command> cmd = std::make_unique<Command>(transferParams_);
+        std::unique_ptr<Command> cmd = std::make_unique<Command>(transferParams_.get());
         if (cmd == nullptr) {
             LOG(ERROR) << "Failed to parse command line.";
             return false;
