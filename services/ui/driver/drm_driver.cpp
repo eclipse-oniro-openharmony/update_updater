@@ -18,14 +18,13 @@
 #include "log/log.h"
 #include "securec.h"
 #include "updater_ui_const.h"
+#include "ui_rotation.h"
 
 namespace Updater {
 void DrmDriver::Flip(const uint8_t *buf)
 {
     if (buff_.vaddr != MAP_FAILED) {
-        if (memcpy_s(buff_.vaddr, buff_.size, buf, buff_.size) != EOK) {
-            LOG(ERROR) << "DrmDriver::Flip memcpy_s fail";
-        }
+        UiRotation::GetInstance().RotateBuffer(buf, buff_.vaddr, buff_.size);
     }
 }
 

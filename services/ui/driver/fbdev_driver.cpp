@@ -25,6 +25,7 @@
 #include <unistd.h>
 #include "log/log.h"
 #include "securec.h"
+#include "ui_rotation.h"
 #include "updater_ui_const.h"
 
 namespace Updater {
@@ -111,9 +112,10 @@ bool FbdevDriver::Init()
 
 void FbdevDriver::Flip(const uint8_t *buf)
 {
-    if (fd_ < 0 || memcpy_s(buff_.vaddr, buff_.size, buf, buff_.size) != EOK) {
+    if (fd_ < 0) {
         return;
     }
+    UiRotation::GetInstance().RotateBuffer(buf, static_cast<uint8_t *>(buff_.vaddr), buff_.size);
     if (ioctl(fd_, FBIOPAN_DISPLAY, &vinfo_) < 0) {
         LOG(ERROR) << "failed to display fb0!";
     }
