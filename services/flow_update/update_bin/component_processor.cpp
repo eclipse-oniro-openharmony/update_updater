@@ -31,10 +31,10 @@ using namespace Hpackage;
 using namespace Uscript;
 
 namespace Updater {
-REGISTER_PROCESSOR(VersionCheckProcessor, "/version_list")
-REGISTER_PROCESSOR(BoardIdCheckProcessor, "/board_list")
-REGISTER_PROCESSOR(RawImgProcessor, "/uboot", "/boot_linux", "/ramdisk",
-                   "/system", "/vendor", "/resource", "/updater", "/userdata")
+REGISTER_PROCESSOR(VersionCheckProcessor, "version_list")
+REGISTER_PROCESSOR(BoardIdCheckProcessor, "board_list")
+REGISTER_PROCESSOR(RawImgProcessor, "uboot", "boot_linux", "ramdisk",
+                   "system", "vendor", "resource", "updater", "userdata")
 
 ComponentProcessorFactory &ComponentProcessorFactory::GetInstance()
 {
@@ -56,10 +56,11 @@ std::unique_ptr<ComponentProcessor> ComponentProcessorFactory::GetProcessor(cons
 {
     std::string partitionName = name;
     std::transform(partitionName.begin(), partitionName.end(), partitionName.begin(), ::tolower);
+    partitionName.erase(std::remove(partitionName.begin(), partitionName.end(), '/'), partitionName.end());
     auto it = m_constructorMap.find(partitionName);
     if (it == m_constructorMap.end() || it->second == nullptr) {
-        LOG(ERROR) << "GetProcessor for: " << name.c_str() << " fail";
-        return nullptr;
+        LOG(WARNING) << "GetProcessor for: " << name.c_str() << " fail, use default raw write";
+        return std::make_unique<RawImgProcessor>(name, len);
     }
     return (*(it->second))(name, len);
 }
