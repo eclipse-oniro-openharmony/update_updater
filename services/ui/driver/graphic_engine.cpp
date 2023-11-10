@@ -20,6 +20,7 @@
 #include "font/ui_font_header.h"
 #include "log/log.h"
 #include "updater_ui_const.h"
+#include "ui_rotation.h"
 #include "utils.h"
 
 namespace Updater {
@@ -107,7 +108,9 @@ OHOS::BufferInfo *GraphicEngine::GetFBBufferInfo()
         LOG(ERROR) << "input error, width: " << width_ << ", height: " << height_;
         return nullptr;
     }
-
+    UiRotation::GetInstance().InitRotation(width_, height_, pixelBytes);
+    width_ = UiRotation::GetInstance().GetWidth();
+    height_ = UiRotation::GetInstance().GetHeight();
     virAddr_ = std::make_unique<uint8_t[]>(width_ * height_ * pixelBytes);
     buffInfo_ = std::make_unique<OHOS::BufferInfo>();
     buffInfo_->rect = { 0, 0, static_cast<int16_t>(width_ - 1), static_cast<int16_t>(height_ - 1) };
@@ -128,7 +131,8 @@ void GraphicEngine::Flush(const OHOS::Rect& flushRect)
         LOG(ERROR) << "null error";
         return;
     }
-
+    std::lock_guard<std::mutex> lock {mtx_};
+    UiRotation::GetInstance().SetFlushRange(flushRect);
     sfDev_->Flip(reinterpret_cast<uint8_t *>(buffInfo_->virAddr));
 }
 
