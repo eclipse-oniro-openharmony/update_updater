@@ -63,7 +63,10 @@ public:
 
     void UpdateProgress(size_t writeSize)
     {
-        SetUpdateProgress(static_cast<float>(writeSize) / pkgFileSize_ * proportion_);
+        if (pkgFileSize_ != 0) {
+            readOffset_ += size;
+            SetUpdateProgress(static_cast<float>(writeSize) / pkgFileSize_ * proportion_);
+        }
     }
 protected:
     std::string name_;
