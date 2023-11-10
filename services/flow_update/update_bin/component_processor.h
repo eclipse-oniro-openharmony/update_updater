@@ -64,7 +64,7 @@ public:
     void UpdateProgress(size_t writeSize)
     {
         if (pkgFileSize_ != 0) {
-            readOffset_ += size;
+            readOffset_ += writeSize;
             SetUpdateProgress(static_cast<float>(writeSize) / pkgFileSize_ * proportion_);
         }
     }
