@@ -180,7 +180,7 @@ Language LanguageUI::ParseLanguage() const
     if (strcmp(para.language, "") == 0) {
         LOG(INFO) << "Language in misc is empty";
         return Language::CHINESE;
-    }else if (strncmp(para.language, CHINSES_LANGUAGE_PREFIX, strlen(CHINSES_LANGUAGE_PREFIX)) == 0) {
+    } else if (strncmp(para.language, CHINSES_LANGUAGE_PREFIX, strlen(CHINSES_LANGUAGE_PREFIX)) == 0) {
         return Language::CHINESE;
     } else if (strncmp(para.language, ENGLISH_LANGUAGE_PREFIX, strlen(ENGLISH_LANGUAGE_PREFIX)) == 0) {
         return Language::ENGLISH;
