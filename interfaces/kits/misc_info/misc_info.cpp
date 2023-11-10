@@ -126,7 +126,8 @@ bool WriteUpdaterParaMisc(const UpdaterPara &para)
     }
 
     if (lseek(fileno(fp), MISC_UPDATER_PARA_OFFSET, SEEK_SET) == -1) {
-        LOG(INFO) << "lseek fp failed";
+        LOG(ERROR) << "lseek fp failed";
+        fclose(fp);
         return false;
     }
     size_t ret = fwrite(&para, sizeof(UpdaterPara), 1, fp);
@@ -161,7 +162,8 @@ bool ReadUpdaterParaMisc(UpdaterPara &para)
     }
 
     if (lseek(fileno(fp), MISC_UPDATER_PARA_OFFSET, SEEK_SET) == -1) {
-        LOG(INFO) << "lseek fp failed";
+        LOG(ERROR) << "lseek fp failed";
+        fclose(fp);
         return false;
     }
     size_t ret = fread(&para, sizeof(UpdaterPara), 1, fp);
