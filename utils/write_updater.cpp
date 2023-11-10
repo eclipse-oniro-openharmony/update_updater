@@ -17,6 +17,7 @@
 #include "misc_info/misc_info.h"
 #include "securec.h"
 #include "updater/updater_const.h"
+#include "parameter.h"
 
 using namespace std;
 using namespace Updater;
@@ -28,7 +29,7 @@ static void PrintPrompts()
     cout << "factory_reset :  write_updater user_factory_reset" << endl;
     cout << "sdcard_update :  write_updater sdcard_update" << endl;
     cout << "clear command :  write_updater clear" << endl;
-    cout << "updater_para  : write_updater updater_para zh-Hans" << endl;
+    cout << "updater_para  : write_updater updater_para" << endl;
 }
 
 static int ExceptionUpdater(int argc, char **argv, UpdateMessage &boot)
@@ -47,14 +48,15 @@ static int ExceptionUpdater(int argc, char **argv, UpdateMessage &boot)
     return 0;
 }
 
-static int ExceptionWriteUpdaterPara(int argc, char **argv, UpdaterPara &para)
+static int WriteUpdaterPara(int argc, UpdaterPara &para)
 {
-    if (argc != 3) { // 3 : Less than 3 is an invalid input
+    if (argc != 2) { // 2 : Not 2 is an invalid input
         cout << "please input correct updater command!" << endl;
         return -1;
     }
-    if (strncpy_s(para.language, sizeof(para.language), argv[2], sizeof(para.language) -1) != 0) { // 2 : argv 2
-        cout << "strncpy_s failed!" << endl;
+    int res = GetParameter("persist.global.language", "", para.language, MAX_PARA_SIZE);
+    if (res <= 0) {
+        cout << "Get language parameter failed" << endl;
         return -1;
     }
     if (!WriteUpdaterParaMisc(para)) {
@@ -96,7 +98,7 @@ int main(int argc, char **argv)
             return -1;
         }
     } else if (strcmp(argv[1], "updater_para") == 0) {
-        if (ExceptionWriteUpdaterPara(argc, argv, para) == -1) {
+        if (WriteUpdaterPara(argc, para) != 0) {
             return -1;
         }
         return 0;
