@@ -112,7 +112,7 @@ HWTEST_F(UpdaterUiLangUnitTest, testParseLanguage, TestSize.Level0)
     langRes.res = std::vector<Res> {{"invalidPath", 0}};
     // set langRes.localeFile
     EXPECT_EQ(LanguageUI::GetInstance().LoadLangRes(JsonNode {GetTestJson(langRes)}), false);
-    EXPECT_EQ(LanguageUI::GetInstance().ParseLanguage(), Language::CHINESE);
+    EXPECT_EQ(LanguageUI::GetInstance().ParseLanguage(), Language::ENGLISH);
 
     EXPECT_EQ(OHOS::SaveStringToFile(LOCALE_FILE, "en"), true);
     EXPECT_EQ(LanguageUI::GetInstance().ParseLanguage(), Language::ENGLISH);
@@ -124,7 +124,7 @@ HWTEST_F(UpdaterUiLangUnitTest, testParseLanguage, TestSize.Level0)
     EXPECT_EQ(LanguageUI::GetInstance().ParseLanguage(), Language::SPANISH);
 
     EXPECT_EQ(OHOS::SaveStringToFile(LOCALE_FILE, "invalid"), true);
-    EXPECT_EQ(LanguageUI::GetInstance().ParseLanguage(), Language::CHINESE);
+    EXPECT_EQ(LanguageUI::GetInstance().ParseLanguage(), Language::ENGLISH);
 }
 
 HWTEST_F(UpdaterUiLangUnitTest, testInit01, TestSize.Level0)

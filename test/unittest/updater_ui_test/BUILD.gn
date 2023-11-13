@@ -87,6 +87,7 @@ ohos_unittest("ui_unittest") {
     "${updater_path}/test/unittest/updater_ui_test",
   ]
   deps = [
+    "${updater_path}/interfaces/kits/misc_info:libmiscinfo",
     "${updater_path}/interfaces/kits/packages:libpackageExt",
     "${updater_path}/services/log:libupdaterlog",
     "${updater_path}/utils:libutils",

@@ -570,6 +570,7 @@ UpdaterStatus DoUpdaterEntry(UpdaterParams &upParams)
             UPDATER_UI_INSTANCE.ShowSuccessPage();
             UPDATER_UI_INSTANCE.ShowLogRes(TR(LOGRES_WIPE_FINISH));
             PostUpdater(true);
+            ClearUpdaterParaMisc();
             std::this_thread::sleep_for(std::chrono::milliseconds(UI_SHOW_DURATION));
         }
     }
