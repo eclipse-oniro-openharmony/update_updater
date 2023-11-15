@@ -228,7 +228,7 @@ public:
         TestPkgManager packageManager;
         auto env = std::make_unique<FuzzTestScriptEnv>(&packageManager);
         HashDataVerifier verifier {&packageManager};
-        verifier.LoadHashDataAndPkcs7(FUZZ_TEST_PATH_FROM + "updater_fake_pkg.zip");
+        verifier.LoadHashDataAndPkcs7(FUZZ_TEST_PATH_FROM + "updater_fake_pkg_fuzz.zip");
         ScriptManager *manager = ScriptManager::GetScriptManager(env.get(), &verifier);
         if (manager == nullptr) {
             USCRIPT_LOGI("create manager fail ret:%d", ret);
