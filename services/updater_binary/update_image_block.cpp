@@ -460,6 +460,7 @@ int32_t UScriptInstructionBlockCheck::Execute(Uscript::UScriptEnv &env, Uscript:
             ctime(&mountTime) << std::endl;
         std::string message = ostr.str();
         env.PostMessage("ui_log", message);
+        LOG(ERROR) << message;
     }
     LOG(INFO) << "UScriptInstructionBlockCheck::Execute Success";
     context.PushParam(USCRIPT_SUCCESS);
