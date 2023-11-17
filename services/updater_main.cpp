@@ -623,7 +623,9 @@ std::unordered_map<std::string, std::function<void ()>> InitOptionsFuncTab(char*
         }},
         {"force_update_action", [&]() -> void
         {
-            upParams.forceUpdate = true;
+            if (std::string(optarg) == POWEROFF) {
+                upParams.forceUpdate = true;
+            }
         }},
         {"night_update", [&]() -> void
         {
