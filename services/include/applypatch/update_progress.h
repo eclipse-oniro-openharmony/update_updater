@@ -17,6 +17,8 @@
 #include "script_instruction.h"
 namespace Updater {
 
+void FillUpdateProgress();
+
 void SetUpdateProgress(float step);
 
 float GetUpdateProress();

@@ -21,6 +21,11 @@
 namespace Updater {
 static std::atomic<float> g_totalProgress(0.0f);
 static bool g_progressExitFlag = false;
+void FillUpdateProgress()
+{
+    g_totalProgress.store(1.0f);
+}
+
 void SetUpdateProgress(float step)
 {
     float totalProgress = g_totalProgress.load();
