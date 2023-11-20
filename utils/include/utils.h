@@ -86,6 +86,7 @@ void SetMessageToMisc(const std::string &miscCmd, const int message, const std::
 bool CheckFaultInfo(const std::string &faultInfo);
 void SetCmdToMisc(const std::string &miscCmd);
 void AddUpdateInfoToMisc(const std::string headInfo, const std::optional<int> message);
+void RemoveUpdateInfoFromMisc(const std::string &headInfo);
 void SetFaultInfoToMisc(const std::string &faultInfo);
 #ifndef __WIN32
 void SetFileAttributes(const std::string& file, uid_t owner, gid_t group, mode_t mode);
