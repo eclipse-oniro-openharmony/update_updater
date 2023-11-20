@@ -100,6 +100,9 @@ bool TransferManager::CommandsParser(int fd, const std::vector<std::string> &con
             UpdateProgress(initBlock, totalSize);
         }
     }
+    if (fabs(Uscript::GetScriptProportion() - 1.0f) < 1e-6) {
+        FillUpdateProgress();
+    }
     return true;
 }
 
