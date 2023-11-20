@@ -16,6 +16,7 @@
 #define UPDATE_PROGRESS_H
 #include "script_instruction.h"
 namespace Updater {
+void FillUpdateProgress();
 
 void SetUpdateProgress(float step);
 

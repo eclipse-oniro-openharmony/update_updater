@@ -22,6 +22,11 @@
 namespace Updater {
 static std::atomic<float> g_totalProgress(0.0f);
 static bool g_progressExitFlag = false;
+void FillUpdateProgress()
+{
+    g_totalProgress.store(1.0f);
+}
+
 void SetUpdateProgress(float step)
 {
     float totalProgress = g_totalProgress.load();
@@ -64,7 +69,7 @@ static void *OtaUpdateProgressThread(Uscript::UScriptEnv *env)
 
 int CreateProgressThread(Uscript::UScriptEnv *env)
 {
-    std::string content = std::to_string(1.0f) + "," + std::to_string(0.0f); // set g_percentage
+    std::string content = std::to_string(1.0f) + "," + std::to_string(0.0f); // set g_percentage 100
     env->PostMessage("show_progress", content);
     std::thread progressThread(OtaUpdateProgressThread, env);
     progressThread.detach();
