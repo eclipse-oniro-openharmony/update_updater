@@ -166,6 +166,7 @@ DEFINE_ASYN_CALLBACK(OnConfirmRstEvt)
     GetFacade().ShowProgressPage();
     DoProgress();
     if (FactoryReset(USER_WIPE_DATA, "/data") != 0) {
+        Utils::RemoveUpdateInfoFromMisc("user_wipe_data");
         GetFacade().ShowLogRes(TR(LOG_WIPE_FAIL));
         GetFacade().ShowFailedPage();
     } else {
