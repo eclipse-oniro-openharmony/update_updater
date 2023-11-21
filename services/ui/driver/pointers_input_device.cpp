@@ -16,6 +16,7 @@
 #include <unistd.h>
 #include "log/log.h"
 #include "common/input_device_manager.h"
+#include "ui_rotation.h"
 
 namespace Updater {
 void AddInputDevice()
@@ -42,8 +43,9 @@ bool PointersInputDevice::Read(OHOS::DeviceData& data)
 
 bool PointersInputDevice::ReadPoint(OHOS::DeviceData& data, OHOS::Point pos, bool fingerPressDown)
 {
-    data.point.x = pos.x;
-    data.point.y = pos.y;
+    auto [x, y] = UiRotation::GetInstance().RotateXY(pos.x, pos.y);
+    data.point.x = x;
+    data.point.y = y;
     data.state = fingerPressDown ? OHOS::InputDevice::STATE_PRESS : OHOS::InputDevice::STATE_RELEASE;
     return false;
 }

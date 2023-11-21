@@ -2,19 +2,19 @@
     "LABEL_UPDATE_FROM_SDCARD": {
         "type": "UIString",
         "zh":"SD卡升级",
-        "en":"",
+        "en":"Update via SD card",
         "spa":""
     },
     "LABEL_REBOOT_DEVICE": {
         "type": "UIString",
         "zh":"重启设备",
-        "en":"",
+        "en":"Restart",
         "spa":""
     },
     "LABEL_USER_DATA_RESET": {
         "type": "UIString",
         "zh":"恢复出厂设置",
-        "en":"",
+        "en":"Factory reset",
         "spa":""
     },
     "LABEL_CLEAR_CACHE": {
@@ -26,7 +26,7 @@
     "LABEL_REBOOT": {
         "type": "UIString",
         "zh":"重新启动",
-        "en":"",
+        "en":"Restart",
         "spa":""
     },
     "LABEL_SAFE_MODE": {
@@ -38,13 +38,13 @@
     "LABEL_SHUTDOWN": {
         "type": "UIString",
         "zh":"关机",
-        "en":"",
+        "en":"Power off",
         "spa":""
     },
     "LABEL_MENU_TITLE" : {
         "type": "UIString",
         "zh":"系统恢复",
-        "en":"",
+        "en":"System recovery",
         "spa":""
     },
     "LABEL_MENU_USAGE" : {
@@ -62,49 +62,49 @@
     "LABEL_RESET_CONFIRM_TITLE" : {
         "type": "UIString",
         "zh":"重要提醒",
-        "en":"",
+        "en":"Important",
         "spa":""
     },
     "LABEL_UPD_FAIL_TIP": {
         "type": "UIString",
         "zh":"升级失败",
-        "en":"",
+        "en":"Software install failed",
         "spa":""
     },
     "LABEL_UPD_OK_REBOOT" : {
         "type": "UIString",
         "zh":"设备将自动重启",
-        "en":"",
+        "en":"The device will restart",
         "spa":""
     },
     "LABEL_UPD_OK_SHUTDOWN" : {
         "type": "UIString",
         "zh":"设备将自动关机",
-        "en":"",
+        "en":"The device will poweroff",
         "spa":""
     },
     "LABEL_UPD_FAIL_REBOOT" : {
         "type": "UIString",
         "zh":"重启设备",
-        "en":"",
+        "en":"Restart",
         "spa":""
     },
     "LABEL_UPD_SDCARD_INFO" : {
         "type": "UIString",
         "zh":"SD卡升级 请勿重启",
-        "en":"",
+        "en":"Updating via SD card. Do not restart the device",
         "spa":""
     },
     "LABEL_RESET_PROGRESS_INFO" : {
         "type": "UIString",
         "zh":"工厂级恢复出厂设置...",
-        "en":"",
+        "en":"Factory reset...",
         "spa":""
     },
     "LABEL_NOTE_CANCEL" : {
         "type": "UIString",
         "zh":"取消",
-        "en":"",
+        "en":"Go back",
         "spa":""
     },
     "LABEL_UPD_OK_DONE" : {
@@ -116,25 +116,25 @@
     "LABEL_UPD_INFO" : {
         "type": "UIString",
         "zh":"正在更新 请勿重启",
-        "en":"",
+        "en":"Updating...Please don't restart",
         "spa":""
     },
     "LOGRES_VERIFY_FAILED" : {
         "type": "UIString",
         "zh":"校验失败",
-        "en":"",
+        "en":"Verification failed",
         "spa":""
     },
     "LOGRES_UPDATE_FAILED" : {
         "type": "UIString",
         "zh":"升级失败",
-        "en":"",
+        "en":"Software install failed",
         "spa":""
     },
     "LOGRES_WIPE_FINISH" : {
         "type": "UIString",
         "zh":"恢复出厂设置成功!",
-        "en":"",
+        "en":"Reset successful!",
         "spa":""
     },
     "LOG_CLEAR_CAHCE" : {
@@ -146,19 +146,19 @@
     "LOG_WIPE_FAIL" : {
         "type": "UIString",
         "zh":"恢复出厂设置失败",
-        "en":"",
+        "en":"Reset failed",
         "spa":""
     },
     "LABEL_RETURN_TO_MAIN" : {
         "type": "UIString",
         "zh":"返回主界面",
-        "en":"",
+        "en":"Back to main screen",
         "spa":""
     },
     "DEFAULT_STRING" : {
         "type": "UIString",
         "zh":"*",
-        "en":"",
+        "en":"*",
         "spa":""
     }
 }

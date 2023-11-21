@@ -53,6 +53,7 @@ ohos_static_library("libui") {
     "driver/keys_input_device.cpp",
     "driver/pointers_input_device.cpp",
     "driver/surface_dev.cpp",
+    "driver/ui_rotation.cpp",
     "language/language_ui.cpp",
     "strategy/logo_strategy.cpp",
     "strategy/progress_strategy.cpp",

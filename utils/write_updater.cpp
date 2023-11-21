@@ -17,6 +17,7 @@
 #include "misc_info/misc_info.h"
 #include "securec.h"
 #include "updater/updater_const.h"
+#include "parameter.h"
 
 using namespace std;
 using namespace Updater;
@@ -28,6 +29,41 @@ static void PrintPrompts()
     cout << "factory_reset :  write_updater user_factory_reset" << endl;
     cout << "sdcard_update :  write_updater sdcard_update" << endl;
     cout << "clear command :  write_updater clear" << endl;
+    cout << "updater_para  : write_updater updater_para" << endl;
+}
+
+static int ExceptionUpdater(int argc, char **argv, UpdateMessage &boot)
+{
+    if (argc < BINARY_MAX_ARGS) {
+        cout << "Please input correct updater command!" << endl;
+        return -1;
+    }
+    if (argv[WRITE_SECOND_CMD] != nullptr) {
+        if (snprintf_s(boot.update, sizeof(boot.update), sizeof(boot.update) - 1, "--update_package=%s",
+            argv[WRITE_SECOND_CMD]) == -1) {
+            cout << "WriteUpdaterMessage snprintf_s failed!" << endl;
+            return -1;
+        }
+    }
+    return 0;
+}
+
+static int WriteUpdaterPara(int argc, UpdaterPara &para)
+{
+    if (argc != 2) { // 2 : Not 2 is an invalid input
+        cout << "please input correct updater command!" << endl;
+        return -1;
+    }
+    int res = GetParameter("persist.global.language", "", para.language, MAX_PARA_SIZE);
+    if (res <= 0) {
+        cout << "Get language parameter failed" << endl;
+        return -1;
+    }
+    if (!WriteUpdaterParaMisc(para)) {
+        cout << "WriteUpdaterParaMisc failed!" << endl;
+        return -1;
+    }
+    return 0;
 }
 
 int main(int argc, char **argv)
@@ -39,17 +75,10 @@ int main(int argc, char **argv)
 
     const std::string miscFile = "/dev/block/by-name/misc";
     struct UpdateMessage boot {};
+    struct UpdaterPara para {};
     if (strcmp(argv[1], "updater") == 0) {
-        if (argc < BINARY_MAX_ARGS) {
-            cout << "Please input correct updater command!" << endl;
+        if (ExceptionUpdater(argc, argv, boot) == -1) {
             return -1;
-        }
-        if (argv[WRITE_SECOND_CMD] != nullptr) {
-            if (snprintf_s(boot.update, sizeof(boot.update), sizeof(boot.update) - 1, "--update_package=%s",
-                argv[WRITE_SECOND_CMD]) == -1) {
-                cout << "WriteUpdaterMessage snprintf_s failed!" << endl;
-                return -1;
-            }
         }
     } else if (strcmp(argv[1], "user_factory_reset") == 0) {
         if (strncpy_s(boot.update, sizeof(boot.update), "--user_wipe_data", sizeof(boot.update) - 1) != 0) {
@@ -68,6 +97,11 @@ int main(int argc, char **argv)
             cout << "strncpy_s failed!" << endl;
             return -1;
         }
+    } else if (strcmp(argv[1], "updater_para") == 0) {
+        if (WriteUpdaterPara(argc, para) != 0) {
+            return -1;
+        }
+        return 0;
     } else {
         cout << "Please input correct command!" << endl;
         return -1;

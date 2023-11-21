@@ -17,6 +17,7 @@
 #include "json_node.h"
 #include "log/log.h"
 #include "utils.h"
+#include "misc_info/misc_info.h"
 
 namespace Updater {
 namespace Lang {
@@ -166,7 +167,25 @@ bool LanguageUI::LoadLangRes(const JsonNode &node)
 
 Language LanguageUI::ParseLanguage() const
 {
-    constexpr Language DEFAULT_LOCALE = Language::CHINESE;
+    constexpr Language DEFAULT_LOCALE = Language::ENGLISH;
+#ifndef UPDATER_UT
+    //read language type(en-Latn-US/zh-Hans) from misc
+    constexpr const char *CHINSES_LANGUAGE_PREFIX = "zh";
+    constexpr const char *ENGLISH_LANGUAGE_PREFIX = "en";
+    struct UpdaterPara para {};
+    if (!ReadUpdaterParaMisc(para)) {
+        LOG(ERROR) << "ReadUpdaterParaMisc failed";
+        return DEFAULT_LOCALE;
+    }
+    if (strcmp(para.language, "") == 0) {
+        LOG(INFO) << "Language in misc is empty";
+        return Language::CHINESE;
+    } else if (strncmp(para.language, CHINSES_LANGUAGE_PREFIX, strlen(CHINSES_LANGUAGE_PREFIX)) == 0) {
+        return Language::CHINESE;
+    } else if (strncmp(para.language, ENGLISH_LANGUAGE_PREFIX, strlen(ENGLISH_LANGUAGE_PREFIX)) == 0) {
+        return Language::ENGLISH;
+    }
+#endif
     constexpr size_t localeLen = 2; // zh|es|en
     std::string realPath {};
     if (!Utils::PathToRealPath(langRes_.localeFile, realPath)) {
@@ -182,6 +201,11 @@ Language LanguageUI::ParseLanguage() const
     }
     LOG(ERROR) << "locale " << locale << " not recognized";
     return DEFAULT_LOCALE;
+}
+
+Language LanguageUI::GetCurLanguage() const
+{
+    return language_;
 }
 }
 } // namespace Updater
