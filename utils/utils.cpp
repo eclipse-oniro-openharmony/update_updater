@@ -78,7 +78,7 @@ void UpdateInfoInMisc(const std::string headInfo, const std::optional<int> messa
     char buffer[128] {}; // 128 : set headInfo size
     if (isRemove) {
         LOG(INFO) << "remove --" << headInfo << " from misc";
-    } else if(!message.has_value()) {
+    } else if (!message.has_value()) {
         if (snprintf_s(buffer, sizeof(buffer), sizeof(buffer) - 1, "--%s", headInfo.c_str()) == -1) {
             LOG(ERROR) << "SetMessageToMisc snprintf_s failed";
             return;
