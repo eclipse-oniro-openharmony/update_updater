@@ -161,16 +161,18 @@ DEFINE_ASYN_CALLBACK(OnConfirmRstEvt)
     if (!GetFacade().SetMode(UPDATERMODE_FACTORYRST)) {
         return;
     }
+    Utils::AddUpdateInfoToMisc("user_wipe_data", std::nullopt);
     GetFacade().ShowUpdInfo(TR(LABEL_RESET_PROGRESS_INFO));
     GetFacade().ShowProgressPage();
     DoProgress();
     if (FactoryReset(USER_WIPE_DATA, "/data") != 0) {
+        Utils::RemoveUpdateInfoFromMisc("user_wipe_data");
         GetFacade().ShowLogRes(TR(LOG_WIPE_FAIL));
         GetFacade().ShowFailedPage();
     } else {
         GetFacade().ShowSuccessPage();
-        Utils::UsSleep(SUCCESS_DELAY);
         PostUpdater(true);
+        Utils::UsSleep(SUCCESS_DELAY);
         Utils::UpdaterDoReboot("");
     }
 }

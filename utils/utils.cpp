@@ -49,6 +49,57 @@ constexpr int NANOSECS_PER_USECONDS = 1000; // 1us = 1000ns
 constexpr int MAX_TIME_SIZE = 20;
 constexpr const char *PREFIX_PARTITION_NODE = "/dev/block/by-name/";
 
+namespace {
+void UpdateInfoInMisc(const std::string headInfo, const std::optional<int> message, bool isRemove)
+{
+    if (headInfo.empty()) {
+        return;
+    }
+    std::vector<std::string> args = Utils::ParseParams(0, nullptr);
+    struct UpdateMessage msg {};
+    if (!ReadUpdaterMiscMsg(msg)) {
+        LOG(ERROR) << "SetMessageToMisc read misc failed";
+        return;
+    }
+
+    (void)memset_s(msg.update, sizeof(msg.update), 0, sizeof(msg.update));
+    for (const auto& arg : args) {
+        if (arg.find(headInfo) == std::string::npos) {
+            if (strncat_s(msg.update, sizeof(msg.update), arg.c_str(), strlen(arg.c_str()) + 1) != EOK) {
+                LOG(ERROR) << "SetMessageToMisc strncat_s failed";
+                return;
+            }
+            if (strncat_s(msg.update, sizeof(msg.update), "\n", strlen("\n") + 1) != EOK) {
+                LOG(ERROR) << "SetMessageToMisc strncat_s failed";
+                return;
+            }
+        }
+    }
+    char buffer[128] {}; // 128 : set headInfo size
+    if (isRemove) {
+        LOG(INFO) << "remove --" << headInfo << " from misc";
+    } else if (!message.has_value()) {
+        if (snprintf_s(buffer, sizeof(buffer), sizeof(buffer) - 1, "--%s", headInfo.c_str()) == -1) {
+            LOG(ERROR) << "SetMessageToMisc snprintf_s failed";
+            return;
+        }
+    } else {
+        if (snprintf_s(buffer, sizeof(buffer), sizeof(buffer) - 1, "--%s=%d",
+            headInfo.c_str(), message.value()) == -1) {
+            LOG(ERROR) << "SetMessageToMisc snprintf_s failed";
+            return;
+        }
+    }
+    if (strncat_s(msg.update, sizeof(msg.update), buffer, strlen(buffer) + 1) != EOK) {
+        LOG(ERROR) << "SetMessageToMisc strncat_s failed";
+        return;
+    }
+    if (WriteUpdaterMiscMsg(msg) != true) {
+        LOG(ERROR) << "Write command to misc failed.";
+    }
+}
+} // namespace
+
 void SaveLogs()
 {
     std::string updaterLogPath = std::string(UPDATER_LOG);
@@ -853,49 +904,12 @@ void SetCmdToMisc(const std::string &miscCmd)
 
 void AddUpdateInfoToMisc(const std::string headInfo, const std::optional<int> message)
 {
-    if (headInfo.empty()) {
-        return;
-    }
-    std::vector<std::string> args = ParseParams(0, nullptr);
-    struct UpdateMessage msg {};
-    if (!ReadUpdaterMiscMsg(msg)) {
-        LOG(ERROR) << "SetMessageToMisc read misc failed";
-        return;
-    }
+    UpdateInfoInMisc(headInfo, message, false);
+}
 
-    (void)memset_s(msg.update, sizeof(msg.update), 0, sizeof(msg.update));
-    for (const auto& arg : args) {
-        if (arg.find(headInfo) == std::string::npos) {
-            if (strncat_s(msg.update, sizeof(msg.update), arg.c_str(), strlen(arg.c_str()) + 1) != EOK) {
-                LOG(ERROR) << "SetMessageToMisc strncat_s failed";
-                return;
-            }
-            if (strncat_s(msg.update, sizeof(msg.update), "\n", strlen("\n") + 1) != EOK) {
-                LOG(ERROR) << "SetMessageToMisc strncat_s failed";
-                return;
-            }
-        }
-    }
-    char buffer[128] {}; // 128 : set headInfo size
-    if (!message.has_value()) {
-        if (snprintf_s(buffer, sizeof(buffer), sizeof(buffer) - 1, "--%s", headInfo.c_str()) == -1) {
-            LOG(ERROR) << "SetMessageToMisc snprintf_s failed";
-            return;
-        }
-    } else {
-        if (snprintf_s(buffer, sizeof(buffer), sizeof(buffer) - 1, "--%s=%d",
-            headInfo.c_str(), message.value()) == -1) {
-            LOG(ERROR) << "SetMessageToMisc snprintf_s failed";
-            return;
-        }
-    }
-    if (strncat_s(msg.update, sizeof(msg.update), buffer, strlen(buffer) + 1) != EOK) {
-        LOG(ERROR) << "SetMessageToMisc strncat_s failed";
-        return;
-    }
-    if (WriteUpdaterMiscMsg(msg) != true) {
-        LOG(ERROR) << "Write command to misc failed.";
-    }
+void RemoveUpdateInfoFromMisc(const std::string &headInfo)
+{
+    UpdateInfoInMisc(headInfo, std::nullopt, true);
 }
 
 void SetFaultInfoToMisc(const std::string &faultInfo)
