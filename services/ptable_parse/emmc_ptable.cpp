@@ -129,8 +129,12 @@ bool EmmcPtable::ParseGptHeaderByEmmc(uint8_t *gptImage, const uint32_t len)
         LOG(ERROR) << "GetPartitionGptHeaderInfo fail";
         return false;
     }
+#ifndef UPDATER_UT
     uint64_t deviceSize = GetDeviceCapacity();
     uint32_t lbaNum = deviceSize / MIN_EMMC_WRITE_SIZE;
+#else
+    uint32_t lbaNum = 0xFFFFFFFF; // init to maximum
+#endif
     return PartitionCheckGptHeader(gptImage, len, lbaNum, blockSize, gptHeaderInfo);
 }
 
@@ -200,7 +204,7 @@ bool EmmcPtable::UpdateCommInitializeGptPartition(uint8_t *gptImage, const uint3
         return false;
     }
     emmcPtnDataInfo_.writeDataLen = len;
-    if (!ParseGptHeaderByEmmc(gptImage, len)) {
+    if (!ParseGptHeaderByEmmc(emmcPtnDataInfo_.data, len)) {
         LOG(ERROR) << "Primary signature invalid";
         return false;
     }
@@ -212,7 +216,11 @@ bool EmmcPtable::UpdateCommInitializeGptPartition(uint8_t *gptImage, const uint3
 
 bool EmmcPtable::ReadEmmcGptImageToRam()
 {
+#ifndef UPDATER_UT
     std::string emmcNode = std::string(MMC_BLOCK_DEV_NAME);
+#else
+    std::string emmcNode = "/data/updater_ext/ptable_parse/ptable.img";
+#endif
     int32_t imgLen = GPT_PARTITION_SIZE;
     auto buf = std::make_unique<uint8_t[]>(imgLen);
     uint8_t *buffer = buf.get();
@@ -226,6 +234,9 @@ bool EmmcPtable::ReadEmmcGptImageToRam()
         return false;
     }
 
+#ifdef UPDATER_UT
+    deviceBlockSize = ptableData_.lbaLen;
+#endif
     uint8_t *gptHeaderStart = buffer + deviceBlockSize; // if image imgBlockSize, if device deviceBlockSize
     if (!CheckProtectiveMbr(buffer, deviceBlockSize) || !CheckIfValidGpt(gptHeaderStart, deviceBlockSize)) {
         LOG(ERROR) << "check mbr or header fail";
