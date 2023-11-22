@@ -55,7 +55,7 @@ void UpdateInfoInMisc(const std::string headInfo, const std::optional<int> messa
     if (headInfo.empty()) {
         return;
     }
-    std::vector<std::string> args = ParseParams(0, nullptr);
+    std::vector<std::string> args = Utils::ParseParams(0, nullptr);
     struct UpdateMessage msg {};
     if (!ReadUpdaterMiscMsg(msg)) {
         LOG(ERROR) << "SetMessageToMisc read misc failed";
