@@ -55,6 +55,7 @@ HWTEST_F(CommandsUnitTest, command_test_001, TestSize.Level0)
     std::string blockInfo = "2,20755,21031 276 2,20306,20582";
     std::string cmdLine = std::string("move ") + hashValue + " " + blockInfo;
     std::unique_ptr<TransferParams> transferParams = std::make_unique<TransferParams>();
+    transferParams->writerThreadInfo = std::make_unique<WriterThreadInfo>();
     Command *cmd = new Command(transferParams.get());
     cmd->Init(cmdLine);
     auto type = cmd->GetCommandType();
@@ -72,6 +73,7 @@ HWTEST_F(CommandsUnitTest, command_test_002, TestSize.Level0)
     std::string blockInfo = "2,20755,21031 276 2,20306,20582";
     std::string cmdLine = std::string("move ") + hashValue + " " + blockInfo;
     std::unique_ptr<TransferParams> transferParams = std::make_unique<TransferParams>();
+    transferParams->writerThreadInfo = std::make_unique<WriterThreadInfo>();
     Command *cmd = new Command(transferParams.get());
     EXPECT_EQ(cmd->Init(cmdLine), true);
     cmdLine = "abort";

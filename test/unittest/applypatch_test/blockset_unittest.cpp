@@ -121,6 +121,7 @@ HWTEST_F(BlockSetUnitTest, blockset_test_005, TestSize.Level1)
         return;
     }
     std::unique_ptr<TransferParams> transferParams = std::make_unique<TransferParams>();
+    transferParams->writerThreadInfo = std::make_unique<WriterThreadInfo>();
     Command *cmd = new Command(transferParams.get());
     cmd->Init(cmdLine);
     cmd->SetFileDescriptor(fd);
