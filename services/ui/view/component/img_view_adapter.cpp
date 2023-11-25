@@ -113,7 +113,7 @@ void ImgViewAdapter::GetRealImgPath()
     }
     const static std::unordered_map<Language, std::string> postFixMap {
         {Language::CHINESE, "chn"},
-        {Language::CHINESE, "eng"},
+        {Language::ENGLISH, "eng"},
         {Language::SPANISH, "esp"},
     };
     auto iter = postFixMap.find(LanguageUI::GetInstance().GetCurLanguage());
