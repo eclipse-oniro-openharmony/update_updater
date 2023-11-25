@@ -52,6 +52,7 @@ public:
 #endif
     static bool IsValid(const UxImageInfo &info);
 private:
+    void GetRealImgPath();
     void ShowNextImage();
     void ThreadCb();
     static bool IsValidForAnimator(const UxImageInfo &info);

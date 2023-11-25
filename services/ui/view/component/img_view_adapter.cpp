@@ -16,6 +16,7 @@
 #include <sstream>
 #include <unistd.h>
 #include "core/render_manager.h"
+#include "language/language_ui.h"
 #include "log/log.h"
 #include "page/view_proxy.h"
 #include "updater/updater_const.h"
@@ -87,6 +88,7 @@ ImgViewAdapter::ImgViewAdapter(const UxViewInfo &info)
     SetViewCommonInfo(info.commonInfo);
     LOG(INFO) << "dir:" << dir_ << ", imgCnt:" << imgCnt_ << ", interval:" << interval_;
     if (interval_ == 0) {
+        GetRealImgPath();
         this->SetSrc(dir_.c_str());
         this->SetResizeMode(OHOS::UIImageView::ImageResizeMode::FILL);
     } else {
@@ -101,6 +103,30 @@ bool ImgViewAdapter::IsValid(const UxImageInfo &info)
         return IsValidForStaticImg(info);
     }
     return IsValidForAnimator(info);
+}
+
+void ImgViewAdapter::GetRealImgPath()
+{
+    using namespace Lang;
+    if (Fs::exists(dir_)) {
+        return;
+    }
+    const static std::unordered_map<Language, std::string> postFixMap {
+        {Language::CHINESE, "chn"},
+        {Language::ENGLISH, "eng"},
+        {Language::SPANISH, "esp"},
+    };
+    auto iter = postFixMap.find(LanguageUI::GetInstance().GetCurLanguage());
+    if (iter == postFixMap.end()) {
+        return;
+    }
+    std::string newPath = dir_ + "_" + iter->second + ".png";
+    if (!Fs::exists(newPath)) {
+        LOG(WARNING) << "newPath not existed " << newPath;
+        return;
+    }
+    dir_ = newPath;
+    return;
 }
 
 bool ImgViewAdapter::IsValidForStaticImg(const UxImageInfo &info)
