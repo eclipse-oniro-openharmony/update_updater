@@ -86,9 +86,9 @@ ImgViewAdapter::ImgViewAdapter(const UxViewInfo &info)
     valid_ = true;
     this->SetAutoEnable(false);
     SetViewCommonInfo(info.commonInfo);
-    GetRealImgPath();
     LOG(INFO) << "dir:" << dir_ << ", imgCnt:" << imgCnt_ << ", interval:" << interval_;
     if (interval_ == 0) {
+        GetRealImgPath();
         this->SetSrc(dir_.c_str());
         this->SetResizeMode(OHOS::UIImageView::ImageResizeMode::FILL);
     } else {
