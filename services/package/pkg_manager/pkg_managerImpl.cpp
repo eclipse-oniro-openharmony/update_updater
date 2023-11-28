@@ -667,7 +667,7 @@ PkgFile::PkgType PkgManagerImpl::GetPkgTypeByName(const std::string &path)
     std::string postfix = path.substr(pos + 1, -1);
     std::transform(postfix.begin(), postfix.end(), postfix.begin(), ::tolower);
 
-    if (path.substr(pos + 1, -1).compare("bin") == 0 && path.find_last_of('_') == std::string::npos) {
+    if (path.compare("update.bin") == 0) {
         return PkgFile::PKG_TYPE_UPGRADE;
     } else if (path.substr(pos + 1, -1).compare("zip") == 0) {
         return PkgFile::PKG_TYPE_ZIP;
