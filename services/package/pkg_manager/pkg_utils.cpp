@@ -93,6 +93,47 @@ std::string GetName(const std::string &filePath)
     return filePath.substr(filePath.find_last_of("/") + 1);
 }
 
+int32_t CreatDirectory(const std::string &path, mode_t mode)
+{
+    size_t slashPos = 0;
+    struct stat info {};
+    while (true) {
+        slashPos = path.find_first_of("/", slashPos);
+        if (slashPos == std::string::npos) {
+            break;
+        }
+        if (slashPos == 0) {
+            slashPos++;
+            continue;
+        }
+        if (slashPos > PATH_MAX) {
+            PKG_LOGE("path too long");
+            return -1;
+        }
+        auto subDir = path.substr(0, slashPos);
+        if (stat(subDir.c_str(), &info) != 0) {
+#ifdef __WIN32
+            int ret = mkdir(subDir.c_str());
+#else
+            int ret = mkdir(subDir.c_str(), mode);
+#endif
+            if (ret && errno != EEXIST) {
+                return ret;
+            }
+        }
+        slashPos++;
+    }
+#ifdef __WIN32
+    int ret = mkdir(path.c_str());
+#else
+    int ret = mkdir(path.c_str(), mode);
+#endif
+    if (ret && errno != EEXIST) {
+        return ret;
+    }
+    return 0;
+}
+
 int32_t CheckFile(const std::string &fileName, int type)
 {
     // Check if the directory of @fileName is exist or has write permission
@@ -102,11 +143,7 @@ int32_t CheckFile(const std::string &fileName, int type)
         return PKG_SUCCESS;
     }
     if (access(path.c_str(), F_OK) == -1) {
-#ifdef __WIN32
-        mkdir(path.c_str());
-#else
-        mkdir(path.c_str(), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
-#endif
+        CreatDirectory(path.c_str(), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
     }
     int ret = -1;
     if (type == PkgStream::PkgStreamType_Read) {
