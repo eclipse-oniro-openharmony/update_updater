@@ -331,7 +331,7 @@ static UpdaterStatus PreUpdatePackages(UpdaterParams &upParams)
     // verify packages first
     if (VerifyPackages(upParams) != UPDATE_SUCCESS) {
         UPDATER_LAST_WORD(UPDATE_CORRUPT);
-        return UPDATE_CORRUPT;
+        return UPDATE_CORRUPT; // verify package failed must return UPDATE_CORRUPT !!!
     }
 
     // Only handle UPATE_ERROR and UPDATE_SUCCESS here.Let package verify handle others.
@@ -479,7 +479,7 @@ UpdaterStatus UpdaterFromSdcard(UpdaterParams &upParams)
     }
 
     if (VerifyPackages(upParams) != UPDATE_SUCCESS) {
-        return UPDATE_CORRUPT;
+        return UPDATE_CORRUPT; // verify package failed must return UPDATE_CORRUPT !!!
     }
 #ifdef UPDATER_USE_PTABLE
     if (!PtablePreProcess::GetInstance().DoPtableProcess(upParams)) {
