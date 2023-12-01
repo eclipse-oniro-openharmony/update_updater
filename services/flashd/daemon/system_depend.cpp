@@ -27,6 +27,8 @@ envirments
 #include "system_depend.h"
 #include "parameter.h"
 #include "utils.h"
+#include "flashd_define.h"
+#include "updater/updater.h"
 
 namespace Hdc {
 namespace SystemDepend {
@@ -50,15 +52,10 @@ namespace SystemDepend {
 
     bool RebootDevice(const string &cmd)
     {
-        const string rebootProperty = "sys.powerctl";
-        string propertyVal;
-        string reason = cmd;
-        if (reason.size() == 0) {
-            propertyVal = "reboot";
-        } else {
-            propertyVal = Base::StringFormat("reboot,%s", reason.c_str());
-        }
-        return SetDevItem(rebootProperty.c_str(), propertyVal.c_str());
+        FLASHD_LOGE("Flashd RebootDevice cmd is %s", cmd.c_str());
+        Updater::PostUpdater(true);
+        Updater::Utils::UpdaterDoReboot("");
+        return true;
     }
 }
 }  // namespace Hdc
