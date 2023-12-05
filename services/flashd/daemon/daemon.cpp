@@ -101,16 +101,8 @@ bool HdcDaemon::RedirectToTask(HTaskInfo hTaskInfo, HSession hSession, const uin
     hTaskInfo->ownerSessionClass = this;
     WRITE_LOG(LOG_DEBUG, "RedirectToTask command %d", command);
     switch (command) {
+#ifndef UPDATER_BUILD_VARIANT_USER
         case CMD_UNITY_EXECUTE:
-        case CMD_UNITY_REMOUNT:
-        case CMD_UNITY_REBOOT:
-        case CMD_UNITY_RUNMODE:
-        case CMD_UNITY_HILOG:
-        case CMD_UNITY_ROOTRUN:
-        case CMD_UNITY_TERMINATE:
-        case CMD_UNITY_BUGREPORT_INIT:
-        case CMD_JDWP_LIST:
-        case CMD_JDWP_TRACK:
             ret = TaskCommandDispatch<HdcDaemonUnity>(hTaskInfo, TYPE_UNITY, command, payload, payloadSize);
             break;
         case CMD_SHELL_INIT:
@@ -123,6 +115,11 @@ bool HdcDaemon::RedirectToTask(HTaskInfo hTaskInfo, HSession hSession, const uin
         case CMD_FILE_INIT:
         case CMD_FILE_BEGIN:
             ret = TaskCommandDispatch<HdcFile>(hTaskInfo, TASK_FILE, command, payload, payloadSize);
+            break;
+#endif
+        case CMD_UNITY_REBOOT:
+        case CMD_UNITY_HILOG:
+            ret = TaskCommandDispatch<HdcDaemonUnity>(hTaskInfo, TYPE_UNITY, command, payload, payloadSize);
             break;
         // One-way function, so fewer options
         case CMD_UPDATER_UPDATE_INIT:
