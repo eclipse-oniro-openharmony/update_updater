@@ -133,6 +133,15 @@ bool HdcDaemon::RedirectToTask(HTaskInfo hTaskInfo, HSession hSession, const uin
         case CMD_UPDATER_PROGRESS:
             ret = TaskCommandDispatch<DaemonUpdater>(hTaskInfo, TASK_UPDATER, command, payload, payloadSize);
             break;
+        case CMD_UNITY_REMOUNT:
+        case CMD_UNITY_RUNMODE:
+        case CMD_UNITY_ROOTRUN:
+        case CMD_UNITY_TERMINATE:
+        case CMD_UNITY_BUGREPORT_INIT:
+        case CMD_JDWP_LIST:
+        case CMD_JDWP_TRACK:
+            ret = TaskCommandDispatch<InvalidDaemon>(hTaskInfo, TASK_FAKE, command, payload, payloadSize);
+            break;
         default:
             break;
     }
