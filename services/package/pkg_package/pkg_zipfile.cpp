@@ -39,6 +39,7 @@ constexpr uint32_t MAX_BUFFER_SIZE = 1024 * 64;
 constexpr uint32_t GPBDD_FLAG_MASK = 0x0008;
 constexpr uint32_t ZIP_PKG_ALIGNMENT_DEF = 1;
 constexpr int32_t DEF_MEM_LEVEL = 8;
+constexpr int32_t Z_STORED = 0;
 
 int32_t ZipPkgFile::AddEntry(const PkgManager::FileInfoPtr file, const PkgStreamPtr inStream)
 {
@@ -680,7 +681,7 @@ int32_t ZipFileEntry::Unpack(PkgStreamPtr outStream)
         case Z_DEFLATED:
             ret = algorithm->Unpack(inStream, outStream, context);
             break;
-        case 0:
+        case Z_STORED:
             ret = Stored(inStream, outStream, context);
             break;
         default:
