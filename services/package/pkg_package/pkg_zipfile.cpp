@@ -34,6 +34,7 @@ constexpr uint32_t LOCAL_HEADER_SIGNATURE = 0x04034b50;
 constexpr uint32_t CENTRAL_SIGNATURE = 0x02014b50;
 constexpr uint32_t END_CENTRAL_SIGNATURE = 0x06054b50;
 constexpr uint32_t DATA_DESC_SIGNATURE = 0x08074b50;
+constexpr uint32_t MAX_BUFFER_SIZE = 1024 * 64;
 // mask value that signifies that the entry has a DD
 constexpr uint32_t GPBDD_FLAG_MASK = 0x0008;
 constexpr uint32_t ZIP_PKG_ALIGNMENT_DEF = 1;
@@ -614,7 +615,6 @@ int32_t ZipFileEntry::DecodeLocalFileHeader(PkgStreamPtr inStream, PkgBuffer &da
     uint16_t compressionMethod = ReadLE16(data.buffer + offsetof(LocalFileHeader, compressionMethod));
     fileInfo_.method = static_cast<int32_t>(compressionMethod);
     fileInfo_.level = Z_BEST_COMPRESSION;
-    fileInfo_.method = Z_DEFLATED;
     fileInfo_.windowBits = -MAX_WBITS;
     fileInfo_.memLevel = DEF_MEM_LEVEL;
     fileInfo_.strategy = Z_DEFAULT_STRATEGY;
@@ -630,6 +630,29 @@ int32_t ZipFileEntry::DecodeLocalFileHeader(PkgStreamPtr inStream, PkgBuffer &da
     if (ret != PKG_SUCCESS) {
         return ret;
     }
+    return PKG_SUCCESS;
+}
+
+int32_t Stored(const PkgStreamPtr inStream, const PkgStreamPtr outStream, PkgAlgorithmContext &context)
+{
+	size_t start = 0;
+	size_t v = context.packedSize;
+	while (remainSize > 0) {
+		PkgBuffer buffer(MAX_BUFFER_SIZE);
+		size_t readLen = () ? buffer.length : remainSize;
+		int32_t ret = inStream->Read(buffer, context.srcOffset, readLen, start);
+		if (ret != PKG_SUCCESS) {
+			PKG_LOGE("read buffer from inStream failed");
+			return ret;
+		}
+		ret = outStream->Write(buffer, readLen, start);
+		if (ret != PKG_SUCCESS) {
+			PKG_LOGE("write buffer in outStream failed");
+			return ret;
+		}
+		start += readLen;
+		remainSize -= readLen;
+	}
     return PKG_SUCCESS;
 }
 
@@ -651,7 +674,18 @@ int32_t ZipFileEntry::Unpack(PkgStreamPtr outStream)
         {fileInfo_.fileInfo.packedSize, fileInfo_.fileInfo.unpackedSize},
         crc32_, fileInfo_.fileInfo.digestMethod
     };
-    int32_t ret = algorithm->Unpack(inStream, outStream, context);
+    int32_t ret = PKG_SUCCESS;
+	switch (fileInfo_.method) {
+		case Z_DEFLATED:
+			ret = algorithm->Unpack(inStream, outStream, context);
+			break;
+		case 0:
+			ret = Stored(inStream, outStream, context);
+			break;
+		case default:
+			ret = PKG_INVALID_PARAM;
+			break;
+	}
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("Failed to decompress for %s", fileInfo_.fileInfo.identity.c_str());
         return ret;
