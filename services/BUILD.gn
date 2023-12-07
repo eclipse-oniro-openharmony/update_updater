@@ -51,7 +51,7 @@ updater_common_deps = [
   "//third_party/zlib:libz",
 ]
 
-ohos_executable("updater") {
+updater_gen("updater") {
   defines = [ "BUILD_OHOS" ]
   sources = [
     "factory_reset/factory_reset.cpp",
@@ -91,28 +91,7 @@ ohos_executable("updater") {
     defines += [ "UPDATER_USE_PTABLE" ]
   }
 
-  # force link invisible function
-  if (defined(updater_force_link_libs)) {
-    ldflags += [ "-Wl,--whole-archive" ]
-    foreach(lib, updater_force_link_libs) {
-      ldflags += [ "${lib}" ]
-    }
-    ldflags += [ "-Wl,--no-whole-archive" ]
-  }
-
   external_deps = [ "init:libbegetutil" ]
-
-  # add updater custom library
-  if (defined(updater_only_custom_external_deps)) {
-    external_deps += updater_only_custom_external_deps
-  }
-  if (defined(updater_custom_external_deps)) {
-    external_deps += updater_custom_external_deps
-  }
-  if (defined(updater_ui_external_deps) && updater_ui_support) {
-    external_deps += updater_ui_external_deps
-  }
-
   if (updater_ui_support) {
     external_deps += [ "drivers_peripheral_input:hdi_input_udriver" ]
   }
@@ -132,8 +111,6 @@ ohos_executable("updater") {
     defines += [ "UPDATER_BUILD_VARIANT_USER" ]
   }
 
-  install_images = [ "updater" ]
-  install_enable = true
   part_name = "updater"
   subsystem_name = "updater"
 }

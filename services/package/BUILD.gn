@@ -81,7 +81,7 @@ ohos_static_library("libupdaterpackage") {
     "${updater_path}/services/common/ring_buffer:libringbuffer",
     "${updater_path}/services/log:libupdaterlog",
     "//third_party/bounds_checking_function:libsec_static",
-    "//third_party/openssl:libcrypto_shared",
+    "//third_party/openssl:libcrypto_static",
   ]
 
   if (!is_linux && !is_mingw && !is_mac) {

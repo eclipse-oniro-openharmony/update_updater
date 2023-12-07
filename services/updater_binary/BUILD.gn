@@ -35,7 +35,7 @@ config("updater_config") {
   ]
 }
 
-ohos_executable("updater_binary") {
+updater_gen("updater_binary") {
   sources = [
     "${updater_path}/services/updater_binary/main.cpp",
     "${updater_path}/services/updater_binary/update_image_block.cpp",
@@ -46,13 +46,7 @@ ohos_executable("updater_binary") {
   configs = [ ":updater_config" ]
 
   ldflags = [ "-Wl -std=c++11" ]
-  if (defined(binary_force_link_libs)) {
-    ldflags += [ "-Wl,--whole-archive" ]
-    foreach(lib, binary_force_link_libs) {
-      ldflags += [ "${lib}" ]
-    }
-    ldflags += [ "-Wl,--no-whole-archive" ]
-  }
+
   deps = [
     "${updater_path}/interfaces/kits/misc_info:libmiscinfo",
     "${updater_path}/interfaces/kits/slot_info:libslotinfo",
@@ -81,15 +75,6 @@ ohos_executable("updater_binary") {
 
   external_deps = [ "init:libfsmanager_static" ]
 
-  if (defined(binary_custom_external_deps)) {
-    external_deps += binary_custom_external_deps
-  }
-
-  install_enable = true
-  install_images = [
-    "system",
-    "updater",
-  ]
   part_name = "updater"
   subsystem_name = "updater"
 }
