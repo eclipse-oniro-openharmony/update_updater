@@ -44,5 +44,13 @@ private:
     std::unordered_map<uint16_t, std::function<void(uint8_t *payload, int payloadSize)>> cmdFunc_;
     static std::atomic<bool> isRunning_;
 };
+
+class InvalidDaemon : public HdcTransferBase {
+public:
+    DISALLOW_COPY_MOVE(InvalidDaemon);
+    explicit InvalidDaemon(HTaskInfo hTaskInfo);
+    virtual ~InvalidDaemon();
+    bool CommandDispatch(const uint16_t command, uint8_t *payload, const int payloadSize) override;
+};
 } // namespace Hdc
 #endif

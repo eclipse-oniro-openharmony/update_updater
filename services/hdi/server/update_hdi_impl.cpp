@@ -27,9 +27,18 @@ EXTERNC __attribute__((visibility("default"))) IUpdateInterface *GetInterfaceIns
     return &impl;
 }
 
+__attribute__((weak)) bool IsRdMode(void)
+{
+    return true;
+}
+
 int32_t UpdateHdiImpl::GetLockStatus(bool &status)
 {
-    status = false;
+    if (IsRdMode()) {
+        status = false;
+    } else {
+        status = true;
+    }
     return 0;
 }
 } // updater

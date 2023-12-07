@@ -198,4 +198,27 @@ bool DaemonUpdater::IsDeviceLocked() const
     }
     return isLocked;
 }
+
+InvalidDaemon::InvalidDaemon(HTaskInfo hTaskInfo) : HdcTransferBase(hTaskInfo)
+{
+    FLASHD_LOGI("InvalidDaemon init");
+}
+
+InvalidDaemon::~InvalidDaemon()
+{
+    FLASHD_LOGI("~InvalidDaemon refCount %d", refCount);
+}
+
+bool InvalidDaemon::CommandDispatch(const uint16_t command, uint8_t *payload, const int payloadSize)
+{
+    std::string echo = "operation is not allowed";
+    vector<uint8_t> buffer;
+    buffer.push_back(command);
+    buffer.push_back(Hdc::MSG_FAIL);
+    buffer.insert(buffer.end(), (uint8_t *)echo.c_str(), (uint8_t *)echo.c_str() + echo.size());
+    LogMsg(MSG_FAIL, "Operation is not allowed");
+    TaskFinish();
+    FLASHD_LOGE("The operation is not allowed");
+    return false;
+}
 } // namespace Hdc
