@@ -635,24 +635,24 @@ int32_t ZipFileEntry::DecodeLocalFileHeader(PkgStreamPtr inStream, PkgBuffer &da
 
 int32_t Stored(const PkgStreamPtr inStream, const PkgStreamPtr outStream, PkgAlgorithmContext &context)
 {
-	size_t start = 0;
-	size_t v = context.packedSize;
-	while (remainSize > 0) {
-		PkgBuffer buffer(MAX_BUFFER_SIZE);
-		size_t readLen = () ? buffer.length : remainSize;
-		int32_t ret = inStream->Read(buffer, context.srcOffset, readLen, start);
-		if (ret != PKG_SUCCESS) {
-			PKG_LOGE("read buffer from inStream failed");
-			return ret;
-		}
-		ret = outStream->Write(buffer, readLen, start);
-		if (ret != PKG_SUCCESS) {
-			PKG_LOGE("write buffer in outStream failed");
-			return ret;
-		}
-		start += readLen;
-		remainSize -= readLen;
-	}
+    size_t start = 0;
+    size_t remainSize = context.packedSize;
+    while (remainSize > 0) {
+        PkgBuffer buffer(MAX_BUFFER_SIZE);
+        size_t readLen = (remainSize > buffer.length) ? buffer.length : remainSize;
+        int32_t ret = inStream->Read(buffer, context.srcOffset, readLen, start);
+        if (ret != PKG_SUCCESS) {
+            PKG_LOGE("read buffer from inStream failed");
+            return ret;
+        }
+        ret = outStream->Write(buffer, readLen, start);
+        if (ret != PKG_SUCCESS) {
+            PKG_LOGE("write buffer in outStream failed");
+            return ret;
+        }
+        start += readLen;
+        remainSize -= readLen;
+    }
     return PKG_SUCCESS;
 }
 
@@ -675,17 +675,17 @@ int32_t ZipFileEntry::Unpack(PkgStreamPtr outStream)
         crc32_, fileInfo_.fileInfo.digestMethod
     };
     int32_t ret = PKG_SUCCESS;
-	switch (fileInfo_.method) {
-		case Z_DEFLATED:
-			ret = algorithm->Unpack(inStream, outStream, context);
-			break;
-		case 0:
-			ret = Stored(inStream, outStream, context);
-			break;
-		case default:
-			ret = PKG_INVALID_PARAM;
-			break;
-	}
+    switch (fileInfo_.method) {
+        case Z_DEFLATED:
+            ret = algorithm->Unpack(inStream, outStream, context);
+            break;
+        case 0:
+            ret = Stored(inStream, outStream, context);
+            break;
+        case default:
+            ret = PKG_INVALID_PARAM;
+            break;
+    }
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("Failed to decompress for %s", fileInfo_.fileInfo.identity.c_str());
         return ret;
