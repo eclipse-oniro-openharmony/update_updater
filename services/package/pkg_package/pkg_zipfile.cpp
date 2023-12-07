@@ -682,7 +682,7 @@ int32_t ZipFileEntry::Unpack(PkgStreamPtr outStream)
         case 0:
             ret = Stored(inStream, outStream, context);
             break;
-        case default:
+        default:
             ret = PKG_INVALID_PARAM;
             break;
     }
