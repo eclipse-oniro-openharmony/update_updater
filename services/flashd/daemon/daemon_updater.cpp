@@ -216,7 +216,7 @@ bool InvalidDaemon::CommandDispatch(const uint16_t command, uint8_t *payload, co
     buffer.push_back(command);
     buffer.push_back(Hdc::MSG_FAIL);
     buffer.insert(buffer.end(), (uint8_t *)echo.c_str(), (uint8_t *)echo.c_str() + echo.size());
-    SendToAnother(Hdc::CMD_UPDATER_FINISH, buffer.data(), buffer.size());
+    LogMsg(MSG_FAIL, "Operation is not allowed");
     TaskFinish();
     FLASHD_LOGE("The operation is not allowed");
     return false;
