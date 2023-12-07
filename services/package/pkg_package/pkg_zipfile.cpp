@@ -633,7 +633,8 @@ int32_t ZipFileEntry::DecodeLocalFileHeader(PkgStreamPtr inStream, PkgBuffer &da
     return PKG_SUCCESS;
 }
 
-int32_t Stored(const PkgStreamPtr inStream, const PkgStreamPtr outStream, PkgAlgorithmContext &context)
+int32_t ZipFileEntry::Stored(const PkgStreamPtr inStream, const PkgStreamPtr outStream,
+    PkgAlgorithmContext &context)
 {
     size_t start = 0;
     size_t remainSize = context.packedSize;
