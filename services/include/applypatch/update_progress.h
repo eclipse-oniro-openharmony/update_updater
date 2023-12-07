@@ -18,8 +18,6 @@
 namespace Updater {
 void FillUpdateProgress();
 
-void FillUpdateProgress();
-
 void SetUpdateProgress(float step);
 
 float GetUpdateProress();
