@@ -173,7 +173,7 @@
                     }
                 },
                 {
-                    "name": "//base/update/updater/services:updater_binary",
+                    "name": "//base/update/updater/services/updater_binary:updater_binary",
                     "header": {
                         "header_files": [],
                         "header_base": [
