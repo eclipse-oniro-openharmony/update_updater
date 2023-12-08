@@ -105,19 +105,22 @@ int32_t ScriptManagerImpl::Init()
 
     // Register other instructions from scripts
     int32_t ret = USCRIPT_SUCCESS;
-    const FileInfo *info = manager->GetFileInfo(REGISTER_CMD_SCRIPT_NAME);
-    if (info != nullptr) {
+    const FileInfo *registerScriptInfo = manager->GetFileInfo(REGISTER_CMD_SCRIPT_NAME);
+    if (registerScriptInfo != nullptr) {
         ret = ExtractAndExecuteScript(manager, REGISTER_CMD_SCRIPT_NAME);
     }
     if (ret != USCRIPT_SUCCESS) {
-        USCRIPT_LOGE("Failed to extract and execute script ");
+        USCRIPT_LOGE("Failed to extract and execute script %s", REGISTER_CMD_SCRIPT_NAME);
         return ret;
     }
 
     // Collect scripts
-    ret = ExtractAndExecuteScript(manager, LOAD_SCRIPT_NAME);
+    const FileInfo *loadScriptInfo = manager->GetFileInfo(LOAD_SCRIPT_NAME);
+    if (loadScriptInfo != nullptr) {
+        ret = ExtractAndExecuteScript(manager, LOAD_SCRIPT_NAME);
+    }
     if (ret != USCRIPT_SUCCESS) {
-        USCRIPT_LOGE("Failed to extract and execute script ");
+        USCRIPT_LOGE("Failed to extract and execute script %s", LOAD_SCRIPT_NAME);
         return ret;
     }
 
