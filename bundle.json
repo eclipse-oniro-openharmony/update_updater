@@ -164,24 +164,6 @@
                     }
                 },
                 {
-                    "name": "//base/update/updater/services:updater",
-                    "header": {
-                        "header_files": [],
-                        "header_base": [
-                            "//base/update/updater/interfaces/kits/include"
-                        ]
-                    }
-                },
-                {
-                    "name": "//base/update/updater/services/updater_binary:updater_binary",
-                    "header": {
-                        "header_files": [],
-                        "header_base": [
-                            "//base/update/updater/interfaces/kits/include"
-                        ]
-                    }
-                },
-                {
                     "name": "//base/update/updater/services/applypatch:libapplypatch",
                     "header": {
                         "header_files": [],
