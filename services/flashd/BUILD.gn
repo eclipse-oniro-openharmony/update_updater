@@ -76,7 +76,7 @@ config("flashd_hdc_config") {
   cflags_cc = [ "-std=c++17" ]
 }
 
-ohos_source_set("flashd_deamon") {
+ohos_static_library("flashd_deamon") {
   sources = [
     "${HDC_PATH}/daemon/daemon_app.cpp",
     "${HDC_PATH}/daemon/daemon_forward.cpp",
