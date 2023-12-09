@@ -57,7 +57,6 @@ ohos_fuzztest("UpdaterFactoryResetFuzzTest") {
     "${updater_path}/services/log:libupdaterlog",
     "${updater_path}/services/package:libupdaterpackage",
     "${updater_path}/services/sdcard_update:libsdupdate",
-    "${updater_path}/services/ui:libui",
     "${updater_path}/utils:libutils",
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/bzip2:libbz2",
@@ -82,7 +81,6 @@ ohos_fuzztest("UpdaterFactoryResetFuzzTest") {
   ]
   sources = [
     "${updater_path}/services/updater_main.cpp",
-    "${updater_path}/services/updater_ui.cpp",
     "${updater_path}/test/fuzztest/utils/fuzz_utils.cpp",
     "updaterfactoryreset_fuzzer.cpp",
   ]
