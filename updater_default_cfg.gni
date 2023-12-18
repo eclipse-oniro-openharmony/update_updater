@@ -31,6 +31,8 @@ template("updater_gen") {
   if (updater_cfg_file != "") {
     ohos_source_set(target_name) {
       forward_variables_from(invoker, "*")
+
+      source = []
     }
   } else {
     ohos_executable(target_name) {

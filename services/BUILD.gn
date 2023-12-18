@@ -52,8 +52,6 @@ updater_common_deps = [
 ]
 
 updater_gen("updater") {
-  source = []
-
   deps = [ "${updater_path}/services:libupdater_static" ]
 
   part_name = "updater"

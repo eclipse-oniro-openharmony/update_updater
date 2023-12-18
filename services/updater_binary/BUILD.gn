@@ -36,8 +36,6 @@ config("updater_config") {
 }
 
 updater_gen("updater_binary") {
-  source = []
-
   deps = [ "${updater_path}/services/updater_binary:libupdater_binary" ]
 
   part_name = "updater"
