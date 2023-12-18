@@ -213,7 +213,7 @@ void PageManager::Reset()
 
 std::string PageManager::GetCurPageId()
 {
-    if (curPage_) {
+    if (curPage_ != nullptr) {
         return curPage_->GetPageId();
     }
     return "";
