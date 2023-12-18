@@ -84,10 +84,15 @@ void GraphicEngine::InitFlushThread()
     LOG(INFO) << "init flush thread";
 }
 
+__attribute__((weak)) void InitFlushBatteryStatusExt(void)
+{
+}
+
 void GraphicEngine::FlushThreadLoop() const
 {
     while (!flushStop_) {
         OHOS::TaskManager::GetInstance()->TaskHandler();
+        InitFlushBatteryStatusExt();
         Utils::UsSleep(THREAD_USLEEP_TIME);
     }
 }
