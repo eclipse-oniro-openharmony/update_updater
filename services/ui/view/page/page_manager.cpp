@@ -211,6 +211,13 @@ void PageManager::Reset()
     mainPage_ = nullptr;
 }
 
+std::string PageManager::GetCurPageId()
+{
+    if (curPage_) {
+        return curPage_->GetPageId();
+    }
+    return "";
+}
 #ifdef UPDATER_UT
 std::vector<std::string> PageManager::Report()
 {
