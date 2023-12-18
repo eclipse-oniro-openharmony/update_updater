@@ -36,6 +36,15 @@ config("updater_config") {
 }
 
 updater_gen("updater_binary") {
+  source = []
+
+  deps = [ "${updater_path}/services/updater_binary:libupdater_binary" ]
+
+  part_name = "updater"
+  subsystem_name = "updater"
+}
+
+ohos_static_library("libupdater_binary") {
   sources = [
     "${updater_path}/services/updater_binary/main.cpp",
     "${updater_path}/services/updater_binary/update_image_block.cpp",
