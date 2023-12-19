@@ -45,9 +45,9 @@ ohos_shared_library("libpackage_shared") {
     "${updater_path}/utils:libutils",
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/lz4:liblz4_static",
-    "//third_party/openssl:libcrypto_static",
+    "//third_party/openssl:libcrypto_shared",
     "//third_party/openssl:libssl_shared",
-    "//third_party/zlib:libz",
+    "//third_party/zlib:shared_libz",
   ]
 
   innerapi_tags = [

@@ -35,7 +35,7 @@ ohos_shared_library("libupdater_shared") {
     "//third_party/lz4:liblz4_static",
     "//third_party/openssl:libcrypto_shared",
     "//third_party/openssl:libssl_shared",
-    "//third_party/zlib:libz",
+    "//third_party/zlib:shared_libz",
   ]
 
   external_deps = [ "init:libbegetutil" ]
