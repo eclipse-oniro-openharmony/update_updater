@@ -52,6 +52,13 @@ updater_common_deps = [
 ]
 
 updater_gen("updater") {
+  deps = [ "${updater_path}/services:libupdater_static" ]
+
+  part_name = "updater"
+  subsystem_name = "updater"
+}
+
+ohos_static_library("libupdater_static") {
   defines = [ "BUILD_OHOS" ]
   sources = [
     "factory_reset/factory_reset.cpp",
