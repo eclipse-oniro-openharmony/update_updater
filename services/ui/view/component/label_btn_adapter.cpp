@@ -75,6 +75,7 @@ LabelBtnAdapter::LabelBtnAdapter(const UxViewInfo &info)
     SetViewCommonInfo(info.commonInfo);
     this->SetText(TranslateText(spec.text).c_str());
     this->SetFont(DEFAULT_FONT_FILENAME, spec.fontSize);
+    this->SetLabelStyle(OHOS::STYLE_LINE_HEIGHT, UPDATER_UI_FONT_HEIGHT_RATIO * spec.fontSize);
     auto txtColor = StrToColor(spec.txtColor);
     this->SetLabelStyle(OHOS::STYLE_TEXT_COLOR, txtColor.full);
     this->SetLabelStyle(OHOS::STYLE_TEXT_OPA, txtColor.alpha);
