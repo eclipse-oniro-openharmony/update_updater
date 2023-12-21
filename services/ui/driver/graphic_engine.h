@@ -53,5 +53,17 @@ private:
     bool flushStop_ = true;
     std::mutex mtx_ {};
 };
+
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif
+#endif /* __cplusplus */
+void InitFlushBatteryStatusExt(void);
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif
+#endif /* __cplusplus */
 } // namespace Updater
 #endif

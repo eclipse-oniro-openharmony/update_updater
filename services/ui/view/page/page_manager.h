@@ -39,6 +39,7 @@ public:
     void ShowMainPage();
     ViewProxy &operator[](const ComInfo &comInfo) const;
     void Reset();
+    std::string GetCurPageId();
 #ifdef UPDATER_UT
     std::vector<std::string> Report();
 #endif
