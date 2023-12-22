@@ -66,13 +66,22 @@ UpdaterStatus CheckSdcardPkgs(UpdaterParams &upParams)
     }
 
     bool mountSuccess = false;
-    for (auto item : sdcardStr) {
-        if (MountSdcard(item, mountPoint) == 0) {
-            mountSuccess = true;
-            LOG(INFO) << "mount " << item << " sdcard success!";
+    unsigned int retryTimes = 20;
+    for (unsigned int retryCount = 1; retryCount <= retryTimes; retryCount++) {
+        LOG(INFO) << "the retry time is: " << retryCount;
+        for (auto item : sdcardStr) {
+            if (MountSdcard(item, mountPoint) == 0) {
+                mountSuccess = true;
+                LOG(INFO) << "mount " << item << " sdcard success!";
+                break;
+            }
+        }
+        if (mountSuccess) {
             break;
         }
+        sleep(1); // sleep 1 second to wait for sd card recongnition
     }
+  
     if (!mountSuccess) {
         LOG(ERROR) << "mount sdcard fail!";
         return UPDATE_ERROR;
