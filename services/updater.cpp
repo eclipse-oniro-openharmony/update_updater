@@ -56,7 +56,7 @@ using Updater::Utils::SplitString;
 using Updater::Utils::Trim;
 using namespace Hpackage;
 
-int g_percentage;
+int g_percentage = 100;
 int g_tmpProgressValue;
 int g_tmpValue;
 
@@ -355,7 +355,6 @@ void HandleChildOutput(const std::string &buffer, int32_t bufferLen, bool &retry
         if (progress.size() != DEFAULT_PROCESS_NUM) {
             LOG(ERROR) << "show progress with wrong arguments";
         } else {
-            UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_INSTALL_START));
             frac = std::stof(progress[0]);
             g_percentage = static_cast<int>(frac * FULL_PERCENT_PROGRESS);
         }
