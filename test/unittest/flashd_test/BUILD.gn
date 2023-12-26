@@ -133,13 +133,11 @@ ohos_unittest("flashd_util_unittest") {
   ]
 
   external_deps = [
+    "c_utils:utils",
     "hilog:libhilog",
     "init:libbegetutil",
-    "c_utils:utils",
   ]
-  deps = [
-    "//third_party/libuv:uv",
-  ]
+  deps = [ "//third_party/libuv:uv" ]
   configs = [ "${updater_path}/test/unittest:utest_config" ]
   install_enable = true
   part_name = "updater"
