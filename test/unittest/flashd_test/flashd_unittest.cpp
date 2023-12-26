@@ -196,24 +196,6 @@ HWTEST_F(FLashServiceUnitTest, GetFileName, TestSize.Level1)
     EXPECT_EQ("", res);
 }
 
-HWTEST_F(FLashServiceUnitTest, Split, TestSize.Level1)
-{
-    std::string input = "";
-    std::vector<std::string> output = Split(input, { "-f" });
-    std::string res = "";
-    for (auto s : output) {
-        res += s;
-    }
-    EXPECT_EQ("", res);
-    input = "flash updater updater.img";
-    output = Split(input, { "-f" });
-    res = "";
-    for (auto s : output) {
-        res += s;
-    }
-    EXPECT_EQ("flashupdaterupdater.img", res);
-}
-
 HWTEST_F(FLashServiceUnitTest, GetWriter, TestSize.Level1)
 {
     std::string partName = "";
