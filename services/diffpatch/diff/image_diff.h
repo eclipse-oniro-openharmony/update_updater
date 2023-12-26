@@ -58,7 +58,7 @@ protected:
     std::vector<ImageBlock> updateBlocks_ {};
     UpdateDiff::ImageParserPtr newParser_ {nullptr};
     UpdateDiff::ImageParserPtr oldParser_ {nullptr};
-    bool usePatchFile_ { true };
+    bool usePatchFile_ { false };
 };
 
 class CompressedImageDiff : public ImageDiff {
