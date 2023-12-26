@@ -59,8 +59,8 @@ int32_t BZipBuffer2Adapter::WriteData(const BlockBuffer &srcData)
         if (stream_.avail_out == 0) {
             dataSize_ += stream_.next_out - next;
             size_t bufferSize =  buffer_.size();
-            buffer_.resize(2 * bufferSize); // 
-            stream_.avail_out = bufferSize;
+            buffer_.resize(bufferSize + IGMDIFF_LIMIT_UNIT);
+            stream_.avail_out = IGMDIFF_LIMIT_UNIT;
             next = reinterpret_cast<char*>(buffer_.data() + bufferSize);
             stream_.next_out = next;
         }
