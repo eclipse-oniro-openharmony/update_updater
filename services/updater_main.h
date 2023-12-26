@@ -43,6 +43,8 @@ UpdaterStatus UpdaterFromSdcard(UpdaterParams &upParams);
 
 bool IsBatteryCapacitySufficient();
 
+void DeleteInstallTimeFile();
+
 void WriteInstallTime(UpdaterParams &upParams);
  
 void ReadInstallTime(UpdaterParams &upParams);

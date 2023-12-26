@@ -461,11 +461,7 @@ static void PostUpdatePackages(UpdaterParams &upParams, bool updateResult)
     }
     LOG(INFO) << "post over, writeBuffer = " << writeBuffer;
     WriteDumpResult(writeBuffer);
-    const std::string installTimeFilePath = std::string(UPDATER_PATH) + "/" + std::string(INSTALL_TIME_FILE);
-    if (access(installTimeFilePath.c_str(), F_OK) != -1) {
-        (void)DeleteFile(installTimeFilePath);
-        LOG(INFO) << "delete install time file";
-    }
+    DeleteInstallTimeFile();
 }
 
 UpdaterStatus UpdaterFromSdcard(UpdaterParams &upParams)
@@ -688,11 +684,7 @@ static UpdaterStatus StartUpdater(const std::vector<std::string> &args,
     }
     optind = 1;
     if (upParams.pkgLocation == 0) {
-        const std::string installTimeFilePath = std::string(UPDATER_PATH) + "/" + std::string(INSTALL_TIME_FILE);
-        if (access(installTimeFilePath.c_str(), F_OK) != -1) {
-            (void)DeleteFile(installTimeFilePath);
-            LOG(INFO) << "delete install time file";
-        }
+        DeleteInstallTimeFile();
     }
     // Sanity checks
     if (upParams.updateMode == SDCARD_UPDATE) {

@@ -35,6 +35,15 @@ namespace Updater {
 using namespace Hpackage;
 using namespace Updater::Utils;
 
+void DeleteInstallTimeFile()
+{
+    const std::string installTimeFilePath = std::string(UPDATER_PATH) + "/" + std::string(INSTALL_TIME_FILE);
+    if (access(installTimeFilePath.c_str(), F_OK) != -1) {
+        (void)DeleteFile(installTimeFilePath);
+        LOG(INFO) << "delete install time file";
+    }
+}
+
 bool IsDouble(const std::string& str)
 {
     std::regex pattern("^[-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?$");
@@ -63,14 +72,13 @@ void ReadInstallTime(UpdaterParams &upParams)
     }
     unsigned int index = 0;
     while (getline(ifs, buf)) {
-        if (index < upParams.pkgLocation) {
-            if (IsDouble(buf)) {
-                upParams.installTime[index++] = std::chrono::duration<double>(std::stod(buf));
-            } else {
-                LOG(ERROR) << "read install time is invalid";
-            }
-        } else {
+        if (index >= upParams.pkgLocation) {
             break;
+        }
+        if (IsDouble(buf)) {
+            upParams.installTime[index++] = std::chrono::duration<double>(std::stod(buf));
+        } else {
+            LOG(ERROR) << "read install time is invalid";
         }
     }
 }
