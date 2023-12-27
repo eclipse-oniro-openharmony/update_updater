@@ -58,6 +58,7 @@ ohos_unittest("updater_unittest") {
     "log_test/log_unittest.cpp",
     "misc_info_test/misc_info_unittest.cpp",
     "updater_test/hwfault_retry_unittest.cpp",
+    "updater_test/record_install_time_unittest.cpp",
     "updaterkits_test/updaterkits_unittest.cpp",
   ]
 
