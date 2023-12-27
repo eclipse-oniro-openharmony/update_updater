@@ -82,6 +82,15 @@ bool UfsPtable::UfsReadGpt(const uint8_t *gptImage, const uint32_t len,
         LOG(ERROR) << "Primary signature invalid";
         return false;
     }
+    auto startIter = partitionInfo_.end();
+    for (auto it = partitionInfo_.begin(); it != partitionInfo_.end();) {
+        if ((*it).lun == lun) {
+            it = partitionInfo_.erase(it);
+            startIter = it;
+            continue;
+        }
+        it++;
+    }
 
     uint32_t partEntryCnt = blockSize / PARTITION_ENTRY_SIZE;
     uint32_t partition0 = GET_LLWORD_FROM_BYTE(gptImage + blockSize + PARTITION_ENTRIES_OFFSET);
@@ -113,7 +122,7 @@ bool UfsPtable::UfsReadGpt(const uint8_t *gptImage, const uint32_t len,
             (void)memcpy_s(newPtnInfo.partitionTypeGuid, sizeof(newPtnInfo.partitionTypeGuid),
                 typeGuid, sizeof(typeGuid));
             newPtnInfo.lun = lun;
-            partitionInfo_.push_back(newPtnInfo);
+            startIter = ++(partitionInfo_.insert(startIter, newPtnInfo));
             count++;
         }
     }
@@ -375,5 +384,103 @@ uint8_t *UfsPtable::GetPtableImageUfsLunEntryStart(uint8_t *imageBuf, const uint
         ptableData_.lbaLen + ptableData_.gptHeaderLen;
     LOG(INFO) << "GetPtableImageUfsLunEntryStart : " << std::hex << entryStart << std::dec;
     return imageBuf + entryStart;
+}
+
+bool UfsPtable::EditPartitionBuf(uint8_t *imageBuf, uint64_t imgBufSize, std::vector<PtnInfo> &modifyList)
+{
+    if (imageBuf == nullptr || imgBufSize == 0 || modifyList.empty() || ptableData_.blockSize == 0) {
+        LOG(ERROR) << "input invalid";
+        return false;
+    }
+    if (imgBufSize < ptableData_.emmcGptDataLen || deviceLunNum_ == 0) {
+        LOG(ERROR) << "can not get offset, imgBufsize =" << imgBufSize << ",emmcGptDataLen ="
+            << ptableData_.emmcGptDataLen << ", deviceLunNum = " << deviceLunNum_;
+        return false;
+    }
+ 
+    uint32_t gptSize = ptableData_.imgLuSize;
+    uint32_t imgBlockSize = ptableData_.lbaLen; // 512
+    uint32_t deviceBlockSize = ptableData_.blockSize; // 4096
+    uint32_t startLu = ptableData_.startLunNumber;
+    for (uint32_t i = 0; i < deviceLunNum_; ++i) {
+        char lunIndexName = 'a' + i + startLu;
+        UfsPartitionDataInfo newLunPtnDataInfo;
+        (void)memset_s(newLunPtnDataInfo.data, TMP_DATA_SIZE, 0, TMP_DATA_SIZE);
+        std::string ufsNode = std::string(PREFIX_UFS_NODE) + lunIndexName;
+        newLunPtnDataInfo.lunSize = GetDeviceLunCapacity(i + startLu);
+        if (newLunPtnDataInfo.lunSize == 0) {
+            LOG(ERROR) << "get devDenisity failed in " << ufsNode;
+            return false;
+        }
+        uint8_t *curGptBuf = GetPtableImageUfsLunPmbrStart(imageBuf, i + startLu);
+        if (!ufsPtnDataInfo_[i].isGptVaild) {
+            continue;
+        }
+        struct GptParseInfo gptInfo(imgBlockSize, deviceBlockSize, newLunPtnDataInfo.lunSize);
+        for (auto &t : modifyList) {
+            if (static_cast<uint32_t>(t.lun) == i + startLu && !ChangeGpt(curGptBuf, gptSize, gptInfo, t)) {
+                LOG(ERROR) << "ChangeGpt failed";
+                return false;
+            }
+        }
+        /* mbr block = 1 block */
+        if (memcpy_s(newLunPtnDataInfo.data, TMP_DATA_SIZE, curGptBuf, imgBlockSize) != EOK) {
+            LOG(WARNING) << "memcpy_s fail";
+        }
+        newLunPtnDataInfo.writeDataLen = ptableData_.writeDeviceLunSize;
+        UfsPatchGptHeader(newLunPtnDataInfo, imgBlockSize);
+    }
+    return true;
+}
+ 
+bool UfsPtable::GetPtableImageBuffer(uint8_t *imageBuf, const uint32_t imgBufSize)
+{
+    uint32_t imgBlockSize = ptableData_.lbaLen; // 512
+    uint32_t deviceBlockSize = ptableData_.blockSize; // 4096
+    SetDeviceLunNum();
+    if (imageBuf == nullptr || imgBufSize == 0 ||
+        imgBufSize < ptableData_.emmcGptDataLen + ptableData_.imgLuSize * deviceLunNum_) {
+        LOG(ERROR) << "input param invalid";
+        return false;
+    }
+    for (uint32_t i = 0; i < deviceLunNum_; ++i) {
+        uint32_t curImgOffset = 0;
+        uint32_t curDevOffset = 0;
+        uint32_t imgOffset = ptableData_.emmcGptDataLen + ptableData_.imgLuSize * i;
+        /* get ufs node name */
+        char lunIndexName = 'a' + i + ptableData_.startLunNumber;
+        std::string ufsNode = std::string(PREFIX_UFS_NODE) + lunIndexName;
+        if (!CheckFileExist(ufsNode)) {
+            LOG(ERROR) << "file " << ufsNode << " is not exist";
+            return false;
+        }
+        /* get mbr head */
+        if (!MemReadWithOffset(ufsNode, curDevOffset, imageBuf + curImgOffset + imgOffset, imgBlockSize)) {
+            LOG(ERROR) << "MemReadWithOffset " << ufsNode << " error";
+            return false;
+        }
+        bool isGptExist = CheckProtectiveMbr(imageBuf + curImgOffset + imgOffset, imgBlockSize);
+        curImgOffset += imgBlockSize;
+        curDevOffset += deviceBlockSize;
+        if (!isGptExist) {
+            continue;
+        }
+        /* get gpt head */
+        if (!MemReadWithOffset(ufsNode, curDevOffset, imageBuf + curImgOffset + imgOffset, imgBlockSize)) {
+            LOG(ERROR) << "MemReadWithOffset " << ufsNode << " error";
+            return false;
+        }
+        uint32_t maxPartCount = GET_LWORD_FROM_BYTE(&imageBuf[imgOffset + curImgOffset + PARTITION_COUNT_OFFSET]);
+        uint32_t entrySize = GET_LWORD_FROM_BYTE(&imageBuf[imgOffset + curImgOffset + PENTRY_SIZE_OFFSET]);
+        curImgOffset += imgBlockSize;
+        curDevOffset += deviceBlockSize;
+        /* get gpt buf */
+        uint32_t gptInfoLen = maxPartCount * entrySize;
+        if (!MemReadWithOffset(ufsNode, curDevOffset, imageBuf + curImgOffset + imgOffset, gptInfoLen)) {
+            LOG(ERROR) << "MemReadWithOffset " << ufsNode << " error" << gptInfoLen;
+            return false;
+        }
+    }
+    return true;
 }
 } // namespace Updater
