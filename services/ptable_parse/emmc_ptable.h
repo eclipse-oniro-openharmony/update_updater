@@ -29,6 +29,8 @@ public:
     bool ParsePartitionFromBuffer(uint8_t *ptbImgBuffer, const uint32_t imgBufSize) override;
     bool LoadPtableFromDevice() override;
     bool WritePartitionTable() override;
+    bool EditPartitionBuf(uint8_t *imageBuf, uint64_t imgBufSize, std::vector<PtnInfo> &modifyList) override;
+    bool GetPtableImageBuffer(uint8_t *imageBuf, const uint32_t imgBufSize) override;
 
 private:
     static constexpr uint32_t  GPT_PARTITION_START_LBA_OFFSET = 32;

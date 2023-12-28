@@ -15,6 +15,7 @@
 
 #ifndef UPDATER_PTABLE_H
 #define UPDATER_PTABLE_H
+#define LAST_PATITION_NAME "USERDATA"
 
 #include "macros.h"
 #include "json_node.h"
@@ -37,6 +38,13 @@ public:
         std::string dispName {};
     };
 
+    struct GptParseInfo {
+    GptParseInfo(uint64_t imgBlockSize, uint64_t devBlockSize, uint64_t devDensity)
+        : imgBlockSize(imgBlockSize), devBlockSize(devBlockSize), devDensity(devDensity) {}
+    uint64_t imgBlockSize;
+    uint64_t devBlockSize;
+    uint64_t devDensity;
+    };
     std::vector<PtnInfo> GetPtablePartitionInfo() const;
     uint32_t GetPtablePartitionNum() const;
     bool InitPtable();
@@ -50,6 +58,8 @@ public:
     virtual bool ParsePartitionFromBuffer(uint8_t *ptbImgBuffer, const uint32_t imgBufSize) = 0;
     virtual bool LoadPtableFromDevice() = 0;
     virtual bool WritePartitionTable() = 0;
+    virtual bool EditPartitionBuf(uint8_t *imageBuf, uint64_t imgBufSize, std::vector<PtnInfo> &modifyList) = 0;
+    virtual bool GetPtableImageBuffer(uint8_t *imageBuf, const uint32_t imgBufSize) = 0;
 
 protected:
     const std::string USERDATA_PARTITION = "USERDATA";
@@ -155,6 +165,9 @@ protected:
     bool WritePtablePartition(const std::string &path, uint64_t offset, const uint8_t *buffer, uint32_t size);
     bool CheckFileExist(const std::string &fileName);
     bool WriteBufferToPath(const std::string &path, const uint64_t offset, const uint8_t *buffer, const uint32_t size);
+    bool ChangeGpt(uint8_t *gptBuf, uint64_t gptSize, GptParseInfo gptInfo, PtnInfo &modifyInfo);
+    bool AdjustGpt(uint8_t *ptnInfoBuf, uint64_t bufSize, std::string &ptnName, uint64_t preLastLBA,
+    uint64_t lastPtnLastLBA);
 
 private:
     static constexpr uint64_t MBR_MAGIC_NUM_POS = 0x1FE;

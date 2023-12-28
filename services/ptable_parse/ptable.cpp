@@ -506,4 +506,81 @@ bool Ptable::GetPartionInfoByName(const std::string &partitionName, PtnInfo &ptn
     LOG(ERROR) << "get partition info failed! Not found partition:" << partitionName;
     return false;
 }
+
+bool Ptable::AdjustGpt(uint8_t *ptnInfoBuf, uint64_t bufSize, std::string &ptnName, uint64_t preLastLBA,
+    uint64_t lastPtnLastLBA)
+{
+    if (ptnInfoBuf == nullptr || bufSize == 0 || ptnName.empty()) {
+        LOG(ERROR) << "invalid input";
+        return false;
+    }
+    if (ptnName != LAST_PATITION_NAME) {
+        uint64_t firstLBA = GET_LLWORD_FROM_BYTE(&ptnInfoBuf[FIRST_LBA_OFFSET]);
+        uint64_t lastLBA = GET_LLWORD_FROM_BYTE(&ptnInfoBuf[LAST_LBA_OFFSET]);
+        lastLBA = lastLBA - firstLBA + preLastLBA + 1;
+        firstLBA = preLastLBA + 1;
+        PUT_LONG_LONG(ptnInfoBuf + FIRST_LBA_OFFSET, firstLBA);
+        PUT_LONG_LONG(ptnInfoBuf + LAST_LBA_OFFSET, lastLBA);
+    } else { /* this is USERDATA partition */
+        uint64_t firstLBA = preLastLBA + 1;
+        if (lastPtnLastLBA < firstLBA) {
+            LOG(ERROR) << "patch last partition fail";
+            return false;
+        }
+        PUT_LONG_LONG(ptnInfoBuf + FIRST_LBA_OFFSET, firstLBA);
+        /* resize last partition by device density */
+        PUT_LONG_LONG(ptnInfoBuf + LAST_LBA_OFFSET, lastPtnLastLBA);
+    }
+    return true;
+}
+
+bool Ptable::ChangeGpt(uint8_t *gptBuf, uint64_t gptSize, GptParseInfo gptInfo, PtnInfo &modifyInfo)
+{
+    if (gptBuf == nullptr || gptSize == 0 || gptSize <= gptInfo.imgBlockSize || gptInfo.devBlockSize == 0) {
+        LOG(ERROR) << "input param invalid";
+        return false;
+    }
+    bool modifyDectect = false;
+    uint8_t *gptHead = gptBuf + gptInfo.imgBlockSize; // skip pmbr
+    uint32_t ptnEntrySize = GET_LLWORD_FROM_BYTE(&gptHead[PENTRY_SIZE_OFFSET]);
+    uint64_t ptnStart = GET_LLWORD_FROM_BYTE(&gptHead[PARTITION_ENTRIES_OFFSET]);
+    uint64_t readSize = ptnStart * gptInfo.imgBlockSize;
+    uint8_t *ptnInfoBuf = gptBuf + readSize;
+    uint64_t preLastLBA = 0;
+    uint64_t lastPtnLastLBA = gptInfo.devDensity / gptInfo.devBlockSize - 1;
+
+    while (readSize < gptSize) {
+        std::string dispName;
+        // convert utf8 to utf16, 2 bytes for 1 charactor of partition name
+        ParsePartitionName(&ptnInfoBuf[GPT_PARTITION_NAME_OFFSET], MAX_GPT_NAME_SIZE, dispName, MAX_GPT_NAME_SIZE / 2);
+        if (dispName.empty()) {
+            break;
+        }
+        if (modifyDectect) {
+            /* partition after modify part */
+            if (!AdjustGpt(ptnInfoBuf, gptSize - readSize, dispName, preLastLBA, lastPtnLastLBA)) {
+                return false;
+            }
+            preLastLBA = GET_LLWORD_FROM_BYTE(&ptnInfoBuf[LAST_LBA_OFFSET]);
+            ptnInfoBuf += ptnEntrySize;
+            readSize += static_cast<uint64_t>(ptnEntrySize);
+            continue;
+        }
+        if (dispName == modifyInfo.dispName) {
+            LOG(INFO) << "modify part dectected!! dispName = " << dispName;
+            uint64_t firstLBA = modifyInfo.startAddr / gptInfo.devBlockSize;
+            uint64_t lastLBA = firstLBA + modifyInfo.partitionSize / gptInfo.devBlockSize - 1;
+            if ((dispName == LAST_PATITION_NAME) && (lastLBA != lastPtnLastLBA)) {
+                return false;
+            }
+            PUT_LONG_LONG(ptnInfoBuf + FIRST_LBA_OFFSET, firstLBA);
+            PUT_LONG_LONG(ptnInfoBuf + LAST_LBA_OFFSET, lastLBA);
+            modifyDectect = true;
+            preLastLBA = lastLBA;
+        }
+        ptnInfoBuf += ptnEntrySize;
+        readSize += static_cast<uint64_t>(ptnEntrySize);
+    }
+    return true;
+}
 } // namespace Updater

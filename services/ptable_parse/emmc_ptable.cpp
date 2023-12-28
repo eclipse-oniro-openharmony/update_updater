@@ -266,4 +266,54 @@ bool EmmcPtable::LoadPtableFromDevice()
     }
     return false;
 }
+
+bool EmmcPtable::GetPtableImageBuffer(uint8_t *imageBuf, const uint32_t imgBufSize)
+{
+    if (imageBuf == nullptr || imgBufSize == 0) {
+        LOG(ERROR) << "input invalid";
+        return false;
+    }
+    if (memcpy_s(imageBuf, imgBufSize, emmcPtnDataInfo_.data, GPT_PARTITION_SIZE) != EOK) {
+        LOG(ERROR) << "memcpy_s failed";
+        return false;
+    }
+    return true;
+}
+
+bool EmmcPtable::EditPartitionBuf(uint8_t *imageBuf, uint64_t imgBufSize, std::vector<PtnInfo> &modifyList)
+{
+    if (imageBuf == nullptr || imgBufSize == 0 || modifyList.empty() == 0) {
+        LOG(ERROR) << "input invalid";
+        return false;
+    }
+    uint8_t *gptImage = imageBuf;
+    uint32_t imgBlockSize = EMMC_BLOCK_SIZE;
+    uint8_t *gptHeader = gptImage + imgBlockSize;
+    uint32_t maxPtnCnt = GET_LWORD_FROM_BYTE(&gptHeader[PARTITION_COUNT_OFFSET]);
+    uint32_t ptnEntrySize = GET_LWORD_FROM_BYTE(&gptHeader[PENTRY_SIZE_OFFSET]);
+    uint32_t gptHeaderLen = EMMC_BLOCK_SIZE;
+    uint32_t gptSize = static_cast<uint64_t>(maxPtnCnt) * ptnEntrySize + imgBlockSize + gptHeaderLen;
+    uint32_t devDensity = GetDeviceCapacity();
+    if (devDensity == 0) {
+        LOG(ERROR) << "get emmc capacity fail";
+        return false;
+    }
+    uint32_t devBlockSize = EMMC_BLOCK_SIZE;
+    struct GptParseInfo gptInfo(imgBlockSize, devBlockSize, devDensity);
+    for (auto &t : modifyList) {
+        if (!ChangeGpt(gptImage, gptSize, gptInfo, t)) {
+            LOG(ERROR) << "ChangeGpt failed";
+            return false;
+        }
+    }
+    EmmcPartitionDataInfo newEmmcPartitionDataInfo;
+    newEmmcPartitionDataInfo.writeDataLen = ptableData_.emmcGptDataLen;
+    (void)memset_s(newEmmcPartitionDataInfo.data, GPT_PARTITION_SIZE, 0, GPT_PARTITION_SIZE);
+    if (memcpy_s(newEmmcPartitionDataInfo.data, GPT_PARTITION_SIZE, imageBuf, imgBlockSize) != EOK) {
+        LOG(ERROR) << "memcpy_s failed";
+        return false;
+    }
+    EmmcPatchGptHeader(newEmmcPartitionDataInfo, imgBlockSize);
+    return true;
+}
 }
