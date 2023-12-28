@@ -111,8 +111,10 @@ void SaveLogs()
         LOG(ERROR) << "Copy updater log failed!";
     }
 
-    mode_t mode = 0640;
-    chmod(updaterLogPath.c_str(), mode);
+    mode_t mode = 0660;
+#ifndef __WIN32
+    SetFileAttributes(updaterLogPath, USER_UPDATE_AUTHORITY, GROUP_UPDATE_AUTHORITY, mode);
+#endif
 
     STAGE(UPDATE_STAGE_SUCCESS) << "PostUpdater";
     ret = CopyUpdaterLogs(TMP_STAGE_LOG, stageLogPath);
@@ -516,17 +518,12 @@ bool CopyUpdaterLogs(const std::string &sLog, const std::string &dLog)
         return false;
     }
 #ifdef WITH_SELINUX
-    RestoreconRecurse(destPath.c_str());
+    RestoreconRecurse("/data");
 #endif // WITH_SELINUX
     if (access(destPath.c_str(), 0) != 0) {
         if (MkdirRecursive(destPath.c_str(), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) != 0) {
             LOG(ERROR) << "MkdirRecursive error!";
             return false;
-        }
-        if (chown(destPath.c_str(), USER_UPDATE_AUTHORITY, USER_UPDATE_AUTHORITY) != EOK &&
-            chmod(destPath.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != EOK) {
-                LOG(ERROR) << "Chmod failed!";
-                return false;
         }
     }
 
