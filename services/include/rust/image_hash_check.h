@@ -26,6 +26,12 @@ const ImgHashData *LoadImgHashData(uint8_t *hash_data, size_t len);
 bool check_data_hash(const ImgHashData *img_hash_data,
     const char *file_name, uint32_t start, uint32_t end, const uint8_t *hash_value, size_t len);
 void ReleaseImgHashData(const ImgHashData *hash_data);
+
+const ImgHashData *LoadImgHashDataNew(uint8_t *hash_data, size_t len);
+bool CheckDataHashNew(const ImgHashData *img_hash_data,
+    const char *file_name, uint64_t start, uint64_t end, const uint8_t *hash_value, size_t len);
+void ReleaseImgHashDataNew(const ImgHashData *hash_data);
+
 }
 
 #endif
