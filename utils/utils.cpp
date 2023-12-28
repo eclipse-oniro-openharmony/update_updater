@@ -430,8 +430,20 @@ bool CopyFile(const std::string &src, const std::string &dest, bool isAppend)
         return false;
     }
     fout.flush();
-    sync();
+    fout.close();
+    SyncFile(dest); // no way to get fd from ofstream, so reopen to sync this file
     return true;
+}
+
+void SyncFile(const std::string &dst)
+{
+    int fd = open(dst.c_str(), O_RDWR);
+    if (fd < 0) {
+        LOG(ERROR) << "open " << dst << " failed! err " << strerror(errno);
+        return;
+    }
+    fsync(fd);
+    close(fd);
 }
 
 std::string GetLocalBoardId()
