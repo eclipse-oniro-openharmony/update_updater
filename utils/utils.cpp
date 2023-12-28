@@ -430,6 +430,7 @@ bool CopyFile(const std::string &src, const std::string &dest, bool isAppend)
         return false;
     }
     fout.flush();
+    sync();
     return true;
 }
 
