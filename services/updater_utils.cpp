@@ -18,6 +18,7 @@
 #include <sys/mount.h>
 #include <sys/stat.h>
 #include <sys/statvfs.h>
+#include <regex>
 
 #include "applypatch/partition_record.h"
 #include "flashd/flashd.h"
@@ -33,6 +34,54 @@
 namespace Updater {
 using namespace Hpackage;
 using namespace Updater::Utils;
+
+void DeleteInstallTimeFile()
+{
+    const std::string installTimeFilePath = std::string(UPDATER_PATH) + "/" + std::string(INSTALL_TIME_FILE);
+    if (access(installTimeFilePath.c_str(), F_OK) != -1) {
+        (void)DeleteFile(installTimeFilePath);
+        LOG(INFO) << "delete install time file";
+    }
+}
+
+bool IsDouble(const std::string& str)
+{
+    std::regex pattern("^[-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?$");
+    return std::regex_match(str, pattern);
+}
+ 
+void WriteInstallTime(UpdaterParams &upParams)
+{
+    std::ofstream ofs;
+    ofs.open(std::string(UPDATER_PATH) + "/" + std::string(INSTALL_TIME_FILE), std::ios::app | std::ios::out);
+    if (!ofs.is_open()) {
+        LOG(ERROR) << "open install time file fail";
+        return;
+    }
+    ofs << DurationToString(upParams.installTime, upParams.pkgLocation) << "\n";
+}
+ 
+void ReadInstallTime(UpdaterParams &upParams)
+{
+    std::ifstream ifs;
+    std::string buf;
+    ifs.open(std::string(UPDATER_PATH) + "/" + std::string(INSTALL_TIME_FILE), std::ios::in);
+    if (!ifs.is_open()) {
+        LOG(ERROR) << "read install time file fail";
+        return;
+    }
+    unsigned int index = 0;
+    while (getline(ifs, buf)) {
+        if (index >= upParams.pkgLocation) {
+            break;
+        }
+        if (IsDouble(buf)) {
+            upParams.installTime[index++] = std::chrono::duration<double>(std::stod(buf));
+        } else {
+            LOG(ERROR) << "read install time is invalid";
+        }
+    }
+}
 
 bool DeleteUpdaterPath(const std::string &path)
 {

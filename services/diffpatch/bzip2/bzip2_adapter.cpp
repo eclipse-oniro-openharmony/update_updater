@@ -50,15 +50,20 @@ int32_t BZipBuffer2Adapter::WriteData(const BlockBuffer &srcData)
     stream_.next_in = reinterpret_cast<char*>(srcData.buffer);
     stream_.avail_in = srcData.length;
 
-    if (offset_ + dataSize_ + srcData.length > buffer_.size()) {
-        buffer_.resize(buffer_.size() + srcData.length);
-    }
     char *next = reinterpret_cast<char*>(buffer_.data() + offset_ + dataSize_);
     stream_.avail_out = buffer_.size() - offset_ - dataSize_;
     stream_.next_out = next;
     int32_t ret = BZ_RUN_OK;
     do {
         ret = BZ2_bzCompress(&stream_, BZ_RUN);
+        if (stream_.avail_out == 0) {
+            dataSize_ += stream_.next_out - next;
+            size_t bufferSize =  buffer_.size();
+            buffer_.resize(bufferSize + IGMDIFF_LIMIT_UNIT);
+            stream_.avail_out = IGMDIFF_LIMIT_UNIT;
+            next = reinterpret_cast<char*>(buffer_.data() + bufferSize);
+            stream_.next_out = next;
+        }
         if (stream_.avail_in == 0) {
             break;
         }

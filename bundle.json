@@ -164,6 +164,26 @@
                     }
                 },
                 {
+                    "name": "//base/update/updater/services:libupdater_static",
+                    "header": {
+                        "header_files": [],
+                        "header_base": [
+                            "//base/update/updater/interfaces/kits/include",
+                            "//base/update/updater/services"
+                        ]
+                    }
+                },
+                {
+                    "name": "//base/update/updater/services/updater_binary:libupdater_binary",
+                    "header": {
+                        "header_files": [],
+                        "header_base": [
+                            "//base/update/updater/interfaces/kits/include",
+                            "//base/update/updater/services/updater_binary"
+                        ]
+                    }
+                },
+                {
                     "name": "//base/update/updater/services/applypatch:libapplypatch",
                     "header": {
                         "header_files": [],

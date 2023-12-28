@@ -43,6 +43,14 @@ UpdaterStatus UpdaterFromSdcard(UpdaterParams &upParams);
 
 bool IsBatteryCapacitySufficient();
 
+void DeleteInstallTimeFile();
+
+void WriteInstallTime(UpdaterParams &upParams);
+ 
+void ReadInstallTime(UpdaterParams &upParams);
+
+bool IsDouble(const std::string& str);
+
 UpdaterStatus InstallUpdaterPackages(UpdaterParams &upParams);
 
 #ifdef __cplusplus

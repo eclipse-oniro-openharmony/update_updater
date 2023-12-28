@@ -111,7 +111,7 @@ HWTEST_F(UtilsUnitTest, IsUpdaterMode, TestSize.Level0)
 HWTEST_F(UtilsUnitTest, IsFileExist, TestSize.Level0)
 {
     EXPECT_EQ(Utils::IsFileExist("/bin/test_updater"), false);
-    EXPECT_EQ(Utils::IsFileExist("/bin/updater_binary"), true);
+    EXPECT_EQ(Utils::IsFileExist("/data/updater/updater/etc/fstab.ut.updater"), true);
 }
 
 HWTEST_F(UtilsUnitTest, IsDirExist, TestSize.Level0)

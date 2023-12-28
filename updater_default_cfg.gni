@@ -29,8 +29,7 @@ if (updater_cfg_file != "") {
 
 template("updater_gen") {
   if (updater_cfg_file != "") {
-    ohos_static_library(target_name) {
-      output_name = "${target_name}_static"
+    ohos_source_set(target_name) {
       forward_variables_from(invoker, "*")
     }
   } else {

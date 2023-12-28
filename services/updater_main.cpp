@@ -147,6 +147,7 @@ static UpdaterStatus VerifyPackages(UpdaterParams &upParams)
     }
     upParams.callbackProgress(0.0);
     upParams.installTime.resize(upParams.updatePackage.size(), std::chrono::duration<double>(0));
+    ReadInstallTime(upParams);
     for (unsigned int i = upParams.pkgLocation; i < upParams.updatePackage.size(); i++) {
         LOG(INFO) << "Verify package:" << upParams.updatePackage[i];
         auto startTime = std::chrono::system_clock::now();
@@ -320,7 +321,7 @@ static UpdaterStatus PreUpdatePackages(UpdaterParams &upParams)
     const std::string resultPath = std::string(UPDATER_PATH) + "/" + std::string(UPDATER_RESULT_FILE);
     if (access(resultPath.c_str(), F_OK) != -1) {
         (void)DeleteFile(resultPath);
-        LOG(INFO) << "deleate last upgrade file";
+        LOG(INFO) << "delete last upgrade file";
     }
 
     if(upParams.pkgLocation == upParams.updatePackage.size()) {
@@ -382,6 +383,7 @@ static UpdaterStatus DoInstallPackages(UpdaterParams &upParams, std::vector<doub
             static_cast<int>(pkgStartPosition[upParams.pkgLocation + 1] * FULL_PERCENT_PROGRESS));
         auto endTime = std::chrono::system_clock::now();
         upParams.installTime[upParams.pkgLocation] = upParams.installTime[upParams.pkgLocation] + endTime - startTime;
+        WriteInstallTime(upParams);
         if (status != UPDATE_SUCCESS) {
             LOG(ERROR) << "InstallUpdaterPackage failed! Pkg is " << upParams.updatePackage[upParams.pkgLocation];
             if (!CheckResultFail()) {
@@ -459,6 +461,7 @@ static void PostUpdatePackages(UpdaterParams &upParams, bool updateResult)
     }
     LOG(INFO) << "post over, writeBuffer = " << writeBuffer;
     WriteDumpResult(writeBuffer);
+    DeleteInstallTimeFile();
 }
 
 UpdaterStatus UpdaterFromSdcard(UpdaterParams &upParams)
@@ -680,6 +683,9 @@ static UpdaterStatus StartUpdater(const std::vector<std::string> &args,
         }
     }
     optind = 1;
+    if (upParams.pkgLocation == 0) {
+        DeleteInstallTimeFile();
+    }
     // Sanity checks
     if (upParams.updateMode == SDCARD_UPDATE) {
         (void)UPDATER_UI_INSTANCE.SetMode(UPDATERMODE_SDCARD);

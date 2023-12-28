@@ -638,6 +638,7 @@ int32_t ZipFileEntry::Stored(const PkgStreamPtr inStream, const PkgStreamPtr out
     PkgAlgorithmContext &context)
 {
     size_t start = 0;
+    size_t startWrite = 0;
     size_t remainSize = context.packedSize;
     while (remainSize > 0) {
         PkgBuffer buffer(MAX_BUFFER_SIZE);
@@ -647,12 +648,12 @@ int32_t ZipFileEntry::Stored(const PkgStreamPtr inStream, const PkgStreamPtr out
             PKG_LOGE("read buffer from inStream failed");
             return ret;
         }
-        ret = outStream->Write(buffer, readLen, start);
+        ret = outStream->Write(buffer, readLen, startWrite);
         if (ret != PKG_SUCCESS) {
             PKG_LOGE("write buffer in outStream failed");
             return ret;
         }
-        start += readLen;
+        startWrite += readLen;
         remainSize -= readLen;
     }
     return PKG_SUCCESS;
