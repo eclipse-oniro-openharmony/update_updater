@@ -342,7 +342,7 @@ int32_t UpgradePkgFile::ReadImgHashData(size_t &parsedLen, DigestAlgorithm::Dige
 #ifndef DIFF_PATCH_SDK
     if ((!Updater::Utils::CheckUpdateMode(Updater::SDCARD_MODE) &&
         !Updater::Utils::CheckUpdateMode(Updater::USB_MODE)) ||
-        pkgInfo_.updateFileVersion != UpgradeFileVersion_V2) {
+        pkgInfo_.updateFileVersion < UpgradeFileVersion_V2) {
         PKG_LOGI("ignore image hash check");
         return PKG_SUCCESS;
     }
@@ -371,7 +371,11 @@ int32_t UpgradePkgFile::ReadImgHashData(size_t &parsedLen, DigestAlgorithm::Dige
     }
 
 #ifndef DIFF_PATCH_SDK
-    hashCheck_ = LoadImgHashData(imgHashBuf.data(), imgHashBuf.size());
+    if (pkgInfo_.updateFileVersion >= UpgradeFileVersion_V3) {
+        hashCheck_ = LoadImgHashDataNew(imgHashBuf.data(), imgHashBuf.size());
+    } else {
+        hashCheck_ = LoadImgHashData(imgHashBuf.data(), imgHashBuf.size());
+    }
     if (hashCheck_ == nullptr) {
         PKG_LOGE("pause hash data fail");
         return PKG_INVALID_FILE;
@@ -474,19 +478,11 @@ int32_t UpgradePkgFile::LoadPackage(std::vector<std::string> &fileNames, VerifyF
 int32_t UpgradePkgFile::VerifyFile(size_t &parsedLen, DigestAlgorithm::DigestAlgorithmPtr algorithm,
                                    VerifyFunction verifier)
 {
-    int32_t ret = PKG_VERIFY_FAIL;
-    switch (pkgInfo_.updateFileVersion) {
-        case UpgradeFileVersion_V1:
-            ret = VerifyFileV1(parsedLen, algorithm, verifier);
-            break;
-        case UpgradeFileVersion_V2:
-            ret = VerifyFileV2(parsedLen, algorithm, verifier);
-            break;
-        default:
-            PKG_LOGE("updateFileVersion: %u fail", pkgInfo_.updateFileVersion);
-            break;
+    if (pkgInfo_.updateFileVersion >= UpgradeFileVersion_V2) {
+        return VerifyFileV2(parsedLen, algorithm, verifier);
     }
-    return ret;
+    
+    return VerifyFileV1(parsedLen, algorithm, verifier);
 }
 
 int32_t UpgradePkgFile::VerifyFileV1(size_t &parsedLen, DigestAlgorithm::DigestAlgorithmPtr algorithm,
@@ -966,7 +962,15 @@ int32_t UpgradeFileEntry::Verify(PkgBuffer &buffer, size_t len, size_t offset)
     }
 #ifndef DIFF_PATCH_SDK
     uint32_t end = offset + len - 1;
-    if (!check_data_hash(pkgFile->GetImgHashData(), fileName_.c_str(), offset, end, hashVal.data(),  hashVal.size())) {
+    bool checkRet = false;
+    if (pkgFile->GetUpgradeFileVer() >= UpgradeFileVersion_V3) {
+        checkRet = CheckDataHashNew(pkgFile->GetImgHashData(), fileName_.c_str(),
+                                    offset, end, hashVal.data(),  hashVal.size());
+    } else {
+        checkRet = check_data_hash(pkgFile->GetImgHashData(), fileName_.c_str(),
+                                   offset, end, hashVal.data(),  hashVal.size());
+    }
+    if (!checkRet) {
         PKG_LOGE("check image hash value fail, name: %s, offset: %zu, end: %u", fileName_.c_str(), offset, end);
         return PKG_INVALID_PARAM;
     }
