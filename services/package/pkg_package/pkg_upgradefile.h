@@ -61,9 +61,9 @@ struct __attribute__((packed))  UpgradeParam {
 };
 
 enum {
-    UpgradeFileVersion_V1 = 1,     // bin v1 version
-    UpgradeFileVersion_V2,        // bin v2 version, add img hash part
-    UpgradeFileVersion_V3,        // bin v2 version, modify img hash part
+    UPGRADE_FILE_VERSION_V1 = 1,     // bin v1 version
+    UPGRADE_FILE_VERSION_V2,        // bin v2 version, add img hash part
+    UPGRADE_FILE_VERSION_V3,        // bin v2 version, modify img hash part
 };
 
 class UpgradeFileEntry : public PkgEntry {
@@ -113,7 +113,7 @@ public:
     {
 #ifndef DIFF_PATCH_SDK
         if (hashCheck_ != nullptr) {
-            if (pkgInfo_.updateFileVersion >= UpgradeFileVersion_V3) {
+            if (pkgInfo_.updateFileVersion >= UPGRADE_FILE_VERSION_V3) {
                 ReleaseImgHashDataNew(hashCheck_);
                 return;
             }

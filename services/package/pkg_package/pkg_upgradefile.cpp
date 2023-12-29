@@ -342,7 +342,7 @@ int32_t UpgradePkgFile::ReadImgHashData(size_t &parsedLen, DigestAlgorithm::Dige
 #ifndef DIFF_PATCH_SDK
     if ((!Updater::Utils::CheckUpdateMode(Updater::SDCARD_MODE) &&
         !Updater::Utils::CheckUpdateMode(Updater::USB_MODE)) ||
-        pkgInfo_.updateFileVersion < UpgradeFileVersion_V2) {
+        pkgInfo_.updateFileVersion < UPGRADE_FILE_VERSION_V2) {
         PKG_LOGI("ignore image hash check");
         return PKG_SUCCESS;
     }
@@ -371,7 +371,7 @@ int32_t UpgradePkgFile::ReadImgHashData(size_t &parsedLen, DigestAlgorithm::Dige
     }
 
 #ifndef DIFF_PATCH_SDK
-    if (pkgInfo_.updateFileVersion >= UpgradeFileVersion_V3) {
+    if (pkgInfo_.updateFileVersion >= UPGRADE_FILE_VERSION_V3) {
         hashCheck_ = LoadImgHashDataNew(imgHashBuf.data(), imgHashBuf.size());
     } else {
         hashCheck_ = LoadImgHashData(imgHashBuf.data(), imgHashBuf.size());
@@ -478,7 +478,7 @@ int32_t UpgradePkgFile::LoadPackage(std::vector<std::string> &fileNames, VerifyF
 int32_t UpgradePkgFile::VerifyFile(size_t &parsedLen, DigestAlgorithm::DigestAlgorithmPtr algorithm,
                                    VerifyFunction verifier)
 {
-    if (pkgInfo_.updateFileVersion >= UpgradeFileVersion_V2) {
+    if (pkgInfo_.updateFileVersion >= UPGRADE_FILE_VERSION_V2) {
         return VerifyFileV2(parsedLen, algorithm, verifier);
     }
     
@@ -963,7 +963,7 @@ int32_t UpgradeFileEntry::Verify(PkgBuffer &buffer, size_t len, size_t offset)
 #ifndef DIFF_PATCH_SDK
     uint32_t end = offset + len - 1;
     bool checkRet = false;
-    if (pkgFile->GetUpgradeFileVer() >= UpgradeFileVersion_V3) {
+    if (pkgFile->GetUpgradeFileVer() >= UPGRADE_FILE_VERSION_V3) {
         checkRet = CheckDataHashNew(pkgFile->GetImgHashData(), fileName_.c_str(),
                                     offset, end, hashVal.data(),  hashVal.size());
     } else {
