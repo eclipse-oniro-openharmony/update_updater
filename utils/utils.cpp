@@ -19,6 +19,7 @@
 #include <cstdint>
 #include <cstdlib>
 #include <dirent.h>
+#include <fcntl.h>
 #include <limits>
 #include <linux/reboot.h>
 #include <string>
@@ -409,6 +410,17 @@ bool WriteStringToFile(int fd, const std::string& content)
     return true;
 }
 
+void SyncFile(const std::string &dst)
+{
+    int fd = open(dst.c_str(), O_RDWR);
+    if (fd < 0) {
+        LOG(ERROR) << "open " << dst << " failed! err " << strerror(errno);
+        return;
+    }
+    fsync(fd);
+    close(fd);
+}
+
 bool CopyFile(const std::string &src, const std::string &dest, bool isAppend)
 {
     char realPath[PATH_MAX + 1] = {0};
@@ -430,6 +442,8 @@ bool CopyFile(const std::string &src, const std::string &dest, bool isAppend)
         return false;
     }
     fout.flush();
+    fout.close();
+    SyncFile(dest); // no way to get fd from ofstream, so reopen to sync this file
     return true;
 }
 
