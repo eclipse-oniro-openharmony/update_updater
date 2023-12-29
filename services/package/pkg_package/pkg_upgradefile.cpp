@@ -876,6 +876,7 @@ int32_t UpgradeFileEntry::DecodeHeader(PkgBuffer &buffer, size_t headerOffset, s
     fileInfo_.originalSize = ReadLE32(buffer.buffer + offsetof(UpgradeCompInfo, originalSize));
     fileInfo_.fileInfo.packMethod = PKG_COMPRESS_METHOD_NONE;
     fileInfo_.fileInfo.digestMethod = PKG_DIGEST_TYPE_NONE;
+    fileInfo_.fileInfo.resType = info->resType;
     int32_t ret = memcpy_s(fileInfo_.digest, sizeof(fileInfo_.digest), info->digest, sizeof(info->digest));
     if (ret != EOK) {
         PKG_LOGE("Fail to memcpy_s ret: %d", ret);

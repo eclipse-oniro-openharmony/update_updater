@@ -56,6 +56,11 @@ enum {
     POST_TYPE_WRITE_PARTITION
 };
 
+enum {
+    UPGRADE_FILE_COMP_OTHER_TPYE = 0,
+    UPGRADE_FILE_COMP_IMG_TPYE
+};
+
 /**
  * Package information
  */
@@ -73,6 +78,7 @@ struct PkgInfo {
  */
 struct FileInfo {
     uint8_t flags = 0;
+    uint8_t resType = 0;
     uint8_t digestMethod = 0;
     uint16_t packMethod = 0;
     time_t modifiedTime = 0;

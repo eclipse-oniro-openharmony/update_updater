@@ -33,7 +33,7 @@ protected:
     virtual int32_t ProcessBinFile(Uscript::UScriptEnv &env, Uscript::UScriptContext &context,
         Hpackage::PkgManager::StreamPtr stream);
     int32_t ComponentProcess(Uscript::UScriptEnv &env, Hpackage::PkgManager::StreamPtr stream,
-        const std::string &name, const size_t fileSize);
+        const std::string &name, const Hpackage::FileInfo &fileInfo);
     bool isStopRun_ = false;
 
 private:
