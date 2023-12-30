@@ -517,14 +517,18 @@ bool CopyUpdaterLogs(const std::string &sLog, const std::string &dLog)
         LOG(WARNING) << "MountForPath /data/log failed!";
         return false;
     }
-#ifdef WITH_SELINUX
-    RestoreconRecurse("/data");
-#endif // WITH_SELINUX
+
     if (access(destPath.c_str(), 0) != 0) {
+        #ifdef WITH_SELINUX
+            RestoreconRecurse("/data");
+        #endif // WITH_SELINUX
         if (MkdirRecursive(destPath.c_str(), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) != 0) {
             LOG(ERROR) << "MkdirRecursive error!";
             return false;
         }
+        #ifdef WITH_SELINUX
+            RestoreconRecurse(UPDATER_PATH);
+        #endif // WITH_SELINUX
     }
 
     if (Utils::GetFileSize(sLog) > MAX_LOG_SIZE) {
