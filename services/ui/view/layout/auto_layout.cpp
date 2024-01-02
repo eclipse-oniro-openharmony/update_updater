@@ -34,6 +34,7 @@ void AutoLayout::Init()
         return;
     }
     helper_->Init();
+    isInited_ = true;
 }
 
 void AutoLayout::SetJsonLocation(JsonNode &root)
@@ -43,5 +44,10 @@ void AutoLayout::SetJsonLocation(JsonNode &root)
         return;
     }
     helper_->SetJsonLocation(root);
+}
+
+bool AutoLayout::IsInited()
+{
+    return isInited_;
 }
 }
