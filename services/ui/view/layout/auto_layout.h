@@ -24,6 +24,7 @@ public:
     static AutoLayout &GetInstance();
     void SetJsonLocation(JsonNode &root);
     void Init();
+    bool IsInited();
 private:
     AutoLayout() = default;
     ~AutoLayout() = default;
