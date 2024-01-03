@@ -264,8 +264,8 @@ int32_t UScriptInstructionBinFlowWrite::ComponentProcess(Uscript::UScriptEnv &en
         }
     }
 
-    if (fileInfo.resType == UPGRADE_FILE_COMP_OTHER_TPYE) {
-        LOG(INFO) << name << "comp file is not image, skip";
+    if (processor == nullptr && fileInfo.resType == UPGRADE_FILE_COMP_OTHER_TPYE) {
+        LOG(INFO) << name << "comp is not register and comp file is not image, skip";
         processor.reset();
         processor = std::make_unique<SkipImgProcessor>(name, fileSize);
     }
