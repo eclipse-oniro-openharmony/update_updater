@@ -21,7 +21,6 @@ class LayoutInterface {
 public:
     virtual void Init() = 0;
     virtual void SetJsonLocation(JsonNode &root) = 0;
-    virtual bool IsInited() = 0;
     virtual ~LayoutInterface() {}
 };
 }

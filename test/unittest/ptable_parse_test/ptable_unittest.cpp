@@ -43,6 +43,16 @@ public:
         return true;
     }
 
+    bool EditPartitionBuf(uint8_t *imageBuf, uint64_t imgBufSize, std::vector<PtnInfo> &modifyList) override
+    {
+        return true;
+    }
+
+    bool GetPtableImageBuffer(uint8_t *imageBuf, const uint32_t imgBufSize) override
+    {
+        return true;
+    }
+
     bool TestGetPartionInfoByName(const std::string &partitionName, PtnInfo &ptnInfo, int32_t &index)
     {
         return GetPartionInfoByName(partitionName, ptnInfo, index);

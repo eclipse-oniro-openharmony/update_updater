@@ -29,6 +29,7 @@ private:
     AutoLayout() = default;
     ~AutoLayout() = default;
     std::unique_ptr<LayoutInterface> helper_ {};
+    bool isInited_ = false;
 };
 }
 #endif

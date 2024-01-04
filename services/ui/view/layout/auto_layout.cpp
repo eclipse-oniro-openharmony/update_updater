@@ -29,11 +29,14 @@ AutoLayout &AutoLayout::GetInstance()
 
 void AutoLayout::Init()
 {
-    if (helper_ == nullptr) {
-        LOG(ERROR) << "helper_ null error";
-        return;
+    if (!isInited_) {
+        if (helper_ == nullptr) {
+            LOG(ERROR) << "helper_ null error";
+            return;
+        }
+        helper_->Init();
+        isInited_ = true;
     }
-    helper_->Init();
 }
 
 void AutoLayout::SetJsonLocation(JsonNode &root)
@@ -47,10 +50,6 @@ void AutoLayout::SetJsonLocation(JsonNode &root)
 
 bool AutoLayout::IsInited()
 {
-    if (helper_ == nullptr) {
-        LOG(ERROR) << "helper_ null error";
-        return false;
-    }
-    return helper_->IsInited();
+    return isInited_;
 }
 }
