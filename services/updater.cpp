@@ -114,8 +114,7 @@ UpdaterStatus IsSpaceCapacitySufficient(const UpdaterParams &upParams)
     }
     uint64_t maxStashSize =  *max_element(stashSizeList.begin(), stashSizeList.end());
     LOG(INFO) << "get max stash size:" << maxStashSize;
-    uint64_t maxLogSpace = MAX_LOG_SPACE * upParams.updatePackage.size();
-    uint64_t totalPkgSize = maxStashSize + maxLogSpace;
+    uint64_t totalPkgSize = maxStashSize + MIN_UPDATE_SPACE;
 
     if (CheckStatvfs(totalPkgSize) != UPDATE_SUCCESS) {
         LOG(ERROR) << "CheckStatvfs error";
