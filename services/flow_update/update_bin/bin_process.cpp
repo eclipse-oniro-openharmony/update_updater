@@ -236,7 +236,7 @@ int32_t UScriptInstructionBinFlowWrite::ProcessBinFile(Uscript::UScriptEnv &env,
         }
 
         LOG(INFO) << " start process Component " << partitionName << " unpackedSize " << info->unpackedSize;
-        if (ComponentProcess(env, stream, partitionName, info->unpackedSize) != USCRIPT_SUCCESS) {
+        if (ComponentProcess(env, stream, partitionName, *info) != USCRIPT_SUCCESS) {
             LOG(ERROR) << "Error to process " << partitionName;
             return USCRIPT_ERROR_EXECUTE;
         }
@@ -247,8 +247,9 @@ int32_t UScriptInstructionBinFlowWrite::ProcessBinFile(Uscript::UScriptEnv &env,
 }
 
 int32_t UScriptInstructionBinFlowWrite::ComponentProcess(Uscript::UScriptEnv &env, PkgManager::StreamPtr stream,
-                                                         const std::string &name, const size_t fileSize)
+                                                         const std::string &name, const Hpackage::FileInfo &fileInfo)
 {
+    size_t fileSize = fileInfo.unpackedSize;
     // 根据镜像名获取组件处理类名
     std::unique_ptr<ComponentProcessor> processor =
         ComponentProcessorFactory::GetInstance().GetProcessor(name, fileSize);
@@ -261,6 +262,12 @@ int32_t UScriptInstructionBinFlowWrite::ComponentProcess(Uscript::UScriptEnv &en
             processor.reset();
             processor = std::make_unique<SkipImgProcessor>(name, fileSize);
         }
+    }
+
+    if (processor == nullptr && fileInfo.resType == UPGRADE_FILE_COMP_OTHER_TPYE) {
+        LOG(INFO) << name << "comp is not register and comp file is not image, skip";
+        processor.reset();
+        processor = std::make_unique<SkipImgProcessor>(name, fileSize);
     }
 
     if (processor == nullptr) {

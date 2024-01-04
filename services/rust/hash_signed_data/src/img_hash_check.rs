@@ -13,12 +13,17 @@
  * limitations under the License.
  */
 
+use std::default::Default;
 use std::collections::HashMap;
+use std::hash::Hash;
+use std::cmp::Eq;
+use std::cmp::PartialEq;
+use std::mem::size_of;
 use crate::updaterlog;
 
-const TLV_SIZE:usize = 6;
+const TLV_SIZE: usize = 6;
 const HASH_INFO_SIZE: usize = 16;
-const HASH_HEADER_SIZE: usize = 38;
+const IMG_NAME_SIZE: usize = 32;
 
 #[derive(Debug)]
 struct HashInfo {
@@ -30,18 +35,34 @@ struct HashInfo {
     block_size: u32
 }
 
+pub trait ReadLeBytes {
+    fn read_le_bytes(buffer: &[u8]) -> Self;
+}
+
+impl ReadLeBytes for u32 {
+    fn read_le_bytes(buffer: &[u8]) -> Self {
+        u32::from_le_bytes(buffer[..].try_into().unwrap())
+    }
+}
+
+impl ReadLeBytes for u64 {
+    fn read_le_bytes(buffer: &[u8]) -> Self {
+        u64::from_le_bytes(buffer[..].try_into().unwrap())
+    }
+}
+
 #[derive(Debug)]
-struct HashHeader {
+struct HashHeader<T: ReadLeBytes> {
     image_name: String,
     hash_num: u16,
-    img_size: u32
+    img_size: T
 }
 
 #[repr(C)]
 #[derive(Debug)]
-struct HashData {
-    addr_star: u32,
-    addr_end: u32,
+struct HashData<T: ReadLeBytes> {
+    addr_star: T,
+    addr_end: T,
     hash_data: Vec<u8>
 }
 
@@ -52,9 +73,13 @@ struct HashSign {
     sign_data: Vec<u8>
 }
 
-#[derive(Debug, PartialEq)]
-pub struct ImgHashData {
-    data: HashMap<String, HashMap<(u32, u32), Vec<u8>>>
+#[derive(Hash, Eq, PartialEq, Debug)]
+struct Tuple<T> (T,  T);
+
+/// PartialEq
+#[derive(Debug)]
+pub struct ImgHashData<T: Hash + Eq + PartialEq> {
+    data: HashMap<String, HashMap<Tuple<T>, Vec<u8>>>
 }
 
 trait TLVStruct {
@@ -84,9 +109,9 @@ impl TLVStruct for HashInfo {
     }
 }
 
-impl TLVStruct for HashHeader {
-    fn new() -> HashHeader {
-        HashHeader {image_name: String::new(), hash_num: 0, img_size: 0}
+impl<T: Default + ReadLeBytes> TLVStruct for HashHeader<T> {
+    fn new() -> HashHeader<T> {
+        HashHeader {image_name: String::new(), hash_num: 0, img_size: Default::default()}
     }
 
     fn read_from_le_bytes(&mut self, buffer: &[u8]) -> bool {
@@ -98,14 +123,14 @@ impl TLVStruct for HashHeader {
         self.image_name = String::from_utf8(Vec::from(&buffer[0..32])).unwrap().trim_end_matches('\0').to_owned();
         updaterlog!(INFO, "HashHeader  read_from_le_bytes image_name {}", self.image_name);
         self.hash_num = u16::from_le_bytes(buffer[32..34].try_into().unwrap());
-        self.img_size = u32::from_le_bytes(buffer[34..].try_into().unwrap());
+        self.img_size =  T::read_le_bytes(&buffer[34..]);
         true
     }
 }
 
-impl TLVStruct for HashData {
-    fn new() -> HashData {
-        HashData {addr_star: 0, addr_end: 0, hash_data: vec![]}
+impl<T: Default + ReadLeBytes> TLVStruct for HashData<T> {
+    fn new() -> HashData<T> {
+        HashData {addr_star: Default::default(), addr_end: Default::default(), hash_data: vec![]}
     }
 
     fn read_from_le_bytes(&mut self, buffer: &[u8]) -> bool {
@@ -114,9 +139,9 @@ impl TLVStruct for HashData {
             return false;
         }
 
-        self.addr_star = u32::from_le_bytes(buffer[0..4].try_into().unwrap());
-        self.addr_end = u32::from_le_bytes(buffer[4..8].try_into().unwrap());
-        self.hash_data = Vec::from(&buffer[8..]);
+        self.addr_star = T::read_le_bytes(&buffer[0..size_of::<T>()]);
+        self.addr_end = T::read_le_bytes(&buffer[size_of::<T>()..(2*size_of::<T>())]);
+        self.hash_data = Vec::from(&buffer[(2*size_of::<T>())..]);
         true
     }
 }
@@ -140,7 +165,7 @@ impl TLVStruct for HashSign {
 }
 
 #[allow(unused)]
-impl ImgHashData {
+impl<T: Default + ReadLeBytes + Hash + Eq + PartialEq> ImgHashData<T> {
     pub fn load_img_hash_data(buffer: &[u8]) -> Result<Self, String> {
         let mut offset = 0usize;
         let mut hash_info = HashInfo::new();
@@ -154,25 +179,29 @@ impl ImgHashData {
             return Err(format!("{} buffer is too small. {}", line!(), buffer.len()));
         }
 
-        let mut hash_data_map: HashMap<String, HashMap<(u32, u32), Vec<u8>>> = HashMap::new();
+        let mut hash_data_map: HashMap<String, HashMap<Tuple<T>, Vec<u8>>> = HashMap::new();
+        let hash_header_size: usize = IMG_NAME_SIZE + size_of::<u16>() + size_of::<T>();
+        updaterlog!(INFO, "HashHeader  read_from_le_bytes hash_header_size {}", hash_header_size);
         while offset < hash_data_len as usize {
-            let mut hash_header = HashHeader::new();
-            hash_header.read_from_le_bytes(&buffer[offset..(HASH_HEADER_SIZE + offset)]);
-            offset += HASH_HEADER_SIZE;
+            let mut hash_header: HashHeader<T> = HashHeader::new();
+            hash_header.read_from_le_bytes(&buffer[offset..(hash_header_size + offset)]);
+            offset += hash_header_size;
 
-            let mut single_data: HashMap<(u32, u32), Vec<u8>> = HashMap::new();
+            let mut single_data: HashMap<Tuple<T>, Vec<u8>> = HashMap::new();
             for i in 0..hash_header.hash_num {
                 let mut hash_data = HashData::new();
-                hash_data.read_from_le_bytes(&buffer[offset.. (offset + 8 + hash_info.algo_size as usize)]);
-                single_data.insert((hash_data.addr_star, hash_data.addr_end), hash_data.hash_data);
-                offset += (8 + hash_info.algo_size) as usize;
+                hash_data.read_from_le_bytes(&buffer[offset.. (offset + (2*size_of::<T>()) + hash_info.algo_size as usize)]);
+                let mut addr_tuple = Tuple(hash_data.addr_star, hash_data.addr_end);
+                single_data.insert(addr_tuple, hash_data.hash_data);
+                offset += 2*size_of::<T>() + (hash_info.algo_size) as usize;
             }
             hash_data_map.insert(hash_header.image_name, single_data);
         }
         Ok(ImgHashData { data: hash_data_map })
     }
 
-    pub fn check_img_hash(&self, img_name: String, start: u32, end: u32, hash_value: &[u8]) -> bool
+    pub fn check_img_hash(&self, img_name: String, start: T, end: T, hash_value: &[u8]) -> bool
+        where T: std::cmp::Eq, T: std::cmp::PartialEq, T: std::fmt::Display
     {
         let img_hash_map = match self.data.get(&img_name) {
             Some(img_hash_map)=> img_hash_map,
@@ -182,10 +211,11 @@ impl ImgHashData {
             }
         };
 
-        let hash_data = match img_hash_map.get(&(start, end)) {
+        let mut addr_tuple = Tuple(start, end);
+        let hash_data = match img_hash_map.get(&addr_tuple) {
             Some(hash_data)=> hash_data,
             _ => {
-                updaterlog!(ERROR, "nothing found start: {}, end: {}", start, end);
+                updaterlog!(ERROR, "nothing found start: {}, end: {}", addr_tuple.0, addr_tuple.1);
                 return false;
             }
         };

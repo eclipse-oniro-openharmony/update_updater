@@ -59,6 +59,13 @@ struct __attribute__((packed))  UpgradeParam {
     size_t srcOffset {};
     size_t currLen {};
 };
+
+enum {
+    UPGRADE_FILE_VERSION_V1 = 1,     // bin v1 version
+    UPGRADE_FILE_VERSION_V2,        // bin v2 version, add img hash part
+    UPGRADE_FILE_VERSION_V3,        // bin v2 version, modify img hash part
+};
+
 class UpgradeFileEntry : public PkgEntry {
 public:
     UpgradeFileEntry(PkgFilePtr pkgFile, uint32_t nodeId) : PkgEntry(pkgFile, nodeId) {}
@@ -92,11 +99,6 @@ private:
 
 class UpgradePkgFile : public PkgFileImpl {
 public:
-    enum {
-        UpgradeFileVersion_V1 = 1,     // bin v1 version
-        UpgradeFileVersion_V2,        // bin v2 version
-    };
-
     UpgradePkgFile(PkgManager::PkgManagerPtr manager, PkgStreamPtr stream, PkgInfoPtr header)
         : PkgFileImpl(manager, stream, PkgFile::PKG_TYPE_UPGRADE)
     {
@@ -111,6 +113,10 @@ public:
     {
 #ifndef DIFF_PATCH_SDK
         if (hashCheck_ != nullptr) {
+            if (pkgInfo_.updateFileVersion >= UPGRADE_FILE_VERSION_V3) {
+                ReleaseImgHashDataNew(hashCheck_);
+                return;
+            }
             ReleaseImgHashData(hashCheck_);
         }
 #endif
@@ -139,6 +145,11 @@ public:
     PkgManager::PkgManagerPtr GetPkgMgr() const
     {
         return pkgManager_;
+    }
+
+    int32_t GetUpgradeFileVer() const
+    {
+        return pkgInfo_.updateFileVersion;
     }
 
 private:
