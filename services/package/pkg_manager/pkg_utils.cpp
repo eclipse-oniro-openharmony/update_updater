@@ -143,7 +143,7 @@ int32_t CheckFile(const std::string &fileName, int type)
         return PKG_SUCCESS;
     }
     if (access(path.c_str(), F_OK) == -1) {
-        CreatDirectory(path.c_str(), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
+        CreatDirectory(path, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
     }
     int ret = -1;
     if (type == PkgStream::PkgStreamType_Read) {
