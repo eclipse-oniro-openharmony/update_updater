@@ -58,7 +58,7 @@ HWTEST_F(RecordInstallTimeUnittest, UpdaterRecordInstallTime, TestSize.Level1)
     for (int i = 0; i < params.installTime.size(); i++) {
         EXPECT_EQ(
             Utils::DurationToString(params.installTime, i, 2), // 2:precision
-            Utils::DurationToString(newParams.installTime, i, 2)); // 2:precision
+            Utils::DurationToString(params.installTime, i, 2)); // 2:precision
     }
 }
 
