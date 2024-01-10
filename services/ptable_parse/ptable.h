@@ -166,7 +166,7 @@ protected:
     bool CheckFileExist(const std::string &fileName);
     bool WriteBufferToPath(const std::string &path, const uint64_t offset, const uint8_t *buffer, const uint32_t size);
     bool ChangeGpt(uint8_t *gptBuf, uint64_t gptSize, GptParseInfo gptInfo, PtnInfo &modifyInfo);
-    bool AdjustGpt(uint8_t *ptnInfoBuf, uint64_t bufSize, std::string &ptnName, uint64_t preLastLBA,
+    bool AdjustGpt(uint8_t *ptnInfoBuf, uint64_t bufSize, const std::string &ptnName, uint64_t preLastLBA,
     uint64_t lastPtnLastLBA);
 
 private:

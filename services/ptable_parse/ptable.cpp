@@ -507,7 +507,7 @@ bool Ptable::GetPartionInfoByName(const std::string &partitionName, PtnInfo &ptn
     return false;
 }
 
-bool Ptable::AdjustGpt(uint8_t *ptnInfoBuf, uint64_t bufSize, std::string &ptnName, uint64_t preLastLBA,
+bool Ptable::AdjustGpt(uint8_t *ptnInfoBuf, uint64_t bufSize, const std::string &ptnName, uint64_t preLastLBA,
     uint64_t lastPtnLastLBA)
 {
     if (ptnInfoBuf == nullptr || bufSize == 0 || ptnName.empty()) {
