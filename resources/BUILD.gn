@@ -156,7 +156,7 @@ foreach(file, updater_resources_list) {
   ohos_prebuilt_etc(_name) {
     source = "//base/update/updater/resources/$file"
     module_install_dir = "resources"
-    if (file == "font/HarmonyOS_Sans_SC_Regular_Small.ttf") {
+    if (file == "font/HarmonyOS_Sans_SC_Regular_Small.ttf" || file == "font/line_cj.brk") {
       module_install_dir = "user/data"
     } else if (get_path_info(file, "dir") != ".") {
       module_install_dir =
