@@ -33,7 +33,7 @@ config("updater_ui_support_cfg") {
 ohos_static_library("libui") {
   defines = [
     "ENABLE_BITMAP_FONT = 0",
-    "ENABLE_ICU = 0",
+    "ENABLE_ICU = 1",
     "ENABLE_MULTI_FONT = 0",
     "ENABLE_SHAPING = 0",
     "ENABLE_STATIC_FONT = 0",
