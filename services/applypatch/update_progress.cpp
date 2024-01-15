@@ -58,12 +58,12 @@ static void *OtaUpdateProgressThread(Uscript::UScriptEnv *env, std::mutex *mtx)
             continue;
         }
         std::lock_guard<std::mutex> lock(*mtx);
+        if (g_progressExitFlag == true) {
+            break;
+        }
         if (curProgress < totalProgress && env != nullptr) {
             env->PostMessage("set_progress", std::to_string(totalProgress));
             curProgress = totalProgress;
-        }
-        if (g_progressExitFlag == true) {
-            break;
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(50)); // 50ms
     }
@@ -74,7 +74,7 @@ int CreateProgressThread(Uscript::UScriptEnv *env, std::mutex &mtx)
 {
     std::string content = std::to_string(1.0f) + "," + std::to_string(0.0f); // set g_percentage 100
     env->PostMessage("show_progress", content);
-    std::thread progressThread(OtaUpdateProgressThread, env, &mtx);
+    std::thread progressThread(OtaUpdateProgressThread, env, std::ref(mtx));
     progressThread.detach();
     return 0;
 }
