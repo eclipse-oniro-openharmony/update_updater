@@ -44,7 +44,7 @@ void SetProgressExitFlag(bool exitFlag)
     g_progressExitFlag = exitFlag;
 }
 
-static void *OtaUpdateProgressThread(Uscript::UScriptEnv *env, std::mutex *mtx)
+static void *OtaUpdateProgressThread(Uscript::UScriptEnv *env, std::mutex &mtx)
 {
     float totalProgress = 0.0f;
     float curProgress = 0.0f;
