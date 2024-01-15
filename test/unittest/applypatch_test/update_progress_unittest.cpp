@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 #include <thread>
+#include <mutex>
 #include <string>
 #include "script_instruction.h"
 #include "script/script_unittest.h"

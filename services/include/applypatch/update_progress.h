@@ -15,6 +15,8 @@
 #ifndef UPDATE_PROGRESS_H
 #define UPDATE_PROGRESS_H
 #include "script_instruction.h"
+#include <thread>
+#include <mutex>
 namespace Updater {
 void FillUpdateProgress();
 
