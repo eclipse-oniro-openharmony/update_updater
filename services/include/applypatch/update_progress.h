@@ -24,6 +24,6 @@ float GetUpdateProress();
 
 void SetProgressExitFlag(bool exitFlag);
 
-int32_t CreateProgressThread(Uscript::UScriptEnv *env);
+int32_t CreateProgressThread(Uscript::UScriptEnv *env, std::mutex &mtx);
 }
 #endif

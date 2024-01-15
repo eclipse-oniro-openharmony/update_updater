@@ -390,7 +390,8 @@ int ExecUpdate(PkgManager::PkgManagerPtr pkgManager, int retry, const std::strin
 
     UpdaterInit::GetInstance().InvokeEvent(UPDATER_BINARY_INIT_DONE_EVENT);
 
-    ret = CreateProgressThread(env);
+    std::mutex mtx;
+    ret = CreateProgressThread(env, mtx);
     if (ret != 0) {
         LOG(ERROR) << "Fail to create progress thread";
         ScriptManager::ReleaseScriptManager();
@@ -410,6 +411,7 @@ int ExecUpdate(PkgManager::PkgManagerPtr pkgManager, int retry, const std::strin
     }
     SetProgressExitFlag(true);
     ScriptManager::ReleaseScriptManager();
+    std::lock_guard<std::mutex> lock(mtx);
     delete env;
     env = nullptr;
     return ret;
