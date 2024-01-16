@@ -14,6 +14,7 @@
  */
 
 #include <gtest/gtest.h>
+#include <pthread.h>
 #include <thread>
 #include <string>
 #include "script_instruction.h"
