@@ -17,6 +17,7 @@
 #include <memory>
 #include <string>
 #include <unistd.h>
+#include <pthread.h>
 #include "securec.h"
 #include "applypatch/data_writer.h"
 #include "applypatch/partition_record.h"
@@ -390,7 +391,8 @@ int ExecUpdate(PkgManager::PkgManagerPtr pkgManager, int retry, const std::strin
 
     UpdaterInit::GetInstance().InvokeEvent(UPDATER_BINARY_INIT_DONE_EVENT);
 
-    ret = CreateProgressThread(env);
+    pthread_t thread;
+    ret = CreateProgressThread(env, thread);
     if (ret != 0) {
         LOG(ERROR) << "Fail to create progress thread";
         ScriptManager::ReleaseScriptManager();
@@ -408,7 +410,7 @@ int ExecUpdate(PkgManager::PkgManagerPtr pkgManager, int retry, const std::strin
             break;
         }
     }
-    SetProgressExitFlag(true);
+    SetProgressExitFlag(thread);
     ScriptManager::ReleaseScriptManager();
     delete env;
     env = nullptr;

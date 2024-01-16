@@ -22,8 +22,8 @@ void SetUpdateProgress(float step);
 
 float GetUpdateProress();
 
-void SetProgressExitFlag(bool exitFlag);
+void SetProgressExitFlag(pthread_t &thread);
 
-int32_t CreateProgressThread(Uscript::UScriptEnv *env);
+int32_t CreateProgressThread(Uscript::UScriptEnv *env, pthread_t &thread);
 }
 #endif

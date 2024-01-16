@@ -14,6 +14,7 @@
  */
 
 #include "applypatch/update_progress.h"
+#include <pthread.h>
 #include <thread>
 #include <mutex>
 #include <chrono>
@@ -39,13 +40,15 @@ float GetUpdateProress()
     return g_totalProgress.load();
 }
 
-void SetProgressExitFlag(bool exitFlag)
+void SetProgressExitFlag(pthread_t &thread)
 {
-    g_progressExitFlag = exitFlag;
+    g_progressExitFlag = true;
+    pthread_join(thread, nullptr);
 }
 
-static void *OtaUpdateProgressThread(Uscript::UScriptEnv *env)
+static void *OtaUpdateProgressThread(void *usEnv)
 {
+    Uscript::UScriptEnv *env = static_cast<Uscript::UScriptEnv *>(usEnv);
     float totalProgress = 0.0f;
     float curProgress = 0.0f;
     while (true) {
@@ -57,24 +60,22 @@ static void *OtaUpdateProgressThread(Uscript::UScriptEnv *env)
             std::this_thread::sleep_for(std::chrono::milliseconds(500)); // 500ms
             continue;
         }
+        if (g_progressExitFlag == true) {
+            break;
+        }
         if (curProgress < totalProgress && env != nullptr) {
             env->PostMessage("set_progress", std::to_string(totalProgress));
             curProgress = totalProgress;
-        }
-        if (g_progressExitFlag == true) {
-            break;
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(50)); // 50ms
     }
     return nullptr;
 }
 
-int CreateProgressThread(Uscript::UScriptEnv *env)
+int CreateProgressThread(Uscript::UScriptEnv *env, pthread_t &thread)
 {
     std::string content = std::to_string(1.0f) + "," + std::to_string(0.0f); // set g_percentage 100
     env->PostMessage("show_progress", content);
-    std::thread progressThread(OtaUpdateProgressThread, env);
-    progressThread.detach();
-    return 0;
+    return pthread_create(&thread, nullptr, OtaUpdateProgressThread, env);
 }
 }
