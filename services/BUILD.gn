@@ -54,6 +54,13 @@ updater_common_deps = [
 updater_gen("updater") {
   deps = [ "${updater_path}/services:libupdater_static" ]
 
+  # force link flashd library
+  ldflags = [
+    "-Wl,--whole-archive",
+    rebase_path("${target_out_dir}/flashd/libflashd.a"),
+    "-Wl,--no-whole-archive",
+  ]
+
   part_name = "updater"
   subsystem_name = "updater"
 }
@@ -83,13 +90,6 @@ ohos_static_library("libupdater_static") {
     "${updater_path}/services/ui:libui",
     "//third_party/libdrm:libdrm",
     "//third_party/openssl:libcrypto_shared",
-  ]
-
-  # force link flashd library
-  ldflags = [
-    "-Wl,--whole-archive",
-    rebase_path("${target_out_dir}/flashd/libflashd.a"),
-    "-Wl,--no-whole-archive",
   ]
 
   if (defined(use_ptable)) {
