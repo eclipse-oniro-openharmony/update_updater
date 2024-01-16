@@ -58,6 +58,7 @@ private:
 HWTEST_F(UpdateProgressTest, UpdateProgressTest01, TestSize.Level1)
 {
     Hpackage::TestScriptPkgManager pkgManager;
+    UTestPostProgressEnv env {&pkgManager};
     pthread_t thread;
     EXPECT_EQ(CreateProgressThread(&env, thread), 0);
     EXPECT_EQ(CreateProgressThread(&env), 0);
