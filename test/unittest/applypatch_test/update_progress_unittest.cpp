@@ -57,12 +57,13 @@ private:
 HWTEST_F(UpdateProgressTest, UpdateProgressTest01, TestSize.Level1)
 {
     Hpackage::TestScriptPkgManager pkgManager;
-    UTestPostProgressEnv env {&pkgManager};
+    pthread_t thread;
+    EXPECT_EQ(CreateProgressThread(&env, thread), 0);
     EXPECT_EQ(CreateProgressThread(&env), 0);
     float progress = 1.0f;
     SetUpdateProgress(progress);
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
     EXPECT_EQ(env.GetPostMessage(), env.GetPostMessage());
-    SetProgressExitFlag(true);
+    SetProgressExitFlag(thread);
 }
 }

@@ -23,7 +23,6 @@
 namespace Updater {
 static std::atomic<float> g_totalProgress(0.0f);
 static bool g_progressExitFlag = false;
-pthread_t g_thread;
 void FillUpdateProgress()
 {
     g_totalProgress.store(1.001f); // ensure > 1.0f
@@ -41,10 +40,10 @@ float GetUpdateProress()
     return g_totalProgress.load();
 }
 
-void SetProgressExitFlag(bool exitFlag)
+void SetProgressExitFlag(pthread_t &thread)
 {
-    g_progressExitFlag = exitFlag;
-    pthread_join(g_thread, nullptr);
+    g_progressExitFlag = true;
+    pthread_join(thread, nullptr);
 }
 
 static void *OtaUpdateProgressThread(void *usEnv)
@@ -73,11 +72,11 @@ static void *OtaUpdateProgressThread(void *usEnv)
     return nullptr;
 }
 
-int CreateProgressThread(Uscript::UScriptEnv *env)
+int CreateProgressThread(Uscript::UScriptEnv *env, pthread_t &thread)
 {
     std::string content = std::to_string(1.0f) + "," + std::to_string(0.0f); // set g_percentage 100
     env->PostMessage("show_progress", content);
-    (void)pthread_create(&g_thread, nullptr, OtaUpdateProgressThread, env);
+    (void)pthread_create(&thread, nullptr, OtaUpdateProgressThread, env);
     return 0;
 }
 }
