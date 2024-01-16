@@ -76,7 +76,6 @@ int CreateProgressThread(Uscript::UScriptEnv *env, pthread_t &thread)
 {
     std::string content = std::to_string(1.0f) + "," + std::to_string(0.0f); // set g_percentage 100
     env->PostMessage("show_progress", content);
-    (void)pthread_create(&thread, nullptr, OtaUpdateProgressThread, env);
-    return 0;
+    return pthread_create(&thread, nullptr, OtaUpdateProgressThread, env);
 }
 }
