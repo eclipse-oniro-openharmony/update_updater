@@ -15,7 +15,6 @@
 
 #include <gtest/gtest.h>
 #include <thread>
-#include <mutex>
 #include <string>
 #include "script_instruction.h"
 #include "script/script_unittest.h"
@@ -59,8 +58,7 @@ HWTEST_F(UpdateProgressTest, UpdateProgressTest01, TestSize.Level1)
 {
     Hpackage::TestScriptPkgManager pkgManager;
     UTestPostProgressEnv env {&pkgManager};
-    std::mutex mtx;
-    EXPECT_EQ(CreateProgressThread(&env, mtx), 0);
+    EXPECT_EQ(CreateProgressThread(&env), 0);
     float progress = 1.0f;
     SetUpdateProgress(progress);
     std::this_thread::sleep_for(std::chrono::milliseconds(500));

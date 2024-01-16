@@ -15,8 +15,6 @@
 #ifndef UPDATE_PROGRESS_H
 #define UPDATE_PROGRESS_H
 #include "script_instruction.h"
-#include <thread>
-#include <mutex>
 namespace Updater {
 void FillUpdateProgress();
 
@@ -26,6 +24,6 @@ float GetUpdateProress();
 
 void SetProgressExitFlag(bool exitFlag);
 
-int32_t CreateProgressThread(Uscript::UScriptEnv *env, std::mutex &mtx);
+int32_t CreateProgressThread(Uscript::UScriptEnv *env);
 }
 #endif
