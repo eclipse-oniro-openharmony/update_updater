@@ -29,6 +29,24 @@ constexpr uint32_t PKG_FOOTER_SIZE = 6;
 constexpr uint32_t PKG_HASH_CONTENT_LEN = SHA256_DIGEST_LENGTH;
 }
 
+int32_t PkgVerifyUtil::VerifySign(std::vector<uint8_t> &signData, std::vector<uint8_t> &digest) const
+{
+    std::vector<uint8_t> hash;
+    int32_t ret = Pkcs7verify(signData, hash);
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("pkcs7 verify fail!");
+        UPDATER_LAST_WORD(ret);
+        return ret;
+    }
+    size_t digestLen = hash.size();
+    if (memcmp(hash.data(), digest.data(), digestLen) != EOK) {
+        PKG_LOGW("Failed to memcmp data.");
+        UPDATER_LAST_WORD(PKG_INVALID_DIGEST);
+        return PKG_INVALID_DIGEST;
+    }
+    return PKG_SUCCESS;
+}
+
 int32_t PkgVerifyUtil::VerifyPackageSign(const PkgStreamPtr pkgStream) const
 {
     if (pkgStream == nullptr) {

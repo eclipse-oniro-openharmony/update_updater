@@ -21,6 +21,7 @@
 #include <memory>
 #include "dump.h"
 #include "openssl_util.h"
+#include "pkg_verify_util.h"
 #include "pkg_lz4file.h"
 #include "pkg_manager.h"
 #include "pkg_pkgfile.h"
@@ -481,7 +482,7 @@ int32_t UpgradePkgFile::VerifyFile(size_t &parsedLen, DigestAlgorithm::DigestAlg
     if (pkgInfo_.updateFileVersion >= UPGRADE_FILE_VERSION_V2) {
         return VerifyFileV2(parsedLen, algorithm, verifier);
     }
-    
+
     return VerifyFileV1(parsedLen, algorithm, verifier);
 }
 
@@ -567,7 +568,14 @@ int32_t UpgradePkgFile::VerifyHeader(DigestAlgorithm::DigestAlgorithmPtr algorit
     Updater::UPDATER_INIT_RECORD;
     PkgBuffer digest(GetDigestLen());
     algorithm->Final(digest);
-    int ret = verifier(&pkgInfo_.pkgInfo, digest.data, signData);
+    int ret = 0;
+    if (pkgInfo_.updateFileVersion > UPGRADE_FILE_VERSION_V2) {
+        auto signature = signData;
+        PkgVerifyUtil pkgVerifyUtil;
+        ret = pkgVerifyUtil.VerifySign(signature, digest.data);
+    } else {
+        ret = verifier(&pkgInfo_.pkgInfo, digest.data, signData);
+    }
     if (ret != 0) {
         PKG_LOGE("Fail to verifier signature");
         UPDATER_LAST_WORD(PKG_INVALID_SIGNATURE);
