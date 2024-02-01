@@ -376,11 +376,6 @@ static UpdaterStatus DoInstallPackages(UpdaterParams &upParams, std::vector<doub
             " percent:" << upParams.initialProgress << "~" << pkgStartPosition[upParams.pkgLocation + 1];
 
         status = InstallUpdaterPackage(upParams, manager);
-        SetMessageToMisc(upParams.miscCmd, upParams.pkgLocation + 1, "upgraded_pkg_num");
-        ProgressSmoothHandler(
-            static_cast<int>(upParams.initialProgress * FULL_PERCENT_PROGRESS +
-            upParams.currentPercentage * GetTmpProgressValue()),
-            static_cast<int>(pkgStartPosition[upParams.pkgLocation + 1] * FULL_PERCENT_PROGRESS));
         auto endTime = std::chrono::system_clock::now();
         upParams.installTime[upParams.pkgLocation] = upParams.installTime[upParams.pkgLocation] + endTime - startTime;
         WriteInstallTime(upParams);
@@ -392,6 +387,11 @@ static UpdaterStatus DoInstallPackages(UpdaterParams &upParams, std::vector<doub
             PkgManager::ReleasePackageInstance(manager);
             return status;
         }
+        ProgressSmoothHandler(
+            static_cast<int>(upParams.initialProgress * FULL_PERCENT_PROGRESS +
+            upParams.currentPercentage * GetTmpProgressValue()),
+            static_cast<int>(pkgStartPosition[upParams.pkgLocation + 1] * FULL_PERCENT_PROGRESS));
+        SetMessageToMisc(upParams.miscCmd, upParams.pkgLocation + 1, "upgraded_pkg_num");
         PkgManager::ReleasePackageInstance(manager);
     }
     return status;
@@ -720,6 +720,7 @@ int UpdaterMain(int argc, char **argv)
     UPDATER_UI_INSTANCE.Sleep(UI_SHOW_DURATION);
     if (status != UPDATE_SUCCESS && status != UPDATE_SKIP) {
         if (mode == HOTA_UPDATE) {
+            ClearMisc();
             UPDATER_UI_INSTANCE.ShowFailedPage();
             UpdaterInit::GetInstance().InvokeEvent(UPDATER_POST_INIT_EVENT);
             if (upParams.forceReboot) {
