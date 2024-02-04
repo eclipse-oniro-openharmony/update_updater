@@ -176,12 +176,6 @@ bool IsSDCardExist(const std::string &sdcardPath)
 
 void PostUpdater(bool clearMisc)
 {
-    static bool isExecuted = false;
-    if (isExecuted) {
-        LOG(INFO) << "post updater has been executed, skip post";
-        return;
-    }
-    isExecuted = true;
     STAGE(UPDATE_STAGE_BEGIN) << "PostUpdater";
 
     (void)SetupPartitions();
