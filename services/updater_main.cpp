@@ -720,9 +720,9 @@ int UpdaterMain(int argc, char **argv)
     UPDATER_UI_INSTANCE.Sleep(UI_SHOW_DURATION);
     if (status != UPDATE_SUCCESS && status != UPDATE_SKIP) {
         if (mode == HOTA_UPDATE) {
-            ClearMisc();
             UPDATER_UI_INSTANCE.ShowFailedPage();
             UpdaterInit::GetInstance().InvokeEvent(UPDATER_POST_INIT_EVENT);
+            PostUpdater(true);
             if (upParams.forceReboot) {
                 Utils::UsSleep(5 * DISPLAY_TIME); // 5 : 5s
                 PostUpdater(true);
