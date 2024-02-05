@@ -38,9 +38,9 @@ int32_t PkgVerifyUtil::VerifySign(std::vector<uint8_t> &signData, std::vector<ui
         UPDATER_LAST_WORD(ret);
         return ret;
     }
-    size_t digestLen = hash.size();
-    if (memcmp(hash.data(), digest.data(), digestLen) != EOK) {
-        PKG_LOGW("Failed to memcmp data.");
+    size_t hashLen = hash.size();
+    if ((hashLen != digest.size()) || memcmp(hash.data(), digest.data(), hashLen) != EOK) {
+        PKG_LOGE("Failed to memcmp data.");
         UPDATER_LAST_WORD(PKG_INVALID_DIGEST);
         return PKG_INVALID_DIGEST;
     }
