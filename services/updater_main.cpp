@@ -77,7 +77,12 @@ constexpr float VERIFY_PERCENT = 0.05;
 int FactoryReset(FactoryResetMode mode, const std::string &path)
 {
     UpdaterInit::GetInstance().InvokeEvent(FACTORY_RESET_INIT_EVENT);
-    return FactoryResetProcess::GetInstance().FactoryResetFunc(mode, path);
+    auto ret = FactoryResetProcess::GetInstance().FactoryResetFunc(mode, path);
+    if (ret == 0) {
+        LOG(INFO) << "restorecon for " << path;
+        RestoreconPath(path); // restore selinux context for /data after factory reset success
+    }
+    return ret;
 }
 
 static int OtaUpdatePreCheck(PkgManager::PkgManagerPtr pkgManager, const std::string &packagePath)

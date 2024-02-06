@@ -84,6 +84,7 @@ int Partition::DoFormat() const
         FLASHD_LOGE("MountForPath fail, ret = %d", ret);
         return ret;
     }
+    Updater::Utils::RestoreconPath(name);
     return 0;
 }
 
