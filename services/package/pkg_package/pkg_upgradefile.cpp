@@ -860,7 +860,13 @@ int32_t UpgradeFileEntry::Pack(PkgStreamPtr inStream, size_t startOffset, size_t
 int32_t UpgradeFileEntry::DecodeHeader(PkgBuffer &buffer, size_t headerOffset, size_t dataOffset,
     size_t &decodeLen)
 {
-    PkgStreamPtr inStream = pkgFile_->GetPkgStream();
+    UpgradePkgFile *pkgFile = static_cast<UpgradePkgFile*>(GetPkgFile());
+    if (pkgFile == nullptr) {
+        PKG_LOGE("Get pkg file ptr fail");
+        return PKG_INVALID_PARAM;
+    }
+
+    PkgStreamPtr inStream = pkgFile->GetPkgStream();
     if (inStream == nullptr) {
         PKG_LOGE("outStream or inStream null for %s", fileName_.c_str());
         return PKG_INVALID_PARAM;
@@ -871,9 +877,13 @@ int32_t UpgradeFileEntry::DecodeHeader(PkgBuffer &buffer, size_t headerOffset, s
     }
 
     UpgradeCompInfo *info = reinterpret_cast<UpgradeCompInfo *>(buffer.buffer);
-    fileInfo_.fileInfo.packedSize = ReadLE32(buffer.buffer + offsetof(UpgradeCompInfo, size));
+    if (pkgFile->GetUpgradeFileVer() >= UPGRADE_FILE_VERSION_V3) {
+        fileInfo_.fileInfo.packedSize = ReadLE64(buffer.buffer + offsetof(UpgradeCompInfo, size));
+    } else {
+        fileInfo_.fileInfo.packedSize = ReadLE32(buffer.buffer + offsetof(UpgradeCompInfo, size));
+        fileInfo_.originalSize = ReadLE32(buffer.buffer + offsetof(UpgradeCompInfo, originalSize));
+    }
     fileInfo_.fileInfo.unpackedSize = fileInfo_.fileInfo.packedSize;
-    fileInfo_.originalSize = ReadLE32(buffer.buffer + offsetof(UpgradeCompInfo, originalSize));
     fileInfo_.fileInfo.packMethod = PKG_COMPRESS_METHOD_NONE;
     fileInfo_.fileInfo.digestMethod = PKG_DIGEST_TYPE_NONE;
     fileInfo_.fileInfo.resType = info->resType;
@@ -962,7 +972,7 @@ int32_t UpgradeFileEntry::Verify(PkgBuffer &buffer, size_t len, size_t offset)
         return PKG_INVALID_PARAM;
     }
 #ifndef DIFF_PATCH_SDK
-    uint32_t end = offset + len - 1;
+    size_t end = offset + len - 1;
     bool checkRet = false;
     if (pkgFile->GetUpgradeFileVer() >= UPGRADE_FILE_VERSION_V3) {
         checkRet = CheckDataHashNew(pkgFile->GetImgHashData(), fileName_.c_str(),
