@@ -77,7 +77,12 @@ constexpr float VERIFY_PERCENT = 0.05;
 int FactoryReset(FactoryResetMode mode, const std::string &path)
 {
     UpdaterInit::GetInstance().InvokeEvent(FACTORY_RESET_INIT_EVENT);
-    return FactoryResetProcess::GetInstance().FactoryResetFunc(mode, path);
+    auto ret = FactoryResetProcess::GetInstance().FactoryResetFunc(mode, path);
+    if (ret == 0) {
+        LOG(INFO) << "restorecon for " << path;
+        RestoreconPath(path); // restore selinux context for /data after factory reset success
+    }
+    return ret;
 }
 
 static int OtaUpdatePreCheck(PkgManager::PkgManagerPtr pkgManager, const std::string &packagePath)
@@ -572,7 +577,6 @@ UpdaterStatus DoUpdaterEntry(UpdaterParams &upParams)
             UpdaterInit::GetInstance().InvokeEvent(UPDATER_RPMB_DATA_CLEAR_EVENT);
             UPDATER_UI_INSTANCE.ShowSuccessPage();
             UPDATER_UI_INSTANCE.ShowLogRes(TR(LOGRES_WIPE_FINISH));
-            PostUpdater(true);
             ClearUpdaterParaMisc();
             std::this_thread::sleep_for(std::chrono::milliseconds(UI_SHOW_DURATION));
         }
