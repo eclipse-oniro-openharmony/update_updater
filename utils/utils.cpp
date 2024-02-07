@@ -519,6 +519,23 @@ int GetFileSize(const std::string &dLog)
     return ret;
 }
 
+bool RestoreconPath(const std::string &path)
+{
+    if (MountForPath(path) != 0) {
+        LOG(ERROR) << "MountForPath " << path << " failed!";
+        return false;
+    }
+#ifdef WITH_SELINUX
+    if (RestoreconRecurse(path.c_str()) == -1) {
+        LOG(WARNING) << "restore " << path << " failed";
+    }
+#endif // WITH_SELINUX
+    if (UmountForPath(path) != 0) {
+        LOG(WARNING) << "UmountForPath " << path << " failed!";
+    }
+    return true;
+}
+
 bool CopyUpdaterLogs(const std::string &sLog, const std::string &dLog)
 {
     std::size_t found = dLog.find_last_of("/");
@@ -533,9 +550,6 @@ bool CopyUpdaterLogs(const std::string &sLog, const std::string &dLog)
     }
 
     if (access(destPath.c_str(), 0) != 0) {
-        #ifdef WITH_SELINUX
-            RestoreconRecurse("/data");
-        #endif // WITH_SELINUX
         if (MkdirRecursive(destPath.c_str(), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) != 0) {
             LOG(ERROR) << "MkdirRecursive error!";
             return false;
