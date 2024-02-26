@@ -240,11 +240,11 @@ void GZipFileEntry::DecodeHeaderCalOffset(uint8_t flags, const PkgBuffer &buffer
         uint16_t extLen = ReadLE16(buffer.buffer + offset);
         offset += sizeof(uint16_t) + extLen;
     }
-    if (flags & ORIG_NAME) {
+    if ((buffer.length > offset) && (flags & ORIG_NAME)) {
         PkgFileImpl::ConvertBufferToString(fileName, {buffer.buffer + offset, buffer.length - offset});
         offset += fileName.size() + 1;
     }
-    if (flags & COMMENT) {
+    if ((buffer.length > offset) && (flags & COMMENT)) {
         std::string comment;
         PkgFileImpl::ConvertBufferToString(comment, {buffer.buffer + offset, buffer.length - offset});
         offset += comment.size() + 1;
