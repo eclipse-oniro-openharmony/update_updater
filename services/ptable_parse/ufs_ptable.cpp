@@ -134,10 +134,10 @@ bool UfsPtable::UfsReadGpt(const uint8_t *gptImage, const uint32_t len,
             // add a new partition info into partitionInfo_ vector
             PtnInfo newPtnInfo;
             (void)memset_s(&newPtnInfo, sizeof(newPtnInfo), 0, sizeof(newPtnInfo));
-            newPtnInfo.startAddr = firstLba * static_cast<uint64_t>(GetBlockDeviceSize());
+            newPtnInfo.startAddr = firstLba * static_cast<uint64_t>(GetDeviceBlockSize());
             newPtnInfo.writePath = GetDeviceLunNodePath(lun);
             // General algorithm : calculate partition size by lba
-            newPtnInfo.partitionSize = (lastLba - firstLba + 1) * static_cast<uint64_t>(GetBlockDeviceSize());
+            newPtnInfo.partitionSize = (lastLba - firstLba + 1) * static_cast<uint64_t>(GetDeviceBlockSize());
             const uint8_t *nameOffset = data + (j * PARTITION_ENTRY_SIZE + GPT_PARTITION_NAME_OFFSET);
             // 2 bytes for 1 charactor of partition name
             ParsePartitionName(nameOffset, MAX_GPT_NAME_SIZE, newPtnInfo.dispName, MAX_GPT_NAME_SIZE / 2);
@@ -341,8 +341,8 @@ uint32_t UfsPtable::LoadAllLunPartitions()
 {
     uint32_t lunIndex;
     for (lunIndex = 0; lunIndex < deviceLunNum_; lunIndex++) {
-        if (ReadAndCheckMbr(lunIndex, MIN_UFS_WRITE_SIZE)) {
-            LoadPartitionInfoFromLun(lunIndex, GetDeviceBlockSize());
+        if (ReadAndCheckMbr(lunIndex, GetDeviceBlockSize())) {
+            LoadPartitionInfoFromLun(lunIndex, ptableData_.writeDeviceLunSize);
         }
     }
     return lunIndex;
@@ -417,11 +417,11 @@ bool UfsPtable::WriteBackupPartitionTable(uint32_t lunIdx, uint64_t lunSize)
 
     if (!WriteBufferToPath(ufsNode, deviceBackGptEntryOffset, ufsPtnDataInfo_[lunIdx].data +
         deviceBlockSize * 2, (GPT_PTABLE_BACKUP_SIZE - 1) * deviceBlockSize)) { // 2 : pmbr(1) + gpt header(1)
-        LOG(ERORR) << "write back up gpt entries failed, deviceBackGptEntryOffset = " << deviceBackGptEntryOffset
+        LOG(ERROR) << "write back up gpt entries failed, deviceBackGptEntryOffset = " << deviceBackGptEntryOffset
             << ", deviceBlockSize = " << deviceBlockSize;
         return false;
     }
-    LOG(INFO) << "write backup parition table successful";
+    LOG(INFO) << "write backup partition table successful";
     return true;
 }
 
