@@ -36,6 +36,7 @@ public:
         uint8_t partitionTypeGuid[GPT_PARTITION_TYPE_GUID_LEN] {};
         uint32_t lun {};
         std::string dispName {};
+        std::string writeMode {"WRITE_RAW"};
         std::string writePath {};
     };
 
