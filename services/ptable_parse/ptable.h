@@ -36,6 +36,7 @@ public:
         uint8_t partitionTypeGuid[GPT_PARTITION_TYPE_GUID_LEN] {};
         uint32_t lun {};
         std::string dispName {};
+        std::string writePath {};
     };
 
     struct GptParseInfo {
@@ -61,7 +62,11 @@ public:
     virtual bool EditPartitionBuf(uint8_t *imageBuf, uint64_t imgBufSize, std::vector<PtnInfo> &modifyList) = 0;
     virtual bool GetPtableImageBuffer(uint8_t *imageBuf, const uint32_t imgBufSize) = 0;
 
+#ifndef UPDATER_UT
 protected:
+#else
+public:
+#endif
     const std::string USERDATA_PARTITION = "USERDATA";
     static constexpr uint32_t PARTITION_ENTRY_SIZE = 128;
     static constexpr uint32_t MAX_PARTITION_NUM = 128;

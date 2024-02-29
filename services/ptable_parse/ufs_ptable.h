@@ -32,10 +32,15 @@ public:
     bool EditPartitionBuf(uint8_t *imageBuf, uint64_t imgBufSize, std::vector<PtnInfo> &modifyList) override;
     bool GetPtableImageBuffer(uint8_t *imageBuf, const uint32_t imgBufSize) override;
 
-private:
+#ifndef UPDATER_UT
+protected:
+#else
+public:
+#endif
     static constexpr uint32_t TMP_DATA_SIZE = 32 * 1024;
     static constexpr uint32_t MAX_LUN_NUMBERS = 26;
     static constexpr uint32_t MIN_UFS_WRITE_SIZE = 4096;
+    static constexpr uint32_t GPT_PTABLE_BACKUP_SIZE = 33; // back ptable at the end of lun
 
     struct UfsPartitionDataInfo {
         bool isGptVaild;
@@ -47,8 +52,20 @@ private:
 
     uint32_t deviceLunNum_ { 0 };
     std::vector<UfsPartitionDataInfo> ufsPtnDataInfo_;
+    bool hasBackupPtable_ {false};
 
-    uint64_t GetDeviceLunCapacity(const uint32_t lunIndex);
+    virtual uint64_t GetDeviceLunCapacity(const uint32_t lunIndex);
+    virtual uint32_t GetPtableExtraOffset(void);
+    virtual uint32_t GetDeviceBlockSize(void);
+    virtual std::string GetDeviceLunNodePath(const uint32_t lun);
+    virtual int32_t GetLunNumFromNode(const std::string &ufsNode);
+
+#ifndef UPDATER_UT
+private:
+#else
+public:
+#endif
+    bool WriteBackupPartitionTable(uint32_t lunIdx, uint64_t lunSize);
     bool UfsReadGpt(const uint8_t *gptImage, const uint32_t len, const uint32_t lun, const uint32_t blockSize);
     bool ParseGptHeaderByUfsLun(const uint8_t *gptImage, const uint32_t len, const uint32_t lun,
         const uint32_t blockSize);
@@ -56,7 +73,6 @@ private:
     uint32_t LoadAllLunPartitions();
     bool ReadAndCheckMbr(const uint32_t lunIndex, const uint32_t blockSize);
     bool LoadPartitionInfoFromLun(const uint32_t lunIndex, const uint32_t imgLen);
-    int32_t GetLunNumFromNode(const std::string &ufsNode);
     void SetDeviceLunNum();
     uint8_t *GetPtableImageUfsLunPmbrStart(uint8_t *imageBuf, const uint32_t lunIndex);
     uint8_t *GetPtableImageUfsLunGptHeaderStart(uint8_t *imageBuf, const uint32_t lunIndex);
