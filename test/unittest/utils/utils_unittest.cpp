@@ -142,4 +142,34 @@ HWTEST_F(UtilsUnitTest, GetDirSizeForFileTest, TestSize.Level0)
     ret = Utils::GetDirSizeForFile(testPath);
     EXPECT_EQ(ret, 827); // 827 : file size
 }
+
+HWTEST_F(UtilsUnitTest, GetTagValInStrTest, TestSize.Level0)
+{
+    const std::string tag = "abc";
+    std::string ret = "";
+    Utils::GetTagValInStr("", tag, ret);
+    EXPECT_EQ(ret, "");
+    Utils::GetTagValInStr("abcde=12", tag, ret);
+    EXPECT_EQ(ret, "");
+    Utils::GetTagValInStr("abc=12", tag, ret);
+    EXPECT_EQ(ret, "12");
+}
+
+HWTEST_F(UtilsUnitTest, GetTagValInStrTest, TestSize.Level0)
+{
+    bool ret = IsValidHexStr("a");
+    EXPECT_EQ(ret, false);
+    ret = IsValidHexStr("1*");
+    EXPECT_EQ(ret, false);
+    ret = IsValidHexStr("ABCDEF");
+    EXPECT_EQ(ret, true);
+}
+
+HWTEST_F(UtilsUnitTest, TrimStringTest, TestSize.Level0)
+{
+    auto ret = Utils::TrimString("abc");
+    EXPECT_EQ(ret, std::string::npos);
+    ret = Utils::GetTagValInStr("abc\r\n");
+    EXPECT_EQ(ret, 3);
+}
 } // updater_ut

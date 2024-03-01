@@ -976,14 +976,14 @@ bool CheckFaultInfo(const std::string &faultInfo)
 
 void GetTagValInStr(const std::string &str, const std::string &tag, std::string &val)
 {
-    if (str.find(tag) != std::string::npos && str.find("=") != std::string::npos) {
+    if (str.find(tag + "=") != std::string::npos) {
         val = str.substr(str.find("=") + 1, str.size() - str.find("="));
     }
 }
 
 bool IsValidHexStr(const std::string &str)
 {
-    for (auto ch : str) {
+    for (const auto &ch : str) {
         if (isxdigit(ch) == 0) {
             return false;
         }

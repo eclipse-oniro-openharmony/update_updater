@@ -705,7 +705,7 @@ static UpdaterStatus StartUpdater(const std::vector<std::string> &args,
 // add updater mode
 REGISTER_MODE(Updater, "updater.hdc.configfs");
 
-void RebootAfterUpdateSuccess(UpdaterParams &upParams)
+void RebootAfterUpdateSuccess(const UpdaterParams &upParams)
 {
     // if need wipe data after update success
     if (upParams.needWipe) {
