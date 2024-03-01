@@ -753,6 +753,11 @@ int UpdaterMain(int argc, char **argv)
     }
 #endif
     PostUpdater(true);
+    // if need wipe data after update success
+    if (upParams.needWipe) {
+        Utils::UpdaterDoReboot("updater", "--user_wipe_data");
+        return 0;
+    }
     upParams.forceUpdate || upParams.factoryReset ? Utils::DoShutdown() : Utils::UpdaterDoReboot("");
     return 0;
 }

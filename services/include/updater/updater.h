@@ -49,6 +49,7 @@ struct UpdaterParams {
     bool factoryReset = false;
     bool mainUpdate = false;
     bool sdUpdate = false;
+    bool needWipe = false;
     PackageUpdateMode updateMode = HOTA_UPDATE;
     int retryCount = 0;
     float initialProgress = 0; /* The upgrade starts at the progress bar location */
