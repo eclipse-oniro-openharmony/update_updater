@@ -705,6 +705,16 @@ static UpdaterStatus StartUpdater(const std::vector<std::string> &args,
 // add updater mode
 REGISTER_MODE(Updater, "updater.hdc.configfs");
 
+void RebootAfterUpdateSuccess(UpdaterParams &upParams)
+{
+    // if need wipe data after update success
+    if (upParams.needWipe) {
+        Utils::UpdaterDoReboot("updater", "--user_wipe_data");
+        return;
+    }
+    upParams.forceUpdate || upParams.factoryReset ? Utils::DoShutdown() : Utils::UpdaterDoReboot("");
+}
+
 int UpdaterMain(int argc, char **argv)
 {
     [[maybe_unused]] UpdaterStatus status = UPDATE_UNKNOWN;
@@ -753,7 +763,7 @@ int UpdaterMain(int argc, char **argv)
     }
 #endif
     PostUpdater(true);
-    upParams.forceUpdate || upParams.factoryReset ? Utils::DoShutdown() : Utils::UpdaterDoReboot("");
+    RebootAfterUpdateSuccess(upParams);
     return 0;
 }
 } // Updater

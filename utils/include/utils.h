@@ -89,6 +89,9 @@ void AddUpdateInfoToMisc(const std::string headInfo, const std::optional<int> me
 void RemoveUpdateInfoFromMisc(const std::string &headInfo);
 void SetFaultInfoToMisc(const std::string &faultInfo);
 bool RestoreconPath(const std::string &path);
+void GetTagValInStr(const std::string& str, const std::string &tag, std::string &val);
+bool IsValidHexStr(const std::string &str);
+void TrimString (std::string &str);
 #ifndef __WIN32
 void SetFileAttributes(const std::string& file, uid_t owner, gid_t group, mode_t mode);
 #endif
