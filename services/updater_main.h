@@ -31,6 +31,8 @@ int UpdaterMain(int argc, char **argv);
 
 int FactoryReset(FactoryResetMode mode, const std::string &path);
 
+void RebootAfterUpdateSuccess(UpdaterParams &upParams);
+
 UpdaterStatus InstallUpdaterPackage(UpdaterParams &upParams, Hpackage::PkgManager::PkgManagerPtr manager);
 
 UpdaterStatus DoUpdatePackages(UpdaterParams &upParams);
@@ -46,7 +48,7 @@ bool IsBatteryCapacitySufficient();
 void DeleteInstallTimeFile();
 
 void WriteInstallTime(UpdaterParams &upParams);
- 
+
 void ReadInstallTime(UpdaterParams &upParams);
 
 bool IsDouble(const std::string& str);
