@@ -132,8 +132,7 @@ bool UfsPtable::UfsReadGpt(const uint8_t *gptImage, const uint32_t len,
             uint64_t firstLba = GET_LLWORD_FROM_BYTE(&data[(j * PARTITION_ENTRY_SIZE) + FIRST_LBA_OFFSET]);
             uint64_t lastLba = GET_LLWORD_FROM_BYTE(&data[(j * PARTITION_ENTRY_SIZE) + LAST_LBA_OFFSET]);
             // add a new partition info into partitionInfo_ vector
-            PtnInfo newPtnInfo;
-            (void)memset_s(&newPtnInfo, sizeof(newPtnInfo), 0, sizeof(newPtnInfo));
+            PtnInfo newPtnInfo = {};
             newPtnInfo.startAddr = firstLba * static_cast<uint64_t>(GetDeviceBlockSize());
             newPtnInfo.writePath = GetDeviceLunNodePath(lun);
             // General algorithm : calculate partition size by lba
