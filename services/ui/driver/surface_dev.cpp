@@ -20,6 +20,8 @@
 #include "updater_ui_const.h"
 
 namespace Updater {
+std::vector<std::string> SurfaceDev::fbDeviceList_ {FB_DEV_PATH};
+
 std::unique_ptr<GraphicDrv> SurfaceDev::MakeDevDrv(DevType devType)
 {
     std::unique_ptr<GraphicDrv> drv = nullptr;
