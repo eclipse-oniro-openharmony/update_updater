@@ -176,7 +176,7 @@ static UpdaterStatus VerifyPackages(UpdaterParams &upParams)
         auto endTime = std::chrono::system_clock::now();
         upParams.installTime[i] = endTime - startTime;
     }
-    if(VerifySpecialPkgs(upParams) != PKG_SUCCESS) {
+    if (VerifySpecialPkgs(upParams) != PKG_SUCCESS) {
         return UPDATE_CORRUPT;
     }
     ProgressSmoothHandler(0, static_cast<int>(VERIFY_PERCENT * FULL_PERCENT_PROGRESS));

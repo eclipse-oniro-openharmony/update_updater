@@ -64,7 +64,7 @@ bool IsSupportOption([[maybe_unused]] const std::string &option);
 UpdaterStatus ProcessOtherOption([[maybe_unused]] const std::string &option,
     [[maybe_unused]] UpdaterParams &upParams);
 bool PreStartBinaryEntry([[maybe_unused]] const std::string &path);
-int32_t VerifySpecialPkgs([[maybe_unused]]UpdaterParams &upParams)
+int32_t VerifySpecialPkgs([[maybe_unused]]UpdaterParams &upParams);
 bool IsNeedWipe();
 #ifdef __cplusplus
 #if __cplusplus
