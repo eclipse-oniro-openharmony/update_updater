@@ -31,6 +31,8 @@ int UpdaterMain(int argc, char **argv);
 
 int FactoryReset(FactoryResetMode mode, const std::string &path);
 
+void RebootAfterUpdateSuccess(const UpdaterParams &upParams);
+
 UpdaterStatus InstallUpdaterPackage(UpdaterParams &upParams, Hpackage::PkgManager::PkgManagerPtr manager);
 
 UpdaterStatus DoUpdatePackages(UpdaterParams &upParams);
@@ -46,7 +48,7 @@ bool IsBatteryCapacitySufficient();
 void DeleteInstallTimeFile();
 
 void WriteInstallTime(UpdaterParams &upParams);
- 
+
 void ReadInstallTime(UpdaterParams &upParams);
 
 bool IsDouble(const std::string& str);
@@ -62,6 +64,8 @@ bool IsSupportOption([[maybe_unused]] const std::string &option);
 UpdaterStatus ProcessOtherOption([[maybe_unused]] const std::string &option,
     [[maybe_unused]] UpdaterParams &upParams);
 bool PreStartBinaryEntry([[maybe_unused]] const std::string &path);
+int32_t VerifySpecialPkgs([[maybe_unused]]UpdaterParams &upParams);
+bool IsNeedWipe();
 #ifdef __cplusplus
 #if __cplusplus
 }

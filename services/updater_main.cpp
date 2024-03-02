@@ -139,6 +139,11 @@ static UpdaterStatus UpdatePreCheck(UpdaterParams &upParams, const std::string p
     return UPDATE_SUCCESS;
 }
 
+__attribute__((weak)) int32_t VerifySpecialPkgs([[maybe_unused]]UpdaterParams &upParams)
+{
+    return PKG_SUCCESS;
+}
+
 static UpdaterStatus VerifyPackages(UpdaterParams &upParams)
 {
     LOG(INFO) << "Verify packages start...";
@@ -171,7 +176,9 @@ static UpdaterStatus VerifyPackages(UpdaterParams &upParams)
         auto endTime = std::chrono::system_clock::now();
         upParams.installTime[i] = endTime - startTime;
     }
-
+    if (VerifySpecialPkgs(upParams) != PKG_SUCCESS) {
+        return UPDATE_CORRUPT;
+    }
     ProgressSmoothHandler(0, static_cast<int>(VERIFY_PERCENT * FULL_PERCENT_PROGRESS));
     LOG(INFO) << "Verify packages successfull...";
     return UPDATE_SUCCESS;
@@ -705,6 +712,20 @@ static UpdaterStatus StartUpdater(const std::vector<std::string> &args,
 // add updater mode
 REGISTER_MODE(Updater, "updater.hdc.configfs");
 
+__attribute__((weak)) bool IsNeedWipe()
+{
+    return false;
+}
+
+void RebootAfterUpdateSuccess(const UpdaterParams &upParams)
+{
+    if (IsNeedWipe()) {
+        Utils::UpdaterDoReboot("updater", "--user_wipe_data");
+        return;
+    }
+    upParams.forceUpdate || upParams.factoryReset ? Utils::DoShutdown() : Utils::UpdaterDoReboot("");
+}
+
 int UpdaterMain(int argc, char **argv)
 {
     [[maybe_unused]] UpdaterStatus status = UPDATE_UNKNOWN;
@@ -753,7 +774,7 @@ int UpdaterMain(int argc, char **argv)
     }
 #endif
     PostUpdater(true);
-    upParams.forceUpdate || upParams.factoryReset ? Utils::DoShutdown() : Utils::UpdaterDoReboot("");
+    RebootAfterUpdateSuccess(upParams);
     return 0;
 }
 } // Updater

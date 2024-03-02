@@ -35,7 +35,7 @@
 #ifdef WITH_SELINUX
 #include <policycoreutils.h>
 #include "selinux/selinux.h"
-#endif 
+#endif
 #include "package/pkg_manager.h"
 #include "securec.h"
 #include "updater/updater_const.h"
@@ -972,6 +972,31 @@ bool CheckFaultInfo(const std::string &faultInfo)
         return true;
     }
     return false;
+}
+
+void GetTagValInStr(const std::string &str, const std::string &tag, std::string &val)
+{
+    if (str.find(tag + "=") != std::string::npos) {
+        val = str.substr(str.find("=") + 1, str.size() - str.find("="));
+    }
+}
+
+bool IsValidHexStr(const std::string &str)
+{
+    for (const auto &ch : str) {
+        if (isxdigit(ch) == 0) {
+            return false;
+        }
+    }
+    return true;
+}
+
+void TrimString(std::string &str)
+{
+    auto pos = str.find_last_not_of("\r\n");
+    if (pos != std::string::npos) {
+        str.erase(pos + 1, str.size() - pos);
+    }
 }
 
 #ifndef __WIN32
