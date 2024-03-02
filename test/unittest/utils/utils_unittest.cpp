@@ -157,11 +157,11 @@ HWTEST_F(UtilsUnitTest, GetTagValInStrTest, TestSize.Level0)
 
 HWTEST_F(UtilsUnitTest, GetTagValInStrTest, TestSize.Level0)
 {
-    bool ret = IsValidHexStr("a");
+    bool ret = Utils::IsValidHexStr("a");
     EXPECT_EQ(ret, false);
-    ret = IsValidHexStr("1*");
+    ret = Utils::IsValidHexStr("1*");
     EXPECT_EQ(ret, false);
-    ret = IsValidHexStr("ABCDEF");
+    ret = Utils::IsValidHexStr("ABCDEF");
     EXPECT_EQ(ret, true);
 }
 
@@ -169,7 +169,7 @@ HWTEST_F(UtilsUnitTest, TrimStringTest, TestSize.Level0)
 {
     auto ret = Utils::TrimString("abc");
     EXPECT_EQ(ret, std::string::npos);
-    ret = Utils::GetTagValInStr("abc\r\n");
+    ret = Utils::TrimString("abc\r\n");
     EXPECT_EQ(ret, 3);
 }
 } // updater_ut
