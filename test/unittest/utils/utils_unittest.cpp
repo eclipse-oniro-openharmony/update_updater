@@ -167,9 +167,10 @@ HWTEST_F(UtilsUnitTest, IsValidHexTest, TestSize.Level0)
 
 HWTEST_F(UtilsUnitTest, TrimStringTest, TestSize.Level0)
 {
-    auto ret = Utils::TrimString("abc");
-    EXPECT_EQ(ret, std::string::npos);
+    std::string ret = "abc";
+    Utils::TrimString(ret);
+    EXPECT_EQ(ret, "abc");
     ret = Utils::TrimString("abc\r\n");
-    EXPECT_EQ(ret, 3);
+    EXPECT_EQ(ret, "abc");
 }
 } // updater_ut
