@@ -170,7 +170,8 @@ HWTEST_F(UtilsUnitTest, TrimStringTest, TestSize.Level0)
     std::string ret = "abc";
     Utils::TrimString(ret);
     EXPECT_EQ(ret, "abc");
-    ret = Utils::TrimString("abc\r\n");
+    ret = "abc\r\n";
+    Utils::TrimString(ret);
     EXPECT_EQ(ret, "abc");
 }
 } // updater_ut
