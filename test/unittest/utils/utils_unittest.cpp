@@ -155,7 +155,7 @@ HWTEST_F(UtilsUnitTest, GetTagValInStrTest, TestSize.Level0)
     EXPECT_EQ(ret, "12");
 }
 
-HWTEST_F(UtilsUnitTest, GetTagValInStrTest, TestSize.Level0)
+HWTEST_F(UtilsUnitTest, IsValidHexTest, TestSize.Level0)
 {
     bool ret = Utils::IsValidHexStr("a");
     EXPECT_EQ(ret, false);
