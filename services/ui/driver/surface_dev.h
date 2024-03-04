@@ -36,10 +36,12 @@ public:
     bool Init();
     void Blank(bool blank);
     void Exit(void);
+    static void AddFbDevice(const std::string &devicePath);
 private:
     DevType GetDevType() const;
     std::unique_ptr<GraphicDrv> MakeDevDrv(DevType devType);
     std::unique_ptr<GraphicDrv> drv_ {};
+    static std::vector<std::string> fbDeviceList_;
 };
 } // namespace Updater
 #endif

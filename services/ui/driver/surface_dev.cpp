@@ -20,6 +20,8 @@
 #include "updater_ui_const.h"
 
 namespace Updater {
+std::vector<std::string> SurfaceDev::fbDeviceList_ {FB_DEV_PATH};
+
 std::unique_ptr<GraphicDrv> SurfaceDev::MakeDevDrv(DevType devType)
 {
     std::unique_ptr<GraphicDrv> drv = nullptr;
@@ -50,9 +52,16 @@ void SurfaceDev::Flip(const uint8_t *buf) const
 
 DevType SurfaceDev::GetDevType() const
 {
+    bool isFbDevice = std::find_if(fbDeviceList_.begin(), fbDeviceList_.end(), [] (auto &devicePath) {
+        if (access(devicePath.c_str(), 0) != 0) {
+            LOG(WARNING) << devicePath << " not existed";
+            return false;
+        }
+        return true;
+    }) != fbDeviceList_.end();
     if (access(DRM_DEV_PATH, 0) == 0) {
         return DevType::DRM_DEVICE;
-    } else if (access(FB_DEV_PATH, 0) == 0) {
+    } else if (isFbDevice) {
         return DevType::FB_DEVICE;
     }
     return DevType::UNKNOW_DEVICE;
@@ -79,6 +88,11 @@ void SurfaceDev::Exit(void)
     if (drv_ != nullptr) {
         drv_->Exit();
     }
+}
+
+void SurfaceDev::AddFbDevice(const std::string &devicePath)
+{
+    fbDeviceList_.push_back(devicePath);
 }
 
 void SurfaceDev::GetScreenSize(uint16_t &w, uint16_t &h) const
