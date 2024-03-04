@@ -428,8 +428,7 @@ int UScriptInstructionRawImageWrite::GetWritePathAndOffset(const std::string &pa
                 partitionName.substr(1, partitionName.size()) << "\'.";
         return USCRIPT_ERROR_EXECUTE;
     }
-    char lunIndexName = 'a' + ptnInfo.lun;
-    writePath = std::string(PREFIX_UFS_NODE) + lunIndexName;
+    writePath = ptnInfo.writePath;
     offset = ptnInfo.startAddr;
     partitionSize = ptnInfo.partitionSize;
 #else

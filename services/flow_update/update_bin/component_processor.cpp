@@ -231,8 +231,7 @@ int RawImgProcessor::GetWritePathAndOffset(const std::string &partitionName, std
             partitionName.substr(1, partitionName.size()) << "\'.";
         return USCRIPT_ERROR_EXECUTE;
     }
-    char lunIndexName = 'a' + ptnInfo.lun;
-    writePath = std::string(PREFIX_UFS_NODE) + lunIndexName;
+    writePath = ptnInfo.writePath;
     offset = ptnInfo.startAddr;
     partitionSize = ptnInfo.partitionSize;
 #else
