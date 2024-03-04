@@ -68,8 +68,8 @@ void UfsPtable::SetDeviceLunNum()
             break;
         }
     }
-    LOG(INFO) << "device lun num is " << deviceLunNum_;
     deviceLunNum_ = lunIndex;
+    LOG(INFO) << "device lun num is " << deviceLunNum_;
     return;
 }
 
