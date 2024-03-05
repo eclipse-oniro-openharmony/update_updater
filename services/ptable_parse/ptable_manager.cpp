@@ -279,7 +279,6 @@ void PtableManager::InitCompositePtable()
             pPtable_->AddChildPtable(iter->second());
         }
     }
-    return;
 }
 
 // class PackagePtable

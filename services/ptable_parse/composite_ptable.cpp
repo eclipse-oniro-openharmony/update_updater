@@ -29,7 +29,7 @@ bool CompositePtable::ParsePartitionFromBuffer(uint8_t *ptbImgBuffer, const uint
             LOG(ERROR) << "parse partition from buffer failed";
             return false;
         }
-        Append(iter->GetPtablePartitionInfo());
+        AppendChildPtnInfo(iter->GetPtablePartitionInfo());
     }
     return true;
 }
@@ -42,7 +42,7 @@ bool CompositePtable::LoadPtableFromDevice()
             LOG(ERROR) << "load ptable from device failed";
             return false;
         }
-        Append(iter->GetPtablePartitionInfo());
+        AppendChildPtnInfo(iter->GetPtablePartitionInfo());
     }
     return true;
 }
