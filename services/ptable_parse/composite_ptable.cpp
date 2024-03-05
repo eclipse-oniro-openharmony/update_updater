@@ -19,7 +19,7 @@
 namespace Updater {
 bool CompositePtable::ParsePartitionFromBuffer(uint8_t *ptbImgBuffer, const uint32_t imgBufSize)
 {
-    if (!CheckBuff<uint32_t>(ptbImgBuffer, imgBufSize)) {
+    if (!CheckBuff(ptbImgBuffer, static_cast<const uint64_t>(imgBufSize))) {
         LOG(ERROR) << "input invalid";
         return false;
     }
@@ -60,7 +60,7 @@ bool CompositePtable::WritePartitionTable()
 
 bool CompositePtable::GetPtableImageBuffer(uint8_t *imageBuf, const uint32_t imgBufSize)
 {
-    if (!CheckBuff<uint32_t>(imageBuf, imgBufSize)) {
+    if (!CheckBuff(imageBuf, static_cast<const uint64_t>(imgBufSize))) {
         LOG(ERROR) << "input invalid";
         return false;
     }
@@ -75,7 +75,7 @@ bool CompositePtable::GetPtableImageBuffer(uint8_t *imageBuf, const uint32_t img
 
 bool CompositePtable::EditPartitionBuf(uint8_t *imageBuf, uint64_t imgBufSize, std::vector<PtnInfo> &modifyList)
 {
-    if (!CheckBuff<uint64_t>(imageBuf, imgBufSize)) {
+    if (!CheckBuff(imageBuf, imgBufSize)) {
         LOG(ERROR) << "input invalid";
         return false;
     }

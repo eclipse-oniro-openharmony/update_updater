@@ -33,8 +33,7 @@ public:
     void AddChildPtable(std::unique_ptr<Ptable> child) override;
 
 private:
-    template <typename T>
-    bool CheckBuff(const uint8_t *buf, const T size)
+    bool CheckBuff(const uint8_t *buf, const uint64_t size)
     {
         return (buf != nullptr) && (size > 0);
     }
