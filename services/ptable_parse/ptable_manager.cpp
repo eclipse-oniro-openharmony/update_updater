@@ -229,7 +229,7 @@ bool PtableManager::GetPartionInfoByName(const std::string &partitionName, Ptabl
     return GetPartionInfoByName(partitionName, ptnInfo, index);
 }
 
-void PtableManager::RegisterPtableMap(uint32_t bitIndex, PtableConstructor constructor)
+void PtableManager::RegisterPtable(uint32_t bitIndex, PtableConstructor constructor)
 {
     if (constructor == nullptr) {
         LOG(ERROR) << "invalid input";
@@ -270,7 +270,7 @@ void PtableManager::InitCompositePtable()
         LOG(ERROR) << "make composite ptable failed";
         return;
     }
-    std::bitset<32> type {GetBootdevType()};
+    std::bitset<32> type {GetBootdevType()}; // uint32_t type init as 32 bit
     for (uint32_t i = 0; i < type.size(); i++) {
         if (type[i] == 0) {
             continue;
