@@ -15,6 +15,7 @@
 
 #include "ptable_manager.h"
 
+#include "composite_ptable.h"
 #include "log/log.h"
 #include "securec.h"
 #include "updater/updater_const.h"
@@ -49,20 +50,7 @@ void PtableManager::SetDeviceStorageType()
 
 bool PtableManager::IsUfsDevice()
 {
-    std::string filePath = std::string(BOOTDEV_TYPE);
-    if (filePath.empty()) {
-        LOG(ERROR) << "filePath is empty or lunCapacity is nullptr";
-        return false;
-    }
-    std::ifstream fin(filePath, std::ios::in);
-    if (!fin.is_open()) {
-        LOG(ERROR) << "open " << filePath << " fail";
-        return false;
-    }
-    uint64_t type = 0;
-    fin >> type;
-    fin.close();
-    return type != 0;
+    return GetBootdevType() != 0;
 }
 
 void PtableManager::ReloadDevicePartition(Hpackage::PkgManager *pkgManager)
@@ -72,6 +60,11 @@ void PtableManager::ReloadDevicePartition(Hpackage::PkgManager *pkgManager)
 
 void PtableManager::InitPtablePtr()
 {
+    if (IsCompositePtable()) {
+        LOG(INFO) << "init composite ptable";
+        return InitCompositePtable();
+    }
+
     SetDeviceStorageType();
     if (pPtable_ == nullptr) {
         if (GetDeviceStorageType() == StorageType::STORAGE_UFS) {
@@ -234,6 +227,58 @@ bool PtableManager::GetPartionInfoByName(const std::string &partitionName, Ptabl
 {
     int32_t index = -1;
     return GetPartionInfoByName(partitionName, ptnInfo, index);
+}
+
+void PtableManager::RegisterPtable(uint32_t bitIndex, PtableConstructor constructor)
+{
+    if (constructor == nullptr) {
+        LOG(ERROR) << "invalid input";
+        return;
+    }
+    ptableMap_.emplace(bitIndex, constructor);
+}
+ 
+bool PtableManager::IsCompositePtable()
+{
+    uint32_t type = GetBootdevType();
+    uint32_t cnt = 0;
+    while (type != 0) {
+        type &= (type - 1);
+        cnt++;
+    }
+    return cnt > 1;
+}
+ 
+uint32_t PtableManager::GetBootdevType()
+{
+    uint32_t ret = 0;
+    std::ifstream fin(BOOTDEV_TYPE, std::ios::in);
+    if (!fin.is_open()) {
+        LOG(ERROR) << "open bootdev failed";
+        return ret;
+    }
+    fin >> ret;
+    fin.close();
+    LOG(INFO) << "bootdev type is " << ret;
+    return ret;
+}
+ 
+void PtableManager::InitCompositePtable()
+{
+    pPtable_ = std::make_unique<CompositePtable>();
+    if (pPtable_ == nullptr) {
+        LOG(ERROR) << "make composite ptable failed";
+        return;
+    }
+    std::bitset<32> type {GetBootdevType()}; // uint32_t type init as 32 bit
+    for (uint32_t i = 0; i < type.size(); i++) {
+        if (type[i] == 0) {
+            continue;
+        }
+        if (auto iter = ptableMap_.find(i); iter != ptableMap_.end()) {
+            pPtable_->AddChildPtable(iter->second());
+        }
+    }
 }
 
 // class PackagePtable

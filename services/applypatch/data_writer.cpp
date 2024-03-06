@@ -88,8 +88,26 @@ std::unique_ptr<DataWriter> DataWriter::CreateDataWriter(WriteMode mode, const s
     return CreateDataWriter(mode, path, offset);
 }
 
+std::unique_ptr<DataWriter> DataWriter::CreateDataWriter(const std::string &mode, const std::string &path,
+    const std::string &partName, uint64_t offset)
+{
+    if (auto it = constructorMap_.find(mode); it != constructorMap_.end()) {
+        return it->second(path, partName, offset);
+    }
+    return nullptr;
+}
+
 void DataWriter::ReleaseDataWriter(std::unique_ptr<DataWriter> &writer)
 {
     writer.reset();
+}
+
+void DataWriter::RegisterDataWriter(const std::string &mode, WriterConstructor constructor)
+{
+    if (mode.empty() || constructor == nullptr) {
+        LOG(ERROR) << "invalid input";
+        return;
+    }
+    constructorMap_.emplace(mode, constructor);
 }
 } // namespace Updater

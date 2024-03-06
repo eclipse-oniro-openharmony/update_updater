@@ -62,6 +62,7 @@ public:
     virtual bool WritePartitionTable() = 0;
     virtual bool EditPartitionBuf(uint8_t *imageBuf, uint64_t imgBufSize, std::vector<PtnInfo> &modifyList) = 0;
     virtual bool GetPtableImageBuffer(uint8_t *imageBuf, const uint32_t imgBufSize) = 0;
+    virtual void AddChildPtable(std::unique_ptr<Ptable> child) {}
 
 #ifndef UPDATER_UT
 protected:

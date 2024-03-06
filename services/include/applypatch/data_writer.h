@@ -32,20 +32,25 @@ enum WriteMode : int {
 class DataWriter {
 public:
     using DataWriterPtr = DataWriter *;
+    using WriterConstructor = std::unique_ptr<DataWriter> (*)(const std::string &, const std::string &, uint64_t);
     virtual bool Write(const uint8_t *addr, size_t len, const void *context) = 0;
     virtual ~DataWriter() {}
     static std::unique_ptr<DataWriter> CreateDataWriter(WriteMode mode, const std::string &path, UpdaterEnv *env,
         uint64_t offset = 0);
     static std::unique_ptr<DataWriter> CreateDataWriter(WriteMode mode, const std::string &path, uint64_t offset = 0);
+    static std::unique_ptr<DataWriter> CreateDataWriter(const std::string &mode, const std::string &path,
+        const std::string &partName = {}, uint64_t offset = 0);
     static UpdaterEnv *GetUpdaterEnv();
     void SetUpdaterEnv(UpdaterEnv *env);
     static void ReleaseDataWriter(std::unique_ptr<DataWriter> &writer);
+    static void RegisterDataWriter(const std::string &mode, WriterConstructor constructor);
 
 protected:
     virtual int OpenPath(const std::string &path);
 
 private:
     static UpdaterEnv *env_;
+    static inline std::unordered_map<std::string, WriterConstructor> constructorMap_;
 };
 
 // Maybe we should read sector size from flash.

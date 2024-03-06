@@ -40,6 +40,7 @@ config("libptableparse_exported_headers") {
 
 ohos_static_library("libptableparse") {
   sources = [
+    "./composite_ptable.cpp",
     "./emmc_ptable.cpp",
     "./ptable.cpp",
     "./ptable_manager.cpp",

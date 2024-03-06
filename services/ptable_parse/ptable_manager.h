@@ -26,6 +26,7 @@ public:
     DISALLOW_COPY_MOVE(PtableManager);
     virtual ~PtableManager() {}
 
+    using PtableConstructor = std::unique_ptr<Ptable> (*)();
     enum class StorageType {
         STORAGE_UNKNOWN,
         STORAGE_EMMC,
@@ -38,6 +39,7 @@ public:
     void PrintPtableInfo();
     bool GetPartionInfoByName(const std::string &partitionName, Ptable::PtnInfo &ptnInfo, int32_t &index);
     bool GetPartionInfoByName(const std::string &partitionName, Ptable::PtnInfo &ptnInfo);
+    static void RegisterPtable(uint32_t bitIndex, PtableConstructor constructor);
 
     std::unique_ptr<Ptable> pPtable_;
     StorageType storage_ = StorageType::STORAGE_UNKNOWN;
@@ -56,6 +58,13 @@ protected:
     int32_t GetPartitionInfoIndexByName(const std::vector<Ptable::PtnInfo> &ptnInfo, const std::string &name);
 
     StorageType GetDeviceStorageType();
+
+private:
+    bool IsCompositePtable();
+    uint32_t GetBootdevType();
+    void InitCompositePtable();
+
+    static inline std::unordered_map<uint32_t, PtableConstructor> ptableMap_;
 };
 
 
