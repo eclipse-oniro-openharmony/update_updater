@@ -546,7 +546,6 @@ bool CopyUpdaterLogs(const std::string &sLog, const std::string &dLog)
     std::string destPath = dLog.substr(0, found);
     if (MountForPath(destPath) != 0) {
         LOG(WARNING) << "MountForPath /data/log failed!";
-        return false;
     }
 
     if (access(destPath.c_str(), 0) != 0) {
