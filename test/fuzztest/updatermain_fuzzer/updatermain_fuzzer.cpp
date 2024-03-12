@@ -40,8 +40,7 @@ static void ParseParamsFuzzTest()
 {
     UpdateMessage boot {};
     const std::string commandFile = "/data/updater/command";
-    auto fp = std::unique_ptr<FILE, decltype(&fclose)>(fopen(commandFile.c_str(), "wb"), fclose);
-    if (fp == nullptr) {
+    if (std::unique_ptr<FILE, decltype(&fclose)>(fopen(commandFile.c_str(), "wb"), fclose) == nullptr) {
         return;
     }
     const std::string commandMsg = "boot_updater";
@@ -66,7 +65,7 @@ static void ParseParamsFuzzTest()
 
 static void MianUpdaterFuzzTest()
 {
-    int args_size = 24;
+    int argsSize = 24;
     UpdateMessage boot {};
     if (access("/data/updater/", 0)) {
         int ret = mkdir("/data/updater/", S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
@@ -75,8 +74,7 @@ static void MianUpdaterFuzzTest()
         }
     }
     const std::string commandFile = "/data/updater/command";
-    auto fp = std::unique_ptr<FILE, decltype(&fclose)>(fopen(commandFile.c_str(), "wb"), fclose);
-    if (fp == nullptr) {
+    if (std::unique_ptr<FILE, decltype(&fclose)>(fopen(commandFile.c_str(), "wb"), fclose) == nullptr) {
         return;
     }
 
@@ -92,9 +90,9 @@ static void MianUpdaterFuzzTest()
     if (!bRet) {
         return;
     }
-    char **argv = new char*[1];
-    argv[0] = new char[args_size];
-    if (strncpy_s(argv[0], args_size, "./UpdaterMain", args_size) != 0) {
+    char **argv = new char* [1];
+    argv[0] = new char[argsSize];
+    if (strncpy_s(argv[0], argsSize, "./UpdaterMain", argsSize) != 0) {
         return;
     }
     int argc = 1;
@@ -109,7 +107,7 @@ static void MianUpdaterFuzzTest()
 
 static void SdCardUpdateFuzzTest()
 {
-    int args_size = 24;
+    int argsSize = 24;
     UpdateMessage boot {};
     if (access("/data/updater/", 0)) {
         int ret = mkdir("/data/updater/", S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
@@ -118,8 +116,7 @@ static void SdCardUpdateFuzzTest()
         }
     }
     const std::string commandFile = "/data/updater/command";
-    auto fp = std::unique_ptr<FILE, decltype(&fclose)>(fopen(commandFile.c_str(), "wb"), fclose);
-    if (fp == nullptr) {
+    if (std::unique_ptr<FILE, decltype(&fclose)>(fopen(commandFile.c_str(), "wb"), fclose) == nullptr) {
         return;
     }
     const std::string commandMsg = "boot_updater";
@@ -134,9 +131,9 @@ static void SdCardUpdateFuzzTest()
     if (!bRet) {
         return;
     }
-    char **argv = new char*[1];
-    argv[0] = new char[MAX_ARG_SIZE];
-    if (strncpy_s(argv[0], args_size, "./UpdaterMain", args_size) != 0) {
+    char **argv = new char* [1];
+    argv[0] = new char[argsSize];
+    if (strncpy_s(argv[0], argsSize, "./UpdaterMain", argsSize) != 0) {
         return;
     }
     int argc = 1;
@@ -245,12 +242,12 @@ static void IsSpaceCapacitySufficientFuzzTest()
     UpdaterParams upParams {};
     UpdaterStatus status = IsSpaceCapacitySufficient(upParams);
     if (status != UPDATE_ERROR) {
-       return;
+        return;
     }
     upParams.updatePackage.push_back("/data/updater/updater/updater_full.zip");
     status = IsSpaceCapacitySufficient(upParams);
     if (status != UPDATE_SUCCESS) {
-       return;
+        return;
     }
 }
 
