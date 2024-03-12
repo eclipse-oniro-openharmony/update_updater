@@ -72,7 +72,7 @@ ohos_fuzztest("UpdaterMainFuzzTest") {
   sources = [ 
     "updatermain_fuzzer.cpp",
     "${updater_path}/services/updater.cpp",
-    "${updater_path}/utils/utils.cpp",
-    "${updater_path}/services/updater_main.cpp"
+    "${updater_path}/services/updater_main.cpp",
+    "${updater_path}/utils/utils.cpp"
   ]
 }

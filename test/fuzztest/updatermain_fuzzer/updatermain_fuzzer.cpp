@@ -40,7 +40,8 @@ static void ParseParamsFuzzTest()
 {
     UpdateMessage boot {};
     const std::string commandFile = "/data/updater/command";
-    if (std::unique_ptr<FILE, decltype(&fclose)>(fopen(commandFile.c_str(), "wb"), fclose) == nullptr) {
+    auto fp = std::unique_ptr<FILE, decltype(&fclose)>(fopen(commandFile.c_str(), "wb"), fclose);
+    if (fp == nullptr) {
         return;
     }
     const std::string commandMsg = "boot_updater";
@@ -74,7 +75,8 @@ static void MianUpdaterFuzzTest()
         }
     }
     const std::string commandFile = "/data/updater/command";
-    if (std::unique_ptr<FILE, decltype(&fclose)>(fopen(commandFile.c_str(), "wb"), fclose) == nullptr) {
+    auto fp = std::unique_ptr<FILE, decltype(&fclose)>(fopen(commandFile.c_str(), "wb"), fclose);
+    if (fp == nullptr) {
         return;
     }
 
@@ -116,7 +118,8 @@ static void SdCardUpdateFuzzTest()
         }
     }
     const std::string commandFile = "/data/updater/command";
-    if (std::unique_ptr<FILE, decltype(&fclose)>(fopen(commandFile.c_str(), "wb"), fclose) == nullptr) {
+    auto fp = std::unique_ptr<FILE, decltype(&fclose)>(fopen(commandFile.c_str(), "wb"), fclose);
+    if (fp == nullptr) {
         return;
     }
     const std::string commandMsg = "boot_updater";
