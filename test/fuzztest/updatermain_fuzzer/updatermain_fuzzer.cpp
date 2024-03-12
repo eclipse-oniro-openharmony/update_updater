@@ -21,12 +21,16 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include "log/log.h"
 #include "updater_main.h"
 #include "misc_info/misc_info.h"
 #include "updater/updater_const.h"
 #include "securec.h"
 #include "utils.h"
+#include "updater/updater.h"
+#include "updater_ui_stub.h"
 
 using namespace Updater;
 using namespace std;
@@ -41,7 +45,7 @@ static void ParseParamsFuzzTest()
         return;
     }
     const std::string commandMsg = "boot_updater";
-    if (strncpy_s(boot.command, sizeof(boot.command) - 1, commandMsg.c_str(), commandMsg.size()) == 0) {
+    if (strncpy_s(boot.command, sizeof(boot.command) - 1, commandMsg.c_str(), commandMsg.size()) != 0) {
         return;
     }
     if (strncpy_s(boot.update, sizeof(boot.update), "", sizeof(boot.update)) != 0) {
@@ -60,10 +64,211 @@ static void ParseParamsFuzzTest()
     delete []argv;
 }
 
+static void MianUpdaterFuzzTest()
+{
+    int args_size = 24;
+    UpdateMessage boot {};
+    if (access("/data/updater/", 0)) {
+        int ret = mkdir("/data/updater/", S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
+        if (ret != 0) {
+            return;
+        }
+    }
+    const std::string commandFile = "/data/updater/command";
+    auto fp = std::unique_ptr<FILE, decltype(&fclose)>(fopen(commandFile.c_str(), "wb"), fclose);
+    if (fp == nullptr) {
+        return;
+    }
+
+    const std::string commandMsg = "boot_updater";
+    const std::string updateMsg = "--update_package=/data/updater/updater/updater_full.zip";
+    if (strncpy_s(boot.command, sizeof(boot.command) - 1, commandMsg.c_str(), commandMsg.size()) != 0) {
+        return;
+    }
+    if (strncpy_s(boot.update, sizeof(boot.update) - 1, updateMsg.c_str(), updateMsg.size()) != 0) {
+        return;
+    }
+    bool bRet = WriteUpdaterMessage(commandFile, boot);
+    if (!bRet) {
+        return;
+    }
+    char **argv = new char*[1];
+    argv[0] = new char[args_size];
+    if (strncpy_s(argv[0], args_size, "./UpdaterMain", args_size) != 0) {
+        return;
+    }
+    int argc = 1;
+ 
+    int ret = UpdaterMain(argc, argv);
+    if (!ret) {
+        return;
+    }
+    delete argv[0];
+    delete []argv;
+}
+
+static void SdCardUpdateFuzzTest()
+{
+    int args_size = 24;
+    UpdateMessage boot {};
+    if (access("/data/updater/", 0)) {
+        int ret = mkdir("/data/updater/", S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
+        if (ret != 0) {
+            return;
+        }
+    }
+    const std::string commandFile = "/data/updater/command";
+    auto fp = std::unique_ptr<FILE, decltype(&fclose)>(fopen(commandFile.c_str(), "wb"), fclose);
+    if (fp == nullptr) {
+        return;
+    }
+    const std::string commandMsg = "boot_updater";
+    const std::string updateMsg = "--sdcard_update";
+    if (strncpy_s(boot.command, sizeof(boot.command) - 1, commandMsg.c_str(), commandMsg.size()) != 0) {
+        return;
+    }
+    if (strncpy_s(boot.update, sizeof(boot.update) - 1, updateMsg.c_str(), updateMsg.size()) != 0) {
+        return;
+    }
+    bool bRet = WriteUpdaterMessage(commandFile, boot);
+    if (!bRet) {
+        return;
+    }
+    char **argv = new char*[1];
+    argv[0] = new char[MAX_ARG_SIZE];
+    if (strncpy_s(argv[0], args_size, "./UpdaterMain", args_size) != 0) {
+        return;
+    }
+    int argc = 1;
+    if (UpdaterMain(argc, argv) != 0) {
+        return;
+    }
+    delete argv[0];
+    delete []argv;
+}
+
+static void InstallUpdaterPackageFuzzTest()
+{
+    UpdaterParams upParams;
+    upParams.retryCount = 0;
+    upParams.callbackProgress = [] (float value) { UPDATER_UI_INSTANCE.ShowProgress(value); };
+    upParams.updatePackage.push_back("/data/updater/updater/updater_full.zip");
+    Hpackage::PkgManager::PkgManagerPtr pkgManager = Hpackage::PkgManager::CreatePackageInstance();
+    if (InstallUpdaterPackage(upParams, pkgManager) != UPDATE_ERROR) {
+        return;
+    }
+}
+
+static void DoUpdatePackagesFuzzTest()
+{
+    UpdaterParams upParams;
+    if (DoUpdatePackages(upParams) != UPDATE_CORRUPT) {
+        return;
+    }
+    upParams.updatePackage.push_back("/data/updater/updater/updater_full.zip");
+    if (DoUpdatePackages(upParams) != UPDATE_CORRUPT) {
+        return;
+    }
+}
+
+static void StartUpdaterEntryFuzzTest()
+{
+    UpdaterParams upParams;
+    upParams.factoryWipeData = true;
+    if (DoUpdatePackages(upParams) != UPDATE_CORRUPT) {
+        return;
+    }
+    upParams.factoryWipeData = false;
+    upParams.userWipeData = true;
+    if (DoUpdatePackages(upParams) != UPDATE_CORRUPT) {
+        return;
+    }
+    upParams.userWipeData = false;
+    if (DoUpdatePackages(upParams) != UPDATE_CORRUPT) {
+        return;
+    }
+}
+
+static void StartUpdaterProcFuzzTest()
+{
+    Hpackage::PkgManager::PkgManagerPtr pkgManager = Hpackage::PkgManager::CreatePackageInstance();
+    UpdaterParams upParams;
+    int maxTemperature = 0;
+    if (StartUpdaterProc(nullptr, upParams, maxTemperature) != UPDATE_CORRUPT) {
+        return;
+    }
+    if (StartUpdaterProc(pkgManager, upParams, maxTemperature) != UPDATE_ERROR) {
+        return;
+    }
+}
+
+static void DoInstallUpdaterPackageFuzzTest()
+{
+    UpdaterParams upParams;
+    upParams.callbackProgress = nullptr;
+    std::vector<std::string> output;
+    if (DoInstallUpdaterPackage(nullptr, upParams, HOTA_UPDATE) != UPDATE_CORRUPT) {
+        return;
+    }
+    upParams.callbackProgress = [] (float value) {};
+    if (DoInstallUpdaterPackage(nullptr, upParams, HOTA_UPDATE) != UPDATE_CORRUPT) {
+        return;
+    }
+    upParams.retryCount = 0;
+    if (DoInstallUpdaterPackage(nullptr, upParams, HOTA_UPDATE) != UPDATE_CORRUPT) {
+        return;
+    }
+    upParams.retryCount = 1;
+    if (DoInstallUpdaterPackage(nullptr, upParams, HOTA_UPDATE) != UPDATE_CORRUPT) {
+        return;
+    }
+}
+
+static void ExtractUpdaterBinaryFuzzTest()
+{
+    Hpackage::PkgManager::PkgManagerPtr pkgManager = Hpackage::PkgManager::CreatePackageInstance();
+    std::string path = "xxx";
+    int32_t ret = ExtractUpdaterBinary(pkgManager, path, UPDATER_BINARY);
+    //EXPECT_EQ(ret, 1);
+    if (ret != 1) {
+        return;
+    }
+    path = "/data/updater/updater/updater_full.zip";
+    ret = ExtractUpdaterBinary(pkgManager, path, UPDATER_BINARY);
+    Hpackage::PkgManager::ReleasePackageInstance(pkgManager);
+    //EXPECT_EQ(ret, 1);
+    if (ret != 1) {
+        return;
+    }
+}
+
+static void IsSpaceCapacitySufficientFuzzTest()
+{
+    UpdaterParams upParams {};
+    UpdaterStatus status = IsSpaceCapacitySufficient(upParams);
+    if (status != UPDATE_ERROR) {
+       return;
+    }
+    upParams.updatePackage.push_back("/data/updater/updater/updater_full.zip");
+    status = IsSpaceCapacitySufficient(upParams);
+    if (status != UPDATE_SUCCESS) {
+       return;
+    }
+}
+
 namespace OHOS {
     void FuzzUpdater(const uint8_t* data, size_t size)
     {
         ParseParamsFuzzTest();
+        MianUpdaterFuzzTest();
+        SdCardUpdateFuzzTest();
+        InstallUpdaterPackageFuzzTest();
+        DoUpdatePackagesFuzzTest();
+        StartUpdaterEntryFuzzTest();
+        StartUpdaterProcFuzzTest();
+        DoInstallUpdaterPackageFuzzTest();
+        ExtractUpdaterBinaryFuzzTest();
+        IsSpaceCapacitySufficientFuzzTest();
     }
 }
 

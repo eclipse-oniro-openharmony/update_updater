@@ -22,6 +22,7 @@ updater_path = rebase_path("${updater_absolutely_path}", ".")
 
 ##############################fuzztest##########################################
 ohos_fuzztest("UpdaterMainFuzzTest") {
+  defines = [ "UPDATER_UT" ]
   module_out_path = module_output_path
   fuzz_config_file = "${updater_path}/test/fuzztest/updatermain_fuzzer"
   include_dirs = [
@@ -68,5 +69,10 @@ ohos_fuzztest("UpdaterMainFuzzTest") {
     "-Wno-unused-variable",
     "-fno-omit-frame-pointer",
   ]
-  sources = [ "updatermain_fuzzer.cpp" ]
+  sources = [ 
+    "updatermain_fuzzer.cpp",
+    "${updater_path}/services/updater.cpp",
+    "${updater_path}/utils/utils.cpp",
+    "${updater_path}/services/updater_main.cpp"
+  ]
 }
