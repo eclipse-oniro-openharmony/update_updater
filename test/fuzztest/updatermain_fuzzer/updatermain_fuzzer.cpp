@@ -229,14 +229,12 @@ static void ExtractUpdaterBinaryFuzzTest()
     Hpackage::PkgManager::PkgManagerPtr pkgManager = Hpackage::PkgManager::CreatePackageInstance();
     std::string path = "xxx";
     int32_t ret = ExtractUpdaterBinary(pkgManager, path, UPDATER_BINARY);
-    //EXPECT_EQ(ret, 1);
     if (ret != 1) {
         return;
     }
     path = "/data/updater/updater/updater_full.zip";
     ret = ExtractUpdaterBinary(pkgManager, path, UPDATER_BINARY);
     Hpackage::PkgManager::ReleasePackageInstance(pkgManager);
-    //EXPECT_EQ(ret, 1);
     if (ret != 1) {
         return;
     }
