@@ -101,7 +101,6 @@ void SetFileAttributes(const std::string& file, uid_t owner, gid_t group, mode_t
 extern "C" {
 #endif
 #endif
-void InitLogger(const std::string &tag);
 int SetParameter(const char *key, const char *value);
 #ifdef __cplusplus
 #if __cplusplus
@@ -109,5 +108,16 @@ int SetParameter(const char *key, const char *value);
 #endif
 #endif
 } // Utils
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif
+#endif
+void InitLogger(const std::string &tag);
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif
+#endif
 } // Updater
 #endif // UPDATER_UTILS_H
