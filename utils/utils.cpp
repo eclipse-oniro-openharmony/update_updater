@@ -536,6 +536,15 @@ bool RestoreconPath(const std::string &path)
     return true;
 }
 
+void InitLogger(const std::string &tag)
+{
+    if (Utils::IsUpdaterMode()) {
+        InitUpdaterLogger(tag, TMP_LOG, TMP_STAGE_LOG, TMP_ERROR_CODE_PATH);
+    } else {
+        InitUpdaterLogger(tag, SYS_INSTALLER_LOG, UPDATER_STAGE_LOG, ERROR_CODE_PATH);
+    }
+}
+
 bool CopyUpdaterLogs(const std::string &sLog, const std::string &dLog)
 {
     std::size_t found = dLog.find_last_of("/");
