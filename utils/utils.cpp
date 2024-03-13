@@ -536,7 +536,7 @@ bool RestoreconPath(const std::string &path)
     return true;
 }
 
-void InitLogger(const std::string &tag)
+void __attribute__((weak)) InitLogger(const std::string &tag)
 {
     if (Utils::IsUpdaterMode()) {
         InitUpdaterLogger(tag, TMP_LOG, TMP_STAGE_LOG, TMP_ERROR_CODE_PATH);
