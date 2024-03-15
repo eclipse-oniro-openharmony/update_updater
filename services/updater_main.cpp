@@ -63,6 +63,7 @@ constexpr struct option OPTIONS[] = {
     { "retry_count", required_argument, nullptr, 0 },
     { "factory_wipe_data", no_argument, nullptr, 0 },
     { "user_wipe_data", no_argument, nullptr, 0 },
+    { "menu_wipe_data", no_argument, nullptr, 0 },
     { "sdcard_update", no_argument, nullptr, 0 },
     { "upgraded_pkg_num", required_argument, nullptr, 0 },
     { "force_update_action", required_argument, nullptr, 0 },
@@ -553,7 +554,7 @@ UpdaterStatus DoUpdaterEntry(UpdaterParams &upParams)
     } else if (upParams.updatePackage.size() > 0) {
         UPDATER_UI_INSTANCE.ShowProgressPage();
         status = InstallUpdaterPackages(upParams);
-    } else if (upParams.factoryWipeData) {
+    } else if (upParams.factoryMode == "factory_wipe_data") {
         UPDATER_UI_INSTANCE.ShowProgressPage();
         LOG(INFO) << "Factory level FactoryReset begin";
         status = UPDATE_SUCCESS;
@@ -567,14 +568,14 @@ UpdaterStatus DoUpdaterEntry(UpdaterParams &upParams)
         UPDATER_UI_INSTANCE.ShowLogRes(
             (status != UPDATE_SUCCESS) ? TR(LOGRES_FACTORY_FAIL) : TR(LOGRES_FACTORY_DONE));
         UpdaterInit::GetInstance().InvokeEvent(UPDATER_RPMB_DATA_CLEAR_EVENT);
-    } else if (upParams.userWipeData) {
+    } else if (upParams.factoryMode == "user_wipe_data" || upParams.factoryMode == "menu_wipe_data") {
         UPDATER_UI_INSTANCE.ShowProgressPage();
         LOG(INFO) << "User level FactoryReset begin";
         status = UPDATE_SUCCESS;
 #if !defined(UPDATER_UT) && defined(UPDATER_UI_SUPPORT)
         DoProgress();
 #endif
-        if (FactoryReset(USER_WIPE_DATA, "/data") != 0) {
+        if (FactoryReset(upParams.factoryMode == "user_wipe_data" ? USER_WIPE_DATA : MENU_WIPE_DATA, "/data") != 0) {
             LOG(ERROR) << "FactoryReset user level failed";
             status = UPDATE_ERROR;
         }
@@ -609,13 +610,17 @@ std::unordered_map<std::string, std::function<void ()>> InitOptionsFuncTab(char*
         {"factory_wipe_data", [&]() -> void
         {
             (void)UPDATER_UI_INSTANCE.SetMode(UPDATERMODE_REBOOTFACTORYRST);
-            upParams.factoryWipeData = true;
-            upParams.factoryReset = true;
+            upParams.factoryMode = "factory_wipe_data";
         }},
         {"user_wipe_data", [&]() -> void
         {
             (void)UPDATER_UI_INSTANCE.SetMode(UPDATERMODE_REBOOTFACTORYRST);
-            upParams.userWipeData = true;
+            upParams.factoryMode = "user_wipe_data";
+        }},
+        {"menu_wipe_data", [&]() -> void
+        {
+            (void)UPDATER_UI_INSTANCE.SetMode(UPDATERMODE_REBOOTFACTORYRST);
+            upParams.factoryMode = "menu_wipe_data";
         }},
         {"upgraded_pkg_num", [&]() -> void
         {
@@ -702,10 +707,6 @@ static UpdaterStatus StartUpdater(const std::vector<std::string> &args,
         (void)UPDATER_UI_INSTANCE.SetMode(UPDATERMODE_SDCARD);
         mode = SDCARD_UPDATE;
     }
-    if (upParams.factoryWipeData && upParams.userWipeData) {
-        LOG(WARNING) << "Factory level reset and user level reset both set. use user level reset.";
-        upParams.factoryWipeData = false;
-    }
     return StartUpdaterEntry(upParams);
 }
 
@@ -723,7 +724,8 @@ void RebootAfterUpdateSuccess(const UpdaterParams &upParams)
         Utils::UpdaterDoReboot("updater", "--user_wipe_data");
         return;
     }
-    upParams.forceUpdate || upParams.factoryReset ? Utils::DoShutdown() : Utils::UpdaterDoReboot("");
+    upParams.forceUpdate || upParams.factoryMode == "factory_wipe_data" ?
+        Utils::DoShutdown() : Utils::UpdaterDoReboot("");
 }
 
 int UpdaterMain(int argc, char **argv)
@@ -759,7 +761,8 @@ int UpdaterMain(int argc, char **argv)
             UPDATER_UI_INSTANCE.ShowFailedPage();
             Utils::UsSleep(5 * DISPLAY_TIME); // 5 : 5s
             UPDATER_UI_INSTANCE.ShowMainpage();
-        } else if (upParams.userWipeData || upParams.factoryWipeData) {
+        } else if (upParams.factoryMode == "user_wipe_data" ||
+            upParams.factoryMode == "menu_wipe_data" || upParams.factoryMode == "factory_wipe_data") {
             UPDATER_UI_INSTANCE.ShowFailedPage();
         } else {
             UPDATER_UI_INSTANCE.ShowMainpage();

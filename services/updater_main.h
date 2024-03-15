@@ -25,6 +25,7 @@ namespace Updater {
 enum FactoryResetMode {
     USER_WIPE_DATA = 0,
     FACTORY_WIPE_DATA,
+    MENU_WIPE_DATA,
 };
 
 int UpdaterMain(int argc, char **argv);

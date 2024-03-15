@@ -311,12 +311,13 @@ HWTEST_F(UpdaterUtilUnitTest, DoUpdatePackagesTest, TestSize.Level1)
 HWTEST_F(UpdaterUtilUnitTest, StartUpdaterEntryTest, TestSize.Level1)
 {
     UpdaterParams upParams;
-    upParams.factoryWipeData = true;
+    upParams.factoryMode = "factory_wipe_data";
     EXPECT_EQ(DoUpdatePackages(upParams), UPDATE_CORRUPT);
-    upParams.factoryWipeData = false;
-    upParams.userWipeData = true;
+    upParams.factoryMode = "user_wipe_data";
     EXPECT_EQ(DoUpdatePackages(upParams), UPDATE_CORRUPT);
-    upParams.userWipeData = false;
+    upParams.factoryMode = "menu_wipe_data";
+    EXPECT_EQ(DoUpdatePackages(upParams), UPDATE_CORRUPT);
+    upParams.factoryMode = "";
     EXPECT_EQ(DoUpdatePackages(upParams), UPDATE_CORRUPT);
 }
 

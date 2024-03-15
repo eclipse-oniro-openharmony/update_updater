@@ -22,7 +22,7 @@
 #include "updater_main.h"
 
 namespace Updater {
-using CommonResetPreFunc = std::function<int(void)>;
+using CommonResetPreFunc = std::function<int(bool)>;
 using FactoryResetPreFunc = std::function<int(void)>;
 using FactoryResetPostFunc = std::function<int(int)>;
 class FactoryResetProcess {

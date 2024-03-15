@@ -29,6 +29,7 @@ FactoryResetProcess::FactoryResetProcess()
 {
     RegisterFunc(USER_WIPE_DATA, [this](const std::string &path) { return DoUserReset(path); });
     RegisterFunc(FACTORY_WIPE_DATA, [this](const std::string &path) { return DoFactoryReset(path); });
+    RegisterFunc(MENU_WIPE_DATA, [this](const std::string &path) { return DoUserReset(path); });
 }
 
 void FactoryResetProcess::RegisterFunc(FactoryResetMode mode, ResetFunc func)
@@ -45,7 +46,7 @@ int FactoryResetProcess::FactoryResetFunc(FactoryResetMode mode, const std::stri
         LOG(ERROR) << "Invalid factory reset tag: " << mode;
         return 1;
     }
-    if (CommonResetPreFunc_ == nullptr || CommonResetPreFunc_() != 0) {
+    if (CommonResetPreFunc_ == nullptr || CommonResetPreFunc_(mode == MENU_WIPE_DATA) != 0) {
         LOG(ERROR) << "Failed to erase the security status";
         return -1;
     }
@@ -56,7 +57,7 @@ int FactoryResetProcess::FactoryResetFunc(FactoryResetMode mode, const std::stri
     return 0;
 }
 
-static int CommonResetPre()
+static int CommonResetPre(bool flag)
 {
     LOG(INFO) << "CommonResetPre";
     return 0;

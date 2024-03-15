@@ -174,16 +174,19 @@ static void DoUpdatePackagesFuzzTest()
 static void StartUpdaterEntryFuzzTest()
 {
     UpdaterParams upParams;
-    upParams.factoryWipeData = true;
+    upParams.factoryMode = "factory_wipe_data";
     if (DoUpdatePackages(upParams) != UPDATE_CORRUPT) {
         return;
     }
-    upParams.factoryWipeData = false;
-    upParams.userWipeData = true;
+    upParams.factoryMode = "user_wipe_data";
     if (DoUpdatePackages(upParams) != UPDATE_CORRUPT) {
         return;
     }
-    upParams.userWipeData = false;
+    upParams.factoryMode = "menu_wipe_data";
+    if (DoUpdatePackages(upParams) != UPDATE_CORRUPT) {
+        return;
+    }
+    upParams.factoryMode = "";
     if (DoUpdatePackages(upParams) != UPDATE_CORRUPT) {
         return;
     }
