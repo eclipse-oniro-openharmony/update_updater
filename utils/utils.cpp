@@ -457,6 +457,7 @@ bool RestoreconPath(const std::string &path)
 {
     if (MountForPath(path) != 0) {
         LOG(ERROR) << "MountForPath " << path << " failed!";
+        return false;
     }
 #ifdef WITH_SELINUX
     if (RestoreconRecurse(path.c_str()) == -1) {
@@ -479,7 +480,6 @@ bool CopyUpdaterLogs(const std::string &sLog, const std::string &dLog)
     std::string destPath = dLog.substr(0, found);
     if (MountForPath(destPath) != 0) {
         LOG(WARNING) << "MountForPath /data/log failed!";
-        return false;
     }
 
     if (access(destPath.c_str(), 0) != 0) {
