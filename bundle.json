@@ -198,6 +198,13 @@
                     }
                 },
                 {
+                    "name": "//base/update/updater/utils:libutils_fs",
+                    "header": {
+                        "header_files": [],
+                        "header_base": "//base/update/updater/utils/include"
+                    }
+                },
+                {
                     "name": "//base/update/updater/services/log:libupdaterlog",
                     "header": {
                         "header_files": [],

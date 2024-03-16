@@ -41,7 +41,6 @@ ohos_static_library("libfsmanager") {
   public_configs = [ ":libfsmanager_exported_headers" ]
 
   deps = [
-    "${updater_path}/utils:libutils",
     "//third_party/bounds_checking_function:libsec_static",
   ]
 

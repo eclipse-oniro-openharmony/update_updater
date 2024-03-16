@@ -45,8 +45,6 @@ using namespace Hpackage;
 
 namespace Utils {
 constexpr uint8_t SHIFT_RIGHT_FOUR_BITS = 4;
-constexpr int USECONDS_PER_SECONDS = 1000000; // 1s = 1000000us
-constexpr int NANOSECS_PER_USECONDS = 1000; // 1us = 1000ns
 constexpr int MAX_TIME_SIZE = 20;
 constexpr const char *PREFIX_PARTITION_NODE = "/dev/block/by-name/";
 
@@ -136,70 +134,6 @@ int32_t DeleteFile(const std::string& filename)
         return -1;
     }
     return 0;
-}
-
-int MkdirRecursive(const std::string &pathName, mode_t mode)
-{
-    size_t slashPos = 0;
-    struct stat info {};
-    while (true) {
-        slashPos = pathName.find_first_of("/", slashPos);
-        if (slashPos == std::string::npos) {
-            break;
-        }
-        if (slashPos == 0) {
-            slashPos++;
-            continue;
-        }
-        if (slashPos > PATH_MAX) {
-            LOG(ERROR) << "path too long for mkdir";
-            return -1;
-        }
-        auto subDir = pathName.substr(0, slashPos);
-        LOG(INFO) << "subDir : " << subDir;
-        if (stat(subDir.c_str(), &info) != 0) {
-            int ret = mkdir(subDir.c_str(), mode);
-            if (ret && errno != EEXIST) {
-                return ret;
-            }
-        }
-        slashPos++;
-    }
-    int ret = mkdir(pathName.c_str(), mode);
-    if (ret && errno != EEXIST) {
-        return ret;
-    }
-    return 0;
-}
-
-int64_t GetFilesFromDirectory(const std::string &path, std::vector<std::string> &files,
-    bool isRecursive)
-{
-    struct stat sb {};
-    if (stat(path.c_str(), &sb) == -1) {
-        LOG(ERROR) << "Failed to stat";
-        return -1;
-    }
-    DIR *dirp = opendir(path.c_str());
-    struct dirent *dp;
-    int64_t totalSize = 0;
-    while ((dp = readdir(dirp)) != nullptr) {
-        std::string fileName = path + "/" + dp->d_name;
-        struct stat st {};
-        if (stat(fileName.c_str(), &st) == 0) {
-            std::string tmpName = dp->d_name;
-            if (tmpName == "." || tmpName == "..") {
-                continue;
-            }
-            if (isRecursive && S_ISDIR(st.st_mode)) {
-                totalSize += GetFilesFromDirectory(fileName, files, isRecursive);
-            }
-            files.push_back(fileName);
-            totalSize += st.st_size;
-        }
-    }
-    closedir(dirp);
-    return totalSize;
 }
 
 std::vector<std::string> SplitString(const std::string &str, const std::string del)
@@ -546,6 +480,7 @@ bool CopyUpdaterLogs(const std::string &sLog, const std::string &dLog)
     std::string destPath = dLog.substr(0, found);
     if (MountForPath(destPath) != 0) {
         LOG(WARNING) << "MountForPath /data/log failed!";
+        return false;
     }
 
     if (access(destPath.c_str(), 0) != 0) {
@@ -626,100 +561,6 @@ void WriteDumpResult(const std::string &result)
 
     (void)chown(resultPath.c_str(), USER_ROOT_AUTHORITY, GROUP_UPDATE_AUTHORITY);
     (void)chmod(resultPath.c_str(), 0660); // 0660: -rw-rw----
-}
-
-void UsSleep(int usec)
-{
-    auto seconds = usec / USECONDS_PER_SECONDS;
-    long nanoSeconds = static_cast<long>(usec) % USECONDS_PER_SECONDS * NANOSECS_PER_USECONDS;
-    struct timespec ts = { static_cast<time_t>(seconds), nanoSeconds };
-    while (nanosleep(&ts, &ts) < 0 && errno == EINTR) {
-    }
-}
-
-bool PathToRealPath(const std::string &path, std::string &realPath)
-{
-    if (path.empty()) {
-        LOG(ERROR) << "path is empty!";
-        return false;
-    }
-
-    if ((path.length() >= PATH_MAX)) {
-        LOG(ERROR) << "path len is error, the len is: " << path.length();
-        return false;
-    }
-
-    char tmpPath[PATH_MAX] = {0};
-    if (realpath(path.c_str(), tmpPath) == nullptr) {
-        LOG(ERROR) << "path to realpath error " << path;
-        return false;
-    }
-
-    realPath = tmpPath;
-    return true;
-}
-
-bool IsUpdaterMode()
-{
-    struct stat st {};
-    if (stat("/bin/updater", &st) == 0 && S_ISREG(st.st_mode)) {
-        LOG(INFO) << "updater mode";
-        return true;
-    }
-    LOG(INFO) << "normal mode";
-    return false;
-}
-
-bool RemoveDir(const std::string &path)
-{
-    if (path.empty()) {
-        LOG(ERROR) << "input path is empty.";
-        return false;
-    }
-    std::string strPath = path;
-    if (strPath.at(strPath.length() - 1) != '/') {
-        strPath.append("/");
-    }
-    DIR *d = opendir(strPath.c_str());
-    if (d != nullptr) {
-        struct dirent *dt = nullptr;
-        dt = readdir(d);
-        while (dt != nullptr) {
-            if (strcmp(dt->d_name, "..") == 0 || strcmp(dt->d_name, ".") == 0) {
-                dt = readdir(d);
-                continue;
-            }
-            struct stat st {};
-            auto file_name = strPath + std::string(dt->d_name);
-            stat(file_name.c_str(), &st);
-            if (S_ISDIR(st.st_mode)) {
-                RemoveDir(file_name);
-            } else {
-                remove(file_name.c_str());
-            }
-            dt = readdir(d);
-        }
-        closedir(d);
-    }
-    return rmdir(strPath.c_str()) == 0 ? true : false;
-}
-
-bool IsFileExist(const std::string &path)
-{
-    struct stat st {};
-    if (stat(path.c_str(), &st) == 0 && S_ISREG(st.st_mode)) {
-        return true;
-    }
-    return false;
-}
-
-bool IsDirExist(const std::string &path)
-{
-    struct stat st {};
-    if (stat(path.c_str(), &st) == 0 && S_ISDIR(st.st_mode)) {
-        return true;
-    }
-    return false;
 }
 
 long long int GetDirSize(const std::string &folderPath)

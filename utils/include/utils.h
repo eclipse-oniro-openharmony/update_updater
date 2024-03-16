@@ -15,6 +15,8 @@
 #ifndef UPDATER_UTILS_H
 #define UPDATER_UTILS_H
 
+#include "utils_fs.h"
+#include "utils_common.h"
 #include <cerrno>
 #include <optional>
 #include <string>
@@ -48,8 +50,6 @@ T String2Int(const std::string &str, int base = N_HEX)
     return result;
 }
 int32_t DeleteFile(const std::string& filename);
-int MkdirRecursive(const std::string &pathName, mode_t mode);
-int64_t GetFilesFromDirectory(const std::string &path, std::vector<std::string> &files, bool isRecursive = false);
 std::vector<std::string> SplitString(const std::string &str, const std::string del = " \t");
 std::string Trim(const std::string &str);
 std::string ConvertSha256Hex(const uint8_t* shaDigest, size_t length);
@@ -66,12 +66,6 @@ bool CopyUpdaterLogs(const std::string &sLog, const std::string &dLog);
 void CompressLogs(const std::string &name);
 bool CheckResultFail();
 void WriteDumpResult(const std::string &result);
-bool PathToRealPath(const std::string &path, std::string &realPath);
-void UsSleep(int usec);
-bool IsUpdaterMode();
-bool RemoveDir(const std::string &path);
-bool IsFileExist(const std::string &path);
-bool IsDirExist(const std::string &path);
 long long int GetDirSize(const std::string &folderPath);
 long long int GetDirSizeForFile(const std::string &filePath);
 bool DeleteOldFile(const std::string dest);
