@@ -46,7 +46,7 @@ struct UpdaterParams {
     bool forceReboot = false;
     bool mainUpdate = false;
     bool sdUpdate = false;
-    std::string factoryMode {};
+    std::string factoryResetMode {};
     PackageUpdateMode updateMode = HOTA_UPDATE;
     int retryCount = 0;
     float initialProgress = 0; /* The upgrade starts at the progress bar location */
