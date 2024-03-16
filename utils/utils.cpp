@@ -457,7 +457,6 @@ bool RestoreconPath(const std::string &path)
 {
     if (MountForPath(path) != 0) {
         LOG(ERROR) << "MountForPath " << path << " failed!";
-        return false;
     }
 #ifdef WITH_SELINUX
     if (RestoreconRecurse(path.c_str()) == -1) {
