@@ -575,7 +575,8 @@ UpdaterStatus DoUpdaterEntry(UpdaterParams &upParams)
 #if !defined(UPDATER_UT) && defined(UPDATER_UI_SUPPORT)
         DoProgress();
 #endif
-        if (FactoryReset(upParams.factoryResetMode == "user_wipe_data" ? USER_WIPE_DATA : MENU_WIPE_DATA, "/data") != 0) {
+        if (FactoryReset(upParams.factoryResetMode == "user_wipe_data" ?
+            USER_WIPE_DATA : MENU_WIPE_DATA, "/data") != 0) {
             LOG(ERROR) << "FactoryReset user level failed";
             status = UPDATE_ERROR;
         }
