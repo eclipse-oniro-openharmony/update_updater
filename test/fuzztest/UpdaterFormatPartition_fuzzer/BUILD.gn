@@ -44,6 +44,7 @@ ohos_fuzztest("UpdaterFormatPartitionFuzzTest") {
   deps = [
     "${updater_path}/services/fs_manager:libfsmanager",
     "${updater_path}/services/log:libupdaterlog",
+    "${updater_path}/utils:libutils",
   ]
 
   external_deps = [ "init:libbegetutil" ]

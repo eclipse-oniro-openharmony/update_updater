@@ -30,6 +30,8 @@ ohos_static_library("libutils") {
     "json/json_node.cpp",
     "partition_utils.cpp",
     "utils.cpp",
+    "utils_common.cpp",
+    "utils_fs.cpp",
   ]
 
   include_dirs = [
@@ -55,6 +57,30 @@ ohos_static_library("libutils") {
     include_dirs += [ "//third_party/selinux/libselinux/include" ]
     cflags = [ "-DWITH_SELINUX" ]
   }
+
+  subsystem_name = "updater"
+  part_name = "updater"
+}
+
+ohos_static_library("libutils_fs") {
+  sources = [ "utils_fs.cpp" ]
+
+  include_dirs = [
+    "include",
+    "${updater_path}/services/include/",
+  ]
+
+  subsystem_name = "updater"
+  part_name = "updater"
+}
+
+ohos_static_library("libutils_common") {
+  sources = [ "utils_common.cpp" ]
+
+  include_dirs = [
+    "include",
+    "${updater_path}/services/include/",
+  ]
 
   subsystem_name = "updater"
   part_name = "updater"
