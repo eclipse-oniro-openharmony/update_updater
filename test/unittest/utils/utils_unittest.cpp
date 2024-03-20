@@ -157,8 +157,8 @@ HWTEST_F(UtilsUnitTest, GetTagValInStrTest, TestSize.Level0)
 
 HWTEST_F(UtilsUnitTest, IsValidHexTest, TestSize.Level0)
 {
-    bool ret = Utils::IsValidHexStr("a");
-    EXPECT_EQ(ret, false);
+    bool ret = Utils::IsValidHexStr("a1");
+    EXPECT_EQ(ret, true);
     ret = Utils::IsValidHexStr("1*");
     EXPECT_EQ(ret, false);
     ret = Utils::IsValidHexStr("ABCDEF");
