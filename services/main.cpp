@@ -39,7 +39,7 @@ int main(int argc, char **argv)
     // execute mode initialization
     bootMode.InitMode();
 
-    printf("################\n");
+    LOG(INFO) << "################################";
     // mode entry
     return bootMode.entryFunc(argc, argv);
 }
