@@ -76,6 +76,7 @@ int32_t PkgVerifyUtil::VerifyPackageSign(const PkgStreamPtr pkgStream) const
         srcDataLen = pkgStream->GetFileLength() - signatureSize - ZIP_EOCD_FIXED_PART_LEN;
         ret = HashCheck(pkgStream, srcDataLen, hash);
     }
+    PKG_LOGI("verify package signature %s", ret == PKG_SUCCESS ? "successfull" : "failed");
     return ret;
 }
 
