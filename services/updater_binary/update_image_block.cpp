@@ -508,12 +508,50 @@ int UScriptInstructionShaCheck::ExecReadShaInfo(Uscript::UScriptEnv &env, const 
     std::string resultSha = Utils::ConvertSha256Hex(digest, SHA256_DIGEST_LENGTH);
     if (resultSha != contrastSha) {
         LOG(ERROR) << "Different sha256, cannot continue";
+        LOG(ERROR) << "blockPairs:" << blockPairs;
+        PrintAbnormalBockHash(devPath, blockPairs);
         UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE);
         env.PostMessage(UPDATER_RETRY_TAG, VERIFY_FAILED_REBOOT);
         return USCRIPT_ERROR_EXECUTE;
     }
     LOG(INFO) << "UScriptInstructionShaCheck::Execute Success";
     return USCRIPT_SUCCESS;
+}
+
+void UScriptInstructionShaCheck::PrintAbnormalBockHash(const std::string &devPath, const std::string &blockPairs)
+{
+    int fd = open(devPath.c_str(), O_RDWR | O_LARGEFILE);
+    if (fd == -1) {
+        LOG(ERROR) << "Failed to open file";
+        return;
+    }
+
+    BlockSet blk;
+    blk.ParserAndInsert(blockPairs);
+    std::vector<uint8_t> block_buff(H_BLOCK_SIZE);
+    std::vector<BlockPair>::iterator it = blk.Begin();
+    for (; it != blk.End(); ++it) {
+        if (lseek64(fd, static_cast<off64_t>(it->first * H_BLOCK_SIZE), SEEK_SET) == -1) {
+            LOG(ERROR) << "Failed to seek";
+            close(fd);
+            return;
+        }
+        SHA256_CTX ctx;
+        SHA256_Init(&ctx);
+        for (size_t i = it->first; i < it->second; ++i) {
+            if (!Utils::ReadFully(fd, block_buff.data(), H_BLOCK_SIZE)) {
+                LOG(ERROR) << "Failed to read";
+                close(fd);
+                return;
+            }
+            SHA256_Update(&ctx, block_buff.data(), H_BLOCK_SIZE);
+        }
+        uint8_t digest[SHA256_DIGEST_LENGTH] = {0};
+        SHA256_Final(digest, &ctx);
+        LOG(ERROR) << "block id:" << it->first << "-" << it->second <<
+            " hex:" << Utils::ConvertSha256Hex(digest, SHA256_DIGEST_LENGTH);
+    }
+    close(fd);
 }
 
 int32_t UScriptInstructionShaCheck::Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context)
