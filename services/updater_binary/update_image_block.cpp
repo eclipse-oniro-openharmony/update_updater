@@ -546,7 +546,7 @@ void UScriptInstructionShaCheck::PrintAbnormalBockHash(const std::string &devPat
             }
             SHA256_Update(&ctx, block_buff.data(), H_BLOCK_SIZE);
         }
-        uint8_t digest[SHA256_DIGEST_LENGTH];
+        uint8_t digest[SHA256_DIGEST_LENGTH] = {0};
         SHA256_Final(digest, &ctx);
         LOG(ERROR) << "block id:" << it->first << "-" << it->second <<
             " hex:" << Utils::ConvertSha256Hex(digest, SHA256_DIGEST_LENGTH);
