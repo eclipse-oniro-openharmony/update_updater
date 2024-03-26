@@ -569,7 +569,7 @@ int32_t UpgradePkgFile::VerifyHeader(DigestAlgorithm::DigestAlgorithmPtr algorit
     PkgBuffer digest(GetDigestLen());
     algorithm->Final(digest);
     int ret = 0;
-    if (pkgInfo_.updateFileVersion >= UPGRADE_FILE_VERSION_V3) {
+    if (pkgInfo_.updateFileVersion >= UPGRADE_FILE_VERSION_V4) {
         auto signature = signData;
         PkgVerifyUtil pkgVerifyUtil;
         ret = pkgVerifyUtil.VerifySign(signature, digest.data);
