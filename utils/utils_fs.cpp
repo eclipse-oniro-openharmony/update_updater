@@ -22,6 +22,7 @@
 #include <fcntl.h>
 #include <limits>
 #include <linux/reboot.h>
+#include <securec.h>
 #include <string>
 #include <sys/reboot.h>
 #include <sys/stat.h>
@@ -29,6 +30,8 @@
 #include <unistd.h>
 #include <vector>
 #include "log/log.h"
+#include "updater/updater_const.h"
+#include "utils.h"
 
 namespace Updater {
 namespace Utils {
@@ -147,6 +150,36 @@ bool IsDirExist(const std::string &path)
         return true;
     }
     return false;
+}
+
+void WriteDumpResult(const std::string &result)
+{
+    if (access(UPDATER_PATH, 0) != 0) {
+        if (MkdirRecursive(UPDATER_PATH, 0755) != 0) { // 0755: -rwxr-xr-x
+            LOG(ERROR) << "MkdirRecursive error!";
+            return;
+        }
+    }
+    LOG(INFO) << "WriteDumpResult: " << result;
+    const std::string resultPath = std::string(UPDATER_PATH) + "/" + std::string(UPDATER_RESULT_FILE);
+    FILE *fp = fopen(resultPath.c_str(), "w+");
+    if (fp == nullptr) {
+        LOG(ERROR) << "open result file failed";
+        return;
+    }
+    char buf[MAX_RESULT_BUFF_SIZE] = "Pass\n";
+    if (sprintf_s(buf, MAX_RESULT_BUFF_SIZE - 1, "%s\n", result.c_str()) < 0) {
+        LOG(WARNING) << "sprintf status fialed";
+    }
+    if (fwrite(buf, 1, strlen(buf) + 1, fp) <= 0) {
+        LOG(WARNING) << "write result file failed, err:" << errno;
+    }
+    if (fclose(fp) != 0) {
+        LOG(WARNING) << "close result file failed";
+    }
+
+    (void)chown(resultPath.c_str(), USER_ROOT_AUTHORITY, GROUP_UPDATE_AUTHORITY);
+    (void)chmod(resultPath.c_str(), 0660); // 0660: -rw-rw----
 }
 } // Utils
 } // updater

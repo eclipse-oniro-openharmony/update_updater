@@ -30,6 +30,7 @@ ohos_shared_library("libupdater_shared") {
     "${updater_path}/interfaces/kits/misc_info:libmiscinfo",
     "${updater_path}/services/log:libupdaterlog",
     "${updater_path}/utils:libutils_common",
+    "${updater_path}/utils:libutils_fs",
     "//third_party/bounds_checking_function:libsec_shared",
     "//third_party/lz4:liblz4_static",
     "//third_party/openssl:libcrypto_shared",

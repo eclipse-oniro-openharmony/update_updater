@@ -21,6 +21,7 @@
 #include "misc_info/misc_info.h"
 #include "securec.h"
 #include "utils.h"
+#include "utils_fs.h"
 
 using namespace Updater;
 using Updater::Utils::SplitString;
@@ -36,6 +37,32 @@ static bool WriteToMiscAndRebootToUpdater(const struct UpdateMessage &updateMsg)
     }
 #ifndef UPDATER_UT
     WriteUpdaterMiscMsg(updateMsg);
+    DoReboot("updater");
+    while (true) {
+        pause();
+    }
+#else
+    return true;
+#endif
+}
+
+static bool WriteToMiscAndResultFileRebootToUpdater(const struct UpdateMessage &updateMsg)
+{
+    // Write package name to misc, then trigger reboot.
+    const char *bootCmd = "boot_updater";
+    int ret = strncpy_s(const_cast<char*>(updateMsg.command), sizeof(updateMsg.command), bootCmd,
+        sizeof(updateMsg.command) - 1);
+    if (ret != 0) {
+        return false;
+    }
+#ifndef UPDATER_UT
+    // Flag before the misc in written
+    std::string writeMiscBefore = "0x80000000";
+    Utils::WriteDumpResult(writeMiscBefore);
+    WriteUpdaterMiscMsg(updateMsg);
+    // Flag after the misc in written
+    std::string writeMiscAfter = "0x80000008";
+    Utils::WriteDumpResult(writeMiscAfter);
     DoReboot("updater");
     while (true) {
         pause();
@@ -117,7 +144,7 @@ bool RebootAndInstallUpgradePackage(const std::string &miscFile, const std::vect
         return false;
     }
 
-    WriteToMiscAndRebootToUpdater(updateMsg);
+    WriteToMiscAndResultFileRebootToUpdater(updateMsg);
 
     // Never get here.
     return true;
