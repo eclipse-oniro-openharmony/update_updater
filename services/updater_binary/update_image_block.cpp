@@ -509,7 +509,7 @@ int UScriptInstructionShaCheck::ExecReadShaInfo(Uscript::UScriptEnv &env, const 
     if (resultSha != contrastSha) {
         LOG(ERROR) << "Different sha256, cannot continue";
         LOG(ERROR) << "blockPairs:" << blockPairs;
-        PrintAbnormalBockHash(devPath, blockPairs);
+        PrintAbnormalBlockHash(devPath, blockPairs);
         UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE);
         env.PostMessage(UPDATER_RETRY_TAG, VERIFY_FAILED_REBOOT);
         return USCRIPT_ERROR_EXECUTE;
