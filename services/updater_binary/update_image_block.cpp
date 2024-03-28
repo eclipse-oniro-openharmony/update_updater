@@ -518,7 +518,7 @@ int UScriptInstructionShaCheck::ExecReadShaInfo(Uscript::UScriptEnv &env, const 
     return USCRIPT_SUCCESS;
 }
 
-void UScriptInstructionShaCheck::PrintAbnormalBockHash(const std::string &devPath, const std::string &blockPairs)
+void UScriptInstructionShaCheck::PrintAbnormalBlockHash(const std::string &devPath, const std::string &blockPairs)
 {
     int fd = open(devPath.c_str(), O_RDWR | O_LARGEFILE);
     if (fd == -1) {
