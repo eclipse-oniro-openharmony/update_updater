@@ -52,7 +52,7 @@ static void WriteUpdaterResultFile(const std::string &result)
 {
     if (access(UPDATER_PATH, 0) != 0) {
         if (Utils::MkdirRecursive(UPDATER_PATH, 0755) != 0) { // 0755: -rwxr-xr-x
-            LOG(ERROR) << "WriteUpdaterResultFile error!";
+            LOG(ERROR) << "Mkdir recursive error!";
             return;
         }
     }
