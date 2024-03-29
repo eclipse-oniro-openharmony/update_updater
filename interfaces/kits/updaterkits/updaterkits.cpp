@@ -87,10 +87,10 @@ static bool WriteToMiscAndResultFileRebootToUpdater(const struct UpdateMessage &
     if (ret != 0) {
         return false;
     }
-#ifndef UPDATER_UT
     // Flag before the misc in written
     std::string writeMiscBefore = "0x80000000";
     WriteUpdaterResultFile(writeMiscBefore);
+#ifndef UPDATER_UT
     WriteUpdaterMiscMsg(updateMsg);
     // Flag after the misc in written
     std::string writeMiscAfter = "0x80000008";
