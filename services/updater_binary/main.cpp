@@ -44,7 +44,7 @@ int main(int argc, char **argv)
         }
         packagePath = argv[0];
         pipeFd = static_cast<int>(std::strtol(argv[1], nullptr, DECIMAL));
-    } else { // 4 a: binary, package, pipe, retry=1/retry/retry=0
+    } else { // 4 a: binary, package, pipe, retry=1/retry=0
         packagePath = argv[1];
         pipeFd = static_cast<int>(std::strtol(argv[2], nullptr, DECIMAL)); // 2: pipe index
         retry = strcmp(argv[3], "retry=0") == 0 ? false : true; // 3: retry index
