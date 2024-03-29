@@ -33,7 +33,7 @@ int main(int argc, char **argv)
         return EXIT_INVALID_ARGS;
     }
     bool retry = false;
-    int pipeFd = static_cast<int>(std::strtol(argv[1], nullptr, DECIMAL));
+    int pipeFd;
     if (argc >= BINARY_MAX_ARGS && strcmp(argv[BINARY_SECOND_ARG], "retry") == 0) {
         retry = true;
     }
