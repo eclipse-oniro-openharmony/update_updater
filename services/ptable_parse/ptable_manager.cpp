@@ -276,6 +276,7 @@ void PtableManager::InitCompositePtable()
             continue;
         }
         if (auto iter = ptableMap_.find(i); iter != ptableMap_.end()) {
+            LOG(INFO) << "add child ptable: " << (i - 1)
             pPtable_->AddChildPtable(iter->second());
         }
     }
