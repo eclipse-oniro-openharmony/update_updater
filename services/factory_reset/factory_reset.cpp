@@ -46,7 +46,8 @@ int FactoryResetProcess::FactoryResetFunc(FactoryResetMode mode, const std::stri
         LOG(ERROR) << "Invalid factory reset tag: " << mode;
         return 1;
     }
-    if (CommonResetPreFunc_ == nullptr || CommonResetPreFunc_(mode == MENU_WIPE_DATA) != 0) {
+    if (CommonResetPreFunc_ == nullptr ||
+        CommonResetPreFunc_(mode == MENU_WIPE_DATA || mode == FACTORY_WIPE_DATA) != 0) {
         LOG(ERROR) << "Failed to erase the security status";
         return -1;
     }
