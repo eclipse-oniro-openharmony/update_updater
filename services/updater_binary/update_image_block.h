@@ -45,7 +45,7 @@ public:
 private:
     int ExecReadShaInfo(Uscript::UScriptEnv &env, const std::string &devPath, const std::string &blockPairs,
         const std::string &contrastSha);
-    void PrintAbnormalBockHash(const std::string &devPath, const std::string &blockPairs);
+    void PrintAbnormalBlockHash(const std::string &devPath, const std::string &blockPairs);
 };
 }
 
