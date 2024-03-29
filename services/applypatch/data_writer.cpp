@@ -89,12 +89,12 @@ std::unique_ptr<DataWriter> DataWriter::CreateDataWriter(WriteMode mode, const s
 }
 
 std::unique_ptr<DataWriter> DataWriter::CreateDataWriter(const std::string &mode, const std::string &path,
-    const std::string &partName,uint64_t startAddr,uint64_t offset)
+    const std::string &partName, uint64_t startAddr, uint64_t offset)
 {
     if (auto it = constructorMap_.find(mode); it != constructorMap_.end()) {
         return it->second(path, partName, offset);
     }
-    LOG(ERROR) << "create writer failed, can not find writer mode: "<<mode;
+    LOG(ERROR) << "create writer failed, can not find writer mode: "<< mode;
     return nullptr;
 }
 
