@@ -70,8 +70,6 @@ ohos_static_library("libutils_fs") {
     "${updater_path}/services/include/",
   ]
 
-  deps = [ "//third_party/bounds_checking_function:libsec_static" ]
-
   subsystem_name = "updater"
   part_name = "updater"
 }

@@ -15,11 +15,13 @@
 #include "updaterkits/updaterkits.h"
 
 #include <string>
+#include <sys/stat.h>
 #include <unistd.h>
 #include "init_reboot.h"
 #include "log.h"
 #include "misc_info/misc_info.h"
 #include "securec.h"
+#include "updater/updater_const.h"
 #include "utils.h"
 #include "utils_fs.h"
 
@@ -46,6 +48,36 @@ static bool WriteToMiscAndRebootToUpdater(const struct UpdateMessage &updateMsg)
 #endif
 }
 
+static void WriteUpdaterResultFile(const std::string &result)
+{
+    if (access(UPDATER_PATH, 0) != 0) {
+        if (Utils::MkdirRecursive(UPDATER_PATH, 0755) != 0) { // 0755: -rwxr-xr-x
+            LOG(ERROR) << "WriteUpdaterResultFile error!";
+            return;
+        }
+    }
+    LOG(INFO) << "WriteUpdaterResultFile: " << result;
+    const std::string resultPath = std::string(UPDATER_PATH) + "/" + std::string(UPDATER_RESULT_FILE);
+    FILE *fp = fopen(resultPath.c_str(), "w+");
+    if (fp == nullptr) {
+        LOG(ERROR) << "open updater result file failed";
+        return;
+    }
+    char buf[MAX_RESULT_BUFF_SIZE] = "Pass\n";
+    if (sprintf_s(buf, MAX_RESULT_BUFF_SIZE - 1, "%s\n", result.c_str()) < 0) {
+        LOG(WARNING) << "sprintf status fialed";
+    }
+    if (fwrite(buf, 1, strlen(buf) + 1, fp) <= 0) {
+        LOG(WARNING) << "write updater result file failed, err:" << errno;
+    }
+    if (fclose(fp) != 0) {
+        LOG(WARNING) << "close updater result file failed";
+    }
+
+    (void)chown(resultPath.c_str(), Utils::USER_ROOT_AUTHORITY, Utils::GROUP_UPDATE_AUTHORITY);
+    (void)chmod(resultPath.c_str(), 0660); // 0660: -rw-rw----
+}
+
 static bool WriteToMiscAndResultFileRebootToUpdater(const struct UpdateMessage &updateMsg)
 {
     // Write package name to misc, then trigger reboot.
@@ -58,11 +90,11 @@ static bool WriteToMiscAndResultFileRebootToUpdater(const struct UpdateMessage &
 #ifndef UPDATER_UT
     // Flag before the misc in written
     std::string writeMiscBefore = "0x80000000";
-    Utils::WriteDumpResult(writeMiscBefore);
+    WriteUpdaterResultFile(writeMiscBefore);
     WriteUpdaterMiscMsg(updateMsg);
     // Flag after the misc in written
     std::string writeMiscAfter = "0x80000008";
-    Utils::WriteDumpResult(writeMiscAfter);
+    WriteUpdaterResultFile(writeMiscAfter);
     DoReboot("updater");
     while (true) {
         pause();

@@ -29,7 +29,6 @@ int64_t GetFilesFromDirectory(const std::string &path, std::vector<std::string> 
 bool RemoveDir(const std::string &path);
 bool IsFileExist(const std::string &path);
 bool IsDirExist(const std::string &path);
-void WriteDumpResult(const std::string &result);
 } // Utils
 } // Updater
 #endif // UTILS_FS_H
