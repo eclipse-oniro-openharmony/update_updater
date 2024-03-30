@@ -28,8 +28,8 @@ using namespace Updater;
 int main(int argc, char **argv)
 {
     InitLogger("UPDATER_BINARY");
-    if (argc < MINIMAL_ARGC_LIMIT) {
-        LOG(ERROR) << "Invalid arguments.";
+    if (argc < MINIMAL_ARGC_LIMIT || argc > MAXIMAL_ARGC_LIMIT) {
+        LOG(ERROR) << "Invalid arguments:" << argc;
         return EXIT_INVALID_ARGS;
     }
     bool retry = false;
