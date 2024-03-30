@@ -37,7 +37,7 @@ config("updater_config") {
 
 updater_gen("updater_binary") {
   deps = [ "${updater_path}/services/updater_binary:libupdater_binary" ]
- 
+
   branch_protector_ret = "pac_ret"
   sanitize = {
     integer_overflow = true
