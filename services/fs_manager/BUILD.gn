@@ -43,6 +43,17 @@ ohos_static_library("libfsmanager") {
   deps = [ "//third_party/bounds_checking_function:libsec_static" ]
 
   external_deps = [ "init:libfsmanager_static" ]
+
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
   subsystem_name = "updater"
   part_name = "updater"
 }

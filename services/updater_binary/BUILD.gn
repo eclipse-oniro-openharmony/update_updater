@@ -37,6 +37,16 @@ config("updater_config") {
 
 updater_gen("updater_binary") {
   deps = [ "${updater_path}/services/updater_binary:libupdater_binary" ]
+ 
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
 
   part_name = "updater"
   subsystem_name = "updater"
@@ -82,7 +92,15 @@ ohos_static_library("libupdater_binary") {
   }
 
   external_deps = [ "init:libfsmanager_static" ]
-
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
   part_name = "updater"
   subsystem_name = "updater"
 }

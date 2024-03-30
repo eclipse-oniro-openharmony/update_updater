@@ -35,6 +35,17 @@ ohos_static_library("libsdupdate") {
     "//third_party/bounds_checking_function:libsec_static",
   ]
   external_deps = [ "init:libbegetutil" ]
+
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
   subsystem_name = "updater"
   part_name = "updater"
 }

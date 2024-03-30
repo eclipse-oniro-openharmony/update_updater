@@ -107,16 +107,17 @@ bool Ptable::ParsePtableData()
 
     // get root node
     std::string content {std::istreambuf_iterator<char> {ifs}, {}};
-    cJSONPtr root(cJSON_Parse(content.c_str()), cJSON_Delete);
+    cJSON* root = cJSON_Parse(content.c_str());
     if (root == nullptr) {
         LOG(ERROR) << PTABLE_CONFIG_PATH << " contained json invalid";
         return false;
     }
 
-    JsonNode node(root.get(), false);
+    JsonNode node(root, false);
     const JsonNode &ptableDataNode = node[PTABLE_DATA_LABEL];
     bool ret = ParsePtableDataNode(ptableDataNode);
     ptableData_.dataValid = ret;
+    cJSON_Delete(root);
     return ret;
 }
 
