@@ -101,6 +101,7 @@ ohos_static_library("libupdater_binary") {
     cfi = true
     cfi_cross_dso = true
     debug = true
+    blocklist = "../../cfi_blocklist.txt"
   }
   part_name = "updater"
   subsystem_name = "updater"
