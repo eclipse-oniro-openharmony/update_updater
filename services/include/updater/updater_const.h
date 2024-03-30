@@ -74,6 +74,7 @@ constexpr const char *IO_FAILED_REBOOT = "reboot_IO_failed";
 
 constexpr int MAX_RETRY_COUNT = 3;
 constexpr int MINIMAL_ARGC_LIMIT = 2;
+constexpr int MAXIMAL_ARGC_LIMIT = 4;
 constexpr int MAX_LOG_BUF_SIZE = 4096;
 constexpr int MAX_LOG_NAME_SIZE = 100;
 constexpr long MAX_LOG_SIZE = 5 * 1024 * 1024;
