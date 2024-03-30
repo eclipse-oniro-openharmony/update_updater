@@ -59,7 +59,7 @@ updater_gen("updater") {
     boundary_sanitize = true
     cfi = true
     cfi_cross_dso = true
-    debug = false
+    debug = true
   }
 
   deps = [ "${updater_path}/services:libupdater_static" ]
@@ -135,7 +135,7 @@ ohos_static_library("libupdater_static") {
     boundary_sanitize = true
     cfi = true
     cfi_cross_dso = true
-    debug = false
+    debug = true
   }
 
   part_name = "updater"
@@ -213,7 +213,7 @@ ohos_static_library("libupdater") {
     boundary_sanitize = true
     cfi = true
     cfi_cross_dso = true
-    debug = false
+    debug = true
   }
 
   subsystem_name = "updater"

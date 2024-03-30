@@ -108,7 +108,7 @@ ohos_executable("updater_reboot") {
     boundary_sanitize = true
     cfi = true
     cfi_cross_dso = true
-    debug = false
+    debug = true
   }
 
   install_images = [ "updater" ]
@@ -141,7 +141,7 @@ ohos_executable("write_updater") {
     boundary_sanitize = true
     cfi = true
     cfi_cross_dso = true
-    debug = false
+    debug = true
   }
 
   install_enable = true

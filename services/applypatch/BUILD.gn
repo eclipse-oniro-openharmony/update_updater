@@ -63,7 +63,7 @@ ohos_static_library("libapplypatch") {
     boundary_sanitize = true
     cfi = true
     cfi_cross_dso = true
-    debug = false
+    debug = true
   }
 
   subsystem_name = "updater"

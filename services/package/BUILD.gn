@@ -21,7 +21,7 @@ if (!is_linux && !is_mingw && !is_mac) {
     boundary_sanitize = true
     cfi = true
     cfi_cross_dso = true
-    debug = false
+    debug = true
   }
 } else {
   updater_path = "../.."

@@ -68,7 +68,7 @@ ohos_static_library("libptableparse") {
     boundary_sanitize = true
     cfi = true
     cfi_cross_dso = true
-    debug = false
+    debug = true
   }
 
   part_name = "updater"

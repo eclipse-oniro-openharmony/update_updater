@@ -45,7 +45,7 @@ updater_gen("updater_binary") {
     boundary_sanitize = true
     cfi = true
     cfi_cross_dso = true
-    debug = false
+    debug = true
   }
 
   part_name = "updater"
@@ -99,7 +99,7 @@ ohos_static_library("libupdater_binary") {
     boundary_sanitize = true
     cfi = true
     cfi_cross_dso = true
-    debug = false
+    debug = true
   }
   part_name = "updater"
   subsystem_name = "updater"

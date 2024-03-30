@@ -91,7 +91,7 @@ ohos_static_library("libthreadpool") {
     boundary_sanitize = true
     cfi = true
     cfi_cross_dso = true
-    debug = false
+    debug = true
   }
 
   subsystem_name = "updater"
@@ -135,7 +135,7 @@ ohos_static_library("libupdaterscript") {
     boundary_sanitize = true
     cfi = true
     cfi_cross_dso = true
-    debug = false
+    debug = true
   }
 
   subsystem_name = "updater"

@@ -36,7 +36,7 @@ ohos_static_library("libdiff_patch") {
     boundary_sanitize = true
     cfi = true
     cfi_cross_dso = true
-    debug = false
+    debug = true
   }
 
   subsystem_name = "updater"
@@ -73,7 +73,7 @@ ohos_shared_library("libdiff_patch_shared") {
     boundary_sanitize = true
     cfi = true
     cfi_cross_dso = true
-    debug = false
+    debug = true
   }
 
   subsystem_name = "updater"

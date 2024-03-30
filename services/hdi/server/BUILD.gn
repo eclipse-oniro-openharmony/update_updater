@@ -27,7 +27,7 @@ ohos_shared_library("libupdate_hdi_impl") {
     boundary_sanitize = true
     cfi = true
     cfi_cross_dso = true
-    debug = false
+    debug = true
   }
 
   deps = []

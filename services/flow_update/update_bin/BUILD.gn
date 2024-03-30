@@ -67,7 +67,7 @@ ohos_static_library("libBinFlowUpdate") {
     boundary_sanitize = true
     cfi = true
     cfi_cross_dso = true
-    debug = false
+    debug = true
   }
 
   subsystem_name = "updater"

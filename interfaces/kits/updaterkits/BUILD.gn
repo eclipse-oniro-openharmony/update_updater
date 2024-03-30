@@ -51,7 +51,7 @@ ohos_shared_library("libupdater_shared") {
     boundary_sanitize = true
     cfi = true
     cfi_cross_dso = true
-    debug = false
+    debug = true
   }
 
   install_enable = true
@@ -87,7 +87,7 @@ ohos_static_library("libupdaterkits") {
     boundary_sanitize = true
     cfi = true
     cfi_cross_dso = true
-    debug = false
+    debug = true
   }
 
   external_deps = [ "init:libbegetutil" ]
