@@ -46,6 +46,7 @@ updater_gen("updater_binary") {
     cfi = true
     cfi_cross_dso = true
     debug = true
+    blocklist = "../../cfi_blocklist.txt"
   }
 
   part_name = "updater"
