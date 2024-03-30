@@ -112,6 +112,5 @@ void DataWriter::RegisterDataWriter(const std::string &mode, WriterConstructor c
     if (!constructorMap_.emplace(mode, constructor).second) {
         LOG(ERROR) << "register writer failed, mode: " << mode;
     }
-    constructorMap_.emplace(mode, constructor);
 }
 } // namespace Updater
