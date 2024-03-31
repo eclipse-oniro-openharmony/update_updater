@@ -29,6 +29,16 @@ ohos_static_library("libdiff_patch") {
   deps = [ "${updater_path}/services/diffpatch/patch:libpatch" ]
   deps += [ "//third_party/openssl:libcrypto_shared" ]
 
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = true
+  }
+
   subsystem_name = "updater"
   part_name = "updater"
 }
@@ -55,6 +65,16 @@ ohos_shared_library("libdiff_patch_shared") {
     "${updater_path}/utils:libutils",
     "//third_party/openssl:libcrypto_shared",
   ]
+
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = true
+  }
 
   subsystem_name = "updater"
   part_name = "updater"

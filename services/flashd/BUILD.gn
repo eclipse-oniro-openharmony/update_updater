@@ -146,6 +146,16 @@ ohos_static_library("flashd_deamon") {
     defines += [ "UPDATER_BUILD_VARIANT_USER" ]
   }
 
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = true
+  }
+
   subsystem_name = "updater"
   part_name = "updater"
 }
@@ -244,6 +254,16 @@ ohos_static_library("libflashd") {
 
   if (defined(binary_custom_external_deps)) {
     external_deps += binary_custom_external_deps
+  }
+
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = true
   }
 
   part_name = "updater"
