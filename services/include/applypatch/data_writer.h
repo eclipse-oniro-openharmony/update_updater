@@ -33,7 +33,7 @@ class DataWriter {
 public:
     using DataWriterPtr = DataWriter *;
     using WriterConstructor = std::unique_ptr<DataWriter> (*)(const std::string &, const std::string &,
-        uint64_t, uint64_t) 
+        uint64_t, uint64_t);
     virtual bool Write(const uint8_t *addr, size_t len, const void *context) = 0;
     virtual ~DataWriter() {}
     static std::unique_ptr<DataWriter> CreateDataWriter(WriteMode mode, const std::string &path, UpdaterEnv *env,

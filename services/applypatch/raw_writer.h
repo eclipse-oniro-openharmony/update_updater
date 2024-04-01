@@ -30,7 +30,7 @@ public:
     RawWriter(const std::string path, uint64_t offset) : fd_(-1), path_(path), offset_(offset) {}
     RawWriter(const std::string path, uint64_t startAddr, uint64_t offset) : fd_(-1),
         path_(path), offset_(startAddr + offset) {}
-    
+
     virtual ~RawWriter()
     {
         offset_ = 0;

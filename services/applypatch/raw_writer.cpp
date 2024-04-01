@@ -20,13 +20,13 @@
 #include "log/log.h"
 
 namespace Updater {
-extern "c" _attribute_((constructor)) void RegisterRawWriter(void)
+extern "C" __attribute__((constructor)) void RegisterRawWriter(void)
 {
     DataWriter::RegisterDataWriter("WRITE_RAW",
-    [](const std::string &path, const std::string &partName, uint64_t stratAddr,
-        uint64_t offset) -> std::unique_ptr<DataWriter> {
-            return std::make_unique<RawWriter>(path, startAddr, offfset)
-        })
+        [](const std::string &path, const std::string &partName, uint64_t startAddr,
+            uint64_t offset) -> std::unique_ptr<DataWriter> {
+                return std::make_unique<RawWriter>(path, startAddr, offset);
+            });
 }
 
 bool RawWriter::Write(const uint8_t *addr, size_t len, [[maybe_unused]] const void *context)
