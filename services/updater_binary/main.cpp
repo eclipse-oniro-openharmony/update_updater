@@ -28,18 +28,30 @@ using namespace Updater;
 int main(int argc, char **argv)
 {
     InitLogger("UPDATER_BINARY");
-    if (argc < MINIMAL_ARGC_LIMIT) {
-        LOG(ERROR) << "Invalid arguments.";
+    if (argc < MINIMAL_ARGC_LIMIT || argc > MAXIMAL_ARGC_LIMIT) {
+        LOG(ERROR) << "Invalid arguments:" << argc;
         return EXIT_INVALID_ARGS;
     }
     bool retry = false;
-    int pipeFd = static_cast<int>(std::strtol(argv[1], nullptr, DECIMAL));
-    if (argc >= BINARY_MAX_ARGS && strcmp(argv[BINARY_SECOND_ARG], "retry") == 0) {
-        retry = true;
+    int pipeFd;
+    std::string packagePath;
+    if (argc == 2) { // 2: package, pipe
+        packagePath = argv[0];
+        pipeFd = static_cast<int>(std::strtol(argv[1], nullptr, DECIMAL));
+    } else if (argc == 3) { // 3 a: package, pipe, retry
+        if (strcmp(argv[2], "retry") == 0) { // 2: retry index
+            retry = true;
+        }
+        packagePath = argv[0];
+        pipeFd = static_cast<int>(std::strtol(argv[1], nullptr, DECIMAL));
+    } else { // 4 a: binary, package, pipe, retry=1/retry=0
+        packagePath = argv[1];
+        pipeFd = static_cast<int>(std::strtol(argv[2], nullptr, DECIMAL)); // 2: pipe index
+        retry = strcmp(argv[3], "retry=0") == 0 ? false : true; // 3: retry index
     }
+
     // Re-load fstab to child process.
     LoadFstab();
-    std::string packagePath = argv[0];
     return ProcessUpdater(retry, pipeFd, packagePath, Utils::GetCertName());
 }
 #endif
