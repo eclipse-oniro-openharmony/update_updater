@@ -52,17 +52,6 @@ updater_common_deps = [
 ]
 
 updater_gen("updater") {
-  branch_protector_ret = "pac_ret"
-  sanitize = {
-    integer_overflow = true
-    ubsan = true
-    boundary_sanitize = true
-    cfi = true
-    cfi_cross_dso = true
-    debug = true
-    blocklist = "../cfi_blocklist.txt"
-  }
-
   deps = [ "${updater_path}/services:libupdater_static" ]
 
   # force link flashd library
@@ -127,16 +116,6 @@ ohos_static_library("libupdater_static") {
 
   if (build_variant == "user") {
     defines += [ "UPDATER_BUILD_VARIANT_USER" ]
-  }
-
-  branch_protector_ret = "pac_ret"
-  sanitize = {
-    integer_overflow = true
-    ubsan = true
-    boundary_sanitize = true
-    cfi = true
-    cfi_cross_dso = true
-    debug = true
   }
 
   part_name = "updater"
@@ -205,16 +184,6 @@ ohos_static_library("libupdater") {
     deps += [ "//third_party/selinux:libselinux" ]
     include_dirs += [ "//third_party/selinux/libselinux/include" ]
     cflags = [ "-DWITH_SELINUX" ]
-  }
-
-  branch_protector_ret = "pac_ret"
-  sanitize = {
-    integer_overflow = true
-    ubsan = true
-    boundary_sanitize = true
-    cfi = true
-    cfi_cross_dso = true
-    debug = true
   }
 
   subsystem_name = "updater"
