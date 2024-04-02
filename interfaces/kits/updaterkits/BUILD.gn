@@ -45,16 +45,6 @@ ohos_shared_library("libupdater_shared") {
     "sasdk",
   ]
 
-  branch_protector_ret = "pac_ret"
-  sanitize = {
-    integer_overflow = true
-    ubsan = true
-    boundary_sanitize = true
-    cfi = true
-    cfi_cross_dso = true
-    debug = true
-  }
-
   install_enable = true
   install_images = [
     "system",
@@ -80,16 +70,6 @@ ohos_static_library("libupdaterkits") {
     "../misc_info:libmiscinfo",
     "//third_party/bounds_checking_function:libsec_static",
   ]
-
-  branch_protector_ret = "pac_ret"
-  sanitize = {
-    integer_overflow = true
-    ubsan = true
-    boundary_sanitize = true
-    cfi = true
-    cfi_cross_dso = true
-    debug = true
-  }
 
   external_deps = [ "init:libbegetutil" ]
   subsystem_name = "updater"
