@@ -271,11 +271,12 @@ void PtableManager::InitCompositePtable()
         return;
     }
     std::bitset<32> type {GetBootdevType()}; // uint32_t type init as 32 bit
-    for (uint32_t i = 0; i < type.size(); i++) {
-        if (type[i] == 0) {
+    for (uint32_t i = type.size(); i > 0; i--) {
+        if (type[i - 1] == 0) {
             continue;
         }
-        if (auto iter = ptableMap_.find(i); iter != ptableMap_.end()) {
+        if (auto iter = ptableMap_.find(i - 1); iter != ptableMap_.end()) {
+            LOG(INFO) << "add child ptable: " << (i - 1);
             pPtable_->AddChildPtable(iter->second());
         }
     }

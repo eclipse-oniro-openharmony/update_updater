@@ -32,14 +32,15 @@ enum WriteMode : int {
 class DataWriter {
 public:
     using DataWriterPtr = DataWriter *;
-    using WriterConstructor = std::unique_ptr<DataWriter> (*)(const std::string &, const std::string &, uint64_t);
+    using WriterConstructor = std::unique_ptr<DataWriter> (*)(const std::string &, const std::string &,
+        uint64_t, uint64_t);
     virtual bool Write(const uint8_t *addr, size_t len, const void *context) = 0;
     virtual ~DataWriter() {}
     static std::unique_ptr<DataWriter> CreateDataWriter(WriteMode mode, const std::string &path, UpdaterEnv *env,
         uint64_t offset = 0);
     static std::unique_ptr<DataWriter> CreateDataWriter(WriteMode mode, const std::string &path, uint64_t offset = 0);
     static std::unique_ptr<DataWriter> CreateDataWriter(const std::string &mode, const std::string &path,
-        const std::string &partName = {}, uint64_t offset = 0);
+        const std::string &partName = {}, uint64_t startAddr = 0, uint64_t offset = 0);
     static UpdaterEnv *GetUpdaterEnv();
     void SetUpdaterEnv(UpdaterEnv *env);
     static void ReleaseDataWriter(std::unique_ptr<DataWriter> &writer);

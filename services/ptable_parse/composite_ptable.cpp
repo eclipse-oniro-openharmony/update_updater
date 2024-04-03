@@ -25,6 +25,10 @@ bool CompositePtable::ParsePartitionFromBuffer(uint8_t *ptbImgBuffer, const uint
     }
     std::vector<PtnInfo>().swap(partitionInfo_);
     for (const auto &iter : childs_) {
+        if (iter == nullptr) {
+            LOG(ERROR) << "invalid iter ptable";
+            return false;
+        }
         if (!iter->ParsePartitionFromBuffer(ptbImgBuffer, imgBufSize)) {
             LOG(ERROR) << "parse partition from buffer failed";
             return false;
@@ -38,6 +42,10 @@ bool CompositePtable::LoadPtableFromDevice()
 {
     std::vector<PtnInfo>().swap(partitionInfo_);
     for (const auto &iter : childs_) {
+        if (iter == nullptr) {
+            LOG(ERROR) << "invalid iter ptable";
+            return false;
+        }
         if (!iter->LoadPtableFromDevice()) {
             LOG(ERROR) << "load ptable from device failed";
             return false;
@@ -50,6 +58,10 @@ bool CompositePtable::LoadPtableFromDevice()
 bool CompositePtable::WritePartitionTable()
 {
     for (const auto &iter : childs_) {
+        if (iter == nullptr) {
+            LOG(ERROR) << "invalid iter ptable";
+            return false;
+        }
         if (!iter->WritePartitionTable()) {
             LOG(ERROR) << "write ptable failed";
             return false;
@@ -65,6 +77,10 @@ bool CompositePtable::GetPtableImageBuffer(uint8_t *imageBuf, const uint32_t img
         return false;
     }
     for (const auto &iter : childs_) {
+        if (iter == nullptr) {
+            LOG(ERROR) << "invalid iter ptable";
+            return false;
+        }
         if (!iter->GetPtableImageBuffer(imageBuf, imgBufSize)) {
             LOG(ERROR) << "get ptable image buffer failed";
             return false;
@@ -80,6 +96,10 @@ bool CompositePtable::EditPartitionBuf(uint8_t *imageBuf, uint64_t imgBufSize, s
         return false;
     }
     for (const auto &iter : childs_) {
+        if (iter == nullptr) {
+            LOG(ERROR) << "invalid iter ptable";
+            return false;
+        }
         if (!iter->EditPartitionBuf(imageBuf, imgBufSize, modifyList)) {
             LOG(ERROR) << "get ptable image buffer failed";
             return false;
