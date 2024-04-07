@@ -19,7 +19,7 @@
 #include <string>
 
 namespace Updater {
-    extern "C" int RestoreOriginalFile(const std::string &path, const std::string &srcImage, const std::string &targetPath);
+extern "C" int RestoreOriginalFile(const std::string &path, const std::string &srcImage, const std::string &targetPath);
 }
 
 #endif // PATCH_SHARED

@@ -18,7 +18,6 @@
 #include <string>
 #include <unistd.h>
 #include <cstdio>
-// #include <stdio.h>
 #include <fcntl.h>
 #include "log/log.h"
 #include "applypatch/store.h"
