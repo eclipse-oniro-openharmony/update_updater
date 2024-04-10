@@ -123,10 +123,10 @@ void FbdevDriver::Flip(const uint8_t *buf)
 
 void FbdevDriver::GetGrSurface(GrSurface &surface)
 {
-    surface.width = static_cast<int>(vinfo_.xres);
     surface.height = static_cast<int>(vinfo_.yres);
     surface.rowBytes = finfo_.line_length;
     surface.pixelBytes = vinfo_.bits_per_pixel / 8; // 8: byte bit len
+    surface.width = surface.rowBytes / surface.pixelBytes;
 }
 
 void FbdevDriver::Blank(bool blank)
