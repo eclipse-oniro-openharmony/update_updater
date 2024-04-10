@@ -67,6 +67,7 @@ void CompressLogs(const std::string &name);
 bool CheckResultFail();
 void WriteDumpResult(const std::string &result);
 long long int GetDirSize(const std::string &folderPath);
+size_t GetFileSize(const std::string &filePath);
 long long int GetDirSizeForFile(const std::string &filePath);
 bool DeleteOldFile(const std::string dest);
 void SaveLogs();

@@ -442,10 +442,10 @@ void CompressLogs(const std::string &logName)
     PkgManager::ReleasePackageInstance(pkgManager);
 }
 
-int GetFileSize(const std::string &dLog)
+size_t GetFileSize(const std::string &filePath)
 {
     int ret = 0;
-    std::ifstream ifs(dLog, std::ios::binary | std::ios::in);
+    std::ifstream ifs(filePath, std::ios::binary | std::ios::in);
     if (ifs.is_open()) {
         ifs.seekg(0, std::ios::end);
         ret = ifs.tellg();

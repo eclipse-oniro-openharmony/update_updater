@@ -96,6 +96,8 @@ public:
 
     int32_t ParseComponents(const std::string &packagePath, std::vector<std::string> &fileName) override;
 
+    int32_t LoadPackage(const std::string &packagePath,
+        std::vector<std::string> &fileIds, PkgFile::PkgType type) override;
 private:
     PkgFilePtr CreatePackage(PkgStreamPtr stream, PkgFile::PkgType type, PkgInfoPtr header = nullptr);
 
@@ -105,7 +107,6 @@ private:
 
     int32_t ExtraAndLoadPackage(const std::string &path, const std::string &name, PkgFile::PkgType,
         std::vector<std::string> &fileIds);
-    int32_t LoadPackage(const std::string &packagePath, std::vector<std::string> &fileIds, PkgFile::PkgType type);
 
     int32_t LoadPackageWithStream(const std::string &packagePath,
         std::vector<std::string> &fileIds, PkgFile::PkgType type, PkgStreamPtr stream);

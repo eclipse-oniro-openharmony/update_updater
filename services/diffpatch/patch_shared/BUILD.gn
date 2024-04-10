@@ -1,0 +1,67 @@
+# Copyright (C) 2024 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+import("//base/update/updater/updater_default_cfg.gni")
+import("//build/ohos.gni")
+
+updater_path = rebase_path("${updater_absolutely_path}", ".")
+
+config("updater_config") {
+  visibility = [ ":*" ]
+  include_dirs = [
+    "${updater_path}/interfaces/kits/include",
+    "${updater_path}/services",
+    "${updater_path}/services/common",
+    "${updater_path}/services/flow_update",
+    "${updater_path}/services/include/package",
+    "${updater_path}/services/include/script",
+    "${updater_path}/services/include/log",
+    "${updater_path}/services/include",
+    "${updater_path}/utils/include",
+    "${updater_path}/utils/json",
+    "${updater_path}/services/include/applypatch",
+    "//base/startup/init/interfaces/innerkits/include",
+    "//third_party/bounds_checking_function/include",
+    "//drivers/hdf/frameworks/include/utils",
+  ]
+}
+
+ohos_shared_library("libupdater_patch_shared") {
+  sources = [
+    "${updater_path}/services/diffpatch/patch_shared/patch_shared.cpp",
+    "${updater_path}/services/updater_binary/update_image_block.cpp",
+    "${updater_path}/services/updater_binary/update_image_patch.cpp",
+    "${updater_path}/services/updater_binary/update_partitions.cpp",
+    "${updater_path}/services/updater_binary/update_processor.cpp",
+  ]
+  configs = [ ":updater_config" ]
+
+  ldflags = [ "-Wl -std=c++11" ]
+  deps = [
+    "${updater_path}/interfaces/kits/misc_info:libmiscinfo",
+    "${updater_path}/interfaces/kits/slot_info:libslotinfo",
+    "${updater_path}/services/flow_update/update_bin:libBinFlowUpdate",
+    "${updater_path}/services/fs_manager:libfsmanager",
+    "${updater_path}/services/log:libupdaterlog",
+    "${updater_path}/services/package:libupdaterpackage",
+    "${updater_path}/services/script:libupdaterscript",
+    "//third_party/cJSON:cjson_static",
+    "//third_party/openssl:libssl_static",
+  ]
+
+  external_deps = [ "init:libfsmanager_static" ]
+
+  output_extension = "so"
+  install_enable = false
+  subsystem_name = "updater"
+  part_name = "updater"
+}
