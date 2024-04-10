@@ -63,7 +63,8 @@ struct __attribute__((packed))  UpgradeParam {
 enum {
     UPGRADE_FILE_VERSION_V1 = 1,     // bin v1 version
     UPGRADE_FILE_VERSION_V2,        // bin v2 version, add img hash part
-    UPGRADE_FILE_VERSION_V3,        // bin v2 version, modify img hash part
+    UPGRADE_FILE_VERSION_V3,        // bin v3 version, modify img hash part
+    UPGRADE_FILE_VERSION_V4,        // bin v4 version, modify bin file signature
 };
 
 class UpgradeFileEntry : public PkgEntry {
