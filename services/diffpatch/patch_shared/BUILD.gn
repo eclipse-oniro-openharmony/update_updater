@@ -58,7 +58,7 @@ ohos_shared_library("libupdater_patch_shared") {
 
   external_deps = [
     "init:libbegetutil",
-    "init:libfsmanager_static"
+    "init:libfsmanager_static",
   ]
 
   output_extension = "so"
