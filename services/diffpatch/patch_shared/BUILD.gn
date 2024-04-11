@@ -51,13 +51,13 @@ ohos_shared_library("libupdater_patch_shared") {
     "${updater_path}/services/log:libupdaterlog",
     "${updater_path}/services/package:libupdaterpackage",
     "${updater_path}/services/script:libupdaterscript",
-    "//third_party/cJSON:cjson",
-    "//third_party/openssl:libssl_static",
   ]
 
   external_deps = [
     "init:libbegetutil",
     "init:libfsmanager_static",
+    "//third_party/cJSON:cjson",
+    "//third_party/openssl:libssl_static",
   ]
 
   output_extension = "so"
