@@ -124,6 +124,11 @@ public:
     {
         return PKG_SUCCESS;
     }
+    int32_t LoadPackage(const std::string &packagePath,
+        std::vector<std::string> &fileIds, PkgFile::PkgType type) override
+    {
+        return PKG_SUCCESS;
+    }
 };
 }
 #endif // SCRIPT_UNITTEST_H
