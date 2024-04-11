@@ -44,8 +44,7 @@ enum PackageUpdateMode {
 struct UpdaterParams {
     bool forceUpdate = false;
     bool forceReboot = false;
-    bool mainUpdate = false;
-    bool sdUpdate = false;
+    std::string sdExtMode {};
     std::string factoryResetMode {};
     PackageUpdateMode updateMode = HOTA_UPDATE;
     int retryCount = 0;

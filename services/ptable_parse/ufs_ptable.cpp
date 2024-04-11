@@ -167,6 +167,11 @@ void UfsPtable::UfsPatchGptHeader(UfsPartitionDataInfo &ptnDataInfo, const uint3
     // Patching primary header
     uint8_t *primaryGptHeader = ptnDataInfo.data + blockSize;
     uint64_t lastUsableSector = cardSizeSector - 1 - (hasBackupPtable_ ? GPT_PTABLE_BACKUP_SIZE : 0);
+    if (reservedSize_ != 0 && lastUsableSector > reservedSize_) {
+        LOG(INFO) << "reserve " << reservedSize_ << "block for " << GetDeviceLunNodePath(ptnDataInfo.lunIndex);
+        lastUsableSector -= reservedSize_;
+    }
+    LOG(INFO) << "cardSizeSector " << cardSizeSector << ", lastUsableSector " << lastUsableSector;
     PUT_LONG_LONG(primaryGptHeader + BACKUP_HEADER_OFFSET, (cardSizeSector - 1));
     PUT_LONG_LONG(primaryGptHeader + LAST_USABLE_LBA_OFFSET, lastUsableSector);
     // Find last partition
