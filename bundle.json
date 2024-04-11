@@ -54,17 +54,17 @@
                 "c_utils",
                 "hilog",
                 "selinux_adapter",
-                "ui_lite"
+                "ui_lite",
+                "cJSON",
+                "openssl"
             ],
             "third_party": [
                 "bounds_checking_function",
                 "bzip2",
                 "libdrm",
                 "lz4",
-                "openssl",
                 "zlib",
                 "libuv",
-                "cJSON",
                 "libpng",
                 "selinux"
             ]
