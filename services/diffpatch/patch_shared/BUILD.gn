@@ -51,7 +51,7 @@ ohos_shared_library("libupdater_patch_shared") {
     "${updater_path}/services/log:libupdaterlog",
     "${updater_path}/services/package:libupdaterpackage",
     "${updater_path}/services/script:libupdaterscript",
-    "//third_party/bounds_checking_function/include",
+    "//third_party/bounds_checking_function:libsec_static",
     "//third_party/cJSON:cjson_static",
     "//third_party/openssl:libssl_static",
   ]
