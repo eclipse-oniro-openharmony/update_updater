@@ -42,8 +42,8 @@ ohos_static_library("libfsmanager") {
   deps = [ "//third_party/bounds_checking_function:libsec_static" ]
 
   external_deps = [
-    "init:libfsmanager_static",
     "init:libbegetutil",
+    "init:libfsmanager_static",
   ]
   subsystem_name = "updater"
   part_name = "updater"

@@ -80,8 +80,8 @@ ohos_static_library("libupdater_binary") {
   }
 
   external_deps = [
-    "init:libfsmanager_static",
     "init:libbegetutil",
+    "init:libfsmanager_static",
   ]
 
   part_name = "updater"
