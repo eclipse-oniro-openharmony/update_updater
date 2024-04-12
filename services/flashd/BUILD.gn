@@ -28,10 +28,7 @@ hash_sources = [
 py_out_dir = "$root_build_dir/gen/" + rebase_path(".", "//")
 
 config("hdc_config") {
-  include_dirs = [
-    "${hdc_base}/src/common",
-    "${py_out_dir}",
-  ]
+  include_dirs = [ "${py_out_dir}" ]
   cflags_cc = [ "-std=c++17" ]
   if (is_mingw) {
     cflags_cc += [ "-Wno-inconsistent-dllimport" ]  # in mingw some sec api will
@@ -127,7 +124,6 @@ ohos_static_library("flashd_deamon") {
     "${updater_path}/services/include/log",
     "${updater_path}/interfaces/kits/include",
     "${updater_path}/utils/include",
-    "//base/startup/init/services/include/param",
     "//third_party/bounds_checking_function/include",
     "//third_party/lz4/lib",
     "//third_party/libuv",
@@ -217,8 +213,6 @@ ohos_static_library("libflashd") {
     "${updater_path}/services/ptable_parse",
     "${updater_path}/utils/include",
     "${updater_path}/utils/json",
-    "//base/startup/init/services/include/param",
-    "//drivers/peripheral/partitionslot/hal/include",
     "//third_party/bounds_checking_function/include",
     "//third_party/cJSON",
     "//third_party/lz4/lib",

@@ -25,7 +25,6 @@ ohos_static_library("libmiscinfo") {
   sources = [ "misc_info.cpp" ]
 
   include_dirs = [
-    "//base/startup/init/interfaces/innerkits/include",
     "${updater_path}/interfaces/kits/include",
     "${updater_path}/services/common",
     "${updater_path}/services/include",

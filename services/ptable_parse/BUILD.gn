@@ -24,7 +24,6 @@ config("updater_config") {
     "${updater_path}/utils/include",
     "${updater_path}/utils/json",
     "//third_party/bounds_checking_function/include",
-    "//drivers/hdf/frameworks/include/utils",
     "${updater_path}/interfaces/kits/include/",
     "${updater_path}/services/include/script",
     "${updater_path}/services/include/package",

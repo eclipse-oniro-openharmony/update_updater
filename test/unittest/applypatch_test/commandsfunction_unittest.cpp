@@ -18,7 +18,7 @@
 #include <gtest/gtest.h>
 #include <iostream>
 #include <string>
-#include "../applypatch/command_process.h"
+#include "applypatch/command_process.h"
 #include "applypatch/transfer_manager.h"
 #include "applypatch/store.h"
 #include "log/log.h"
