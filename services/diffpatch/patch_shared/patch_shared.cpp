@@ -358,7 +358,6 @@ static int32_t ExecuteUpdateBlock(Uscript::UScriptEnv &env, const UpdateBlockInf
 
     if (ExtractFileByNameFunc(env, infos.patchDataName, outStream,
         transferParams->patchDataBuffer, transferParams->patchDataSize) != USCRIPT_SUCCESS) {
-        delete env;
         return USCRIPT_ERROR_EXECUTE;
     }
     env.GetPkgManager()->ClosePkgStream(outStream);
@@ -367,7 +366,6 @@ static int32_t ExecuteUpdateBlock(Uscript::UScriptEnv &env, const UpdateBlockInf
     const std::string fileName = "anco_size";
     if (ExtractFileByNameFunc(env, fileName, outStream, ancoSizeBuffer,
                               ancoSizeListSize) != USCRIPT_SUCCESS) {
-        delete env;
         return USCRIPT_ERROR_EXECUTE;
     }
     env.GetPkgManager()->ClosePkgStream(outStream);
@@ -375,18 +373,15 @@ static int32_t ExecuteUpdateBlock(Uscript::UScriptEnv &env, const UpdateBlockInf
     int64_t maxStashSize = std::stoll(str);
     if (CreateFixedSizeEmptyFile(infos, destImage, maxStashSize) != 0) {
         LOG(ERROR) << "Failed to create empty file";
-        delete env;
         return USCRIPT_ERROR_EXECUTE;
     }
 
     LOG(INFO) << "Ready to start a thread to handle new data processing";
     if (InitThread(infos, tm.get()) != 0) {
         LOG(ERROR) << "Failed to create pthread";
-        delete env;
         return USCRIPT_ERROR_EXECUTE;
     }
     int32_t ret = DoExecuteUpdateBlock(infos, tm.get(), lines, targetPath, destImage);
-    delete env;
     return ret;
 }
 
@@ -419,6 +414,11 @@ int RestoreOriginalFile(const std::string &packagePath, const std::string &srcIm
         return -1;
     }
 
-    return ExecuteUpdateBlock(*env, infos, targetPath, destImage);
+    int ret = ExecuteUpdateBlock(*env, infos, targetPath, destImage);
+    if (ret != 0) {
+        LOG(ERROR) << "restore original file fail.";
+    }
+    delete env;
+    env = nullptr;
 }
 }
