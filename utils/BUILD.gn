@@ -114,7 +114,6 @@ ohos_executable("write_updater") {
     "${updater_path}/interfaces/kits/include/",
     "${updater_path}/services/include/",
     "//third_party/bounds_checking_function/include",
-    "//base/startup/init/interfaces/innerkits/include",
   ]
 
   deps = [

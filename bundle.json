@@ -251,6 +251,13 @@
                     }
                 },
                 {
+                    "name": "//base/update/updater/services/diffpatch/diff:libdiff",
+                    "header": {
+                        "header_files": [],
+                        "header_base": "//base/update/updater/services/diffpatch/diff"
+                    }
+                },
+                {
                     "name": "//base/update/updater/services/ptable_parse:libptableparse",
                     "header": {
                         "header_files": [],

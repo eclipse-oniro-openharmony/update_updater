@@ -29,9 +29,7 @@ config("updater_config") {
     "${updater_path}/utils/include",
     "${updater_path}/utils/json",
     "${updater_path}/services/include/applypatch",
-    "//base/startup/init/interfaces/innerkits/include",
     "//third_party/bounds_checking_function/include",
-    "//drivers/hdf/frameworks/include/utils",
   ]
 }
 
@@ -81,7 +79,10 @@ ohos_static_library("libupdater_binary") {
     defines += [ "UPDATER_USE_PTABLE" ]
   }
 
-  external_deps = [ "init:libfsmanager_static" ]
+  external_deps = [
+    "init:libfsmanager_static",
+    "init:libbegetutil",
+  ]
 
   part_name = "updater"
   subsystem_name = "updater"

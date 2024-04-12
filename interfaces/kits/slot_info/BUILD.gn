@@ -11,7 +11,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//base/startup/init/begetd.gni")
 import("//base/update/updater/updater_default_cfg.gni")
 import("//build/ohos.gni")
 
@@ -23,7 +22,6 @@ ohos_static_library("libslotinfo") {
     "${updater_path}/interfaces/kits/include",
     "${updater_path}/services/include",
     "${updater_path}/utils/include",
-    "//drivers/peripheral/partitionslot/hal/include",
   ]
 
   deps = [ "${updater_path}/services/log:libupdaterlog" ]
