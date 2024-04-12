@@ -413,11 +413,12 @@ int RestoreOriginalFile(const std::string &packagePath, const std::string &srcIm
         return -1;
     }
 
-    int ret = ExecuteUpdateBlock(*env, infos, targetPath, destImage);
-    if (ret != 0) {
+    int result = ExecuteUpdateBlock(*env, infos, targetPath, destImage);
+    if (result != 0) {
         LOG(ERROR) << "restore original file fail.";
     }
     delete env;
     env = nullptr;
+    return result;
 }
 }
