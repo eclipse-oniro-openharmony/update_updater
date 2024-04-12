@@ -344,7 +344,6 @@ static int32_t ExecuteUpdateBlock(Uscript::UScriptEnv &env, const UpdateBlockInf
     size_t transferListSize = 0;
     if (ExtractFileByNameFunc(env, infos.transferName,
         outStream, transferListBuffer, transferListSize) != USCRIPT_SUCCESS) {
-        delete env;
         return USCRIPT_ERROR_EXECUTE;
     }
 
