@@ -344,6 +344,7 @@ static int32_t ExecuteUpdateBlock(Uscript::UScriptEnv &env, const UpdateBlockInf
     size_t transferListSize = 0;
     if (ExtractFileByNameFunc(env, infos.transferName,
         outStream, transferListBuffer, transferListSize) != USCRIPT_SUCCESS) {
+        delete env;
         return USCRIPT_ERROR_EXECUTE;
     }
 
@@ -357,30 +358,35 @@ static int32_t ExecuteUpdateBlock(Uscript::UScriptEnv &env, const UpdateBlockInf
 
     if (ExtractFileByNameFunc(env, infos.patchDataName, outStream,
         transferParams->patchDataBuffer, transferParams->patchDataSize) != USCRIPT_SUCCESS) {
+        delete env;
         return USCRIPT_ERROR_EXECUTE;
     }
+    env.GetPkgManager()->ClosePkgStream(outStream);
     uint8_t *ancoSizeBuffer = nullptr;
     size_t ancoSizeListSize = 0;
     const std::string fileName = "anco_size";
-    if (ExtractFileByNameFunc(env, fileName, outStream,
-        ancoSizeBuffer, ancoSizeListSize) != USCRIPT_SUCCESS) {
+    if (ExtractFileByNameFunc(env, fileName, outStream, ancoSizeBuffer,
+                              ancoSizeListSize) != USCRIPT_SUCCESS) {
+        delete env;
         return USCRIPT_ERROR_EXECUTE;
     }
+    env.GetPkgManager()->ClosePkgStream(outStream);
     std::string str(reinterpret_cast<char*>(ancoSizeBuffer), ancoSizeListSize);
     int64_t maxStashSize = std::stoll(str);
     if (CreateFixedSizeEmptyFile(infos, destImage, maxStashSize) != 0) {
         LOG(ERROR) << "Failed to create empty file";
+        delete env;
         return USCRIPT_ERROR_EXECUTE;
     }
 
     LOG(INFO) << "Ready to start a thread to handle new data processing";
     if (InitThread(infos, tm.get()) != 0) {
         LOG(ERROR) << "Failed to create pthread";
-        env.GetPkgManager()->ClosePkgStream(outStream);
+        delete env;
         return USCRIPT_ERROR_EXECUTE;
     }
     int32_t ret = DoExecuteUpdateBlock(infos, tm.get(), lines, targetPath, destImage);
-    env.GetPkgManager()->ClosePkgStream(outStream);
+    delete env;
     return ret;
 }
 
