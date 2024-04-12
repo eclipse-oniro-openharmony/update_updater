@@ -24,7 +24,7 @@ using namespace std;
 
 namespace UpdatePatch {
 #define PATCH_MIN std::char_traits<char>::length(BSDIFF_MAGIC) + sizeof(int64_t) * 3
-#define GET_BYTE_FROM_BUFFER(v, index, buffer)  (y) = (y) * 256; (y) += buffer[index]
+#define GET_BYTE_FROM_BUFFER(v, index, buffer)  ((v) * 256 + buffer[index])
 constexpr uint8_t BUFFER_MASK = 0x80;
 
 static int64_t ReadLE64(const uint8_t *buffer)
@@ -36,19 +36,19 @@ static int64_t ReadLE64(const uint8_t *buffer)
     int32_t index = static_cast<int32_t>(sizeof(int64_t)) - 1;
     y = buffer[index] & static_cast<uint8_t>(~BUFFER_MASK);
     index--;
-    GET_BYTE_FROM_BUFFER(y, index, buffer);
+    y = GET_BYTE_FROM_BUFFER(y, index, buffer);
     index--;
-    GET_BYTE_FROM_BUFFER(y, index, buffer);
+    y = GET_BYTE_FROM_BUFFER(y, index, buffer);
     index--;
-    GET_BYTE_FROM_BUFFER(y, index, buffer);
+    y = GET_BYTE_FROM_BUFFER(y, index, buffer);
     index--;
-    GET_BYTE_FROM_BUFFER(y, index, buffer);
+    y = GET_BYTE_FROM_BUFFER(y, index, buffer);
     index--;
-    GET_BYTE_FROM_BUFFER(y, index, buffer);
+    y = GET_BYTE_FROM_BUFFER(y, index, buffer);
     index--;
-    GET_BYTE_FROM_BUFFER(y, index, buffer);
+    y = GET_BYTE_FROM_BUFFER(y, index, buffer);
     index--;
-    GET_BYTE_FROM_BUFFER(y, index, buffer);
+    y = GET_BYTE_FROM_BUFFER(y, index, buffer);
 
     index = static_cast<int32_t>(sizeof(int64_t));
     if (buffer[index - 1] & BUFFER_MASK) {
@@ -69,7 +69,7 @@ int32_t BlocksPatch::ApplyPatch()
 
     while (newOffset_ < newSize_) {
         ControlData ctrlData {};
-        int32_t ret = ReadControlData(ctrlData);
+        ret = ReadControlData(ctrlData);
         if (ret != 0) {
             PATCH_LOGE("Failed to read control data");
             return ret;
@@ -114,7 +114,7 @@ int32_t BlocksPatch::ReadHeader(int64_t &controlDataSize, int64_t &diffDataSize,
     }
     BlockBuffer patchData = {patchInfo_.buffer + patchInfo_.start, patchInfo_.length - patchInfo_.start};
     PATCH_DEBUG("Restore patch hash %zu %zu %s",
-        patchInfo_.length , patchInfo_.start, GeneraterBufferHash(patchData).c_str());
+        patchInfo_.length, patchInfo_.start, GeneraterBufferHash(patchData).c_str());
     uint8_t *header = patchInfo_.buffer + patchInfo_.start;
     if (memcmp(header, BSDIFF_MAGIC, std::char_traits<char>::length(BSDIFF_MAGIC)) != 0) {
         PATCH_LOGE("Corrupt patch, patch head != BSDIFF40");
