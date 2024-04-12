@@ -254,7 +254,7 @@ int32_t PkgAlgorithmLz4::PackCalculate(const PkgStreamPtr inStream, const PkgStr
 
     msg.context.destOffset += dataLen;
     while (msg.context.unpackedSize > 0) {
-        int32_t ret = ReadData(inStream, msg.context.srcOffset, msg.inBuffer, msg.context.unpackedSize, dataLen);
+        ret = ReadData(inStream, msg.context.srcOffset, msg.inBuffer, msg.context.unpackedSize, dataLen);
         if (ret != PKG_SUCCESS) {
             PKG_LOGE("Fail read data ");
             break;
