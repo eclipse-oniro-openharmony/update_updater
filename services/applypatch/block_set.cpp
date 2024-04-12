@@ -176,14 +176,7 @@ size_t BlockSet::WriteDataToBlock(int fd, std::vector<uint8_t> &buffer)
     for (; it != blocks_.end(); ++it) {
         off64_t offset = static_cast<off64_t>(it->first * H_BLOCK_SIZE);
         size_t writeSize = (it->second - it->first) * H_BLOCK_SIZE;
-#ifndef UPDATER_UT
-        uint64_t arguments[] = {static_cast<uint64_t>(offset), writeSize};
-        ret = ioctl(fd, BLKDISCARD, &arguments);
-        if (ret == -1 && errno != EOPNOTSUPP) {
-            LOG(ERROR) << "Error to write block set to memory";
-            return 0;
-        }
-#endif
+
         ret = lseek64(fd, offset, SEEK_SET);
         if (ret == -1) {
             LOG(ERROR) << "BlockSet::WriteDataToBlock Fail to seek";
@@ -345,16 +338,17 @@ int32_t BlockSet::WriteZeroToBlock(int fd, bool isErase)
     while (iter != blocks_.end()) {
         off64_t offset = static_cast<off64_t>(iter->first * H_BLOCK_SIZE);
         int ret = 0;
-#ifndef UPDATER_UT
-        size_t writeSize = (iter->second - iter->first) * H_BLOCK_SIZE;
-        uint64_t arguments[2] = {static_cast<uint64_t>(offset), writeSize};
-        ret = ioctl(fd, BLKDISCARD, &arguments);
-        if (ret == -1 && errno != EOPNOTSUPP) {
-            LOG(ERROR) << "Error to write block set to memory";
-            return -1;
-        }
-#endif
+
         if (isErase) {
+#ifndef UPDATER_UT
+            size_t writeSize = (iter->second - iter->first) * H_BLOCK_SIZE;
+            uint64_t arguments[2] = {static_cast<uint64_t>(offset), writeSize};
+            ret = ioctl(fd, BLKDISCARD, &arguments);
+            if (ret == -1 && errno != EOPNOTSUPP) {
+                LOG(ERROR) << "Error to write block set to memory";
+                return -1;
+            }
+#endif
             iter++;
             continue;
         }

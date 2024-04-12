@@ -33,6 +33,7 @@ using namespace Hpackage;
 using namespace Updater;
 
 namespace Updater {
+constexpr int WRITEFILLSIZE = 4096;
 struct UpdateBlockInfo {
     std::string partitionName;
     std::string transferName;
@@ -41,14 +42,20 @@ struct UpdateBlockInfo {
     std::string devPath;
 };
 
-static bool UpdatePathCheck(const std::string &updatePath)
+static bool UpdatePathCheck(const std::string &updatePath, size_t length)
 {
-    if (updatePath.c_str() == nullptr) {
+    if (updatePath.empty() || length == 0) {
         LOG(ERROR) << "updatePath is nullptr.";
         return false;
     }
 
-    if (access(updatePath.c_str(), F_OK) != 0) {
+    char realPath[PATH_MAX + 1] = {0};
+    if (realpath(updatePath.c_str(), realPath) == nullptr) {
+        LOG(ERROR) << "realPath is NULL" << " : " << strerror(errno);
+        return false;
+    }
+
+    if (access(realPath, F_OK) != 0) {
         LOG(ERROR) << "package does not exist!";
         return false;
     }
@@ -56,25 +63,32 @@ static bool UpdatePathCheck(const std::string &updatePath)
     return true;
 }
 
-static int GetUpdateBlockInfo(UpdateBlockInfo &infos, const std::string &path, const std::string &srcImage)
+static int GetUpdateBlockInfo(UpdateBlockInfo &infos, const std::string &packagePath,
+    const std::string &srcImage, const std::string &targetPath)
 {
-    if (UpdatePathCheck(path)) {
-        LOG(ERROR) << path << " is empty.";
+    if (!UpdatePathCheck(packagePath, packagePath.length())) {
+        LOG(ERROR) << packagePath << " is empty.";
         return -1;
     }
-    if (UpdatePathCheck(srcImage)) {
+
+    if (!UpdatePathCheck(srcImage, srcImage.length())) {
         LOG(ERROR) << srcImage << " is empty.";
         return -1;
     }
 
-    infos.newDataName = "anco_hmos.new.dat";
+    if (!UpdatePathCheck(targetPath, targetPath.length())) {
+        LOG(INFO) << "need to make store";
+        if (Updater::Utils::MkdirRecursive(targetPath, S_IRWXU) != 0) {
+            LOG(ERROR) << "Failed to make store";
+            return -1;
+        }
+    }
 
+    infos.newDataName = "anco_hmos.new.dat";
     infos.patchDataName = "anco_hmos.patch.dat";
 
     infos.transferName = "anco_hmos.transfer.list";
-
     infos.devPath = srcImage;
-
     infos.partitionName = "/anco_hmos";
 
     return 0;
@@ -106,18 +120,18 @@ static int32_t ExtractFileByNameFunc(Uscript::UScriptEnv &env, const std::string
         return USCRIPT_ERROR_EXECUTE;
     }
     ret = outStream->GetBuffer(outBuf, buffSize);
-    LOG(DEBUG) << "outBuf data size is: " << buffSize;
+    LOG(INFO) << "outBuf data size is: " << buffSize;
 
     return USCRIPT_SUCCESS;
 }
 
 static int32_t ExecuteTransferCommand(int fd, const std::vector<std::string> &lines,
-                                      TransferManagerPtr tm, const std::string &partitionName)
+    TransferManagerPtr tm, const std::string &partitionName, const std::string &targetPath)
 {
     auto transferParams = tm->GetTransferParams();
     auto writerThreadInfo = transferParams->writerThreadInfo.get();
 
-    transferParams->storeBase = std::string("/data/updater") + partitionName + "_tmp";
+    transferParams->storeBase = targetPath + partitionName + "_tmp";
     LOG(INFO) << "Store base path is " << transferParams->storeBase;
     int32_t ret = Store::CreateNewSpace(transferParams->storeBase, true);
     if (ret == -1) {
@@ -145,32 +159,26 @@ static int32_t ExecuteTransferCommand(int fd, const std::vector<std::string> &li
     }
     if (transferParams->storeCreated != -1) {
         Store::DoFreeSpace(transferParams->storeBase);
+        (void)Utils::DeleteFile(transferParams->storeBase);
     }
     return Uscript::USCRIPT_SUCCESS;
 }
 
 static int32_t DoExecuteUpdateBlock(const UpdateBlockInfo &infos, TransferManagerPtr tm,
-    Hpackage::PkgManager::StreamPtr &outStream, const std::vector<std::string> &lines, const std::string &targetPath)
+    const std::vector<std::string> &lines, const std::string &targetPath, const std::string &dstImage)
 {
-    int fd = open(infos.devPath.c_str(), O_RDWR | O_LARGEFILE);
-    auto env = tm->GetTransferParams()->env;
+    int fd = open(dstImage.c_str(), O_RDWR | O_LARGEFILE);
     if (fd == -1) {
         LOG(ERROR) << "Failed to open block";
-        env->GetPkgManager()->ClosePkgStream(outStream);
         return Uscript::USCRIPT_ERROR_EXECUTE;
     }
-    int32_t ret = ExecuteTransferCommand(fd, lines, tm, infos.partitionName);
+    int32_t ret = ExecuteTransferCommand(fd, lines, tm, infos.partitionName, targetPath);
 
     fsync(fd);
     close(fd);
     fd = -1;
-    env->GetPkgManager()->ClosePkgStream(outStream);
     if (ret == Uscript::USCRIPT_SUCCESS) {
         PartitionRecord::GetInstance().RecordPartitionUpdateStatus(infos.partitionName, true);
-    }
-    if (!Updater::Utils::CopyFile(infos.devPath, targetPath)) {
-        LOG(ERROR) << "copy " << infos.devPath << " to " << targetPath << " failed";
-        ret = Uscript::USCRIPT_ERROR_CREATE_THREAD;
     }
     (void)Utils::DeleteFile(infos.devPath);
     
@@ -278,12 +286,112 @@ static int InitThread(const struct UpdateBlockInfo &infos, TransferManagerPtr tm
     return error;
 }
 
-int RestoreOriginalFile(const std::string &path, const std::string &srcImage, const std::string &targetPath)
+static int CreateFixedSizeEmptyFile(const UpdateBlockInfo &infos, const std::string &filename, int64_t size)
 {
-    UpdateBlockInfo infos {};
-    if (GetUpdateBlockInfo(infos, path, srcImage) != 0) {
+    if (size <= 0) {
+        LOG(ERROR) << "size is " << size;
         return -1;
     }
+    if (!Updater::Utils::CopyFile(infos.devPath, filename)) {
+        LOG(ERROR) << "copy " << infos.devPath << " to " << filename << " failed";
+        return -1;
+    }
+    size_t fileSize = Updater::Utils::GetFileSize(infos.devPath);
+    if (fileSize >= (static_cast<size_t>(size))) {
+        LOG(INFO) << "no need copy";
+        return 0;
+    }
+    std::ofstream file(filename, std::ios::binary | std::ios::ate);
+    if (!file.is_open()) {
+        LOG(ERROR) << "Failed to open file for writing.";
+        return -1;
+    }
+
+    /* fill the remaining space with zero values */
+    int writeFileTmp = (size - fileSize) / WRITEFILLSIZE;
+    char zerolist[WRITEFILLSIZE] = {0};
+    while (writeFileTmp > 0) {
+        file.write(zerolist, WRITEFILLSIZE);
+        writeFileTmp--;
+    }
+    writeFileTmp = (size - fileSize) % WRITEFILLSIZE;
+    char zero = 0;
+    while (writeFileTmp > 0) {
+        file.write(&zero, 1);
+        writeFileTmp--;
+    }
+
+    file.close();
+    return 0;
+}
+
+static std::string GetFileName(const std::string &srcImage)
+{
+    std::vector<std::string> lines =
+        Updater::Utils::SplitString(std::string(srcImage), "/");
+    LOG(INFO) << "lines.size is " << lines.size();
+    if (lines.size() == 0) {
+        return nullptr;
+    }
+    return lines[lines.size() - 1];
+}
+
+static int32_t ExecuteUpdateBlock(Uscript::UScriptEnv &env, const UpdateBlockInfo &infos,
+    const std::string targetPath, std::string destImage)
+{
+    Hpackage::PkgManager::StreamPtr outStream = nullptr;
+    uint8_t *transferListBuffer = nullptr;
+    size_t transferListSize = 0;
+    if (ExtractFileByNameFunc(env, infos.transferName,
+        outStream, transferListBuffer, transferListSize) != USCRIPT_SUCCESS) {
+        return USCRIPT_ERROR_EXECUTE;
+    }
+
+    std::unique_ptr<TransferManager> tm = std::make_unique<TransferManager>();
+    auto transferParams = tm->GetTransferParams();
+    /* Save Script Env to transfer manager */
+    transferParams->env = &env;
+    std::vector<std::string> lines =
+        Updater::Utils::SplitString(std::string(reinterpret_cast<const char*>(transferListBuffer)), "\n");
+    env.GetPkgManager()->ClosePkgStream(outStream);
+
+    if (ExtractFileByNameFunc(env, infos.patchDataName, outStream,
+        transferParams->patchDataBuffer, transferParams->patchDataSize) != USCRIPT_SUCCESS) {
+        return USCRIPT_ERROR_EXECUTE;
+    }
+    env.GetPkgManager()->ClosePkgStream(outStream);
+    uint8_t *ancoSizeBuffer = nullptr;
+    size_t ancoSizeListSize = 0;
+    const std::string fileName = "anco_size";
+    if (ExtractFileByNameFunc(env, fileName, outStream, ancoSizeBuffer,
+                              ancoSizeListSize) != USCRIPT_SUCCESS) {
+        return USCRIPT_ERROR_EXECUTE;
+    }
+    env.GetPkgManager()->ClosePkgStream(outStream);
+    std::string str(reinterpret_cast<char*>(ancoSizeBuffer), ancoSizeListSize);
+    int64_t maxStashSize = std::stoll(str);
+    if (CreateFixedSizeEmptyFile(infos, destImage, maxStashSize) != 0) {
+        LOG(ERROR) << "Failed to create empty file";
+        return USCRIPT_ERROR_EXECUTE;
+    }
+
+    LOG(INFO) << "Ready to start a thread to handle new data processing";
+    if (InitThread(infos, tm.get()) != 0) {
+        LOG(ERROR) << "Failed to create pthread";
+        return USCRIPT_ERROR_EXECUTE;
+    }
+    int32_t ret = DoExecuteUpdateBlock(infos, tm.get(), lines, targetPath, destImage);
+    return ret;
+}
+
+int RestoreOriginalFile(const std::string &packagePath, const std::string &srcImage, const std::string &targetPath)
+{
+    UpdateBlockInfo infos {};
+    if (GetUpdateBlockInfo(infos, packagePath, srcImage, targetPath) != 0) {
+        return -1;
+    }
+    std::string destName = GetFileName(srcImage);
+    std::string destImage = targetPath + "/" + destName;
 
     PkgManager::PkgManagerPtr pkgManager = PkgManager::CreatePackageInstance();
     if (pkgManager == nullptr) {
@@ -292,8 +400,8 @@ int RestoreOriginalFile(const std::string &path, const std::string &srcImage, co
     }
 
     std::vector<std::string> components;
-    std::string packagePath = path;
-    int32_t ret = pkgManager->LoadPackage(packagePath, components, PkgFile::PKG_TYPE_ZIP);
+    std::string pckPath = packagePath;
+    int32_t ret = pkgManager->LoadPackage(pckPath, components, PkgFile::PKG_TYPE_ZIP);
     if (ret != PKG_SUCCESS) {
         LOG(ERROR) << "Fail to load package";
         return -1;
@@ -305,32 +413,12 @@ int RestoreOriginalFile(const std::string &path, const std::string &srcImage, co
         return -1;
     }
 
-    Hpackage::PkgManager::StreamPtr outStream = nullptr;
-    uint8_t *transferListBuffer = nullptr;
-    size_t transferListSize = 0;
-    if (ExtractFileByNameFunc(*env, infos.transferName,
-        outStream, transferListBuffer, transferListSize) != USCRIPT_SUCCESS) {
-        return USCRIPT_ERROR_EXECUTE;
+    int result = ExecuteUpdateBlock(*env, infos, targetPath, destImage);
+    if (result != 0) {
+        LOG(ERROR) << "restore original file fail.";
     }
-
-    std::unique_ptr<TransferManager> tm = std::make_unique<TransferManager>();
-    auto transferParams = tm->GetTransferParams();
-    /* Save Script Env to transfer manager */
-    transferParams->env = env;
-    std::vector<std::string> lines =
-        Updater::Utils::SplitString(std::string(reinterpret_cast<const char*>(transferListBuffer)), "\n");
-
-    LOG(INFO) << "Ready to start a thread to handle new data processing";
-    if (ExtractFileByNameFunc(*env, infos.patchDataName, outStream,
-        transferParams->patchDataBuffer, transferParams->patchDataSize) != USCRIPT_SUCCESS) {
-        return USCRIPT_ERROR_EXECUTE;
-    }
-
-    LOG(INFO) << "Ready to start a thread to handle new data processing";
-    if (InitThread(infos, tm.get()) != 0) {
-        LOG(ERROR) << "Failed to create pthread";
-        return USCRIPT_ERROR_EXECUTE;
-    }
-    return DoExecuteUpdateBlock(infos, tm.get(), outStream, lines, targetPath);
+    delete env;
+    env = nullptr;
+    return result;
 }
 }

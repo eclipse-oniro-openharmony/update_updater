@@ -358,6 +358,17 @@ public:
     virtual StreamPtr GetPkgFileStream(const std::string &fileName) = 0;
 
     virtual int32_t ParseComponents(const std::string &packagePath, std::vector<std::string> &fileName) = 0;
+
+    /**
+     * Load and parse the update package.
+     *
+     * @param packagePath       file name of the update package
+     * @param fileIds           returned file ID list
+     * @param middleTofile      file saving mode during intermediate parsing.
+     * @return                  loading and parsing result
+     */
+    virtual int32_t LoadPackage(const std::string &packagePath,
+        std::vector<std::string> &fileIds, PkgFile::PkgType type) = 0;
 };
 
 template <typename FileClassName>
