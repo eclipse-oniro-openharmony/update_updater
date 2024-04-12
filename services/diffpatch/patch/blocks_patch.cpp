@@ -24,7 +24,7 @@ using namespace std;
 
 namespace UpdatePatch {
 #define PATCH_MIN std::char_traits<char>::length(BSDIFF_MAGIC) + sizeof(int64_t) * 3
-#define GET_BYTE_FROM_BUFFER(v, index, buffer)  ((v) * 256 + buffer[index])
+#define GET_BYTE_FROM_BUFFER(v, index, buffer)  ((v) * 256 + (buffer)[index])
 constexpr uint8_t BUFFER_MASK = 0x80;
 
 static int64_t ReadLE64(const uint8_t *buffer)
