@@ -33,6 +33,8 @@ ohos_fuzztest("UpdaterMainFuzzTest") {
     "${updater_path}/services",
     "${updater_path}/services/common",
     "${updater_path}/services/include",
+    "${updater_path}/services/ui",
+    "${updater_path}/services/ui/include",
   ]
 
   deps = [
@@ -46,7 +48,6 @@ ohos_fuzztest("UpdaterMainFuzzTest") {
     "${updater_path}/services/package:libupdaterpackage",
     "${updater_path}/services/script:libupdaterscript",
     "${updater_path}/services/sdcard_update:libsdupdate",
-    "${updater_path}/services/ui:libui",
     "${updater_path}/utils:libutils",
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/bzip2:libbz2",
@@ -59,9 +60,6 @@ ohos_fuzztest("UpdaterMainFuzzTest") {
   ]
 
   external_deps = [ "init:libbegetutil" ]
-  if (updater_ui_support) {
-    external_deps += [ "ui_lite:libupdater_layout" ]
-  }
 
   cflags = [
     "-g",
