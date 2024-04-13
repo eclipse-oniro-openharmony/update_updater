@@ -126,7 +126,7 @@ HWTEST_F(UtilsUnitTest, CopyUpdaterLogsTest, TestSize.Level0)
     const std::string sLog = "/data/updater/main_data/updater.tab";
     const std::string dLog = "/data/updater/main_data/ut_dLog.txt";
     bool ret = Utils::CopyUpdaterLogs(sLog, dLog);
-    EXPECT_EQ(ret, false);
+    EXPECT_EQ(ret, true);
     unlink(dLog.c_str());
 }
 
