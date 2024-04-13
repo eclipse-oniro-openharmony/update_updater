@@ -223,6 +223,7 @@
         <preparer>
             <option name="push" value="src/updater_log_test -> /data/updater/log" src="res"/>
             <option name="push" value="updater/etc/fstab.ut.updater -> /data/updater/updater/etc" src="res"/>
+            <option name="push" value="main_data/updater.tab -> /data/updater/main_data" src="res"/>
         </preparer>
     </target>
     <target name="bin_flow_update_test">
