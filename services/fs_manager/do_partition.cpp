@@ -205,8 +205,8 @@ static void DestroyDiskDevices(const Disk &disk)
 static bool WriteMiscMsgWithOffset(const std::string &msg, int32_t offset)
 {
     const std::string miscDevPath = GetBlockDeviceByMountPoint("/misc");
-    char *realPath = realpath(miscDevPath.c_str(), nullptr);
-    if (realPath == nullptr) {
+    char realPath[PATH_MAX] = {0};
+    if (realpath(miscDevPath.c_str(), realPath) == nullptr) {
         LOG(ERROR) << "realPath is NULL";
         return false;
     }

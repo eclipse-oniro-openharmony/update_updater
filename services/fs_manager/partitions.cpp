@@ -91,8 +91,8 @@ static bool ReadDeviceSysfsFile(BlockDevice &dev, const std::string &file, std::
         LastComponent(dev.devPath).c_str(), file.c_str()) == -1) {
         return false;
     }
-    char *realPath = realpath(nameBuf, nullptr);
-    if (realPath == nullptr) {
+    char realPath[PATH_MAX] = {0};
+    if (realpath(nameBuf, realPath) == nullptr) {
         return false;
     }
     if ((f = fopen(realPath, "r")) == nullptr) {
