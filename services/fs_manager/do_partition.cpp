@@ -211,7 +211,6 @@ static bool WriteMiscMsgWithOffset(const std::string &msg, int32_t offset)
         return false;
     }
     FILE *fp = fopen(realPath, "rb+");
-    free(realPath);
     if (fp == nullptr) {
         LOG(ERROR) << "fopen error " << errno;
         return false;
