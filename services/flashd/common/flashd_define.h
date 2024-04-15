@@ -21,10 +21,10 @@
 #include "log/log.h"
 
 namespace Flashd {
-#define FLASHD_LOGE(format, ...) Logger(Updater::ERROR, (__FILE_NAME__), (__LINE__), format, ##__VA_ARGS__)
-#define FLASHD_LOGD(format, ...) Logger(Updater::DEBUG, (__FILE_NAME__), (__LINE__), format, ##__VA_ARGS__)
-#define FLASHD_LOGI(format, ...) Logger(Updater::INFO, (__FILE_NAME__), (__LINE__), format, ##__VA_ARGS__)
-#define FLASHD_LOGW(format, ...) Logger(Updater::WARNING, (__FILE_NAME__), (__LINE__), format, ##__VA_ARGS__)
+#define FLASHD_LOGE(format, ...) Logger(Updater::ERROR, (__UPDATER_FILE_NAME__), (__LINE__), format, ##__VA_ARGS__)
+#define FLASHD_LOGD(format, ...) Logger(Updater::DEBUG, (__UPDATER_FILE_NAME__), (__LINE__), format, ##__VA_ARGS__)
+#define FLASHD_LOGI(format, ...) Logger(Updater::INFO, (__UPDATER_FILE_NAME__), (__LINE__), format, ##__VA_ARGS__)
+#define FLASHD_LOGW(format, ...) Logger(Updater::WARNING, (__UPDATER_FILE_NAME__), (__LINE__), format, ##__VA_ARGS__)
 }
 
 namespace Hdc {

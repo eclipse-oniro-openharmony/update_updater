@@ -49,9 +49,9 @@ uint16_t ReadLE16(const uint8_t *buff);
 void WriteLE16(uint8_t *buff, uint16_t value);
 uint64_t ReadLE64(const uint8_t *buff);
 
-#define PKG_LOGE(format, ...) Logger(Updater::ERROR, (__FILE_NAME__), (__LINE__), format, ##__VA_ARGS__)
-#define PKG_LOGI(format, ...) Logger(Updater::INFO, (__FILE_NAME__), (__LINE__), format, ##__VA_ARGS__)
-#define PKG_LOGW(format, ...) Logger(Updater::WARNING, (__FILE_NAME__), (__LINE__), format, ##__VA_ARGS__)
+#define PKG_LOGE(format, ...) Logger(Updater::ERROR, (__UPDATER_FILE_NAME__), (__LINE__), format, ##__VA_ARGS__)
+#define PKG_LOGI(format, ...) Logger(Updater::INFO, (__UPDATER_FILE_NAME__), (__LINE__), format, ##__VA_ARGS__)
+#define PKG_LOGW(format, ...) Logger(Updater::WARNING, (__UPDATER_FILE_NAME__), (__LINE__), format, ##__VA_ARGS__)
 
 enum {
     PKG_INFO_BASE = PKG_ERROR_BASE + 100,
