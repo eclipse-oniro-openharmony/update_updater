@@ -178,11 +178,11 @@ static std::string ReadPartitionFromSys(const std::string &devname, const std::s
             return partString;
         }
         if (type == "uevent" && strstr(buf, table.c_str()) != nullptr) {
-			partString = std::string(buf + table.size(), sizeof(buf) - table.size());
-			if (!partString.empty()) {
-				partString.pop_back();
-			}
-			return partString;
+            partString = std::string(buf + table.size(), sizeof(buf) - table.size());
+            if (!partString.empty()) {
+                partString.pop_back();
+            }
+            return partString;
         } else if (type == "start" || type == "size") {
             partString = std::string(buf, sizeof(buf) - 1);
             LOG(INFO) << type << " partInf: " << std::string(buf, sizeof(buf) - 1);
