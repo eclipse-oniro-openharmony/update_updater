@@ -434,7 +434,7 @@ void CompressLogs(const std::string &logName)
         PkgManager::ReleasePackageInstance(pkgManager);
         return;
     }
-    mode_t mode = 0640;
+    mode_t mode = 0660;
 #ifndef __WIN32
     SetFileAttributes(pkgName, USER_UPDATE_AUTHORITY, GROUP_UPDATE_AUTHORITY, mode);
 #endif
@@ -844,7 +844,10 @@ void SetFileAttributes(const std::string& file, uid_t owner, gid_t group, mode_t
 #ifdef WITH_SELINUX
     RestoreconRecurse(file.c_str());
 #endif // WITH_SELINUX
-    if (chown(file.c_str(), owner, group) != 0 && chmod(file.c_str(), mode) != EOK) {
+    if (chown(file.c_str(), USER_ROOT_AUTHORITY, GROUP_ROOT_AUTHORITY) != 0) {
+        LOG(ERROR) << "Chown failed!";
+    }
+    if (chmod(file.c_str(), mode) != EOK && chown(file.c_str(), owner, group) != 0) {
         LOG(ERROR) << "Chmod failed!";
     }
 }
