@@ -32,10 +32,10 @@ namespace UpdatePatch {
 #undef ERROR
 #endif
 
-#define PATCH_LOGE(format, ...) Logger(Updater::ERROR, (__UPDATER_LOG_FILE_NAME__), (__LINE__), format, ##__VA_ARGS__)
-#define PATCH_DEBUG(format, ...) Logger(Updater::DEBUG, (__UPDATER_LOG_FILE_NAME__), (__LINE__), format, ##__VA_ARGS__)
-#define PATCH_LOGI(format, ...) Logger(Updater::INFO, (__UPDATER_LOG_FILE_NAME__), (__LINE__), format, ##__VA_ARGS__)
-#define PATCH_LOGW(format, ...) Logger(Updater::WARNING, (__UPDATER_LOG_FILE_NAME__), (__LINE__), format, ##__VA_ARGS__)
+#define PATCH_LOGE(format, ...) Logger(Updater::ERROR, (UPDATER_LOG_FILE_NAME), (__LINE__), format, ##__VA_ARGS__)
+#define PATCH_DEBUG(format, ...) Logger(Updater::DEBUG, (UPDATER_LOG_FILE_NAME), (__LINE__), format, ##__VA_ARGS__)
+#define PATCH_LOGI(format, ...) Logger(Updater::INFO, (UPDATER_LOG_FILE_NAME), (__LINE__), format, ##__VA_ARGS__)
+#define PATCH_LOGW(format, ...) Logger(Updater::WARNING, (UPDATER_LOG_FILE_NAME), (__LINE__), format, ##__VA_ARGS__)
 
 enum {
     PATCH_SUCCESS = 0,
