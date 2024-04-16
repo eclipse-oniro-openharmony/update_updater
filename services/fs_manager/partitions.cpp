@@ -91,23 +91,20 @@ static bool ReadDeviceSysfsFile(BlockDevice &dev, const std::string &file, std::
         LastComponent(dev.devPath).c_str(), file.c_str()) == -1) {
         return false;
     }
-    char *realPath = realpath(nameBuf, NULL);
-    if (realPath == nullptr) {
+    char realPath[PATH_MAX] = {0};
+    if (realpath(nameBuf, realPath) == nullptr) {
         return false;
     }
     if ((f = fopen(realPath, "r")) == nullptr) {
-        free(realPath);
         return false;
     }
 
     if (fgets(buf, BUFFER_SIZE, f) == nullptr) {
         fclose(f);
-        free(realPath);
         return false;
     }
     strl = buf;
     fclose(f);
-    free(realPath);
     return true;
 }
 
@@ -180,14 +177,12 @@ static std::string ReadPartitionFromSys(const std::string &devname, const std::s
         if (fgets(buf, BUFFER_SIZE, f) == nullptr) {
             return partString;
         }
-        if (type == "uevent") {
-            if (strstr(buf, table.c_str()) != nullptr) {
-                partString = std::string(buf + table.size(), sizeof(buf) - table.size());
-                if (!partString.empty()) {
-                    partString.pop_back();
-                }
-                return partString;
+        if (type == "uevent" && strstr(buf, table.c_str()) != nullptr) {
+            partString = std::string(buf + table.size(), sizeof(buf) - table.size());
+            if (!partString.empty()) {
+                partString.pop_back();
             }
+            return partString;
         } else if (type == "start" || type == "size") {
             partString = std::string(buf, sizeof(buf) - 1);
             LOG(INFO) << type << " partInf: " << std::string(buf, sizeof(buf) - 1);

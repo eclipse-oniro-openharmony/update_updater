@@ -74,7 +74,7 @@ void EmmcPtable::EmmcPatchGptHeader(EmmcPartitionDataInfo &ptnDataInfo, const ui
     if (partitionName == USERDATA_PARTITION || (totalPart == 1 && partitionSize == 0)) {
         // patch userdata or only one partition
         PUT_LONG_LONG(lastPartOffset + PARTITION_ENTRY_LAST_LBA, (cardSizeSector - 1));
-        LOG(INFO) << "partitionSize=" << cardSizeSector - 1 << ", partition_name:" << partitionName;
+        LOG(INFO) << "partitionSize=" << (cardSizeSector - 1) << ", partition_name:" << partitionName;
     }
 
     // Updating CRC of the Partition entry array in both headers

@@ -84,7 +84,7 @@ int32_t BZipBuffer2Adapter::FlushData(size_t &dataSize)
 {
     dataSize = 0;
     PATCH_DEBUG("FlushData dataSize_ %d ", dataSize_);
-    stream_.next_in = 0;
+    stream_.next_in = nullptr;
     stream_.avail_in = 0;
     stream_.avail_out = buffer_.size() - offset_ - dataSize_;
     char *next = reinterpret_cast<char*>(buffer_.data() + offset_ + dataSize_);
@@ -154,7 +154,7 @@ int32_t BZip2StreamAdapter::FlushData(size_t &dataSize)
 {
     dataSize = 0;
     PATCH_DEBUG("FlushData dataSize_ %d ", dataSize_);
-    stream_.next_in = 0;
+    stream_.next_in = nullptr;
     stream_.avail_in = 0;
     stream_.avail_out = buffer_.size();
     stream_.next_out = reinterpret_cast<char*>(buffer_.data());

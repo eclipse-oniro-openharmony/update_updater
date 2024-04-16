@@ -50,7 +50,7 @@ std::string TranslateText(const std::string &id)
 bool CheckColor(const std::string &color)
 {
     constexpr char colorBegin = '#';
-    constexpr std::size_t len = 9ul; // #rrggbbaa
+    constexpr std::size_t len = 9uL; // #rrggbbaa
     if (color.empty() || color[0] != colorBegin || color.size() != len) {
         LOG(ERROR) << "color format error: " << color;
         return false;
@@ -69,9 +69,9 @@ bool CheckColor(const std::string &color)
  */
 OHOS::ColorType StrToColor(const std::string &hexColor)
 {
-    std::size_t startPos = 1ul;
+    std::size_t startPos = 1uL;
     auto getNextField = [&startPos, &hexColor] () {
-        constexpr std::size_t width = 2ul;
+        constexpr std::size_t width = 2uL;
         uint8_t ret = (startPos > hexColor.size()) ? 0 : Utils::String2Int<uint8_t>(hexColor.substr(startPos, width));
         startPos += width;
         return ret;
