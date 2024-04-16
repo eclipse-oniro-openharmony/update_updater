@@ -844,7 +844,7 @@ void SetFileAttributes(const std::string& file, uid_t owner, gid_t group, mode_t
 #ifdef WITH_SELINUX
     RestoreconRecurse(file.c_str());
 #endif // WITH_SELINUX
-    if (chown(file.c_str(), USER_ROOT_AUTHORITY, GROUP_UPDATE_AUTHORITY) != 0) {
+    if (chown(file.c_str(), USER_ROOT_AUTHORITY, GROUP_ROOT_AUTHORITY) != 0) {
         LOG(ERROR) << "Chown failed!";
     }
     if (chmod(file.c_str(), mode) != EOK && chown(file.c_str(), owner, group) != 0) {
