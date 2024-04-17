@@ -25,8 +25,8 @@ enum {
     USCRIPT_INVALID_STATEMENT = USCRIPT_BASE + 100,
 };
 
-#define USCRIPT_LOGE(format, ...) Logger(Updater::ERROR, (__FILE_NAME__), (__LINE__), format, ##__VA_ARGS__)
-#define USCRIPT_LOGI(format, ...) Logger(Updater::INFO, (__FILE_NAME__), (__LINE__), format, ##__VA_ARGS__)
-#define USCRIPT_LOGW(format, ...) Logger(Updater::WARNING, (__FILE_NAME__), (__LINE__), format, ##__VA_ARGS__)
+#define USCRIPT_LOGE(format, ...) Logger(Updater::ERROR, (UPDATER_LOG_FILE_NAME), (__LINE__), format, ##__VA_ARGS__)
+#define USCRIPT_LOGI(format, ...) Logger(Updater::INFO, (UPDATER_LOG_FILE_NAME), (__LINE__), format, ##__VA_ARGS__)
+#define USCRIPT_LOGW(format, ...) Logger(Updater::WARNING, (UPDATER_LOG_FILE_NAME), (__LINE__), format, ##__VA_ARGS__)
 } // namespace Uscript
 #endif /* USCRIPT_UTILES_H */

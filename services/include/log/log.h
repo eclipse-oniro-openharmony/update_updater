@@ -30,10 +30,10 @@ namespace Updater {
 
 constexpr size_t MIN_UPDATE_SPACE = 50 * 1024 * 1024;
 constexpr int MAX_TIME_SIZE = 20;
-#define __FILE_NAME__   (strrchr((__FILE__), '/') ? strrchr((__FILE__), '/') + 1 : (__FILE__))
-#define LOG(level) UpdaterLogger(level).OutputUpdaterLog((__FILE_NAME__), (__LINE__))
+#define UPDATER_LOG_FILE_NAME   (strrchr((__FILE__), '/') ? strrchr((__FILE__), '/') + 1 : (__FILE__))
+#define LOG(level) UpdaterLogger(level).OutputUpdaterLog((UPDATER_LOG_FILE_NAME), (__LINE__))
 #define STAGE(stage) StageLogger(stage).OutputUpdaterStage()
-#define ERROR_CODE(code) ErrorCode(code).OutputErrorCode((__FILE_NAME__), (__LINE__), (code))
+#define ERROR_CODE(code) ErrorCode(code).OutputErrorCode((UPDATER_LOG_FILE_NAME), (__LINE__), (code))
 
 enum {
     DEBUG = 3,
