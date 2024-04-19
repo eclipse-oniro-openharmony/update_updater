@@ -33,7 +33,7 @@ void UpdaterUiTools::SaveUxBuffToFile(const std::string &filePath)
         return;
     }
 
-    int32_t fd = open(filePath.c_str(), O_WRONLY | O_CREAT | O_TRUNC, DEFAULT_FILE_PERMISSION);
+    int32_t fd = open(filePath.c_str(), O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
     if (fd == -1) {
         LOG(ERROR) << "uxtools open file failed";
         ImageCacheFree(imageBit);

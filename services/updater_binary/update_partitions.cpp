@@ -29,6 +29,24 @@ using namespace Updater;
 constexpr int MIN_PARTITIONS_NUM = 2;
 constexpr int MAX_PARTITIONS_NUM = 20;
 namespace Updater {
+static bool CheckValueInt(const cJson *item)
+{
+    if (item == nullptr || item->valueint < 0 || item->valueint >= std::npos) {
+        LOG(ERROR) << "Error get valueint";
+        return false;
+    }
+    return true;
+}
+
+static bool CheckValueString(const cJson *item)
+{
+    if (item == nullptr || strlen(item->valuestring) == 0) {
+        LOG(ERROR) << "Error get valuestring";
+        return false;
+    }
+    return true;
+}
+
 bool UpdatePartitions::SetPartitionInfo(const cJSON *partitions, int idx, struct Partition *myPartition) const
 {
     cJSON *thisPartition = cJSON_GetArrayItem(partitions, idx);
@@ -37,14 +55,14 @@ bool UpdatePartitions::SetPartitionInfo(const cJSON *partitions, int idx, struct
         return false;
     }
     cJSON *item = cJSON_GetObjectItem(thisPartition, "start");
-    if (item == nullptr) {
+    if (!CheckValueInt(item)) {
         LOG(ERROR) << "Error get start";
         return false;
     }
     myPartition->start = static_cast<size_t>(item->valueint);
 
     item = cJSON_GetObjectItem(thisPartition, "length");
-    if (item == nullptr) {
+    if (!CheckValueInt(item)) {
         LOG(ERROR) << "Error get length";
         return false;
     }
@@ -53,14 +71,14 @@ bool UpdatePartitions::SetPartitionInfo(const cJSON *partitions, int idx, struct
     myPartition->devName = "mmcblk0px";
 
     item = cJSON_GetObjectItem(thisPartition, "partName");
-    if (item == nullptr) {
+    if (!CheckValueString(item)) {
         LOG(ERROR) << "Error get partName";
         return false;
     }
     myPartition->partName = (item->valuestring);
 
     item = cJSON_GetObjectItem(thisPartition, "fsType");
-    if (item == nullptr) {
+    if (!CheckValueString(item)) {
         LOG(ERROR) << "Error get fsType";
         return false;
     }

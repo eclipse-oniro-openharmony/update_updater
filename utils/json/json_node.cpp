@@ -56,6 +56,7 @@ JsonNode::JsonNode(const Fs::path &path)
     std::string content {std::istreambuf_iterator<char> {ifs}, {}};
     cJSON *root = cJSON_Parse(content.c_str());
     if (root == nullptr || cJSON_IsInvalid(root)) {
+        cJSON_Delete(root);
         LOG(ERROR) << path << " contained json invalid";
         return;
     }
