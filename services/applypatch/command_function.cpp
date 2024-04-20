@@ -17,35 +17,41 @@
 #include "command_process.h"
 
 namespace Updater {
-std::unique_ptr<CommandFunction> CommandFunctionFactory::GetCommandFunction(const CommandType type)
+extern "C" __attribute__((constructor)) void RegistBlockUpdateCommandFunction(void)
 {
-    switch (type) {
-        case CommandType::ABORT:
-            return std::make_unique<AbortCommandFn>();
-        case CommandType::NEW:
-            return std::make_unique<NewCommandFn>();
-        case CommandType::BSDIFF:
-            return std::make_unique<DiffAndMoveCommandFn>();
-        case CommandType::IMGDIFF:
-            return std::make_unique<DiffAndMoveCommandFn>();
-        case CommandType::ERASE:
-            return std::make_unique<ZeroAndEraseCommandFn>();
-        case CommandType::ZERO:
-            return std::make_unique<ZeroAndEraseCommandFn>();
-        case CommandType::FREE:
-            return std::make_unique<FreeCommandFn>();
-        case CommandType::MOVE:
-            return std::make_unique<DiffAndMoveCommandFn>();
-        case CommandType::STASH:
-            return std::make_unique<StashCommandFn>();
-        default:
-            break;
+    const std::unordered_map<std::string, std::function<std::unique_ptr<CommandFunction>()>> COMMANDFUNC = {
+        { "abort", []() { return std::make_unique<AbortCommandFn>(); } },
+        { "bsdiff", []() { return std::make_unique<DiffAndMoveCommandFn>(); } },
+        { "new", []() { return std::make_unique<NewCommandFn>(); } },
+        { "pkgdiff", []() { return std::make_unique<DiffAndMoveCommandFn>(); } },
+        { "zero", []() { return std::make_unique<ZeroAndEraseCommandFn>(); } },
+        { "erase", []() { return std::make_unique<ZeroAndEraseCommandFn>(); } },
+        { "free", []() { return std::make_unique<FreeCommandFn>(); } },
+        { "move", []() { return std::make_unique<DiffAndMoveCommandFn>(); } },
+        { "stash", []() { return std::make_unique<StashCommandFn>(); } }
+    };
+    for(auto &iter : COMMANDFUNC) {
+        CommandFunctionFactory::GetInstance().RegistCommandFunction(iter.first, iter.second());
+    }
+}
+
+CommandFunctionFactory &CommandFunctionFactory::GetInstance()
+{
+    static CommandFunctionFactory instance;
+    return instance;
+}
+
+CommandFunction* CommandFunctionFactory::GetCommandFunction(std::string command)
+{
+    auto iter = commandFunctionMap_.find(command);
+    if (iter != commandFunctionMap_.end()) {
+        return iter->second.get();
     }
     return nullptr;
 }
 
-void CommandFunctionFactory::ReleaseCommandFunction(std::unique_ptr<CommandFunction> &instr)
+void CommandFunctionFactory::RegistCommandFunction(std::string command, std::unique_ptr<CommandFunction> commandFunction)
 {
-    instr.reset();
+    commandFunctionMap_.emplace(command, std::move(commandFunction));
 }
 }

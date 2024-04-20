@@ -16,6 +16,7 @@
 #define UPDATER_COMMAND_FUNCTION_H
 
 #include "command.h"
+#include <unordered_map>
 
 namespace Updater {
 class CommandFunction {
@@ -25,9 +26,16 @@ public:
 };
 
 class CommandFunctionFactory {
+    DISALLOW_COPY_MOVE(CommandFunctionFactory);
 public:
-    static std::unique_ptr<CommandFunction> GetCommandFunction(const CommandType type);
-    static void ReleaseCommandFunction(std::unique_ptr<CommandFunction> &instr);
+    static CommandFunctionFactory &GetInstance();
+    CommandFunction* GetCommandFunction(std::string command);
+    void RegistCommandFunction(std::string command, std::unique_ptr<CommandFunction> commandFunction);
+    std::unordered_map<std::string, std::unique_ptr<CommandFunction>> commandFunctionMap_;
+private:
+
+    CommandFunctionFactory() = default;
+    ~CommandFunctionFactory() = default;
 };
 }
 #endif // UPDATER_COMMAND_FUNCTION_H

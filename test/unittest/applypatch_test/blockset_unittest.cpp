@@ -126,13 +126,16 @@ HWTEST_F(BlockSetUnitTest, blockset_test_005, TestSize.Level1)
     cmd->Init(cmdLine);
     cmd->SetFileDescriptor(fd);
     BlockSet targetBlock;
-    size_t tgtBlockSize = H_BLOCK_SIZE;
-    std::vector<uint8_t> buffer(tgtBlockSize);
+    size_t BlockSize = H_BLOCK_SIZE;
+    std::vector<uint8_t> srcBuffer(BlockSize);
+    std::vector<uint8_t> patchBuffer(BlockSize);
     bool isImgDiff = true;
-    int ret = targetBlock.WriteDiffToBlock(const_cast<const Command &>(*cmd), buffer, tgtBlockSize, isImgDiff);
+    int ret = targetBlock.WriteDiffToBlock(const_cast<const Command &>(*cmd),
+                                           srcBuffer, patchBuffer.data(), BlockSize, isImgDiff);
     EXPECT_EQ(ret, -1);
     isImgDiff = false;
-    ret = targetBlock.WriteDiffToBlock(const_cast<const Command &>(*cmd), buffer, tgtBlockSize, isImgDiff);
+    ret = targetBlock.WriteDiffToBlock(const_cast<const Command &>(*cmd),
+                                       srcBuffer, patchBuffer.data(), BlockSize, isImgDiff);
     EXPECT_EQ(ret, -1);
     close(fd);
     delete cmd;

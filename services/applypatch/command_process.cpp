@@ -135,19 +135,19 @@ bool LoadTarget(const Command &params, size_t &pos, std::vector<uint8_t> &buffer
     return true;
 }
 
+int32_t DiffAndMoveCommandFn::WriteDiffToBlock(const Command &params, std::vector<uint8_t> &srcBuffer,
+                                               uint8_t *patchBuffer, size_t patchLength, BlockSet &targetBlock)
+{
+    CommandType type = params.GetCommandType();
+    return targetBlock.WriteDiffToBlock(params, srcBuffer, patchBuffer, patchLength, type == CommandType::IMGDIFF);
+}
+
 CommandResult DiffAndMoveCommandFn::Execute(const Command &params)
 {
     CommandType type = params.GetCommandType();
-    if (type != CommandType::MOVE && type != CommandType::BSDIFF && type != CommandType::IMGDIFF) {
-        LOG(ERROR) << "Invalid command type";
-        return FAILED;
-    }
     size_t pos = H_DIFF_CMD_ARGS_START;
-    bool isImgDiff = false;
     if (type == CommandType::MOVE) {
         pos = H_MOVE_CMD_ARGS_START;
-    } else if (type == CommandType::IMGDIFF) {
-        isImgDiff = true;
     }
 
     BlockSet targetBlock;
@@ -158,9 +158,12 @@ CommandResult DiffAndMoveCommandFn::Execute(const Command &params)
     }
 
     int32_t ret = -1;
-    size_t tgtBlockSize = buffer.size() / H_BLOCK_SIZE;
     if (type != CommandType::MOVE) {
-        ret = targetBlock.WriteDiffToBlock(const_cast<const Command &>(params), buffer, tgtBlockSize, isImgDiff);
+        pos = H_MOVE_CMD_ARGS_START;
+        size_t offset = Utils::String2Int<size_t>(params.GetArgumentByPos(pos++), Utils::N_DEC);
+        size_t patchLength = Utils::String2Int<size_t>(params.GetArgumentByPos(pos++), Utils::N_DEC);
+        uint8_t *patchBuffer = params.GetTransferParams()->patchDataBuffer + offset;
+        ret = WriteDiffToBlock(params, buffer, patchBuffer, patchLength, targetBlock);
     } else {
         ret = targetBlock.WriteDataToBlock(params.GetFileDescriptor(), buffer) == 0 ? -1 : 0;
     }

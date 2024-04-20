@@ -37,9 +37,8 @@ public:
     CommandResult TestCommandFnExec(std::shared_ptr<Command> cmd, std::string cmdLine)
     {
         cmd->Init(cmdLine);
-        std::unique_ptr<CommandFunction> cf = CommandFunctionFactory::GetCommandFunction(cmd->GetCommandType());
+        CommandFunction* cf = CommandFunctionFactory::GetInstance().GetCommandFunction(cmd.GetCommandHead());
         CommandResult ret = cf->Execute(const_cast<Command &>(*cmd.get()));
-        CommandFunctionFactory::ReleaseCommandFunction(cf);
         return ret;
     }
 };
@@ -105,7 +104,7 @@ HWTEST_F(CommandFunctionUnitTest, command_function_test_001, TestSize.Level1)
     EXPECT_EQ(ret, 0);
     cmdLine = "ppop";
     cmd->Init(cmdLine);
-    std::unique_ptr<CommandFunction> cf = CommandFunctionFactory::GetCommandFunction(cmd->GetCommandType());
+    CommandFunction* cf = CommandFunctionFactory::GetInstance().GetCommandFunction(cmd.GetCommandHead());
     EXPECT_EQ(cf, nullptr);
     unlink(filePath.c_str());
 }
