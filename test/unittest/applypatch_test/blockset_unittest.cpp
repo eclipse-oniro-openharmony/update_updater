@@ -131,11 +131,11 @@ HWTEST_F(BlockSetUnitTest, blockset_test_005, TestSize.Level1)
     std::vector<uint8_t> patchBuffer(blockSize);
     bool isImgDiff = true;
     int ret = targetBlock.WriteDiffToBlock(const_cast<const Command &>(*cmd),
-                                           srcBuffer, patchBuffer.data(), BlockSize, isImgDiff);
+                                           srcBuffer, patchBuffer.data(), blockSize, isImgDiff);
     EXPECT_EQ(ret, -1);
     isImgDiff = false;
     ret = targetBlock.WriteDiffToBlock(const_cast<const Command &>(*cmd),
-                                       srcBuffer, patchBuffer.data(), BlockSize, isImgDiff);
+                                       srcBuffer, patchBuffer.data(), blockSize, isImgDiff);
     EXPECT_EQ(ret, -1);
     close(fd);
     delete cmd;
