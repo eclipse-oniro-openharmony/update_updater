@@ -60,7 +60,7 @@ public:
     ~DiffAndMoveCommandFn() override {}
     CommandResult Execute(const Command &params) override;
     virtual int32_t WriteDiffToBlock(const Command &params, std::vector<uint8_t> &srcBuffer,
-                                     uint8_t * atchBuffer, size_t patchLength, BlockSet &targetBlock);
+                                     uint8_t *patchBuffer, size_t patchLength, BlockSet &targetBlock);
 };
 }
 #endif // UPDATER_COMMAND_PROCESS_H

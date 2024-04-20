@@ -168,7 +168,7 @@ CommandResult DiffAndMoveCommandFn::Execute(const Command &params)
         ret = targetBlock.WriteDataToBlock(params.GetFileDescriptor(), buffer) == 0 ? -1 : 0;
     }
     if (ret != 0) {
-        LOG(ERROR) << "tgtBlockSize is : " <<tgtBlockSize << " , type is :" <<type;
+        LOG(ERROR) << "fail to write block data.";
         return errno == EIO ? NEED_RETRY : FAILED;
     }
     std::string storeBase = params.GetTransferParams()->storeBase;

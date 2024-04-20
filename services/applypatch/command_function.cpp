@@ -30,7 +30,7 @@ extern "C" __attribute__((constructor)) void RegistBlockUpdateCommandFunction(vo
         { "move", []() { return std::make_unique<DiffAndMoveCommandFn>(); } },
         { "stash", []() { return std::make_unique<StashCommandFn>(); } }
     };
-    for(auto &iter : COMMANDFUNC) {
+    for (auto &iter : COMMANDFUNC) {
         CommandFunctionFactory::GetInstance().RegistCommandFunction(iter.first, iter.second());
     }
 }
@@ -50,7 +50,8 @@ CommandFunction* CommandFunctionFactory::GetCommandFunction(std::string command)
     return nullptr;
 }
 
-void CommandFunctionFactory::RegistCommandFunction(std::string command, std::unique_ptr<CommandFunction> commandFunction)
+void CommandFunctionFactory::RegistCommandFunction(std::string command,
+                                                   std::unique_ptr<CommandFunction> commandFunction)
 {
     commandFunctionMap_.emplace(command, std::move(commandFunction));
 }

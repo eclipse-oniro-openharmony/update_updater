@@ -89,7 +89,7 @@ bool TransferManager::CommandsParser(int fd, const std::vector<std::string> &con
             }
         }
         if (!CommandsExecute(fd, *cmd)) {
-            LOG(ERROR) << "Running command : " << cmd->GetCommandLine << " fail";
+            LOG(ERROR) << "Running command : " << cmd->GetCommandLine() << " fail";
             return false;
         }
         if (initBlock == 0) {
