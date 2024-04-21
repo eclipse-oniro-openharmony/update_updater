@@ -37,13 +37,15 @@ macro_rules! updaterlog {
             None => { None }
         };
         let file_name = file_name_str.unwrap_or("unknown");
+        let c_file_name = std::ffi::CString::new(file_name).expect("unknown");
+        let c_log_str = std::ffi::CString::new(log_str).expect("default log");
         // can use CString::new(...).expect(...) because file_name and log_str can't have internal 0 byte
         unsafe {
             $crate::ffi::Logger(
                 $crate::ffi::LogLevel::$level as i32,
-                std::ffi::CString::new(file_name).expect("unknown").as_ptr() as *const std::ffi::c_char,
+                c_file_name.as_ptr() as *const std::ffi::c_char,
                 line!() as i32,
-                std::ffi::CString::new(log_str).expect("default log").as_ptr() as *const std::ffi::c_char
+                c_log_str.as_ptr() as *const std::ffi::c_char
             )
         };
     )
