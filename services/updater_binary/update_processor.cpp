@@ -136,8 +136,8 @@ int UScriptInstructionRawImageWrite::RawImageWriteProcessor(const PkgBuffer &buf
     return PKG_SUCCESS;
 }
 
-bool UScriptInstructionRawImageWrite::WriteRawImage(const std::string &partitionName, const std::unique_ptr<DataWriter> &writer,
-    [[maybe_unused]] uint64_t partitionSize, Uscript::UScriptEnv &env)
+bool UScriptInstructionRawImageWrite::WriteRawImage(const std::string &partitionName,
+    const std::unique_ptr<DataWriter> &writer, [[maybe_unused]] uint64_t partitionSize, Uscript::UScriptEnv &env)
 {
     UPDATER_INIT_RECORD;
     // Extract partition information

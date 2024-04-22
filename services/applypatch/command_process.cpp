@@ -100,7 +100,7 @@ CommandResult ZeroAndEraseCommandFn::Execute(const Command &params)
 }
 
 bool LoadTarget(const Command &params, size_t &pos, std::vector<uint8_t> &buffer,
-                    BlockSet &targetBlock, CommandResult &result)
+    BlockSet &targetBlock, CommandResult &result)
 {
     CommandType type = params.GetCommandType();
     // Read sha256 of source and target

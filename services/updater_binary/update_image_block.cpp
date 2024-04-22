@@ -298,7 +298,7 @@ static int32_t DoExecuteUpdateBlock(const UpdateBlockInfo &infos, TransferManage
 }
 
 static int32_t ExtractFileByName(Uscript::UScriptEnv &env, const std::string &fileName,
-                                     Hpackage::PkgManager::StreamPtr &outStream, uint8_t *&outBuf, size_t &buffSize)
+    Hpackage::PkgManager::StreamPtr &outStream, uint8_t *&outBuf, size_t &buffSize)
 {
     if (env.GetPkgManager() == nullptr) {
         LOG(ERROR) << "Error to get pkg manager";
@@ -350,7 +350,8 @@ static int32_t ExecuteUpdateBlock(Uscript::UScriptEnv &env, Uscript::UScriptCont
     uint8_t *transferListBuffer = nullptr;
     size_t transferListSize = 0;
     Hpackage::PkgManager::StreamPtr outStream = nullptr;
-    if (ExtractFileByName(env, infos.transferName, outStream, transferListBuffer, transferListSize) != USCRIPT_SUCCESS) {
+    if (ExtractFileByName(env, infos.transferName, outStream,
+                          transferListBuffer, transferListSize) != USCRIPT_SUCCESS) {
         return USCRIPT_ERROR_EXECUTE;
     }
 
