@@ -29,7 +29,6 @@ config("updater_config") {
     "${updater_path}/utils/include",
     "${updater_path}/utils/json",
     "${updater_path}/services/include/applypatch",
-    "//third_party/bounds_checking_function/include",
   ]
 }
 
@@ -63,12 +62,6 @@ ohos_static_library("libupdater_binary") {
     "${updater_path}/services/package:libupdaterpackage",
     "${updater_path}/services/script:libupdaterscript",
     "${updater_path}/utils:libutils",
-    "//third_party/bzip2:libbz2",
-    "//third_party/cJSON:cjson_static",
-    "//third_party/lz4:liblz4_static",
-    "//third_party/openssl:libcrypto_static",
-    "//third_party/openssl:libssl_static",
-    "//third_party/zlib:libz",
   ]
 
   defines = [ "OPENSSL_SUPPRESS_DEPRECATED" ]
@@ -80,8 +73,15 @@ ohos_static_library("libupdater_binary") {
   }
 
   external_deps = [
+    "bounds_checking_function:libsec_shared",
+    "bzip2:libbz2",
+    "cJSON:cjson_static",
     "init:libbegetutil",
     "init:libfsmanager_static",
+    "lz4:liblz4_static",
+    "openssl:libcrypto_static",
+    "openssl:libssl_static",
+    "zlib:libz",
   ]
 
   part_name = "updater"

@@ -33,8 +33,6 @@ config("diff_config") {
     "${updater_path}/services/diffpatch/diff",
     "${updater_path}/services/diffpatch",
     "${updater_path}/services/package/pkg_manager",
-    "//third_party/bounds_checking_function/include",
-    "//third_party/bzip2",
   ]
   defines = [ "OPENSSL_SUPPRESS_DEPRECATED" ]
 }
@@ -51,10 +49,14 @@ ohos_static_library("libdiff") {
   deps = [
     "${updater_path}/services/log:libupdaterlog",
     "${updater_path}/services/package:libupdaterpackage",
-    "//third_party/bounds_checking_function:libsec_static",
-    "//third_party/bzip2:libbz2",
-    "//third_party/openssl:libcrypto_static",
   ]
+
+  external_deps = [
+    "bounds_checking_function:libsec_static",
+    "bzip2:libbz2",
+    "openssl:libcrypto_static",
+  ]
+
   configs = [ ":diff_config" ]
 
   subsystem_name = "updater"

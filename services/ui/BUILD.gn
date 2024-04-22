@@ -77,9 +77,6 @@ ohos_static_library("libui") {
   ]
 
   include_dirs = [
-    "//third_party/libpng",
-    "//third_party/libdrm/include/drm",
-    "//third_party/libdrm",
     "${updater_path}/services/common",
     "${updater_path}/services/include/log",
     "${updater_path}/services/include",
@@ -99,16 +96,19 @@ ohos_static_library("libui") {
     "${updater_path}/interfaces/kits/packages:libpackageExt",
     "${updater_path}/services/log:libupdaterlog",
     "${updater_path}/utils:libutils",
-    "//third_party/bounds_checking_function:libsec_static",
-    "//third_party/cJSON:cjson",
-    "//third_party/libdrm:libdrm",
-    "//third_party/libpng:libpng",
+  ]
+
+  external_deps = [
+    "bounds_checking_function:libsec_static",
+    "cJSON:cjson",
+    "libdrm:libdrm",
+    "libpng:libpng",
   ]
 
   if (!updater_ui_support) {
     sources = []
   } else {
-    external_deps = [
+    external_deps += [
       "drivers_peripheral_input:hdi_input",
       "ui_lite:libupdater_layout",
     ]

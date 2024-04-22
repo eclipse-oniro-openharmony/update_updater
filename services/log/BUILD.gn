@@ -37,15 +37,17 @@ ohos_shared_library("libupdaterlog_shared") {
   include_dirs = [
     "${updater_path}/services/include",
     "${updater_path}/utils/include",
-    "//third_party/bounds_checking_function/include",
   ]
 
   public_configs = [ ":log_config" ]
+
+  external_deps = [ "bounds_checking_function:libsec_static" ]
+
   if (!is_linux && !is_mingw && !is_mac) {
-    external_deps = [ "hilog:libhilog_base" ]
+    external_deps += [ "hilog:libhilog_base" ]
   }
 
-  deps = [ "//third_party/bounds_checking_function:libsec_static" ]
+  deps = []
 
   innerapi_tags = [
     "platformsdk",
@@ -70,15 +72,17 @@ ohos_static_library("libupdaterlog") {
   include_dirs = [
     "${updater_path}/services/include",
     "${updater_path}/utils/include",
-    "//third_party/bounds_checking_function/include",
   ]
 
   public_configs = [ ":log_config" ]
+
+  external_deps = [ "bounds_checking_function:libsec_static" ]
+
   if (!is_linux && !is_mingw && !is_mac) {
-    external_deps = [ "hilog:libhilog_base" ]
+    external_deps += [ "hilog:libhilog_base" ]
   }
 
-  deps = [ "//third_party/bounds_checking_function:libsec_static" ]
+  deps = []
   subsystem_name = "updater"
   part_name = "updater"
 }

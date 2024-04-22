@@ -47,7 +47,6 @@ config("script_config") {
     "${updater_path}/services/include/script",
     "${updater_path}/services/include/updater",
     "${updater_path}/utils/include",
-    "//third_party/bounds_checking_function/include",
     "script_instruction",
     "script_interpreter",
     "script_manager",
@@ -111,11 +110,13 @@ ohos_static_library("libupdaterscript") {
 
   public_configs = [ ":libupdaterscript_exported_headers" ]
 
-  external_deps = [ "c_utils:utils" ]
+  external_deps = [
+    "bounds_checking_function:libsec_static",
+    "c_utils:utils",
+  ]
   deps = [
     "${updater_path}/services/script:gen_yacc",
     "${updater_path}/services/script:libthreadpool",
-    "//third_party/bounds_checking_function:libsec_static",
   ]
 
   subsystem_name = "updater"

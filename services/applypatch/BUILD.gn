@@ -39,22 +39,22 @@ ohos_static_library("libapplypatch") {
     "${updater_path}/utils/include",
     "${updater_path}/interfaces/kits/include",
     "${updater_path}/services/include/script",
-    "//third_party/zlib",
-    "//third_party/external/lz4/lib",
     "${updater_path}/services/include/package",
     "${updater_path}/services/include/log",
-    "//third_party/bounds_checking_function/include",
   ]
 
   deps = [
     "${updater_path}/services/diffpatch/patch:libpatch",
     "${updater_path}/services/fs_manager:libfsmanager",
     "${updater_path}/services/script:libthreadpool",
-    "//third_party/bounds_checking_function:libsec_static",
-    "//third_party/bzip2:libbz2",
-    "//third_party/openssl:libcrypto_static",
   ]
-  external_deps = [ "init:libbegetutil" ]
+  external_deps = [
+    "bounds_checking_function:libsec_static",
+    "bzip2:libbz2",
+    "init:libbegetutil",
+    "openssl:libcrypto_static",
+    "zlib:shared_libz",
+  ]
   subsystem_name = "updater"
   part_name = "updater"
 }

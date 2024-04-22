@@ -27,14 +27,13 @@ ohos_static_library("libsdupdate") {
     "${updater_path}/services/ui",
     "${updater_path}/services/ui/include",
     "${updater_path}/utils/include",
-    "//third_party/bounds_checking_function/include",
   ]
 
-  deps = [
-    "${updater_path}/utils:libutils",
-    "//third_party/bounds_checking_function:libsec_static",
+  deps = [ "${updater_path}/utils:libutils" ]
+  external_deps = [
+    "bounds_checking_function:libsec_static",
+    "init:libbegetutil",
   ]
-  external_deps = [ "init:libbegetutil" ]
   subsystem_name = "updater"
   part_name = "updater"
 }

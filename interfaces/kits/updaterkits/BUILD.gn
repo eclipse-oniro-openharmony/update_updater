@@ -23,7 +23,6 @@ ohos_shared_library("libupdater_shared") {
     "../include",
     "${updater_path}/services/include/log",
     "${updater_path}/utils/include",
-    "//third_party/bounds_checking_function/include",
   ]
 
   deps = [
@@ -31,14 +30,16 @@ ohos_shared_library("libupdater_shared") {
     "${updater_path}/services/log:libupdaterlog",
     "${updater_path}/utils:libutils_common",
     "${updater_path}/utils:libutils_fs",
-    "//third_party/bounds_checking_function:libsec_shared",
-    "//third_party/lz4:liblz4_static",
-    "//third_party/openssl:libcrypto_shared",
-    "//third_party/openssl:libssl_shared",
-    "//third_party/zlib:shared_libz",
   ]
 
-  external_deps = [ "init:libbegetutil" ]
+  external_deps = [
+    "bounds_checking_function:libsec_shared",
+    "init:libbegetutil",
+    "lz4:liblz4_static",
+    "openssl:libcrypto_shared",
+    "openssl:libssl_shared",
+    "zlib:shared_libz",
+  ]
 
   innerapi_tags = [
     "platformsdk",
@@ -61,17 +62,18 @@ ohos_static_library("libupdaterkits") {
     "../include",
     "${updater_path}/services/include/log",
     "${updater_path}/utils/include",
-    "//third_party/bounds_checking_function/include",
   ]
 
   deps = [
     "${updater_path}/services/log:libupdaterlog",
     "${updater_path}/utils:libutils",
     "../misc_info:libmiscinfo",
-    "//third_party/bounds_checking_function:libsec_static",
   ]
 
-  external_deps = [ "init:libbegetutil" ]
+  external_deps = [
+    "bounds_checking_function:libsec_static",
+    "init:libbegetutil",
+  ]
   subsystem_name = "updater"
   part_name = "updater"
 }

@@ -95,14 +95,15 @@ ohos_static_library("flashd_deamon") {
 
   configs = [ ":flashd_hdc_config" ]
 
-  external_deps = [ "c_utils:utils" ]
-  deps = [
-    "//third_party/libuv:uv",
-    "//third_party/lz4:liblz4_static",
-    "//third_party/openssl:libcrypto_shared",
+  external_deps = [
+    "bounds_checking_function:libsec_shared",
+    "c_utils:utils",
+    "libuv:uv",
+    "lz4:liblz4_static",
+    "openssl:libcrypto_shared",
   ]
 
-  deps += [ "${updater_path}/services/flashd:hdc_hash_gen" ]
+  deps = [ "${updater_path}/services/flashd:hdc_hash_gen" ]
 
   if (use_musl) {
     external_deps += [ "init:libbegetutil" ]
@@ -124,14 +125,10 @@ ohos_static_library("flashd_deamon") {
     "${updater_path}/services/include/log",
     "${updater_path}/interfaces/kits/include",
     "${updater_path}/utils/include",
-    "//third_party/bounds_checking_function/include",
-    "//third_party/lz4/lib",
-    "//third_party/libuv",
   ]
 
   if (build_selinux) {
-    deps += [ "//third_party/selinux:libselinux" ]
-    include_dirs += [ "//third_party/selinux/libselinux/include" ]
+    external_deps += [ "selinux:libselinux" ]
     defines += [
       "SURPPORT_SELINUX",
       "UPDATER_MODE",
@@ -187,12 +184,6 @@ ohos_static_library("libflashd") {
     "${updater_path}/services/package:libupdaterpackage",
     "${updater_path}/services/script:libupdaterscript",
     "${updater_path}/utils:libutils",
-    "//third_party/bzip2:libbz2",
-    "//third_party/cJSON:cjson",
-    "//third_party/libuv:uv",
-    "//third_party/lz4:liblz4_static",
-    "//third_party/openssl:libcrypto_shared",
-    "//third_party/zlib:libz",
   ]
 
   include_dirs = [
@@ -213,17 +204,7 @@ ohos_static_library("libflashd") {
     "${updater_path}/services/ptable_parse",
     "${updater_path}/utils/include",
     "${updater_path}/utils/json",
-    "//third_party/bounds_checking_function/include",
-    "//third_party/cJSON",
-    "//third_party/lz4/lib",
-    "//third_party/libuv",
   ]
-
-  if (build_selinux) {
-    deps += [ "//third_party/selinux:libselinux" ]
-    include_dirs += [ "//third_party/selinux/libselinux/include" ]
-    defines += [ "SURPPORT_SELINUX" ]
-  }
 
   if (defined(use_ptable)) {
     include_dirs += [ "${updater_path}/services/ptable_parse" ]
@@ -232,9 +213,21 @@ ohos_static_library("libflashd") {
   }
 
   external_deps = [
+    "bounds_checking_function:libsec_shared",
+    "bzip2:libbz2",
+    "cJSON:cjson",
     "c_utils:utils",
     "init:libbegetutil",
+    "libuv:uv",
+    "lz4:liblz4_static",
+    "openssl:libcrypto_shared",
+    "zlib:libz",
   ]
+
+  if (build_selinux) {
+    external_deps += [ "selinux:libselinux" ]
+    defines += [ "SURPPORT_SELINUX" ]
+  }
 
   if (defined(binary_custom_external_deps)) {
     external_deps += binary_custom_external_deps
