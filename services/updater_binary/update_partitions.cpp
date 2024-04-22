@@ -29,16 +29,16 @@ using namespace Updater;
 constexpr int MIN_PARTITIONS_NUM = 2;
 constexpr int MAX_PARTITIONS_NUM = 20;
 namespace Updater {
-static bool CheckValueInt(const cJson *item)
+static bool CheckValueInt(const cJSON *item)
 {
-    if (item == nullptr || item->valueint < 0 || item->valueint >= std::npos) {
+    if (item == nullptr || item->valueint < 0 || item->valueint >= std::string::npos) {
         LOG(ERROR) << "Error get valueint";
         return false;
     }
     return true;
 }
 
-static bool CheckValueString(const cJson *item)
+static bool CheckValueString(const cJSON *item)
 {
     if (item == nullptr || strlen(item->valuestring) == 0) {
         LOG(ERROR) << "Error get valuestring";
