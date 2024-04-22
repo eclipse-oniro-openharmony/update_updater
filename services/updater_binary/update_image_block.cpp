@@ -354,7 +354,7 @@ static int32_t ExecuteUpdateBlock(Uscript::UScriptEnv &env, Uscript::UScriptCont
                           transferListBuffer, transferListSize) != USCRIPT_SUCCESS) {
         return USCRIPT_ERROR_EXECUTE;
     }
-     
+    
     std::unique_ptr<TransferManager> tm = std::make_unique<TransferManager>();
 
     auto transferParams = tm->GetTransferParams();
