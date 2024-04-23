@@ -73,7 +73,7 @@ ohos_static_library("libupdater_binary") {
   }
 
   external_deps = [
-    "bounds_checking_function:libsec_shared",
+    "bounds_checking_function:libsec_static",
     "bzip2:libbz2",
     "cJSON:cjson_static",
     "init:libbegetutil",

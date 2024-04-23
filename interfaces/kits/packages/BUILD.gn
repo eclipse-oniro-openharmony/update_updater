@@ -88,7 +88,7 @@ ohos_static_library("libpackageExt") {
     "lz4:liblz4_static",
     "openssl:libcrypto_shared",
     "openssl:libssl_shared",
-    "zlib:shared_libz",
+    "zlib:libz",
   ]
   subsystem_name = "updater"
   part_name = "updater"

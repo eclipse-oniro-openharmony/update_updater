@@ -96,7 +96,7 @@ ohos_static_library("flashd_deamon") {
   configs = [ ":flashd_hdc_config" ]
 
   external_deps = [
-    "bounds_checking_function:libsec_shared",
+    "bounds_checking_function:libsec_static",
     "c_utils:utils",
     "libuv:uv",
     "lz4:liblz4_static",
@@ -213,7 +213,7 @@ ohos_static_library("libflashd") {
   }
 
   external_deps = [
-    "bounds_checking_function:libsec_shared",
+    "bounds_checking_function:libsec_static",
     "bzip2:libbz2",
     "cJSON:cjson",
     "c_utils:utils",

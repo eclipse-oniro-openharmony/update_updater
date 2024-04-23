@@ -53,7 +53,7 @@ ohos_static_library("libapplypatch") {
     "bzip2:libbz2",
     "init:libbegetutil",
     "openssl:libcrypto_static",
-    "zlib:shared_libz",
+    "zlib:libz",
   ]
   subsystem_name = "updater"
   part_name = "updater"

@@ -57,7 +57,7 @@ ohos_static_library("libptableparse") {
   ]
 
   external_deps = [
-    "bounds_checking_function:libsec_shared",
+    "bounds_checking_function:libsec_static",
     "bzip2:libbz2",
     "cJSON:cjson",
     "zlib:libz",
