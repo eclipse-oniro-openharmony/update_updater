@@ -55,7 +55,12 @@ JsonNode::JsonNode(const Fs::path &path)
     // get root node
     std::string content {std::istreambuf_iterator<char> {ifs}, {}};
     cJSON *root = cJSON_Parse(content.c_str());
-    if (root == nullptr || cJSON_IsInvalid(root)) {
+    if (root == nullptr) {
+        LOG(ERROR) << " root node is null";
+        return;
+    }
+    if (cJSON_IsInvalid(root)) {
+        cJSON_Delete(root);
         LOG(ERROR) << path << " contained json invalid";
         return;
     }
