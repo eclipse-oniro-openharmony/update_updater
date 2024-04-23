@@ -31,7 +31,7 @@ constexpr int MAX_PARTITIONS_NUM = 20;
 namespace Updater {
 static bool CheckValueInt(const cJSON *item)
 {
-    if (item == nullptr || item->valueint < 0 || item->valueint >= std::string::npos) {
+    if (item == nullptr || !cJSON_IsNumber(item)) {
         LOG(ERROR) << "Error get valueint";
         return false;
     }
@@ -40,7 +40,7 @@ static bool CheckValueInt(const cJSON *item)
 
 static bool CheckValueString(const cJSON *item)
 {
-    if (item == nullptr || strlen(item->valuestring) == 0) {
+    if (item == nullptr || !cJSON_IsString(item) || strlen(item->valuestring) == 0) {
         LOG(ERROR) << "Error get valuestring";
         return false;
     }
