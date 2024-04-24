@@ -17,12 +17,14 @@
 
 #include <atomic>
 #include <linux/input.h>
+#include <string>
 #include "input_manager.h"
 #include "macros.h"
 #include "dock/key_input_device.h"
 #include "events/key_event.h"
 
 namespace Updater {
+static constexpr auto LONG_PRESS_POWER_ONLY_TYPE = "power";
 class KeysInputDevice : public OHOS::KeyInputDevice {
     DISALLOW_COPY_MOVE(KeysInputDevice);
 public:
@@ -31,7 +33,7 @@ public:
     static KeysInputDevice &GetInstance();
     bool Read(OHOS::DeviceData &data) override;
     int HandleKeyEvent(const input_event &ev, uint32_t type);
-
+    void SetLongPressType(const std::string &type);
 private:
     void PowerVolumeDownPress(const input_event &ev);
     void OnLongKeyPressUp();
@@ -40,6 +42,7 @@ private:
     uint16_t lastKeyId_ { 0 };
     uint16_t keyState_ = OHOS::INVALID_KEY_STATE;
     std::atomic<bool> timerStop_ {false};
+    std::string type_;
 };
 } // namespace Updater
 #endif // UPDATER_UI_KEYS_INPUT_DEVICE_H
