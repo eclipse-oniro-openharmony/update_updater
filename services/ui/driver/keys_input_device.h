@@ -24,7 +24,7 @@
 #include "events/key_event.h"
 
 namespace Updater {
-static constexpr auto LONG_PRESS_POWER_ONLY_TYPE = "power";
+constexpr auto LONG_PRESS_POWER_ONLY_TYPE = "power";
 class KeysInputDevice : public OHOS::KeyInputDevice {
     DISALLOW_COPY_MOVE(KeysInputDevice);
 public:
