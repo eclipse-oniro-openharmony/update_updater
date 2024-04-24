@@ -67,6 +67,10 @@ void KeysInputDevice::OnLongKeyPressUp()
     UpdaterEvent::Invoke(UPDATER_POWER_VOLUME_UP_EVENT);
 }
 
+/*
+ * LONG_PRESS_POWER_ONLY_TYPE : press power key to show long press warning
+ * others : press power key and volume key to show long press warning
+ */
 void KeysInputDevice::SetLongPressType(const std::string &type)
 {
     type_ = type;
