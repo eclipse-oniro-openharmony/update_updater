@@ -42,7 +42,7 @@ bool WriteUpdaterMessage(const std::string &path, const UpdateMessage &boot)
         return false;
     }
     if (fsync(fileno(fp)) == -1) {
-         LOG(ERROR) << "WriteUpdaterMessage fsync failed" << " : " << strerror(errno);
+        LOG(ERROR) << "WriteUpdaterMessage fsync failed" << " : " << strerror(errno);
     }
 
     int res = fclose(fp);
@@ -141,7 +141,7 @@ bool WriteUpdaterParaMisc(const UpdaterPara &para)
     }
 
     if (fsync(fileno(fp)) == -1) {
-         LOG(ERROR) << "WriteUpdaterParaMisc fsync failed" << " : " << strerror(errno);
+        LOG(ERROR) << "WriteUpdaterParaMisc fsync failed" << " : " << strerror(errno);
     }
 
     if (fclose(fp) != 0) {
