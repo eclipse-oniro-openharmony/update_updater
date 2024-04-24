@@ -36,6 +36,7 @@ public:
     void SetLongPressType(const std::string &type);
 private:
     void PowerVolumeDownPress(const input_event &ev);
+    void PowerDownPress(const input_event &ev);
     void OnLongKeyPressUp();
     void OnLongKeyPressDown();
     /* for KeysInputDevice */
