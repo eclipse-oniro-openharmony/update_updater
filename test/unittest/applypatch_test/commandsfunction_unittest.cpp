@@ -90,7 +90,7 @@ HWTEST_F(CommandFunctionUnitTest, command_function_test_001, TestSize.Level1)
     cmdLine = R"(bsdiff 0 132 ad7facb2586fc6e966c004d7d1d16b024f5805ff7cb4
     7c7a85dabd8b48892ca7 3431383721510cf1c211de027cf958c183e16db5fabb6b230
     eb284c85e196aa9 2,0,1 1 - ad7facb2586fc6e966c004d7d1d16b024f5805ff7cb4
-    7c7a85dabd8b48892ca7:2,0,1)";
+    7c7a85dabd8b48892ca7 : 2,0,1)";
     lseek64(fd, 0, SEEK_SET);
     ret = CommandFunctionUnitTest::TestCommandFnExec(cmd, cmdLine);
     EXPECT_EQ(ret, -1);

@@ -147,7 +147,7 @@ int32_t CheckFile(const std::string &fileName, int type)
     }
     int ret = -1;
     if (type == PkgStream::PkgStreamType_Read) {
-        ret = access(path.c_str(), R_OK );
+        ret = access(path.c_str(), R_OK);
     } else {
         ret = access(path.c_str(), R_OK | W_OK);
     }

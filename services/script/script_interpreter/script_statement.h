@@ -130,8 +130,8 @@ public:
 
 class UScriptExpressionStatement : public UScriptStatement {
 public:
-    explicit UScriptExpressionStatement(UScriptExpression *expression) :
-        UScriptStatement(STATEMENT_TYPE_EXPRESSION), expression_(expression) {}
+    explicit UScriptExpressionStatement(UScriptExpression *expression)
+        : UScriptStatement(STATEMENT_TYPE_EXPRESSION), expression_(expression) {}
     ~UScriptExpressionStatement() override;
     UScriptStatementResult Execute(ScriptInterpreter &interpreter, UScriptContextPtr context) override;
 private:
@@ -179,8 +179,8 @@ private:
 
 class UScriptWhileStatement : public UScriptStatement {
 public:
-    UScriptWhileStatement(UScriptExpression *condition, UScriptStatementList *statements) :
-        UScriptStatement(STATEMENT_TYPE_WHILE), condition_(condition), statements_(statements) {}
+    UScriptWhileStatement(UScriptExpression *condition, UScriptStatementList *statements)
+        : UScriptStatement(STATEMENT_TYPE_WHILE), condition_(condition), statements_(statements) {}
 
     ~UScriptWhileStatement() override;
     UScriptStatementResult Execute(ScriptInterpreter &interpreter, UScriptContextPtr context) override;
