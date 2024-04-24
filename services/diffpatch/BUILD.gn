@@ -58,19 +58,19 @@ ohos_executable("diff") {
     "${updater_path}/services/diffpatch",
     "${updater_path}/services/package/pkg_manager",
     "${updater_path}/services/include/log",
-    "//third_party/bounds_checking_function/include",
-    "//third_party/bzip2",
-    "//third_party/zlib",
-    "//third_party/lz4/lib",
   ]
 
   deps = [
     "${updater_path}/services/log:libupdaterlog",
     "${updater_path}/services/package:libupdaterpackage",
-    "//third_party/bzip2:libbz2",
-    "//third_party/lz4:liblz4_static",
-    "//third_party/openssl:libcrypto_static",
-    "//third_party/zlib:libz",
+  ]
+
+  external_deps = [
+    "bounds_checking_function:libsec_static",
+    "bzip2:libbz2",
+    "lz4:liblz4_static",
+    "openssl:libcrypto_static",
+    "zlib:libz",
   ]
 
   if (is_mingw) {

@@ -23,7 +23,6 @@ config("updater_config") {
     "${updater_path}/services/include",
     "${updater_path}/utils/include",
     "${updater_path}/utils/json",
-    "//third_party/bounds_checking_function/include",
     "${updater_path}/interfaces/kits/include/",
     "${updater_path}/services/include/script",
     "${updater_path}/services/include/package",
@@ -55,9 +54,13 @@ ohos_static_library("libptableparse") {
   deps = [
     "${updater_path}/services/log:libupdaterlog",
     "${updater_path}/utils:libutils",
-    "//third_party/bzip2:libbz2",
-    "//third_party/cJSON:cjson",
-    "//third_party/zlib:libz",
+  ]
+
+  external_deps = [
+    "bounds_checking_function:libsec_static",
+    "bzip2:libbz2",
+    "cJSON:cjson",
+    "zlib:libz",
   ]
 
   part_name = "updater"

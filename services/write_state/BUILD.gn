@@ -27,8 +27,10 @@ ohos_static_library("libwritestate") {
     "${updater_path}/services/ui",
     "${updater_path}/services/ui/include",
     "${updater_path}/utils/include",
-    "//third_party/bounds_checking_function/include",
   ]
+
+  external_deps = [ "bounds_checking_function:libsec_static" ]
+
   subsystem_name = "updater"
   part_name = "updater"
 }

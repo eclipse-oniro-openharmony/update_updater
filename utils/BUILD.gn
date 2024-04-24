@@ -39,22 +39,22 @@ ohos_static_library("libutils") {
     "${updater_path}/interfaces/kits/include/",
     "${updater_path}/services/common/",
     "${updater_path}/services/include/",
-    "//third_party/bounds_checking_function/include",
-    "//third_party/cJSON",
   ]
 
   public_configs = [ ":libutils_exported_headers" ]
 
-  deps = [
-    "//third_party/bounds_checking_function:libsec_static",
-    "//third_party/cJSON:cjson",
+  deps = []
+  external_deps = [
+    "bounds_checking_function:libsec_static",
+    "cJSON:cjson",
+    "init:libbegetutil",
   ]
-  external_deps = [ "init:libbegetutil" ]
 
   if (build_selinux) {
-    external_deps += [ "selinux_adapter:librestorecon" ]
-    deps += [ "//third_party/selinux:libselinux" ]
-    include_dirs += [ "//third_party/selinux/libselinux/include" ]
+    external_deps += [
+      "selinux:libselinux",
+      "selinux_adapter:librestorecon",
+    ]
     cflags = [ "-DWITH_SELINUX" ]
   }
 
@@ -113,14 +113,13 @@ ohos_executable("write_updater") {
     "include",
     "${updater_path}/interfaces/kits/include/",
     "${updater_path}/services/include/",
-    "//third_party/bounds_checking_function/include",
   ]
 
-  deps = [
-    "${updater_path}/interfaces/kits/misc_info:libmiscinfo",
-    "//third_party/bounds_checking_function:libsec_static",
+  deps = [ "${updater_path}/interfaces/kits/misc_info:libmiscinfo" ]
+  external_deps = [
+    "bounds_checking_function:libsec_static",
+    "init:libbegetutil",
   ]
-  external_deps = [ "init:libbegetutil" ]
 
   install_enable = true
   part_name = "updater"

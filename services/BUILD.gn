@@ -26,7 +26,6 @@ updater_common_include = [
   "${updater_path}/services/package/pkg_verify",
   "${updater_path}/services/include/log",
   "${updater_path}/utils/json",
-  "//third_party/bounds_checking_function/include",
   ".",
   "./ui/include",
   "./ui",
@@ -42,13 +41,6 @@ updater_common_deps = [
   "${updater_path}/services/log:libupdaterlog",
   "${updater_path}/services/package:libupdaterpackage",
   "${updater_path}/services/write_state:libwritestate",
-  "//third_party/bounds_checking_function:libsec_shared",
-  "//third_party/bounds_checking_function:libsec_static",
-  "//third_party/bzip2:libbz2",
-  "//third_party/cJSON:cjson",
-  "//third_party/openssl:libcrypto_shared",
-  "//third_party/openssl:libssl_shared",
-  "//third_party/zlib:libz",
 ]
 
 updater_gen("updater") {
@@ -88,8 +80,6 @@ ohos_static_library("libupdater_static") {
     "${updater_path}/interfaces/kits/misc_info:libmiscinfo",
     "${updater_path}/services/sdcard_update:libsdupdate",
     "${updater_path}/services/ui:libui",
-    "//third_party/libdrm:libdrm",
-    "//third_party/openssl:libcrypto_shared",
   ]
 
   if (defined(use_ptable)) {
@@ -98,7 +88,17 @@ ohos_static_library("libupdater_static") {
     defines += [ "UPDATER_USE_PTABLE" ]
   }
 
-  external_deps = [ "init:libbegetutil" ]
+  external_deps = [
+    "bounds_checking_function:libsec_shared",
+    "bounds_checking_function:libsec_static",
+    "bzip2:libbz2",
+    "cJSON:cjson",
+    "init:libbegetutil",
+    "libdrm:libdrm",
+    "openssl:libcrypto_shared",
+    "openssl:libssl_shared",
+    "zlib:libz",
+  ]
   if (updater_ui_support) {
     external_deps += [ "drivers_peripheral_input:hdi_input_udriver" ]
   }
@@ -108,9 +108,10 @@ ohos_static_library("libupdater_static") {
   }
 
   if (build_selinux) {
-    external_deps += [ "selinux_adapter:librestorecon" ]
-    deps += [ "//third_party/selinux:libselinux" ]
-    include_dirs += [ "//third_party/selinux/libselinux/include" ]
+    external_deps += [
+      "selinux:libselinux",
+      "selinux_adapter:librestorecon",
+    ]
     cflags = [ "-DWITH_SELINUX" ]
   }
 
@@ -164,7 +165,16 @@ ohos_static_library("libupdater") {
     ldflags += [ "-Wl,--no-whole-archive" ]
   }
 
-  external_deps = [ "init:libbegetutil" ]
+  external_deps = [
+    "bounds_checking_function:libsec_shared",
+    "bounds_checking_function:libsec_static",
+    "bzip2:libbz2",
+    "cJSON:cjson",
+    "init:libbegetutil",
+    "openssl:libcrypto_shared",
+    "openssl:libssl_shared",
+    "zlib:libz",
+  ]
 
   # add updater custom library
   if (defined(updater_custom_external_deps)) {
@@ -180,9 +190,10 @@ ohos_static_library("libupdater") {
   }
 
   if (build_selinux) {
-    external_deps += [ "selinux_adapter:librestorecon" ]
-    deps += [ "//third_party/selinux:libselinux" ]
-    include_dirs += [ "//third_party/selinux/libselinux/include" ]
+    external_deps += [
+      "selinux:libselinux",
+      "selinux_adapter:librestorecon",
+    ]
     cflags = [ "-DWITH_SELINUX" ]
   }
 

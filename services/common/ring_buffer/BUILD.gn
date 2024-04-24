@@ -31,10 +31,9 @@ ohos_static_library("libringbuffer") {
     "${updater_path}/services/include/log",
     "${updater_path}/utils/include",
   ]
-  deps = [
-    "${updater_path}/services/log:libupdaterlog",
-    "//third_party/bounds_checking_function:libsec_static",
-  ]
+  deps = [ "${updater_path}/services/log:libupdaterlog" ]
+
+  external_deps = [ "bounds_checking_function:libsec_static" ]
 
   public_configs = [ ":libringbuffer_exported_headers" ]
 

@@ -33,10 +33,6 @@ config("patch_config") {
     "${updater_path}/services/diffpatch/patch",
     "${updater_path}/services/diffpatch",
     "${updater_path}/services/package/pkg_manager",
-    "//third_party/bounds_checking_function/include",
-    "//third_party/bzip2",
-    "//third_party/zlib",
-    "//third_party/lz4/lib",
   ]
   defines = [ "OPENSSL_SUPPRESS_DEPRECATED" ]
 }
@@ -55,11 +51,14 @@ ohos_static_library("libpatch") {
   deps = [
     "${updater_path}/services/log:libupdaterlog",
     "${updater_path}/services/package:libupdaterpackage",
-    "//third_party/bounds_checking_function:libsec_static",
-    "//third_party/bzip2:libbz2",
-    "//third_party/lz4:liblz4_static",
-    "//third_party/openssl:libcrypto_static",
-    "//third_party/zlib:libz",
+  ]
+
+  external_deps = [
+    "bounds_checking_function:libsec_static",
+    "bzip2:libbz2",
+    "lz4:liblz4_static",
+    "openssl:libcrypto_static",
+    "zlib:libz",
   ]
 
   configs = [ ":patch_config" ]

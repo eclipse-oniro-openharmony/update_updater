@@ -54,20 +54,19 @@
                 "c_utils",
                 "hilog",
                 "selinux_adapter",
-                "ui_lite"
-            ],
-            "third_party": [
+                "ui_lite",
                 "bounds_checking_function",
                 "bzip2",
+                "cJSON",
                 "libdrm",
+                "libpng",
+                "libuv",
                 "lz4",
                 "openssl",
-                "zlib",
-                "libuv",
-                "cJSON",
-                "libpng",
-                "selinux"
-            ]
+                "selinux",
+                "zlib"
+            ],
+            "third_party": []
         },
         "build": {
             "sub_component": [
