@@ -222,15 +222,15 @@ UScriptStatementResult UScriptForStatement::Execute(ScriptInterpreter &interpret
     return result;
 }
 
-UScriptStatementResult UScriptWhileStatement::Execute(ScriptInterpreter &interpreter, UScriptContextPtr local)
+UScriptStatementResult UScriptWhileStatement::Execute(ScriptInterpreter &interpreter, UScriptContextPtr context)
 {
-    INTERPRETER_LOGI(interpreter, local, "UScriptStatementResult::statement ");
+    INTERPRETER_LOGI(interpreter, context, "UScriptStatementResult::statement ");
     UScriptStatementResult result(UScriptStatementResult::STATEMENT_RESULT_TYPE_NORMAL, nullptr);
     while (1) {
         if (condition_ != nullptr) {
-            UScriptValuePtr v = condition_->Execute(interpreter, local);
+            UScriptValuePtr v = condition_->Execute(interpreter, context);
             if (v == nullptr || v->GetValueType() == UScriptValue::VALUE_TYPE_ERROR) {
-                INTERPRETER_LOGE(interpreter, local, "Execute while condition failed: %s",
+                INTERPRETER_LOGE(interpreter, context, "Execute while condition failed: %s",
                     UScriptValue::ScriptToString(v).c_str());
                 result.SetResultType(UScriptStatementResult::STATEMENT_RESULT_TYPE_ERROR);
                 result.SetError(USCRIPT_INVALID_PARAM);
@@ -240,8 +240,8 @@ UScriptStatementResult UScriptWhileStatement::Execute(ScriptInterpreter &interpr
                 break;
             }
         }
-        UScriptStatementResult centerResult = statements_->Execute(interpreter, local);
-        INTERPRETER_LOGI(interpreter, local, "Execute statements result %s ",
+        UScriptStatementResult centerResult = statements_->Execute(interpreter, context);
+        INTERPRETER_LOGI(interpreter, context, "Execute statements result %s ",
             UScriptStatementResult::ScriptToString(&centerResult).c_str());
         if (centerResult.GetResultType() == UScriptStatementResult::STATEMENT_RESULT_TYPE_BREAK) {
             break;
@@ -284,13 +284,13 @@ UScriptStatementResult UScriptIfStatement::Execute(ScriptInterpreter &interprete
     return result;
 }
 
-UScriptStatementResult UScriptStatementList::Execute(ScriptInterpreter &inter, UScriptContextPtr context)
+UScriptStatementResult UScriptStatementList::Execute(ScriptInterpreter &interpreter, UScriptContextPtr context)
 {
-    INTERPRETER_LOGI(inter, context, "UScriptStatementList::Execute ");
-    inter.ContextPush(context);
+    INTERPRETER_LOGI(interpreter, context, "UScriptStatementList::Execute ");
+    interpreter.ContextPush(context);
     UScriptStatementResult result(UScriptStatementResult::STATEMENT_RESULT_TYPE_NORMAL, nullptr);
     for (auto statement : statements_) {
-        result = statement->Execute(inter, context);
+        result = statement->Execute(interpreter, context);
         if (result.GetResultType() == UScriptStatementResult::STATEMENT_RESULT_TYPE_BREAK) {
             break;
         } else if (result.GetResultType() == UScriptStatementResult::STATEMENT_RESULT_TYPE_CONTINUE) {
@@ -301,8 +301,8 @@ UScriptStatementResult UScriptStatementList::Execute(ScriptInterpreter &inter, U
             break;
         }
     }
-    inter.ContextPop();
-    INTERPRETER_LOGI(inter, context, "UScriptStatementList finish %s",
+    interpreter.ContextPop();
+    INTERPRETER_LOGI(interpreter, context, "UScriptStatementList finish %s",
         UScriptStatementResult::ScriptToString(&result).c_str());
     return result;
 }

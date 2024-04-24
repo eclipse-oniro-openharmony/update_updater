@@ -36,7 +36,7 @@ static std::ofstream g_nullStream;
 static std::string g_logTag;
 static int g_logLevel = INFO;
 #ifndef DIFF_PATCH_SDK
-static const unsigned int g_domain = 0XD002E01;
+static constexpr unsigned int UPDATER_DOMAIN = 0XD002E01;
 #endif
 
 void InitUpdaterLogger(const std::string &tag, const std::string &logFile, const std::string &stageFile,
@@ -56,7 +56,7 @@ UpdaterLogger::~UpdaterLogger()
     }
     pid_t tid = 0;
 #ifndef DIFF_PATCH_SDK
-    HiLogBasePrint(LOG_CORE, (LogLevel)level_, g_domain, g_logTag.c_str(), "%{public}s", str.c_str());
+    HiLogBasePrint(LOG_CORE, (LogLevel)level_, UPDATER_DOMAIN, g_logTag.c_str(), "%{public}s", str.c_str());
     tid = gettid();
 #endif
     oss_.str("");

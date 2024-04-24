@@ -53,10 +53,10 @@ void ThreadPool::Destroy()
     g_threadPool = nullptr;
 }
 
-void ThreadPool::Init(int32_t numberThread)
+void ThreadPool::Init(int32_t number)
 {
-    threadNumber_ = numberThread;
-    taskQueue_.resize(THREAD_POOL_MAX_TASKS);
+    threadNumber_ = number;
+    taskQueue_.resize(threadPoolMaxTasks);
     for (size_t t = 0; t < taskQueue_.size(); ++t) {
         taskQueue_[t].available = true;
         for (int32_t i = 0; i < threadNumber_; ++i) {
@@ -73,7 +73,7 @@ void ThreadPool::ThreadRun(int32_t threadIndex)
 {
     USCRIPT_LOGI("Create new thread successfully, tid: %d", gettid());
     while (!stop_) {
-        for (int32_t k = 0; k < THREAD_POOL_MAX_TASKS; ++k) {
+        for (int32_t k = 0; k < threadPoolMaxTasks; ++k) {
             if (*taskQueue_[k].subTaskFlag[threadIndex]) {
                 taskQueue_[k].task.processor(threadIndex);
                 *taskQueue_[k].subTaskFlag[threadIndex] = false;
@@ -123,7 +123,7 @@ void ThreadPool::AddNewTask(Task &&task)
 int32_t ThreadPool::AcquireWorkIndex()
 {
     std::lock_guard<std::mutex> lock(queueMutex_);
-    for (int32_t i = 0; i < THREAD_POOL_MAX_TASKS; ++i) {
+    for (int32_t i = 0; i < threadPoolMaxTasks; ++i) {
         if (taskQueue_[i].available) {
             taskQueue_[i].available = false;
             return i;

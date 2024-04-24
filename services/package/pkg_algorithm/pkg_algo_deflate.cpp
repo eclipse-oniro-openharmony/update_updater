@@ -166,18 +166,18 @@ int32_t PkgAlgoDeflate::UnpackCalculate(PkgAlgorithmContext &context, const PkgS
     PkgBuffer crcResult((uint8_t *)&crc, sizeof(crc));
     PkgAlgorithmContext unpackContext = context;
     size_t readLen = 0;
-    int32_t unpack_ret = Z_OK;
-    while ((unpackContext.packedSize > 0) || (unpack_ret != Z_STREAM_END)) {
+    int32_t unpackRet = Z_OK;
+    while ((unpackContext.packedSize > 0) || (unpackRet != Z_STREAM_END)) {
         if (ReadUnpackData(inStream, inBuffer, zstream, unpackContext, readLen) != PKG_SUCCESS) {
             break;
         }
-        unpack_ret = inflate(&zstream, Z_SYNC_FLUSH);
-        if (unpack_ret < Z_OK) {
-            PKG_LOGE("fail inflate ret:%d", unpack_ret);
+        unpackRet = inflate(&zstream, Z_SYNC_FLUSH);
+        if (unpackRet < Z_OK) {
+            PKG_LOGE("fail inflate ret:%d", unpackRet);
             break;
         }
 
-        if (zstream.avail_out == 0 || (unpack_ret == Z_STREAM_END && zstream.avail_out != INFLATE_OUT_BUFFER_SIZE)) {
+        if (zstream.avail_out == 0 || (unpackRet == Z_STREAM_END && zstream.avail_out != INFLATE_OUT_BUFFER_SIZE)) {
             inflateLen = outBuffer.length - zstream.avail_out;
             ret = outStream->Write(outBuffer, inflateLen, unpackContext.destOffset);
             if (ret != PKG_SUCCESS) {
@@ -191,7 +191,7 @@ int32_t PkgAlgoDeflate::UnpackCalculate(PkgAlgorithmContext &context, const PkgS
             algorithm->Calculate(crcResult, outBuffer, inflateLen);
         }
     }
-    return CalculateUnpackData(zstream, crc, unpack_ret, context, unpackContext);
+    return CalculateUnpackData(zstream, crc, unpackRet, context, unpackContext);
 }
 
 int32_t PkgAlgoDeflate::Unpack(const PkgStreamPtr inStream, const PkgStreamPtr outStream,

@@ -52,7 +52,7 @@ static void ParseParamsFuzzTest()
         return;
     }
     WriteUpdaterMessage(commandFile, boot);
-    char **argv = new char*[1];
+    char **argv = new char *[1];
     argv[0] = new char[MAX_ARG_SIZE];
     if (strncpy_s(argv[0], MAX_ARG_SIZE, "./main", MAX_ARG_SIZE) != 0) {
         return;
