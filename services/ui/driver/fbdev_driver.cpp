@@ -171,7 +171,7 @@ bool FbdevDriver::FbPowerContrl(int fd, bool powerOn)
     if (fd < 0) {
         return false;
     }
-    if (ioctl(fd, FBIOBLANK, powerOn ? FB_BLANK_UNBLANK: FB_BLANK_POWERDOWN) < 0) {
+    if (ioctl(fd, FBIOBLANK, powerOn ? FB_BLANK_UNBLANK : FB_BLANK_POWERDOWN) < 0) {
         LOG(ERROR) << "failed to set fb0 power " << powerOn;
         return false;
     }

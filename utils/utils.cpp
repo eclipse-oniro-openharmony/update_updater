@@ -669,7 +669,7 @@ std::vector<std::string> ParseParams(int argc, char **argv)
 bool CheckUpdateMode(const std::string &mode)
 {
     std::vector<std::string> args = ParseParams(0, nullptr);
-    for(const auto &arg : args) {
+    for (const auto &arg : args) {
         if (arg.find(mode) != std::string::npos) {
             return true;
         }

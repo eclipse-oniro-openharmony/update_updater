@@ -337,7 +337,7 @@ static UpdaterStatus PreUpdatePackages(UpdaterParams &upParams)
         LOG(INFO) << "delete last upgrade file";
     }
 
-    if(upParams.pkgLocation == upParams.updatePackage.size()) {
+    if (upParams.pkgLocation == upParams.updatePackage.size()) {
         LOG(WARNING) << "all package has been upgraded, skip pre process";
         return UPDATE_SUCCESS;
     }
