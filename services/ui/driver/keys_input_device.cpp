@@ -67,6 +67,29 @@ void KeysInputDevice::OnLongKeyPressUp()
     UpdaterEvent::Invoke(UPDATER_POWER_VOLUME_UP_EVENT);
 }
 
+/*
+ * LONG_PRESS_POWER_ONLY_TYPE : press power key to show long press warning
+ * others : press power key and volume key to show long press warning
+ */
+void KeysInputDevice::SetLongPressType(const std::string &type)
+{
+    type_ = type;
+}
+
+void KeysInputDevice::PowerDownPress(const input_event &ev)
+{
+    if (ev.code != KEY_POWER) {
+        return;
+    }
+    bool down = ev.value == EVENT_KEY_DOWN_VALUE;
+    LOG(INFO) << "power down " << ev.code;
+    if (down) {
+        OnLongKeyPressDown();
+    } else {
+        OnLongKeyPressUp();
+    }
+}
+
 void KeysInputDevice::PowerVolumeDownPress(const input_event &ev)
 {
     static bool powerDown = false;
@@ -105,7 +128,11 @@ int KeysInputDevice::HandleKeyEvent(const input_event &ev, uint32_t type)
     }
 
     lastKeyId_ = ev.code;
-    PowerVolumeDownPress(ev);
+    if (type_ == LONG_PRESS_POWER_ONLY_TYPE) {
+        PowerDownPress(ev);
+    } else {
+        PowerVolumeDownPress(ev);
+    }
     return 0;
 }
 } // namespace Updater
