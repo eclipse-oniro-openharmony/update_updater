@@ -194,20 +194,20 @@ std::string ConvertSha256Hex(const uint8_t* shaDigest, size_t length)
 
 bool SetRebootMisc(const std::string& rebootTarget, const std::string &extData, struct UpdateMessage &msg)
 {
-    static const int32_t MAX_COMMAND_SIZE = 16;
+    static const int32_t maxCommandSize  = 16;
     int result = 0;
     if (rebootTarget == "updater" && strcmp(msg.command, "boot_updater") != 0) {
-        result = strcpy_s(msg.command, MAX_COMMAND_SIZE, "boot_updater");
+        result = strcpy_s(msg.command, maxCommandSize , "boot_updater");
     } else if (rebootTarget == "flashd" && strcmp(msg.command, "flashd") != 0) {
-        result = strcpy_s(msg.command, MAX_COMMAND_SIZE, "boot_flash");
+        result = strcpy_s(msg.command, maxCommandSize , "boot_flash");
     } else if (rebootTarget == "bootloader" && strcmp(msg.command, "boot_loader") != 0) {
-        result = strcpy_s(msg.command, MAX_COMMAND_SIZE, "boot_loader");
+        result = strcpy_s(msg.command, maxCommandSize , "boot_loader");
     }
     if (result != EOK) {
         LOG(ERROR) << "reboot set misc strcpy failed";
         return false;
     }
-    msg.command[MAX_COMMAND_SIZE] = 0;
+    msg.command[maxCommandSize ] = 0;
     if (extData.empty()) {
         (void)memset_s(msg.update, sizeof(msg.update), 0, sizeof(msg.update));
         return true;
