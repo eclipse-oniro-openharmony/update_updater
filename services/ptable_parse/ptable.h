@@ -49,6 +49,7 @@ public:
     };
     std::vector<PtnInfo> GetPtablePartitionInfo() const;
     uint32_t GetPtablePartitionNum() const;
+    void SetReservedSize(uint64_t reservedSize);
     bool InitPtable();
     uint32_t GetDefaultImageSize() const;
     void PrintPtableInfo() const;
@@ -156,6 +157,7 @@ public:
 
     std::vector<PtnInfo> partitionInfo_;
     PtableData ptableData_;
+    uint64_t reservedSize_ {0};
 
     PtableData GetPtableData() const;
     bool MemReadWithOffset(const std::string &filePath, const uint64_t offset,

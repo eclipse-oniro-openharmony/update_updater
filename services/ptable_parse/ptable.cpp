@@ -54,6 +54,11 @@ bool Ptable::LoadPtnInfo(const std::vector<PtnInfo> &ptnInfo)
     return true;
 }
 
+void Ptable::SetReservedSize(uint64_t reservedSize)
+{
+    reservedSize_ = reservedSize;
+}
+
 std::vector<Ptable::PtnInfo>& Ptable::GetPtablePartitionInfoInstance()
 {
     return partitionInfo_;

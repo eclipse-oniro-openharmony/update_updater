@@ -34,6 +34,7 @@ public:
     bool Push(uint8_t *buf, uint32_t len);
     bool Pop(uint8_t *buf, uint32_t maxLen, uint32_t &len);
     void Stop();
+    void Reset();
 private:
     inline bool IsFull();
     inline bool IsEmpty();

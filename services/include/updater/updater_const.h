@@ -51,6 +51,11 @@ constexpr const char *OTA_MODE = "update_package";
 constexpr const char *USB_MODE = "usb_update";
 constexpr const char *UPDATRE_SCRIPT_ZIP = "/etc/updater_script.zip";
 
+// sd update ext mode
+constexpr const char *SDCARD_NORMAL_UPDATE = "sdUpdate";
+constexpr const char *SDCARD_UPDATE_FROM_DEV = "sdUpdateFromDev";
+constexpr const char *SDCARD_MAINIMG = "mainUpdate";
+
 #ifndef UPDATER_UT
 constexpr const char *SDCARD_CARD_PATH = "/sdcard/updater";
 constexpr const char *SDCARD_CARD_PKG_PATH = "/sdcard/updater/updater.zip";

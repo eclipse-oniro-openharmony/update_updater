@@ -52,11 +52,21 @@ __attribute__((weak)) UpdaterStatus GetSdcardPkgsPath(UpdaterParams &upParams)
     return UPDATE_SUCCESS;
 }
 
+__attribute__((weak)) UpdaterStatus GetSdcardPkgsFromDev(UpdaterParams &upParams)
+{
+    LOG(INFO) << "not implemented get sdcard pkgs from dev";
+    return UPDATE_ERROR;
+}
+
 UpdaterStatus CheckSdcardPkgs(UpdaterParams &upParams)
 {
 #ifndef UPDATER_UT
     auto sdParam = "updater.data.configs";
     Utils::SetParameter(sdParam, "1");
+    if (upParams.sdExtMode == SDCARD_UPDATE_FROM_DEV && GetSdcardPkgsFromDev(upParams) == UPDATE_SUCCESS) {
+        LOG(INFO) << "get sd card from dev succeed, skip get package from sd card";
+        return UPDATE_SUCCESS;
+    }
     std::string mountPoint = std::string(SDCARD_PATH);
     std::vector<std::string> sdcardStr = GetBlockDevicesByMountPoint(mountPoint);
     if (sdcardStr.empty()) {
