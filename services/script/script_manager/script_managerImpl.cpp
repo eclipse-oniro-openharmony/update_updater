@@ -124,9 +124,10 @@ int32_t ScriptManagerImpl::Init()
         return ret;
     }
 
-    int threadnum = 0;
+    int32_t threadnum = 0;
     for (int32_t i = 0; i < ScriptManager::MAX_PRIORITY; i++) {
-        threadnum = threadnum > scriptFiles_[i].size() ? threadnum : scriptFiles_[i].size();
+        int32_t scriptFileSize = (static_cast<int32_t>(scriptFiles_[i].size()));
+        threadnum = threadnum > scriptFileSize ? threadnum : scriptFileSize;
     }
     threadPool_ = ThreadPool::CreateThreadPool(threadnum > MAX_THREAD_POOL ? MAX_THREAD_POOL : threadnum);
     if (threadPool_ == nullptr) {
@@ -224,7 +225,7 @@ int32_t ScriptManagerImpl::ExecuteScript(int32_t priority)
     Task task;
     int32_t ret = USCRIPT_SUCCESS;
     int32_t retCode = USCRIPT_SUCCESS;
-    task.workSize = scriptFiles_[priority].size();
+    task.workSize = (static_cast<int32_t>(scriptFiles_[priority].size()));
     task.processor = [&](int iter) {
         for (size_t i = static_cast<size_t>(iter); i < scriptFiles_[priority].size();
             i += static_cast<size_t>(threadNumber)) {

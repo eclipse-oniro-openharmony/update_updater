@@ -225,7 +225,7 @@ int32_t UpgradePkgFile::SavePackage(size_t &signOffset)
 
     size_t offset = 0;
     // Package header information
-    size_t ret = CheckPackageHeader(buffer, offset);
+    int32_t ret = CheckPackageHeader(buffer, offset);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("Fail to CheckPackageHeader");
         return PKG_NONE_MEMORY;
@@ -391,7 +391,7 @@ int32_t UpgradePkgFile::ReadPackageInfo(std::vector<uint8_t> &signData, size_t &
 {
     PkgBuffer buffer(GetUpgradeSignatureLen() + UPGRADE_RESERVE_LEN);
     size_t readBytes = 0;
-    size_t ret = pkgStream_->Read(buffer, parsedLen, buffer.length, readBytes);
+    int32_t ret = pkgStream_->Read(buffer, parsedLen, buffer.length, readBytes);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("read sign data fail");
         UPDATER_LAST_WORD(ret);
@@ -596,7 +596,7 @@ int32_t UpgradePkgFile::SaveEntry(const PkgBuffer &buffer, size_t &parsedLen, Up
     // Extract header information from file
     size_t decodeLen = 0;
     PkgBuffer headerBuff(buffer.buffer + info.currLen, info.readLen - info.currLen);
-    size_t ret = entry->DecodeHeader(headerBuff, parsedLen + info.srcOffset, info.dataOffset, decodeLen);
+    int32_t ret = entry->DecodeHeader(headerBuff, parsedLen + info.srcOffset, info.dataOffset, decodeLen);
     if (ret != PKG_SUCCESS) {
         delete entry;
         PKG_LOGE("Fail to decode header");
@@ -663,7 +663,7 @@ int32_t UpgradePkgFile::ReadComponents(size_t &parsedLen,
             }
             info.currLen = 0;
         }
-        size_t ret = SaveEntry(compBuffer, parsedLen, info, algorithm, fileNames);
+        ret = SaveEntry(compBuffer, parsedLen, info, algorithm, fileNames);
         if (ret != PKG_SUCCESS) {
             PKG_LOGE("SaveEntry");
             UPDATER_LAST_WORD(ret);
