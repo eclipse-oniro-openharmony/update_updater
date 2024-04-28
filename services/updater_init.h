@@ -26,6 +26,7 @@ enum UpdaterInitEvent {
     // updater
     UPDATER_PRE_INIT_EVENT,
     UPDATER_INIT_EVENT,
+    UPDATER_PRE_VERIFY_EVENT,
     UPDATER_POST_INIT_EVENT,
 
     // flashd

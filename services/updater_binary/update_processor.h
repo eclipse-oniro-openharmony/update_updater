@@ -42,6 +42,18 @@ enum EXIT_CODES {
 int ProcessUpdater(bool retry, int pipeFd, const std::string &packagePath, const std::string &keyPath);
 void GetPartitionPathFromName(const std::string &partitionName, std::string &partitionPath);
 
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif
+#endif /* __cplusplus */
+int32_t GetFinalBinaryResult(int32_t result);
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif
+#endif /* __cplusplus */
+
 class UpdaterInstructionFactory : public UScriptInstructionFactory {
 public:
     virtual int32_t CreateInstructionInstance(UScriptInstructionPtr& instr, const std::string& name);
