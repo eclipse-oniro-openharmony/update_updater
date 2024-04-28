@@ -34,7 +34,7 @@ int32_t ScriptInterpreter::ExecuteScript(ScriptManagerImpl *manager, Hpackage::P
         return USCRIPT_INVALID_PARAM;
     }
     USCRIPT_LOGI("ExecuteScript %s", pkgStream->GetFileName().c_str());
-    auto inter = new ScriptInterpreter(manager);
+    auto inter = new (std::nothrow) ScriptInterpreter(manager);
     if (inter == nullptr) {
         USCRIPT_LOGE("Fail to create ScriptInterpreter for script %s", pkgStream->GetFileName().c_str());
         UPDATER_LAST_WORD(USCRIPT_ERROR_CREATE_OBJ);
