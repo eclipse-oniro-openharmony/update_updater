@@ -48,6 +48,11 @@ size_t UScriptInstructionRawImageWrite::totalSize_ = 0;
 size_t UScriptInstructionRawImageWrite::readSize_ = 0;
 size_t UScriptInstructionUpdateFromBin::stashDataSize_ = 0;
 
+__attribute__((weak)) int32_t GetFinalBinaryResult(int32_t result)
+{
+    return result;
+}
+
 UpdaterEnv::~UpdaterEnv()
 {
     if (factory_ != nullptr) {
@@ -414,7 +419,7 @@ int ExecUpdate(PkgManager::PkgManagerPtr pkgManager, int retry, const std::strin
     ScriptManager::ReleaseScriptManager();
     delete env;
     env = nullptr;
-    return ret;
+    return GetFinalBinaryResult(ret);
 }
 
 int UScriptInstructionRawImageWrite::GetWritePathAndOffset(const std::string &partitionName, std::string &writePath,

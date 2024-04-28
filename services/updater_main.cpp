@@ -343,6 +343,8 @@ static UpdaterStatus PreUpdatePackages(UpdaterParams &upParams)
         return UPDATE_SUCCESS;
     }
 
+    UpdaterInit::GetInstance().InvokeEvent(UPDATER_PRE_VERIFY_EVENT);
+
     // verify packages first
     if (VerifyPackages(upParams) != UPDATE_SUCCESS) {
         UPDATER_LAST_WORD(UPDATE_CORRUPT);
