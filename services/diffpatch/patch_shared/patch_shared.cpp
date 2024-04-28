@@ -297,7 +297,7 @@ static int CreateFixedSizeEmptyFile(const UpdateBlockInfo &infos, const std::str
         return -1;
     }
     size_t fileSize = Updater::Utils::GetFileSize(infos.devPath);
-    if (fileSize >= (static_cast<size_t>(size))) {
+    if (static_cast<int64_t>(fileSize) >= size) {
         LOG(INFO) << "no need copy";
         return 0;
     }
@@ -308,13 +308,13 @@ static int CreateFixedSizeEmptyFile(const UpdateBlockInfo &infos, const std::str
     }
 
     /* fill the remaining space with zero values */
-    int writeFileTmp = (static_cast<size_t>(size) - fileSize) / WRITEFILLSIZE;
+    int writeFileTmp = (size - static_cast<int64_t>(fileSize)) / WRITEFILLSIZE;
     char zerolist[WRITEFILLSIZE] = {0};
     while (writeFileTmp > 0) {
         file.write(zerolist, WRITEFILLSIZE);
         writeFileTmp--;
     }
-    writeFileTmp = (static_cast<size_t>(size) - fileSize) % WRITEFILLSIZE;
+    writeFileTmp = (size - static_cast<int64_t>(fileSize)) % WRITEFILLSIZE;
     char zero = 0;
     while (writeFileTmp > 0) {
         file.write(&zero, 1);
