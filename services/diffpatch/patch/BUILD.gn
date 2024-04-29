@@ -25,6 +25,7 @@ config("patch_config") {
     "${updater_path}/interfaces/kits/include/package",
     "${updater_path}/interfaces/kits/include",
     "${updater_path}/services/common",
+    "${updater_path}/services/include/log",
     "${updater_path}/services/include/package",
     "${updater_path}/services/include/patch",
     "${updater_path}/services/include",
@@ -37,16 +38,18 @@ config("patch_config") {
   defines = [ "OPENSSL_SUPPRESS_DEPRECATED" ]
 }
 
+libpatch_common_source = [
+  "${updater_path}/services/diffpatch/bzip2/bzip2_adapter.cpp",
+  "${updater_path}/services/diffpatch/bzip2/lz4_adapter.cpp",
+  "${updater_path}/services/diffpatch/bzip2/zip_adapter.cpp",
+  "${updater_path}/services/diffpatch/diffpatch.cpp",
+  "${updater_path}/services/diffpatch/patch/blocks_patch.cpp",
+  "${updater_path}/services/diffpatch/patch/image_patch.cpp",
+  "${updater_path}/services/diffpatch/patch/update_patch.cpp",
+]
+
 ohos_static_library("libpatch") {
-  sources = [
-    "${updater_path}/services/diffpatch/bzip2/bzip2_adapter.cpp",
-    "${updater_path}/services/diffpatch/bzip2/lz4_adapter.cpp",
-    "${updater_path}/services/diffpatch/bzip2/zip_adapter.cpp",
-    "${updater_path}/services/diffpatch/diffpatch.cpp",
-    "${updater_path}/services/diffpatch/patch/blocks_patch.cpp",
-    "${updater_path}/services/diffpatch/patch/image_patch.cpp",
-    "${updater_path}/services/diffpatch/patch/update_patch.cpp",
-  ]
+  sources = libpatch_common_source
 
   deps = [
     "${updater_path}/services/log:libupdaterlog",
@@ -58,6 +61,24 @@ ohos_static_library("libpatch") {
     "bzip2:libbz2",
     "lz4:liblz4_static",
     "openssl:libcrypto_static",
+    "zlib:libz",
+  ]
+
+  configs = [ ":patch_config" ]
+  subsystem_name = "updater"
+  part_name = "updater"
+}
+
+ohos_shared_library("libpatch_shared") {
+  sources = libpatch_common_source
+
+  deps = [ "${updater_path}/interfaces/kits/packages:libpackage_shared" ]
+
+  external_deps = [
+    "bounds_checking_function:libsec_shared",
+    "bzip2:libbz2",
+    "lz4:liblz4_static",
+    "openssl:libcrypto_shared",
     "zlib:libz",
   ]
 
