@@ -48,6 +48,7 @@ ohos_shared_library("libdiff_patch_shared") {
     "${updater_path}/interfaces/kits/packages:libpackage_shared",
     "${updater_path}/services/diffpatch/patch:libpatch_shared",
   ]
+  external_deps = [ "openssl:libcrypto_shared" ]
 
   subsystem_name = "updater"
   part_name = "updater"
