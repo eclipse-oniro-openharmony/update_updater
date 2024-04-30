@@ -63,7 +63,7 @@ extern "C" {
 #endif /* __cplusplus */
 bool IsSupportOption([[maybe_unused]] const std::string &option);
 UpdaterStatus ProcessOtherOption([[maybe_unused]] const std::string &option,
-    [[maybe_unused]] UpdaterParams &upParams);
+    [[maybe_unused]] UpdaterParams &upParams, PackageUpdateMode &mode);
 bool PreStartBinaryEntry([[maybe_unused]] const std::string &path);
 int32_t VerifySpecialPkgs([[maybe_unused]]UpdaterParams &upParams);
 bool IsNeedWipe();
