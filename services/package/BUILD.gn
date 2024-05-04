@@ -50,29 +50,31 @@ config("libupdaterpackage_exported_headers") {
   ]
 }
 
+libupdaterpackage_common_source = [
+  "./pkg_algorithm/pkg_algo_deflate.cpp",
+  "./pkg_algorithm/pkg_algo_digest.cpp",
+  "./pkg_algorithm/pkg_algo_lz4.cpp",
+  "./pkg_algorithm/pkg_algo_sign.cpp",
+  "./pkg_algorithm/pkg_algorithm.cpp",
+  "./pkg_manager/pkg_managerImpl.cpp",
+  "./pkg_manager/pkg_stream.cpp",
+  "./pkg_manager/pkg_utils.cpp",
+  "./pkg_package/packages_info.cpp",
+  "./pkg_package/pkg_gzipfile.cpp",
+  "./pkg_package/pkg_lz4file.cpp",
+  "./pkg_package/pkg_pkgfile.cpp",
+  "./pkg_package/pkg_upgradefile.cpp",
+  "./pkg_package/pkg_zipfile.cpp",
+  "./pkg_verify/cert_verify.cpp",
+  "./pkg_verify/openssl_util.cpp",
+  "./pkg_verify/pkcs7_signed_data.cpp",
+  "./pkg_verify/pkg_verify_util.cpp",
+  "./pkg_verify/zip_pkg_parse.cpp",
+  "pkg_verify/hash_data_verifier.cpp",
+]
+
 ohos_static_library("libupdaterpackage") {
-  sources = [
-    "./pkg_algorithm/pkg_algo_deflate.cpp",
-    "./pkg_algorithm/pkg_algo_digest.cpp",
-    "./pkg_algorithm/pkg_algo_lz4.cpp",
-    "./pkg_algorithm/pkg_algo_sign.cpp",
-    "./pkg_algorithm/pkg_algorithm.cpp",
-    "./pkg_manager/pkg_managerImpl.cpp",
-    "./pkg_manager/pkg_stream.cpp",
-    "./pkg_manager/pkg_utils.cpp",
-    "./pkg_package/packages_info.cpp",
-    "./pkg_package/pkg_gzipfile.cpp",
-    "./pkg_package/pkg_lz4file.cpp",
-    "./pkg_package/pkg_pkgfile.cpp",
-    "./pkg_package/pkg_upgradefile.cpp",
-    "./pkg_package/pkg_zipfile.cpp",
-    "./pkg_verify/cert_verify.cpp",
-    "./pkg_verify/openssl_util.cpp",
-    "./pkg_verify/pkcs7_signed_data.cpp",
-    "./pkg_verify/pkg_verify_util.cpp",
-    "./pkg_verify/zip_pkg_parse.cpp",
-    "pkg_verify/hash_data_verifier.cpp",
-  ]
+  sources = libupdaterpackage_common_source
 
   deps = [
     "${updater_path}/services/common/ring_buffer:libringbuffer",
@@ -111,6 +113,37 @@ ohos_static_library("libupdaterpackage") {
     ]
   }
   defines = [ "OPENSSL_SUPPRESS_DEPRECATED" ]
+
+  subsystem_name = "updater"
+  part_name = "updater"
+}
+
+ohos_shared_library("libupdaterpackage_shared") {
+  sources = libupdaterpackage_common_source
+
+  deps = [
+    "${updater_path}/services/common/ring_buffer:libringbuffer",
+    "${updater_path}/services/log:libupdaterlog_shared",
+  ]
+
+  external_deps = [
+    "bounds_checking_function:libsec_static",
+    "lz4:liblz4_static",
+    "openssl:libcrypto_shared",
+    "zlib:shared_libz",
+  ]
+
+  if (!is_linux && !is_mingw && !is_mac) {
+    deps += [ "../rust/hash_signed_data:rust_hash_signed_data" ]
+  }
+
+  configs = [ ":package_config" ]
+
+  public_configs = [ ":libupdaterpackage_exported_headers" ]
+  defines = [
+    "DIFF_PATCH_SDK",
+    "OPENSSL_SUPPRESS_DEPRECATED",
+  ]
 
   subsystem_name = "updater"
   part_name = "updater"

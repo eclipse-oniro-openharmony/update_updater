@@ -37,19 +37,8 @@ ohos_shared_library("libpackage_shared") {
   public_configs = [ ":libpackageExt_exported_headers" ]
 
   deps = [
-    "${updater_path}/interfaces/kits/misc_info:libmiscinfo",
-    "${updater_path}/services/fs_manager:libfsmanager",
-    "${updater_path}/services/log:libupdaterlog",
-    "${updater_path}/services/package:libupdaterpackage",
-    "${updater_path}/utils:libutils",
-  ]
-
-  external_deps = [
-    "bounds_checking_function:libsec_shared",
-    "lz4:liblz4_static",
-    "openssl:libcrypto_shared",
-    "openssl:libssl_shared",
-    "zlib:shared_libz",
+    "${updater_path}/services/log:libupdaterlog_shared",
+    "${updater_path}/services/package:libupdaterpackage_shared",
   ]
 
   innerapi_tags = [

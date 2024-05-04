@@ -72,7 +72,11 @@ ohos_static_library("libpatch") {
 ohos_shared_library("libpatch_shared") {
   sources = libpatch_common_source
 
-  deps = [ "${updater_path}/interfaces/kits/packages:libpackage_shared" ]
+  deps = [
+    "${updater_path}/interfaces/kits/packages:libpackage_shared",
+    "${updater_path}/services/log:libupdaterlog_shared",
+    "${updater_path}/services/package:libupdaterpackage_shared",
+  ]
 
   external_deps = [
     "bounds_checking_function:libsec_shared",
