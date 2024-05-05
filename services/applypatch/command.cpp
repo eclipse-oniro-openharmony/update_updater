@@ -22,9 +22,11 @@
 namespace Updater {
 bool Command::Init(const std::string &cmdLine)
 {
+    if (cmdLine.empty()) return false;
     cmdLine_ = std::move(cmdLine);
     tokens_.clear();
     tokens_ = Utils::SplitString(cmdLine_, " ");
+    cmdhead_ = tokens_[H_ZERO_NUMBER];
     type_ = ParseCommandType(tokens_[H_ZERO_NUMBER]);
     return true;
 }
@@ -37,6 +39,11 @@ Command::~Command()
 CommandType Command::GetCommandType() const
 {
     return type_;
+}
+
+std::string Command::GetCommandHead() const
+{
+    return cmdhead_;
 }
 
 std::string Command::GetArgumentByPos(size_t pos) const

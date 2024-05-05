@@ -36,13 +36,12 @@ TransferManager::TransferManager()
 bool TransferManager::CommandsExecute(int fd, Command &cmd)
 {
     cmd.SetFileDescriptor(fd);
-    std::unique_ptr<CommandFunction> cf = CommandFunctionFactory::GetCommandFunction(cmd.GetCommandType());
+    CommandFunction* cf = CommandFunctionFactory::GetInstance().GetCommandFunction(cmd.GetCommandHead());
     if (cf == nullptr) {
         LOG(ERROR) << "Failed to get cmd exec";
         return false;
     }
     CommandResult ret = cf->Execute(cmd);
-    CommandFunctionFactory::ReleaseCommandFunction(cf);
     if (!CheckResult(ret, cmd.GetCommandLine(), cmd.GetCommandType())) {
         return false;
     }
@@ -77,7 +76,7 @@ bool TransferManager::CommandsParser(int fd, const std::vector<std::string> &con
             LOG(ERROR) << "Failed to parse command line.";
             return false;
         }
-        if (!cmd->Init(*ct) || cmd->GetCommandType() == CommandType::LAST || transferParams_->env == nullptr) {
+        if (!cmd->Init(*ct) || transferParams_->env == nullptr) {
             continue;
         }
         if (!retryCmd.empty() && transferParams_->env->IsRetry()) {
@@ -90,13 +89,13 @@ bool TransferManager::CommandsParser(int fd, const std::vector<std::string> &con
             }
         }
         if (!CommandsExecute(fd, *cmd)) {
-            LOG(ERROR) << "Running command : " << cmd->GetArgumentByPos(0) << " fail";
+            LOG(ERROR) << "Running command : " << cmd->GetCommandLine() << " fail";
             return false;
         }
         if (initBlock == 0) {
             initBlock = transferParams_->written;
         }
-        if (totalSize != 0 && NeedSetProgress(cmd->GetCommandType())) {
+        if (totalSize != 0 && (transferParams_->written - initBlock) > 0) {
             UpdateProgress(initBlock, totalSize);
         }
     }
@@ -146,14 +145,6 @@ std::string TransferManager::ReloadForRetry() const
     }
     close(fd);
     return cmd;
-}
-
-bool TransferManager::NeedSetProgress(const CommandType &type)
-{
-    return type == CommandType::NEW ||
-        type == CommandType::IMGDIFF ||
-        type == CommandType::BSDIFF ||
-        type == CommandType::ZERO;
 }
 
 bool TransferManager::CheckResult(const CommandResult result, const std::string &cmd, const CommandType &type)

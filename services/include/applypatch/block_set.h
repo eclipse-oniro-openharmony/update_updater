@@ -89,8 +89,8 @@ public:
         std::string &srcHash);
     int32_t WriteZeroToBlock(int fd, bool isErase = true);
 
-    int32_t WriteDiffToBlock(const Command &cmd, std::vector<uint8_t> &sourceBuffer, const size_t srcBlockSize,
-        bool isImgDiff = true);
+    int32_t WriteDiffToBlock(const Command &cmd, std::vector<uint8_t> &sourceBuffer, uint8_t *patchBuffer,
+                             size_t patchLength, bool isImgDiff = true);
 
     // Read data from block
     size_t ReadDataFromBlock(int fd, std::vector<uint8_t> &buffer);

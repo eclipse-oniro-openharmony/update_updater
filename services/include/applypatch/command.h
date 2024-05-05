@@ -40,10 +40,12 @@ public:
     int GetFileDescriptor() const;
     TransferParams* GetTransferParams() const;
     std::string GetCommandLine() const;
+    std::string GetCommandHead() const;
 private:
     CommandType ParseCommandType(const std::string &first_cmd);
 
     CommandType type_ {LAST};
+    std::string cmdhead_ {};
     std::string cmdLine_ {};
     std::vector<std::string> tokens_ {};
     std::unique_ptr<int> fd_ {};

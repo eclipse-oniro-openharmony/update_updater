@@ -372,21 +372,13 @@ int32_t BlockSet::WriteZeroToBlock(int fd, bool isErase)
     return 0;
 }
 
-int32_t BlockSet::WriteDiffToBlock(const Command &cmd, std::vector<uint8_t> &srcBuffer,
-    const size_t srcBlockSize, bool isImgDiff)
+int32_t BlockSet::WriteDiffToBlock(const Command &cmd, std::vector<uint8_t> &sourceBuffer, uint8_t *patchBuffer,
+                                   size_t patchLength, bool isImgDiff)
 {
-    size_t pos = H_MOVE_CMD_ARGS_START;
-    size_t offset = Utils::String2Int<size_t>(cmd.GetArgumentByPos(pos++), Utils::N_DEC);
-    size_t length = Utils::String2Int<size_t>(cmd.GetArgumentByPos(pos++), Utils::N_DEC);
-    // Get patch buffer
-    auto transferParams = cmd.GetTransferParams();
-    auto patchBuff = transferParams->patchDataBuffer + offset;
-    size_t srcBuffSize =  srcBlockSize * H_BLOCK_SIZE;
+    size_t srcBuffSize =  sourceBuffer.size();
     if (isImgDiff) {
         std::vector<uint8_t> empty;
-        UpdatePatch::PatchParam patchParam = {
-            reinterpret_cast<u_char*>(srcBuffer.data()), srcBuffSize, reinterpret_cast<u_char*>(patchBuff), length
-        };
+        UpdatePatch::PatchParam patchParam = {sourceBuffer.data(), srcBuffSize, patchBuffer, patchLength};
         std::unique_ptr<BlockWriter> writer = std::make_unique<BlockWriter>(cmd.GetFileDescriptor(), *this);
         if (writer.get() == nullptr) {
             LOG(ERROR) << "Cannot create block writer, pkgdiff patch abort!";
@@ -395,24 +387,24 @@ int32_t BlockSet::WriteDiffToBlock(const Command &cmd, std::vector<uint8_t> &src
         int32_t ret = UpdatePatch::UpdateApplyPatch::ApplyImagePatch(patchParam, empty,
             [&](size_t start, const UpdatePatch::BlockBuffer &data, size_t size) -> int {
                 return (writer->Write(data.buffer, size, nullptr)) ? 0 : -1;
-            }, cmd.GetArgumentByPos(pos + 1));
+            }, cmd.GetArgumentByPos(H_DIFF_CMD_ARGS_START + 1));
         writer.reset();
         if (ret != 0) {
-            LOG(ERROR) << "Fail to ApplyImagePatch; offset: " << offset << ", length: " << length;
+            LOG(ERROR) << "Fail to ApplyImagePatch";
             return -1;
         }
     } else {
         LOG(DEBUG) << "Run bsdiff patch.";
-        UpdatePatch::PatchBuffer patchInfo = {patchBuff, 0, length};
+        UpdatePatch::PatchBuffer patchInfo = {patchBuffer, 0, patchLength};
         std::unique_ptr<BlockWriter> writer = std::make_unique<BlockWriter>(cmd.GetFileDescriptor(), *this);
         if (writer.get() == nullptr) {
             LOG(ERROR) << "Cannot create block writer, pkgdiff patch abort!";
             return -1;
         }
-        auto ret = UpdatePatch::UpdateApplyPatch::ApplyBlockPatch(patchInfo, {srcBuffer.data(), srcBuffSize},
+        auto ret = UpdatePatch::UpdateApplyPatch::ApplyBlockPatch(patchInfo, {sourceBuffer.data(), srcBuffSize},
             [&](size_t start, const UpdatePatch::BlockBuffer &data, size_t size) -> int {
                 return (writer->Write(data.buffer, size, nullptr)) ? 0 : -1;
-            }, cmd.GetArgumentByPos(pos + 1));
+            }, cmd.GetArgumentByPos(H_DIFF_CMD_ARGS_START + 1));
         writer.reset();
         if (ret != 0) {
             LOG(ERROR) << "Fail to ApplyBlockPatch";

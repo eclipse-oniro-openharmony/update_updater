@@ -70,7 +70,6 @@ public:
     }
     std::string ReloadForRetry() const;
     bool CheckResult(const CommandResult result, const std::string &cmd, const CommandType &type);
-    bool NeedSetProgress(const CommandType &type);
 
 private:
     void UpdateProgress(size_t &initBlock, size_t totalSize);
