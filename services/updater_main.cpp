@@ -70,6 +70,7 @@ constexpr struct option OPTIONS[] = {
     { "night_update", no_argument, nullptr, 0 },
     { USB_MODE, no_argument, nullptr, 0 },
     { "UPDATE:MAINIMG", no_argument, nullptr, 0 },
+    { "update_protect", no_argument, nullptr, 0 },
     { "UPDATE:SD", no_argument, nullptr, 0 },
     { "UPDATE:SDFROMDEV", no_argument, nullptr, 0 },
     { nullptr, 0, nullptr, 0 },
@@ -671,7 +672,7 @@ __attribute__((weak)) bool IsSupportOption([[maybe_unused]] const std::string &o
 }
 
 __attribute__((weak)) UpdaterStatus ProcessOtherOption([[maybe_unused]] const std::string &option,
-    [[maybe_unused]] UpdaterParams &upParams)
+    [[maybe_unused]] UpdaterParams &upParams, PackageUpdateMode &mode)
 {
     return UPDATE_UNKNOWN;
 }
@@ -698,7 +699,7 @@ static UpdaterStatus StartUpdater(const std::vector<std::string> &args,
                     auto optionsFunc = optionsFuncTab.at(option);
                     optionsFunc();
                 } else if (IsSupportOption(option)) {
-                    return ProcessOtherOption(option, upParams);
+                    return ProcessOtherOption(option, upParams, mode);
                 }
                 break;
             }
