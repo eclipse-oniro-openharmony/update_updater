@@ -25,7 +25,7 @@ int Scanner::LexerInput(char *buf, int maxSize)
     PkgBuffer data(maxSize);
     if (pkgStream_->Read(data, currPos, maxSize, readLen) != PKG_SUCCESS) {
         USCRIPT_LOGE("read error");
-        return -1;
+        return readLen;
     }
     memcpy_s(reinterpret_cast<uint8_t*>(buf), maxSize, data.buffer, readLen);
     currPos += readLen;
