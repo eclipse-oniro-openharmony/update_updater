@@ -60,7 +60,7 @@ ohos_static_library("libptableparse") {
     "bounds_checking_function:libsec_static",
     "bzip2:libbz2",
     "cJSON:cjson",
-    "zlib:libz",
+    "zlib:libz_static",
   ]
 
   part_name = "updater"

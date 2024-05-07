@@ -25,3 +25,13 @@ ohos_shared_library("libupdate_hdi_impl") {
   subsystem_name = "updater"
   part_name = "updater"
 }
+
+ohos_static_library("libupdate_hdi_impl_static") {
+  sources = [ "update_hdi_impl.cpp" ]
+
+  include_dirs = [ "${updater_path}/interfaces/kits/include" ]
+
+  deps = []
+  subsystem_name = "updater"
+  part_name = "updater"
+}
