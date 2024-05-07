@@ -44,6 +44,7 @@ config("libupdaterpackage_exported_headers") {
     "${updater_path}/services",
     "${updater_path}/services/include/package",
     "${updater_path}/services/include",
+    "${updater_path}/services/package",
     "${updater_path}/services/package/pkg_manager",
     "${updater_path}/services/package/pkg_verify",
     "${updater_path}/services/include/script",
