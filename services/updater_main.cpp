@@ -477,7 +477,7 @@ static void PostUpdatePackages(UpdaterParams &upParams, bool updateResult)
         writeBuffer.pop_back();
     }
     LOG(INFO) << "post over, writeBuffer = " << writeBuffer;
-    WriteDumpResult(writeBuffer);
+    WriteDumpResult(writeBuffer, UPDATER_RESULT_FILE);
     DeleteInstallTimeFile();
 }
 

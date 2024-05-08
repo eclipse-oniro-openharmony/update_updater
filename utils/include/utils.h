@@ -66,7 +66,7 @@ std::string GetLocalBoardId();
 bool CopyUpdaterLogs(const std::string &sLog, const std::string &dLog);
 void CompressLogs(const std::string &name);
 bool CheckResultFail();
-void WriteDumpResult(const std::string &result);
+void WriteDumpResult(const std::string &result, const std::string &fileName);
 long long int GetDirSize(const std::string &folderPath);
 size_t GetFileSize(const std::string &filePath);
 long long int GetDirSizeForFile(const std::string &filePath);
