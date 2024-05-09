@@ -77,7 +77,7 @@ ohos_static_library("libupdater_binary") {
     "bzip2:libbz2",
     "cJSON:cjson_static",
     "init:libbegetutil_static",
-    "init:libfsmanager_static",
+    "init:libfsmanager_static_real",
     "lz4:liblz4_static",
     "openssl:libcrypto_static",
     "openssl:libssl_static",

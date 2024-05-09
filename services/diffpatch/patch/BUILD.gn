@@ -61,7 +61,6 @@ ohos_static_library("libpatch") {
     "bzip2:libbz2",
     "lz4:liblz4_static",
     "openssl:libcrypto_static",
-    "zlib:libz",
   ]
 
   configs = [ ":patch_config" ]

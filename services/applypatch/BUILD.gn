@@ -51,9 +51,9 @@ ohos_static_library("libapplypatch") {
   external_deps = [
     "bounds_checking_function:libsec_static",
     "bzip2:libbz2",
-    "init:libbegetutil",
+    "init:libbegetutil_static",
+    "init:libfsmanager_static_real",
     "openssl:libcrypto_static",
-    "zlib:libz",
   ]
   subsystem_name = "updater"
   part_name = "updater"

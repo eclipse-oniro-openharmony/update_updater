@@ -75,7 +75,7 @@ ohos_fuzztest("BinFlowFuzzTest") {
   ]
   external_deps = [
     "hilog:libhilog",
-    "init:libbegetutil",
+    "init:libbegetutil_static",
   ]
 
   cflags = [

@@ -48,8 +48,8 @@ ohos_static_library("libBinFlowUpdate") {
   ]
   external_deps = [
     "bounds_checking_function:libsec_static",
-    "init:libbegetutil",
-    "init:libfsmanager_static",
+    "init:libbegetutil_static",
+    "init:libfsmanager_static_real",
     "openssl:libcrypto_static",
   ]
   if (defined(use_ptable)) {

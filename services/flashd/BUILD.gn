@@ -106,7 +106,7 @@ ohos_static_library("flashd_deamon") {
   deps = [ "${updater_path}/services/flashd:hdc_hash_gen" ]
 
   if (use_musl) {
-    external_deps += [ "init:libbegetutil" ]
+    external_deps += [ "init:libbegetutil_static" ]
   }
 
   include_dirs = [
@@ -217,7 +217,7 @@ ohos_static_library("libflashd") {
     "bzip2:libbz2",
     "cJSON:cjson",
     "c_utils:utils",
-    "init:libbegetutil",
+    "init:libbegetutilz_static",
     "libuv:uv",
     "lz4:liblz4_static",
     "openssl:libcrypto_shared",
