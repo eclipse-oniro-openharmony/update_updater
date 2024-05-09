@@ -411,7 +411,6 @@ int ExecUpdate(PkgManager::PkgManagerPtr pkgManager, int retry, const std::strin
         ret = scriptManager->ExecuteScript(i);
         if (ret != USCRIPT_SUCCESS) {
             LOG(ERROR) << "Fail to execute script";
-            UPDATER_LAST_WORD(ret);
             break;
         }
     }

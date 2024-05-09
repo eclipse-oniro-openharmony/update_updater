@@ -532,7 +532,7 @@ bool CheckResultFail()
     return false;
 }
 
-void WriteDumpResult(const std::string &result)
+void WriteDumpResult(const std::string &result, const std::string &fileName)
 {
     if (access(UPDATER_PATH, 0) != 0) {
         if (MkdirRecursive(UPDATER_PATH, 0755) != 0) { // 0755: -rwxr-xr-x
@@ -541,7 +541,7 @@ void WriteDumpResult(const std::string &result)
         }
     }
     LOG(INFO) << "WriteDumpResult: " << result;
-    const std::string resultPath = std::string(UPDATER_PATH) + "/" + std::string(UPDATER_RESULT_FILE);
+    const std::string resultPath = std::string(UPDATER_PATH) + "/" + fileName;
     FILE *fp = fopen(resultPath.c_str(), "w+");
     if (fp == nullptr) {
         LOG(ERROR) << "open result file failed";
