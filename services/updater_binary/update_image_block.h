@@ -44,7 +44,7 @@ public:
     int32_t Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context) override;
 private:
     int ExecReadShaInfo(Uscript::UScriptEnv &env, const std::string &devPath, const std::string &blockPairs,
-        const std::string &contrastSha);
+        const std::string &contrastSha, const std::string &targetSha);
     void PrintAbnormalBlockHash(const std::string &devPath, const std::string &blockPairs);
 };
 }

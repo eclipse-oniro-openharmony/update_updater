@@ -197,6 +197,7 @@ CommandResult StashCommandFn::Execute(const Command &params)
 {
     size_t pos = 1;
     const std::string shaStr = params.GetArgumentByPos(pos++);
+    const std::string resultSha = params.GetArgumentByPos(pos++);
     BlockSet srcBlk;
     LOG(INFO) << "Get source block info to block set";
     srcBlk.ParserAndInsert(params.GetArgumentByPos(pos++));
@@ -214,7 +215,8 @@ CommandResult StashCommandFn::Execute(const Command &params)
         LOG(ERROR) << "Error to load block data";
         return FAILED;
     }
-    if (srcBlk.VerifySha256(buffer, srcBlockSize, shaStr) != 0) {
+    if (srcBlk.VerifySha256(buffer, srcBlockSize, shaStr) != 0 && 
+        srcBlk.VerifySha256(buffer, srcBlockSize, resultSha) != 0) {
         return FAILED;
     }
     LOG(INFO) << "store " << srcBlockSize << " blocks to " << storeBase << "/" << shaStr;
