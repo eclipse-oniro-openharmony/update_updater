@@ -36,9 +36,9 @@ using namespace Hpackage;
 using namespace Updater;
 
 namespace Updater {
-constexpr int32_t SHA_CHECK_SECOND = 2;
-constexpr int32_t SHA_CHECK_THIRD = 3;
-constexpr int32_t SHA_CHECK_FOURTH = 4;
+constexpr int32_t SHA_CHECK_CONTRASTSHA_INDEX = 2;
+constexpr int32_t SHA_CHECK_TARGETPAIRS_INDEX = 3;
+constexpr int32_t SHA_CHECK_TARGETSHA_INDEX = 4;
 constexpr int32_t SHA_CHECK_PARAMS = 5;
 static int ExtractNewData(const PkgBuffer &buffer, size_t size, size_t start, bool isFinish, const void* context)
 {
@@ -592,19 +592,19 @@ int32_t UScriptInstructionShaCheck::Execute(Uscript::UScriptEnv &env, Uscript::U
         UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE);
         return ReturnAndPushParam(USCRIPT_ERROR_EXECUTE, context);
     }
-    ret = context.GetParam(SHA_CHECK_SECOND, shaInfo.contrastSha);
+    ret = context.GetParam(SHA_CHECK_CONTRASTSHA_INDEX, shaInfo.contrastSha);
     if (ret != USCRIPT_SUCCESS) {
         LOG(ERROR) << "Failed to get param";
         UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE);
         return ReturnAndPushParam(USCRIPT_ERROR_EXECUTE, context);
     }
-    ret = context.GetParam(SHA_CHECK_THIRD, shaInfo.targetPairs);
+    ret = context.GetParam(SHA_CHECK_TARGETPAIRS_INDEX, shaInfo.targetPairs);
     if (ret != USCRIPT_SUCCESS) {
         LOG(ERROR) << "Failed to get param";
         UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE);
         return ReturnAndPushParam(USCRIPT_ERROR_EXECUTE, context);
     }
-    ret = context.GetParam(SHA_CHECK_FOURTH, shaInfo.targetSha);
+    ret = context.GetParam(SHA_CHECK_TARGETSHA_INDEX, shaInfo.targetSha);
     if (ret != USCRIPT_SUCCESS) {
         LOG(ERROR) << "Failed to get param";
         UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE);
