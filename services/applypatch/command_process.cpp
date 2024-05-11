@@ -215,7 +215,7 @@ CommandResult StashCommandFn::Execute(const Command &params)
         LOG(ERROR) << "Error to load block data";
         return FAILED;
     }
-    if (srcBlk.VerifySha256(buffer, srcBlockSize, shaStr) != 0 && 
+    if (srcBlk.VerifySha256(buffer, srcBlockSize, shaStr) != 0 &&
         srcBlk.VerifySha256(buffer, srcBlockSize, resultSha) != 0) {
         return FAILED;
     }

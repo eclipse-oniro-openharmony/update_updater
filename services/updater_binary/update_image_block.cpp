@@ -37,6 +37,8 @@ using namespace Updater;
 
 namespace Updater {
 constexpr int32_t SHA_CHECK_SECOND = 2;
+constexpr int32_t SHA_CHECK_THIRD = 3;
+constexpr int32_t SHA_CHECK_FOURTH = 4;
 constexpr int32_t SHA_CHECK_PARAMS = 5;
 static int ExtractNewData(const PkgBuffer &buffer, size_t size, size_t start, bool isFinish, const void* context)
 {
@@ -468,7 +470,8 @@ int32_t UScriptInstructionBlockCheck::Execute(Uscript::UScriptEnv &env, Uscript:
     return USCRIPT_SUCCESS;
 }
 
-int UScriptInstructionShaCheck::ExecReadShaInfo(Uscript::UScriptEnv &env, const std::string &devPath, const ShaInfo &shaInfo)
+int UScriptInstructionShaCheck::ExecReadShaInfo(Uscript::UScriptEnv &env, const std::string &devPath,
+    const ShaInfo &shaInfo)
 {
     UPDATER_INIT_RECORD;
     std::string resultSha = CalculateBlocksSha(devPath, shaInfo.blockPairs);
@@ -595,13 +598,13 @@ int32_t UScriptInstructionShaCheck::Execute(Uscript::UScriptEnv &env, Uscript::U
         UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE);
         return ReturnAndPushParam(USCRIPT_ERROR_EXECUTE, context);
     }
-    ret = context.GetParam(3, shaInfo.targetPairs);
+    ret = context.GetParam(SHA_CHECK_THIRD, shaInfo.targetPairs);
     if (ret != USCRIPT_SUCCESS) {
         LOG(ERROR) << "Failed to get param";
         UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE);
         return ReturnAndPushParam(USCRIPT_ERROR_EXECUTE, context);
     }
-    ret = context.GetParam(4, shaInfo.targetSha);
+    ret = context.GetParam(SHA_CHECK_FOURTH, shaInfo.targetSha);
     if (ret != USCRIPT_SUCCESS) {
         LOG(ERROR) << "Failed to get param";
         UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE);
