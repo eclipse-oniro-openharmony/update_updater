@@ -380,14 +380,9 @@ void ExcuteSubProc(const UpdaterParams &upParams, const std::string &fullPath, i
             LOG(WARNING) << "Cannot set current process schedule with SCHED_OTHER";
         }
     }
-    const
-    if (upParams.retryCount > 0) {
-        execl(fullPath.c_str(), upParams.updatePackage[upParams.pkgLocation].c_str(),
-            std::to_string(pipeWrite).c_str(), "retry", nullptr);
-    } else {
-        execl(fullPath.c_str(), upParams.updatePackage[upParams.pkgLocation].c_str(),
-            std::to_string(pipeWrite).c_str(), nullptr);
-    }
+    const std::string retryPara = upParams.retryCount > 0 ? "retry=1" : "retry=0";
+    execl(fullPath.c_str(), fullPath.c_str(), upParams.updatePackage[upParams.pkgLocation].c_str(),
+            std::to_string(pipeWrite).c_str(), retryPara.c_str(), nullptr);
     LOG(ERROR) << "Execute updater binary failed";
     UPDATER_LAST_WORD(UPDATE_ERROR);
     exit(-1);
