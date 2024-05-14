@@ -380,6 +380,7 @@ void ExcuteSubProc(const UpdaterParams &upParams, const std::string &fullPath, i
             LOG(WARNING) << "Cannot set current process schedule with SCHED_OTHER";
         }
     }
+    const
     if (upParams.retryCount > 0) {
         execl(fullPath.c_str(), upParams.updatePackage[upParams.pkgLocation].c_str(),
             std::to_string(pipeWrite).c_str(), "retry", nullptr);
