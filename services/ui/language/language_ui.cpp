@@ -172,7 +172,7 @@ bool LanguageUI::LoadLangRes(const JsonNode &node)
 
 Language LanguageUI::ParseLanguage() const
 {
-    constexpr Language DEFAULT_LOCALE = defaultLanguage_;
+    Language DEFAULT_LOCALE = defaultLanguage_;
 #ifndef UPDATER_UT
     //read language type(en-Latn-US/zh-Hans) from misc
     constexpr const char *CHINSES_LANGUAGE_PREFIX = "zh";
