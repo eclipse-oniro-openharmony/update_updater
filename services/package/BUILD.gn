@@ -91,7 +91,7 @@ ohos_static_library("libupdaterpackage") {
     "bounds_checking_function:libsec_static",
     "lz4:liblz4_static",
     "openssl:libcrypto_static",
-    "zlib:libz_static",
+    "zlib:libz",
   ]
 
   configs = [ ":package_config" ]

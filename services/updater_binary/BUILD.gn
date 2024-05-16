@@ -81,7 +81,7 @@ ohos_static_library("libupdater_binary") {
     "lz4:liblz4_static",
     "openssl:libcrypto_static",
     "openssl:libssl_static",
-    "zlib:libz_static",
+    "zlib:libz",
   ]
 
   part_name = "updater"
