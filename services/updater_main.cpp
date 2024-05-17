@@ -661,7 +661,7 @@ std::unordered_map<std::string, std::function<void ()>> InitOptionsFuncTab(char*
         {
             (void)UPDATER_UI_INSTANCE.SetMode(UPDATERMODE_NIGHTUPDATE);
             upParams.forceReboot = true;
-        }}
+        }},
         {"sdcard_intral_update", [&]() -> void
         {
             upParams.updateMode = SDCARD_UPDATE;
