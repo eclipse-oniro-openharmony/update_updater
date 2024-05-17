@@ -342,7 +342,8 @@ int32_t UpgradePkgFile::ReadImgHashData(size_t &parsedLen, DigestAlgorithm::Dige
 {
 #ifndef DIFF_PATCH_SDK
     if ((!Updater::Utils::CheckUpdateMode(Updater::SDCARD_MODE) &&
-        !Updater::Utils::CheckUpdateMode(Updater::USB_MODE)) ||
+        !Updater::Utils::CheckUpdateMode(Updater::USB_MODE) &&
+        !Updater::Utils::CheckUpdateMode(Updater::SDCARD_INTRAL_MODE)) ||
         pkgInfo_.updateFileVersion < UPGRADE_FILE_VERSION_V2) {
         PKG_LOGI("ignore image hash check");
         return PKG_SUCCESS;

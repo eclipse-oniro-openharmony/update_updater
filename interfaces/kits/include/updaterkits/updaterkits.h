@@ -16,10 +16,15 @@
 #define UPDATER_KITS_H
 #include <string>
 
+constexpr const char *UPGRADE_TYPE_OTA = "ota";
+constexpr const char *UPGRADE_TYPE_SD = "sdcard";
+constexpr const char *UPGRADE_TYPE_SD_INTRAL = "sdcard_intral";
+
 // Reboot system to updater mode and trigger installing update package.
 // @param packageName update package file name.
 // @return returns true if trigger update package installing success, else returns false.
-extern bool RebootAndInstallUpgradePackage(const std::string &miscFile, const std::vector<std::string> &packageName);
+extern bool RebootAndInstallUpgradePackage(const std::string &miscFile, const std::vector<std::string> &packageName,
+    const std::string &upgradeType = UPGRADE_TYPE_OTA);
 
 // Reboot system to sdcard update mode and trigger installing update package.
 // @return returns true if trigger update package installing success, else returns false.

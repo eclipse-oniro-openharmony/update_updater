@@ -21,6 +21,7 @@
 #include "securec.h"
 #include "updater/updater_const.h"
 #include "updater/updater.h"
+#include "sdcard_update/sdcard_update.h"
 #include "fs_manager/mount.h"
 #include "misc_info/misc_info.h"
 #include "updater_main.h"
@@ -328,5 +329,18 @@ HWTEST_F(UpdaterUtilUnitTest, StartUpdaterProcTest, TestSize.Level1)
     int maxTemperature = 0;
     EXPECT_EQ(StartUpdaterProc(nullptr, upParams, maxTemperature), UPDATE_CORRUPT);
     EXPECT_EQ(StartUpdaterProc(pkgManager, upParams, maxTemperature), UPDATE_ERROR);
+}
+
+HWTEST_F(UpdaterUtilUnitTest, CheckPathNeedMountSD, TestSize.Level0)
+{
+    UpdaterParams upParams;
+    upParams.updatePackage.push_back("/data/updater/updater_full.zip");
+    EXPECT_EQ(CheckPathNeedMountSD(upParams), false);
+    upParams.updatePackage.clear();
+    upParams.updatePackage.push_back("/sdcard/updater/updater_full.zip");
+    EXPECT_EQ(CheckPathNeedMountSD(upParams), true);
+    upParams.updatePackage.clear();
+    upParams.updatePackage.push_back("/data/sdcard/updater_full.zip");
+    EXPECT_EQ(CheckPathNeedMountSD(upParams), false);
 }
 }

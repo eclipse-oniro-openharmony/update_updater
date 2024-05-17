@@ -34,5 +34,7 @@ UpdaterStatus GetSdcardPkgsFromDev(UpdaterParams &upParams);
 }
 #endif
 #endif
+
+bool CheckPathNeedMountSD(UpdaterParams &upParams);
 } // namespace Updater
 #endif // SDCARD_UPDATE_H
