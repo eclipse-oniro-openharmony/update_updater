@@ -175,9 +175,11 @@ bool RebootAndInstallUpgradePackage(const std::string &miscFile, const std::vect
     struct UpdateMessage updateMsg {};
     int ret = 0;
     if (upgradeType == UPGRADE_TYPE_SD) {
-        ret = snprintf_s(updateMsg.update, sizeof(updateMsg.update), sizeof(updateMsg.update) - 1, "--sdcard_update\n");
+        ret = snprintf_s(updateMsg.update, sizeof(updateMsg.update), sizeof(updateMsg.update) - 1,
+            "--sdcard_update\n");
     } else if (upgradeType == UPGRADE_TYPE_SD_INTRAL) {
-        ret = snprintf_s(updateMsg.update, sizeof(updateMsg.update), sizeof(updateMsg.update) - 1, "--sdcard_intral_update\n");
+        ret = snprintf_s(updateMsg.update, sizeof(updateMsg.update), sizeof(updateMsg.update) - 1,
+            "--sdcard_intral_update\n");
     }
     if (ret < 0) {
         LOG(ERROR) << "updaterkits: copy updater message failed";
