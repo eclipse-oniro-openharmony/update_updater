@@ -73,6 +73,7 @@ constexpr struct option OPTIONS[] = {
     { "update_protect", no_argument, nullptr, 0 },
     { "UPDATE:SD", no_argument, nullptr, 0 },
     { "UPDATE:SDFROMDEV", no_argument, nullptr, 0 },
+    { "sdcard_intral_update", optional_argument, nullptr, 0},
     { nullptr, 0, nullptr, 0 },
 };
 constexpr float VERIFY_PERCENT = 0.05;
@@ -660,6 +661,10 @@ std::unordered_map<std::string, std::function<void ()>> InitOptionsFuncTab(char*
         {
             (void)UPDATER_UI_INSTANCE.SetMode(UPDATERMODE_NIGHTUPDATE);
             upParams.forceReboot = true;
+        }},
+        {"sdcard_intral_update", [&]() -> void
+        {
+            upParams.updateMode = SDCARD_UPDATE;
         }}
     };
     return optionsFuncTab;

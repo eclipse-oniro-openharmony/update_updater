@@ -49,6 +49,7 @@ constexpr const char *BOOTDEV_TYPE = "/proc/bootdevice/type";
 constexpr const char *SDCARD_MODE = "sdcard_update";
 constexpr const char *OTA_MODE = "update_package";
 constexpr const char *USB_MODE = "usb_update";
+constexpr const char *SDCARD_INTRAL_MODE = "sdcard_intral_update";
 constexpr const char *UPDATRE_SCRIPT_ZIP = "/etc/updater_script.zip";
 
 // sd update ext mode

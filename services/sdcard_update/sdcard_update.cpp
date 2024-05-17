@@ -58,23 +58,18 @@ __attribute__((weak)) UpdaterStatus GetSdcardPkgsFromDev(UpdaterParams &upParams
     return UPDATE_ERROR;
 }
 
-UpdaterStatus CheckSdcardPkgs(UpdaterParams &upParams)
+bool CheckPathNeedMountSD(UpdaterParams &upParams)
 {
-#ifndef UPDATER_UT
-    auto sdParam = "updater.data.configs";
-    Utils::SetParameter(sdParam, "1");
-    if (upParams.sdExtMode == SDCARD_UPDATE_FROM_DEV && GetSdcardPkgsFromDev(upParams) == UPDATE_SUCCESS) {
-        LOG(INFO) << "get sd card from dev succeed, skip get package from sd card";
-        return UPDATE_SUCCESS;
+    for (auto pkgPath : upParams.updatePackage) {
+        if (pkgPath.find("/sdcard") != 0) {
+            return false;
+        }
     }
-    std::string mountPoint = std::string(SDCARD_PATH);
-    std::vector<std::string> sdcardStr = GetBlockDevicesByMountPoint(mountPoint);
-    if (sdcardStr.empty()) {
-        UPDATER_UI_INSTANCE.ShowLog(
-            (errno == ENOENT) ? TR(LOG_SDCARD_NOTFIND) : TR(LOG_SDCARD_ABNORMAL), true);
-        return UPDATE_ERROR;
-    }
+    return true;
+}
 
+bool DoMountSdcard(std::vector<std::string> &sdcardStr, std::string &mountPoint)
+{
     bool mountSuccess = false;
     unsigned int retryTimes = 20;
     for (unsigned int retryCount = 1; retryCount <= retryTimes; retryCount++) {
@@ -91,11 +86,38 @@ UpdaterStatus CheckSdcardPkgs(UpdaterParams &upParams)
         }
         sleep(1); // sleep 1 second to wait for sd card recongnition
     }
-  
-    if (!mountSuccess) {
-        LOG(ERROR) << "mount sdcard fail!";
+    return mountSuccess;
+}
+
+UpdaterStatus CheckSdcardPkgs(UpdaterParams &upParams)
+{
+#ifndef UPDATER_UT
+    auto sdParam = "updater.data.configs";
+    Utils::SetParameter(sdParam, "1");
+    if (upParams.sdExtMode == SDCARD_UPDATE_FROM_DEV && GetSdcardPkgsFromDev(upParams) == UPDATE_SUCCESS) {
+        LOG(INFO) << "get sd card from dev succeed, skip get package from sd card";
+        return UPDATE_SUCCESS;
+    }
+    std::string mountPoint = std::string(SDCARD_PATH);
+    std::vector<std::string> sdcardStr = GetBlockDevicesByMountPoint(mountPoint);
+    if (sdcardStr.empty()) {
+        UPDATER_UI_INSTANCE.ShowLog(
+            (errno == ENOENT) ? TR(LOG_SDCARD_NOTFIND) : TR(LOG_SDCARD_ABNORMAL), true);
         return UPDATE_ERROR;
     }
+    if (Utils::CheckUpdateMode(Updater::SDCARD_INTRAL_MODE)) {
+        if (MountForPath("/data") != 0) {
+            LOG(ERROR) << "data partition mount fail";
+            return UPDATE_ERROR;
+        }
+    }
+    if ((Utils::CheckUpdateMode(Updater::SDCARD_MODE) && !Utils::CheckUpdateMode(Updater::SDCARD_INTRAL_MODE)) ||
+        (Utils::CheckUpdateMode(Updater::SDCARD_INTRAL_MODE) && CheckPathNeedMountSD(upParams))) {
+            if (!DoMountSdcard(sdcardStr, mountPoint)) {
+                LOG(ERROR) << "mount sdcard fail!";
+                return UPDATE_ERROR;
+            }
+        }
 #endif
     if (GetSdcardPkgsPath(upParams) != UPDATE_SUCCESS) {
         LOG(ERROR) << "there is no package in sdcard/updater, please check";

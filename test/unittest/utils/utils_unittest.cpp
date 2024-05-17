@@ -174,4 +174,14 @@ HWTEST_F(UtilsUnitTest, TrimStringTest, TestSize.Level0)
     Utils::TrimString(ret);
     EXPECT_EQ(ret, "abc");
 }
+
+HWTEST_F(UtilsUnitTest, TrimUpdateMode, TestSize.Level0)
+{
+    const std::string updateMode = "--update_package=";
+    EXPECT_EQ(Utils::TrimUpdateMode(updateMode), "update_package");
+    const std::string sdcardMode = "--sdcard_update";
+    EXPECT_EQ(Utils::TrimUpdateMode(sdcardMode), "sdcard_update");
+    const std::string intralMode = "--sdcard_intral_update";
+    EXPECT_EQ(Utils::TrimUpdateMode(intralMode), "sdcard_intral_update");
+}
 } // updater_ut
