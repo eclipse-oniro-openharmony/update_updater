@@ -68,7 +68,7 @@ bool CheckPathNeedMountSD(UpdaterParams &upParams)
     return true;
 }
 
-bool DoMountSdcard(std::vector<std::string> &sdcardStr)
+bool DoMountSdcard(std::vector<std::string> &sdcardStr. const std::string &mountPoint)
 {
 #ifndef UPDATER_UT
     bool mountSuccess = false;
@@ -115,7 +115,7 @@ UpdaterStatus CheckSdcardPkgs(UpdaterParams &upParams)
     }
     if ((Utils::CheckUpdateMode(Updater::SDCARD_MODE) && !Utils::CheckUpdateMode(Updater::SDCARD_INTRAL_MODE)) ||
         (Utils::CheckUpdateMode(Updater::SDCARD_INTRAL_MODE) && CheckPathNeedMountSD(upParams))) {
-            if (!DoMountSdcard(sdcardStr)) {
+            if (!DoMountSdcard(sdcardStr, mountPoint)) {
                 LOG(ERROR) << "mount sdcard fail!";
                 return UPDATE_ERROR;
             }
