@@ -47,6 +47,10 @@ HWTEST_F(UpdaterKitsUnitTest, updater_kits_test01, TestSize.Level1)
     EXPECT_NE(fp, nullptr);
     ret = RebootAndInstallUpgradePackage(MISC_FILE, packageName2);
     EXPECT_EQ(ret, true);
+    ret = RebootAndInstallUpgradePackage(MISC_FILE, packageName2, UPGRADE_TYPE_SD);
+    EXPECT_EQ(ret, true);
+    ret = RebootAndInstallUpgradePackage(MISC_FILE, packageName2, UPGRADE_TYPE_SD_INTRAL);
+    EXPECT_EQ(ret, true);
     unlink(MISC_FILE.c_str());
 }
 

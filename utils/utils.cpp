@@ -666,11 +666,33 @@ std::vector<std::string> ParseParams(int argc, char **argv)
     return parseParams;
 }
 
+std::string TrimUpdateMode(const std::string &mode)
+{
+    std::string optEqual = "=";
+    std::string modePrefix = "--"; // misc = --update_package=xxxx / --sdcard_update
+    size_t optPos = mode.size();
+    size_t prefixPos = 0;
+    if (mode.empty()) {
+        return "";
+    }
+    if (mode.find(optEqual) != std::string::npos) {
+        optPos = mode.find(optEqual);
+    }
+    if (mode.find(modePrefix) != std::string::npos) {
+        modePrefix = mode.find(modePrefix);
+    }
+    if (optPos < prefixPos) {
+        return mode;
+    }
+    return mode.substr(prefixPos + modePrefix.size(),
+        optPos - prefixPos - modePrefix.size());
+}
+
 bool CheckUpdateMode(const std::string &mode)
 {
     std::vector<std::string> args = ParseParams(0, nullptr);
     for (const auto &arg : args) {
-        if (arg.find(mode) != std::string::npos) {
+        if (TrimUpdateMode(arg) == mode) {
             return true;
         }
     }
