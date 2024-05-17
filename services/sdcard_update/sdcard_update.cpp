@@ -68,7 +68,7 @@ bool CheckPathNeedMountSD(UpdaterParams &upParams)
     return true;
 }
 
-bool DoMountSdcard(std::vector<std::string> &sdcardStr, const std::string &mountPoint)
+bool DoMountSdcard(std::vector<std::string> &sdcardStr, std::string &mountPoint)
 {
 #ifndef UPDATER_UT
     bool mountSuccess = false;
