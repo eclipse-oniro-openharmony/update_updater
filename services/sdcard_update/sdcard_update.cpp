@@ -70,7 +70,6 @@ bool CheckPathNeedMountSD(UpdaterParams &upParams)
 
 bool DoMountSdcard(std::vector<std::string> &sdcardStr, std::string &mountPoint)
 {
-#ifndef UPDATER_UT
     bool mountSuccess = false;
     unsigned int retryTimes = 20;
     for (unsigned int retryCount = 1; retryCount <= retryTimes; retryCount++) {
@@ -87,7 +86,6 @@ bool DoMountSdcard(std::vector<std::string> &sdcardStr, std::string &mountPoint)
         }
         sleep(1); // sleep 1 second to wait for sd card recongnition
     }
-#endif
     return mountSuccess;
 }
 
