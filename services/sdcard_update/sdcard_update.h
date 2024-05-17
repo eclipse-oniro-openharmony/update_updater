@@ -36,6 +36,6 @@ UpdaterStatus GetSdcardPkgsFromDev(UpdaterParams &upParams);
 #endif
 
 bool CheckPathNeedMountSD(UpdaterParams &upParams);
-bool MountSdcard(std::vector<std::string> &sdcardStr);
+bool DoMountSdcard(std::vector<std::string> &sdcardStr);
 } // namespace Updater
 #endif // SDCARD_UPDATE_H
