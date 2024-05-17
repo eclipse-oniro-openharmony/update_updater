@@ -462,7 +462,7 @@ int ProcessUpdater(bool retry, int pipeFd, const std::string &packagePath, const
     Dump::GetInstance().RegisterDump("DumpHelperLog", std::make_unique<DumpHelperLog>());
     FILE *pipeWrite = fdopen(pipeFd, "w");
     if (pipeWrite == nullptr) {
-        LOG(ERROR) << "Fail to fdopen";
+        LOG(ERROR) << "Fail to fdopen, err: " << strerror(errno);
         UPDATER_LAST_WORD(EXIT_INVALID_ARGS);
         return EXIT_INVALID_ARGS;
     }
