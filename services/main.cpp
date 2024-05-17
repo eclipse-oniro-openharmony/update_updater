@@ -30,7 +30,7 @@ int main(int argc, char **argv)
     struct UpdateMessage boot {};
     if (!ReadUpdaterMiscMsg(boot)) {
         // read misc failed, default enter updater mode
-        boot = {"boot_updater", "", ""};
+        LOG(WARNING) << "read misc message failed";
     }
 
     // select modes by bootMode.cond which would check misc message

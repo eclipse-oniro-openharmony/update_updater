@@ -41,6 +41,7 @@ public:
     [[nodiscard]] bool LoadLangRes(const JsonNode &node);
     Language ParseLanguage() const;
     Language GetCurLanguage() const;
+    void SetDefaultLanguage(Language language);
 private:
     ~LanguageUI() = default;
     LanguageUI();
@@ -52,6 +53,7 @@ private:
     std::vector<std::string> res_;
     LangResource langRes_;
     Language language_;
+    Language defaultLanguage_ = Language::ENGLISH;
     static constexpr auto LANG_RES_KEY = "locale";
     const static std::unordered_map<std::string, Language> LOCALES;
 };

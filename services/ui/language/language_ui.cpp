@@ -44,6 +44,11 @@ LanguageUI::LanguageUI() : strMap_ {}, res_ {}, langRes_ {}, language_ {Language
     res_.resize(MAX_LVL + 1);
 }
 
+void LanguageUI::SetDefaultLanguage(Language language)
+{
+    defaultLanguage_ = language;
+}
+
 LanguageUI &LanguageUI::GetInstance()
 {
     static LanguageUI instance;
@@ -167,7 +172,7 @@ bool LanguageUI::LoadLangRes(const JsonNode &node)
 
 Language LanguageUI::ParseLanguage() const
 {
-    constexpr Language DEFAULT_LOCALE = Language::ENGLISH;
+    Language DEFAULT_LOCALE = defaultLanguage_;
 #ifndef UPDATER_UT
     //read language type(en-Latn-US/zh-Hans) from misc
     constexpr const char *CHINSES_LANGUAGE_PREFIX = "zh";
