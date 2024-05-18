@@ -34,12 +34,12 @@ ohos_shared_library("libupdater_shared") {
 
   external_deps = [
     "bounds_checking_function:libsec_shared",
+    "hilog:libhilog",
     "init:libbegetutil_static",
     "lz4:liblz4_static",
     "openssl:libcrypto_shared",
     "openssl:libssl_shared",
     "zlib:shared_libz",
-    "hilog:libhilog",
   ]
 
   innerapi_tags = [
