@@ -217,7 +217,7 @@ ohos_static_library("libflashd") {
     "bzip2:libbz2",
     "cJSON:cjson",
     "c_utils:utils",
-    "init:libbegetutilz_static",
+    "init:libbegetutil_static",
     "libuv:uv",
     "lz4:liblz4_static",
     "openssl:libcrypto_shared",
