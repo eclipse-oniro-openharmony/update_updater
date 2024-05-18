@@ -672,20 +672,19 @@ std::string TrimUpdateMode(const std::string &mode)
     std::string modePrefix = "--"; // misc = --update_package=xxxx / --sdcard_update
     size_t optPos = mode.size();
     size_t prefixPos = 0;
-    if (mode.empty()) {
+    if (mode.empty() || mode == "") {
         return "";
     }
     if (mode.find(optEqual) != std::string::npos) {
         optPos = mode.find(optEqual);
     }
     if (mode.find(modePrefix) != std::string::npos) {
-        modePrefix = mode.find(modePrefix);
+        prefixPos = mode.find(modePrefix) + modePrefix.size();
     }
     if (optPos < prefixPos) {
         return mode;
     }
-    return mode.substr(prefixPos + modePrefix.size(),
-        optPos - prefixPos - modePrefix.size());
+    return mode.substr(prefixPos, optPos - prefixPos);
 }
 
 bool CheckUpdateMode(const std::string &mode)

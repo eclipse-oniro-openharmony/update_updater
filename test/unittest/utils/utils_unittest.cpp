@@ -183,5 +183,7 @@ HWTEST_F(UtilsUnitTest, TrimUpdateMode, TestSize.Level0)
     EXPECT_EQ(Utils::TrimUpdateMode(sdcardMode), "sdcard_update");
     const std::string intralMode = "--sdcard_intral_update";
     EXPECT_EQ(Utils::TrimUpdateMode(intralMode), "sdcard_intral_update");
+    const std::string emptyStr = "";
+    EXPECT_EQ(Utils::TrimUpdateMode(emptyStr), "");
 }
 } // updater_ut
