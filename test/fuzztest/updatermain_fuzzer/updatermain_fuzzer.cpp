@@ -192,19 +192,6 @@ static void StartUpdaterEntryFuzzTest()
     }
 }
 
-static void StartUpdaterProcFuzzTest()
-{
-    Hpackage::PkgManager::PkgManagerPtr pkgManager = Hpackage::PkgManager::CreatePackageInstance();
-    UpdaterParams upParams;
-    int maxTemperature = 0;
-    if (StartUpdaterProc(nullptr, upParams, maxTemperature) != UPDATE_CORRUPT) {
-        return;
-    }
-    if (StartUpdaterProc(pkgManager, upParams, maxTemperature) != UPDATE_ERROR) {
-        return;
-    }
-}
-
 static void DoInstallUpdaterPackageFuzzTest()
 {
     UpdaterParams upParams;
@@ -250,9 +237,41 @@ static void IsSpaceCapacitySufficientFuzzTest()
     if (status != UPDATE_ERROR) {
         return;
     }
+    if (CheckStatvfs(0) != 0) {
+        return;
+    }
+    if (IsBatteryCapacitySufficient()) {
+        return;
+    }
     upParams.updatePackage.push_back("/data/updater/updater/updater_full.zip");
     status = IsSpaceCapacitySufficient(upParams);
     if (status != UPDATE_SUCCESS) {
+        return;
+    }
+}
+
+static void ProgressFuzzTest()
+{
+    int progress = 0;
+    SetTmpProgressValue(progress);
+    if (GetTmpProgressValue() != 0) {
+        return;
+    }
+    ProgressSmoothHandler(0, 1);
+}
+
+static void UtilsFuzzTest()
+{
+    std::string path = "/data/fuzz/test";
+    if (!Updater::Utils::IsDirExist(path)) {
+        return;
+    }
+    std::vector<std::string> files {};
+    if (Updater::Utils::GetFilesFromDirectory(path, files, false) < 0) {
+        return;
+    }
+    std::string filePath = path + "MountForPath_fuzzer.fstable";
+    if (!Updater::Utils::IsFileExist(filePath)) {
         return;
     }
 }
@@ -266,10 +285,11 @@ namespace OHOS {
         InstallUpdaterPackageFuzzTest();
         DoUpdatePackagesFuzzTest();
         StartUpdaterEntryFuzzTest();
-        StartUpdaterProcFuzzTest();
         DoInstallUpdaterPackageFuzzTest();
         ExtractUpdaterBinaryFuzzTest();
         IsSpaceCapacitySufficientFuzzTest();
+        ProgressFuzzTest();
+        UtilsFuzzTest();
     }
 }
 

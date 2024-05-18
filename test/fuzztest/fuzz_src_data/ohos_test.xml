@@ -5,6 +5,11 @@
             <option name="push" value="MountForPath_fuzzer.fstable -> /data/fuzz/test" src="res"/>
         </preparer>
     </target>
+    <target name="UpdaterMainFuzzTest">
+        <preparer>
+            <option name="push" value="MountForPath_fuzzer.fstable -> /data/fuzz/test" src="res"/>
+        </preparer>
+    </target>
     <target name="ExtractAndExecuteScriptFuzzTest">
         <preparer>
             <option name="push" value="loadScript.us -> /data/fuzz/test" src="res"/>
