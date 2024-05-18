@@ -45,6 +45,7 @@ updater_common_deps = [
 
 updater_gen("updater") {
   deps = [ "${updater_path}/services:libupdater_static" ]
+  external_deps = [ "hilog:libhilog" ]
 
   # force link flashd library
   ldflags = [
