@@ -49,6 +49,7 @@ ohos_fuzztest("UpdaterMainFuzzTest") {
     "${updater_path}/services/script:libupdaterscript",
     "${updater_path}/services/sdcard_update:libsdupdate",
     "${updater_path}/utils:libutils",
+    "${updater_path}/utils:libutils_fs",
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/bzip2:libbz2",
     "//third_party/cJSON:cjson",
@@ -71,6 +72,7 @@ ohos_fuzztest("UpdaterMainFuzzTest") {
     "${updater_path}/services/updater.cpp",
     "${updater_path}/services/updater_main.cpp",
     "${updater_path}/utils/utils.cpp",
+    "${updater_path}/utils/utils_fs.cpp",
     "updatermain_fuzzer.cpp",
   ]
 }
