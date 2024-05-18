@@ -287,7 +287,6 @@ static void UtilsFuzzTest()
     if (!Updater::Utils::IsFileExist(filePath)) {
         return;
     }
-
 }
 
 namespace OHOS {
