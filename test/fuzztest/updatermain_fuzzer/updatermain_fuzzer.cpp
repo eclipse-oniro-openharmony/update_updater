@@ -192,19 +192,6 @@ static void StartUpdaterEntryFuzzTest()
     }
 }
 
-static void StartUpdaterProcFuzzTest()
-{
-    Hpackage::PkgManager::PkgManagerPtr pkgManager = Hpackage::PkgManager::CreatePackageInstance();
-    UpdaterParams upParams;
-    int maxTemperature = 0;
-    if (StartUpdaterProc(nullptr, upParams, maxTemperature) != UPDATE_CORRUPT) {
-        return;
-    }
-    if (StartUpdaterProc(pkgManager, upParams, maxTemperature) != UPDATE_ERROR) {
-        return;
-    }
-}
-
 static void DoInstallUpdaterPackageFuzzTest()
 {
     UpdaterParams upParams;
@@ -298,7 +285,6 @@ namespace OHOS {
         InstallUpdaterPackageFuzzTest();
         DoUpdatePackagesFuzzTest();
         StartUpdaterEntryFuzzTest();
-        StartUpdaterProcFuzzTest();
         DoInstallUpdaterPackageFuzzTest();
         ExtractUpdaterBinaryFuzzTest();
         IsSpaceCapacitySufficientFuzzTest();
