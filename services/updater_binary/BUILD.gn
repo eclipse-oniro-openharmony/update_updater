@@ -32,9 +32,15 @@ config("updater_config") {
   ]
 }
 
-updater_gen("updater_binary") {
-  deps = [ "${updater_path}/services/updater_binary:libupdater_binary" ]
+config("updater_binary_lc++")
+{
+  ldflags = [ "-lc++" ]
+}
 
+updater_gen("updater_binary") {
+  static_link = true
+  deps = [ "${updater_path}/services/updater_binary:libupdater_binary" ]
+  configs = [ ":updater_binary_lc++" ]
   part_name = "updater"
   subsystem_name = "updater"
 }
