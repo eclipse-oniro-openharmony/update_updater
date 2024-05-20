@@ -20,6 +20,7 @@ declare_args() {
   if (!defined(global_parts_info.arkui_ui_lite)) {
     updater_ui_support = false
   }
+  updater_hdc_depend = true
   updater_absolutely_path = "//base/update/updater"
   hdc_base = "//developtools/hdc"
 }
