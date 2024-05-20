@@ -98,13 +98,16 @@ ohos_static_library("flashd_deamon") {
   external_deps = [
     "bounds_checking_function:libsec_static",
     "c_utils:utils",
-    "hdc:hdc_register",
     "libuv:uv",
     "lz4:liblz4_static",
     "openssl:libcrypto_shared",
   ]
 
   deps = [ "${updater_path}/services/flashd:hdc_hash_gen" ]
+
+  if (updater_hdc_depend) {
+    external_deps += [ "hdc:hdc_register" ]
+  }
 
   if (use_musl) {
     external_deps += [ "init:libbegetutil" ]
@@ -214,13 +217,16 @@ ohos_static_library("libflashd") {
     "bzip2:libbz2",
     "cJSON:cjson",
     "c_utils:utils",
-    "hdc:hdc_register",
     "init:libbegetutil",
     "libuv:uv",
     "lz4:liblz4_static",
     "openssl:libcrypto_shared",
     "zlib:libz",
   ]
+
+  if (updater_hdc_depend) {
+    external_deps += [ "hdc:hdc_register" ]
+  }
 
   if (build_selinux) {
     external_deps += [ "selinux:libselinux" ]
