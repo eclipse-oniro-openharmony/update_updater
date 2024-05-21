@@ -36,7 +36,7 @@ namespace OHOS {
         WriteUpdaterMessage(path, boot);
         WriteUpdaterMiscMsg(boot);
     }
-    void FuzzWriteUpdaterPara(const uint8_t* data, size_t size)
+    void FuzzWriteUpdaterPara()
     {
         UpdaterPara boot;
         WriteUpdaterParaMisc(boot);
@@ -50,7 +50,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
     OHOS::FuzzWriteUpdaterMsg(data, size);
-    OHOS::FuzzWriteUpdaterPara(data, size);
+    OHOS::FuzzWriteUpdaterPara();
     return 0;
 }
 
