@@ -30,6 +30,7 @@ namespace OHOS {
         // const std::string miscFile = "/dev/block/by_name/misc";
         const std::vector<std::string> packageName {std::string(reinterpret_cast<const char*>(data), size)};
         RebootAndInstallUpgradePackage("", packageName);
+        RebootAndInstallSdcardPackage("", packageName);
         RebootAndCleanUserData("", std::string(reinterpret_cast<const char*>(data), size));
     }
 }
