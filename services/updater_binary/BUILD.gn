@@ -32,8 +32,7 @@ config("updater_config") {
   ]
 }
 
-config("updater_binary_lc++")
-{
+config("updater_binary_lc++") {
   ldflags = [ "-lc++" ]
 }
 
