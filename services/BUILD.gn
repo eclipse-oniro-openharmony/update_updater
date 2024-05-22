@@ -110,8 +110,8 @@ ohos_static_library("libupdater_static") {
 
   if (build_selinux) {
     external_deps += [
-      "selinux:libselinux",
-      "selinux_adapter:librestorecon",
+      "selinux:libselinux_static",
+      "selinux_adapter:librestorecon_static",
     ]
     cflags = [ "-DWITH_SELINUX" ]
   }
@@ -192,8 +192,8 @@ ohos_static_library("libupdater") {
 
   if (build_selinux) {
     external_deps += [
-      "selinux:libselinux",
-      "selinux_adapter:librestorecon",
+      "selinux:libselinux_static",
+      "selinux_adapter:librestorecon_static",
     ]
     cflags = [ "-DWITH_SELINUX" ]
   }

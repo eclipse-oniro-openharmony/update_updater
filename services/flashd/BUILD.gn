@@ -128,7 +128,7 @@ ohos_static_library("flashd_deamon") {
   ]
 
   if (build_selinux) {
-    external_deps += [ "selinux:libselinux" ]
+    external_deps += [ "selinux:libselinux_static" ]
     defines += [
       "SURPPORT_SELINUX",
       "UPDATER_MODE",
@@ -225,7 +225,7 @@ ohos_static_library("libflashd") {
   ]
 
   if (build_selinux) {
-    external_deps += [ "selinux:libselinux" ]
+    external_deps += [ "selinux:libselinux_static" ]
     defines += [ "SURPPORT_SELINUX" ]
   }
 
