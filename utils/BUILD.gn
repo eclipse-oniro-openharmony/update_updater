@@ -46,14 +46,15 @@ ohos_static_library("libutils") {
   deps = []
   external_deps = [
     "bounds_checking_function:libsec_static",
-    "cJSON:cjson",
-    "init:libbegetutil",
+    "cJSON:cjson_static",
+    "init:libbegetutil_static",
+    "init:libfsmanager_static_real",
   ]
 
   if (build_selinux) {
     external_deps += [
-      "selinux:libselinux",
-      "selinux_adapter:librestorecon",
+      "selinux:libselinux_static",
+      "selinux_adapter:librestorecon_static",
     ]
     cflags = [ "-DWITH_SELINUX" ]
   }
@@ -118,7 +119,7 @@ ohos_executable("write_updater") {
   deps = [ "${updater_path}/interfaces/kits/misc_info:libmiscinfo" ]
   external_deps = [
     "bounds_checking_function:libsec_static",
-    "init:libbegetutil",
+    "init:libbegetutil_static",
   ]
 
   install_enable = true

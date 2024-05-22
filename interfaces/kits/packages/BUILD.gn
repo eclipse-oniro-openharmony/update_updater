@@ -75,9 +75,7 @@ ohos_static_library("libpackageExt") {
   external_deps = [
     "bounds_checking_function:libsec_static",
     "lz4:liblz4_static",
-    "openssl:libcrypto_shared",
-    "openssl:libssl_shared",
-    "zlib:libz",
+    "openssl:libcrypto_static",
   ]
   subsystem_name = "updater"
   part_name = "updater"

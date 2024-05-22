@@ -40,7 +40,8 @@ ohos_static_library("libmiscinfo") {
 
   external_deps = [
     "bounds_checking_function:libsec_static",
-    "init:libbegetutil",
+    "init:libbegetutil_static",
+    "init:libfsmanager_static_real",
   ]
 
   subsystem_name = "updater"

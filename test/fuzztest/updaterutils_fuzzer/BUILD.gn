@@ -39,7 +39,7 @@ ohos_fuzztest("UpdaterUtilsFuzzTest") {
 
   external_deps = [
     "hilog:libhilog",
-    "init:libbegetutil",
+    "init:libbegetutil_static",
   ]
 
   deps = [

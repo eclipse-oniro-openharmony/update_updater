@@ -39,7 +39,7 @@ ohos_fuzztest("WriteUpdaterMsgFuzzTest") {
     "//third_party/bounds_checking_function:libsec_static",
   ]
 
-  external_deps = [ "init:libbegetutil" ]
+  external_deps = [ "init:libbegetutil_static" ]
 
   cflags = [
     "-g",

@@ -45,6 +45,7 @@ updater_common_deps = [
 
 updater_gen("updater") {
   deps = [ "${updater_path}/services:libupdater_static" ]
+  external_deps = [ "hilog:libhilog" ]
 
   # force link flashd library
   ldflags = [
@@ -93,7 +94,7 @@ ohos_static_library("libupdater_static") {
     "bounds_checking_function:libsec_static",
     "bzip2:libbz2",
     "cJSON:cjson",
-    "init:libbegetutil",
+    "init:libbegetutil_static",
     "libdrm:libdrm",
     "openssl:libcrypto_shared",
     "openssl:libssl_shared",
@@ -109,8 +110,8 @@ ohos_static_library("libupdater_static") {
 
   if (build_selinux) {
     external_deps += [
-      "selinux:libselinux",
-      "selinux_adapter:librestorecon",
+      "selinux:libselinux_static",
+      "selinux_adapter:librestorecon_static",
     ]
     cflags = [ "-DWITH_SELINUX" ]
   }
@@ -170,7 +171,7 @@ ohos_static_library("libupdater") {
     "bounds_checking_function:libsec_static",
     "bzip2:libbz2",
     "cJSON:cjson",
-    "init:libbegetutil",
+    "init:libbegetutil_static",
     "openssl:libcrypto_shared",
     "openssl:libssl_shared",
     "zlib:libz",
@@ -191,8 +192,8 @@ ohos_static_library("libupdater") {
 
   if (build_selinux) {
     external_deps += [
-      "selinux:libselinux",
-      "selinux_adapter:librestorecon",
+      "selinux:libselinux_static",
+      "selinux_adapter:librestorecon_static",
     ]
     cflags = [ "-DWITH_SELINUX" ]
   }

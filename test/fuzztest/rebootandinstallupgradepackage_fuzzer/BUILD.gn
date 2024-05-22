@@ -51,7 +51,7 @@ ohos_fuzztest("RebootAndInstallUpgradePackageFuzzTest") {
 
   external_deps = [
     "c_utils:utils",
-    "init:libbegetutil",
+    "init:libbegetutil_static",
   ]
 
   cflags = [

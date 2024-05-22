@@ -68,7 +68,7 @@ ohos_fuzztest("UpdaterFactoryResetFuzzTest") {
     "//third_party/zlib:libz",
   ]
 
-  external_deps = [ "init:libbegetutil" ]
+  external_deps = [ "init:libbegetutil_static" ]
   if (updater_ui_support) {
     external_deps += [ "ui_lite:libupdater_layout" ]
   }
