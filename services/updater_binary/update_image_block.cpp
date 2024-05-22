@@ -477,9 +477,10 @@ int UScriptInstructionShaCheck::ExecReadShaInfo(Uscript::UScriptEnv &env, const 
     UPDATER_INIT_RECORD;
     std::string resultSha = CalculateBlockSha(devPath, shaInfo.blockPairs);
     std::string tgtResultSha = CalculateBlockSha(devPath, shaInfo.targetPairs);
-    if (resultSha.empty() || tgtResultSha.empty()) {
+    if (resultSha.empty() && tgtResultSha.empty()) {
         return USCRIPT_ERROR_EXECUTE;
     }
+
     if (resultSha != shaInfo.contrastSha && tgtResultSha != shaInfo.targetSha) {
         LOG(ERROR) << "Different sha256, cannot continue";
         LOG(ERROR) << "blockPairs:" << shaInfo.blockPairs;
@@ -537,6 +538,11 @@ std::string UScriptInstructionShaCheck::CalculateBlockSha(const std::string &dev
         return "";
     }
 
+    if (blockPairs.empty()) {
+        LOG(ERROR) << "Failed to get blockPairs";
+        return "";
+    }
+
     BlockSet blk;
     blk.ParserAndInsert(blockPairs);
     std::vector<uint8_t> block_buff(H_BLOCK_SIZE);
@@ -567,32 +573,33 @@ std::string UScriptInstructionShaCheck::CalculateBlockSha(const std::string &dev
     std::string resultSha = Utils::ConvertSha256Hex(digest, SHA256_DIGEST_LENGTH);
     return resultSha;
 }
-int32_t UScriptInstructionShaCheck::SetShaInfo(Uscript::UScriptContext &context, ShaInfo &shaInfo)
+
+int32_t UScriptInstructionShaCheck::SetShaInfo(const Uscript::UScriptContext &context, ShaInfo &shaInfo)
 {
     int32_t ret = context.GetParam(1, shaInfo.blockPairs);
     if (ret != USCRIPT_SUCCESS) {
-        LOG(ERROR) << "Failed to get param";
+        LOG(ERROR) << "Failed to get param blockPairs";
         UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE);
         return USCRIPT_ERROR_EXECUTE;
     }
 
     ret = context.GetParam(SHA_CHECK_SECOND, shaInfo.contrastSha);
     if (ret != USCRIPT_SUCCESS) {
-        LOG(ERROR) << "Failed to get param";
+        LOG(ERROR) << "Failed to get param contrastSha";
         UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE);
         return USCRIPT_ERROR_EXECUTE;
     }
 
     ret = context.GetParam(SHA_CHECK_TARGETPAIRS_INDEX, shaInfo.targetPairs);
     if (ret != USCRIPT_SUCCESS) {
-        LOG(ERROR) << "Failed to get param";
+        LOG(ERROR) << "Failed to get param targetPairs";
         UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE);
         return USCRIPT_ERROR_EXECUTE;
     }
 
     ret = context.GetParam(SHA_CHECK_TARGETSHA_INDEX, shaInfo.targetSha);
     if (ret != USCRIPT_SUCCESS) {
-        LOG(ERROR) << "Failed to get param";
+        LOG(ERROR) << "Failed to get param targetSha";
         UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE);
         return USCRIPT_ERROR_EXECUTE;
     }
@@ -622,6 +629,7 @@ int32_t UScriptInstructionShaCheck::Execute(Uscript::UScriptEnv &env, Uscript::U
     ShaInfo shaInfo {};
     ret = SetShaInfo(context, shaInfo);
     if (ret != USCRIPT_SUCCESS) {
+        LOG(ERROR) << "Failed to set sha info "
         return ReturnAndPushParam(ret, context);
     }
 
