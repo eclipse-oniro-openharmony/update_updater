@@ -478,10 +478,12 @@ int UScriptInstructionShaCheck::ExecReadShaInfo(Uscript::UScriptEnv &env, const 
     std::string resultSha = CalculateBlockSha(devPath, shaInfo.blockPairs);
     std::string tgtResultSha = CalculateBlockSha(devPath, shaInfo.targetPairs);
     if (resultSha.empty() && tgtResultSha.empty()) {
+        LOG(ERROR) << "All sha is empty";
         return USCRIPT_ERROR_EXECUTE;
     }
 
-    if (resultSha != shaInfo.contrastSha && tgtResultSha != shaInfo.targetSha) {
+    bool isTargetSame = tgtResultSha.empty() ? true : (tgtResultSha != shaInfo.targetSha);
+    if (resultSha != shaInfo.contrastSha && isTargetSame) {
         LOG(ERROR) << "Different sha256, cannot continue";
         LOG(ERROR) << "blockPairs:" << shaInfo.blockPairs;
         PrintAbnormalBlockHash(devPath, shaInfo.blockPairs);
@@ -531,15 +533,15 @@ void UScriptInstructionShaCheck::PrintAbnormalBlockHash(const std::string &devPa
 
 std::string UScriptInstructionShaCheck::CalculateBlockSha(const std::string &devPath, const std::string &blockPairs)
 {
+    if (blockPairs.empty()) {
+        LOG(ERROR) << "Failed to get blockPairs";
+        return "";
+    }
+
     int fd = open(devPath.c_str(), O_RDWR | O_LARGEFILE);
     if (fd == -1) {
         LOG(ERROR) << "Failed to open file";
         UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE);
-        return "";
-    }
-
-    if (blockPairs.empty()) {
-        LOG(ERROR) << "Failed to get blockPairs";
         return "";
     }
 
@@ -570,8 +572,7 @@ std::string UScriptInstructionShaCheck::CalculateBlockSha(const std::string &dev
 
     uint8_t digest[SHA256_DIGEST_LENGTH];
     SHA256_Final(digest, &ctx);
-    std::string resultSha = Utils::ConvertSha256Hex(digest, SHA256_DIGEST_LENGTH);
-    return resultSha;
+    return Utils::ConvertSha256Hex(digest, SHA256_DIGEST_LENGTH);
 }
 
 int32_t UScriptInstructionShaCheck::SetShaInfo(const Uscript::UScriptContext &context, ShaInfo &shaInfo)
@@ -590,18 +591,15 @@ int32_t UScriptInstructionShaCheck::SetShaInfo(const Uscript::UScriptContext &co
         return USCRIPT_ERROR_EXECUTE;
     }
 
+    // Only three parameters can be obtained for the upgrade package of an earlier version.
     ret = context.GetParam(SHA_CHECK_TARGETPAIRS_INDEX, shaInfo.targetPairs);
     if (ret != USCRIPT_SUCCESS) {
-        LOG(ERROR) << "Failed to get param targetPairs";
-        UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE);
-        return USCRIPT_ERROR_EXECUTE;
+        LOG(WARNING) << "Failed to get param targetPairs";
     }
 
     ret = context.GetParam(SHA_CHECK_TARGETSHA_INDEX, shaInfo.targetSha);
     if (ret != USCRIPT_SUCCESS) {
-        LOG(ERROR) << "Failed to get param targetSha";
-        UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE);
-        return USCRIPT_ERROR_EXECUTE;
+        LOG(WARNING) << "Failed to get param targetSha";
     }
 
     return USCRIPT_SUCCESS;
@@ -609,7 +607,8 @@ int32_t UScriptInstructionShaCheck::SetShaInfo(const Uscript::UScriptContext &co
 
 int32_t UScriptInstructionShaCheck::Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context)
 {
-    if (context.GetParamCount() != SHA_CHECK_PARAMS && context.GetParamCount() != SHA_CHECK_TARGET_PARAMS) {
+    int32_t paramCount = context.GetParamCount();
+    if (paramCount != SHA_CHECK_PARAMS && paramCount != SHA_CHECK_TARGET_PARAMS) {
         LOG(ERROR) << "Invalid param";
         UPDATER_LAST_WORD(USCRIPT_INVALID_PARAM);
         return ReturnAndPushParam(USCRIPT_INVALID_PARAM, context);
