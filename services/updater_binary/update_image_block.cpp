@@ -482,8 +482,8 @@ int UScriptInstructionShaCheck::ExecReadShaInfo(Uscript::UScriptEnv &env, const 
         return USCRIPT_ERROR_EXECUTE;
     }
 
-    bool isTargetSame = tgtResultSha.empty() ? true : (tgtResultSha != shaInfo.targetSha);
-    if (resultSha != shaInfo.contrastSha && isTargetSame) {
+    bool isTargetDiff = tgtResultSha.empty() ? true : (tgtResultSha != shaInfo.targetSha);
+    if (resultSha != shaInfo.contrastSha && isTargetDiff) {
         LOG(ERROR) << "Different sha256, cannot continue";
         LOG(ERROR) << "blockPairs:" << shaInfo.blockPairs;
         PrintAbnormalBlockHash(devPath, shaInfo.blockPairs);
