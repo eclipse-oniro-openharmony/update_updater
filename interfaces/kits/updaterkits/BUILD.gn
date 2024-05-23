@@ -34,8 +34,7 @@ ohos_shared_library("libupdater_shared") {
 
   external_deps = [
     "bounds_checking_function:libsec_shared",
-    "hilog:libhilog",
-    "init:libbegetutil_static",
+    "init:libbegetutil",
     "lz4:liblz4_static",
     "openssl:libcrypto_shared",
     "openssl:libssl_shared",
@@ -73,7 +72,7 @@ ohos_static_library("libupdaterkits") {
 
   external_deps = [
     "bounds_checking_function:libsec_static",
-    "init:libbegetutil_static",
+    "init:libbegetutil",
   ]
   subsystem_name = "updater"
   part_name = "updater"

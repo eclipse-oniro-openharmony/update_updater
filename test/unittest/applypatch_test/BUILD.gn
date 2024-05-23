@@ -71,7 +71,7 @@ ohos_unittest("applypatch_unittest") {
     "//third_party/openssl:libcrypto_shared",
     "//third_party/openssl:libssl_shared",
   ]
-  external_deps = [ "init:libbegetutil_static" ]
+  external_deps = [ "init:libbegetutil" ]
   configs = [ "${updater_path}/test/unittest:utest_config" ]
   install_enable = true
   part_name = "updater"

@@ -33,10 +33,7 @@ config("updater_config") {
 
 config("libptableparse_exported_headers") {
   visibility = [ ":*" ]
-  include_dirs = [
-    "${updater_path}/services/include",
-    "${updater_path}/services",
-  ]
+  include_dirs = [ "${updater_path}/services/include" ]
 }
 
 ohos_static_library("libptableparse") {
@@ -62,7 +59,8 @@ ohos_static_library("libptableparse") {
   external_deps = [
     "bounds_checking_function:libsec_static",
     "bzip2:libbz2",
-    "cJSON:cjson_static",
+    "cJSON:cjson",
+    "zlib:libz",
   ]
 
   part_name = "updater"

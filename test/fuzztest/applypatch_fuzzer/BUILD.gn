@@ -56,7 +56,7 @@ ohos_fuzztest("ApplyPatchFuzzTest") {
 
   external_deps = [
     "c_utils:utils",
-    "init:libbegetutil_static",
+    "init:libbegetutil",
   ]
 
   cflags = [

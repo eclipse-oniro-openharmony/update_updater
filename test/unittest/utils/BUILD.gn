@@ -43,7 +43,7 @@ ohos_unittest("utils_test") {
   ]
   external_deps = [
     "hilog:libhilog",
-    "init:libbegetutil_static",
+    "init:libbegetutil",
   ]
   deps = [
     "${updater_path}/interfaces/kits/misc_info:libmiscinfo",

@@ -110,7 +110,7 @@ ohos_static_library("flashd_deamon") {
   }
 
   if (use_musl) {
-    external_deps += [ "init:libbegetutil_static" ]
+    external_deps += [ "init:libbegetutil" ]
   }
 
   include_dirs = [
@@ -130,7 +130,7 @@ ohos_static_library("flashd_deamon") {
   ]
 
   if (build_selinux) {
-    external_deps += [ "selinux:libselinux_static" ]
+    external_deps += [ "selinux:libselinux" ]
     defines += [
       "SURPPORT_SELINUX",
       "UPDATER_MODE",
@@ -217,7 +217,7 @@ ohos_static_library("libflashd") {
     "bzip2:libbz2",
     "cJSON:cjson",
     "c_utils:utils",
-    "init:libbegetutil_static",
+    "init:libbegetutil",
     "libuv:uv",
     "lz4:liblz4_static",
     "openssl:libcrypto_shared",
@@ -229,7 +229,7 @@ ohos_static_library("libflashd") {
   }
 
   if (build_selinux) {
-    external_deps += [ "selinux:libselinux_static" ]
+    external_deps += [ "selinux:libselinux" ]
     defines += [ "SURPPORT_SELINUX" ]
   }
 

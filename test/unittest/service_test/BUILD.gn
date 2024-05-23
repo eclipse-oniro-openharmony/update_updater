@@ -74,7 +74,7 @@ ohos_unittest("updater_service_unittest") {
 
   external_deps = [
     "hilog:libhilog",
-    "init:libbegetutil_static",
+    "init:libbegetutil",
     "ui_lite:libupdater_layout",
   ]
   configs = [ "${updater_path}/test/unittest:utest_config" ]

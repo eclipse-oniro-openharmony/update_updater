@@ -44,7 +44,7 @@ ohos_fuzztest("UpdaterMountForPathFuzzTest") {
     "${updater_path}/services/log:libupdaterlog",
   ]
 
-  external_deps = [ "init:libbegetutil_static" ]
+  external_deps = [ "init:libbegetutil" ]
 
   cflags = [
     "-g",

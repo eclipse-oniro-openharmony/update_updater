@@ -197,7 +197,7 @@ ohos_unittest("updater_unittest") {
 
   external_deps = [
     "hilog:libhilog_base",
-    "init:libbegetutil_static",
+    "init:libbegetutil",
   ]
 
   public_configs = [ ":utest_config" ]

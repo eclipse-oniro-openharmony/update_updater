@@ -32,14 +32,9 @@ config("updater_config") {
   ]
 }
 
-config("updater_binary_lc++") {
-  ldflags = [ "-lc++" ]
-}
-
 updater_gen("updater_binary") {
-  static_link = true
   deps = [ "${updater_path}/services/updater_binary:libupdater_binary" ]
-  configs = [ ":updater_binary_lc++" ]
+
   part_name = "updater"
   subsystem_name = "updater"
 }
@@ -81,8 +76,8 @@ ohos_static_library("libupdater_binary") {
     "bounds_checking_function:libsec_static",
     "bzip2:libbz2",
     "cJSON:cjson_static",
-    "init:libbegetutil_static",
-    "init:libfsmanager_static_real",
+    "init:libbegetutil",
+    "init:libfsmanager_static",
     "lz4:liblz4_static",
     "openssl:libcrypto_static",
     "openssl:libssl_static",
