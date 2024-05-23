@@ -575,7 +575,7 @@ std::string UScriptInstructionShaCheck::CalculateBlockSha(const std::string &dev
     return Utils::ConvertSha256Hex(digest, SHA256_DIGEST_LENGTH);
 }
 
-int32_t UScriptInstructionShaCheck::SetShaInfo(const Uscript::UScriptContext &context, ShaInfo &shaInfo)
+int32_t UScriptInstructionShaCheck::SetShaInfo(Uscript::UScriptContext &context, ShaInfo &shaInfo)
 {
     int32_t ret = context.GetParam(1, shaInfo.blockPairs);
     if (ret != USCRIPT_SUCCESS) {
@@ -628,7 +628,7 @@ int32_t UScriptInstructionShaCheck::Execute(Uscript::UScriptEnv &env, Uscript::U
     ShaInfo shaInfo {};
     ret = SetShaInfo(context, shaInfo);
     if (ret != USCRIPT_SUCCESS) {
-        LOG(ERROR) << "Failed to set sha info "
+        LOG(ERROR) << "Failed to set sha info";
         return ReturnAndPushParam(ret, context);
     }
 

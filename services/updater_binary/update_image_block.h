@@ -52,7 +52,7 @@ private:
     int ExecReadShaInfo(Uscript::UScriptEnv &env, const std::string &devPath, const ShaInfo &shaInfo);
     void PrintAbnormalBlockHash(const std::string &devPath, const std::string &blockPairs);
     std::string CalculateBlockSha(const std::string &devPath, const std::string &blockPairs);
-    int32_t SetShaInfo(const Uscript::UScriptContext &context, ShaInfo &shaInfo);
+    int32_t SetShaInfo(Uscript::UScriptContext &context, ShaInfo &shaInfo);
 };
 }
 
