@@ -570,7 +570,7 @@ std::string UScriptInstructionShaCheck::CalculateBlockSha(const std::string &dev
     }
     close(fd);
 
-    uint8_t digest[SHA256_DIGEST_LENGTH];
+    uint8_t digest[SHA256_DIGEST_LENGTH] = {0};
     SHA256_Final(digest, &ctx);
     return Utils::ConvertSha256Hex(digest, SHA256_DIGEST_LENGTH);
 }
