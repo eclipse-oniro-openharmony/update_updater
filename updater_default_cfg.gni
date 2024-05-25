@@ -36,6 +36,9 @@ template("updater_gen") {
     }
   } else {
     ohos_executable(target_name) {
+      if (!is_asan && !is_emulator && target_name == "updater_binary") {
+        static_link = true
+      }
       forward_variables_from(invoker, "*")
 
       install_images = [ "updater" ]
