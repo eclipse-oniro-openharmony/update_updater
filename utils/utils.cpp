@@ -37,6 +37,7 @@
 #include "selinux/selinux.h"
 #endif
 #include "package/pkg_manager.h"
+#include "parameter.h"
 #include "securec.h"
 #include "updater/updater_const.h"
 
@@ -46,6 +47,7 @@ using namespace Hpackage;
 namespace Utils {
 constexpr uint8_t SHIFT_RIGHT_FOUR_BITS = 4;
 constexpr int MAX_TIME_SIZE = 20;
+constexpr size_t PARAM_SIZE = 32;
 constexpr const char *PREFIX_PARTITION_NODE = "/dev/block/by-name/";
 
 namespace {
@@ -857,6 +859,20 @@ void TrimString(std::string &str)
     if (pos != std::string::npos) {
         str.erase(pos + 1, str.size() - pos);
     }
+}
+
+bool IsEsDevice()
+{
+    char deviceType[PARAM_SIZE + 1] = {0};
+    if (GetParameter("ohos.boot.chiptype", "", deviceType, sizeof(deviceType) - 1) <= 0) {
+        LOG(ERROR) << "get device type failed";
+        return false;
+    }
+    LOG(INFO) << "device type is " << deviceType;
+    if (strstr(deviceType, "_es") == nullptr) {
+        return false;
+    }
+    return true;
 }
 
 #ifndef __WIN32

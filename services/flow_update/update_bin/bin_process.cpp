@@ -34,6 +34,9 @@ using namespace Uscript;
 namespace Updater {
 constexpr uint32_t STASH_BUFFER_SIZE = 4 * 1024 * 1024;
 constexpr uint32_t MAX_BUFFER_NUM = 16;
+constexpr uint8_t ES_IMAGE = 6;
+constexpr uint8_t CS_IMAGE = 7;
+constexpr uint8_t NEED_VERIFY_CS_IMAGE = 8;
 
 int32_t UScriptInstructionBinFlowWrite::Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context)
 {
@@ -246,6 +249,25 @@ int32_t UScriptInstructionBinFlowWrite::ProcessBinFile(Uscript::UScriptEnv &env,
     return USCRIPT_SUCCESS;
 }
 
+bool UScriptInstructionBinFlowWrite::IsMatchedCsEsIamge(const Hpackage::FileInfo &fileInfo)
+{
+    if ((fileInfo.resType == ES_IMAGE && !Utils::IsEsDevice()) ||
+        (fileInfo.resType == CS_IMAGE && Utils::IsEsDevice())) {
+        LOG(INFO) << "not matched cs es image, skip write";
+        return false;
+    }
+    return true;
+}
+
+bool UScriptInstructionBinFlowWrite::CheckEsDeviceUpdate(const Hpackage::FileInfo &fileInfo)
+{
+    if (fileInfo.resType == NEED_VERIFY_CS_IMAGE && Utils::IsEsDevice()) {
+        LOG(ERROR) << "pkg just cs image, but device is es";
+        return false;
+    }
+    return true;
+}
+
 int32_t UScriptInstructionBinFlowWrite::ComponentProcess(Uscript::UScriptEnv &env, PkgManager::StreamPtr stream,
                                                          const std::string &name, const Hpackage::FileInfo &fileInfo)
 {
@@ -264,8 +286,14 @@ int32_t UScriptInstructionBinFlowWrite::ComponentProcess(Uscript::UScriptEnv &en
         }
     }
 
-    if (processor == nullptr && fileInfo.resType == UPGRADE_FILE_COMP_OTHER_TPYE) {
-        LOG(INFO) << name << "comp is not register and comp file is not image, skip";
+    if (!CheckEsDeviceUpdate(fileInfo)) {
+        LOG(ERROR) << "pkg just cs image, es device not allow update";
+        return USCRIPT_ERROR_EXECUTE;
+    }
+
+    if ((processor == nullptr && fileInfo.resType == UPGRADE_FILE_COMP_OTHER_TPYE) ||
+        !IsMatchedCsEsIamge(fileInfo)) {
+        LOG(INFO) << name << " comp is not register and comp file is not image, or not match cs es image, skip";
         processor.reset();
         processor = std::make_unique<SkipImgProcessor>(name, fileSize);
     }

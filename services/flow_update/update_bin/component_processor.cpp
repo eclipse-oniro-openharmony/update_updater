@@ -57,6 +57,10 @@ std::unique_ptr<ComponentProcessor> ComponentProcessorFactory::GetProcessor(cons
     std::string partitionName = name;
     std::transform(partitionName.begin(), partitionName.end(), partitionName.begin(), ::tolower);
     partitionName.erase(std::remove(partitionName.begin(), partitionName.end(), '/'), partitionName.end());
+    std::string::size_type position = partitionName.find("_es");
+    if (position != partitionName.npos) {
+        partitionName = partitionName.substr(0, position);
+    }
     auto it = m_constructorMap.find(partitionName);
     if (it == m_constructorMap.end() || it->second == nullptr) {
         LOG(WARNING) << "GetProcessor for: " << name.c_str() << " fail, use default raw write";
