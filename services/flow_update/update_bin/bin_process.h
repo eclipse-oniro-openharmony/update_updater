@@ -43,6 +43,8 @@ private:
         bool isFinish, const void* context);
     size_t GetFileLength();
     bool ReadFromBinFile(Hpackage::PkgBuffer &buffer, size_t start, size_t &readLen);
+    bool CheckEsDeviceUpdate(const Hpackage::FileInfo &fileInfo);
+    bool IsMatchedCsEsIamge(const Hpackage::FileInfo &fileInfo);
     float fullUpdateProportion_ = 1.0f;
     size_t stashDataSize_ = 0;
     Hpackage::PkgBuffer stashBuffer_ {};

@@ -215,6 +215,10 @@ bool PtableManager::GetPartionInfoByName(const std::string &partitionName, Ptabl
     }
     std::string standardPtnName = partitionName;
     standardPtnName.erase(std::remove(standardPtnName.begin(), standardPtnName.end(), '/'), standardPtnName.end());
+    std::string::size_type position = standardPtnName.find("_es");
+    if (position != standardPtnName.npos) {
+        standardPtnName = standardPtnName.substr(0, position);
+    }
     if (pPtable_->GetPartionInfoByName(standardPtnName, ptnInfo, index)) {
         LOG(INFO) << "GetPartionInfoByName success!";
         return true;

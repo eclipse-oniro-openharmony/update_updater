@@ -89,6 +89,7 @@ void GetTagValInStr(const std::string& str, const std::string &tag, std::string 
 bool IsValidHexStr(const std::string &str);
 void TrimString (std::string &str);
 std::string TrimUpdateMode(const std::string &mode);
+bool IsEsDevice();
 #ifndef __WIN32
 void SetFileAttributes(const std::string& file, uid_t owner, gid_t group, mode_t mode);
 #endif
