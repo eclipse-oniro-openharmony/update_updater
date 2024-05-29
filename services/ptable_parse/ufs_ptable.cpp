@@ -406,7 +406,7 @@ bool UfsPtable::WriteBackupPartitionTable(uint32_t lunIdx, uint64_t lunSize)
 
     std::string ufsNode = GetDeviceLunNodePath(lunIdx);
     uint32_t deviceBlockSize = GetDeviceBlockSize();
-    if (lunSize == 0|| lunSize <= GPT_PTABLE_BACKUP_SIZE * deviceBlockSize) {
+    if (lunSize == 0 || lunSize <= GPT_PTABLE_BACKUP_SIZE * deviceBlockSize) {
         LOG(ERROR) << "lun size invalid, lun size = " << lunSize;
         return false;
     }
