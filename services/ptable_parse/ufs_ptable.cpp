@@ -406,15 +406,22 @@ bool UfsPtable::WriteBackupPartitionTable(uint32_t lunIdx, uint64_t lunSize)
 
     std::string ufsNode = GetDeviceLunNodePath(lunIdx);
     uint32_t deviceBlockSize = GetDeviceBlockSize();
-    if (lunSize == 0 || lunSize <= GPT_PTABLE_BACKUP_SIZE * deviceBlockSize) {
+    if (lunSize == 0|| lunSize <= GPT_PTABLE_BACKUP_SIZE * deviceBlockSize) {
         LOG(ERROR) << "lun size invalid, lun size = " << lunSize;
+        return false;
+    }
+    if (deviceBlockSize == 0) {
+        LOG(ERROR) << "deviceBlockSize is invalid";
         return false;
     }
     uint64_t deviceBackGptEntryOffset = lunSize - GPT_PTABLE_BACKUP_SIZE * deviceBlockSize;
     uint64_t deviceBackGptHeaderOffset = lunSize - deviceBlockSize;
     std::unique_ptr<uint8_t[]> backUpHeader = std::make_unique<uint8_t[]>(deviceBlockSize);
-    (void)memcpy_s(backUpHeader.get(), deviceBlockSize, ufsPtnDataInfo_[lunIdx].data +
-        deviceBlockSize, deviceBlockSize);
+    if (memcpy_s(backUpHeader.get(), deviceBlockSize, ufsPtnDataInfo_[lunIdx].data +
+        deviceBlockSize, deviceBlockSize) != EOK) {
+        LOG(ERROR) << "memcpy error, deviceBlockSize:" << deviceBlockSize;
+        return false;
+    }
     PatchBackUpGptHeader(backUpHeader.get(), deviceBlockSize, deviceBackGptEntryOffset / deviceBlockSize);
     if (!WriteBufferToPath(ufsNode, deviceBackGptHeaderOffset, backUpHeader.get(), deviceBlockSize)) {
         LOG(ERROR) << "write back up gpt header failed, deviceBackGptHeaderOffset = " << deviceBackGptHeaderOffset
