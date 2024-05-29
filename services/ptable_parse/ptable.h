@@ -81,7 +81,9 @@ public:
     static constexpr uint32_t PARTITION_CRC_OFFSET = 88;
     static constexpr uint32_t GPT_DISP_NAME_LEN = 32;
     static constexpr uint64_t DEFAULT_SECTOR_NUM = (4 * 1024 * 1024 * 2 - 1);
+    static constexpr uint32_t GPT_HEADER_OFFSET = 24;
     static constexpr uint32_t BACKUP_HEADER_OFFSET = 32;
+    static constexpr uint32_t PARTITION_ENTRY_OFFSET = 72;
     static constexpr uint32_t LAST_USABLE_LBA_OFFSET = 48;
     static constexpr uint32_t PARTITION_ENTRY_LAST_LBA = 40;
     static constexpr uint32_t PARTITION_COUNT_OFFSET = 80;
@@ -166,6 +168,7 @@ public:
     bool CheckIfValidGpt(const uint8_t *gptImage, const uint32_t gptImageLen);
     bool GetCapacity(const std::string &filePath, uint64_t &lunCapacity);
     bool GetPartitionGptHeaderInfo(const uint8_t *buffer, const uint32_t bufferLen, GPTHeaderInfo& gptHeaderInfo);
+    void PatchBackUpGptHeader(uint8_t *gptHeader, const uint32_t len, uint64_t backGptEntryStart);
     bool PartitionCheckGptHeader(const uint8_t *gptImage, const uint32_t len, const uint64_t lbaNum,
         const uint32_t blockSize, GPTHeaderInfo& gptHeaderInfo);
     void ParsePartitionName(const uint8_t *data, const uint32_t dataLen,

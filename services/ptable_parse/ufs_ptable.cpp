@@ -412,8 +412,11 @@ bool UfsPtable::WriteBackupPartitionTable(uint32_t lunIdx, uint64_t lunSize)
     }
     uint64_t deviceBackGptEntryOffset = lunSize - GPT_PTABLE_BACKUP_SIZE * deviceBlockSize;
     uint64_t deviceBackGptHeaderOffset = lunSize - deviceBlockSize;
-    if (!WriteBufferToPath(ufsNode, deviceBackGptHeaderOffset, ufsPtnDataInfo_[lunIdx].data +
-        deviceBlockSize, deviceBlockSize)) {
+    std::unique_ptr<uint8_t[]> backUpHeader = std::make_unique<uint8_t[]>(deviceBlockSize);
+    (void)memcpy_s(backUpHeader.get(), deviceBlockSize, ufsPtnDataInfo_[lunIdx].data +
+        deviceBlockSize, deviceBlockSize);
+    PatchBackUpGptHeader(backUpHeader.get(), deviceBlockSize, deviceBackGptEntryOffset / deviceBlockSize);
+    if (!WriteBufferToPath(ufsNode, deviceBackGptHeaderOffset, backUpHeader.get(), deviceBlockSize)) {
         LOG(ERROR) << "write back up gpt header failed, deviceBackGptHeaderOffset = " << deviceBackGptHeaderOffset
             << ", deviceBlockSize = " << deviceBlockSize;
         return false;

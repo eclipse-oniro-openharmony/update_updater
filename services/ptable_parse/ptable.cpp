@@ -15,6 +15,7 @@
 
 #include "ptable.h"
 
+#include <algorithm>
 #include <map>
 #include <sys/stat.h>
 
@@ -326,6 +327,25 @@ bool Ptable::GetPartitionGptHeaderInfo(const uint8_t *buffer, const uint32_t buf
         return false;
     }
     return true;
+}
+
+void Ptable::PatchBackUpGptHeader(uint8_t *gptHeader, const uint32_t len, uint64_t backGptEntryStart)
+{
+    if (std::max({GPT_HEADER_OFFSET, BACKUP_HEADER_OFFSET, PARTITION_ENTRY_OFFSET}) + sizeof(uint64_t) > len ||
+        HEADER_CRC_OFFSET + sizeof(uint32_t) > len) {
+        LOG(ERROR) << "input param invalid";
+        return;
+    }
+    uint64_t gptHeaderOffset = GET_LLWORD_FROM_BYTE(gptHeader + GPT_HEADER_OFFSET);
+    uint64_t backHeaderOffset = GET_LLWORD_FROM_BYTE(gptHeader + BACKUP_HEADER_OFFSET);
+    PUT_LONG_LONG(gptHeader + GPT_HEADER_OFFSET, backHeaderOffset);
+    PUT_LONG_LONG(gptHeader + BACKUP_HEADER_OFFSET, gptHeaderOffset);
+    PUT_LONG_LONG(gptHeader + PARTITION_ENTRY_OFFSET, backGptEntryStart);
+    PUT_LONG(gptHeader + HEADER_CRC_OFFSET, 0);
+    uint32_t crcValue = CalculateCrc32(gptHeader, GPT_CRC_LEN);
+    PUT_LONG(gptHeader + HEADER_CRC_OFFSET, crcValue);
+    LOG(INFO) << "gpt header offset " << gptHeaderOffset << ", back header offset " << backHeaderOffset <<
+        ", crc value " << crcValue;
 }
 
 bool Ptable::CheckGptHeader(uint8_t *buffer, const uint32_t bufferLen, const uint64_t lbaNum,
