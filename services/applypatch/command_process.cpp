@@ -215,7 +215,8 @@ CommandResult StashCommandFn::Execute(const Command &params)
         return FAILED;
     }
     if (srcBlk.VerifySha256(buffer, srcBlockSize, shaStr) != 0) {
-        return FAILED;
+        LOG(WARNING) << "failed to load source blocks for stash";
+        return SUCCESS;
     }
     LOG(INFO) << "store " << srcBlockSize << " blocks to " << storeBase << "/" << shaStr;
     int ret = Store::WriteDataToStore(storeBase, shaStr, buffer, srcBlockSize * H_BLOCK_SIZE);
