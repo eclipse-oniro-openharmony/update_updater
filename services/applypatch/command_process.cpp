@@ -215,6 +215,7 @@ CommandResult StashCommandFn::Execute(const Command &params)
         return FAILED;
     }
     if (srcBlk.VerifySha256(buffer, srcBlockSize, shaStr) != 0) {
+        LOG(WARNING) << "src block has been change";
         return SUCCESS;
     }
     LOG(INFO) << "store " << srcBlockSize << " blocks to " << storeBase << "/" << shaStr;
