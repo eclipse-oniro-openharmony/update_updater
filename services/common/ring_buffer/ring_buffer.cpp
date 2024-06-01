@@ -139,17 +139,19 @@ void RingBuffer::Stop()
 
 void RingBuffer::StopPush()
 {
-    std::unique_lock<std::mutex> pushLock(notifyMtx_);
-    isStop_ = true;
+    {
+        std::unique_lock<std::mutex> pushLock(notifyMtx_);
+        isStop_ = true;
+    }
     notFull_.notify_all();
-    notEmpty_.notify_all();
 }
 
 void RingBuffer::StopPop()
 {
-    std::unique_lock<std::mutex> popLock(notifyMtx_);
-    isStop_ = true;
-    notFull_.notify_all();
+    {
+        std::unique_lock<std::mutex> popLock(notifyMtx_);
+        isStop_ = true;
+    }
     notEmpty_.notify_all();
 }
 
