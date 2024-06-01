@@ -54,16 +54,6 @@ bool RingBuffer::Init(uint32_t singleSize, uint32_t num)
     return true;
 }
 
-void RingBuffer::Reset()
-{
-    isStop_ = false;
-    writeIndex_ = 0;
-    readIndex_ = 0;
-    for (uint32_t i = 0; i < num_; ++i) {
-        lenArray_[i] = 0;
-    }
-}
-
 bool RingBuffer::IsFull()
 {
     // writeIndex readIndex real size: 0 ~ num_ -1, logic size: 0 ~ 2num_ - 1
@@ -142,6 +132,22 @@ bool RingBuffer::Pop(uint8_t *buf, uint32_t maxLen, uint32_t &len)
 
 void RingBuffer::Stop()
 {
+    isStop_ = true;
+    notFull_.notify_all();
+    notEmpty_.notify_all();
+}
+
+void RingBuffer::StopPush()
+{
+    std::unique_lock<std::mutex> pushLock(notifyMtx_);
+    isStop_ = true;
+    notFull_.notify_all();
+    notEmpty_.notify_all();
+}
+
+void RingBuffer::StopPop()
+{
+    std::unique_lock<std::mutex> popLock(notifyMtx_);
     isStop_ = true;
     notFull_.notify_all();
     notEmpty_.notify_all();
