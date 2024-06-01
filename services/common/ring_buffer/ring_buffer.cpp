@@ -54,6 +54,16 @@ bool RingBuffer::Init(uint32_t singleSize, uint32_t num)
     return true;
 }
 
+void RingBuffer::Reset()
+{
+    isStop_ = false;
+    writeIndex_ = 0;
+    readIndex_ = 0;
+    for (uint32_t i = 0; i < num_; ++i) {
+        lenArray_[i] = 0;
+    }
+}
+
 bool RingBuffer::IsFull()
 {
     // writeIndex readIndex real size: 0 ~ num_ -1, logic size: 0 ~ 2num_ - 1
