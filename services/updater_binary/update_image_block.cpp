@@ -38,6 +38,9 @@ using namespace Updater;
 namespace Updater {
 constexpr int32_t SHA_CHECK_SECOND = 2;
 constexpr int32_t SHA_CHECK_PARAMS = 3;
+constexpr int32_t SHA_CHECK_TARGETPAIRS_INDEX = 3;
+constexpr int32_t SHA_CHECK_TARGETSHA_INDEX = 4;
+constexpr int32_t SHA_CHECK_TARGET_PARAMS = 5;
 static int ExtractNewData(const PkgBuffer &buffer, size_t size, size_t start, bool isFinish, const void* context)
 {
     void *p = const_cast<void *>(context);
@@ -354,7 +357,7 @@ static int32_t ExecuteUpdateBlock(Uscript::UScriptEnv &env, Uscript::UScriptCont
                           transferListBuffer, transferListSize) != USCRIPT_SUCCESS) {
         return USCRIPT_ERROR_EXECUTE;
     }
-    
+
     std::unique_ptr<TransferManager> tm = std::make_unique<TransferManager>();
 
     auto transferParams = tm->GetTransferParams();
@@ -469,48 +472,21 @@ int32_t UScriptInstructionBlockCheck::Execute(Uscript::UScriptEnv &env, Uscript:
 }
 
 int UScriptInstructionShaCheck::ExecReadShaInfo(Uscript::UScriptEnv &env, const std::string &devPath,
-    const std::string &blockPairs, const std::string &contrastSha)
+    const ShaInfo &shaInfo)
 {
     UPDATER_INIT_RECORD;
-    int fd = open(devPath.c_str(), O_RDWR | O_LARGEFILE);
-    if (fd == -1) {
-        LOG(ERROR) << "Failed to open file";
-        UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE);
+    std::string resultSha = CalculateBlockSha(devPath, shaInfo.blockPairs);
+    std::string tgtResultSha = CalculateBlockSha(devPath, shaInfo.targetPairs);
+    if (resultSha.empty() && tgtResultSha.empty()) {
+        LOG(ERROR) << "All sha is empty";
         return USCRIPT_ERROR_EXECUTE;
     }
 
-    BlockSet blk;
-    blk.ParserAndInsert(blockPairs);
-    std::vector<uint8_t> block_buff(H_BLOCK_SIZE);
-    SHA256_CTX ctx;
-    SHA256_Init(&ctx);
-    std::vector<BlockPair>::iterator it = blk.Begin();
-    for (; it != blk.End(); ++it) {
-        if (lseek64(fd, static_cast<off64_t>(it->first * H_BLOCK_SIZE), SEEK_SET) == -1) {
-            LOG(ERROR) << "Failed to seek";
-            close(fd);
-            UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE);
-            return USCRIPT_ERROR_EXECUTE;
-        }
-        for (size_t i = it->first; i < it->second; ++i) {
-            if (!Utils::ReadFully(fd, block_buff.data(), H_BLOCK_SIZE)) {
-                LOG(ERROR) << "Failed to read";
-                close(fd);
-                UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE);
-                return USCRIPT_ERROR_EXECUTE;
-            }
-            SHA256_Update(&ctx, block_buff.data(), H_BLOCK_SIZE);
-        }
-    }
-    close(fd);
-
-    uint8_t digest[SHA256_DIGEST_LENGTH];
-    SHA256_Final(digest, &ctx);
-    std::string resultSha = Utils::ConvertSha256Hex(digest, SHA256_DIGEST_LENGTH);
-    if (resultSha != contrastSha) {
+    bool isTargetDiff = tgtResultSha.empty() ? true : (tgtResultSha != shaInfo.targetSha);
+    if (resultSha != shaInfo.contrastSha && isTargetDiff) {
         LOG(ERROR) << "Different sha256, cannot continue";
-        LOG(ERROR) << "blockPairs:" << blockPairs;
-        PrintAbnormalBlockHash(devPath, blockPairs);
+        LOG(ERROR) << "blockPairs:" << shaInfo.blockPairs;
+        PrintAbnormalBlockHash(devPath, shaInfo.blockPairs);
         UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE);
         env.PostMessage(UPDATER_RETRY_TAG, VERIFY_FAILED_REBOOT);
         return USCRIPT_ERROR_EXECUTE;
@@ -555,9 +531,84 @@ void UScriptInstructionShaCheck::PrintAbnormalBlockHash(const std::string &devPa
     close(fd);
 }
 
+std::string UScriptInstructionShaCheck::CalculateBlockSha(const std::string &devPath, const std::string &blockPairs)
+{
+    if (blockPairs.empty()) {
+        LOG(ERROR) << "Failed to get blockPairs";
+        return "";
+    }
+
+    int fd = open(devPath.c_str(), O_RDWR | O_LARGEFILE);
+    if (fd == -1) {
+        LOG(ERROR) << "Failed to open file";
+        UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE);
+        return "";
+    }
+
+    BlockSet blk;
+    blk.ParserAndInsert(blockPairs);
+    std::vector<uint8_t> block_buff(H_BLOCK_SIZE);
+    SHA256_CTX ctx;
+    SHA256_Init(&ctx);
+    std::vector<BlockPair>::iterator it = blk.Begin();
+    for (; it != blk.End(); ++it) {
+        if (lseek64(fd, static_cast<off64_t>(it->first * H_BLOCK_SIZE), SEEK_SET) == -1) {
+            LOG(ERROR) << "Failed to seek";
+            close(fd);
+            UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE);
+            return "";
+        }
+        for (size_t i = it->first; i < it->second; ++i) {
+            if (!Utils::ReadFully(fd, block_buff.data(), H_BLOCK_SIZE)) {
+                LOG(ERROR) << "Failed to read";
+                close(fd);
+                UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE);
+                return "";
+            }
+            SHA256_Update(&ctx, block_buff.data(), H_BLOCK_SIZE);
+        }
+    }
+    close(fd);
+
+    uint8_t digest[SHA256_DIGEST_LENGTH] = {0};
+    SHA256_Final(digest, &ctx);
+    return Utils::ConvertSha256Hex(digest, SHA256_DIGEST_LENGTH);
+}
+
+int32_t UScriptInstructionShaCheck::SetShaInfo(Uscript::UScriptContext &context, ShaInfo &shaInfo)
+{
+    int32_t ret = context.GetParam(1, shaInfo.blockPairs);
+    if (ret != USCRIPT_SUCCESS) {
+        LOG(ERROR) << "Failed to get param blockPairs";
+        UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE);
+        return USCRIPT_ERROR_EXECUTE;
+    }
+
+    ret = context.GetParam(SHA_CHECK_SECOND, shaInfo.contrastSha);
+    if (ret != USCRIPT_SUCCESS) {
+        LOG(ERROR) << "Failed to get param contrastSha";
+        UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE);
+        return USCRIPT_ERROR_EXECUTE;
+    }
+
+    // Only three parameters can be obtained for the upgrade package of an earlier version.
+    ret = context.GetParam(SHA_CHECK_TARGETPAIRS_INDEX, shaInfo.targetPairs);
+    if (ret != USCRIPT_SUCCESS) {
+        LOG(WARNING) << "Failed to get param targetPairs";
+    }
+
+    ret = context.GetParam(SHA_CHECK_TARGETSHA_INDEX, shaInfo.targetSha);
+    if (ret != USCRIPT_SUCCESS) {
+        LOG(WARNING) << "Failed to get param targetSha";
+    }
+
+    return USCRIPT_SUCCESS;
+}
+
 int32_t UScriptInstructionShaCheck::Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context)
 {
-    if (context.GetParamCount() != SHA_CHECK_PARAMS) {
+    int32_t paramCount = context.GetParamCount();
+    if (paramCount != SHA_CHECK_PARAMS && paramCount != SHA_CHECK_TARGET_PARAMS) {
         LOG(ERROR) << "Invalid param";
         UPDATER_LAST_WORD(USCRIPT_INVALID_PARAM);
         return ReturnAndPushParam(USCRIPT_INVALID_PARAM, context);
@@ -573,20 +624,14 @@ int32_t UScriptInstructionShaCheck::Execute(Uscript::UScriptEnv &env, Uscript::U
         UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE);
         return ReturnAndPushParam(USCRIPT_ERROR_EXECUTE, context);
     }
-    std::string blockPairs;
-    ret = context.GetParam(1, blockPairs);
+
+    ShaInfo shaInfo {};
+    ret = SetShaInfo(context, shaInfo);
     if (ret != USCRIPT_SUCCESS) {
-        LOG(ERROR) << "Failed to get param";
-        UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE);
-        return ReturnAndPushParam(USCRIPT_ERROR_EXECUTE, context);
+        LOG(ERROR) << "Failed to set sha info";
+        return ReturnAndPushParam(ret, context);
     }
-    std::string contrastSha;
-    ret = context.GetParam(SHA_CHECK_SECOND, contrastSha);
-    if (ret != USCRIPT_SUCCESS) {
-        LOG(ERROR) << "Failed to get param";
-        UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE);
-        return ReturnAndPushParam(USCRIPT_ERROR_EXECUTE, context);
-    }
+
     auto devPath = GetBlockDeviceByMountPoint(partitionName);
     LOG(INFO) << "UScriptInstructionShaCheck::dev path : " << devPath;
     if (devPath.empty()) {
@@ -594,7 +639,7 @@ int32_t UScriptInstructionShaCheck::Execute(Uscript::UScriptEnv &env, Uscript::U
         UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE);
         return ReturnAndPushParam(USCRIPT_ERROR_EXECUTE, context);
     }
-    ret = ExecReadShaInfo(env, devPath, blockPairs, contrastSha);
+    ret = ExecReadShaInfo(env, devPath, shaInfo);
     return ReturnAndPushParam(ret, context);
 }
 }

@@ -52,12 +52,14 @@ HWTEST_F(TransferManagerUnitTest, transfer_manager_test_001, TestSize.Level1)
 {
     std::unique_ptr<TransferManager> tm = std::make_unique<TransferManager>();
     std::string cmd = "zero 2,0,1";
-    tm->CheckResult(CommandResult::NEED_RETRY, cmd, CommandType::ZERO);
+    bool reset = tm->CheckResult(CommandResult::NEED_RETRY, cmd, CommandType::ZERO);
+    EXPECT_EQ(reset, false);
 }
 
 HWTEST_F(TransferManagerUnitTest, transfer_manager_test_002, TestSize.Level1)
 {
     std::unique_ptr<TransferManager> tm = std::make_unique<TransferManager>();
-    tm->ReloadForRetry();
+    string cmd = tm->ReloadForRetry();
+    EXPECT_STREQ(cmd.c_str(), "");
 }
 } // updater_ut
