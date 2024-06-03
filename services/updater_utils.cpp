@@ -178,7 +178,11 @@ void PostUpdater(bool clearMisc)
 {
     STAGE(UPDATE_STAGE_BEGIN) << "PostUpdater";
 
-    (void)SetupPartitions();
+    if (!CheckUpdateMode(SDCARD_MODE) && !CheckUpdateMode(USB_MODE)) {
+        (void)SetupPartitions();
+    } else {
+        (void)SetupPartitions(false);
+    }
     UpdaterInit::GetInstance().InvokeEvent(UPDATER_POST_INIT_EVENT);
     // clear update misc partition.
     if (clearMisc && !ClearMisc()) {
@@ -198,8 +202,9 @@ void PostUpdater(bool clearMisc)
     if (access(Flashd::FLASHD_FILE_PATH, 0) == 0 && !DeleteUpdaterPath(Flashd::FLASHD_FILE_PATH)) {
         LOG(ERROR) << "DeleteUpdaterPath failed";
     }
-
-    SaveLogs();
+    if (!CheckUpdateMode(SDCARD_MODE) && !CheckUpdateMode(USB_MODE)) {
+        SaveLogs();
+    }
 }
 
 void BootMode::InitMode(void) const
