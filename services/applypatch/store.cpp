@@ -125,11 +125,10 @@ int32_t Store::WriteDataToStore(const std::string &dirPath, const std::string &f
         return -1;
     }
     if (fsync(fd) == -1) {
-        LOG(ERROR) << "Failed to fsync";
-        close(fd);
-        return -1;
+        LOG(WARNING) << "Failed to fsync :" << strerror(errno);
     }
     close(fd);
+
     int fdd = open(dirPath.c_str(), O_RDONLY | O_DIRECTORY);
     if (fdd == -1) {
         LOG(ERROR) << "Failed to open";
