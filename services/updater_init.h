@@ -31,6 +31,7 @@ enum UpdaterInitEvent {
 
     // flashd
     FLAHSD_PRE_INIT_EVENT,
+    FLAHSD_PRE_INIT_NORFLASH,
 
     // binary
     UPDATER_BINARY_INIT_EVENT,
