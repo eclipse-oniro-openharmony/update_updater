@@ -56,10 +56,16 @@ void UpdaterUiEnv::Init()
     } ();
 }
 
+__attribute__((weak)) void InitHimaxLcd()
+{
+    return;
+}
+
 void UpdaterUiEnv::InitEngine()
 {
     OHOS::GraphicStartUp::Init();
     GraphicEngine::GetInstance().Init(WHITE_BGCOLOR, OHOS::ColorMode::ARGB8888, VECTOR_FONT_DIR);
+    InitHimaxLcd();
     InitRootView();
     LOG(INFO) << "UxInitEngine done";
 }
