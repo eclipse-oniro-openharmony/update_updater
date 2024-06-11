@@ -36,6 +36,11 @@ GraphicEngine &GraphicEngine::GetInstance()
     return instance;
 }
 
+__attribute__((weak)) void PostInitSurfDev(std::unique_ptr<SurfaceDev> &surfDev, GrSurface &surface)
+{
+    return;
+}
+
 void GraphicEngine::Init(uint32_t bkgColor, uint8_t mode, const char *fontPath)
 {
     bkgColor_ = bkgColor;
@@ -46,7 +51,9 @@ void GraphicEngine::Init(uint32_t bkgColor, uint8_t mode, const char *fontPath)
             LOG(INFO) << "GraphicEngine Init failed!";
             return false;
         }
-        sfDev_->GetScreenSize(width_, height_);
+        GrSurface surface {0};
+        sfDev_->GetScreenSize(width_, height_, surface);
+        PostInitSurfDev(sfDev_, surface);
         buffInfo_ = nullptr;
         virAddr_ = nullptr;
         InitFontEngine(fontPath);
