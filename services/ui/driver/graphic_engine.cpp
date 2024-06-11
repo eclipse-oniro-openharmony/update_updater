@@ -51,7 +51,7 @@ void GraphicEngine::Init(uint32_t bkgColor, uint8_t mode, const char *fontPath)
             LOG(INFO) << "GraphicEngine Init failed!";
             return false;
         }
-        GrSurface surface {0};
+        GrSurface surface {};
         sfDev_->GetScreenSize(width_, height_, surface);
         PostInitSurfDev(sfDev_, surface);
         buffInfo_ = nullptr;
