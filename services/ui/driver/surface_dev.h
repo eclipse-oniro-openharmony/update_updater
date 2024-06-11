@@ -32,7 +32,7 @@ public:
     SurfaceDev() = default;
     ~SurfaceDev();
     void Flip(const uint8_t* buf) const;
-    void GetScreenSize(uint16_t &w, uint16_t &h) const;
+    void GetScreenSize(uint16_t &w, uint16_t &h, GrSurface &surface) const;
     bool Init();
     void Blank(bool blank);
     void Exit(void);
