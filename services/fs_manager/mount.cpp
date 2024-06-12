@@ -311,6 +311,7 @@ int SetupPartitions(bool isMountData)
                 UPDATER_LAST_WORD(-1);
                 return -1;
             }
+            LOG(INFO) << "mount data not fail";
             continue;
         }
         if (UmountForPath(mountPoint) != 0) {
