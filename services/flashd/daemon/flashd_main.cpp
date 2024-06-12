@@ -32,7 +32,6 @@ int FlashdMain(int argc, char **argv)
     Base::SetLogLevel(LOG_LAST);  // debug log print
     Base::SetLogCache(false);
     UpdaterInit::GetInstance().InvokeEvent(FLAHSD_PRE_INIT_EVENT);
-    UpdaterInit::GetInstance().InvokeEvent(FLAHSD_PRE_INIT_NORFLASH);
 
     std::vector<std::string> args = Updater::Utils::ParseParams(argc, argv);
     bool enableUsb = false;
