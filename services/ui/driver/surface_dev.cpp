@@ -95,9 +95,8 @@ void SurfaceDev::AddFbDevice(const std::string &devicePath)
     fbDeviceList_.push_back(devicePath);
 }
 
-void SurfaceDev::GetScreenSize(uint16_t &w, uint16_t &h) const
+void SurfaceDev::GetScreenSize(uint16_t &w, uint16_t &h, GrSurface &surface) const
 {
-    GrSurface surface {0};
     if (drv_ != nullptr) {
         drv_->GetGrSurface(surface);
     }
