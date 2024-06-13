@@ -60,6 +60,7 @@ extern "C" {
 #endif
 #endif /* __cplusplus */
 void InitFlushBatteryStatusExt(void);
+void PostInitSurfDev(std::unique_ptr<SurfaceDev> &surfDev, GrSurface &surface);
 #ifdef __cplusplus
 #if __cplusplus
 }
