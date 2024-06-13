@@ -83,7 +83,7 @@ ohos_static_library("libupdaterpackage") {
     "${updater_path}/services/log:libupdaterlog",
   ]
 
-  if (!is_linux && !is_mingw && !is_mac) {
+  if (!is_linux && !is_mingw && !is_mac && host_cpu != arm64) {
     deps += [ "../rust/hash_signed_data:rust_hash_signed_data" ]
   }
 
