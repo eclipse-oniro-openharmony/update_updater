@@ -38,6 +38,7 @@ GraphicEngine &GraphicEngine::GetInstance()
 
 __attribute__((weak)) void PostInitSurfDev(std::unique_ptr<SurfaceDev> &surfDev, GrSurface &surface)
 {
+    LOG(INFO) << "not inited the post InitSurfDev process";
     return;
 }
 
