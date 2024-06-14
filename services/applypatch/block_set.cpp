@@ -196,7 +196,7 @@ size_t BlockSet::WriteDataToBlock(int fd, std::vector<uint8_t> &buffer)
         pos += writeSize;
     }
     if (fsync(fd) == -1) {
-        LOG(ERROR) << "Failed to fsync";
+        LOG(ERROR) << "Failed to fsync" << strerror(errno);
         return 0;
     }
     return pos;
