@@ -42,11 +42,12 @@ void CloseStdout(void)
     close(fd);
 }
 
-void TestTrim(void)
+void TestTrim(const uint8_t* data, size_t size)
 {
     Utils::Trim("");
     Utils::Trim("   ");
     Utils::Trim("aa   ");
+    Utils::Trim(std::string(reinterpret_cast<const char*>(data), size));
 }
 
 void TestConvertSha256Hex(void)
@@ -368,7 +369,7 @@ namespace OHOS {
     void FuzzUtils(const uint8_t* data, size_t size)
     {
         CloseStdout();
-        TestTrim();
+        TestTrim(data, size);
         TestConvertSha256Hex();
         TestSplitString();
         TestMkdirRecursive();
