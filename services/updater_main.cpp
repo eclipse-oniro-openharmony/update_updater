@@ -71,6 +71,7 @@ constexpr struct option OPTIONS[] = {
     { USB_MODE, no_argument, nullptr, 0 },
     { "UPDATE:MAINIMG", no_argument, nullptr, 0 },
     { "update_protect", no_argument, nullptr, 0 },
+    { "factory_sd_update", no_argument, nullptr, 0 },
     { "UPDATE:SD", no_argument, nullptr, 0 },
     { "UPDATE:SDFROMDEV", no_argument, nullptr, 0 },
     { "sdcard_intral_update", optional_argument, nullptr, 0},
@@ -640,6 +641,11 @@ std::unordered_map<std::string, std::function<void ()>> InitOptionsFuncTab(char*
         {
             upParams.updateMode = SDCARD_UPDATE;
             upParams.sdExtMode = SDCARD_MAINIMG;
+        }},
+        {"factory_sd_update", [&]() -> void
+        {
+            upParams.updateMode = SDCARD_UPDATE;
+            upParams.sdExtMode = SDCARD_NORMAL_UPDATE;
         }},
         {"UPDATE:SD", [&]() -> void
         {
