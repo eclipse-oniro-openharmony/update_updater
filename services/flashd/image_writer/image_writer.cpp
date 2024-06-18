@@ -41,9 +41,7 @@ bool FlashdWriterRaw::GetDataWriter(const std::string &partition)
         LOG(ERROR) << "FlashdWriterRaw: cannot find the lun index of partition: " << partition;
         return false;
     }
-    char lunIndexName = 'a' + ptnInfo.lun;
-    const std::string writePath = std::string(PREFIX_UFS_NODE) + lunIndexName;
-    writer_ = DataWriter::CreateDataWriter(WRITE_RAW, writePath, ptnInfo.startAddr);
+    writer_ = DataWriter::CreateDataWriter(ptnInfo.writeMode, ptnInfo.writePath, partition, ptnInfo.startAddr);
 #else
     writer_ = DataWriter::CreateDataWriter(WRITE_RAW, GetBlockDeviceByMountPoint(partition));
 #endif

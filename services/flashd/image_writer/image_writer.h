@@ -58,7 +58,7 @@ private:
     ~FlashdImageWriter() {}
     bool IsRawImage(const std::string &partition, const uint8_t *data, size_t len) const;
     std::unique_ptr<FlashdWriter> GetRawWriter() const;
-    std::vector<FlashdWriterGet>  writerGet_ = {};
+    std::vector<FlashdWriterGet> writerGet_ = {};
 };
 } // Flashd
 #endif // FLASHD_IMAGE_WRITER_H
