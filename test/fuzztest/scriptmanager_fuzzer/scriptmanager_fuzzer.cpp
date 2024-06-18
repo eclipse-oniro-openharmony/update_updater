@@ -228,7 +228,7 @@ public:
         TestPkgManager packageManager;
         auto env = std::make_unique<FuzzTestScriptEnv>(&packageManager);
         HashDataVerifier verifier {&packageManager};
-        char *realPath = realpath(path.c_str(), NULL);
+        char *realPath = realpath(path.c_str(), nullptr);
         if (realPath == nullptr) {
             LOG(ERROR) << "realPath is NULL" << " : " << strerror(errno);
             path = FUZZ_TEST_PATH_FROM + "updater_fake_pkg.zip";
