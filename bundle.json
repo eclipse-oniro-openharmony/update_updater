@@ -243,6 +243,13 @@
                     }
                 },
                 {
+                    "name": "//base/update/updater/services/package:libupdaterpackage_shared",
+                    "header": {
+                        "header_files": [],
+                        "header_base": "//base/update/updater/services/include"
+                    }
+                },
+                {
                     "name": "//base/update/updater/services/diffpatch/patch:libpatch",
                     "header": {
                         "header_files": [],

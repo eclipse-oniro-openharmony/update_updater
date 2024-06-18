@@ -21,6 +21,7 @@ config("libpackageExt_exported_headers") {
   include_dirs = [
     "${updater_path}/interfaces/kits/include",
     "${updater_path}/services/include/package",
+    "${updater_path}/services/package/pkg_verify",
   ]
 }
 
