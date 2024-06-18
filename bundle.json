@@ -84,7 +84,7 @@
                 "//base/update/updater/utils:write_updater",
                 "//base/update/updater/services/diffpatch/patch:libpatch",
                 "//base/update/updater/services/diffpatch/diff:libdiff",
-                "//base/update/updater/services/diffpatch:diff(//build/toolchain/linux:clang_arm64)",
+                "//base/update/updater/services/diffpatch:diff(//build/toolchain/linux:clang_${host_cpu})",
                 "//base/update/updater/services/ui:libui",
                 "//base/update/updater/services/flow_update/update_bin:libBinFlowUpdate"
             ],
