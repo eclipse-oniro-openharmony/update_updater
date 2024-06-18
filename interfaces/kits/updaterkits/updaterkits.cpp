@@ -186,7 +186,7 @@ bool RebootAndInstallUpgradePackage(const std::string &miscFile, const std::vect
         return false;
     }
 
-    if (!AddPkgPath(updateMsg, 0, packageName)) {
+    if (!AddPkgPath(updateMsg, static_cast<size_t>(ret), packageName)) {
         return false;
     }
     if (upgradeType == UPGRADE_TYPE_OTA) {
