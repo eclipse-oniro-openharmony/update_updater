@@ -367,8 +367,12 @@ bool ReadFully(int fd, void *data, size_t size)
     size_t remaining = size;
     while (remaining > 0) {
         ssize_t sread = read(fd, p, remaining);
-        if (sread <= 0) {
-            LOG(ERROR) << "Utils::ReadFully run error";
+        if (sread == -1) {
+            LOG(ERROR) << "read failed: " << strerror(errno);
+            return false;
+        }
+        if (sread == 0) {
+            LOG(ERROR) << "read reached unexpected EOF";
             return false;
         }
         p += sread;
