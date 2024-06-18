@@ -71,6 +71,24 @@ ohos_static_library("libutils_fs") {
     "${updater_path}/services/include/",
   ]
 
+  public_configs = [ ":libutils_exported_headers" ]
+
+  subsystem_name = "updater"
+  part_name = "updater"
+}
+
+ohos_static_library("libutils_json") {
+  sources = [ "json/json_node.cpp" ]
+
+  include_dirs = [
+    "include",
+    "${updater_path}/services/include/",
+  ]
+
+  public_configs = [ ":libutils_exported_headers" ]
+
+  external_deps = [ "cJSON:cjson" ]
+
   subsystem_name = "updater"
   part_name = "updater"
 }
