@@ -70,6 +70,9 @@ static void WriteUpdaterResultFile(const std::string &result)
     if (fwrite(buf, 1, strlen(buf) + 1, fp) <= 0) {
         LOG(WARNING) << "write updater result file failed, err:" << errno;
     }
+    if (fsync(fileno(fp)) != 0) {
+        LOG(WARNING) << "WriteUpdaterResultFile fsync failed" << strerror(errno);
+    }
     if (fclose(fp) != 0) {
         LOG(WARNING) << "close updater result file failed";
     }
