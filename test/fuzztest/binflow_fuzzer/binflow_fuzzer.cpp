@@ -26,11 +26,6 @@ namespace OHOS {
         InitUpdaterLogger("UPDATER", "updater_log.log", "updater_status.log", "error_code.log");
         LOG(INFO) << "TestBinFlowUpdater start";
         std::string packagePath = std::string(reinterpret_cast<const char*>(data), size);
-        char tmpPath[PATH_MAX] = {0};
-        if (realpath(packagePath.c_str(), tmpPath) == nullptr) {
-            LOG(ERROR) << "realPath is NULL" << " : " << strerror(errno);
-            packagePath = "/data/fuzz/test/updater_flow.zip";
-        }
         PkgManager::PkgManagerPtr pkgManager = PkgManager::CreatePackageInstance();
         if (pkgManager == nullptr) {
             LOG(ERROR) << "pkgManager is nullptr";
