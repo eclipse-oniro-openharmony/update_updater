@@ -222,13 +222,13 @@ public:
         ScriptManager::ReleaseScriptManager();
     }
 
-    int TestUscriptExecute()
+    int TestUscriptExecute(std::string &path)
     {
         int32_t ret {};
         TestPkgManager packageManager;
         auto env = std::make_unique<FuzzTestScriptEnv>(&packageManager);
         HashDataVerifier verifier {&packageManager};
-        verifier.LoadHashDataAndPkcs7(FUZZ_TEST_PATH_FROM + "updater_fake_pkg.zip");
+        verifier.LoadHashDataAndPkcs7(path);
         ScriptManager *manager = ScriptManager::GetScriptManager(env.get(), &verifier);
         if (manager == nullptr) {
             USCRIPT_LOGI("create manager fail ret:%d", ret);
@@ -265,7 +265,8 @@ private:
 void FuzzScriptManager(const uint8_t *data, size_t size)
 {
     FuzzScriptTest test;
-    test.TestUscriptExecute();
+    std::string path = std::string(reinterpret_cast<const char*>(data), size);
+    test.TestUscriptExecute(path);
 }
 }
 

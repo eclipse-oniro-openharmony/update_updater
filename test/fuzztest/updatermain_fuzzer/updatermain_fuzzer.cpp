@@ -260,18 +260,17 @@ static void ProgressFuzzTest()
     ProgressSmoothHandler(0, 1);
 }
 
-static void UtilsFuzzTest()
+static void UtilsFuzzTest(const uint8_t* data, size_t size)
 {
-    std::string path = "/data/fuzz/test";
-    if (!Updater::Utils::IsDirExist(path)) {
+    if (!Utils::IsDirExist(std::string(reinterpret_cast<const char*>(data), size))) {
         return;
     }
     std::vector<std::string> files {};
-    if (Updater::Utils::GetFilesFromDirectory(path, files, false) < 0) {
+    if (Utils::GetFilesFromDirectory(std::string(reinterpret_cast<const char*>(data), size), files, false) < 0) {
         return;
     }
-    std::string filePath = path + "MountForPath_fuzzer.fstable";
-    if (!Updater::Utils::IsFileExist(filePath)) {
+    std::string filePath = std::string(reinterpret_cast<const char*>(data), size) + "MountForPath_fuzzer.fstable";
+    if (!Utils::IsFileExist(filePath)) {
         return;
     }
 }
@@ -289,7 +288,7 @@ namespace OHOS {
         ExtractUpdaterBinaryFuzzTest();
         IsSpaceCapacitySufficientFuzzTest();
         ProgressFuzzTest();
-        UtilsFuzzTest();
+        UtilsFuzzTest(data, size);
     }
 }
 
