@@ -33,6 +33,7 @@
 #include "utils.h"
 
 using namespace Hpackage;
+using namespace Updater::Utils;
 namespace Updater {
 CommandResult AbortCommandFn::Execute(const Command &params)
 {
@@ -111,23 +112,26 @@ bool LoadTarget(const Command &params, size_t &pos, std::vector<uint8_t> &buffer
     }
 
     // Read the target's buffer to determine whether it needs to be written
-    size_t tgtBlockSize;
     std::string cmdTmp = params.GetArgumentByPos(pos++);
     targetBlock.ParserAndInsert(cmdTmp);
-    tgtBlockSize = targetBlock.TotalBlockSize() * H_BLOCK_SIZE;
-    buffer.resize(tgtBlockSize);
-    if (targetBlock.ReadDataFromBlock(params.GetFileDescriptor(), buffer) == 0) {
+    size_t tgtBlockSize = targetBlock.TotalBlockSize() * H_BLOCK_SIZE;
+    std::vector<uint8_t> tgtBuffer(tgtBlockSize);
+
+    if (targetBlock.ReadDataFromBlock(params.GetFileDescriptor(), tgtBuffer) == 0) {
         LOG(ERROR) << "Read data from block error, TotalBlockSize: " << targetBlock.TotalBlockSize();
         result = FAILED;
         return false;
     }
-    if (targetBlock.VerifySha256(buffer, targetBlock.TotalBlockSize(), tgtHash) == 0) {
+    if (targetBlock.VerifySha256(tgtBuffer, targetBlock.TotalBlockSize(), tgtHash) == 0) {
         LOG(ERROR) << "Will write same sha256 blocks to target, no need to write";
         result = SUCCESS;
         return false;
     }
-
-    if (targetBlock.LoadTargetBuffer(params, buffer, tgtBlockSize, pos, srcHash) != 0) {
+    std::vector<uint8_t>().swap(tgtBuffer);
+    std::string blockLen = params.GetArgumentByPos(pos++);
+    size_t srcBlockSize = String2Int<size_t>(blockLen, N_DEC);
+    buffer.resize(srcBlockSize * H_BLOCK_SIZE);
+    if (targetBlock.LoadTargetBuffer(params, buffer, srcBlockSize, pos, srcHash) != 0) {
         LOG(ERROR) << "Failed to load blocks";
         result = FAILED;
         return false;

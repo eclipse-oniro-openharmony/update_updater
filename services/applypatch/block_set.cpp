@@ -251,9 +251,6 @@ void BlockSet::MoveBlock(std::vector<uint8_t> &target, const BlockSet& locations
 int32_t BlockSet::LoadSourceBuffer(const Command &cmd, size_t &pos, std::vector<uint8_t> &sourceBuffer,
     bool &isOverlap, size_t &srcBlockSize)
 {
-    std::string blockLen = cmd.GetArgumentByPos(pos++);
-    srcBlockSize = String2Int<size_t>(blockLen, N_DEC);
-    sourceBuffer.resize(srcBlockSize * H_BLOCK_SIZE);
     std::string targetCmd = cmd.GetArgumentByPos(pos++);
     std::string storeBase = cmd.GetTransferParams()->storeBase;
     if (targetCmd != "-") {
