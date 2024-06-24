@@ -59,19 +59,21 @@ ohos_unittest("applypatch_unittest") {
     "${updater_path}/test/unittest",
     "${updater_path}/test/unittest/script",
     "${updater_path}/utils/include",
-    "//third_party/bounds_checking_function/include",
   ]
   deps = [
     "${updater_path}/interfaces/kits/misc_info:libmiscinfo",
     "${updater_path}/services/applypatch:libapplypatch",
     "${updater_path}/services/fs_manager:libfsmanager",
     "${updater_path}/utils:libutils",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
-    "//third_party/openssl:libcrypto_shared",
-    "//third_party/openssl:libssl_shared",
   ]
-  external_deps = [ "init:libbegetutil_static" ]
+  external_deps = [
+    "bounds_checking_function:libsec_static",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
+    "init:libbegetutil_static",
+    "openssl:libcrypto_shared",
+    "openssl:libssl_shared",
+  ]
   configs = [ "${updater_path}/test/unittest:utest_config" ]
   install_enable = true
   part_name = "updater"

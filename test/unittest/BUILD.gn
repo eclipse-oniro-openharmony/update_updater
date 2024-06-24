@@ -143,30 +143,6 @@ ohos_unittest("updater_unittest") {
     "${updater_path}/services/diffpatch/bzip2",
     "${updater_path}/services/ui",
     "${updater_path}/test/unittest",
-    "//developtools/hdc/src/common",
-    "//developtools/hdc/src/host",
-    "//developtools/hdc/src/daemon",
-    "//third_party/zlib",
-    "//third_party/lz4/lib",
-    "//third_party/bounds_checking_function/include",
-    "//foundation/arkui/napi/interfaces/kits",
-    "//third_party/cJSON",
-    "//third_party/curl/include",
-    "//third_party/bzip2",
-    "//third_party/libdrm/include/drm",
-    "//third_party/libdrm",
-    "//third_party/googletest/googletest/include",
-    "//drivers/framework/ability/sbuf/include",
-    "//drivers/framework/include/platform",
-    "//drivers/framework/include/core",
-    "//drivers/framework/include/osal",
-    "//drivers/framework/include/utils",
-    "//drivers/framework/include/config",
-    "//drivers/framework/include",
-    "//drivers/peripheral/input/hal/include",
-    "//drivers/peripheral/input/interfaces/include",
-    "//drivers/peripheral/partitionslot/hal/include",
-    "//third_party/bounds_checking_function/include",
   ]
   deps = [
     "${updater_path}/interfaces/kits/misc_info:libmiscinfo",
@@ -177,16 +153,6 @@ ohos_unittest("updater_unittest") {
     "${updater_path}/services/log:libupdaterlog",
     "${updater_path}/services/package:libupdaterpackage",
     "${updater_path}/utils:libutils",
-    "//third_party/bounds_checking_function:libsec_static",
-    "//third_party/bzip2:libbz2",
-    "//third_party/cJSON:cjson",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
-    "//third_party/libuv:uv",
-    "//third_party/lz4:liblz4_static",
-    "//third_party/openssl:libcrypto_shared",
-    "//third_party/openssl:libssl_shared",
-    "//third_party/zlib:libz",
   ]
 
   deps += [
@@ -196,8 +162,18 @@ ohos_unittest("updater_unittest") {
   ]
 
   external_deps = [
+    "bounds_checking_function:libsec_static",
+    "bzip2:libbz2",
+    "cJSON:cjson",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
     "hilog:libhilog_base",
     "init:libbegetutil_static",
+    "libuv:uv",
+    "lz4:liblz4_static",
+    "openssl:libcrypto_shared",
+    "openssl:libssl_shared",
+    "zlib:libz",
   ]
 
   public_configs = [ ":utest_config" ]
