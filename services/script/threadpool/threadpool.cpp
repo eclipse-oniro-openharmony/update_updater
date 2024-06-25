@@ -65,7 +65,9 @@ void ThreadPool::Init(int32_t number)
     }
     // Create workers
     for (int32_t threadIndex = 0; threadIndex < threadNumber_; ++threadIndex) {
-        workers_.emplace_back(std::thread(ThreadPool::ThreadExecute, this, threadIndex));
+        workers_.emplace_back(std::thread([this, threadIndex] {
+            ThreadExecute(this, threadIndex);
+            }));
     }
 }
 
