@@ -50,17 +50,19 @@ ohos_fuzztest("UpdaterMainFuzzTest") {
     "${updater_path}/services/sdcard_update:libsdupdate",
     "${updater_path}/utils:libutils",
     "${updater_path}/utils:libutils_fs",
-    "//third_party/bounds_checking_function:libsec_static",
-    "//third_party/bzip2:libbz2",
-    "//third_party/cJSON:cjson",
-    "//third_party/libdrm:libdrm",
-    "//third_party/lz4:liblz4_static",
-    "//third_party/openssl:libcrypto_shared",
-    "//third_party/openssl:libssl_shared",
-    "//third_party/zlib:libz",
   ]
 
-  external_deps = [ "init:libbegetutil_static" ]
+  external_deps = [
+    "bounds_checking_function:libsec_static",
+    "bzip2:libbz2",
+    "cJSON:cjson",
+    "init:libbegetutil_static",
+    "libdrm:libdrm",
+    "lz4:liblz4_static",
+    "openssl:libcrypto_shared",
+    "openssl:libssl_shared",
+    "zlib:libz",
+  ]
 
   cflags = [
     "-g",

@@ -38,7 +38,6 @@ ohos_fuzztest("RebootAndInstallUpgradePackageFuzzTest") {
     "${updater_path}/interfaces/kits/include",
     "${updater_path}/services/include/log",
     "${updater_path}/utils/include",
-    "//third_party/bounds_checking_function/include",
   ]
 
   deps = [
@@ -46,10 +45,10 @@ ohos_fuzztest("RebootAndInstallUpgradePackageFuzzTest") {
     "${updater_path}/interfaces/kits/updaterkits:libupdaterkits",
     "${updater_path}/services/log:libupdaterlog",
     "${updater_path}/utils:libutils",
-    "//third_party/bounds_checking_function:libsec_static",
   ]
 
   external_deps = [
+    "bounds_checking_function:libsec_static",
     "c_utils:utils",
     "init:libbegetutil_static",
   ]

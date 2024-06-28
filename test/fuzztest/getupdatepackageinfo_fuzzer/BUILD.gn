@@ -39,18 +39,18 @@ ohos_fuzztest("GetUpdatePackageInfoFuzzTest") {
     "${updater_path}/services/log:libupdaterlog",
     "${updater_path}/services/package:libupdaterpackage",
     "${updater_path}/utils:libutils",
-    "//third_party/bounds_checking_function:libsec_static",
-    "//third_party/bzip2:libbz2",
-    "//third_party/libdrm:libdrm",
-    "//third_party/lz4:liblz4_static",
-    "//third_party/openssl:libcrypto_shared",
-    "//third_party/openssl:libssl_shared",
-    "//third_party/zlib:libz",
   ]
 
   external_deps = [
+    "bounds_checking_function:libsec_static",
+    "bzip2:libbz2",
     "c_utils:utils",
     "init:libbegetutil_static",
+    "libdrm:libdrm",
+    "lz4:liblz4_static",
+    "openssl:libcrypto_shared",
+    "openssl:libssl_shared",
+    "zlib:libz",
   ]
 
   cflags = [

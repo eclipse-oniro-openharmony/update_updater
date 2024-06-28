@@ -44,7 +44,6 @@ ohos_unittest("updater_service_unittest") {
     "${updater_path}/services/include/log",
     "${updater_path}/utils/include",
     "${updater_path}/utils/json",
-    "//third_party/bounds_checking_function/include",
     "${updater_path}/services",
     "${updater_path}/services/ui",
     "${updater_path}/services/ui/include",
@@ -62,20 +61,20 @@ ohos_unittest("updater_service_unittest") {
     "${updater_path}/services/package:libupdaterpackage",
     "${updater_path}/services/write_state:libwritestate",
     "${updater_path}/utils:libutils",
-    "//third_party/bounds_checking_function:libsec_shared",
-    "//third_party/bounds_checking_function:libsec_static",
-    "//third_party/bzip2:libbz2",
-    "//third_party/cJSON:cjson",
-    "//third_party/libdrm:libdrm",
-    "//third_party/openssl:libcrypto_shared",
-    "//third_party/openssl:libssl_shared",
-    "//third_party/zlib:libz",
   ]
 
   external_deps = [
+    "bounds_checking_function:libsec_shared",
+    "bounds_checking_function:libsec_static",
+    "bzip2:libbz2",
+    "cJSON:cjson",
     "hilog:libhilog",
     "init:libbegetutil_static",
+    "libdrm:libdrm",
+    "openssl:libcrypto_shared",
+    "openssl:libssl_shared",
     "ui_lite:libupdater_layout",
+    "zlib:libz",
   ]
   configs = [ "${updater_path}/test/unittest:utest_config" ]
   install_enable = true

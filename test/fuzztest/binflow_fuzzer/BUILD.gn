@@ -68,14 +68,14 @@ ohos_fuzztest("BinFlowFuzzTest") {
     "${updater_path}/services/package:libupdaterpackage",
     "${updater_path}/services/script:libupdaterscript",
     "${updater_path}/utils:libutils",
-    "//third_party/bounds_checking_function:libsec_static",
-    "//third_party/bzip2:libbz2",
-    "//third_party/cJSON:cjson",
-    "//third_party/openssl:libcrypto_shared",
   ]
   external_deps = [
+    "bounds_checking_function:libsec_static",
+    "bzip2:libbz2",
+    "cJSON:cjson",
     "hilog:libhilog",
     "init:libbegetutil_static",
+    "openssl:libcrypto_shared",
   ]
 
   cflags = [
