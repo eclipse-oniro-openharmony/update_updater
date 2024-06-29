@@ -61,7 +61,7 @@ std::vector<std::string> UiStrategy::modeStr_ = {
 
 void UiStrategy::RegisterUiMode(const std::string &mode)
 {
-    LOG(INFO) << "RegisterUiMode " << mode;
+    LOG(DEBUG) << "RegisterUiMode " << mode;
     modeStr_.emplace_back(mode);
 }
 

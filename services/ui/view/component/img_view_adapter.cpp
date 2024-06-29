@@ -86,7 +86,7 @@ ImgViewAdapter::ImgViewAdapter(const UxViewInfo &info)
     valid_ = true;
     this->SetAutoEnable(false);
     SetViewCommonInfo(info.commonInfo);
-    LOG(INFO) << "dir:" << dir_ << ", imgCnt:" << imgCnt_ << ", interval:" << interval_;
+    LOG(DEBUG) << "dir:" << dir_ << ", imgCnt:" << imgCnt_ << ", interval:" << interval_;
     if (interval_ == 0) {
         GetRealImgPath();
         this->SetSrc(dir_.c_str());

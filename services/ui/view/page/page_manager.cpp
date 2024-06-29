@@ -100,7 +100,7 @@ bool PageManager::BuildSubPages(const std::string &pageId, const std::shared_ptr
             return false;
         }
         pages_.push_back(subPage);
-        LOG(INFO) << subPageId << " builded";
+        LOG(DEBUG) << subPageId << " builded";
         if (subPageId == entry) {
             mainPage_ = subPage;
         }
