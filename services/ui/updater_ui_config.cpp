@@ -51,20 +51,20 @@ std::ostream &operator<<(std::ostream &os, const UxViewCommonInfo &info)
 
 std::ostream &operator<<(std::ostream &os, const UxPageInfo &info)
 {
-    LOG(INFO) << "page:" << info.id;
+    LOG(DEBUG) << "page:" << info.id;
     for (auto &it : info.viewInfos) {
-        LOG(INFO) << it.commonInfo;
+        LOG(DEBUG) << it.commonInfo;
     }
     return os;
 }
 
 void PrintInfoVec(const std::vector<UxPageInfo> &infoVec)
 {
-    LOG(INFO) << "=====print start=====";
+    LOG(DEBUG) << "=====print start=====";
     for (auto &iter : infoVec) {
-        LOG(INFO) << iter;
+        LOG(DEBUG) << iter;
     }
-    LOG(INFO) << "=====print end=====";
+    LOG(DEBUG) << "=====print end=====";
 }
 
 std::string SelectConfig(const JsonNode &node)

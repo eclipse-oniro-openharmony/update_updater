@@ -83,7 +83,7 @@ LabelBtnAdapter::LabelBtnAdapter(const UxViewInfo &info)
     this->SetStyle(OHOS::STYLE_BACKGROUND_COLOR, bgColor.full);
     this->SetStyle(OHOS::STYLE_BACKGROUND_OPA, bgColor.alpha);
     if (spec.focusable) {
-        LOG(INFO) << "init focus listener for " << viewId_;
+        LOG(DEBUG) << "init focus listener for " << viewId_;
         InitFocus(txtColor, bgColor, StrToColor(spec.focusedTxtColor),
             StrToColor(spec.focusedBgColor));
     }
