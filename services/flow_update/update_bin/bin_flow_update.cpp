@@ -36,9 +36,15 @@ BinFlowUpdate::BinFlowUpdate(uint32_t maxBufSize)
 {
     maxBufSize_ = maxBufSize == 0 ? DEFAULT_SIZE : maxBufSize;
     buffer_ = new uint8_t[maxBufSize_];
-    updateBinProcess_.emplace(BIN_UPDATE_STEP_PRE, std::bind(&BinFlowUpdate::BinUpdatePreWrite, this, _1, _2));
-    updateBinProcess_.emplace(BIN_UPDATE_STEP_DO, std::bind(&BinFlowUpdate::BinUpdateDoWrite, this, _1, _2));
-    updateBinProcess_.emplace(BIN_UPDATE_STEP_POST, std::bind(&BinFlowUpdate::BinUpdatePostWrite, this, _1, _2));
+    updateBinProcess_.emplace(BIN_UPDATE_STEP_PRE, [this](uint8_t *data, uint32_t &len) {
+        return this->BinUpdatePreWrite(data, len);
+        });
+    updateBinProcess_.emplace(BIN_UPDATE_STEP_DO, [this](uint8_t *data, uint32_t &len) {
+        return this->BinUpdateDoWrite(data, len);
+    });
+    updateBinProcess_.emplace(BIN_UPDATE_STEP_POST, [this](uint8_t *data, uint32_t &len) {
+        return this->BinUpdatePostWrite(data, len);
+    });
     pkgManager_ = PkgManager::CreatePackageInstance();
 }
 

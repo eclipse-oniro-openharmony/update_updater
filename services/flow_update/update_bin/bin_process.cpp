@@ -75,10 +75,12 @@ int32_t UScriptInstructionBinFlowWrite::Execute(Uscript::UScriptEnv &env, Uscrip
         return USCRIPT_INVALID_PARAM;
     }
 
-    std::thread consumer(&UScriptInstructionBinFlowWrite::ProcessBinFile, this,
-        std::ref(env), std::ref(context), binFlowStream);
-    std::thread producer(&UScriptInstructionBinFlowWrite::ExtractBinFile, this,
-        std::ref(env), std::ref(context), binFlowStream);
+    std::thread consumer([this, &env, &context, binFlowStream] {
+        this->ProcessBinFile(env, context, binFlowStream);
+        });
+    std::thread producer([this, &env, &context, binFlowStream] {
+        this->ExtractBinFile(env, context, binFlowStream);
+        });
     consumer.join();
     producer.join();
     if (isStopRun_) {

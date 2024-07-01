@@ -87,7 +87,9 @@ void GraphicEngine::InitImageDecodeAbility() const
 void GraphicEngine::InitFlushThread()
 {
     flushStop_ = false;
-    flushLoop_ = std::thread(&GraphicEngine::FlushThreadLoop, this);
+    flushLoop_ = std::thread([this] {
+        this->FlushThreadLoop();
+        });
     flushLoop_.detach();
     LOG(INFO) << "init flush thread";
 }

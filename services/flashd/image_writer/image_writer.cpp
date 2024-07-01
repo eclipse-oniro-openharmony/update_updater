@@ -71,8 +71,12 @@ int FlashdWriterRaw::Write(const std::string &partition, const uint8_t *data, si
 FlashdImageWriter::FlashdImageWriter()
 {
     FlashdWriterGet writerGet;
-    writerGet.checkImage = std::bind(&FlashdImageWriter::IsRawImage, this, _1, _2, _3);
-    writerGet.getWriter = std::bind(&FlashdImageWriter::GetRawWriter, this);
+    writerGet.checkImage = [this](const std::string &partition, const uint8_t *data, size_t len) {
+        return this->IsRawImage(partition, data, len);
+    };
+    writerGet.getWriter = [this] {
+        return this->GetRawWriter();
+    };
     writerGet_.emplace_back(std::move(writerGet));
 }
 
