@@ -109,6 +109,9 @@ int UmountForPath(const std::string& path)
     } else if (rc == MOUNT_UMOUNTED) {
         return 0;
     } else {
+        if (path == "/data") {
+            Utils::SetParameter("updater.data.ready", "0");
+        }
         int ret = umount(item->mountPoint);
         if (ret == -1) {
             LOG(ERROR) << "Umount " << item->mountPoint << "failed: " << errno;
@@ -311,6 +314,7 @@ int SetupPartitions(bool isMountData)
                 UPDATER_LAST_WORD(-1);
                 return -1;
             }
+            Utils::SetParameter("updater.data.ready", "1");
             LOG(INFO) << "mount data not fail";
             continue;
         }
