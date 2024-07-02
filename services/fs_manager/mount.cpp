@@ -202,6 +202,7 @@ int MountForPath(const std::string &path)
     LOG(DEBUG) << "Mount for path " << path;
     MountStatus rc = GetMountStatusForMountPoint(item->mountPoint);
     if (rc == MountStatus::MOUNT_ERROR) {
+        LOG(INFO) << "GetMountStatusForMountPoint ret is MOUNT_ERROR";
         ret = -1;
     } else if (rc == MountStatus::MOUNT_MOUNTED) {
         LOG(INFO) << path << " already mounted";
