@@ -56,7 +56,7 @@ ohos_shared_library("libupdater_patch_shared") {
   ]
 
   external_deps = [
-    "bounds_checking_function:libsec_static",
+    "bounds_checking_function:libsec_shared",
     "init:libbegetutil_static",
     "init:libfsmanager_static_real",
   ]
