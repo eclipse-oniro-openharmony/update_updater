@@ -242,7 +242,7 @@ int32_t ScriptManagerImpl::ExecuteScript(int32_t priority)
 
 int32_t ScriptManagerImpl::AddInstruction(const std::string &instrName, const UScriptInstructionPtr instruction)
 {
-    USCRIPT_LOGI("AddInstruction instrName: %s ", instrName.c_str());
+    USCRIPT_LOGD("AddInstruction instrName: %s ", instrName.c_str());
     if (scriptInstructions_.find(instrName) != scriptInstructions_.end()) {
         USCRIPT_LOGW("Instruction: %s exist", instrName.c_str());
         // New instruction has the same name

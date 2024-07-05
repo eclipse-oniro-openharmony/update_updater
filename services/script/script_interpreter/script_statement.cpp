@@ -172,10 +172,10 @@ UScriptStatementResult UScriptExpressionStatement::Execute(ScriptInterpreter &in
     UScriptContextPtr context)
 {
     UScriptStatementResult result(UScriptStatementResult::STATEMENT_RESULT_TYPE_NORMAL, nullptr);
-    INTERPRETER_LOGI(interpreter, context, "UScriptExpressionStatement::statement ");
+    INTERPRETER_LOGD(interpreter, context, "UScriptExpressionStatement::statement ");
     UScriptValuePtr value = expression_->Execute(interpreter, context);
     result.UpdateStatementResult(value);
-    INTERPRETER_LOGI(interpreter, context, "UScriptExpressionStatement::Execute result: %s",
+    INTERPRETER_LOGD(interpreter, context, "UScriptExpressionStatement::Execute result: %s",
         UScriptStatementResult::ScriptToString(&result).c_str());
     return result;
 }
@@ -286,7 +286,7 @@ UScriptStatementResult UScriptIfStatement::Execute(ScriptInterpreter &interprete
 
 UScriptStatementResult UScriptStatementList::Execute(ScriptInterpreter &interpreter, UScriptContextPtr context)
 {
-    INTERPRETER_LOGI(interpreter, context, "UScriptStatementList::Execute ");
+    INTERPRETER_LOGD(interpreter, context, "UScriptStatementList::Execute ");
     interpreter.ContextPush(context);
     UScriptStatementResult result(UScriptStatementResult::STATEMENT_RESULT_TYPE_NORMAL, nullptr);
     for (auto statement : statements_) {
@@ -302,7 +302,7 @@ UScriptStatementResult UScriptStatementList::Execute(ScriptInterpreter &interpre
         }
     }
     interpreter.ContextPop();
-    INTERPRETER_LOGI(interpreter, context, "UScriptStatementList finish %s",
+    INTERPRETER_LOGD(interpreter, context, "UScriptStatementList finish %s",
         UScriptStatementResult::ScriptToString(&result).c_str());
     return result;
 }

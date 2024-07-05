@@ -148,7 +148,7 @@ int32_t Store::LoadDataFromStore(const std::string &dirPath, const std::string &
     }
     struct stat fileStat {};
     if (stat(path.c_str(), &fileStat) == -1) {
-        LOG(WARNING) << "Failed to stat";
+        LOG(DEBUG) << "Failed to stat";
         return -1;
     }
     if (fileStat.st_size % H_BLOCK_SIZE != 0) {

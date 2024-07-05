@@ -88,7 +88,7 @@ int32_t ScriptInterpreter::Execute()
 {
     UScriptContextPtr context = std::make_shared<UScriptInterpretContext>(true);
     UScriptStatementResult result = statements_->Execute(*this, context);
-    INTERPRETER_LOGI(*this, context, "statements_ execute result %s ",
+    INTERPRETER_LOGD(*this, context, "statements_ execute result %s ",
         UScriptStatementResult::ScriptToString(&result).c_str());
     if (result.GetResultType() == UScriptStatementResult::STATEMENT_RESULT_TYPE_ERROR) {
         return result.GetError();

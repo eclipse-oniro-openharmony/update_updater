@@ -149,7 +149,7 @@ UScriptValuePtr BinaryExpression::Execute(ScriptInterpreter &inter, UScriptConte
 UScriptValuePtr FunctionCallExpression::Execute(ScriptInterpreter &inter, UScriptContextPtr local)
 {
     UScriptValuePtr v;
-    INTERPRETER_LOGI(inter, local, "FunctionCallExpression::Execute %s ", functionName_.c_str());
+    INTERPRETER_LOGD(inter, local, "FunctionCallExpression::Execute %s ", functionName_.c_str());
 
     if (inter.IsNativeFunction(functionName_)) {
         return inter.ExecuteNativeFunc(local, functionName_, params_);
