@@ -32,7 +32,7 @@ constexpr uint32_t PKG_FOOTER_SIZE = 6;
 constexpr uint32_t PKG_HASH_CONTENT_LEN = SHA256_DIGEST_LENGTH;
 }
 
-int32_t PkgVeriyUtil::VerifySourceDigest(std::vector<uint8_t> &signature, std::vector<uint8_t> &sourceDigest,
+int32_t PkgVerifyUtil::VerifySourceDigest(std::vector<uint8_t> &signature, std::vector<uint8_t> &sourceDigest,
     const std::string & keyPath) const
 {
     std::vector<uint8_t> sig;
@@ -54,16 +54,16 @@ int32_t PkgVerifyUtil::VerifyPackageSignOld(const PkgStreamPtr pkgStream, const 
     size_t signatureSize = 0;
     std::vector<uint8_t> signature;
     uint16_t commentTotalLenAll = 0;
-    if (GetSignature(pkgStream, signatureSize, Signature, commentTotalLenAll) != PKG_SUCCESS) {
+    if (GetSignature(pkgStream, signatureSize, signature, commentTotalLenAll) != PKG_SUCCESS) {
         PKG_LOGE("get package signature fail!");
         UPDATER_LAST_WORD(PKG_INVALID_SIGNATURE);
         return PKG_INVALID_SIGNATURE;
     }
-    size_t srcDataLen = pkgStram->GetFileLength() - commentTotalLenAll -2;
+    size_t srcDataLen = pkgStream->GetFileLength() - commentTotalLenAll -2;
     size_t readLen = 0;
     std::vector<uint8_t> sourceDigest;
     PkgBuffer digest(srcDataLen);
-    pkgStream->Read(digest.buffer, digest.buffer + readLen);
+    pkgStream->Read(digest, 0, srcDataLen, readLen);
     sourceDigest.assign(digest.buffer, digest.buffer + readLen);
     return VerifySourceDigest(signature, sourceDigest, keyPath);
 }
