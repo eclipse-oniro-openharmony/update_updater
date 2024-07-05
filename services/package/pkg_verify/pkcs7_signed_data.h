@@ -72,6 +72,8 @@ public:
 
     int32_t GetDigest(std::vector<uint8_t> &digestBlock,
         HwSigningSigntureInfo &signatureInfo, std::vector<uint8_t> &digest);
+
+    int32_t ReadSig(const uint8_t *sourceData, const uint32_t sourceDataLen, std::vector<uint8_t> &sig);
 private:
     int32_t Init(const uint8_t *sourceData, const uint32_t sourceDataLen);
     int32_t DoParse();

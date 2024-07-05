@@ -18,6 +18,9 @@
 #include "dump.h"
 #include "openssl_util.h"
 #include "pkcs7_signed_data.h"
+#include "pkg_algo_sign.h"
+#include "pkg_algorithm.h"
+#include "pkg_manager_impl.h"
 #include "pkg_utils.h"
 #include "securec.h"
 #include "zip_pkg_parse.h"
@@ -27,6 +30,42 @@ namespace {
 constexpr uint32_t ZIP_EOCD_FIXED_PART_LEN = 22;
 constexpr uint32_t PKG_FOOTER_SIZE = 6;
 constexpr uint32_t PKG_HASH_CONTENT_LEN = SHA256_DIGEST_LENGTH;
+}
+
+int32_t PkgVeriyUtil::VerifySourceDigest(std::vector<uint8_t> &signature, std::vector<uint8_t> &sourceDigest,
+    const std::string & keyPath) const
+{
+    std::vector<uint8_t> sig;
+    Pkcs7SignedData pkcs7;
+    SignAlgorithm::SignAlgorithmPtr signAlgorithm = PkgAlgorithmFactory::GetVerifyAlgorithm(
+        keyPath, PKG_DIGEST_TYPE_SHA256);
+    if (pkcs7.ReadSig(signature.data(), signature.size(), sig) != 0 || sig.size() == 0) {
+        return -1;
+    }
+    return signAlgorithm->VerifyDigest(sourceDigest, sig);
+}
+
+int32_t PkgVerifyUtil::VerifyPackageSignOld(const PkgStreamPtr pkgStream, const std::string &keyPath) const
+{
+    if(pkgStream == nullptr) {
+        UPDATER_LAST_WORD(PKG_INVALID_PARAM);
+        return PKG_INVALID_PARAM;
+    }
+    size_t signatureSize = 0;
+    std::vector<uint8_t> signature;
+    uint16_t commentTotalLenAll = 0;
+    if (GetSignature(pkgStream, signatureSize, Signature, commentTotalLenAll) != PKG_SUCCESS) {
+        PKG_LOGE("get package signature fail!");
+        UPDATER_LAST_WORD(PKG_INVALID_SIGNATURE);
+        return PKG_INVALID_SIGNATURE;
+    }
+    size_t srcDataLen = pkgStram->GetFileLength() - commentTotalLenAll -2;
+    size_t readLen = 0;
+    std::vector<uint8_t> sourceDigest;
+    PkgBuffer digest(srcDataLen);
+    pkgStream->Read(digest.buffer, digest.buffer + readLen);
+    sourceDigest.assign(digest.buffer, digest.buffer + readLen);
+    return VerifySourceDigest(signature, sourceDigest, keyPath);
 }
 
 int32_t PkgVerifyUtil::VerifySign(std::vector<uint8_t> &signData, std::vector<uint8_t> &digest) const

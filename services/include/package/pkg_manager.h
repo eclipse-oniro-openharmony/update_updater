@@ -258,6 +258,8 @@ public:
     virtual int32_t LoadPackage(const std::string &packagePath, const std::string &keyPath,
         std::vector<std::string> &fileIds) = 0;
 
+    virtual int32_t VerifyAccPackage(const std::string &packagePath, const std::string &keyPath) = 0;
+
     virtual int32_t VerifyOtaPackage(const std::string &packagePath) = 0;
 
     virtual int32_t VerifyBinFile(const std::string &packagePath, const std::string &keyPath,

@@ -75,7 +75,7 @@ public:
 
     int32_t CreatePkgStream(StreamPtr &stream, const std::string &fileName,
         uint64_t fileLen, Updater::RingBuffer *buffer) override;
-
+    int32_t VerifyAccPackage(const std::string &packagePath, const std::string &keyPath) override;
     int32_t VerifyOtaPackage(const std::string &packagePath) override;
 
     int32_t VerifyBinFile(const std::string &packagePath, const std::string &keyPath,
