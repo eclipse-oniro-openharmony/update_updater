@@ -32,7 +32,7 @@ int32_t Store::DoFreeSpace(const std::string &directoryPath)
 {
     std::vector<std::string> files;
     if (GetFilesFromDirectory(directoryPath, files, true) <= 0) {
-        LOG(ERROR) << "Failed to get files for free space";
+        LOG(WARNING) << "Failed to get files for free space";
         return -1;
     }
     for (const auto &file : files) {
