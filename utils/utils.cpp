@@ -394,13 +394,24 @@ std::string GetLocalBoardId()
     return "HI3516";
 }
 
-void CompressLogs(const std::string &logName)
+int32_t CreateCompressLogFile(const std::string &pkgName, std::vector<std::pair<std::string, ZipFileInfo>> &files)
 {
+    PkgInfo pkgInfo;
+    pkgInfo.signMethod = PKG_SIGN_METHOD_NONE;
+    pkgInfo.digestMethod = PKG_SIGN_METHOD_NONE;
+    pkgInfo.pkgType = PKG_PACK_TYPE_ZIP;
     PkgManager::PkgManagerPtr pkgManager = PkgManager::CreatePackageInstance();
     if (pkgManager == nullptr) {
         LOG(ERROR) << "pkgManager is nullptr";
-        return;
+        return -1;
     }
+    int32_t ret = pkgManager->CreatePackage(pkgName, GetCertName(), &pkgInfo, files);
+    PkgManager::ReleasePackageInstance(pkgManager);
+    return ret;
+}
+
+void CompressLogs(const std::string &logName)
+{
     std::vector<std::pair<std::string, ZipFileInfo>> files;
     // Build the zip file to be packaged
     std::vector<std::string> testFileNames;
@@ -416,11 +427,6 @@ void CompressLogs(const std::string &logName)
         files.push_back(std::pair<std::string, ZipFileInfo>(fileName, file));
     }
 
-    PkgInfo pkgInfo;
-    pkgInfo.signMethod = PKG_SIGN_METHOD_NONE;
-    pkgInfo.digestMethod = PKG_SIGN_METHOD_NONE;
-    pkgInfo.pkgType = PKG_PACK_TYPE_ZIP;
-
     char realTime[MAX_TIME_SIZE] = {0};
     auto sysTime = std::chrono::system_clock::now();
     auto currentTime = std::chrono::system_clock::to_time_t(sysTime);
@@ -431,10 +437,9 @@ void CompressLogs(const std::string &logName)
     char pkgName[MAX_LOG_NAME_SIZE];
     if (snprintf_s(pkgName, MAX_LOG_NAME_SIZE, MAX_LOG_NAME_SIZE - 1,
         "%s/%s_%s.zip", logPath.c_str(), realName.c_str(), realTime) == -1) {
-        PkgManager::ReleasePackageInstance(pkgManager);
         return;
     }
-    int32_t ret = pkgManager->CreatePackage(pkgName, GetCertName(), &pkgInfo, files);
+    int32_t ret = CreateCompressLogFile(pkgName, files);
     if (ret != 0) {
         LOG(WARNING) << "CompressLogs failed";
         PkgManager::ReleasePackageInstance(pkgManager);
@@ -446,7 +451,7 @@ void CompressLogs(const std::string &logName)
 #endif
     sync();
     if (access(pkgName, 0) != 0) {
-        LOG(ERROR) << "Failed to creat zipfile: " << pkgName;
+        LOG(ERROR) << "Failed to create zipfile: " << pkgName;
     } else {
         (void)DeleteFile(logName);
     }
