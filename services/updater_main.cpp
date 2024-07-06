@@ -745,6 +745,10 @@ void RebootAfterUpdateSuccess(const UpdaterParams &upParams)
         Utils::UpdaterDoReboot("updater", "--user_wipe_data");
         return;
     }
+    if (upParams.factoryResetMode == "factory_wipe_data") {
+        LOG(INFO) << "factory wipe data, sleep...";
+        Utils::UsSleep(120 * DISPLAY_TIME); // 120 : 120s
+    }
     upParams.forceUpdate || upParams.factoryResetMode == "factory_wipe_data" ?
         Utils::DoShutdown() : Utils::UpdaterDoReboot("");
 }
