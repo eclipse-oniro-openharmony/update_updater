@@ -487,7 +487,7 @@ int UScriptInstructionShaCheck::ExecReadShaInfo(Uscript::UScriptEnv &env, const 
         LOG(ERROR) << "Different sha256, cannot continue";
         LOG(ERROR) << "blockPairs:" << shaInfo.blockPairs;
         PrintAbnormalBlockHash(devPath, shaInfo.blockPairs);
-        UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE, devPath.substr(devPath.find_last_of("/") + 1));
+        UPDATER_LAST_WORD(devPath.substr(devPath.find_last_of("/") + 1), USCRIPT_ERROR_EXECUTE);
         env.PostMessage(UPDATER_RETRY_TAG, VERIFY_FAILED_REBOOT);
         return USCRIPT_ERROR_EXECUTE;
     }
