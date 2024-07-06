@@ -444,7 +444,12 @@ void CompressLogs(const std::string &logName)
 #ifndef __WIN32
     SetFileAttributes(pkgName, USER_UPDATE_AUTHORITY, GROUP_UPDATE_AUTHORITY, mode);
 #endif
-    (void)DeleteFile(logName);
+    sync();
+    if (access(pkgName, 0) != 0) {
+        LOG(ERROR) << "Failed to creat zipfile: " << pkgName;
+    } else {
+        (void)DeleteFile(logName);
+    }
     PkgManager::ReleasePackageInstance(pkgManager);
 }
 
