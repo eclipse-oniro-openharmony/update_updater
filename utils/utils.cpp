@@ -446,7 +446,7 @@ void CompressLogs(const std::string &logName)
     }
     mode_t mode = 0660;
 #ifndef __WIN32
-    SetFileAttributes(pkgName, USER_UPDATE_AUTHORITY, GROUP_UPDATE_AUTHORITY, mode);
+    SetFileAttributes(pkgName, USER_UPDATE_AUTHORITY, GROUP_SYS_AUTHORITY, mode);
 #endif
     sync();
     if (access(pkgName, 0) != 0) {
