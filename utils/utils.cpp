@@ -442,7 +442,6 @@ void CompressLogs(const std::string &logName)
     int32_t ret = CreateCompressLogFile(pkgName, files);
     if (ret != 0) {
         LOG(WARNING) << "CompressLogs failed";
-        PkgManager::ReleasePackageInstance(pkgManager);
         return;
     }
     mode_t mode = 0660;
@@ -455,7 +454,6 @@ void CompressLogs(const std::string &logName)
     } else {
         (void)DeleteFile(logName);
     }
-    PkgManager::ReleasePackageInstance(pkgManager);
 }
 
 size_t GetFileSize(const std::string &filePath)
