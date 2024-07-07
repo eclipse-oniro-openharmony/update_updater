@@ -52,7 +52,7 @@ bool UfsPtable::CheckDeviceLunRemoveable(const uint32_t lunIndex)
         return false;
     }
     char lunIndexName = 'a' + lunIndex;
-    std::string removeableNode = std::string(PREFIX_SYS_CLASS_BLOCK) + lunIndexName + "/removeable";
+    std::string removeableNode = std::string(PREFIX_SYS_CLASS_BLOCK) + lunIndexName + "/removable";
     std::string removeableResult {};
     if (!ReadFileToString(removeableNode, removeableResult)) {
         LOG(ERROR) << "read removable node failed";
