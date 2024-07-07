@@ -86,7 +86,7 @@ void UfsPtable::SetDeviceLunNum()
             break;
         }
 #ifndef UPDATER_UT
-        if (CheckDeviceRemoveable(lunIndex)) {
+        if (CheckDeviceLunRemoveable(lunIndex)) {
             LOG(ERROR) << "device " << ufsNode << " is removable, may be a u disk";
             break;
         }
