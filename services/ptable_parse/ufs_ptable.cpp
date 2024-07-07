@@ -23,6 +23,7 @@
 #include "log/log.h"
 #include "securec.h"
 #include "updater/updater_const.h"
+#include "utils.h"
 
 namespace Updater {
 uint32_t UfsPtable::GetDeviceLunNum()
@@ -54,7 +55,7 @@ bool UfsPtable::CheckDeviceLunRemoveable(const uint32_t lunIndex)
     char lunIndexName = 'a' + lunIndex;
     std::string removeableNode = std::string(PREFIX_SYS_CLASS_BLOCK) + lunIndexName + "/removable";
     std::string removeableResult {};
-    if (!ReadFileToString(removeableNode, removeableResult)) {
+    if (!Utils::ReadFileToString(removeableNode, removeableResult)) {
         LOG(ERROR) << "read removable node failed";
         return false;
     }
