@@ -45,7 +45,7 @@ uint32_t UfsPtable::GetPtableExtraOffset(void)
 }
 
 // avoid u disk being recognized as a valid gpt lun device
-bool UfsPtable::CheckDeviceRemoveable(const uint32_t lunIndex)
+bool UfsPtable::CheckDeviceLunRemoveable(const uint32_t lunIndex)
 {
     constexpr uint32_t minRemoveableStartIdx = 3;
     if (lunIndex <= minRemoveableStartIdx) {
