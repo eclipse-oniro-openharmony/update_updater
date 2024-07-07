@@ -337,6 +337,23 @@ bool ReadFileToString(int fd, std::string &content)
     return true;
 }
 
+bool ReadFileToString(const std::string &path, std::string &content)
+{
+    int fd = open(path.c_str(), O_RDONLY);
+    if (fd < 0) {
+        LOG(ERROR) << "Failed to open " << path;
+        return false;
+    }
+    (void)lseek(fd, 0, SEEK_SET);
+    if (!ReadFileToString(fd, content)) {
+        LOG(ERROR) << "Error to read file " << path << ", err: " << strerror(errno);
+        close(fd);
+        return false;
+    }
+    close(fd);
+    return true;
+}
+
 bool WriteStringToFile(int fd, const std::string& content)
 {
     const char *p = content.data();

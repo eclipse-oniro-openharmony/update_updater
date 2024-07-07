@@ -44,6 +44,24 @@ uint32_t UfsPtable::GetPtableExtraOffset(void)
     return 0;
 }
 
+// avoid u disk being recognized as a valid gpt lun device
+bool UfsPtable::CheckDeviceRemoveable(const uint32_t lunIndex)
+{
+    constexpr uint32_t MIN_REMOVEAVBLE_START_INDEX = 3;
+    if (lunIndex <= MIN_REMOVEAVBLE_START_INDEX) {
+        return false;
+    }
+    char lunIndexName = 'a' + lunIndex;
+    std::string removeableNode = std::string(PREFIX_SYS_CLASS_BLOCK) + lunIndexName + "/removeable";
+    std::string removeableResult {};
+    if (!ReadFileToString(removeableNode, removeableResult)) {
+        LOG(ERROR) << "read removable node failed";
+        return false;
+    }
+    LOG(DEBUG) << "lun " << lunIndex << " removable result is : " << removeableResult;
+    return removeableResult == "1";
+}
+
 uint32_t UfsPtable::GetDeviceBlockSize(void)
 {
     return ptableData_.blockSize;
@@ -67,6 +85,12 @@ void UfsPtable::SetDeviceLunNum()
             LOG(ERROR) << "file " << ufsNode << " is not exist";
             break;
         }
+#ifndef UPDATER_UT
+        if (CheckDeviceRemoveable(lunIndex)) {
+            LOG(ERROR) << "device " << ufsNode << " is removable, may be a u disk";
+            break;
+        }
+#endif
     }
     deviceLunNum_ = lunIndex;
     LOG(INFO) << "device lun num is " << deviceLunNum_;

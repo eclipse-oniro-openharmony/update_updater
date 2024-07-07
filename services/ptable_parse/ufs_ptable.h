@@ -59,7 +59,7 @@ public:
     virtual uint32_t GetDeviceBlockSize(void);
     virtual std::string GetDeviceLunNodePath(const uint32_t lun);
     virtual int32_t GetLunNumFromNode(const std::string &ufsNode);
-
+    virtual bool CheckDeviceRemoveable(const uint32_t lunIndex);
 #ifndef UPDATER_UT
 private:
 #else
