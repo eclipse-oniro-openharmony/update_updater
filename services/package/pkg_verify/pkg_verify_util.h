@@ -30,7 +30,7 @@ public:
     int32_t VerifyPackageSign(const Hpackage::PkgStreamPtr PkgStream) const;
     int32_t VerifySign(std::vector<uint8_t> &signData, std::vector<uint8_t> &digest) const;
     int32_t VerifySourceDigest(std::vector<uint8_t> &signature, std::vector<uint8_t> &sourceDigest,
-        const std::string & keyPath) const;
+        const std::string &keyPath) const;
     int32_t VerifyPackageSignOld(const PkgStreamPtr pkgStream, const std::string &keyPath) const;
     int32_t GetSignature(const PkgStreamPtr pkgStream, size_t &signatureSize,
         std::vector<uint8_t> &signature, uint16_t &commentTotalLenAll) const;

@@ -47,7 +47,7 @@ int32_t PkgVerifyUtil::VerifySourceDigest(std::vector<uint8_t> &signature, std::
 
 int32_t PkgVerifyUtil::VerifyPackageSignOld(const PkgStreamPtr pkgStream, const std::string &keyPath) const
 {
-    if(pkgStream == nullptr) {
+    if (pkgStream == nullptr) {
         UPDATER_LAST_WORD(PKG_INVALID_PARAM);
         return PKG_INVALID_PARAM;
     }
