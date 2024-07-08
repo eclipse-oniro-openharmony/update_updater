@@ -43,6 +43,16 @@ struct Pkcs7SignerInfo {
     size_t length;
 };
 
+enum {
+    PKCS7_SUCCESS = 0,
+    PKCS7_INIT_ERR = 200,
+    PKCS7_INVALID_PARAM_ERR,
+    PKCS7_INVALID_VALUE_ERR,
+    PKCS7_HAS_NO_VALID_SIG_ERR,
+    PKCS7_PARSING_ERR,
+    PKCS7_VERIFY_FAIL_ERR,
+};
+
 class VerifyHelper {
 public:
     virtual int32_t GetDigestFromSubBlocks(std::vector<uint8_t> &digestBlock,
@@ -73,7 +83,7 @@ public:
     int32_t GetDigest(std::vector<uint8_t> &digestBlock,
         HwSigningSigntureInfo &signatureInfo, std::vector<uint8_t> &digest);
 
-    int32_t ReadSig(const uint8_t *sourceData, const uint32_t sourceDataLen, std::vector<uint8_t> &sig);
+    int32_t ReadSig(const uint8_t *sourceData, const uint32_t sourceDataLen, std::vector<std::vector<uint8_t>> &sigs);
 private:
     int32_t Init(const uint8_t *sourceData, const uint32_t sourceDataLen);
     int32_t DoParse();

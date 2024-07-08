@@ -159,6 +159,7 @@ public:
         Pkcs7SignedData signedData;
         uint8_t *srcData {};
         std::vector<uint8_t> hash;
+        std::vector<std::vector<uint8_t>> sigs;
 
         int32_t ret = signedData.Verify();
         EXPECT_EQ(ret, -1);
@@ -167,6 +168,12 @@ public:
         ret = signedData.GetHashFromSignBlock(srcData, 0, hash);
         EXPECT_EQ(ret, -1);
         ret = signedData.GetHashFromSignBlock(srcData, 1, hash);
+        EXPECT_EQ(ret, -1);
+        ret = signedData.ReadSig(nullptr, 0, sigs);
+        EXPECT_EQ(ret, -1);
+        ret = signedData.ReadSig(srcData, 0, sigs);
+        EXPECT_EQ(ret, -1);
+        ret = signedData.ReadSig(srcData, 1, sigs);
         EXPECT_EQ(ret, -1);
         return 0;
     }

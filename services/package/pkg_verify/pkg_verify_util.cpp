@@ -35,17 +35,24 @@ constexpr uint32_t PKG_HASH_CONTENT_LEN = SHA256_DIGEST_LENGTH;
 int32_t PkgVerifyUtil::VerifySourceDigest(std::vector<uint8_t> &signature, std::vector<uint8_t> &sourceDigest,
     const std::string & keyPath) const
 {
-    std::vector<uint8_t> sig;
+    std::vector<std::vector<uint8_t>> sigs;
     Pkcs7SignedData pkcs7;
     SignAlgorithm::SignAlgorithmPtr signAlgorithm = PkgAlgorithmFactory::GetVerifyAlgorithm(
         keyPath, PKG_DIGEST_TYPE_SHA256);
-    if (pkcs7.ReadSig(signature.data(), signature.size(), sig) != 0 || sig.size() == 0) {
-        return -1;
+    int32_t ret = pkcs7.ReadSig(signature.data(), signature.size(), sigs);
+    if (ret != PKCS7_SUCCESS) {
+        UPDATER_LAST_WORD("pkcs7", ret);
+        return ret;
     }
-    return signAlgorithm->VerifyDigest(sourceDigest, sig);
+    for (auto &sig : sigs) {
+        if (signAlgorithm->VerifyDigest(sourceDigest, sig) == 0) {
+            return PKG_SUCCESS;
+        }
+    }
+    return PKG_VERIFY_FAIL;
 }
 
-int32_t PkgVerifyUtil::VerifyPackageSignOld(const PkgStreamPtr pkgStream, const std::string &keyPath) const
+int32_t PkgVerifyUtil::VerifyAccPackageSign(const PkgStreamPtr pkgStream, const std::string &keyPath) const
 {
     if (pkgStream == nullptr) {
         UPDATER_LAST_WORD(PKG_INVALID_PARAM);

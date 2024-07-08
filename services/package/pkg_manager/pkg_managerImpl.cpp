@@ -971,11 +971,11 @@ int32_t PkgManagerImpl::VerifyAccPackage(const std::string &packagePath, const s
 
     PkgVerifyUtil verifyUtil;
     if (verifyUtil.VerifyPackageSign(pkgStream) != PKG_SUCCESS) {
-        ret = verifyUtil.VerifyPackageSignOld(pkgStream, keyPath);
+        ret = verifyUtil.VerifyAccPackageSign(pkgStream, keyPath);
     }
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("Verify zpkcs7 signature failed.");
-        UPDATER_LAST_WORD(ret);
+        UPDATER_LAST_WORD(packagePath, ret);
         ClosePkgStream(pkgStream);
         return ret;
     }
