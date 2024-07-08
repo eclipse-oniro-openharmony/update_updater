@@ -746,6 +746,7 @@ void RebootAfterUpdateSuccess(const UpdaterParams &upParams)
         return;
     }
     if (upParams.factoryResetMode == "factory_wipe_data") {
+        Utils::SetParameter("odm.factory.updater.succssful_flg", "1");
         LOG(INFO) << "factory wipe data, sleep...";
         Utils::UsSleep(120 * DISPLAY_TIME); // 120 : 120s
     }
