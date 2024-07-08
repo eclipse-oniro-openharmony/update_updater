@@ -26,7 +26,7 @@ class Store {
 public:
     // Create new store space
     static int32_t CreateNewSpace(const std::string &path, bool needClear);
-    static int32_t DoFreeSpace(const std::string &directoryPath);
+    static void DoFreeSpace(const std::string &directoryPath);
     static int32_t FreeStore(const std::string &dirPath, const std::string &fileName);
     // Write data to store space by id
     static int32_t WriteDataToStore(const std::string &dirPath, const std::string &fileName,
