@@ -34,11 +34,6 @@ ohos_unittest("flashd_unittest") {
     "${HDC_PATH}/common/file.cpp",
     "${HDC_PATH}/common/file_descriptor.cpp",
     "${HDC_PATH}/common/forward.cpp",
-    "${HDC_PATH}/common/session.cpp",
-    "${HDC_PATH}/common/task.cpp",
-    "${HDC_PATH}/common/tcp.cpp",
-    "${HDC_PATH}/common/transfer.cpp",
-    "${HDC_PATH}/common/usb.cpp",
     "${updater_path}/services/flashd/daemon/commander.cpp",
     "${updater_path}/services/flashd/daemon/commander_factory.cpp",
     "${updater_path}/services/flashd/daemon/daemon_updater.cpp",
@@ -110,7 +105,10 @@ ohos_unittest("flashd_unittest") {
   configs = [ "${updater_path}/test/unittest:utest_config" ]
   install_enable = true
   part_name = "updater"
-  defines = [ "OPENSSL_SUPPRESS_DEPRECATED" ]
+  defines = [
+    "UPDATER_UT",
+    "OPENSSL_SUPPRESS_DEPRECATED"
+  ]
 }
 
 ohos_unittest("flashd_util_unittest") {
@@ -119,7 +117,7 @@ ohos_unittest("flashd_util_unittest") {
   module_out_path = MODULE_OUTPUT_PATH
   sources = [
     "${updater_path}/services/flashd/daemon/flashd_utils.cpp",
-    "flashd_util_unittest.cpp",
+    "flashd_utils.cpp",
   ]
   include_dirs = [
     "${updater_path}/services/include",
