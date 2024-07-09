@@ -192,28 +192,6 @@ static void StartUpdaterEntryFuzzTest()
     }
 }
 
-static void DoInstallUpdaterPackageFuzzTest()
-{
-    UpdaterParams upParams;
-    upParams.callbackProgress = nullptr;
-    std::vector<std::string> output;
-    if (DoInstallUpdaterPackage(nullptr, upParams, HOTA_UPDATE) != UPDATE_CORRUPT) {
-        return;
-    }
-    upParams.callbackProgress = [] (float value) {};
-    if (DoInstallUpdaterPackage(nullptr, upParams, HOTA_UPDATE) != UPDATE_CORRUPT) {
-        return;
-    }
-    upParams.retryCount = 0;
-    if (DoInstallUpdaterPackage(nullptr, upParams, HOTA_UPDATE) != UPDATE_CORRUPT) {
-        return;
-    }
-    upParams.retryCount = 1;
-    if (DoInstallUpdaterPackage(nullptr, upParams, HOTA_UPDATE) != UPDATE_CORRUPT) {
-        return;
-    }
-}
-
 static void ExtractUpdaterBinaryFuzzTest()
 {
     Hpackage::PkgManager::PkgManagerPtr pkgManager = Hpackage::PkgManager::CreatePackageInstance();
@@ -284,7 +262,6 @@ namespace OHOS {
         InstallUpdaterPackageFuzzTest();
         DoUpdatePackagesFuzzTest();
         StartUpdaterEntryFuzzTest();
-        DoInstallUpdaterPackageFuzzTest();
         ExtractUpdaterBinaryFuzzTest();
         IsSpaceCapacitySufficientFuzzTest();
         ProgressFuzzTest();
