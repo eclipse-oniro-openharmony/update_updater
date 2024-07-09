@@ -110,7 +110,7 @@ ohos_static_library("flashd_deamon") {
   deps = [ "${updater_path}/services/flashd:hdc_hash_gen" ]
 
   if (updater_hdc_depend) {
-    external_deps += [ "hdc:hdc_register" ]
+    external_deps += [ "hdc:hdc_updater" ]
   }
 
   if (use_musl) {
@@ -229,7 +229,7 @@ ohos_static_library("libflashd") {
   ]
 
   if (updater_hdc_depend) {
-    external_deps += [ "hdc:hdc_register" ]
+    external_deps += [ "hdc:hdc_updater" ]
   }
 
   if (build_selinux) {
