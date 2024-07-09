@@ -49,6 +49,8 @@ group("unittest") {
     "test/unittest/script:user_instruction_invalid",
     "test/unittest/updater_binary:binary_unittest",
     "test/unittest/utils:utils_test",
+    "test/unittest/flashd_test:flashd_unittest",
+    "test/unittest/flashd_test:flashd_util_unittest",
   ]
   if (updater_ui_support) {
     deps += [

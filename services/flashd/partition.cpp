@@ -62,11 +62,13 @@ int Partition::DoErase() const
         return FLASHING_NOPERMISSION;
     }
     std::vector<uint8_t> buffer(BLOCK_SIZE, 0);
+#ifndef UPDATER_UT
     if (!Updater::Utils::WriteFully(fd, buffer.data(), buffer.size())) {
         close(fd);
         FLASHD_LOGE("WriteFully fail");
         return FLASHING_PART_WRITE_ERROR;
     }
+#endif
     fsync(fd);
     close(fd);
     return 0;

@@ -61,4 +61,34 @@ HWTEST_F(FLashServiceUnitTest, Split, TestSize.Level1)
     }
     EXPECT_EQ("flashupdaterupdater.img", res);
 }
+
+HWTEST_F(FLashServiceUnitTest, GetPathRoot, TestSize.Level1)
+{
+    std::string path = "/";
+    std::string root = GetPathRoot(path);
+    EXPECT_EQ("/", root);
+
+    path = "";
+    root = GetPathRoot(path);
+    EXPECT_EQ("", root);
+
+    path = "/usr/local/bin";
+    root = GetPathRoot(path);
+    EXPECT_EQ("/usr", root);
+}
+
+HWTEST_F(FLashServiceUnitTest, GetFileName, TestSize.Level1)
+{
+    std::string testStr = "data/test/test.zip";
+    std::string res = GetFileName(testStr);
+    EXPECT_EQ("test.zip", res);
+
+    testStr = "D:\\test\\test.zip";
+    res = GetFileName(testStr);
+    EXPECT_EQ("test.zip", res);
+
+    testStr = "test.zip";
+    res = GetFileName(testStr);
+    EXPECT_EQ("", res);
+}
 } // namespace
