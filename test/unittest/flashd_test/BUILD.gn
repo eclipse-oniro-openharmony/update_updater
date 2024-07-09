@@ -107,7 +107,7 @@ ohos_unittest("flashd_unittest") {
   part_name = "updater"
   defines = [
     "UPDATER_UT",
-    "OPENSSL_SUPPRESS_DEPRECATED"
+    "OPENSSL_SUPPRESS_DEPRECATED",
   ]
 }
 
