@@ -315,7 +315,7 @@ HWTEST_F(FLashServiceUnitTest, FlashCommanderDoCommand2, TestSize.Level1)
     EXPECT_EQ(UpdaterState::FAIL, ret);
 }
 
-HWTEST_F(FLashServiceUnitTest, PartitionEraseSuccess, TestSize.Level1)
+HWTEST_F(FLashServiceUnitTest, PartitionEraseSuccessTest, TestSize.Level1)
 {
     std::string partitionName = "misc";
     Partition partTest(partitionName);
@@ -339,7 +339,7 @@ HWTEST_F(FLashServiceUnitTest, PartitionEraseSuccess, TestSize.Level1)
     EXPECT_EQ(0, ret);
 }
 
-HWTEST_F(FLashServiceUnitTest, DoEraseCommanderSuccess, TestSize.Level1)
+HWTEST_F(FLashServiceUnitTest, DoEraseCommanderSuccessTest, TestSize.Level1)
 {
     LoadFstab();
     std::unique_ptr<Flashd::Commander> commander = nullptr;
@@ -368,7 +368,7 @@ HWTEST_F(FLashServiceUnitTest, DoEraseCommanderSuccess, TestSize.Level1)
     EXPECT_EQ(UpdaterState::SUCCESS, ret);
 }
 
-HWTEST_F(FLashServiceUnitTest, DoFlashSuccess, TestSize.Level1)
+HWTEST_F(FLashServiceUnitTest, DoFlashSuccessTest, TestSize.Level1)
 {
     LoadFstab();
     std::unique_ptr<Flashd::Commander> commander = nullptr;
@@ -391,7 +391,7 @@ HWTEST_F(FLashServiceUnitTest, DoFlashSuccess, TestSize.Level1)
     EXPECT_EQ(UpdaterState::SUCCESS, ret);
 }
 
-HWTEST_F(FLashServiceUnitTest, CreateCommander, TestSize.Level1)
+HWTEST_F(FLashServiceUnitTest, CreateCommanderTest, TestSize.Level1)
 {
     std::unique_ptr<Flashd::Commander> commander = nullptr;
     Flashd::UpdaterState ret = UpdaterState::DOING;
