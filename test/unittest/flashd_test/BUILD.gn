@@ -36,8 +36,8 @@ ohos_unittest("flashd_unittest") {
     "${HDC_PATH}/common/forward.cpp",
     "${updater_path}/services/flashd/daemon/commander.cpp",
     "${updater_path}/services/flashd/daemon/commander_factory.cpp",
-    "${updater_path}/services/flashd/daemon/daemon_updater.cpp",
     "${updater_path}/services/flashd/daemon/daemon.cpp",
+    "${updater_path}/services/flashd/daemon/daemon_updater.cpp",
     "${updater_path}/services/flashd/daemon/erase_commander.cpp",
     "${updater_path}/services/flashd/daemon/flash_commander.cpp",
     "${updater_path}/services/flashd/daemon/flashd_main.cpp",
@@ -141,6 +141,5 @@ ohos_unittest("flashd_util_unittest") {
   part_name = "updater"
   defines = [
     "OPENSSL_SUPPRESS_DEPRECATED",
-    "HDC_SUPPORT_FLASHD",
   ]
 }
