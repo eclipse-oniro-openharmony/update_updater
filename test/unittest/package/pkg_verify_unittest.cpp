@@ -170,11 +170,11 @@ public:
         ret = signedData.GetHashFromSignBlock(srcData, 1, hash);
         EXPECT_EQ(ret, -1);
         ret = signedData.ReadSig(nullptr, 0, sigs);
-        EXPECT_EQ(ret, -1);
+        EXPECT_EQ(ret, PKCS7_INVALID_PARAM_ERR);
         ret = signedData.ReadSig(srcData, 0, sigs);
-        EXPECT_EQ(ret, -1);
+        EXPECT_EQ(ret, PKCS7_INVALID_PARAM_ERR);
         ret = signedData.ReadSig(srcData, 1, sigs);
-        EXPECT_EQ(ret, -1);
+        EXPECT_EQ(ret, PKCS7_INVALID_PARAM_ERR);
         return 0;
     }
 
