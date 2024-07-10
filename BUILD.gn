@@ -43,7 +43,7 @@ group("unittest") {
     "test/unittest/applypatch_test:applypatch_unittest",
     "test/unittest/common/ring_buffer:ring_buffer_test",
     "test/unittest/flashd_test:flashd_unittest",
-    "test/unittest/flashd_test:flashd_util_unittest",
+    "test/unittest/flashd_test:flashd_utils_unittest",
     "test/unittest/flow_update/update_bin:bin_flow_update_test",
     "test/unittest/package:package_unittest",
     "test/unittest/script:script_unittest",

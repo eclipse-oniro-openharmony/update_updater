@@ -111,13 +111,13 @@ ohos_unittest("flashd_unittest") {
   ]
 }
 
-ohos_unittest("flashd_util_unittest") {
+ohos_unittest("flashd_utils_unittest") {
   testonly = true
   resource_config_file = "${updater_path}/test/unittest/test_data/ohos_test.xml"
   module_out_path = MODULE_OUTPUT_PATH
   sources = [
     "${updater_path}/services/flashd/daemon/flashd_utils.cpp",
-    "flashd_utils.cpp",
+    "flashd_utils_unittest.cpp",
   ]
   include_dirs = [
     "${updater_path}/services/include",
