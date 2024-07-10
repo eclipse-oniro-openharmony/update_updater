@@ -180,7 +180,7 @@ static UpdaterStatus VerifyPackages(UpdaterParams &upParams)
             UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_VERIFYPKGFAIL), true);
             auto endTime = std::chrono::system_clock::now();
             upParams.installTime[i] = endTime - startTime;
-            UPDATER_LAST_WORD(UPDATE_CORRUPT);
+            UPDATER_LAST_WORD(verifyret);
             return UPDATE_CORRUPT;
         }
         auto endTime = std::chrono::system_clock::now();
