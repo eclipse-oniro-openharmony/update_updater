@@ -86,7 +86,7 @@ ohos_unittest("flashd_unittest") {
     "${updater_path}/services/package:libupdaterpackage",
     "${updater_path}/services/script:libupdaterscript",
     "${updater_path}/utils:libutils",
-    "//developtools/hdc:hdc_hash_gen",
+    "${updater_path}/services/flashd:hdc_hash_gen",
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/bzip2:libbz2",
     "//third_party/cJSON:cjson",
