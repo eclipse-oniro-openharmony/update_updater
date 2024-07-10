@@ -37,6 +37,7 @@ ohos_unittest("flashd_unittest") {
     "${updater_path}/services/flashd/daemon/commander.cpp",
     "${updater_path}/services/flashd/daemon/commander_factory.cpp",
     "${updater_path}/services/flashd/daemon/daemon_updater.cpp",
+    "${updater_path}/services/flashd/daemon/daemon.cpp",
     "${updater_path}/services/flashd/daemon/erase_commander.cpp",
     "${updater_path}/services/flashd/daemon/flash_commander.cpp",
     "${updater_path}/services/flashd/daemon/flashd_main.cpp",
