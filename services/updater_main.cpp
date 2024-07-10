@@ -113,17 +113,19 @@ static int OtaUpdatePreCheck(PkgManager::PkgManagerPtr pkgManager, const std::st
     int32_t ret = pkgManager->VerifyOtaPackage(packagePath);
     if (ret != PKG_SUCCESS) {
         LOG(INFO) << "VerifyOtaPackage fail ret :"<< ret;
-        UPDATER_LAST_WORD(ret);
+        UPDATER_LAST_WORD("sign", ret);
         return ret;
     }
 
-    return PKG_SUCCESS;
+    return UPDATE_SUCCESS;
 }
 
 static UpdaterStatus UpdatePreCheck(UpdaterParams &upParams, const std::string pkgPath)
 {
-    if (PreProcess::GetInstance().DoUpdateAuth(pkgPath) != 0) {
-        UPDATER_LAST_WORD(UPDATE_ERROR);
+    UPDATER_INIT_RECORD;
+    int32_t ret = PreProcess::GetInstance().DoUpdateAuth(pkgPath);
+    if (ret != 0) {
+        UPDATER_LAST_WORD("auth", ret);
         return UPDATE_ERROR;
     }
 
@@ -169,13 +171,16 @@ static UpdaterStatus VerifyPackages(UpdaterParams &upParams)
         PkgManager::PkgManagerPtr manager = PkgManager::CreatePackageInstance();
         int32_t verifyret = OtaUpdatePreCheck(manager, upParams.updatePackage[i]);
         PkgManager::ReleasePackageInstance(manager);
+        if (verifyret == UPDATE_SUCCESS) {
+            verifyret = UpdatePreCheck(upParams, upParams.updatePackage[i]);
+        }
 
-        if (verifyret != PKG_SUCCESS || UpdatePreCheck(upParams, upParams.updatePackage[i]) != UPDATE_SUCCESS) {
+        if (verifyret != UPDATE_SUCCESS) {
             upParams.pkgLocation = i;
             UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_VERIFYPKGFAIL), true);
             auto endTime = std::chrono::system_clock::now();
             upParams.installTime[i] = endTime - startTime;
-            UPDATER_LAST_WORD(UPDATE_CORRUPT);
+            UPDATER_LAST_WORD(verifyret);
             return UPDATE_CORRUPT;
         }
         auto endTime = std::chrono::system_clock::now();
