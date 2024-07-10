@@ -96,7 +96,6 @@
             <option name="push" value="diffpatch/ImgageDiffPatchLz4File_3_lz4_new.lz -> /data/updater/diffpatch" src="res"/>
             <option name="push" value="diffpatch/PatchGztest_gz.img_patch -> /data/updater/diffpatch" src="res"/>
             <option name="push" value="diffpatch/ImgageDiffPatchLz4File_1_old.lz -> /data/updater/diffpatch" src="res"/>
-            <option name="push" value="ptable_parse/updater1.zip -> /data/updater/ptable_parse" src="res"/>
             <option name="push" value="src/rsa_private_key384.pem -> /data/updater/src" src="res"/>
             <option name="push" value="src/signing_cert384.crt -> /data/updater/src" src="res"/>
             <option name="push" value="src/rsa_private_key2048.pem -> /data/updater/src" src="res"/>
@@ -108,8 +107,6 @@
             <option name="push" value="src/packageInfos.json -> /data/updater/src" src="res"/>
             <option name="push" value="src/version_list -> /data/updater/src" src="res"/>
             <option name="push" value="src/signing_cert.crt -> /data/updater/src" src="res"/>
-            <option name="push" value="src/ecc/prime256v1-key.pem -> /data/updater/src/ecc" src="res"/>
-            <option name="push" value="src/ecc/signing_cert.crt -> /data/updater/src/ecc" src="res"/>
             <option name="push" value="src/test_math.us -> /data/updater/src" src="res"/>
             <option name="push" value="src/test_script.us -> /data/updater/src" src="res"/>
             <option name="push" value="src/registerCmd.us -> /data/updater/src" src="res"/>
