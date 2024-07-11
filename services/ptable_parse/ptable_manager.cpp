@@ -220,7 +220,6 @@ bool PtableManager::GetPartionInfoByName(const std::string &partitionName, Ptabl
         standardPtnName = standardPtnName.substr(0, position);
     }
     if (pPtable_->GetPartionInfoByName(standardPtnName, ptnInfo, index)) {
-        LOG(INFO) << "GetPartionInfoByName success!";
         return true;
     }
     LOG(ERROR) << "GetPartionInfoByName failed! Not found " << standardPtnName;
