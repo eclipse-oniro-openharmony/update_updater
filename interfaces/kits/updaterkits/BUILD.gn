@@ -38,7 +38,7 @@ ohos_shared_library("libupdater_shared") {
     "init:libbegetutil_static",
     "lz4:liblz4_static",
     "openssl:libcrypto_shared",
-    "openssl:libssl_shared",
+    "openssl:libssl_static",
     "zlib:shared_libz",
   ]
 

@@ -204,6 +204,20 @@
                     }
                 },
                 {
+		    "name": "//base/update/updater/utils:libutils_common",
+                    "header": {
+			"header_files": [],
+			"header_base": "//base/update/updater/utils/include"
+		    }
+                },
+                {
+                    "name": "//base/update/updater/utils:libutils_json",
+                    "header": {
+                        "header_files": [],
+                        "header_base": "//base/update/updater/utils/json"
+                    }
+                },
+                {
                     "name": "//base/update/updater/services/log:libupdaterlog",
                     "header": {
                         "header_files": [],
@@ -306,4 +320,5 @@
         }
     }
 }
+
 
