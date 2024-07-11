@@ -39,11 +39,13 @@ public:
     FLashServiceUnitTest()
     {
         std::cout<<"FLashServiceUnitTest()";
-        InitUpdaterLogger("FLASHD", TMP_LOG, TMP_STAGE_LOG, TMP_ERROR_CODE_PATH);
     }
     ~FLashServiceUnitTest() {}
 
-    static void SetUpTestCase(void) {}
+    static void SetUpTestCase(void)
+    {
+        InitUpdaterLogger("FLASHD", TMP_LOG, TMP_STAGE_LOG, TMP_ERROR_CODE_PATH);
+    }
     static void TearDownTestCase(void) {}
     void SetUp() {}
     void TearDown() {}
