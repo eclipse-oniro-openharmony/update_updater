@@ -16,7 +16,7 @@ import("//build/ohos.gni")
 
 updater_path = rebase_path("${updater_absolutely_path}", ".")
 
-config("libapplypatch_exported_headers"){
+config("libapplypatch_exported_headers") {
   visibility = [ ":*" ]
   include_dirs = [
     "${updater_path}/interfaces/kits/include",
