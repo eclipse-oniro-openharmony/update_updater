@@ -30,8 +30,8 @@ group("fuzztest") {
     "test/fuzztest/rebootandinstallupgradepackage_fuzzer:RebootAndInstallUpgradePackageFuzzTest",
     "test/fuzztest/scriptmanager_fuzzer:ScriptManagerFuzzTest",
     "test/fuzztest/updaterfactoryreset_fuzzer:UpdaterFactoryResetFuzzTest",
-    "test/fuzztest/updaterutils_fuzzer:UpdaterUtilsFuzzTest",
     "test/fuzztest/updatermain_fuzzer:UpdaterMainFuzzTest",
+    "test/fuzztest/updaterutils_fuzzer:UpdaterUtilsFuzzTest",
     "test/fuzztest/writeupdatermsg_fuzzer:WriteUpdaterMsgFuzzTest",
   ]
 }
