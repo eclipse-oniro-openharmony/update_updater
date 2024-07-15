@@ -48,7 +48,7 @@ static bool WriteToMiscAndRebootToUpdater(const struct UpdateMessage &updateMsg)
 #endif
 }
 
-static void WriteUpdaterResultFile(const std::string &result)
+static void WriteUpdaterResultFile(const std::string &pkgPath, const std::string &result)
 {
     if (access(UPDATER_PATH, 0) != 0) {
         if (Utils::MkdirRecursive(UPDATER_PATH, 0755) != 0) { // 0755: -rwxr-xr-x
@@ -63,11 +63,8 @@ static void WriteUpdaterResultFile(const std::string &result)
         LOG(ERROR) << "open updater result file failed";
         return;
     }
-    char buf[MAX_RESULT_BUFF_SIZE] = "Pass\n";
-    if (sprintf_s(buf, MAX_RESULT_BUFF_SIZE - 1, "%s\n", result.c_str()) < 0) {
-        LOG(WARNING) << "sprintf status fialed";
-    }
-    if (fwrite(buf, 1, strlen(buf) + 1, fp) <= 0) {
+    std::string resultInfo = pkgPath + "|fail|" + result + "||\n";
+    if (fwrite(resultInfo.c_str(), resultInfo.size() + 1, 1, fp) <= 0) {
         LOG(WARNING) << "write updater result file failed, err:" << errno;
     }
     if (fsync(fileno(fp)) != 0) {
@@ -81,6 +78,24 @@ static void WriteUpdaterResultFile(const std::string &result)
     (void)chmod(resultPath.c_str(), 0660); // 0660: -rw-rw----
 }
 
+static std::string ParsePkgPath(const struct UpdateMessage &updateMsg)
+{
+    std::string pkgPath = "";
+    std::string pathInfo(updateMsg.update, sizeof(updateMsg.update));
+    std::string::size_type startPos = pathInfo.find("update_package=");
+    std::string::size_type endPos = pathInfo.find(".zip");
+    if (startPos != pathInfo.npos && endPos != pathInfo.npos) {
+        startPos += strlen("update_package=");
+        endPos += strlen(".zip");
+        if (endPos > startPos) {
+            pkgPath = pathInfo.substr(startPos, endPos - startPos);
+        } else {
+            LOG(ERROR) << "pkgPath invalid";
+        }
+    }
+    return pkgPath;
+}
+
 static bool WriteToMiscAndResultFileRebootToUpdater(const struct UpdateMessage &updateMsg)
 {
     // Write package name to misc, then trigger reboot.
@@ -90,14 +105,15 @@ static bool WriteToMiscAndResultFileRebootToUpdater(const struct UpdateMessage &
     if (ret != 0) {
         return false;
     }
+    std::string pkgPath = ParsePkgPath(updateMsg);
     // Flag before the misc in written
     std::string writeMiscBefore = "0x80000000";
-    WriteUpdaterResultFile(writeMiscBefore);
+    WriteUpdaterResultFile(pkgPath, writeMiscBefore);
 #ifndef UPDATER_UT
     WriteUpdaterMiscMsg(updateMsg);
     // Flag after the misc in written
     std::string writeMiscAfter = "0x80000008";
-    WriteUpdaterResultFile(writeMiscAfter);
+    WriteUpdaterResultFile(pkgPath, writeMiscAfter);
     DoReboot("updater");
     while (true) {
         pause();
