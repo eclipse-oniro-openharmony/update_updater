@@ -306,6 +306,48 @@ int32_t Pkcs7SignedData::GetDigest(std::vector<uint8_t> &digestBlock,
  *     OCTET_STRING(0x30)        encryptedDigest EncryptedDigest,
  *     CONTET_SPECIFIC[1](0xA1)  unauthenticatedAttributes [1] IMPLICIT Attributes OPTIONAL }
  */
+int32_t Pkcs7SignedData::ReadSig(const uint8_t *sourceData, const uint32_t sourceDataLen,
+    std::vector<std::vector<uint8_t>> &sigs)
+{
+    if (sourceData == nullptr || sourceDataLen == 0) {
+        UPDATER_LAST_WORD(PKCS7_INVALID_PARAM_ERR);
+        return PKCS7_INVALID_PARAM_ERR;
+    }
+    if (Init(sourceData, sourceDataLen) != 0) {
+        PKG_LOGE("init pkcs7 data fail");
+        UPDATER_LAST_WORD(PKCS7_INIT_ERR);
+        return PKCS7_INIT_ERR;
+    }
+    STACK_OF(PKCS7_SIGNER_INFO) *p7SignerInfos = PKCS7_get_signer_info(pkcs7_);
+    if (p7SignerInfos == nullptr) {
+        PKG_LOGE("get pkcs7 signers failed!");
+        UPDATER_LAST_WORD(PKCS7_INVALID_VALUE_ERR);
+        return PKCS7_INVALID_VALUE_ERR;
+    }
+    int signerInfoNum = sk_PKCS7_SIGNER_INFO_num(p7SignerInfos);
+    if (signerInfoNum <= 0) {
+        PKG_LOGE("invalid signers info num %d!", signerInfoNum);
+        UPDATER_LAST_WORD(PKCS7_INVALID_VALUE_ERR);
+        return PKCS7_INVALID_VALUE_ERR;
+    }
+    for (int i = 0; i < signerInfoNum; i++) {
+        PKCS7_SIGNER_INFO *p7SiTmp = sk_PKCS7_SIGNER_INFO_value(p7SignerInfos, i);
+        Pkcs7SignerInfo signer;
+        int32_t ret = SignerInfoParse(p7SiTmp, signer);
+        if (ret != 0) {
+            PKG_LOGE("SignerInfo Parse failed!");
+            continue;
+        }
+        sigs.push_back(signer.digestEncryptData);
+    }
+    if (sigs.size() == 0) {
+        PKG_LOGE("no valid sigs!");
+        UPDATER_LAST_WORD(PKCS7_HAS_NO_VALID_SIG_ERR);
+        return PKCS7_HAS_NO_VALID_SIG_ERR;
+    }
+    return PKCS7_SUCCESS;
+}
+
 int32_t Pkcs7SignedData::SignerInfosParse()
 {
     Updater::UPDATER_INIT_RECORD;

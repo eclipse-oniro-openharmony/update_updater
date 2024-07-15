@@ -157,8 +157,9 @@ public:
     int TestPkcs7SignedDataFailed()
     {
         Pkcs7SignedData signedData;
-        uint8_t *srcData {};
+        uint8_t srcData[] = "A";
         std::vector<uint8_t> hash;
+        std::vector<std::vector<uint8_t>> sigs;
 
         int32_t ret = signedData.Verify();
         EXPECT_EQ(ret, -1);
@@ -168,6 +169,12 @@ public:
         EXPECT_EQ(ret, -1);
         ret = signedData.GetHashFromSignBlock(srcData, 1, hash);
         EXPECT_EQ(ret, -1);
+        ret = signedData.ReadSig(nullptr, 0, sigs);
+        EXPECT_EQ(ret, PKCS7_INVALID_PARAM_ERR);
+        ret = signedData.ReadSig(srcData, 0, sigs);
+        EXPECT_EQ(ret, PKCS7_INVALID_PARAM_ERR);
+        ret = signedData.ReadSig(srcData, 1, sigs);
+        EXPECT_EQ(ret, PKCS7_INIT_ERR);
         return 0;
     }
 

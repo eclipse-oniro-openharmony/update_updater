@@ -129,6 +129,10 @@ public:
     {
         return PKG_SUCCESS;
     }
+    int32_t VerifyAccPackage(const std::string &packagePath, const std::string &keyPath) override
+    {
+        return PKG_SUCCESS;
+    }
 };
 }
 #endif // SCRIPT_UNITTEST_H

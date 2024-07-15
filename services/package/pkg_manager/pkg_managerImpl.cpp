@@ -959,6 +959,31 @@ void PkgManagerImpl::PostDecodeProgress(int type, size_t writeDataLen, const voi
     }
 }
 
+int32_t PkgManagerImpl::VerifyAccPackage(const std::string &packagePath, const std::string &keyPath)
+{
+    PkgStreamPtr pkgStream = nullptr;
+    int32_t ret = CreatePkgStream(pkgStream, packagePath, 0, PkgStream::PkgStreamType_Read);
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("CreatePackage fail %s", packagePath.c_str());
+        UPDATER_LAST_WORD(PKG_INVALID_FILE);
+        return ret;
+    }
+
+    PkgVerifyUtil verifyUtil;
+    if (verifyUtil.VerifyPackageSign(pkgStream) != PKG_SUCCESS) {
+        ret = verifyUtil.VerifyAccPackageSign(pkgStream, keyPath);
+    }
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("Verify zpkcs7 signature failed.");
+        UPDATER_LAST_WORD(packagePath, ret);
+        ClosePkgStream(pkgStream);
+        return ret;
+    }
+
+    ClosePkgStream(pkgStream);
+    return PKG_SUCCESS;
+}
+
 int32_t PkgManagerImpl::VerifyOtaPackage(const std::string &packagePath)
 {
     PkgStreamPtr pkgStream = nullptr;
