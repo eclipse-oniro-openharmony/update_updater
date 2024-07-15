@@ -35,6 +35,9 @@ int32_t WriteDataToFile(const std::string &fileName, const std::vector<uint8_t> 
 #else
     if (realpath(fileName.c_str(), realPath) == nullptr) {
 #endif
+        PATCH_LOGE("Failed to get realpath %s", fileName.c_str());
+        return -1;
+    }
     std::ofstream patchFile(realPath, std::ios::out | std::ios::binary);
     if (!patchFile) {
         PATCH_LOGE("Failed to open %s", fileName.c_str());
