@@ -880,6 +880,9 @@ int32_t PkgManagerImpl::Sign(PkgStreamPtr stream, size_t offset, const PkgInfoPt
 int32_t PkgManagerImpl::SetSignVerifyKeyName(const std::string &keyName)
 {
     Updater::UPDATER_INIT_RECORD;
+    if (keyName == Updater::Utils::ON_SERVER) {
+        return PKG_SUCCESS;
+    }
     if (access(keyName.c_str(), 0) != 0) {
         UPDATER_LAST_WORD(PKG_INVALID_FILE);
         PKG_LOGE("Invalid keyname");
