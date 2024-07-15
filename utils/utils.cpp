@@ -370,10 +370,15 @@ bool CopyFile(const std::string &src, const std::string &dest, bool isAppend)
         LOG(ERROR) << src << " get realpath fail";
         return false;
     }
+    char realDestPath[PATH_MAX + 1] = {0};
+    if (realpath(dest.c_str(), realPath) == nullptr) {
+        LOG(ERROR) << dest << " get realpath fail";
+        return false;
+    }
 
     std::ios_base::openmode mode = isAppend ? std::ios::app | std::ios::out : std::ios_base::out;
     std::ifstream fin(realPath);
-    std::ofstream fout(dest, mode);
+    std::ofstream fout(realDestPath, mode);
     if (!fin.is_open() || !fout.is_open()) {
         return false;
     }
@@ -385,7 +390,7 @@ bool CopyFile(const std::string &src, const std::string &dest, bool isAppend)
     }
     fout.flush();
     fout.close();
-    SyncFile(dest); // no way to get fd from ofstream, so reopen to sync this file
+    SyncFile(realDestPath); // no way to get fd from ofstream, so reopen to sync this file
     return true;
 }
 

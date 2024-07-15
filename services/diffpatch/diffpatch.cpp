@@ -29,9 +29,15 @@
 namespace UpdatePatch {
 int32_t WriteDataToFile(const std::string &fileName, const std::vector<uint8_t> &data, size_t dataSize)
 {
-    std::ofstream patchFile(fileName, std::ios::out | std::ios::binary);
+    char realPath[PATH_MAX] = { 0 };
+#ifdef _WIN32
+    if (_fullpath(realPath, fileName.c_str(), PATH_MAX) == nullptr) {
+#else
+    if (realpath(fileName.c_str(), realPath) == nullptr) {
+#endif
+    std::ofstream patchFile(realPath, std::ios::out | std::ios::binary);
     if (!patchFile) {
-        PATCH_LOGE("Failed to open %s", fileName.c_str());
+        PATCH_LOGE("Failed to open %s", realPath.c_str());
         return -1;
     }
     patchFile.write(reinterpret_cast<const char*>(data.data()), dataSize);
