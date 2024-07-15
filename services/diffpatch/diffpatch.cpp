@@ -29,7 +29,7 @@
 namespace UpdatePatch {
 int32_t WriteDataToFile(const std::string &fileName, const std::vector<uint8_t> &data, size_t dataSize)
 {
-    char realPath[PATH_MAX] = { 0 };
+    char realPath[PATH_MAX + 1] = { 0 };
 #ifdef _WIN32
     if (_fullpath(realPath, fileName.c_str(), PATH_MAX) == nullptr) {
 #else

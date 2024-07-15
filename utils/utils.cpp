@@ -371,8 +371,8 @@ bool CopyFile(const std::string &src, const std::string &dest, bool isAppend)
         return false;
     }
     char realDestPath[PATH_MAX + 1] = {0};
-    if (realpath(dest.c_str(), realPath) == nullptr) {
-        LOG(ERROR) << dest << " get realpath fail";
+    if (realpath(dest.c_str(), realDestPath) == nullptr) {
+        LOG(ERROR) << dest << " get realDestPath fail";
         return false;
     }
 
