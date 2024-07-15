@@ -266,9 +266,12 @@ void DoShutdown()
     DoReboot("shutdown");
 }
 
-std::string GetCertName()
+std::string __attribute__((weak)) GetCertName()
 {
 #ifndef UPDATER_UT
+/*
+* if you use your own cert, youn need to replace it.
+*/
     static std::string signingCertName = "/etc/certificate/signing_cert.crt";
 #else
     static std::string signingCertName = "/data/updater/src/signing_cert.crt";
