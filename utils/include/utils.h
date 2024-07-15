@@ -36,7 +36,7 @@ constexpr int USER_UPDATE_AUTHORITY = 6666;
 constexpr int GROUP_SYS_AUTHORITY = 1000;
 constexpr int GROUP_UPDATE_AUTHORITY = 6666;
 constexpr int GROUP_ROOT_AUTHORITY = 0;
-constexpr char* ON_SERVER = "ON_SERVER";
+constexpr const char* ON_SERVER = "ON_SERVER";
 template<class T>
 T String2Int(const std::string &str, int base = N_HEX)
 {
