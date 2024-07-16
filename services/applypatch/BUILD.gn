@@ -15,6 +15,19 @@ import("//base/update/updater/updater_default_cfg.gni")
 import("//build/ohos.gni")
 
 updater_path = rebase_path("${updater_absolutely_path}", ".")
+
+config("libapplypatch_exported_headers") {
+  visibility = [ ":*" ]
+  include_dirs = [
+    "${updater_path}/interfaces/kits/include",
+    "${updater_path}/services/applypatch",
+    "${updater_path}/services/common",
+    "${updater_path}/services/include",
+    "${updater_path}/services/include/package",
+    "${updater_path}/services/include/script",
+  ]
+}
+
 ohos_static_library("libapplypatch") {
   sources = [
     "block_set.cpp",
@@ -56,6 +69,7 @@ ohos_static_library("libapplypatch") {
     "openssl:libcrypto_static",
     "zlib:libz",
   ]
+  public_configs = [ ":libapplypatch_exported_headers" ]
   subsystem_name = "updater"
   part_name = "updater"
 }

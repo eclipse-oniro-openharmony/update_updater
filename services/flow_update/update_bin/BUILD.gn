@@ -54,7 +54,7 @@ ohos_static_library("libBinFlowUpdate") {
   ]
   if (defined(use_ptable)) {
     deps += [ "${updater_path}/services/ptable_parse:libptableparse" ]
-    external_deps = [ "cJSON:cjson_static" ]
+    external_deps += [ "cJSON:cjson_static" ]
     defines = [ "UPDATER_USE_PTABLE" ]
   }
   subsystem_name = "updater"

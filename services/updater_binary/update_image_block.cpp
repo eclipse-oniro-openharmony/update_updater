@@ -499,7 +499,7 @@ void UScriptInstructionShaCheck::PrintAbnormalBlockHash(const std::string &devPa
 {
     int fd = open(devPath.c_str(), O_RDWR | O_LARGEFILE);
     if (fd == -1) {
-        LOG(ERROR) << "Failed to open file";
+        LOG(ERROR) << "Failed to open file " << devPath;
         return;
     }
 

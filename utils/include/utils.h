@@ -85,10 +85,10 @@ void SetCmdToMisc(const std::string &miscCmd);
 void AddUpdateInfoToMisc(const std::string headInfo, const std::optional<int> message);
 void RemoveUpdateInfoFromMisc(const std::string &headInfo);
 void SetFaultInfoToMisc(const std::string &faultInfo);
-bool RestoreconPath(const std::string &path);
 void GetTagValInStr(const std::string& str, const std::string &tag, std::string &val);
 bool IsValidHexStr(const std::string &str);
 void TrimString (std::string &str);
+bool RestoreconPath(const std::string &path);
 std::string TrimUpdateMode(const std::string &mode);
 bool IsEsDevice();
 #ifndef __WIN32
