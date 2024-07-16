@@ -56,8 +56,8 @@ ohos_shared_library("libupdater_patch_shared") {
   ]
 
   external_deps = [
-    "cJSON:cjson_static",
     "bounds_checking_function:libsec_shared",
+    "cJSON:cjson_static",
     "hilog:libhilog",
     "init:libbegetutil_static",
     "init:libfsmanager_static_real",
