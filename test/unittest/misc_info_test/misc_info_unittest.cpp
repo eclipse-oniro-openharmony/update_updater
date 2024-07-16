@@ -69,5 +69,17 @@ HWTEST_F(MiscInfoUnitTest, misc_info_test_001, TestSize.Level1)
 
     ret = ReadUpdaterMiscMsg(boot);
     EXPECT_EQ(ret, true);
+
+    UpdaterPara writePara {};
+    const std::string language = "zh";
+    const std::string command = "boot_updater";
+    EXPECT_EQ(strncpy_s(writePara.language, sizeof(writePara.language) - 1, language.c_str(), language.size()), 0);
+    EXPECT_EQ(strncpy_s(writePara.reserved, sizeof(writePara.reserved) - 1, command.c_str(), command.size()), 0);
+    ret = WriteUpdaterParaMisc(writePara);
+    EXPECT_EQ(ret, true);
+    
+    UpdaterPara readPara {};
+    ret = ReadUpdaterParaMisc(readPara);
+    EXPECT_EQ(ret, true);
 }
 } // namespace updater_ut
