@@ -31,6 +31,7 @@ ohos_unittest("bin_flow_update_test") {
     "${updater_path}/services/updater_binary/update_image_patch.cpp",
     "${updater_path}/services/updater_binary/update_partitions.cpp",
     "${updater_path}/services/updater_binary/update_processor.cpp",
+    "${updater_path}/utils/utils.cpp",
   ]
 
   include_dirs = [
@@ -72,6 +73,7 @@ ohos_unittest("bin_flow_update_test") {
     "googletest:gtest_main",
     "hilog:libhilog",
     "init:libbegetutil_static",
+    "init:libfsmanager_static_real",
     "openssl:libcrypto_shared",
   ]
   defines = [ "UPDATER_UT" ]
