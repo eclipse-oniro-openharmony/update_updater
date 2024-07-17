@@ -55,6 +55,7 @@ ohos_unittest("package_unittest") {
     "${updater_path}/services/package/pkg_verify/pkcs7_signed_data.cpp",
     "${updater_path}/services/package/pkg_verify/pkg_verify_util.cpp",
     "${updater_path}/services/package/pkg_verify/zip_pkg_parse.cpp",
+    "${updater_path}/utils/utils.cpp",
   ]
 
   include_dirs = [
@@ -87,6 +88,8 @@ ohos_unittest("package_unittest") {
     "googletest:gmock_main",
     "googletest:gtest_main",
     "hilog:libhilog",
+    "init:libbegetutil_static",
+    "init:libfsmanager_static_real",
     "lz4:liblz4_static",
     "openssl:libcrypto_shared",
     "zlib:libz",
