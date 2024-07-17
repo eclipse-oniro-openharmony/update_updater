@@ -94,7 +94,7 @@ CommandResult ZeroAndEraseCommandFn::Execute(const Command &params)
     blk.ParserAndInsert(params.GetArgumentByPos(1));
     LOG(INFO) << "Parser params to block set";
     auto ret = CommandResult(blk.WriteZeroToBlock(params.GetFileDescriptor(), isErase));
-    if (ret == SUCCESS) {
+    if (ret == SUCCESS && !isErase) {
         params.GetTransferParams()->written += blk.TotalBlockSize();
     }
     return ret;

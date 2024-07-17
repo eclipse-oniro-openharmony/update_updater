@@ -35,12 +35,18 @@ ohos_unittest("ui_unittest") {
     "lang/ui_language_unittest.cpp",
     "strategy/ui_strategy_unittest.cpp",
     "view/ui_component_unittest.cpp",
+    "view/ui_graphic_engine_unittest.cpp",
     "view/ui_layout_unittest.cpp",
     "view/ui_page_manager_unittest.cpp",
     "view/ui_view_api_unittest.cpp",
     "view/ui_view_proxy_unittest.cpp",
   ]
   sources += [
+    "${updater_path}/services/ui/driver/drm_driver.cpp",
+    "${updater_path}/services/ui/driver/fbdev_driver.cpp",
+    "${updater_path}/services/ui/driver/graphic_engine.cpp",
+    "${updater_path}/services/ui/driver/surface_dev.cpp",
+    "${updater_path}/services/ui/driver/ui_rotation.cpp",
     "${updater_path}/services/ui/language/language_ui.cpp",
     "${updater_path}/services/ui/strategy/ui_strategy.cpp",
     "${updater_path}/services/ui/view/component/box_progress_adapter.cpp",

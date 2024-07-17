@@ -47,6 +47,7 @@ int Partition::DoErase() const
         return FLASHING_OPEN_PART_ERROR;
     }
 
+#ifndef UPDATER_UT
     uint64_t size = GetBlockDeviceSize(fd);
     uint64_t range[2] = { 0, size };
     if (ioctl(fd, BLKSECDISCARD, &range) >= 0) {
@@ -62,14 +63,13 @@ int Partition::DoErase() const
         return FLASHING_NOPERMISSION;
     }
     std::vector<uint8_t> buffer(BLOCK_SIZE, 0);
-#ifndef UPDATER_UT
     if (!Updater::Utils::WriteFully(fd, buffer.data(), buffer.size())) {
         close(fd);
         FLASHD_LOGE("WriteFully fail");
         return FLASHING_PART_WRITE_ERROR;
     }
-#endif
     fsync(fd);
+#endif
     close(fd);
     return 0;
 }
