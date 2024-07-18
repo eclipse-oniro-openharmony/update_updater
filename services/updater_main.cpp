@@ -746,7 +746,9 @@ __attribute__((weak)) bool IsNeedWipe()
 
 void RebootAfterUpdateSuccess(const UpdaterParams &upParams)
 {
-    if (IsNeedWipe() || upParams.sdExtMode == SDCARD_UPDATE_FROM_DEV) {
+    if (IsNeedWipe() ||
+        upParams.sdExtMode == SDCARD_UPDATE_FROM_DEV ||
+        upParams.sdExtMode == SDCARD_FACTORY_INTERNAL_MODE) {
         Utils::UpdaterDoReboot("updater", "--user_wipe_data");
         return;
     }
