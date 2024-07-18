@@ -32,6 +32,10 @@ ohos_unittest("ui_unittest") {
     "ENABLE_VECTOR_FONT = 1",
   ]
   sources = [
+    "driver/fbdev_driver_unittest.cpp",
+    "driver/keys_input_device_unittest.cpp",
+    "driver/pointers_input_device_unittest.cpp",
+    "driver/ui_rotation_unittest.cpp",
     "lang/ui_language_unittest.cpp",
     "strategy/ui_strategy_unittest.cpp",
     "view/ui_component_unittest.cpp",
