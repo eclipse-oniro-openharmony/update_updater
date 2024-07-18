@@ -55,6 +55,6 @@ HWTEST_F(UpdaterUiGraphicEngineUnitTest, test_ui_graphic_engine_test01, TestSize
     EXPECT_EQ(bufferInfo->color, WHITE_BGCOLOR);
     EXPECT_EQ(bufferInfo->mode, OHOS::ColorMode::ARGB8888);
     EXPECT_EQ(height, bufferInfo->height);
-    EXPECT_EQ(height, bufferInfo->width);
+    EXPECT_EQ(width, bufferInfo->width);
 }
 }
