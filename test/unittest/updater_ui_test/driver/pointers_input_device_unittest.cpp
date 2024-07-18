@@ -46,8 +46,9 @@ HWTEST_F(PointersInputDeviceUnitTest, test_handle_point_event, TestSize.Level0)
     ev.code = ABS_MT_POSITION_Y;
     EXPECT_EQ(PointersInputDevice::GetInstance().HandlePointEvent(ev, type), 0);
     ev.code = ABS_MT_TRACKING_ID;
-    EXPECT_EQ();
+    EXPECT_EQ(PointersInputDevice::GetInstance().HandlePointEvent(ev, type), 0);
     ev.code = BTN_TOUCH;
     ev.type = EV_KEY;
+    EXPECT_EQ(PointersInputDevice::GetInstance().HandlePointEvent(ev, type), 0);
 }
 }
