@@ -111,6 +111,10 @@ int32_t CompressedImagePatch::ApplyImagePatch(const PatchParam &param, size_t &s
     }
     // decompress old data
     Hpackage::PkgManager::PkgManagerPtr pkgManager = Hpackage::PkgManager::CreatePackageInstance();
+    if (pkgManager == nullptr) {
+        PATCH_LOGE("CreatePackageInstance fail");
+        return -1;
+    }
     Hpackage::PkgManager::StreamPtr stream = nullptr;
     BlockBuffer oldData = { param.oldBuff + header.srcStart, header.srcLength };
     if (DecompressData(pkgManager, oldData, stream, true, header.expandedLen) != 0) {

@@ -130,6 +130,10 @@ static UpdaterStatus UpdatePreCheck(UpdaterParams &upParams, const std::string p
     }
 
     PkgManager::PkgManagerPtr pkgManager = PkgManager::CreatePackageInstance();
+    if (pkgManager == nullptr) {
+        LOG(ERROR) << "CreatePackageInstance fail";
+        return UPDATE_ERROR;
+    }
     if (GetUpdatePackageInfo(pkgManager, pkgPath) != PKG_SUCCESS) {
         PkgManager::ReleasePackageInstance(pkgManager);
         LOG(ERROR) << "Verify update bin file Fail!";
@@ -175,6 +179,10 @@ static UpdaterStatus VerifyPackages(UpdaterParams &upParams)
         LOG(INFO) << "Verify package:" << upParams.updatePackage[i];
         auto startTime = std::chrono::system_clock::now();
         PkgManager::PkgManagerPtr manager = PkgManager::CreatePackageInstance();
+        if (manager == nullptr) {
+            LOG(ERROR) << "CreatePackageInstance fail";
+            return UPDATE_ERROR;
+        }
         int32_t verifyret = OtaUpdatePreCheck(manager, upParams.updatePackage[i]);
         PkgManager::ReleasePackageInstance(manager);
         if (verifyret == UPDATE_SUCCESS) {
@@ -399,6 +407,10 @@ static UpdaterStatus DoInstallPackages(UpdaterParams &upParams, std::vector<doub
     }
     for (; upParams.pkgLocation < upParams.updatePackage.size(); upParams.pkgLocation++) {
         PkgManager::PkgManagerPtr manager = PkgManager::CreatePackageInstance();
+        if (manager == nullptr) {
+            LOG(ERROR) << "CreatePackageInstance fail";
+            return UPDATE_ERROR;
+        }
         auto startTime = std::chrono::system_clock::now();
         upParams.currentPercentage = pkgStartPosition[upParams.pkgLocation + 1] -
             pkgStartPosition[upParams.pkgLocation];
