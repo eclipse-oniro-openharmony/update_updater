@@ -28,12 +28,12 @@
 using namespace Updater::Utils;
 
 namespace Updater {
-int32_t Store::DoFreeSpace(const std::string &directoryPath)
+void Store::DoFreeSpace(const std::string &directoryPath)
 {
     std::vector<std::string> files;
     if (GetFilesFromDirectory(directoryPath, files, true) <= 0) {
-        LOG(ERROR) << "Failed to get files for free space";
-        return -1;
+        LOG(WARNING) << "Failed to get files for free space";
+        return;
     }
     for (const auto &file : files) {
         if (DeleteFile(file.c_str()) == -1) {
@@ -41,7 +41,6 @@ int32_t Store::DoFreeSpace(const std::string &directoryPath)
             continue;
         }
     }
-    return 0;
 }
 
 int32_t Store::FreeStore(const std::string &dirPath, const std::string &fileName)
@@ -148,7 +147,7 @@ int32_t Store::LoadDataFromStore(const std::string &dirPath, const std::string &
     }
     struct stat fileStat {};
     if (stat(path.c_str(), &fileStat) == -1) {
-        LOG(WARNING) << "Failed to stat";
+        LOG(DEBUG) << "Failed to stat";
         return -1;
     }
     if (fileStat.st_size % H_BLOCK_SIZE != 0) {

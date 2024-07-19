@@ -84,7 +84,7 @@ int32_t UpdateApplyPatch::ApplyImagePatch(const PatchParam &param,
             return -1;
         }
         int32_t type = ImagePatch::ReadLE<int32_t>(param.patch + offset);
-        PATCH_LOGI("ApplyImagePatch numChunks[%d] type %d offset %d", i, type, offset);
+        PATCH_DEBUG("ApplyImagePatch numChunks[%d] type %d offset %d", i, type, offset);
         offset += sizeof(int32_t);
         std::unique_ptr<ImagePatch> imagePatch = nullptr;
         switch (type) {

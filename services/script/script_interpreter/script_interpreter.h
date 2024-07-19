@@ -23,10 +23,13 @@
 #include "script_statement.h"
 
 #define INTERPRETER_LOGE(inter, context, format, ...) \
-    Logger(Updater::INFO, (UPDATER_LOG_FILE_NAME), (__LINE__), \
+    Logger(Updater::ERROR, (UPDATER_LOG_FILE_NAME), (__LINE__), \
     "[INTERPRETER %d-%d]"#format, (inter).GetInstanceId(), (context)->GetContextId(), ##__VA_ARGS__)
 #define INTERPRETER_LOGI(inter, context, format, ...) \
     Logger(Updater::INFO, (UPDATER_LOG_FILE_NAME), (__LINE__), \
+    "[INTERPRETER %d-%d]"#format, (inter).GetInstanceId(), (context)->GetContextId(), ##__VA_ARGS__)
+#define INTERPRETER_LOGD(inter, context, format, ...) \
+    Logger(Updater::DEBUG, (UPDATER_LOG_FILE_NAME), (__LINE__), \
     "[INTERPRETER %d-%d]"#format, (inter).GetInstanceId(), (context)->GetContextId(), ##__VA_ARGS__)
 
 namespace Uscript {

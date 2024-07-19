@@ -205,7 +205,7 @@ int32_t ScriptInstructionHelper::RegisterUserInstruction(const std::string &inst
         return ret;
     }
 
-    USCRIPT_LOGI("RegisterUserInstruction %s successfull", instrName.c_str());
+    USCRIPT_LOGD("RegisterUserInstruction %s successfull", instrName.c_str());
     return ret;
 }
 } // namespace Uscript

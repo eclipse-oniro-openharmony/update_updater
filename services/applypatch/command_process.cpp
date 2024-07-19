@@ -208,12 +208,12 @@ CommandResult StashCommandFn::Execute(const Command &params)
     std::vector<uint8_t> buffer;
     buffer.resize(srcBlockSize * H_BLOCK_SIZE);
     std::string storeBase = params.GetTransferParams()->storeBase;
-    LOG(INFO) << "Confirm whether the block is stored";
+    LOG(DEBUG) << "Confirm whether the block is stored";
     if (Store::LoadDataFromStore(storeBase, shaStr, buffer) == 0) {
         LOG(INFO) << "The stash has been stored, skipped";
         return SUCCESS;
     }
-    LOG(INFO) << "Read block data to buffer";
+    LOG(DEBUG) << "Read block data to buffer";
     if (srcBlk.ReadDataFromBlock(params.GetFileDescriptor(), buffer) == 0) {
         LOG(ERROR) << "Error to load block data";
         return FAILED;
