@@ -259,13 +259,13 @@ int32_t ExtraPackageDir(const char *packagePath, [[maybe_unused]] const char *ke
 int32_t ExtraPackageFile(const char *packagePath, [[maybe_unused]] const char *keyPath, const char *file,
     const char *outPath)
 {
-    if (outPath == nullptr || file == nullptr || manager == nullptr) {
+    if (packagePath == nullptr || outPath == nullptr || file == nullptr) {
         LOG(ERROR) << "Check param fail ";
         return PKG_INVALID_PARAM;
     }
 
     PkgManager::PkgManagerPtr manager = PkgManager::CreatePackageInstance();
-    if (packagePath == nullptr) {
+    if (manager == nullptr) {
         LOG(ERROR) << "Check param fail ";
         return PKG_INVALID_PARAM;
     }
