@@ -18,6 +18,9 @@ updater_path = rebase_path("${updater_absolutely_path}", ".")
 
 config("libutils_exported_headers") {
   visibility = [ ":*" ]
+  if (updater_sign_on_server) {
+    defines = [ "SIGN_ON_SERVER" ]
+  }
   include_dirs = [
     "${updater_path}/services/include",
     "${updater_path}/utils/include",

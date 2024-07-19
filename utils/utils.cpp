@@ -268,10 +268,13 @@ void DoShutdown()
     DoReboot("shutdown");
 }
 
-std::string __attribute__((weak)) GetCertName()
+std::string GetCertName()
 {
 #ifndef UPDATER_UT
     static std::string signingCertName = "/etc/certificate/signing_cert.crt";
+#ifdef SIGN_ON_SERVER
+    signingCertName = Updater::Utils::ON_SERVER;
+#endif
 #else
     static std::string signingCertName = "/data/updater/src/signing_cert.crt";
 #endif

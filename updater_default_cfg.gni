@@ -23,9 +23,11 @@ declare_args() {
   updater_hdc_depend = true
   updater_absolutely_path = "//base/update/updater"
   hdc_base = "//developtools/hdc"
+  updater_sign_on_server = false
 }
 
 if (updater_cfg_file != "") {
+  updater_sign_on_server = true
   import("${updater_cfg_file}")
 }
 
