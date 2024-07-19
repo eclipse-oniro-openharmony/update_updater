@@ -83,7 +83,6 @@ UScriptValuePtr IdentifierExpression::Execute(ScriptInterpreter &inter, UScriptC
 int32_t IdentifierExpression::GetIdentifierName(UScriptExpression *expression, std::string &name)
 {
     if (expression == nullptr) {
-        INTERPRETER_LOGI(inter, local, "GetIdentifierName null");
         return USCRIPT_INVALID_PARAM;
     }
     if (expression->GetExpressType() != EXPRESSION_TYPE_IDENTIFIER) {
