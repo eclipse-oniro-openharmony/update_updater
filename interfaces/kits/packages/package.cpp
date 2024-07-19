@@ -220,12 +220,12 @@ int32_t VerifyPackageWithCallback(const std::string &packagePath,
 int32_t ExtraPackageDir(const char *packagePath, [[maybe_unused]] const char *keyPath, const char *dir,
     const char *outPath)
 {
-    if (outPath == nullptr || manager == nullptr) {
+    if (packagePath == nullptr || outPath == nullptr) {
         LOG(ERROR) << "Check param fail ";
         return PKG_INVALID_PARAM;
     }
     PkgManager::PkgManagerPtr manager = PkgManager::CreatePackageInstance();
-    if (packagePath == nullptr) {
+    if (manager == nullptr) {
         LOG(ERROR) << "CreatePackageInstance fail ";
         return PKG_INVALID_PARAM;
     }
