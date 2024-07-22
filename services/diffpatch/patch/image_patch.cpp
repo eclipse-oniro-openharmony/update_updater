@@ -25,6 +25,7 @@
 #include "scope_guard.h"
 
 using namespace Hpackage;
+using namespace Updater;
 
 namespace UpdatePatch {
 uint32_t g_tmpFileId = 0;
