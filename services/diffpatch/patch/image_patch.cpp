@@ -22,8 +22,10 @@
 #include "openssl/sha.h"
 #include "securec.h"
 #include "zip_adapter.h"
+#include "scope_guard.h"
 
 using namespace Hpackage;
+using namespace Updater;
 
 namespace UpdatePatch {
 uint32_t g_tmpFileId = 0;
@@ -111,18 +113,23 @@ int32_t CompressedImagePatch::ApplyImagePatch(const PatchParam &param, size_t &s
     }
     // decompress old data
     Hpackage::PkgManager::PkgManagerPtr pkgManager = Hpackage::PkgManager::CreatePackageInstance();
+    if (pkgManager == nullptr) {
+        PATCH_LOGE("CreatePackageInstance fail");
+        return -1;
+    }
+    ON_SCOPE_EXIT(releaseManager) {
+        Hpackage::PkgManager::ReleasePackageInstance(pkgManager);
+    };
     Hpackage::PkgManager::StreamPtr stream = nullptr;
     BlockBuffer oldData = { param.oldBuff + header.srcStart, header.srcLength };
     if (DecompressData(pkgManager, oldData, stream, true, header.expandedLen) != 0) {
         PATCH_LOGE("Failed to decompress data");
-        Hpackage::PkgManager::ReleasePackageInstance(pkgManager);
         return -1;
     }
     // prepare new data
     std::unique_ptr<Hpackage::FileInfo> info = GetFileInfo();
     if (info == nullptr) {
         PATCH_LOGE("Failed to get file info");
-        Hpackage::PkgManager::ReleasePackageInstance(pkgManager);
         return -1;
     }
     info->packedSize = header.targetSize;
@@ -130,14 +137,12 @@ int32_t CompressedImagePatch::ApplyImagePatch(const PatchParam &param, size_t &s
     std::unique_ptr<CompressedFileRestore> zipWriter = std::make_unique<CompressedFileRestore>(info.get(), writer_);
     if (zipWriter == nullptr || zipWriter->Init() != 0) {
         PATCH_LOGE("Failed to create zip writer");
-        Hpackage::PkgManager::ReleasePackageInstance(pkgManager);
         return -1;
     }
     // apply patch
     PatchBuffer patchInfo = {param.patch, header.patchOffset, param.patchSize};
     if (UpdateApplyPatch::ApplyBlockPatch(patchInfo, stream, zipWriter.get()) != 0) {
         PATCH_LOGE("Failed to apply bsdiff patch");
-        Hpackage::PkgManager::ReleasePackageInstance(pkgManager);
         return -1;
     }
     // compress new data
@@ -147,11 +152,9 @@ int32_t CompressedImagePatch::ApplyImagePatch(const PatchParam &param, size_t &s
     PATCH_LOGI("ApplyImagePatch unpackedSize %zu %zu", originalSize, compressSize);
     if (originalSize != header.targetSize) {
         PATCH_LOGE("Failed to apply bsdiff patch");
-        Hpackage::PkgManager::ReleasePackageInstance(pkgManager);
         return -1;
     }
     startOffset = offset;
-    Hpackage::PkgManager::ReleasePackageInstance(pkgManager);
     return 0;
 }
 

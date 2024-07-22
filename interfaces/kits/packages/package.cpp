@@ -124,9 +124,13 @@ int32_t CreatePackage(const UpgradePkgInfoExt *pkgInfoExt,
     const char *path,
     const char *keyPath)
 {
-    PkgManager::PkgManagerPtr manager = PkgManager::CreatePackageInstance();
-    if (pkgInfoExt == nullptr || path == nullptr || keyPath == nullptr || manager == nullptr) {
+    if (pkgInfoExt == nullptr || path == nullptr || keyPath == nullptr) {
         LOG(ERROR) << "Check param fail ";
+        return PKG_INVALID_PARAM;
+    }
+    PkgManager::PkgManagerPtr manager = PkgManager::CreatePackageInstance();
+    if (manager == nullptr) {
+        LOG(ERROR) << "CreatePackageInstance fail ";
         return PKG_INVALID_PARAM;
     }
 
@@ -174,8 +178,13 @@ int32_t VerifyPackage(const char *packagePath,
     const uint8_t *digest,
     size_t size)
 {
+    if (packagePath == nullptr || keyPath == nullptr || version == nullptr) {
+        LOG(ERROR) << "Check param fail";
+        return PKG_INVALID_PARAM;
+    }
     PkgManager::PkgManagerPtr manager = PkgManager::CreatePackageInstance();
-    if (packagePath == nullptr || keyPath == nullptr || version == nullptr || manager == nullptr) {
+    if (manager == nullptr) {
+        LOG(ERROR) << "CreatePackageInstance fail";
         return PKG_INVALID_PARAM;
     }
 
@@ -194,6 +203,10 @@ int32_t VerifyPackageWithCallback(const std::string &packagePath,
     }
 
     PkgManager *manager = PkgManager::CreatePackageInstance();
+    if (manager == nullptr) {
+        LOG(ERROR) << "CreatePackageInstance fail";
+        return PKG_INVALID_PARAM;
+    }
     PkgBuffer digestBuffer {};
     std::string version {};
     int32_t ret = manager->VerifyPackage(packagePath, keyPath, version, digestBuffer, cb);
@@ -207,9 +220,13 @@ int32_t VerifyPackageWithCallback(const std::string &packagePath,
 int32_t ExtraPackageDir(const char *packagePath, [[maybe_unused]] const char *keyPath, const char *dir,
     const char *outPath)
 {
-    PkgManager::PkgManagerPtr manager = PkgManager::CreatePackageInstance();
-    if (packagePath == nullptr || outPath == nullptr || manager == nullptr) {
+    if (packagePath == nullptr || outPath == nullptr) {
         LOG(ERROR) << "Check param fail ";
+        return PKG_INVALID_PARAM;
+    }
+    PkgManager::PkgManagerPtr manager = PkgManager::CreatePackageInstance();
+    if (manager == nullptr) {
+        LOG(ERROR) << "CreatePackageInstance fail ";
         return PKG_INVALID_PARAM;
     }
 
@@ -242,8 +259,13 @@ int32_t ExtraPackageDir(const char *packagePath, [[maybe_unused]] const char *ke
 int32_t ExtraPackageFile(const char *packagePath, [[maybe_unused]] const char *keyPath, const char *file,
     const char *outPath)
 {
+    if (packagePath == nullptr || outPath == nullptr || file == nullptr) {
+        LOG(ERROR) << "Check param fail ";
+        return PKG_INVALID_PARAM;
+    }
+
     PkgManager::PkgManagerPtr manager = PkgManager::CreatePackageInstance();
-    if (packagePath == nullptr || outPath == nullptr || file == nullptr || manager == nullptr) {
+    if (manager == nullptr) {
         LOG(ERROR) << "Check param fail ";
         return PKG_INVALID_PARAM;
     }
