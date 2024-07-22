@@ -22,6 +22,7 @@
 #include "openssl/sha.h"
 #include "securec.h"
 #include "zip_adapter.h"
+#include "scope_guard.h"
 
 using namespace Hpackage;
 
