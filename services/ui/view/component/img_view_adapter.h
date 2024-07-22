@@ -20,7 +20,7 @@
 #include "animator/animator_manager.h"
 #include "component_common.h"
 #include "components/ui_image_view.h"
-#include "macros.h"
+#include "macros_updater.h"
 
 namespace Updater {
 struct UxImageInfo {

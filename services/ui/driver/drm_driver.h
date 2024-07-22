@@ -26,7 +26,7 @@
 #include <sys/mman.h>
 #include <xf86drm.h>
 #include <xf86drmMode.h>
-#include "macros.h"
+#include "macros_updater.h"
 #include "graphic_drv.h"
 
 namespace Updater {

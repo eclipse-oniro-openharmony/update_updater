@@ -20,7 +20,7 @@
 #include <linux/fb.h>
 #include <string>
 #include "graphic_drv.h"
-#include "macros.h"
+#include "macros_updater.h"
 #include "updater_ui_const.h"
 
 namespace Updater {

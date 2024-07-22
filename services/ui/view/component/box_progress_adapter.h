@@ -19,7 +19,7 @@
 #include <string>
 #include "component_common.h"
 #include "components/ui_box_progress.h"
-#include "macros.h"
+#include "macros_updater.h"
 
 namespace Updater {
 struct UxBoxProgressInfo {

@@ -17,7 +17,7 @@
 #define UPDATE_HDI_CLIENT_H
 
 #include "hdi/iupdate_interface.h"
-#include "macros.h"
+#include "macros_updater.h"
 
 namespace Updater {
 class UpdateHdiClient {

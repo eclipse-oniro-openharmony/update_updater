@@ -16,7 +16,7 @@
 #define UPDATER_UI_POINTERS_INPUT_DEVICE_H
 #include <linux/input.h>
 #include "input_manager.h"
-#include "macros.h"
+#include "macros_updater.h"
 #include "dock/pointer_input_device.h"
 #include "dock/input_device.h"
 

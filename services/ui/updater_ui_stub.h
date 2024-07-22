@@ -16,7 +16,7 @@
 #ifndef UPDATER_UI_STUB_H
 #define UPDATER_UI_STUB_H
 
-#include "macros.h"
+#include "macros_updater.h"
 #ifdef UPDATER_UI_SUPPORT
 #include "updater_ui_facade.h"
 #else

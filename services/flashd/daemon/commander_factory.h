@@ -20,7 +20,7 @@
 #include <unordered_map>
 
 #include "commander.h"
-#include "macros.h"
+#include "macros_updater.h"
 
 namespace Flashd {
 class CommanderFactory {

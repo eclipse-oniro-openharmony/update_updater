@@ -16,7 +16,7 @@
 #include "utils_json_visitor_test.h"
 
 #include "json_visitor.h"
-#include "macros.h"
+#include "macros_updater.h"
 
 namespace Updater {
 DEFINE_STRUCT_TRAIT(D, "D",

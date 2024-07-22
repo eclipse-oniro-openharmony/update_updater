@@ -16,7 +16,7 @@
 #define UPDATER_INIT_H
 
 #include <vector>
-#include "macros.h"
+#include "macros_updater.h"
 
 namespace Updater {
 enum UpdaterInitEvent {

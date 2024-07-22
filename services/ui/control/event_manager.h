@@ -21,7 +21,7 @@
 
 #include "component/component_factory.h"
 #include "event_listener.h"
-#include "macros.h"
+#include "macros_updater.h"
 #include "page/page_manager.h"
 
 namespace Updater {

@@ -16,7 +16,7 @@
 #ifndef PTABLE_PROCESS_H
 #define PTABLE_PROCESS_H
 
-#include "macros.h"
+#include "macros_updater.h"
 #include "updater/updater.h"
 
 namespace Updater {

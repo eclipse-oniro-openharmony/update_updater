@@ -25,7 +25,7 @@
 #include <string>
 #include <vector>
 #include "log.h"
-#include "macros.h"
+#include "macros_updater.h"
 
 #define UPDATER_LAST_WORD Updater::Dump::GetInstance().DumpInfo
 #define UPDATER_INIT_RECORD DumpStageHelper stageHelper(__FUNCTION__)

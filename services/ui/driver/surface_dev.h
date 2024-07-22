@@ -16,7 +16,7 @@
 #ifndef UPDATER_UI_SURFACE_DEV_H
 #define UPDATER_UI_SURFACE_DEV_H
 #include <string>
-#include "macros.h"
+#include "macros_updater.h"
 #include "graphic_drv.h"
 
 namespace Updater {

@@ -17,7 +17,7 @@
 #define UPDATER_PTABLE_H
 #define LAST_PATITION_NAME "USERDATA"
 
-#include "macros.h"
+#include "macros_updater.h"
 #include "json_node.h"
 
 namespace Updater {

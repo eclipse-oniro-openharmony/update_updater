@@ -19,7 +19,7 @@
 #include <cstdint>
 #include <utility>
 #include "gfx_utils/rect.h"
-#include "macros.h"
+#include "macros_updater.h"
 
 namespace Updater {
 enum class UI_ROTATION_DEGREE {
