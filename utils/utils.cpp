@@ -653,10 +653,12 @@ bool DeleteOldFile(const std::string folderPath)
         LOG(ERROR) << "Unable to delete file";
         return false;
     }
+    size_t size = GetFileSize(oldestFilePath);
     if (remove(oldestFilePath.c_str()) != 0) {
         LOG(ERROR) << "Failed to delete file: " << oldestFilePath;
         return false;
     }
+    LOG(INFO) << "Delete old file: " << oldestFilePath << " size: " << size;
     return true;
 }
 
