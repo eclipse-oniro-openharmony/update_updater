@@ -509,6 +509,7 @@ static void PostUpdatePackages(UpdaterParams &upParams, bool updateResult)
 
 UpdaterStatus UpdaterFromSdcard(UpdaterParams &upParams)
 {
+    UPDATER_INIT_RECORD;
     upParams.callbackProgress = [] (float value) { UPDATER_UI_INSTANCE.ShowProgress(value); };
     SetMessageToMisc(upParams.miscCmd, 0, "sdcard_update");
     if (CheckSdcardPkgs(upParams) != UPDATE_SUCCESS) {
@@ -580,6 +581,7 @@ UpdaterStatus DoUpdaterEntry(UpdaterParams &upParams)
         LOG(INFO) << "start sdcard update";
         UPDATER_UI_INSTANCE.ShowProgressPage();
         status = UpdaterFromSdcard(upParams);
+        PostUpdatePackages(upParams, status == UPDATE_SUCCESS);
         return status;
     } else if (upParams.updatePackage.size() > 0) {
         UPDATER_UI_INSTANCE.ShowProgressPage();
