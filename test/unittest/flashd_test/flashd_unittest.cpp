@@ -214,7 +214,38 @@ HWTEST_F(FLashServiceUnitTest, GetWriter, TestSize.Level1)
     writer = FlashdImageWriter::GetInstance().GetWriter(partName, buffer, bufferSize);
     EXPECT_NE(nullptr, writer);
 
-    int ret;
+    int ret = writer->Write(partName, reinterpret_cast<uint8_t*>(temp.data()), temp.size());
+    EXPECT_EQ(-1, ret);
+}
+
+HWTEST_F(FLashServiceUnitTest, FlashdWriterRawWriter, TestSize.Level1)
+{
+    std::string partName = "updater_ramdisk.img";
+    std::string temp = "";
+    std::unique_ptr<FlashdWriterRaw> writer = std::make_unique<FlashdWriterRaw>();
+    if (writer == nullptr) {
+        std::cout << "writer is nullptr";
+    }
+    EXPECT_NE(nullptr, writer);
+
+    int ret = writer->Write(partName, reinterpret_cast<uint8_t*>(temp.data()), temp.size());
+    EXPECT_EQ(-1, ret);
+}
+
+bool IsTestImg(const std::string &partition, const uint8_t */*data*/, size_t len)
+{
+    std::cout << "IsTestImg " << partition << " len " << len;
+    return true;
+}
+
+std::unique_ptr<FlashdWriter> GetTestWriter()
+{
+    return std::make_unique<FlashdWriterRaw>();
+}
+
+HWTEST_F(FLashServiceUnitTest, FlashdRegisterWriter, TestSize.Level1)
+{
+    FlashdImageWriter::GetInstance().RegisterUserWriter(IsTestImg, GetTestWriter);
 }
 
 HWTEST_F(FLashServiceUnitTest, PartitionDoErase, TestSize.Level1)
