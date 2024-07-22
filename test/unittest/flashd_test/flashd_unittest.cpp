@@ -213,6 +213,8 @@ HWTEST_F(FLashServiceUnitTest, GetWriter, TestSize.Level1)
     partName = "test";
     writer = FlashdImageWriter::GetInstance().GetWriter(partName, buffer, bufferSize);
     EXPECT_NE(nullptr, writer);
+
+    int ret;
 }
 
 HWTEST_F(FLashServiceUnitTest, PartitionDoErase, TestSize.Level1)
