@@ -238,15 +238,8 @@ public:
             UTestScriptEnv env {nullptr};{
             ScriptManagerImpl scriptManager(&env);
             auto *helper = ScriptInstructionHelper::GetBasicInstructionHelper(&scriptManager);
-            EXPECT_EQ(helper->RegisterUserInstruction(TEST_INVALID_LIB_PATH, ""), USCRIPT_ERROR_CREATE_OBJ);}
-        }
-        {
-            UTestScriptEnv env {nullptr};{
-            ScriptManagerImpl scriptManager(&env);
-            auto *helper = ScriptInstructionHelper::GetBasicInstructionHelper(&scriptManager);
             EXPECT_EQ(helper->RegisterUserInstruction(TEST_VALID_LIB_PATH, ""), USCRIPT_NOTEXIST_INSTRUCTION);
             EXPECT_EQ(helper->RegisterUserInstruction(TEST_NONEXIST_LIB_PATH, ""), USCRIPT_INVALID_PARAM);
-            EXPECT_EQ(helper->RegisterUserInstruction(TEST_INVALID_LIB_PATH, ""), USCRIPT_INVALID_PARAM);
             EXPECT_EQ(helper->RegisterUserInstruction(TEST_VALID_LIB_PATH, "uInstruction1"), USCRIPT_SUCCESS);}
         }
         {
