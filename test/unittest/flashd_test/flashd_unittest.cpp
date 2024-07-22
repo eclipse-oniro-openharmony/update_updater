@@ -232,8 +232,11 @@ HWTEST_F(FLashServiceUnitTest, FlashdWriterRawWriter, TestSize.Level1)
     EXPECT_EQ(-1, ret);
 }
 
-bool IsTestImg(const std::string &partition, const uint8_t */*data*/, size_t len)
+bool IsTestImg(const std::string &partition, const uint8_t *data, size_t len)
 {
+    if (data == nullptr) {
+        return false;
+    }
     std::cout << "IsTestImg " << partition << " len " << len;
     return true;
 }
