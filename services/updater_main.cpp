@@ -208,9 +208,8 @@ static UpdaterStatus VerifyPackages(UpdaterParams &upParams)
     if (VerifySpecialPkgs(upParams) != PKG_SUCCESS) {
         return UPDATE_CORRUPT;
     }
-    ProgressSmoothHandler(UPDATER_UI_INSTANCE.GetCurrentPercent() * FULL_PERCENT_PROGRESS,
-        UPDATER_UI_INSTANCE.GetCurrentPercent() * FULL_PERCENT_PROGRESS +
-        static_cast<int>(VERIFY_PERCENT * FULL_PERCENT_PROGRESS));
+    ProgressSmoothHandler(UPDATER_UI_INSTANCE.GetCurrentPercent(),
+        UPDATER_UI_INSTANCE.GetCurrentPercent() + static_cast<int>(VERIFY_PERCENT * FULL_PERCENT_PROGRESS));
     LOG(INFO) << "Verify packages successfull...";
     return UPDATE_SUCCESS;
 }
