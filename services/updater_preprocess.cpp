@@ -30,6 +30,11 @@ extern "C" __attribute__((constructor)) void AuthHelper(void)
     PreProcess::GetInstance().AuthHelper(UpdateAuth);
 }
 
+extern "C" __attribute__((constructor)) void ClearHelper(void)
+{
+    PreProcess::GetInstance().CleaerHelper(UpdateClear);
+}
+
 void PreProcess::RegisterHelper(PreProcessFunc ptr)
 {
     helper_ = std::move(ptr);
@@ -38,6 +43,11 @@ void PreProcess::RegisterHelper(PreProcessFunc ptr)
 void PreProcess::AuthHelper(AuthFunc ptr)
 {
     authHelper_ = std::move(ptr);
+}
+
+void PreProcess::ClearHelper(ClearFunc ptr)
+{
+    clearHelper_ = std::move(ptr);
 }
 
 PreProcess &PreProcess::GetInstance()
@@ -58,6 +68,11 @@ int32_t PreProcess::DoUpdatePreProcess(UpdaterParams &upParams, PkgManager::PkgM
 int32_t PreProcess::DoUpdateAuth(std::string path)
 {
     return authHelper_(path);
+}
+
+int32_t PreProcess::DoUpdateClear(void)
+{
+    return clearHelper_();
 }
 
 int CheckVersion(PkgManager::PkgManagerPtr pkgManager, PackagesInfoPtr pkginfomanager)
@@ -132,6 +147,11 @@ int32_t UpdatePreProcess(UpdaterParams &upParams, PkgManager::PkgManagerPtr pkgM
 }
 
 int32_t UpdateAuth(std::string &path)
+{
+    return 0;
+}
+
+int32_t UpdateClear(void)
 {
     return 0;
 }

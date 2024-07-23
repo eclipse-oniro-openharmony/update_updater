@@ -51,6 +51,7 @@ public:
 
     void Sleep(int ms) const;
     void SaveScreen() const;
+    float GetCurrentPercent(void);
 private:
     std::pair<bool, StrategyMap::const_iterator> CheckMode() const;
     void SetLogoVisible(bool isVisible) const;
