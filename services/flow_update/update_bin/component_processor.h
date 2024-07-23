@@ -23,7 +23,7 @@
 #include <unistd.h>
 #include "applypatch/data_writer.h"
 #include "applypatch/update_progress.h"
-#include "macros.h"
+#include "macros_updater.h"
 #include "pkg_manager.h"
 #include "script_instruction.h"
 #include "script_manager.h"

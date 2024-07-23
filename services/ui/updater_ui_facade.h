@@ -16,7 +16,7 @@
 #ifndef UPDATER_UI_FACADE_H
 #define UPDATER_UI_FACADE_H
 
-#include "macros.h"
+#include "macros_updater.h"
 #include "strategy/ui_strategy.h"
 #include "updater_ui.h"
 

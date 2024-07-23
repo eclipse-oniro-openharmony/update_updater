@@ -18,7 +18,7 @@
 
 #include "component/component_factory.h"
 #include "json_visitor.h"
-#include "macros.h"
+#include "macros_updater.h"
 #include "traits_util.h"
 
 namespace Updater {

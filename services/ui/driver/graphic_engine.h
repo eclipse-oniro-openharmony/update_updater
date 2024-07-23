@@ -20,7 +20,7 @@
 #include <mutex>
 #include <thread>
 #include "engines/gfx/soft_engine.h"
-#include "macros.h"
+#include "macros_updater.h"
 #include "surface_dev.h"
 
 namespace Updater {

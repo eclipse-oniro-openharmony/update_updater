@@ -19,7 +19,7 @@
 #include <linux/input.h>
 #include <string>
 #include "input_manager.h"
-#include "macros.h"
+#include "macros_updater.h"
 #include "dock/key_input_device.h"
 #include "events/key_event.h"
 

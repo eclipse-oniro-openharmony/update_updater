@@ -16,7 +16,7 @@
 #define UPDATE_BIN_PROCESS_H
 
 #include <string>
-#include "macros.h"
+#include "macros_updater.h"
 #include "component_processor.h"
 #include "package/pkg_manager.h"
 #include "script_instruction.h"

@@ -15,7 +15,7 @@
 #ifndef UPDATER_PREPROCESS_H
 #define UPDATER_PREPROCESS_H
 
-#include "macros.h"
+#include "macros_updater.h"
 #include "pkg_manager.h"
 #include "package/packages_info.h"
 #include "updater/updater.h"

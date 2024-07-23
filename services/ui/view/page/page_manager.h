@@ -21,7 +21,7 @@
 #include <string_view>
 #include <vector>
 #include "base_page.h"
-#include "macros.h"
+#include "macros_updater.h"
 #include "page.h"
 #include "updater_ui.h"
 #include "view_api.h"

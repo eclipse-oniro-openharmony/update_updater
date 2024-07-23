@@ -19,7 +19,7 @@
 #include <memory>
 #include <string>
 #include <openssl/x509.h>
-#include "macros.h"
+#include "macros_updater.h"
 
 namespace Hpackage {
 struct CertInfo {

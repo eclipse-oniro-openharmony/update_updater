@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef MACRO_H
-#define MACRO_H
+#ifndef MACRO_UPDATER_H
+#define MACRO_UPDATER_H
 
 #define DISALLOW_COPY_MOVE_ASSIGN(ClassName)            \
     ClassName &operator = (const ClassName &) = delete; \

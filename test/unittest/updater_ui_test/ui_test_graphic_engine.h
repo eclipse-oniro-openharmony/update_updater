@@ -17,7 +17,7 @@
 #define UI_TEST_COMMON_H
 
 #include "engines/gfx/soft_engine.h"
-#include "macros.h"
+#include "macros_updater.h"
 
 class TestGraphicEngine : public OHOS::SoftEngine {
     DISALLOW_COPY_MOVE(TestGraphicEngine);

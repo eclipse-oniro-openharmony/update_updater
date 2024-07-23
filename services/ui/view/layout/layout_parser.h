@@ -16,7 +16,7 @@
 #ifndef LAYOUT_PARSER_H
 #define LAYOUT_PARSER_H
 
-#include "macros.h"
+#include "macros_updater.h"
 #include "updater_ui_traits.h"
 
 namespace Updater {

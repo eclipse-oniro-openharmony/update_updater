@@ -21,7 +21,7 @@
 #include <unistd.h>
 
 #include "applypatch/data_writer.h"
-#include "macros.h"
+#include "macros_updater.h"
 
 namespace Flashd {
 using namespace Updater;

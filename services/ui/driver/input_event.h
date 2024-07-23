@@ -18,7 +18,7 @@
 #include "common/input_device_manager.h"
 #include "dock/pointer_input_device.h"
 #include "input_manager.h"
-#include "macros.h"
+#include "macros_updater.h"
 #include <unordered_set>
 #include "pointers_input_device.h"
 

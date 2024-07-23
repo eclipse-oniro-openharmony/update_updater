@@ -28,7 +28,7 @@
 
 #include "cJSON.h"
 #include "log/log.h"
-#include "macros.h"
+#include "macros_updater.h"
 #include "traits_util.h"
 
 namespace Updater {
