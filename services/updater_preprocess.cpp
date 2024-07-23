@@ -32,7 +32,7 @@ extern "C" __attribute__((constructor)) void AuthHelper(void)
 
 extern "C" __attribute__((constructor)) void ClearHelper(void)
 {
-    PreProcess::GetInstance().CleaerHelper(UpdateClear);
+    PreProcess::GetInstance().ClearHelper(UpdateClear);
 }
 
 void PreProcess::RegisterHelper(PreProcessFunc ptr)
