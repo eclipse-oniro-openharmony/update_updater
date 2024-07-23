@@ -460,7 +460,7 @@ UpdaterStatus DoUpdatePackages(UpdaterParams &upParams)
     }
     for (unsigned int i = 0; i < upParams.updatePackage.size(); i++) {
         LOG(INFO) << "package " << i << ":" << upParams.updatePackage[i] <<
-            " precent:" << upParams.currentPercentage;
+            " percent:" << upParams.currentPercentage;
     }
     if (upParams.callbackProgress == nullptr) {
         LOG(ERROR) << "CallbackProgress is nullptr";
