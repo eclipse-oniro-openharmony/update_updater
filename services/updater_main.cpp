@@ -310,8 +310,9 @@ static UpdaterStatus CalcProgress(const UpdaterParams &upParams,
     UPDATER_INIT_RECORD;
     int64_t allPkgSize = 0;
     std::vector<int64_t> everyPkgSize;
+    double startPosition = UPDATER_UI_INSTANCE.GetCurrentPercent() / FULL_PERCENT;
     if (upParams.pkgLocation == upParams.updatePackage.size()) {
-        updateStartPosition = VERIFY_PERCENT;
+        updateStartPosition = startPosition;
         return UPDATE_SUCCESS;
     }
     for (const auto &path : upParams.updatePackage) {
@@ -328,7 +329,7 @@ static UpdaterStatus CalcProgress(const UpdaterParams &upParams,
             LOG(INFO) << "pkg " << path << " size is:" << st.st_size;
         }
     }
-    pkgStartPosition.push_back(VERIFY_PERCENT);
+    pkgStartPosition.push_back(startPosition);
     if (allPkgSize == 0) {
         LOG(ERROR) << "All packages's size is 0.";
         UPDATER_LAST_WORD(UPDATE_ERROR);
@@ -337,7 +338,7 @@ static UpdaterStatus CalcProgress(const UpdaterParams &upParams,
     int64_t startSize = 0;
     for (auto size : everyPkgSize) {
         startSize += size;
-        float percent = static_cast<double>(startSize) / static_cast<double>(allPkgSize) + VERIFY_PERCENT;
+        float percent = static_cast<double>(startSize) / static_cast<double>(allPkgSize) + startPosition;
         percent = (percent > 1.0) ? 1.0 : percent; // 1.0 : 100%
         LOG(INFO) << "percent is:" << percent;
         pkgStartPosition.push_back(percent);
