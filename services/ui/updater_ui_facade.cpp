@@ -22,6 +22,9 @@
 #include "updater_ui_tools.h"
 
 namespace Updater {
+constexpr int FULL_PERCENT_PROGRESS = 100;
+static float g_currentPercent = 0.0;
+
 UpdaterUiFacade::UpdaterUiFacade()
     : strategies_ {UpdaterUiConfig::GetStrategy()}, pgMgr_ {PageManager::GetInstance()}, mode_ {""}
 {
@@ -86,9 +89,14 @@ void UpdaterUiFacade::ShowUpdInfo(const std::string &tag, bool isClear) const
     }
 }
 
+float UpdaterUiFacade::GetCurrentPercent(void)
+{
+    return g_currentPercent;
+}
+
 void UpdaterUiFacade::ShowProgress(float value) const
 {
-    if (!CheckMode().first) {
+    if (!CheckMode().first || (value > FULL_PERCENT_PROGRESS)) {
         return;
     }
     static float lastValue = 0.0;
@@ -97,6 +105,7 @@ void UpdaterUiFacade::ShowProgress(float value) const
         lastValue = value;
     }
     if (auto it = progressMap_.find(mode_); it->second != nullptr) {
+        g_currentPercent = value;
         it->second->ShowProgress(value);
         return;
     }
