@@ -51,13 +51,11 @@ constexpr const char *OTA_MODE = "update_package";
 constexpr const char *USB_MODE = "usb_update";
 constexpr const char *SDCARD_INTRAL_MODE = "sdcard_intral_update";
 constexpr const char *UPDATRE_SCRIPT_ZIP = "/etc/updater_script.zip";
-constexpr const char *FACTORY_INTERNAL_MODE = "factory_internal_update";
 
 // sd update ext mode
 constexpr const char *SDCARD_NORMAL_UPDATE = "sdUpdate";
 constexpr const char *SDCARD_UPDATE_FROM_DEV = "sdUpdateFromDev";
 constexpr const char *SDCARD_MAINIMG = "mainUpdate";
-constexpr const char *SDCARD_FACTORY_INTERNAL_MODE = "FactoryInternalUpdate";
 
 #ifndef UPDATER_UT
 constexpr const char *SDCARD_CARD_PATH = "/sdcard/updater";
