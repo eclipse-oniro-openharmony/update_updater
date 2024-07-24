@@ -17,6 +17,7 @@
 #include <cctype>
 #include <cstdio>
 #include <cstring>
+#include <fcntl.h>
 #include <functional>
 #include <iterator>
 #include <unistd.h>
@@ -24,12 +25,14 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include "dump.h"
+#include "inttypes.h"
 #include "pkg_gzipfile.h"
 #include "pkg_lz4file.h"
 #include "pkg_manager.h"
 #include "pkg_upgradefile.h"
 #include "pkg_verify_util.h"
 #include "pkg_zipfile.h"
+#include "scope_guard.h"
 #include "securec.h"
 #include "updater/updater_const.h"
 #include "utils.h"
@@ -962,6 +965,7 @@ void PkgManagerImpl::PostDecodeProgress(int type, size_t writeDataLen, const voi
     }
 }
 
+<<<<<<< Updated upstream
 int32_t PkgManagerImpl::VerifyAccPackage(const std::string &packagePath, const std::string &keyPath)
 {
     PkgStreamPtr pkgStream = nullptr;
@@ -984,6 +988,49 @@ int32_t PkgManagerImpl::VerifyAccPackage(const std::string &packagePath, const s
     }
 
     ClosePkgStream(pkgStream);
+=======
+int32_t PkgManagerImpl::VerifyOtaPackage(const std::string &devPath, uint64_t offset, size_t size)
+{
+    constexpr size_t pageSize = 4096;
+    size_t offsetAligned = (offset / pageSize) * pageSize;
+    if (size == 0 || size + offset < offsetAligned || offset < offsetAligned) {
+        PKG_LOGE("invalid param %zu %" PRIu64 " %zu", size, offset, offsetAligned);
+        return PKG_INVALID_PARAM;
+    }
+    int fd = open(devPath.c_str(), O_RDONLY | O_LARGEFILE);
+    if (fd < 0) {
+        PKG_LOGE("open %s fail, %s", devPath.c_str(), strerror(errno));
+        return PKG_INVALID_FILE;
+    }
+    ON_SCOPE_EXIT(closePath) {
+        close(fd);
+    };
+    uint8_t *pMap = static_cast<uint8_t *>(mmap64(nullptr, size + offset - offsetAligned, PROT_READ, MAP_PRIVATE,
+        fd, offsetAligned));
+    if (pMap == MAP_FAILED) {
+        PKG_LOGE("mmap64 %s fail, %s %zu %" PRIu64, devPath.c_str(), strerror(errno), size, offset);
+        return PKG_NONE_MEMORY;
+    }
+    ON_SCOPE_EXIT(unmapMem) {
+        munmap(pMap, size + offset - offsetAligned);
+    };
+    PkgBuffer buffer(pMap + (offset - offsetAligned), size);
+    PkgStreamPtr pkgStream = nullptr;
+    int32_t ret = CreatePkgStream(pkgStream, devPath, buffer);
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("create package stream fail %s %s", devPath.c_str(), strerror(errno));
+        return ret;
+    }
+    ON_SCOPE_EXIT(closeStream) {
+        ClosePkgStream(pkgStream);
+    };
+    PkgVerifyUtil verifyUtil {};
+    ret = verifyUtil.VerifyPackageSigne(pkgStream);
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("verify pkcs7 signature failed.");
+        return ret;
+    }
+>>>>>>> Stashed changes
     return PKG_SUCCESS;
 }
 
