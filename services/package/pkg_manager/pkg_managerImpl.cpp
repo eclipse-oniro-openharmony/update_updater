@@ -965,7 +965,6 @@ void PkgManagerImpl::PostDecodeProgress(int type, size_t writeDataLen, const voi
     }
 }
 
-<<<<<<< Updated upstream
 int32_t PkgManagerImpl::VerifyAccPackage(const std::string &packagePath, const std::string &keyPath)
 {
     PkgStreamPtr pkgStream = nullptr;
@@ -988,7 +987,9 @@ int32_t PkgManagerImpl::VerifyAccPackage(const std::string &packagePath, const s
     }
 
     ClosePkgStream(pkgStream);
-=======
+    return PKG_SUCCESS;
+}
+
 int32_t PkgManagerImpl::VerifyOtaPackage(const std::string &devPath, uint64_t offset, size_t size)
 {
     constexpr size_t pageSize = 4096;
@@ -1030,7 +1031,6 @@ int32_t PkgManagerImpl::VerifyOtaPackage(const std::string &devPath, uint64_t of
         PKG_LOGE("verify pkcs7 signature failed.");
         return ret;
     }
->>>>>>> Stashed changes
     return PKG_SUCCESS;
 }
 

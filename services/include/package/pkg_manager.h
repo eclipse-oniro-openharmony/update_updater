@@ -258,11 +258,9 @@ public:
     virtual int32_t LoadPackage(const std::string &packagePath, const std::string &keyPath,
         std::vector<std::string> &fileIds) = 0;
 
-<<<<<<< Updated upstream
     virtual int32_t VerifyAccPackage(const std::string &packagePath, const std::string &keyPath) = 0;
-=======
+
     virtual int32_t VerifyOtaPackage(const std::string &devPath, uint64_t offset, size_t size) = 0;
->>>>>>> Stashed changes
 
     virtual int32_t VerifyOtaPackage(const std::string &packagePath) = 0;
 
