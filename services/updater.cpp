@@ -259,6 +259,7 @@ UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, Upda
 
     if (SetupPartitions(updateMode != SDCARD_UPDATE ||
         Utils::CheckUpdateMode(Updater::SDCARD_INTRAL_MODE) ||
+        Utils::CheckUpdateMode(Updater::FACTORY_INTERNAL_MODE) ||
         upParams.sdExtMode == SDCARD_UPDATE_FROM_DEV) != 0) {
         UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_SETPART_FAIL), true);
         UPDATER_LAST_WORD(UPDATE_ERROR);
