@@ -15,6 +15,7 @@
 #include "pkg_manager_impl.h"
 #include <algorithm>
 #include <cctype>
+#include <cinttypes>
 #include <cstdio>
 #include <cstring>
 #include <fcntl.h>
@@ -25,7 +26,6 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include "dump.h"
-#include "inttypes.h"
 #include "pkg_gzipfile.h"
 #include "pkg_lz4file.h"
 #include "pkg_manager.h"
