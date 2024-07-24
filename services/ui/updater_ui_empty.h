@@ -55,6 +55,10 @@ public:
     }
     void Sleep(int ms) const {}
     void SaveScreen() const {}
+    float GetCurrentPercent()
+    {
+        return 0;
+    }
 };
 } // namespace Updater
 #endif

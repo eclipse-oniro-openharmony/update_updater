@@ -78,6 +78,7 @@ constexpr struct option OPTIONS[] = {
     { nullptr, 0, nullptr, 0 },
 };
 constexpr float VERIFY_PERCENT = 0.05;
+constexpr double FULL_PERCENT = 100.00;
 
 int FactoryReset(FactoryResetMode mode, const std::string &path)
 {
@@ -146,6 +147,9 @@ static UpdaterStatus UpdatePreCheck(UpdaterParams &upParams, const std::string p
         UPDATER_LAST_WORD(UPDATE_ERROR);
         return UPDATE_ERROR;
     }
+    if (PreProcess::GetInstance().DoUpdateClear() != 0) {
+        LOG(ERROR) << "DoUpdateClear Fail!";
+    }
     PkgManager::ReleasePackageInstance(pkgManager);
     return UPDATE_SUCCESS;
 }
@@ -204,7 +208,8 @@ static UpdaterStatus VerifyPackages(UpdaterParams &upParams)
     if (VerifySpecialPkgs(upParams) != PKG_SUCCESS) {
         return UPDATE_CORRUPT;
     }
-    ProgressSmoothHandler(0, static_cast<int>(VERIFY_PERCENT * FULL_PERCENT_PROGRESS));
+    ProgressSmoothHandler(UPDATER_UI_INSTANCE.GetCurrentPercent(),
+        UPDATER_UI_INSTANCE.GetCurrentPercent() + static_cast<int>(VERIFY_PERCENT * FULL_PERCENT_PROGRESS));
     LOG(INFO) << "Verify packages successfull...";
     return UPDATE_SUCCESS;
 }
@@ -412,9 +417,10 @@ static UpdaterStatus DoInstallPackages(UpdaterParams &upParams, std::vector<doub
             return UPDATE_ERROR;
         }
         auto startTime = std::chrono::system_clock::now();
-        upParams.currentPercentage = pkgStartPosition[upParams.pkgLocation + 1] -
-            pkgStartPosition[upParams.pkgLocation];
-        upParams.initialProgress = pkgStartPosition[upParams.pkgLocation];
+        upParams.initialProgress = ((UPDATER_UI_INSTANCE.GetCurrentPercent() / FULL_PERCENT) >
+            pkgStartPosition[upParams.pkgLocation]) ?
+            (UPDATER_UI_INSTANCE.GetCurrentPercent() / FULL_PERCENT) : pkgStartPosition[upParams.pkgLocation];
+        upParams.currentPercentage = pkgStartPosition[upParams.pkgLocation + 1] - upParams.initialProgress;
         LOG(INFO) << "InstallUpdaterPackage pkg is " << upParams.updatePackage[upParams.pkgLocation] <<
             " percent:" << upParams.initialProgress << "~" << pkgStartPosition[upParams.pkgLocation + 1];
 
@@ -453,13 +459,15 @@ UpdaterStatus DoUpdatePackages(UpdaterParams &upParams)
     }
     for (unsigned int i = 0; i < upParams.updatePackage.size(); i++) {
         LOG(INFO) << "package " << i << ":" << upParams.updatePackage[i] <<
-            " precent:" << upParams.currentPercentage;
+            " percent:" << upParams.currentPercentage;
     }
     if (upParams.callbackProgress == nullptr) {
         LOG(ERROR) << "CallbackProgress is nullptr";
         return UPDATE_CORRUPT;
     }
-    upParams.callbackProgress(updateStartPosition * FULL_PERCENT_PROGRESS);
+    float value = (UPDATER_UI_INSTANCE.GetCurrentPercent() > (updateStartPosition * FULL_PERCENT_PROGRESS)) ?
+        UPDATER_UI_INSTANCE.GetCurrentPercent() : (updateStartPosition * FULL_PERCENT_PROGRESS);
+    upParams.callbackProgress(value);
     status = DoInstallPackages(upParams, pkgStartPosition);
     if (status != UPDATE_SUCCESS) {
         UPDATER_LAST_WORD(status);
