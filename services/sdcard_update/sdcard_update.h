@@ -29,7 +29,6 @@ extern "C" {
 #endif
 UpdaterStatus GetSdcardPkgsPath(UpdaterParams &upParams);
 UpdaterStatus GetSdcardPkgsFromDev(UpdaterParams &upParams);
-UpdaterStatus GetFactoryInternalPkgs(UpdaterParams &upParams);
 #ifdef __cplusplus
 #if __cplusplus
 }
