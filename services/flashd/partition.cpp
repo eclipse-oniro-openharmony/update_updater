@@ -50,13 +50,6 @@ int Partition::DoErase() const
 #ifndef UPDATER_UT
     uint64_t size = GetBlockDeviceSize(fd);
     uint64_t range[2] = { 0, size };
-    if (ioctl(fd, BLKSECDISCARD, &range) >= 0) {
-        close(fd);
-        return 0;
-    }
-
-    range[0] = 0;
-    range[1] = size;
     if (ioctl(fd, BLKDISCARD, &range) < 0) {
         close(fd);
         FLASHD_LOGE("BLKDISCARD fail");
