@@ -20,6 +20,7 @@
 #include "common/flashd_define.h"
 #include "daemon/format_commander.h"
 #include "daemon/commander_factory.h"
+#include "daemon/daemon_updater.h"
 #include "daemon/flashd_utils.h"
 #include "partition.h"
 #include "fs_manager/mount.h"
@@ -31,6 +32,7 @@
 using namespace std;
 using namespace Flashd;
 using namespace testing::ext;
+using namespace Hdc;
 
 namespace {
 
@@ -455,5 +457,49 @@ HWTEST_F(FLashServiceUnitTest, CreateCommanderTest, TestSize.Level1)
     cmd = Hdc::CMDSTR_ERASE_PARTITION;
     commander = Flashd::CommanderFactory::GetInstance().CreateCommander(cmd, callbackFail);
     EXPECT_NE(nullptr, commander);
+}
+
+HWTEST_F(FLashServiceUnitTest, CreateCommanderTest, TestSize.Level1)
+{
+    bool isLocked = true;
+    if (auto ret = Updater::UpdateHdiClient::GetInstance().GetLockStatus(isLocked); ret != 0) {
+        std::cout << "get lock failed";
+    }
+    EXPECT_EQ(isLocked, false);
+}
+
+HWTEST_F(FLashServiceUnitTest, CommandDispatchrTest, TestSize.Level1)
+{
+    HTaskInfo hTaskInfo = nullptr;
+    std::shared_ptr<TaskInformation> task = std::make_shared<TaskInformation>();
+    if (task == nullptr) {
+        return;
+    }
+    hTaskInfo = task.get();
+    hTaskInfo->channelId = 1;
+    hTaskInfo->sessionId = 0;
+    hTaskInfo->runLoop = uv_default_loop();
+    hTaskInfo->serverOrDaemon = 0;
+    hTaskInfo->ownerSessionClass = nullptr;
+    std::string testString = "x";
+    std::unique_ptr<DaemonUpdater> testDaemonUpdater = std::make_unique<DaemonUpdater>(hTaskInfo);
+    bool ret = testDaemonUpdater->CommandDispatch(CMD_UPDATER_UPDATE_INIT,
+        reinterpret_cast<uint8_t *>(const_cast<char*>(testString.c_str())), 1);
+    EXPECT_EQ(ret, false);
+    ret = testDaemonUpdater->CommandDispatch(CMD_UPDATER_DATA,
+        reinterpret_cast<uint8_t *>(const_cast<char*>(testString.c_str())), 1);
+    EXPECT_EQ(ret, true);
+    ret = testDaemonUpdater->CommandDispatch(CMD_UPDATER_CHECK,
+        reinterpret_cast<uint8_t *>(const_cast<char*>(testString.c_str())), 100); // 100 : test number
+    EXPECT_EQ(ret, true);
+    ret = testDaemonUpdater->CommandDispatch(CMD_UPDATER_DATA,
+        reinterpret_cast<uint8_t *>(const_cast<char*>(testString.c_str())), 1);
+    EXPECT_EQ(ret, true);
+    ret = testDaemonUpdater->CommandDispatch(CMD_UPDATER_ERASE,
+        reinterpret_cast<uint8_t *>(const_cast<char*>(testString.c_str())), 1);
+    EXPECT_EQ(ret, true);
+    ret = testDaemonUpdater->CommandDispatch(CMD_UPDATER_FORMAT,
+        reinterpret_cast<uint8_t *>(const_cast<char*>(testString.c_str())), 1);
+    EXPECT_EQ(ret, true);
 }
 } // namespace
