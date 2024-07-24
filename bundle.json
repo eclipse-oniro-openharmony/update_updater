@@ -204,11 +204,11 @@
                     }
                 },
                 {
-		    "name": "//base/update/updater/utils:libutils_common",
+                    "name": "//base/update/updater/utils:libutils_common",
                     "header": {
-			"header_files": [],
-			"header_base": "//base/update/updater/utils/include"
-		    }
+                        "header_files": [],
+                        "header_base": "//base/update/updater/utils/include"
+                    }
                 },
                 {
                     "name": "//base/update/updater/utils:libutils_json",

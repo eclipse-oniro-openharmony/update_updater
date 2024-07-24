@@ -84,7 +84,7 @@ bool DoMountSdcard(std::vector<std::string> &sdcardStr, std::string &mountPoint)
         if (mountSuccess) {
             break;
         }
-        sleep(1); // sleep 1 second to wait for sd card recongnition
+        sleep(1); // sleep 1 second to wait for sd card recognition
     }
     return mountSuccess;
 }
