@@ -47,8 +47,6 @@ group("unittest") {
     "test/unittest/flow_update/update_bin:bin_flow_update_test",
     "test/unittest/package:package_unittest",
     "test/unittest/script:script_unittest",
-    "test/unittest/script:user_instruction",
-    "test/unittest/script:user_instruction_invalid",
     "test/unittest/updater_binary:binary_unittest",
     "test/unittest/utils:utils_test",
   ]
