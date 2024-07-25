@@ -159,7 +159,7 @@ __attribute__((weak)) int32_t VerifySpecialPkgs([[maybe_unused]]UpdaterParams &u
     return PKG_SUCCESS;
 }
 
-__attribute__((weak)) void UpdaterVerifyFailEntry(int32_t verifyret)
+__attribute__((weak)) void UpdaterVerifyFailEntry(bool verifyret)
 {
     LOG(INFO) << "pre verify package info process";
     return;
@@ -194,7 +194,7 @@ static UpdaterStatus VerifyPackages(UpdaterParams &upParams)
         }
 
         if (verifyret != UPDATE_SUCCESS) {
-            UpdaterVerifyFailEntry(verifyret);
+            UpdaterVerifyFailEntry((verifyret == PKG_INVALID_DIGEST) && (upParams.updateMode == HOTA_UPDATE));
             upParams.pkgLocation = i;
             UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_VERIFYPKGFAIL), true);
             auto endTime = std::chrono::system_clock::now();
