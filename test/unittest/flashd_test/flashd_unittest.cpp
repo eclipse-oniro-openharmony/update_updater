@@ -459,7 +459,7 @@ HWTEST_F(FLashServiceUnitTest, CreateCommanderTest, TestSize.Level1)
     EXPECT_NE(nullptr, commander);
 }
 
-HWTEST_F(FLashServiceUnitTest, CreateCommanderTest, TestSize.Level1)
+HWTEST_F(FLashServiceUnitTest, GetLockStatusTest, TestSize.Level1)
 {
     bool isLocked = true;
     if (auto ret = Updater::UpdateHdiClient::GetInstance().GetLockStatus(isLocked); ret != 0) {
