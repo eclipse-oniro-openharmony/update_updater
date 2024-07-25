@@ -22,6 +22,7 @@
 #include "daemon/commander_factory.h"
 #include "daemon/daemon_updater.h"
 #include "daemon/flashd_utils.h"
+#include "hdi/client/update_hdi_client.h"
 #include "partition.h"
 #include "fs_manager/mount.h"
 #include "log/log.h"
