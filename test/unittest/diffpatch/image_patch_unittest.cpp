@@ -119,5 +119,5 @@ HWTEST_F(CompressedImagePatchUnitTest, TestApplyImagePatch, TestSize.Level0)
     size_t offset = 0;
     int32_t ret = imagePatch->ApplyImagePatch(patchParam, offset);
     EXPECT_EQ(ret, -1);
-+}
+}
 }
