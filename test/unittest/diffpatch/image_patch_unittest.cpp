@@ -106,4 +106,18 @@ HWTEST_F(CompressedImagePatchUnitTest, TestDecompressData, TestSize.Level0)
     EXPECT_EQ(ret, -1);
     PkgManager::ReleasePackageInstance(pkgManager);
 }
+
+HWTEST_F(CompressedImagePatchUnitTest, TestApplyImagePatch, TestSize.Level0)
+{
+    const std::vector<uint8_t> bonusData;
+    PatchParam patchParam = {
+        reinterpret_cast<u_char*>(const_cast<char*>("xxx")), sizeof("xxx"),
+        reinterpret_cast<u_char*>(const_cast<char*>("xxx")), sizeof("xxx")
+    };
+    UpdatePatchWriterPtr writer { nullptr };
+    std::unique_ptr<ImagePatch> imagePatch = std::make_unique<ZipImagePatch>(writer, bonusData);
+    size_t offset = 0;
+    int32_t ret = imagePatch->ApplyImagePatch(patchParam, offset);
+    EXPECT_EQ(ret, -1);
+}
 }
