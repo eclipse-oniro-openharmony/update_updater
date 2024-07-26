@@ -46,6 +46,7 @@ public:
 
 HWTEST_F(UpdaterUiGraphicEngineUnitTest, test_ui_graphic_engine_test01, TestSize.Level0)
 {
+    UiRotation::GetInstance().SetDegree(UI_ROTATION_DEGREE::UI_ROTATION_0);
     GraphicEngine::GetInstance().Init(WHITE_BGCOLOR, OHOS::ColorMode::ARGB8888, FONT_PATH);
     uint16_t height = OHOS::Screen::GetInstance().GetHeight();
     uint16_t width = OHOS::Screen::GetInstance().GetWidth();
