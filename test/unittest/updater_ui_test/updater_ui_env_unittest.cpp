@@ -15,10 +15,6 @@
 
 #include "gtest/gtest.h"
 #include "updater_ui_env.h"
-#include
-#include
-#include
-#include
 #include <unistd.h>
 #include "callback_manager.h"
 #include "common/graphic_startup.h"
