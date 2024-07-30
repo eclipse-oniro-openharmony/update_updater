@@ -534,8 +534,8 @@ static UpdaterStatus PreSdcardUpdatePackages(UpdaterParams &upParams)
     }
 #ifdef UPDATER_USE_PTABLE
     if (!PtablePreProcess::GetInstance().DoPtableProcess(upParams)) {
-    LOG(ERROR) << "DoPtableProcess failed";
-    return UPDATE_ERROR;
+        LOG(ERROR) << "DoPtableProcess failed";
+        return UPDATE_ERROR;
     }
 #endif
     return UPDATE_SUCCESS;
@@ -554,8 +554,8 @@ UpdaterStatus UpdaterFromSdcard(UpdaterParams &upParams)
     upParams.callbackProgress = [] (float value) { UPDATER_UI_INSTANCE.ShowProgress(value); };
     SetMessageToMisc(upParams.miscCmd, 0, "sdcard_update");
     if (CheckSdcardPkgs(upParams) != UPDATE_SUCCESS) {
-    LOG(ERROR) << "can not find sdcard packages";
-    return UPDATE_ERROR;
+        LOG(ERROR) << "can not find sdcard packages";
+        return UPDATE_ERROR;
     }
     UpdaterStatus status = PreSdcardUpdatePackages(upParams);
     if (status == UPDATE_SUCCESS) {
