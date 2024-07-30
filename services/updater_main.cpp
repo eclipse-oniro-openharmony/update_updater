@@ -517,9 +517,10 @@ static void PostUpdatePackages(UpdaterParams &upParams, bool updateResult)
     WriteDumpResult(writeBuffer, UPDATER_RESULT_FILE);
     DeleteInstallTimeFile();
 }
+
 static UpdaterStatus PreSdcardUpdatePackages(UpdaterParams &upParams)
 {
-    upParams.installTime.resize(upParams.updatePackage.size(), std::chrono::duration(0));
+    upParams.installTime.resize(upParams.updatePackage.size(), std::chrono::duration<double>(0));
     // verify packages first
     if (upParams.retryCount == 0 && !IsBatteryCapacitySufficient()) {
         UPDATER_UI_INSTANCE.ShowUpdInfo(TR(LOG_LOWPOWER));
@@ -531,12 +532,12 @@ static UpdaterStatus PreSdcardUpdatePackages(UpdaterParams &upParams)
     if (VerifyPackages(upParams) != UPDATE_SUCCESS) {
         return UPDATE_CORRUPT; // verify package failed must return UPDATE_CORRUPT, ux need it !!!
     }
-    #ifdef UPDATER_USE_PTABLE
+#ifdef UPDATER_USE_PTABLE
     if (!PtablePreProcess::GetInstance().DoPtableProcess(upParams)) {
     LOG(ERROR) << "DoPtableProcess failed";
     return UPDATE_ERROR;
     }
-    #endif
+#endif
     return UPDATE_SUCCESS;
 }
 
