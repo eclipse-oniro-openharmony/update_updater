@@ -499,11 +499,14 @@ static void PostUpdatePackages(UpdaterParams &upParams, bool updateResult)
 
     for (unsigned int i = 0; i < upParams.pkgLocation; i++) {
         time = DurationToString(upParams.installTime, i);
-        writeBuffer += upParams.updatePackage[i] + "|pass||install_time=" + time + "|\n";
+        writeBuffer += upParams.updatePackage.size() < i + 1 ? "" : upParams.updatePackage[i];
+        writeBuffer += "|pass||install_time=" + time + "|\n";
     }
     time = DurationToString(upParams.installTime, upParams.pkgLocation);
 
-    writeBuffer += upParams.updatePackage[upParams.pkgLocation] + "|" + buf + "|install_time=" + time + "|\n";
+    writeBuffer += upParams.updatePackage.size() < upParams.pkgLocation + 1 ? "" :
+        upParams.updatePackage[upParams.pkgLocation];
+    writeBuffer += "|" + buf + "|install_time=" + time + "|\n";
     for (unsigned int i = upParams.pkgLocation + 1; i < upParams.updatePackage.size(); i++) {
         writeBuffer += upParams.updatePackage[i] + "\n";
     }
@@ -513,6 +516,13 @@ static void PostUpdatePackages(UpdaterParams &upParams, bool updateResult)
     LOG(INFO) << "post over, writeBuffer = " << writeBuffer;
     WriteDumpResult(writeBuffer, UPDATER_RESULT_FILE);
     DeleteInstallTimeFile();
+}
+
+static void PostSdcardUpdatePackages(UpdaterParams &upParams, bool updateResult)
+{
+    if (Utils::CheckUpdateMode(Updater::SDCARD_INTRAL_MODE)) {
+        PostUpdatePackages(upParams, updateResult);
+    }
 }
 
 UpdaterStatus UpdaterFromSdcard(UpdaterParams &upParams)
@@ -548,7 +558,9 @@ UpdaterStatus UpdaterFromSdcard(UpdaterParams &upParams)
     STAGE(UPDATE_STAGE_BEGIN) << "UpdaterFromSdcard";
     LOG(INFO) << "UpdaterFromSdcard start, sdcard updaterPath : " << upParams.updatePackage[upParams.pkgLocation];
     UPDATER_UI_INSTANCE.ShowLog(TR(LOG_SDCARD_NOTMOVE));
-    return DoUpdatePackages(upParams);
+    UpdaterStatus status = DoUpdatePackages(upParams);
+    PostSdcardUpdatePackages(upParams, status == UPDATE_SUCCESS);
+    return status;
 }
 
 UpdaterStatus InstallUpdaterPackages(UpdaterParams &upParams)
