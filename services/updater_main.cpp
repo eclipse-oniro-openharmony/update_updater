@@ -517,6 +517,28 @@ static void PostUpdatePackages(UpdaterParams &upParams, bool updateResult)
     WriteDumpResult(writeBuffer, UPDATER_RESULT_FILE);
     DeleteInstallTimeFile();
 }
+static UpdaterStatus PreSdcardUpdatePackages(UpdaterParams &upParams)
+{
+    upParams.installTime.resize(upParams.updatePackage.size(), std::chrono::duration(0));
+    // verify packages first
+    if (upParams.retryCount == 0 && !IsBatteryCapacitySufficient()) {
+        UPDATER_UI_INSTANCE.ShowUpdInfo(TR(LOG_LOWPOWER));
+        UPDATER_UI_INSTANCE.Sleep(UI_SHOW_DURATION);
+        LOG(ERROR) << "Battery is not sufficient for install package.";
+        return UPDATE_SKIP;
+    }
+
+    if (VerifyPackages(upParams) != UPDATE_SUCCESS) {
+        return UPDATE_CORRUPT; // verify package failed must return UPDATE_CORRUPT, ux need it !!!
+    }
+    #ifdef UPDATER_USE_PTABLE
+    if (!PtablePreProcess::GetInstance().DoPtableProcess(upParams)) {
+    LOG(ERROR) << "DoPtableProcess failed";
+    return UPDATE_ERROR;
+    }
+    #endif
+    return UPDATE_SUCCESS;
+}
 
 static void PostSdcardUpdatePackages(UpdaterParams &upParams, bool updateResult)
 {
@@ -531,34 +553,19 @@ UpdaterStatus UpdaterFromSdcard(UpdaterParams &upParams)
     upParams.callbackProgress = [] (float value) { UPDATER_UI_INSTANCE.ShowProgress(value); };
     SetMessageToMisc(upParams.miscCmd, 0, "sdcard_update");
     if (CheckSdcardPkgs(upParams) != UPDATE_SUCCESS) {
-        LOG(ERROR) << "can not find sdcard packages";
-        return UPDATE_ERROR;
+    LOG(ERROR) << "can not find sdcard packages";
+    return UPDATE_ERROR;
     }
-    upParams.installTime.resize(upParams.updatePackage.size(), std::chrono::duration<double>(0));
-    // verify packages first
-    if (upParams.retryCount == 0 && !IsBatteryCapacitySufficient()) {
-        UPDATER_UI_INSTANCE.ShowUpdInfo(TR(LOG_LOWPOWER));
-        UPDATER_UI_INSTANCE.Sleep(UI_SHOW_DURATION);
-        LOG(ERROR) << "Battery is not sufficient for install package.";
-        return UPDATE_SKIP;
-    }
+    UpdaterStatus status = PreSdcardUpdatePackages(upParams);
+    if (status == UPDATE_SUCCESS) {
+        upParams.initialProgress += VERIFY_PERCENT;
+        upParams.currentPercentage -= VERIFY_PERCENT;
 
-    if (VerifyPackages(upParams) != UPDATE_SUCCESS) {
-        return UPDATE_CORRUPT; // verify package failed must return UPDATE_CORRUPT, ux need it !!!
+        STAGE(UPDATE_STAGE_BEGIN) << "UpdaterFromSdcard";
+        LOG(INFO) << "UpdaterFromSdcard start, sdcard updaterPath : " << upParams.updatePackage[upParams.pkgLocation];
+        UPDATER_UI_INSTANCE.ShowLog(TR(LOG_SDCARD_NOTMOVE));
+        status = DoUpdatePackages(upParams);
     }
-#ifdef UPDATER_USE_PTABLE
-    if (!PtablePreProcess::GetInstance().DoPtableProcess(upParams)) {
-        LOG(ERROR) << "DoPtableProcess failed";
-        return UPDATE_ERROR;
-    }
-#endif
-    upParams.initialProgress += VERIFY_PERCENT;
-    upParams.currentPercentage -= VERIFY_PERCENT;
-
-    STAGE(UPDATE_STAGE_BEGIN) << "UpdaterFromSdcard";
-    LOG(INFO) << "UpdaterFromSdcard start, sdcard updaterPath : " << upParams.updatePackage[upParams.pkgLocation];
-    UPDATER_UI_INSTANCE.ShowLog(TR(LOG_SDCARD_NOTMOVE));
-    UpdaterStatus status = DoUpdatePackages(upParams);
     PostSdcardUpdatePackages(upParams, status == UPDATE_SUCCESS);
     return status;
 }
