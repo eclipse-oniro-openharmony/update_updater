@@ -499,11 +499,14 @@ static void PostUpdatePackages(UpdaterParams &upParams, bool updateResult)
 
     for (unsigned int i = 0; i < upParams.pkgLocation; i++) {
         time = DurationToString(upParams.installTime, i);
-        writeBuffer += upParams.updatePackage[i] + "|pass||install_time=" + time + "|\n";
+        writeBuffer += upParams.updatePackage.size() < i + 1 ? "" : upParams.updatePackage[i];
+        writeBuffer += "|pass||install_time=" + time + "|\n";
     }
     time = DurationToString(upParams.installTime, upParams.pkgLocation);
 
-    writeBuffer += upParams.updatePackage[upParams.pkgLocation] + "|" + buf + "|install_time=" + time + "|\n";
+    writeBuffer += upParams.updatePackage.size() < upParams.pkgLocation + 1 ? "" :
+        upParams.updatePackage[upParams.pkgLocation];
+    writeBuffer += "|" + buf + "|install_time=" + time + "|\n";
     for (unsigned int i = upParams.pkgLocation + 1; i < upParams.updatePackage.size(); i++) {
         writeBuffer += upParams.updatePackage[i] + "\n";
     }
@@ -515,15 +518,8 @@ static void PostUpdatePackages(UpdaterParams &upParams, bool updateResult)
     DeleteInstallTimeFile();
 }
 
-UpdaterStatus UpdaterFromSdcard(UpdaterParams &upParams)
+static UpdaterStatus PreSdcardUpdatePackages(UpdaterParams &upParams)
 {
-    UPDATER_INIT_RECORD;
-    upParams.callbackProgress = [] (float value) { UPDATER_UI_INSTANCE.ShowProgress(value); };
-    SetMessageToMisc(upParams.miscCmd, 0, "sdcard_update");
-    if (CheckSdcardPkgs(upParams) != UPDATE_SUCCESS) {
-        LOG(ERROR) << "can not find sdcard packages";
-        return UPDATE_ERROR;
-    }
     upParams.installTime.resize(upParams.updatePackage.size(), std::chrono::duration<double>(0));
     // verify packages first
     if (upParams.retryCount == 0 && !IsBatteryCapacitySufficient()) {
@@ -542,13 +538,37 @@ UpdaterStatus UpdaterFromSdcard(UpdaterParams &upParams)
         return UPDATE_ERROR;
     }
 #endif
-    upParams.initialProgress += VERIFY_PERCENT;
-    upParams.currentPercentage -= VERIFY_PERCENT;
+    return UPDATE_SUCCESS;
+}
 
-    STAGE(UPDATE_STAGE_BEGIN) << "UpdaterFromSdcard";
-    LOG(INFO) << "UpdaterFromSdcard start, sdcard updaterPath : " << upParams.updatePackage[upParams.pkgLocation];
-    UPDATER_UI_INSTANCE.ShowLog(TR(LOG_SDCARD_NOTMOVE));
-    return DoUpdatePackages(upParams);
+static void PostSdcardUpdatePackages(UpdaterParams &upParams, bool updateResult)
+{
+    if (Utils::CheckUpdateMode(Updater::SDCARD_INTRAL_MODE)) {
+        PostUpdatePackages(upParams, updateResult);
+    }
+}
+
+UpdaterStatus UpdaterFromSdcard(UpdaterParams &upParams)
+{
+    UPDATER_INIT_RECORD;
+    upParams.callbackProgress = [] (float value) { UPDATER_UI_INSTANCE.ShowProgress(value); };
+    SetMessageToMisc(upParams.miscCmd, 0, "sdcard_update");
+    if (CheckSdcardPkgs(upParams) != UPDATE_SUCCESS) {
+        LOG(ERROR) << "can not find sdcard packages";
+        return UPDATE_ERROR;
+    }
+    UpdaterStatus status = PreSdcardUpdatePackages(upParams);
+    if (status == UPDATE_SUCCESS) {
+        upParams.initialProgress += VERIFY_PERCENT;
+        upParams.currentPercentage -= VERIFY_PERCENT;
+
+        STAGE(UPDATE_STAGE_BEGIN) << "UpdaterFromSdcard";
+        LOG(INFO) << "UpdaterFromSdcard start, sdcard updaterPath : " << upParams.updatePackage[upParams.pkgLocation];
+        UPDATER_UI_INSTANCE.ShowLog(TR(LOG_SDCARD_NOTMOVE));
+        status = DoUpdatePackages(upParams);
+    }
+    PostSdcardUpdatePackages(upParams, status == UPDATE_SUCCESS);
+    return status;
 }
 
 UpdaterStatus InstallUpdaterPackages(UpdaterParams &upParams)
