@@ -26,14 +26,12 @@
 #include "script_utils.h"
 #include "unittest_comm.h"
 #include "update_processor.h"
-#include "utils.h"
 
 using namespace std;
 using namespace Hpackage;
 using namespace Uscript;
 using namespace Updater;
 using namespace testing::ext;
-using namespace Updater::Utils;
 
 namespace {
 class UpdaterBinaryUnittest : public ::testing::Test {
