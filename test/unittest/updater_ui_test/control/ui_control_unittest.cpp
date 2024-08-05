@@ -48,6 +48,10 @@ HWTEST_F(UpdaterUiControlUnittest, OnKeyAct01, TestSize.Level0)
     OHOS::KeyEvent *event = new OHOS::KeyEvent(KEY_POWER, OHOS::InputDevice::STATE_PRESS);
     bool ret = keyListener->OnKeyAct(*view, *event);
     EXPECT_EQ(ret, true);
+    if (event != nullptr) {
+        delete event;
+        event = nullptr;
+    }
 }
 
 HWTEST_F(UpdaterUiControlUnittest, OnKeyAct02, TestSize.Level0)
@@ -55,6 +59,10 @@ HWTEST_F(UpdaterUiControlUnittest, OnKeyAct02, TestSize.Level0)
     OHOS::KeyEvent *event = new OHOS::KeyEvent(KEY_VOLUMEUP, OHOS::InputDevice::STATE_PRESS);
     bool ret = keyListener->OnKeyAct(*view, *event);
     EXPECT_EQ(ret, true);
+    if (event != nullptr) {
+        delete event;
+        event = nullptr;
+    }
 }
 
 HWTEST_F(UpdaterUiControlUnittest, OnKeyAct03, TestSize.Level0)
@@ -62,6 +70,10 @@ HWTEST_F(UpdaterUiControlUnittest, OnKeyAct03, TestSize.Level0)
     OHOS::KeyEvent *event = new OHOS::KeyEvent(KEY_VOLUMEDOWN, OHOS::InputDevice::STATE_PRESS);
     bool ret = keyListener->OnKeyAct(*view, *event);
     EXPECT_EQ(ret, true);
+    if (event != nullptr) {
+        delete event;
+        event = nullptr;
+    }
 }
 
 HWTEST_F(UpdaterUiControlUnittest, OnKeyAct04, TestSize.Level0)
@@ -69,5 +81,9 @@ HWTEST_F(UpdaterUiControlUnittest, OnKeyAct04, TestSize.Level0)
     OHOS::KeyEvent *event = new OHOS::KeyEvent(100, OHOS::InputDevice::STATE_PRESS);
     bool ret = keyListener->OnKeyAct(*view, *event);
     EXPECT_EQ(ret, true);
+    if (event != nullptr) {
+        delete event;
+        event = nullptr;
+    }
 }
 }
