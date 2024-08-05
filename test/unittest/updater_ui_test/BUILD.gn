@@ -32,6 +32,7 @@ ohos_unittest("ui_unittest") {
     "ENABLE_VECTOR_FONT = 1",
   ]
   sources = [
+    "control/ui_control_unittest.cpp",
     "driver/fbdev_driver_unittest.cpp",
     "driver/keys_input_device_unittest.cpp",
     "driver/pointers_input_device_unittest.cpp",
@@ -46,6 +47,7 @@ ohos_unittest("ui_unittest") {
     "view/ui_view_proxy_unittest.cpp",
   ]
   sources += [
+    "${updater_path}/services/ui/control/event_listener.cpp",
     "${updater_path}/services/ui/driver/drm_driver.cpp",
     "${updater_path}/services/ui/driver/fbdev_driver.cpp",
     "${updater_path}/services/ui/driver/graphic_engine.cpp",
