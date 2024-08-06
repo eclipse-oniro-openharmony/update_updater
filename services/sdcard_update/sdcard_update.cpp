@@ -98,8 +98,8 @@ UpdaterStatus CheckSdcardPkgs(UpdaterParams &upParams)
         LOG(INFO) << "get sd card from dev succeed, skip get package from sd card";
         return UPDATE_SUCCESS;
     }
-    if (upParams.sdExtMode == SDCARD_NORMAL_UPDATE && GetFactoryInternalPkgs(upParams) == UPDATE_SUCCESS) {
-        LOG(INFO) << "get factory internal sdcard pkgs succeed";
+    if (GetSdcardInternalPkgs(upParams) == UPDATE_SUCCESS) {
+        LOG(INFO) << "get sdcard internal pkgs succeed";
         return UPDATE_SUCCESS;
     }
     std::string mountPoint = std::string(SDCARD_PATH);
@@ -129,7 +129,7 @@ UpdaterStatus CheckSdcardPkgs(UpdaterParams &upParams)
     }
     return UPDATE_SUCCESS;
 }
-__attribute__((weak)) UpdaterStatus GetFactoryInternalPkgs(UpdaterParams &upParams)
+__attribute__((weak)) UpdaterStatus GetSdcardInternalPkgs(UpdaterParams &upParams)
 {
     LOG(INFO) << "not implemented get normal update sdcard pkgs";
     return UPDATE_ERROR;

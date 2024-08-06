@@ -123,7 +123,7 @@ bool EmmcPtable::ParsePartitionFromBuffer(uint8_t *ptbImgBuffer, const uint32_t 
 bool EmmcPtable::ParseGptHeaderByEmmc(uint8_t *gptImage, const uint32_t len)
 {
     GPTHeaderInfo gptHeaderInfo;
-    uint32_t blockSize = ptableData_.blockSize; // 4096
+    uint32_t blockSize = EMMC_BLOCK_SIZE;
     (void)memset_s(&gptHeaderInfo, sizeof(GPTHeaderInfo), 0, sizeof(GPTHeaderInfo));
     if (!GetPartitionGptHeaderInfo(gptImage + blockSize, blockSize, gptHeaderInfo)) {
         LOG(ERROR) << "GetPartitionGptHeaderInfo fail";
@@ -138,9 +138,15 @@ bool EmmcPtable::ParseGptHeaderByEmmc(uint8_t *gptImage, const uint32_t len)
     return PartitionCheckGptHeader(gptImage, len, lbaNum, blockSize, gptHeaderInfo);
 }
 
-bool EmmcPtable::EmmcReadGpt(uint8_t *ptableData)
+bool EmmcPtable::EmmcReadGpt(uint8_t *ptableData, uint32_t len)
 {
     uint32_t number = 0;
+
+    partitionInfo_.clear();
+    if (!ParseGptHeaderByEmmc(emmcPtnDataInfo_.data, len)) {
+        LOG(ERROR) << "Primary signature invalid";
+        return false;
+    }
     for (uint32_t i = 0; i < MAX_PARTITION_NUM; i++) {
         uint8_t *startLbaOffset = ptableData + GPT_PARTITION_START_LBA_OFFSET;
         uint8_t *endLbaOffset = ptableData + GPT_PARTITION_START_LBA_OFFSET + GPT_PARTITION_END_LBA_OFFSET;
@@ -159,6 +165,8 @@ bool EmmcPtable::EmmcReadGpt(uint8_t *ptableData)
             LOG(ERROR) << "memcpy guid fail";
         }
         newPtnInfo.startAddr = startLba * LBA_LENGTH;
+        newPtnInfo.writePath = MMC_BLOCK_DEV_NAME;
+        newPtnInfo.writeMode = "WRITE_RAW";
         /* General algorithm : calculate partition size by lba */
         newPtnInfo.partitionSize = (endLba - startLba + 1) * LBA_LENGTH;
         ptableData += GPT_PARTITION_INFO_LENGTH;
@@ -176,7 +184,7 @@ bool EmmcPtable::UpdateCommInitializeGptPartition(uint8_t *gptImage, const uint3
         return false;
     }
     uint32_t imgBlockSize = ptableData_.lbaLen; // 512
-    uint32_t deviceBlockSize = ptableData_.blockSize; // 4096
+    uint32_t deviceBlockSize = EMMC_BLOCK_SIZE;
 
     uint8_t *gptHeaderStart = gptImage + imgBlockSize;
     uint8_t *ptableData = gptImage + PROTECTIVE_MBR_SIZE + LBA_LENGTH; /* skip MBR and gpt header */
@@ -204,14 +212,10 @@ bool EmmcPtable::UpdateCommInitializeGptPartition(uint8_t *gptImage, const uint3
         return false;
     }
     emmcPtnDataInfo_.writeDataLen = len;
-    if (!ParseGptHeaderByEmmc(emmcPtnDataInfo_.data, len)) {
-        LOG(ERROR) << "Primary signature invalid";
-        return false;
-    }
     EmmcPatchGptHeader(emmcPtnDataInfo_, deviceBlockSize);
     emmcPtnDataInfo_.isGptVaild = true;
 
-    return EmmcReadGpt(ptableData);
+    return EmmcReadGpt(emmcPtnDataInfo_.data + 2 * deviceBlockSize, len); // 2: skip 2 lba length to set gpt entry
 }
 
 bool EmmcPtable::ReadEmmcGptImageToRam()
@@ -224,7 +228,7 @@ bool EmmcPtable::ReadEmmcGptImageToRam()
     int32_t imgLen = GPT_PARTITION_SIZE;
     auto buf = std::make_unique<uint8_t[]>(imgLen);
     uint8_t *buffer = buf.get();
-    uint32_t deviceBlockSize = ptableData_.blockSize; // 4096
+    uint32_t deviceBlockSize = EMMC_BLOCK_SIZE;
     if (buffer == nullptr) {
         LOG(ERROR) << "new buffer failed!";
         return false;
@@ -251,7 +255,7 @@ bool EmmcPtable::ReadEmmcGptImageToRam()
 
     emmcPtnDataInfo_.isGptVaild = true;
     uint8_t *ptableData = buffer + 2 * deviceBlockSize; /* skip MBR and gpt header */
-    return EmmcReadGpt(ptableData);
+    return EmmcReadGpt(ptableData, imgLen);
 }
 
 bool EmmcPtable::LoadPtableFromDevice()
@@ -282,7 +286,7 @@ bool EmmcPtable::GetPtableImageBuffer(uint8_t *imageBuf, const uint32_t imgBufSi
 
 bool EmmcPtable::EditPartitionBuf(uint8_t *imageBuf, uint64_t imgBufSize, std::vector<PtnInfo> &modifyList)
 {
-    if (imageBuf == nullptr || imgBufSize == 0 || modifyList.empty() == 0) {
+    if (imageBuf == nullptr || imgBufSize == 0 || modifyList.empty()) {
         LOG(ERROR) << "input invalid";
         return false;
     }
@@ -291,9 +295,9 @@ bool EmmcPtable::EditPartitionBuf(uint8_t *imageBuf, uint64_t imgBufSize, std::v
     uint8_t *gptHeader = gptImage + imgBlockSize;
     uint32_t maxPtnCnt = GET_LWORD_FROM_BYTE(&gptHeader[PARTITION_COUNT_OFFSET]);
     uint32_t ptnEntrySize = GET_LWORD_FROM_BYTE(&gptHeader[PENTRY_SIZE_OFFSET]);
-    uint32_t gptHeaderLen = EMMC_BLOCK_SIZE;
-    uint32_t gptSize = static_cast<uint64_t>(maxPtnCnt) * ptnEntrySize + imgBlockSize + gptHeaderLen;
-    uint32_t devDensity = GetDeviceCapacity();
+    uint64_t gptHeaderLen = EMMC_BLOCK_SIZE;
+    uint64_t gptSize = static_cast<uint64_t>(maxPtnCnt) * ptnEntrySize + imgBlockSize + gptHeaderLen;
+    uint64_t devDensity = GetDeviceCapacity();
     if (devDensity == 0) {
         LOG(ERROR) << "get emmc capacity fail";
         return false;
