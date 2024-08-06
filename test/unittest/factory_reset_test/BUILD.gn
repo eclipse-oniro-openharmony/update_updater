@@ -1,0 +1,50 @@
+# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//base/update/updater/updater_default_cfg.gni")
+import("//build/test.gni")
+
+updater_path = rebase_path("${updater_absolutely_path}", ".")
+
+MODULE_OUTPUT_PATH = "updater/updater_test"
+
+ohos_unittest("factory_reset_unittest") {
+  defines = [ "UPDATER_UT" ]
+  testonly = true
+  module_out_path = MODULE_OUTPUT_PATH
+  sources = [
+    "${updater_path}/services/factory_reset/factory_reset.cpp",
+    "factory_reset_unittest.cpp",
+  ]
+
+  include_dirs = [
+    "${updater_path}/utils/include",
+    "${updater_path}/services",
+    "${updater_path}/services/include",
+    "${updater_path}/services/include/package",
+    "${updater_path}/services/factory_reset/",
+    "${updater_path}/interfaces/kits/include/",
+    "${updater_path}/services/common",
+  ]
+
+  deps = [
+    "${updater_path}/services/fs_manager:libfsmanager",
+    "${updater_path}/services/log:libupdaterlog",
+    "${updater_path}/utils:libutils",
+  ]
+
+  external_deps = [ "init:libbegetutil_static" ]
+  configs = [ "${updater_path}/test/unittest:utest_config" ]
+  install_enable = true
+  part_name = "updater"
+}

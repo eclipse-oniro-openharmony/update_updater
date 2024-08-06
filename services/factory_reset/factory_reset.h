@@ -38,7 +38,9 @@ public:
     void RegisterFactoryResetPostFunc(FactoryResetPostFunc ptr);
     int FactoryResetFunc(FactoryResetMode mode, const std::string &path);
 
+#ifndef UPDATER_UT
 private:
+#endif
     CommonResetPostFunc CommonResetPostFunc_ = nullptr;
     FactoryResetPreFunc FactoryResetPreFunc_ = nullptr;
     FactoryResetPostFunc FactoryResetPostFunc_ = nullptr;
