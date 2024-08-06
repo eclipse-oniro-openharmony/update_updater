@@ -49,7 +49,7 @@ public:
 
 HWTEST_F(FactoryResetUnitTest, FactoryResetFunc01, TestSize.Level0)
 {
-    int ret = factoryResetProcess->GetInstance().FactoryResetFunc(FactoryResetMode::INVALID, "/data");
+    int ret = factoryResetProcess->GetInstance().FactoryResetFunc(FactoryResetMode::INVALID_MODE, "/data");
     EXPECT_EQ(ret, 1);
 }
 
