@@ -57,7 +57,7 @@ constexpr const char *FACTORY_INTERNAL_MODE = "factory_internal_update";
 constexpr const char *SDCARD_NORMAL_UPDATE = "sdUpdate";
 constexpr const char *SDCARD_UPDATE_FROM_DEV = "sdUpdateFromDev";
 constexpr const char *SDCARD_MAINIMG = "mainUpdate";
-constexpr const char *SDCARD_FACTORY_INTERNAL_MODE = "FactoryInternalUpdate";
+constexpr const char *SDCARD_UPDATE_FROM_DATA = "sdUpdateFromData";
 
 #ifndef UPDATER_UT
 constexpr const char *SDCARD_CARD_PATH = "/sdcard/updater";
