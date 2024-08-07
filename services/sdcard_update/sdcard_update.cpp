@@ -99,8 +99,8 @@ UpdaterStatus CheckSdcardPkgs(UpdaterParams &upParams)
         return UPDATE_SUCCESS;
     }
  
-    if (upParams.sdExtMode == SDCARD_NORMAL_UPDATE && GetFactoryInternalPkgs(upParams) == UPDATE_SUCCESS) {
-        LOG(INFO) << "get factory internal sdcard pkgs succeed";
+    if (GetSdcardInternalPkgs(upParams) == UPDATE_SUCCESS) {
+        LOG(INFO) << "get sdcard internal pkgs succeed";
         return UPDATE_SUCCESS;
     }
  
@@ -132,7 +132,7 @@ UpdaterStatus CheckSdcardPkgs(UpdaterParams &upParams)
     return UPDATE_SUCCESS;
 }
 
-__attribute__((weak)) UpdaterStatus GetFactoryInternalPkgs(UpdaterParams &upParams)
+__attribute__((weak)) UpdaterStatus GetSdcardInternalPkgs(UpdaterParams &upParams)
 {
     LOG(INFO) << "not implemented get normal update sdcard pkgs";
     return UPDATE_ERROR;
