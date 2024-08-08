@@ -203,6 +203,8 @@
             <!-- strategy test -->
             <option name="push" value="ui/strategy/strategy_valid.json -> /data/updater/ui/strategy" src="res"/>
             <option name="push" value="ui/strategy/strategy_invalid.json -> /data/updater/ui/strategy" src="res"/>
+            <option name="push" value="ui/brightness -> /data/updater/ui" src="res"/>
+            <option name="push" value="ui/max_brightness -> /data/updater/ui" src="res"/>
         </preparer>
     </target>
     <target name="flashd_unittest">
