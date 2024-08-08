@@ -795,7 +795,7 @@ void RebootAfterUpdateSuccess(const UpdaterParams &upParams)
 {
     if (IsNeedWipe() ||
         upParams.sdExtMode == SDCARD_UPDATE_FROM_DEV ||
-        upParams.sdExtMode == SDCARD_FACTORY_INTERNAL_MODE) {
+        upParams.sdExtMode == SDCARD_UPDATE_FROM_DATA) {
         Utils::UpdaterDoReboot("updater", "--user_wipe_data");
         return;
     }
