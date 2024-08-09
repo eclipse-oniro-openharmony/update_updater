@@ -487,10 +487,10 @@ int UScriptInstructionShaCheck::ExecReadShaInfo(Uscript::UScriptEnv &env, const 
 {
     UPDATER_INIT_RECORD;
     std::string resultSha = CalculateBlockSha(devPath, shaInfo.blockPairs);
-    LOG(INFO) << "resultSha: " << resultSha << ", shaInfo.contrastSha: " << shaInfo.contrastSha;
     if (resultSha != shaInfo.contrastSha && IsTargetShaDiff(devPath, shaInfo)) {
         LOG(ERROR) << "Different sha256, cannot continue";
         LOG(ERROR) << "blockPairs:" << shaInfo.blockPairs;
+        LOG(ERROR) << "resultSha: " << resultSha << ", shaInfo.contrastSha: " << shaInfo.contrastSha;
         PrintAbnormalBlockHash(devPath, shaInfo.blockPairs);
         UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE);
         env.PostMessage(UPDATER_RETRY_TAG, VERIFY_FAILED_REBOOT);
