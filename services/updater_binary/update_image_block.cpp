@@ -478,7 +478,7 @@ bool UScriptInstructionShaCheck::IsTargetShaDiff(const std::string &devPath, con
         LOG(WARNING) << "target sha is empty";
         return true;
     }
-    LOG(INFO) << "tgtResultSha: " << tgtResultSha << " shaInfo.targetSha: " << shaInfo.targetSha;
+    LOG(INFO) << "tgtResultSha: " << tgtResultSha << ", shaInfo.targetSha: " << shaInfo.targetSha;
     return (tgtResultSha != shaInfo.targetSha);
 }
 
@@ -487,6 +487,7 @@ int UScriptInstructionShaCheck::ExecReadShaInfo(Uscript::UScriptEnv &env, const 
 {
     UPDATER_INIT_RECORD;
     std::string resultSha = CalculateBlockSha(devPath, shaInfo.blockPairs);
+    LOG(INFO) << "resultSha: " << resultSha << ", shaInfo.contrastSha: " << shaInfo.contrastSha;
     if (resultSha != shaInfo.contrastSha && IsTargetShaDiff(devPath, shaInfo)) {
         LOG(ERROR) << "Different sha256, cannot continue";
         LOG(ERROR) << "blockPairs:" << shaInfo.blockPairs;
