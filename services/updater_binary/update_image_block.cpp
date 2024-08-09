@@ -471,19 +471,23 @@ int32_t UScriptInstructionBlockCheck::Execute(Uscript::UScriptEnv &env, Uscript:
     return USCRIPT_SUCCESS;
 }
 
+bool UScriptInstructionShaCheck::IsTargetShaDiff(const std::string &devPath, const ShaInfo &shaInfo)
+{
+    std::string tgtResultSha = CalculateBlockSha(devPath, shaInfo.targetPairs);
+    if (tgtResultSha.empty()) {
+        LOG(WARNING) << "target sha is empty";
+        return true;
+    }
+    LOG(INFO) << "tgtResultSha: " << tgtResultSha << " shaInfo.targetSha: " << shaInfo.targetSha;
+    return (tgtResultSha != shaInfo.targetSha);
+}
+
 int UScriptInstructionShaCheck::ExecReadShaInfo(Uscript::UScriptEnv &env, const std::string &devPath,
     const ShaInfo &shaInfo)
 {
     UPDATER_INIT_RECORD;
     std::string resultSha = CalculateBlockSha(devPath, shaInfo.blockPairs);
-    std::string tgtResultSha = CalculateBlockSha(devPath, shaInfo.targetPairs);
-    if (resultSha.empty() && tgtResultSha.empty()) {
-        LOG(ERROR) << "All sha is empty";
-        return USCRIPT_ERROR_EXECUTE;
-    }
-
-    bool isTargetDiff = tgtResultSha.empty() ? true : (tgtResultSha != shaInfo.targetSha);
-    if (resultSha != shaInfo.contrastSha && isTargetDiff) {
+    if (resultSha != shaInfo.contrastSha && IsTargetShaDiff()) {
         LOG(ERROR) << "Different sha256, cannot continue";
         LOG(ERROR) << "blockPairs:" << shaInfo.blockPairs;
         PrintAbnormalBlockHash(devPath, shaInfo.blockPairs);
