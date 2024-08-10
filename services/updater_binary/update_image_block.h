@@ -53,6 +53,7 @@ private:
     void PrintAbnormalBlockHash(const std::string &devPath, const std::string &blockPairs);
     std::string CalculateBlockSha(const std::string &devPath, const std::string &blockPairs);
     int32_t SetShaInfo(Uscript::UScriptContext &context, ShaInfo &shaInfo);
+    bool IsTargetShaDiff(const std::string &devPath, const ShaInfo &shaInfo);
 };
 }
 
