@@ -108,6 +108,7 @@ DEFINE_ASYN_CALLBACK(OnLabelSDCardNoDelayEvt)
     UpdaterParams upParams;
     upParams.updateMode = SDCARD_UPDATE;
     if (auto res = UpdaterFromSdcard(upParams); res != UPDATE_SUCCESS) {
+        Utils::RemoveUpdateInfoFromMisc("sdcard_update");
         GetFacade().ShowLogRes(res == UPDATE_CORRUPT ? TR(LOGRES_VERIFY_FAILED) : TR(LOGRES_UPDATE_FAILED));
         GetFacade().ShowFailedPage();
         Utils::UsSleep(FAIL_DELAY);
