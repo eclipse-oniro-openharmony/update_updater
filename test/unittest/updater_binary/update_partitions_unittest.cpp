@@ -61,7 +61,8 @@ HWTEST_F(UpdatePartitionsUnitTest, UpdatePartitions_Unitest01, TestSize.Level1)
     int ret = pkgManager->LoadPackage(packagePath, GetTestCertName(), components);
     cout << "load package's ret:" << ret << endl;
     UpdaterEnv* env = new UpdaterEnv(pkgManager, nullptr, false);
-    ScriptManager* scriptManager = ScriptManager::GetScriptManager(env);
+    Hpackage::HashDataVerifier scriptVerifier {pkgManager};
+    ScriptManager* scriptManager = ScriptManager::GetScriptManager(env, &scriptVerifier);
     for (int32_t i = 0; i < ScriptManager::MAX_PRIORITY; i++) {
         ret = scriptManager->ExecuteScript(i);
         cout << " execute ret:" << ret << endl;
@@ -84,7 +85,8 @@ HWTEST_F(UpdatePartitionsUnitTest, UpdatePartitions_Unitest02, TestSize.Level1)
     int ret = pkgManager->LoadPackage(packagePath, GetTestCertName(), components);
     cout << "load package's ret:" << ret << endl;
     UpdaterEnv* env = new UpdaterEnv(pkgManager, nullptr, false);
-    ScriptManager* scriptManager = ScriptManager::GetScriptManager(env);
+    Hpackage::HashDataVerifier scriptVerifier {pkgManager};
+    ScriptManager* scriptManager = ScriptManager::GetScriptManager(env, &scriptVerifier);
     for (int32_t i = 0; i < ScriptManager::MAX_PRIORITY; i++) {
         ret = scriptManager->ExecuteScript(i);
         cout << " execute ret:" << ret << endl;
@@ -95,6 +97,6 @@ HWTEST_F(UpdatePartitionsUnitTest, UpdatePartitions_Unitest02, TestSize.Level1)
     delete env;
     ScriptManager::ReleaseScriptManager();
     PkgManager::ReleasePackageInstance(pkgManager);
-    EXPECT_EQ(partRet, USCRIPT_ERROR_EXECUTE);
+    EXPECT_EQ(partRet, USCRIPT_SUCCESS);
 }
 } // namespace updater_ut

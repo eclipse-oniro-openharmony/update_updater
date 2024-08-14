@@ -23,7 +23,7 @@
 
 namespace Hpackage {
 using DataBuffer = struct {
-    const unsigned char *buffer;
+    std::vector<char> buffer;
     size_t length;
 };
 

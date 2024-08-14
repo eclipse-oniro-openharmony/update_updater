@@ -26,6 +26,7 @@ enum FactoryResetMode {
     USER_WIPE_DATA = 0,
     FACTORY_WIPE_DATA,
     MENU_WIPE_DATA,
+    INVALID_MODE,
 };
 
 int UpdaterMain(int argc, char **argv);
@@ -66,7 +67,7 @@ UpdaterStatus ProcessOtherOption([[maybe_unused]] const std::string &option,
     [[maybe_unused]] UpdaterParams &upParams, PackageUpdateMode &mode);
 bool PreStartBinaryEntry([[maybe_unused]] const std::string &path);
 int32_t VerifySpecialPkgs([[maybe_unused]]UpdaterParams &upParams);
-void UpdaterVerifyFailEntry(int32_t verifyret);
+void UpdaterVerifyFailEntry(bool verifyret);
 bool IsNeedWipe();
 #ifdef __cplusplus
 #if __cplusplus

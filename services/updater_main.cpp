@@ -159,7 +159,7 @@ __attribute__((weak)) int32_t VerifySpecialPkgs([[maybe_unused]]UpdaterParams &u
     return PKG_SUCCESS;
 }
 
-__attribute__((weak)) void UpdaterVerifyFailEntry(int32_t verifyret)
+__attribute__((weak)) void UpdaterVerifyFailEntry(bool verifyret)
 {
     LOG(INFO) << "pre verify package info process";
     return;
@@ -194,7 +194,7 @@ static UpdaterStatus VerifyPackages(UpdaterParams &upParams)
         }
 
         if (verifyret != UPDATE_SUCCESS) {
-            UpdaterVerifyFailEntry(verifyret);
+            UpdaterVerifyFailEntry((verifyret == PKG_INVALID_DIGEST) && (upParams.updateMode == HOTA_UPDATE));
             upParams.pkgLocation = i;
             UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_VERIFYPKGFAIL), true);
             auto endTime = std::chrono::system_clock::now();
@@ -499,11 +499,14 @@ static void PostUpdatePackages(UpdaterParams &upParams, bool updateResult)
 
     for (unsigned int i = 0; i < upParams.pkgLocation; i++) {
         time = DurationToString(upParams.installTime, i);
-        writeBuffer += upParams.updatePackage[i] + "|pass||install_time=" + time + "|\n";
+        writeBuffer += upParams.updatePackage.size() < i + 1 ? "" : upParams.updatePackage[i];
+        writeBuffer += "|pass||install_time=" + time + "|\n";
     }
     time = DurationToString(upParams.installTime, upParams.pkgLocation);
 
-    writeBuffer += upParams.updatePackage[upParams.pkgLocation] + "|" + buf + "|install_time=" + time + "|\n";
+    writeBuffer += upParams.updatePackage.size() < upParams.pkgLocation + 1 ? "" :
+        upParams.updatePackage[upParams.pkgLocation];
+    writeBuffer += "|" + buf + "|install_time=" + time + "|\n";
     for (unsigned int i = upParams.pkgLocation + 1; i < upParams.updatePackage.size(); i++) {
         writeBuffer += upParams.updatePackage[i] + "\n";
     }
@@ -515,15 +518,8 @@ static void PostUpdatePackages(UpdaterParams &upParams, bool updateResult)
     DeleteInstallTimeFile();
 }
 
-UpdaterStatus UpdaterFromSdcard(UpdaterParams &upParams)
+static UpdaterStatus PreSdcardUpdatePackages(UpdaterParams &upParams)
 {
-    UPDATER_INIT_RECORD;
-    upParams.callbackProgress = [] (float value) { UPDATER_UI_INSTANCE.ShowProgress(value); };
-    SetMessageToMisc(upParams.miscCmd, 0, "sdcard_update");
-    if (CheckSdcardPkgs(upParams) != UPDATE_SUCCESS) {
-        LOG(ERROR) << "can not find sdcard packages";
-        return UPDATE_ERROR;
-    }
     upParams.installTime.resize(upParams.updatePackage.size(), std::chrono::duration<double>(0));
     // verify packages first
     if (upParams.retryCount == 0 && !IsBatteryCapacitySufficient()) {
@@ -542,13 +538,37 @@ UpdaterStatus UpdaterFromSdcard(UpdaterParams &upParams)
         return UPDATE_ERROR;
     }
 #endif
-    upParams.initialProgress += VERIFY_PERCENT;
-    upParams.currentPercentage -= VERIFY_PERCENT;
+    return UPDATE_SUCCESS;
+}
 
-    STAGE(UPDATE_STAGE_BEGIN) << "UpdaterFromSdcard";
-    LOG(INFO) << "UpdaterFromSdcard start, sdcard updaterPath : " << upParams.updatePackage[upParams.pkgLocation];
-    UPDATER_UI_INSTANCE.ShowLog(TR(LOG_SDCARD_NOTMOVE));
-    return DoUpdatePackages(upParams);
+static void PostSdcardUpdatePackages(UpdaterParams &upParams, bool updateResult)
+{
+    if (Utils::CheckUpdateMode(Updater::SDCARD_INTRAL_MODE)) {
+        PostUpdatePackages(upParams, updateResult);
+    }
+}
+
+UpdaterStatus UpdaterFromSdcard(UpdaterParams &upParams)
+{
+    UPDATER_INIT_RECORD;
+    upParams.callbackProgress = [] (float value) { UPDATER_UI_INSTANCE.ShowProgress(value); };
+    SetMessageToMisc(upParams.miscCmd, 0, "sdcard_update");
+    if (CheckSdcardPkgs(upParams) != UPDATE_SUCCESS) {
+        LOG(ERROR) << "can not find sdcard packages";
+        return UPDATE_ERROR;
+    }
+    UpdaterStatus status = PreSdcardUpdatePackages(upParams);
+    if (status == UPDATE_SUCCESS) {
+        upParams.initialProgress += VERIFY_PERCENT;
+        upParams.currentPercentage -= VERIFY_PERCENT;
+
+        STAGE(UPDATE_STAGE_BEGIN) << "UpdaterFromSdcard";
+        LOG(INFO) << "UpdaterFromSdcard start, sdcard updaterPath : " << upParams.updatePackage[upParams.pkgLocation];
+        UPDATER_UI_INSTANCE.ShowLog(TR(LOG_SDCARD_NOTMOVE));
+        status = DoUpdatePackages(upParams);
+    }
+    PostSdcardUpdatePackages(upParams, status == UPDATE_SUCCESS);
+    return status;
 }
 
 UpdaterStatus InstallUpdaterPackages(UpdaterParams &upParams)
@@ -607,7 +627,6 @@ UpdaterStatus DoUpdaterEntry(UpdaterParams &upParams)
         }
         UPDATER_UI_INSTANCE.ShowLogRes(
             (status != UPDATE_SUCCESS) ? TR(LOGRES_FACTORY_FAIL) : TR(LOGRES_FACTORY_DONE));
-        UpdaterInit::GetInstance().InvokeEvent(UPDATER_RPMB_DATA_CLEAR_EVENT);
     } else if (upParams.factoryResetMode == "user_wipe_data" || upParams.factoryResetMode == "menu_wipe_data") {
         UPDATER_UI_INSTANCE.ShowProgressPage();
         LOG(INFO) << "User level FactoryReset begin";
@@ -623,7 +642,6 @@ UpdaterStatus DoUpdaterEntry(UpdaterParams &upParams)
         if (status != UPDATE_SUCCESS) {
             UPDATER_UI_INSTANCE.ShowLogRes(TR(LOGRES_WIPE_FAIL));
         } else {
-            UpdaterInit::GetInstance().InvokeEvent(UPDATER_RPMB_DATA_CLEAR_EVENT);
             UPDATER_UI_INSTANCE.ShowSuccessPage();
             UPDATER_UI_INSTANCE.ShowLogRes(TR(LOGRES_WIPE_FINISH));
             ClearUpdaterParaMisc();
@@ -775,7 +793,9 @@ __attribute__((weak)) bool IsNeedWipe()
 
 void RebootAfterUpdateSuccess(const UpdaterParams &upParams)
 {
-    if (IsNeedWipe() || upParams.sdExtMode == SDCARD_UPDATE_FROM_DEV) {
+    if (IsNeedWipe() ||
+        upParams.sdExtMode == SDCARD_UPDATE_FROM_DEV ||
+        upParams.sdExtMode == SDCARD_UPDATE_FROM_DATA) {
         Utils::UpdaterDoReboot("updater", "--user_wipe_data");
         return;
     }

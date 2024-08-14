@@ -22,7 +22,7 @@
 #include "updater_main.h"
 
 namespace Updater {
-using CommonResetPreFunc = std::function<int(bool)>;
+using CommonResetPostFunc = std::function<int(bool)>;
 using FactoryResetPreFunc = std::function<int(void)>;
 using FactoryResetPostFunc = std::function<int(int)>;
 class FactoryResetProcess {
@@ -33,13 +33,15 @@ public:
 
     static FactoryResetProcess &GetInstance();
     using ResetFunc = std::function<int(const std::string &)>;
-    void RegisterCommonResetPreFunc(CommonResetPreFunc ptr);
+    void RegisterCommonResetPostFunc(CommonResetPostFunc ptr);
     void RegisterFactoryResetPreFunc(FactoryResetPreFunc ptr);
     void RegisterFactoryResetPostFunc(FactoryResetPostFunc ptr);
     int FactoryResetFunc(FactoryResetMode mode, const std::string &path);
 
+#ifndef UPDATER_UT
 private:
-    CommonResetPreFunc CommonResetPreFunc_ = nullptr;
+#endif
+    CommonResetPostFunc CommonResetPostFunc_ = nullptr;
     FactoryResetPreFunc FactoryResetPreFunc_ = nullptr;
     FactoryResetPostFunc FactoryResetPostFunc_ = nullptr;
     std::unordered_map<FactoryResetMode, ResetFunc> resetTab_;
