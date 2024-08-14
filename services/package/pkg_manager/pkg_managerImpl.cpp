@@ -1026,7 +1026,7 @@ int32_t PkgManagerImpl::VerifyOtaPackage(const std::string &devPath, uint64_t of
         ClosePkgStream(pkgStream);
     };
     PkgVerifyUtil verifyUtil {};
-    ret = verifyUtil.VerifyPackageSigne(pkgStream);
+    ret = verifyUtil.VerifyPackageSign(pkgStream);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("verify pkcs7 signature failed.");
         return ret;
