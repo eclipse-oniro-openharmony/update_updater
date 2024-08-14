@@ -992,6 +992,7 @@ int32_t PkgManagerImpl::VerifyAccPackage(const std::string &packagePath, const s
 
 int32_t PkgManagerImpl::VerifyOtaPackage(const std::string &devPath, uint64_t offset, size_t size)
 {
+#ifndef DIFF_PATCH_SDK
     constexpr size_t pageSize = 4096;
     size_t offsetAligned = (offset / pageSize) * pageSize;
     if (size == 0 || size + offset < offsetAligned || offset < offsetAligned) {
@@ -1031,6 +1032,7 @@ int32_t PkgManagerImpl::VerifyOtaPackage(const std::string &devPath, uint64_t of
         PKG_LOGE("verify pkcs7 signature failed.");
         return ret;
     }
+#endif
     return PKG_SUCCESS;
 }
 
