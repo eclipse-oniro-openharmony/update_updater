@@ -501,6 +501,8 @@ int ProcessUpdater(bool retry, int pipeFd, const std::string &packagePath, const
         });
     PkgManager::ReleasePackageInstance(pkgManager);
 #ifndef UPDATER_UT
+    fprintf(pipeWrite, "subProcessResult:%d\n", ret);
+    fflush(pipeWrite);
     fclose(pipeWrite);
     pipeWrite = nullptr;
     if (ret == 0) {
