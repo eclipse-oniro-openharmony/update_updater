@@ -403,7 +403,7 @@ UpdaterStatus HandlePipeMsg(UpdaterParams &upParams, int pipeRead, bool &retryUp
         if (pch != nullptr) {
             *pch = '\0';
         }
-        if(strstr(buffer, "subProcessResult") != nullptr) {
+        if (strstr(buffer, "subProcessResult") != nullptr) {
             LOG(INFO) << "subProcessResult: " << buffer;
             break;
         }
