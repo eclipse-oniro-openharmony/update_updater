@@ -469,8 +469,8 @@ int ProcessUpdater(bool retry, int pipeFd, const std::string &packagePath, const
     }
     int ret = -1;
     Detail::ScopeGuard guard([&] {
-        fprintf(pipeWrite.get(), "subProcessResult:%d\n", ret);
-        fflush(pipeWrite.get());
+        (void)fprintf(pipeWrite.get(), "subProcessResult:%d\n", ret);
+        (void)fflush(pipeWrite.get());
     });
     // line buffered, make sure parent read per line.
     setlinebuf(pipeWrite.get());
@@ -494,8 +494,8 @@ int ProcessUpdater(bool retry, int pipeFd, const std::string &packagePath, const
     ret = Updater::ExecUpdate(pkgManager, retry, packagePath,
         [&pipeWrite](const char *cmd, const char *content) {
             if (pipeWrite.get() != nullptr) {
-                fprintf(pipeWrite.get(), "%s:%s\n", cmd, content);
-                fflush(pipeWrite.get());
+                (void)fprintf(pipeWrite.get(), "%s:%s\n", cmd, content);
+                (void)fflush(pipeWrite.get());
             }
         });
     PkgManager::ReleasePackageInstance(pkgManager);
