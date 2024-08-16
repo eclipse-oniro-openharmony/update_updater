@@ -419,10 +419,10 @@ void CompressFiles(std::vector<std::string> &files, const std::string &zipFile)
     std::vector<std::pair<std::string, ZipFileInfo>> zipFiles {};
     for (auto path : files) {
         ZipFileInfo file;
-        file.fileInfo.identity = path.substr(logName.find_last_of("/") + 1);;
+        file.fileInfo.identity = path.substr(path.find_last_of("/") + 1);;
         file.fileInfo.packMethod = PKG_COMPRESS_METHOD_ZIP;
         file.fileInfo.digestMethod = PKG_DIGEST_TYPE_CRC;
-        files.push_back(std::pair<std::string, ZipFileInfo>(path, file));
+        zipFiles.push_back(std::pair<std::string, ZipFileInfo>(path, file));
     }
 
     int32_t ret = CreateCompressLogFile(zipFile, zipFiles);
@@ -432,7 +432,7 @@ void CompressFiles(std::vector<std::string> &files, const std::string &zipFile)
     }
     mode_t mode = 0660;
 #ifndef __WIN32
-    SetFileAttributes(pkgName, USER_UPDATE_AUTHORITY, GROUP_SYS_AUTHORITY, mode);
+    SetFileAttributes(zipFile, USER_UPDATE_AUTHORITY, GROUP_SYS_AUTHORITY, mode);
 #endif
 }
 
