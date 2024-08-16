@@ -418,8 +418,8 @@ void CompressFiles(std::vector<std::string> &files, const std::string &zipFile)
     (void)DeleteFile(zipFile);
     std::vector<std::pair<std::string, ZipFileInfo>> zipFiles {};
     for (auto path : files) {
-        ZipFileInfo file;
-        file.fileInfo.identity = path.substr(path.find_last_of("/") + 1);;
+        ZipFileInfo file {};
+        file.fileInfo.identity = path.substr(path.find_last_of("/") + 1);
         file.fileInfo.packMethod = PKG_COMPRESS_METHOD_ZIP;
         file.fileInfo.digestMethod = PKG_DIGEST_TYPE_CRC;
         zipFiles.push_back(std::pair<std::string, ZipFileInfo>(path, file));
