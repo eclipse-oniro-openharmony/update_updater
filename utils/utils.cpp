@@ -413,7 +413,7 @@ int32_t CreateCompressLogFile(const std::string &pkgName, std::vector<std::pair<
     return ret;
 }
 
-void CompressFiles(std::vector<std::string> &files, std::vector<std::string> &zipFile)
+void CompressFiles(std::vector<std::string> &files, const std::string &zipFile)
 {
     (void)DeleteFile(zipFile);
     std::vector<std::pair<std::string, ZipFileInfo>> zipFiles {};
