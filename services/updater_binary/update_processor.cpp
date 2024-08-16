@@ -477,6 +477,7 @@ int ProcessUpdater(bool retry, int pipeFd, const std::string &packagePath, const
     PkgManager::PkgManagerPtr pkgManager = PkgManager::CreatePackageInstance();
     if (pkgManager == nullptr) {
         LOG(ERROR) << "pkgManager is nullptr";
+        UPDATER_LAST_WORD(EXIT_INVALID_ARGS);
         return EXIT_INVALID_ARGS;
     }
 
@@ -485,6 +486,7 @@ int ProcessUpdater(bool retry, int pipeFd, const std::string &packagePath, const
     if (ret != PKG_SUCCESS) {
         LOG(ERROR) << "Fail to load package";
         PkgManager::ReleasePackageInstance(pkgManager);
+        UPDATER_LAST_WORD(EXIT_INVALID_ARGS);
         return EXIT_INVALID_ARGS;
     }
 #ifdef UPDATER_USE_PTABLE
