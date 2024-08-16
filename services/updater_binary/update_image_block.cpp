@@ -186,13 +186,14 @@ static int32_t GetUpdateBlockInfo(struct UpdateBlockInfo &infos, Uscript::UScrip
 }
 
 static int32_t ExecuteTransferCommand(int fd, const std::vector<std::string> &lines, TransferManagerPtr tm,
-    Uscript::UScriptContext &context, const std::string &partitionName)
+    Uscript::UScriptContext &context, const UpdateBlockInfo &infos)
 {
     auto transferParams = tm->GetTransferParams();
     auto writerThreadInfo = transferParams->writerThreadInfo.get();
 
-    transferParams->storeBase = std::string("/data/updater") + partitionName + "_tmp";
-    transferParams->retryFile = std::string("/data/updater") + partitionName + "_retry";
+    transferParams->storeBase = std::string("/data/updater") + infos.partitionName + "_tmp";
+    transferParams->retryFile = std::string("/data/updater") + infos.partitionName + "_retry";
+    transferParams->devPath = infos.devPath;
     LOG(INFO) << "Store base path is " << transferParams->storeBase;
     int32_t ret = Store::CreateNewSpace(transferParams->storeBase, !transferParams->env->IsRetry());
     if (ret == -1) {
@@ -289,7 +290,7 @@ static int32_t DoExecuteUpdateBlock(const UpdateBlockInfo &infos, TransferManage
         env->GetPkgManager()->ClosePkgStream(outStream);
         return USCRIPT_ERROR_EXECUTE;
     }
-    int32_t ret = ExecuteTransferCommand(fd, lines, tm, context, infos.partitionName);
+    int32_t ret = ExecuteTransferCommand(fd, lines, tm, context, infos);
     fsync(fd);
     close(fd);
     fd = -1;
