@@ -296,7 +296,7 @@ bool WriteFully(int fd, const uint8_t *data, size_t size)
         data += written;
         rest -= static_cast<size_t>(written);
         if (rest != 0) {
-            LOG(ERROR) << "totalSize =  " << size << ", rest =  " << rest;
+            LOG(INFO) << "totalSize =  " << size << ", rest =  " << rest;
         }
     }
     return true;
