@@ -290,12 +290,14 @@ bool WriteFully(int fd, const uint8_t *data, size_t size)
         do {
             written = write(fd, data, rest);
         } while (written < 0 && errno == EINTR);
-
         if (written < 0) {
             return false;
         }
         data += written;
         rest -= static_cast<size_t>(written);
+        if (rest != 0) {
+            LOG(INFO) << "totalSize =  " << size << ", rest =  " << rest;
+        }
     }
     return true;
 }
