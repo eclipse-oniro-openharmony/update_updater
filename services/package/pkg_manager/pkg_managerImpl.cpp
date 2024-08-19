@@ -999,15 +999,15 @@ int32_t PkgManagerImpl::VerifyOtaPackage(const std::string &devPath, uint64_t of
         PKG_LOGE("invalid param %zu %" PRIu64 " %zu", size, offset, offsetAligned);
         return PKG_INVALID_PARAM;
     }
-    char *realPath = realpath(devPath.c_str(), nullptr);
-    if (realPath == nullptr) {
+    char devRealPath[PATH_MAX + 1] = { '\0' };
+    if (realpath(devPath.c_str(), devRealPath) == nullptr) {
         PKG_LOGE("realPath %s is nullptr, err %s", realPath.c_str(), strerror(errno));
         return PKG_INVALID_PARAM;
     }
-    int fd = open(realPath.c_str(), O_RDONLY | O_LARGEFILE);
-    free(realPath);
+    int fd = open(devRealPath, O_RDONLY | O_LARGEFILE);
+    free(devRealPath);
     if (fd < 0) {
-        PKG_LOGE("open %s fail, %s", realPath.c_str(), strerror(errno));
+        PKG_LOGE("open %s fail, %s", devRealPath, strerror(errno));
         return PKG_INVALID_FILE;
     }
     ON_SCOPE_EXIT(closePath) {
@@ -1016,7 +1016,7 @@ int32_t PkgManagerImpl::VerifyOtaPackage(const std::string &devPath, uint64_t of
     uint8_t *pMap = static_cast<uint8_t *>(mmap64(nullptr, size + offset - offsetAligned, PROT_READ, MAP_PRIVATE,
         fd, offsetAligned));
     if (pMap == MAP_FAILED) {
-        PKG_LOGE("mmap64 %s fail, %s %zu %" PRIu64, realPath.c_str(), strerror(errno), size, offset);
+        PKG_LOGE("mmap64 %s fail, %s %zu %" PRIu64, devRealPath, strerror(errno), size, offset);
         return PKG_NONE_MEMORY;
     }
     ON_SCOPE_EXIT(unmapMem) {
@@ -1024,9 +1024,9 @@ int32_t PkgManagerImpl::VerifyOtaPackage(const std::string &devPath, uint64_t of
     };
     PkgBuffer buffer(pMap + (offset - offsetAligned), size);
     PkgStreamPtr pkgStream = nullptr;
-    int32_t ret = CreatePkgStream(pkgStream, realPath, buffer);
+    int32_t ret = CreatePkgStream(pkgStream, devRealPath, buffer);
     if (ret != PKG_SUCCESS) {
-        PKG_LOGE("create package stream fail %s %s", realPath.c_str(), strerror(errno));
+        PKG_LOGE("create package stream fail %s %s", devRealPath, strerror(errno));
         return ret;
     }
     ON_SCOPE_EXIT(closeStream) {
