@@ -999,13 +999,12 @@ int32_t PkgManagerImpl::VerifyOtaPackage(const std::string &devPath, uint64_t of
         PKG_LOGE("invalid param %zu %" PRIu64 " %zu", size, offset, offsetAligned);
         return PKG_INVALID_PARAM;
     }
-    char *devRealPath = realpath(devPath.c_str(), nullptr);
-    if (devRealPath == nullptr) {
-        PKG_LOGE("realPath %s is nullptr, err %s", devRealPath, strerror(errno));
+    char devRealPath[PATH_MAX + 1] = {};
+    if (realpath(devPath.c_str(), devRealPath) == nullptr) {
+        PKG_LOGE("realPath is nullptr, err %s", strerror(errno));
         return PKG_INVALID_PARAM;
     }
     int fd = open(devRealPath, O_RDONLY | O_LARGEFILE);
-    free(devRealPath);
     if (fd < 0) {
         PKG_LOGE("open %s fail, %s", devRealPath, strerror(errno));
         return PKG_INVALID_FILE;
