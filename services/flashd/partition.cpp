@@ -51,7 +51,7 @@ int Partition::DoErase() const
     uint64_t size = GetBlockDeviceSize(fd);
     uint64_t range[2] = { 0, size };
     if (ioctl(fd, BLKSECDISCARD, &range) >= 0) {
-        FLASHD_LOGI("BLKDISCARD success");
+        FLASHD_LOGI("BLKSECDISCARD success");
     }
 
     range[0] = 0;

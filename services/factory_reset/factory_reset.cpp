@@ -17,6 +17,7 @@
 #include "log/dump.h"
 #include "log/log.h"
 #include "fs_manager/mount.h"
+#include "scope_guard.h"
 
 namespace Updater {
 FactoryResetProcess &FactoryResetProcess::GetInstance()
@@ -46,12 +47,13 @@ int FactoryResetProcess::FactoryResetFunc(FactoryResetMode mode, const std::stri
         LOG(ERROR) << "Invalid factory reset tag: " << mode;
         return 1;
     }
-    if (CommonResetPreFunc_ == nullptr ||
-        CommonResetPreFunc_(mode == MENU_WIPE_DATA || mode == FACTORY_WIPE_DATA) != 0) {
-        LOG(ERROR) << "Failed to erase the security status";
-        return -1;
+    int resetStatus = inter->second(patch);
+    ON_SCOPE_EXIT(factoryResetPost) {
+        if (mode == FACTORY_WIPE_DATA && (FactoryResetPostFunc_== nullptr || FactoryResetPostFunc_(resetStatus) != 0)) {
+            LOG(ERROR) << "FactoryResetPostFunc_fail";
+        }
     }
-    if (iter->second(path) != 0) {
+    if (resetStatus != 0) {
         LOG(ERROR) << "Do factory reset failed! tag: " << mode;
         return 1;
     }

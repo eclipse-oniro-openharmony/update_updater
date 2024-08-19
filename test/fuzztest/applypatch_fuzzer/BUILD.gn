@@ -45,6 +45,7 @@ ohos_fuzztest("ApplyPatchFuzzTest") {
     "${updater_path}/services/script:libupdaterscript",
     "${updater_path}/services/ui:libui",
     "${updater_path}/utils:libutils",
+    "//third_party/libdrm:libdrm",
   ]
 
   external_deps = [
@@ -52,10 +53,9 @@ ohos_fuzztest("ApplyPatchFuzzTest") {
     "bzip2:libbz2",
     "c_utils:utils",
     "init:libbegetutil_static",
-    "libdrm:libdrm",
     "lz4:liblz4_static",
     "openssl:libcrypto_shared",
-    "openssl:libssl_shared",
+    "openssl:libssl_static",
     "zlib:libz",
   ]
 
