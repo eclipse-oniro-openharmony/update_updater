@@ -1000,7 +1000,7 @@ int32_t PkgManagerImpl::VerifyOtaPackage(const std::string &devPath, uint64_t of
         return PKG_INVALID_PARAM;
     }
     char *realPath = realpath(devPath.c_str(), nullptr);
-    if (realpath == nullptr) {
+    if (realPath == nullptr) {
         PKG_LOGE("realPath %s is nullptr, err %s", realPath.c_str(), strerror(errno));
         return PKG_INVALID_PARAM;
     }
