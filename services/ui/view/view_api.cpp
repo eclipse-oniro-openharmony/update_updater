@@ -74,7 +74,7 @@ OHOS::ColorType StrToColor(const std::string &hexColor)
         constexpr std::size_t width = 2uL;
         constexpr uint8_t colorMaxSize = 255;
         int reset = Utils::String2Int<int>(hexColor.substr(startPos, width));
-        if (reset < 0 || reset > colorMaxSize) {
+        if (reset < 0 || reset > static_cast<int>(colorMaxSize)) {
             LOG(ERROR) << "String2Int error, reset = " << reset;
             return colorMaxSize;
         }
