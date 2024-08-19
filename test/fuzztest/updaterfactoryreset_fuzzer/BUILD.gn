@@ -58,6 +58,7 @@ ohos_fuzztest("UpdaterFactoryResetFuzzTest") {
     "${updater_path}/services/package:libupdaterpackage",
     "${updater_path}/services/sdcard_update:libsdupdate",
     "${updater_path}/utils:libutils",
+    "//third_party/libdrm:libdrm",
   ]
 
   external_deps = [
@@ -65,10 +66,9 @@ ohos_fuzztest("UpdaterFactoryResetFuzzTest") {
     "bzip2:libbz2",
     "cJSON:cjson",
     "init:libbegetutil_static",
-    "libdrm:libdrm",
     "lz4:liblz4_static",
     "openssl:libcrypto_shared",
-    "openssl:libssl_shared",
+    "openssl:libssl_static",
     "zlib:libz",
   ]
   if (updater_ui_support) {

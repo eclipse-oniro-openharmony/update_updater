@@ -50,6 +50,7 @@ ohos_fuzztest("UpdaterMainFuzzTest") {
     "${updater_path}/services/sdcard_update:libsdupdate",
     "${updater_path}/utils:libutils",
     "${updater_path}/utils:libutils_fs",
+    "//third_party/libdrm:libdrm",
   ]
 
   external_deps = [
@@ -57,10 +58,9 @@ ohos_fuzztest("UpdaterMainFuzzTest") {
     "bzip2:libbz2",
     "cJSON:cjson",
     "init:libbegetutil_static",
-    "libdrm:libdrm",
     "lz4:liblz4_static",
     "openssl:libcrypto_shared",
-    "openssl:libssl_shared",
+    "openssl:libssl_static",
     "zlib:libz",
   ]
 

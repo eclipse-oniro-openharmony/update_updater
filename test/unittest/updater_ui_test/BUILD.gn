@@ -32,10 +32,6 @@ ohos_unittest("ui_unittest") {
     "ENABLE_VECTOR_FONT = 1",
   ]
   sources = [
-    "driver/fbdev_driver_unittest.cpp",
-    "driver/keys_input_device_unittest.cpp",
-    "driver/pointers_input_device_unittest.cpp",
-    "driver/ui_rotation_unittest.cpp",
     "lang/ui_language_unittest.cpp",
     "strategy/ui_strategy_unittest.cpp",
     "view/ui_component_unittest.cpp",
@@ -49,8 +45,6 @@ ohos_unittest("ui_unittest") {
     "${updater_path}/services/ui/driver/drm_driver.cpp",
     "${updater_path}/services/ui/driver/fbdev_driver.cpp",
     "${updater_path}/services/ui/driver/graphic_engine.cpp",
-    "${updater_path}/services/ui/driver/keys_input_device.cpp",
-    "${updater_path}/services/ui/driver/pointers_input_device.cpp",
     "${updater_path}/services/ui/driver/surface_dev.cpp",
     "${updater_path}/services/ui/driver/ui_rotation.cpp",
     "${updater_path}/services/ui/language/language_ui.cpp",
@@ -90,6 +84,7 @@ ohos_unittest("ui_unittest") {
     "${updater_path}/interfaces/kits/packages:libpackageExt",
     "${updater_path}/services/log:libupdaterlog",
     "${updater_path}/utils:libutils",
+    "//third_party/libdrm:libdrm",
   ]
   configs = [ "${updater_path}/test/unittest:utest_config" ]
   external_deps = [
@@ -100,7 +95,6 @@ ohos_unittest("ui_unittest") {
     "googletest:gmock_main",
     "googletest:gtest_main",
     "hilog:libhilog",
-    "libdrm:libdrm",
     "libpng:libpng",
     "ui_lite:libupdater_layout",
   ]

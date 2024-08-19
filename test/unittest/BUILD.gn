@@ -172,7 +172,7 @@ ohos_unittest("updater_unittest") {
     "libuv:uv",
     "lz4:liblz4_static",
     "openssl:libcrypto_shared",
-    "openssl:libssl_shared",
+    "openssl:libssl_static",
     "zlib:libz",
   ]
 
