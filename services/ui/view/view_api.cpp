@@ -72,7 +72,13 @@ OHOS::ColorType StrToColor(const std::string &hexColor)
     std::size_t startPos = 1uL;
     auto getNextField = [&startPos, &hexColor] () {
         constexpr std::size_t width = 2uL;
-        uint8_t ret = (startPos > hexColor.size()) ? 0 : Utils::String2Int<uint8_t>(hexColor.substr(startPos, width));
+        constexpr uint8_t colorMaxSize = 255;
+        int reset = Utils::String2Int<int>(hexColor.substr(startPos, width));
+        if (reset < 0 || reset > colorMaxSize) {
+            LOG(ERROR) << "String2Int error, reset = " << reset;
+            return colorMaxSize;
+        }
+        uint8_t ret = (startPos > hexColor.size()) ? 0 : static_cast<uint8_t>(reset);
         startPos += width;
         return ret;
     };
