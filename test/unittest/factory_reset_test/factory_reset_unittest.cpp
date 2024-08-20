@@ -14,7 +14,9 @@
  */
 
 #include <gtest/gtest.h>
+#define private public
 #include "factory_reset.h"
+#undef private
 
 using namespace Updater;
 using namespace testing::ext;

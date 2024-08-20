@@ -154,6 +154,7 @@ bool KeyListener::OnKeyAct(OHOS::UIView &view, const OHOS::KeyEvent &event)
 
 bool KeyListener::ProcessPowerKey(OHOS::UIView &view, const OHOS::KeyEvent &event)
 {
+#ifndef UPDATER_UT
     OHOS::UIView *pView = OHOS::FocusManager::GetInstance()->GetFocusedView();
     if (pView == nullptr) {
         LOG(ERROR) << "focused view is nullptr";
@@ -170,6 +171,7 @@ bool KeyListener::ProcessPowerKey(OHOS::UIView &view, const OHOS::KeyEvent &even
         LOG(DEBUG) << "OnPress";
         pView->OnClickEvent(OHOS::Point { centerX, centerY });
     }
+#endif
     return true;
 }
 
