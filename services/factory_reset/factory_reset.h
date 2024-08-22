@@ -33,7 +33,7 @@ public:
 
     static FactoryResetProcess &GetInstance();
     using ResetFunc = std::function<int(const std::string &)>;
-    void RegisterCommonResetPostFunc(CommonResetPreFunc ptr);
+    void RegisterCommonResetPostFunc(CommonResetPostFunc ptr);
     void RegisterFactoryResetPreFunc(FactoryResetPreFunc ptr);
     void RegisterFactoryResetPostFunc(FactoryResetPostFunc ptr);
     int FactoryResetFunc(FactoryResetMode mode, const std::string &path);

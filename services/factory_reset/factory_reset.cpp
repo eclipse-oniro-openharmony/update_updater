@@ -47,11 +47,17 @@ int FactoryResetProcess::FactoryResetFunc(FactoryResetMode mode, const std::stri
         LOG(ERROR) << "Invalid factory reset tag: " << mode;
         return 1;
     }
-    int resetStatus = inter->second(patch);
+    int resetStatus = iter->second(patch);
     ON_SCOPE_EXIT(factoryResetPost) {
-        if (mode == FACTORY_WIPE_DATA && (FactoryResetPostFunc_== nullptr || FactoryResetPostFunc_(resetStatus) != 0)) {
-            LOG(ERROR) << "FactoryResetPostFunc_fail";
+        if (mode == FACTORY_WIPE_DATA &&
+            (FactoryResetPostFunc_== nullptr || FactoryResetPostFunc_(resetStatus) != 0)) {
+            LOG(ERROR) << "FactoryResetPostFunc_ fail";
         }
+    };
+    if (CommonResetPostFunc_ == nullptr || CommonResetPostFunc_(mode == MENU_WIPE_DATA || mode == FACTORY_WIPE_DATA) != 0) {
+        resetStatus = 1;
+        LOG(ERROR) << "CommonResetPostFunc_ fail";
+        return -1;
     }
     if (resetStatus != 0) {
         LOG(ERROR) << "Do factory reset failed! tag: " << mode;
@@ -60,15 +66,15 @@ int FactoryResetProcess::FactoryResetFunc(FactoryResetMode mode, const std::stri
     return 0;
 }
 
-static int CommonResetPre(bool flag)
+static int CommonResetPost(bool flag)
 {
-    LOG(INFO) << "CommonResetPre";
+    LOG(INFO) << "CommonResetPost";
     return 0;
 }
 
-void FactoryResetProcess::RegisterCommonResetPreFunc(CommonResetPreFunc ptr)
+void FactoryResetProcess::RegisterCommonResetPostFunc(CommonResetPostFunc ptr)
 {
-    CommonResetPreFunc_ = std::move(ptr);
+    CommonResetPostFunc_ = std::move(ptr);
 }
 
 static int FactoryResetPre()
@@ -124,15 +130,12 @@ int FactoryResetProcess::DoFactoryReset(const std::string &path)
     }
 
     LOG(INFO) << "Factory level FactoryReset status:" << resetStatus;
-    if (FactoryResetPostFunc_ == nullptr || FactoryResetPostFunc_(resetStatus) != 0) {
-        LOG(ERROR) << "FactoryResetPostFunc_ fail";
-    }
     return resetStatus;
 }
 
-extern "C" __attribute__((constructor)) void RegisterCommonResetPreFunc(void)
+extern "C" __attribute__((constructor)) void RegisterCommonResetPostFunc(void)
 {
-    FactoryResetProcess::GetInstance().RegisterCommonResetPreFunc(CommonResetPre);
+    FactoryResetProcess::GetInstance().RegisterCommonResetPostFunc(CommonResetPre);
 }
 
 extern "C" __attribute__((constructor)) void RegisterFactoryResetPreFunc(void)

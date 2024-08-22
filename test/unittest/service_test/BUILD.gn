@@ -71,7 +71,6 @@ ohos_unittest("updater_service_unittest") {
     "cJSON:cjson",
     "hilog:libhilog",
     "init:libbegetutil_static",
-    "libdrm:libdrm",
     "openssl:libcrypto_shared",
     "openssl:libssl_static",
     "ui_lite:libupdater_layout",

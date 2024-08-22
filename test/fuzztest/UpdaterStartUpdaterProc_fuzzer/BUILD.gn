@@ -59,7 +59,7 @@ ohos_fuzztest("UpdaterStartUpdaterProcFuzzTest") {
     "${updater_path}/services/package:libupdaterpackage",
     "${updater_path}/services/sdcard_update:libsdupdate",
     "${updater_path}/utils:libutils",
-    "//tird_party/libdrm:libdrm",
+    "//third_party/libdrm:libdrm",
   ]
 
   external_deps = [
