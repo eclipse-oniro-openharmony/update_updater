@@ -27,7 +27,6 @@
 namespace Updater {
 namespace {
 constexpr uint32_t DISPLAY_TIME = 1 * 1000 * 1000; /* 1s */
-constexpr uint32_t FAIL_DELAY = 5 * 1000 * 1000;
 constexpr uint32_t SUCCESS_DELAY = 3 * 1000 * 1000;
 constexpr int CALLBACK_DELAY = 20 * 1000; /* 20ms */
 
@@ -111,8 +110,6 @@ DEFINE_ASYN_CALLBACK(OnLabelSDCardNoDelayEvt)
         Utils::RemoveUpdateInfoFromMisc("sdcard_update");
         GetFacade().ShowLogRes(res == UPDATE_CORRUPT ? TR(LOGRES_VERIFY_FAILED) : TR(LOGRES_UPDATE_FAILED));
         GetFacade().ShowFailedPage();
-        Utils::UsSleep(FAIL_DELAY);
-        GetFacade().ShowMainpage();
         return;
     }
     GetFacade().ShowLogRes(TR(LABEL_UPD_OK_DONE));
