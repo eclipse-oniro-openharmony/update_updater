@@ -456,12 +456,36 @@ int UScriptInstructionRawImageWrite::GetWritePathAndOffset(const std::string &pa
     return USCRIPT_SUCCESS;
 }
 
+static PkgManager::PkgManagerPtr LoadPackage(const std::string &packagePath, const std::string &keyPath)
+{
+    if (packagePath.empty() || keyPath.empty()) {
+        LOG(ERROR) << "pkgManager path is null";
+        return nullptr;
+    }
+    PkgManager::PkgManagerPtr pkgManager = PkgManager::CreatePackageInstance();
+    if (pkgManager == nullptr) {
+        LOG(ERROR) << "pkgManager is nullptr";
+        UPDATER_LAST_WORD(EXIT_INVALID_ARGS);
+        return nullptr;
+    }
+
+    std::vector<std::string> components;
+    if (pkgManager->LoadPackage(packagePath, keyPath, components) != PKG_SUCCESS) {
+        LOG(ERROR) << "Fail to load package";
+        PkgManager::ReleasePackageInstance(pkgManager);
+        UPDATER_LAST_WORD(EXIT_INVALID_ARGS);
+        return nullptr;
+    }
+
+    return pkgManager;
+}
+
 int ProcessUpdater(bool retry, int pipeFd, const std::string &packagePath, const std::string &keyPath)
 {
     UPDATER_INIT_RECORD;
     UpdaterInit::GetInstance().InvokeEvent(UPDATER_BINARY_INIT_EVENT);
     Dump::GetInstance().RegisterDump("DumpHelperLog", std::make_unique<DumpHelperLog>());
-    std::unique_ptr<FILE, decltype(&fclose)> pipeWrite(fdopen(pipeFd, "w"), fclose);
+    FILE *pipeWrite = fdopen(pipeFd, "w");
     if (pipeWrite == nullptr) {
         LOG(ERROR) << "Fail to fdopen, err: " << strerror(errno);
         UPDATER_LAST_WORD(EXIT_INVALID_ARGS);
@@ -469,35 +493,28 @@ int ProcessUpdater(bool retry, int pipeFd, const std::string &packagePath, const
     }
     int ret = -1;
     Detail::ScopeGuard guard([&] {
-        (void)fprintf(pipeWrite.get(), "subProcessResult:%d\n", ret);
-        (void)fflush(pipeWrite.get());
+        (void)fprintf(pipeWrite, "subProcessResult:%d\n", ret);
+        (void)fflush(pipeWrite);
+        fclose(pipeWrite);
+        pipeWrite = nullptr;
     });
     // line buffered, make sure parent read per line.
-    setlinebuf(pipeWrite.get());
-    PkgManager::PkgManagerPtr pkgManager = PkgManager::CreatePackageInstance();
+    setlinebuf(pipeWrite);
+    PkgManager::PkgManagerPtr pkgManager = LoadPackage(packagePath, keyPath);
     if (pkgManager == nullptr) {
-        LOG(ERROR) << "pkgManager is nullptr";
         UPDATER_LAST_WORD(EXIT_INVALID_ARGS);
         return EXIT_INVALID_ARGS;
     }
 
-    std::vector<std::string> components;
-    ret = pkgManager->LoadPackage(packagePath, keyPath, components);
-    if (ret != PKG_SUCCESS) {
-        LOG(ERROR) << "Fail to load package";
-        PkgManager::ReleasePackageInstance(pkgManager);
-        UPDATER_LAST_WORD(EXIT_INVALID_ARGS);
-        return EXIT_INVALID_ARGS;
-    }
 #ifdef UPDATER_USE_PTABLE
     DevicePtable::GetInstance().LoadPartitionInfo();
 #endif
 
     ret = Updater::ExecUpdate(pkgManager, retry, packagePath,
         [&pipeWrite](const char *cmd, const char *content) {
-            if (pipeWrite.get() != nullptr) {
-                (void)fprintf(pipeWrite.get(), "%s:%s\n", cmd, content);
-                (void)fflush(pipeWrite.get());
+            if (pipeWrite != nullptr) {
+                (void)fprintf(pipeWrite, "%s:%s\n", cmd, content);
+                (void)fflush(pipeWrite);
             }
         });
     PkgManager::ReleasePackageInstance(pkgManager);
