@@ -83,5 +83,7 @@ ohos_fuzztest("UpdaterStartUpdaterProcFuzzTest") {
     "-Wno-unused-variable",
     "-fno-omit-frame-pointer",
   ]
-  sources = [ "UpdaterStartUpdaterProc_fuzzer.cpp" ]
+  sources = [
+    "UpdaterStartUpdaterProc_fuzzer.cpp",
+  ]
 }

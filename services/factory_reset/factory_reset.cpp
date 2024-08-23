@@ -47,21 +47,22 @@ int FactoryResetProcess::FactoryResetFunc(FactoryResetMode mode, const std::stri
         LOG(ERROR) << "Invalid factory reset tag: " << mode;
         return 1;
     }
-    int resetStatus = iter->second(patch);
+    int resetStatus = iter->second(path);
     ON_SCOPE_EXIT(factoryResetPost) {
         if (mode == FACTORY_WIPE_DATA &&
-            (FactoryResetPostFunc_== nullptr || FactoryResetPostFunc_(resetStatus) != 0)) {
+            (FactoryResetPostFunc_ == nullptr || FactoryResetPostFunc_(resetStatus) != 0)) {
             LOG(ERROR) << "FactoryResetPostFunc_ fail";
         }
     };
-    if (CommonResetPostFunc_ == nullptr || CommonResetPostFunc_(mode == MENU_WIPE_DATA || mode == FACTORY_WIPE_DATA) != 0) {
-        resetStatus = 1;
-        LOG(ERROR) << "CommonResetPostFunc_ fail";
-        return -1;
-    }
     if (resetStatus != 0) {
         LOG(ERROR) << "Do factory reset failed! tag: " << mode;
         return 1;
+    }
+    if (CommonResetPostFunc_ == nullptr ||
+        CommonResetPostFunc_(mode == MENU_WIPE_DATA || mode == FACTORY_WIPE_DATA) != 0) {
+        resetStatus = 1;
+        LOG(ERROR) << "CommonResetPostFunc_ fail";
+        return -1;
     }
     return 0;
 }
@@ -135,7 +136,7 @@ int FactoryResetProcess::DoFactoryReset(const std::string &path)
 
 extern "C" __attribute__((constructor)) void RegisterCommonResetPostFunc(void)
 {
-    FactoryResetProcess::GetInstance().RegisterCommonResetPostFunc(CommonResetPre);
+    FactoryResetProcess::GetInstance().RegisterCommonResetPostFunc(CommonResetPost);
 }
 
 extern "C" __attribute__((constructor)) void RegisterFactoryResetPreFunc(void)
