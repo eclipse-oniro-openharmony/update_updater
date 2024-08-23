@@ -160,14 +160,13 @@ static int StartUpdaterProcFun(const std::string &patch)
 {
     UpdaterStatus status;
     std::vector<std::string> components;
-    int maxTemperature;
     PkgManager::PkgManagerPtr pkgManager = PkgManager::CreatePackageInstance();
 
     pkgManager->LoadPackage(patch, GetTestCertName(), components);
     UpdaterParams upParams;
     upParams.updatePackage.push_back(patch);
     upParams.retryCount = 0;
-    status = StartUpdaterProc(pkgManager, upParams, maxTemperature);
+    status = StartUpdaterProc(pkgManager, upParams);
     LOG(INFO) << "[fuzz] status " << status;
     PkgManager::ReleasePackageInstance(pkgManager);
     return status;

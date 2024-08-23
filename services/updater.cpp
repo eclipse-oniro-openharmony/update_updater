@@ -279,8 +279,7 @@ UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, Upda
     }
 
     g_tmpProgressValue = 0;
-    int maxTemperature;
-    UpdaterStatus updateRet = StartUpdaterProc(pkgManager, upParams, maxTemperature);
+    UpdaterStatus updateRet = StartUpdaterProc(pkgManager, upParams);
     if (updateRet != UPDATE_SUCCESS) {
         UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_INSTALL_FAIL));
         LOG(ERROR) << "Install package failed.";
@@ -439,7 +438,7 @@ UpdaterStatus CheckProcStatus(pid_t pid, bool retryUpdate)
     return UPDATE_SUCCESS;
 }
 
-UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, UpdaterParams &upParams, int &maxTemperature)
+UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, UpdaterParams &upParams)
 {
     UPDATER_INIT_RECORD;
     int pfd[DEFAULT_PIPE_NUM]; /* communication between parent and child */
