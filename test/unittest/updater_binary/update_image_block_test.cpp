@@ -61,6 +61,8 @@ void UpdateImageBlockTest::TearDown()
 HWTEST_F(UpdateImageBlockTest, update_image_block_test_001, TestSize.Level1)
 {
     const string packagePath = "/data/updater/updater/updater_write_miscblock_img.zip";
+    int fd = open("/dev/null", O_RDWR);
+    dup2(fd, STDOUT_FILENO);
     int32_t ret = ProcessUpdater(false, STDOUT_FILENO, packagePath, GetTestCertName());
     EXPECT_EQ(ret, 0);
 }
@@ -69,6 +71,8 @@ HWTEST_F(UpdateImageBlockTest, update_image_block_test_001, TestSize.Level1)
 HWTEST_F(UpdateImageBlockTest, update_image_block_test_002, TestSize.Level1)
 {
     const string packagePath = "/data/updater/updater/updater_write_diff_miscblock_img.zip";
+    int fd = open("/dev/null", O_RDWR);
+    dup2(fd, STDOUT_FILENO);
     int32_t ret = ProcessUpdater(false, STDOUT_FILENO, packagePath, GetTestCertName());
     EXPECT_EQ(ret, 0);
 }
@@ -77,6 +81,8 @@ HWTEST_F(UpdateImageBlockTest, update_image_block_test_002, TestSize.Level1)
 HWTEST_F(UpdateImageBlockTest, update_image_block_test_003, TestSize.Level1)
 {
     const string packagePath = "/data/updater/updater/updater_write_diff_miscblock_img.zip";
+    int fd = open("/dev/null", O_RDWR);
+    dup2(fd, STDOUT_FILENO);
     int32_t ret = ProcessUpdater(false, STDOUT_FILENO, packagePath, GetTestCertName());
     EXPECT_EQ(ret, USCRIPT_INVALID_PARAM);
 }
