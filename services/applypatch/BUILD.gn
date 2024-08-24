@@ -43,6 +43,10 @@ ohos_static_library("libapplypatch") {
     "update_progress.cpp",
   ]
 
+  if (build_variant == "user") {
+    cflags = [ "-DIS_RELEASE_VERSION" ]
+  }
+
   include_dirs = [
     "${updater_path}/services/include",
     "${updater_path}/services/applypatch",
