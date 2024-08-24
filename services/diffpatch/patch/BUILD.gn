@@ -51,6 +51,10 @@ libpatch_common_source = [
 ohos_static_library("libpatch") {
   sources = libpatch_common_source
 
+  if (build_variant == "user") {
+    cflags = [ "-DIS_RELEASE_VERSION" ]
+  }
+
   deps = [
     "${updater_path}/services/log:libupdaterlog",
     "${updater_path}/services/package:libupdaterpackage",
@@ -71,6 +75,10 @@ ohos_static_library("libpatch") {
 
 ohos_shared_library("libpatch_shared") {
   sources = libpatch_common_source
+
+  if (build_variant == "user") {
+    cflags = [ "-DIS_RELEASE_VERSION" ]
+  }
 
   deps = [
     "${updater_path}/interfaces/kits/packages:libpackage_shared",
