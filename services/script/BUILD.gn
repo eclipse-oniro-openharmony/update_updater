@@ -71,6 +71,10 @@ config("libupdaterscript_exported_headers") {
 ohos_static_library("libthreadpool") {
   sources = [ "${updater_path}/services/script/threadpool/threadpool.cpp" ]
 
+  if (build_variant == "user") {
+    cflags = [ "-DIS_RELEASE_VERSION" ]
+  }
+
   include_dirs = [
     "${updater_path}/interfaces/kits/include",
     "${updater_path}/services/common",
@@ -107,6 +111,10 @@ ohos_static_library("libupdaterscript") {
     "./script_manager/script_utils.cpp",
   ]
   configs = [ ":script_config" ]
+
+  if (build_variant == "user") {
+    cflags = [ "-DIS_RELEASE_VERSION" ]
+  }
 
   public_configs = [ ":libupdaterscript_exported_headers" ]
 
