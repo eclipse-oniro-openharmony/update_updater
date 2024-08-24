@@ -78,6 +78,10 @@ libupdaterpackage_common_source = [
 ohos_static_library("libupdaterpackage") {
   sources = libupdaterpackage_common_source
 
+  if (build_variant == "user") {
+    cflags = [ "-DIS_RELEASE_VERSION" ]
+  }
+
   deps = [
     "${updater_path}/services/common/ring_buffer:libringbuffer",
     "${updater_path}/services/log:libupdaterlog",
@@ -122,6 +126,10 @@ ohos_static_library("libupdaterpackage") {
 
 ohos_shared_library("libupdaterpackage_shared") {
   sources = libupdaterpackage_common_source
+
+  if (build_variant == "user") {
+    cflags = [ "-DIS_RELEASE_VERSION" ]
+  }
 
   deps = [
     "${updater_path}/services/common/ring_buffer:libringbuffer",
