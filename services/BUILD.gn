@@ -143,6 +143,11 @@ ohos_static_library("libupdater") {
     "updater_utils.cpp",
   ]
 
+  cflags = []
+  if (build_variant == "user") {
+    cflags += [ "-DIS_RELEASE_VERSION" ]
+  }
+
   include_dirs = updater_common_include
 
   deps = updater_common_deps
@@ -195,7 +200,7 @@ ohos_static_library("libupdater") {
       "selinux:libselinux_static",
       "selinux_adapter:librestorecon_static",
     ]
-    cflags = [ "-DWITH_SELINUX" ]
+    cflags += [ "-DWITH_SELINUX" ]
   }
 
   subsystem_name = "updater"
