@@ -29,6 +29,10 @@ ohos_static_library("libfsmanager") {
     "partitions.cpp",
   ]
 
+  if (build_variant == "user") {
+    cflags = [ "-DIS_RELEASE_VERSION" ]
+  }
+
   include_dirs = [
     "${updater_path}/interfaces/kits/include",
     "${updater_path}/services/common",
