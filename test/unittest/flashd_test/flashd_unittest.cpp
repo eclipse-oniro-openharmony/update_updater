@@ -391,7 +391,7 @@ HWTEST_F(FLashServiceUnitTest, DoEraseCommanderSuccessTest, TestSize.Level1)
     commander->DoCommand(payload, payloadSize);
     EXPECT_EQ(UpdaterState::SUCCESS, ret);
 
-    cmdstr = "erase updater_ramdisk";
+    cmdstr = "erase vendor";
     payload = reinterpret_cast<uint8_t*>(cmdstr.data());
     payloadSize = cmdstr.size() + 1;
     commander->DoCommand(payload, payloadSize);
