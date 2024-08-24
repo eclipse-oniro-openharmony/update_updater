@@ -27,6 +27,10 @@ config("libringbuffer_exported_headers") {
 ohos_static_library("libringbuffer") {
   sources = [ "ring_buffer.cpp" ]
 
+  if (build_variant == "user") {
+    cflags = [ "-DIS_RELEASE_VERSION" ]
+  }
+
   include_dirs = [
     "${updater_path}/services/include/log",
     "${updater_path}/utils/include",
