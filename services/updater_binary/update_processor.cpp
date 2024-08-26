@@ -296,7 +296,7 @@ int32_t UScriptInstructionPkgExtract::Execute(Uscript::UScriptEnv &env, Uscript:
 
 void UScriptInstructionPkgExtractNoRet::ExecuteNoRet(Uscript::UScriptEnv &env, Uscript::UScriptContext &context)
 {
-    UScriptInstructionPkgExtract().Execute(env, context);
+    UScriptInstructionPkgExtract::Execute(env, context);
     return;
 }
 
