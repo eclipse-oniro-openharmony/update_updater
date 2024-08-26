@@ -837,15 +837,15 @@ int UpdaterMain(int argc, char **argv)
             UPDATER_UI_INSTANCE.ShowLogRes(
                 status == UPDATE_CORRUPT ? TR(LOGRES_VERIFY_FAILED) : TR(LOGRES_UPDATE_FAILED));
             UPDATER_UI_INSTANCE.ShowFailedPage();
-            Utils::UsSleep(5 * DISPLAY_TIME); // 5 : 5s
-            UPDATER_UI_INSTANCE.ShowMainpage();
         } else if (upParams.factoryResetMode == "user_wipe_data" ||
             upParams.factoryResetMode == "menu_wipe_data" || upParams.factoryResetMode == "factory_wipe_data") {
             UPDATER_UI_INSTANCE.ShowFailedPage();
         } else {
-            UPDATER_UI_INSTANCE.ShowMainpage();
-            UPDATER_UI_INSTANCE.Sleep(50); /* wait for page flush 50ms */
-            UPDATER_UI_INSTANCE.SaveScreen();
+            if (!CheckUpdateMode(USB_MODE)) {
+                UPDATER_UI_INSTANCE.ShowMainpage();
+                UPDATER_UI_INSTANCE.Sleep(50); /* wait for page flush 50ms */
+                UPDATER_UI_INSTANCE.SaveScreen();
+            }
         }
         // Wait for user input
         while (true) {
