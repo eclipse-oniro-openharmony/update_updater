@@ -75,6 +75,7 @@ constexpr struct option OPTIONS[] = {
     { "UPDATE:SD", no_argument, nullptr, 0 },
     { "UPDATE:SDFROMDEV", no_argument, nullptr, 0 },
     { "sdcard_intral_update", optional_argument, nullptr, 0},
+    {"wipe_data_factory_lowlevel", no_argument, nullptr, 0},
     { nullptr, 0, nullptr, 0 },
 };
 constexpr float VERIFY_PERCENT = 0.05;
@@ -670,6 +671,11 @@ std::unordered_map<std::string, std::function<void ()>> InitOptionsFuncTab(char*
             upParams.factoryResetMode = "factory_wipe_data";
         }},
         {"user_wipe_data", [&]() -> void
+        {
+            (void)UPDATER_UI_INSTANCE.SetMode(UPDATERMODE_REBOOTFACTORYRST);
+            upParams.factoryResetMode = "user_wipe_data";
+        }},
+        {"wipe_data_factory_lowlevel", [&]() -> void
         {
             (void)UPDATER_UI_INSTANCE.SetMode(UPDATERMODE_REBOOTFACTORYRST);
             upParams.factoryResetMode = "user_wipe_data";
