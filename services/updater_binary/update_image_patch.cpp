@@ -266,7 +266,7 @@ int32_t USInstrImageShaCheck::CheckHash(const CheckPara &para)
         LOG(ERROR) << "PatchMapFile error";
         return USCRIPT_ERROR_EXECUTE;
     }
-    if (std::all_of(para.srcSize.begin(), para.srcSize.end(), ::isdigit)) {
+    if (!std::all_of(para.srcSize.begin(), para.srcSize.end(), ::isdigit)) {
         LOG(ERROR) << "para size error " << para.srcSize;
         return USCRIPT_ERROR_EXECUTE;
     }
