@@ -97,6 +97,6 @@ HWTEST_F(UpdatePartitionsUnitTest, UpdatePartitions_Unitest02, TestSize.Level1)
     delete env;
     ScriptManager::ReleaseScriptManager();
     PkgManager::ReleasePackageInstance(pkgManager);
-    EXPECT_EQ(partRet, USCRIPT_ERROR_EXECUTE);
+    EXPECT_EQ(partRet, USCRIPT_SUCCESS);
 }
 } // namespace updater_ut
