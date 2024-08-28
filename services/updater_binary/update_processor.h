@@ -88,7 +88,7 @@ public:
 class UScriptInstructionPkgExtractNoRet : public UScriptInstructionPkgExtract {
 public:
     UScriptInstructionPkgExtractNoRet() {}
-    virtual ~UScriptInstructionPkgExtractNoRet() {}
+    ~UScriptInstructionPkgExtractNoRet() override {}
     void ExecuteNoRet(Uscript::UScriptEnv &env, Uscript::UScriptContext &context);
 };
 
