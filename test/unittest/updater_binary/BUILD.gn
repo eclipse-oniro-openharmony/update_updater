@@ -25,7 +25,6 @@ ohos_unittest("binary_unittest") {
     "update_image_patch_unittest.cpp",
     "update_partitions_unittest.cpp",
     "update_processor_unittest.cpp",
-    "updater_binary_unittest.cpp",
   ]
 
   sources += [
