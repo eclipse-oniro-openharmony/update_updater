@@ -50,10 +50,6 @@ ohos_static_library("libptableparse") {
   ]
   configs = [ ":updater_config" ]
 
-  if (build_variant == "user") {
-    cflags = [ "-DIS_RELEASE_VERSION" ]
-  }
-
   public_configs = [ ":libptableparse_exported_headers" ]
 
   ldflags = [ "-Wl -std=c++11" ]
