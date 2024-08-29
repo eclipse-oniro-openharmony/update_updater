@@ -19,10 +19,6 @@ updater_path = rebase_path("${updater_absolutely_path}", ".")
 ohos_shared_library("libupdater_shared") {
   sources = [ "updaterkits.cpp" ]
 
-  if (build_variant == "user") {
-    cflags = [ "-DIS_RELEASE_VERSION" ]
-  }
-
   include_dirs = [
     "../include",
     "${updater_path}/services/include/log",
@@ -62,10 +58,6 @@ ohos_shared_library("libupdater_shared") {
 
 ohos_static_library("libupdaterkits") {
   sources = [ "updaterkits.cpp" ]
-
-  if (build_variant == "user") {
-    cflags = [ "-DIS_RELEASE_VERSION" ]
-  }
 
   include_dirs = [
     "../include",
