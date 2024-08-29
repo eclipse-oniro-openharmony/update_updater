@@ -39,6 +39,15 @@ static int g_logLevel = INFO;
 static constexpr unsigned int UPDATER_DOMAIN = 0XD002E01;
 #endif
 
+const char *GetLogFileName()
+{
+#ifndef IS_RELEASE_VERSION
+    return (strrchr((__FILE_NAME__), '/') ? strrchr((__FILE_NAME__), '/') + 1 : (__FILE_NAME__));
+#else
+    return "***";
+#endif
+}
+
 void InitUpdaterLogger(const std::string &tag, const std::string &logFile, const std::string &stageFile,
     const std::string &errorCodeFile)
 {
