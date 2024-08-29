@@ -53,10 +53,6 @@ ohos_static_library("libupdater_binary") {
   ]
   configs = [ ":updater_config" ]
 
-  if (build_variant == "user") {
-    cflags = [ "-DIS_RELEASE_VERSION" ]
-  }
-
   ldflags = [ "-Wl -std=c++11" ]
 
   deps = [
