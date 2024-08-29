@@ -74,8 +74,6 @@ ohos_unittest("script_unittest") {
     "${updater_path}/services/log:libupdaterlog",
     "${updater_path}/services/package:libupdaterpackage",
     "${updater_path}/services/script:gen_yacc",
-    "${updater_path}/test/unittest/script:user_instruction",
-    "${updater_path}/test/unittest/script:user_instruction_invalid",
     "${updater_path}/utils:libutils",
   ]
   configs = [ "${updater_path}/test/unittest:utest_config" ]
