@@ -37,11 +37,6 @@ ohos_static_library("libutils") {
     "utils_fs.cpp",
   ]
 
-  cflags = []
-  if (build_variant == "user") {
-    cflags += [ "-DIS_RELEASE_VERSION" ]
-  }
-
   include_dirs = [
     "include",
     "${updater_path}/interfaces/kits/include/",
@@ -64,7 +59,7 @@ ohos_static_library("libutils") {
       "selinux:libselinux_static",
       "selinux_adapter:librestorecon_static",
     ]
-    cflags += [ "-DWITH_SELINUX" ]
+    cflags = [ "-DWITH_SELINUX" ]
   }
 
   subsystem_name = "updater"
@@ -73,10 +68,6 @@ ohos_static_library("libutils") {
 
 ohos_static_library("libutils_fs") {
   sources = [ "utils_fs.cpp" ]
-
-  if (build_variant == "user") {
-    cflags = [ "-DIS_RELEASE_VERSION" ]
-  }
 
   include_dirs = [
     "include",
@@ -107,10 +98,6 @@ ohos_static_library("libutils_json") {
 
 ohos_static_library("libutils_common") {
   sources = [ "utils_common.cpp" ]
-
-  if (build_variant == "user") {
-    cflags = [ "-DIS_RELEASE_VERSION" ]
-  }
 
   include_dirs = [
     "include",
