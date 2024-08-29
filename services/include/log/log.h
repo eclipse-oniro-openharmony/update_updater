@@ -30,7 +30,7 @@ namespace Updater {
 
 constexpr size_t MIN_UPDATE_SPACE = 50 * 1024 * 1024;
 constexpr int MAX_TIME_SIZE = 20;
-#define UPDATER_LOG_FILE_NAME   (strrchr((__FILE__), '/') ? strrchr((__FILE__), '/') + 1 : (__FILE__))
+#define UPDATER_LOG_FILE_NAME   (Updater::GetLogFileName())
 #define LOG(level) UpdaterLogger(level).OutputUpdaterLog((UPDATER_LOG_FILE_NAME), (__LINE__))
 #define STAGE(stage) StageLogger(stage).OutputUpdaterStage()
 #define ERROR_CODE(code) ErrorCode(code).OutputErrorCode((UPDATER_LOG_FILE_NAME), (__LINE__), (code))
@@ -49,6 +49,8 @@ enum {
     UPDATE_STAGE_FAIL,
     UPDATE_STAGE_OUT,
 };
+
+const char *GetLogFileName();
 
 void SetLogLevel(int level);
 
