@@ -28,10 +28,6 @@ config("libpackageExt_exported_headers") {
 ohos_shared_library("libpackage_shared") {
   sources = [ "package.cpp" ]
 
-  if (build_variant == "user") {
-    cflags = [ "-DIS_RELEASE_VERSION" ]
-  }
-
   include_dirs = [
     "${updater_path}/interfaces/kits/include",
     "${updater_path}/services/common",
@@ -64,10 +60,6 @@ ohos_shared_library("libpackage_shared") {
 
 ohos_static_library("libpackageExt") {
   sources = [ "package.cpp" ]
-
-  if (build_variant == "user") {
-    cflags = [ "-DIS_RELEASE_VERSION" ]
-  }
 
   include_dirs = [
     "${updater_path}/interfaces/kits/include",
