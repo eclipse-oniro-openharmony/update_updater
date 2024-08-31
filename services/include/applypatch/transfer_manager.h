@@ -54,6 +54,7 @@ struct TransferParams {
     std::string devPath;
     uint8_t *patchDataBuffer;
     size_t patchDataSize;
+    bool canWrite;
 };
 
 class TransferManager;

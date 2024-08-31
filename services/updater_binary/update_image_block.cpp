@@ -540,7 +540,7 @@ bool UScriptInstructionShaCheck::IsTargetShaDiff(const std::string &devPath, con
 }
 
 int UScriptInstructionShaCheck::ExecReadShaInfo(Uscript::UScriptEnv &env, const std::string &devPath,
-    const ShaInfo &shaInfo)
+    const ShaInfo &shaInfo, const std::string &partitionName)
 {
     UPDATER_INIT_RECORD;
     std::string resultSha = CalculateBlockSha(devPath, shaInfo.blockPairs);
