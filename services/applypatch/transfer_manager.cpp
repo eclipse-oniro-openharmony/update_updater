@@ -112,7 +112,7 @@ bool TransferManager::CommandsParser(int fd, const std::vector<std::string> &con
                 continue;
             }
         }
-         if (!transferParams_->canWrite && !JudgeBlockVerifyCmdType(*cmd)) {
+        if (!transferParams_->canWrite && !JudgeBlockVerifyCmdType(*cmd)) {
             continue;
         }
         if (!CommandsExecute(fd, *cmd)) {
