@@ -186,7 +186,7 @@ static int32_t GetUpdateBlockInfo(struct UpdateBlockInfo &infos, Uscript::UScrip
 }
 
 static int32_t ExecuteTransferCommand(int fd, const std::vector<std::string> &lines, TransferManagerPtr tm,
-    Uscript::UScriptContext &context, const std::string &partitionName)
+    Uscript::UScriptContext &context, const UpdateBlockInfo &infos)
 {
     auto transferParams = tm->GetTransferParams();
     auto writerThreadInfo = transferParams->writerThreadInfo.get();
@@ -290,7 +290,7 @@ static int32_t DoExecuteUpdateBlock(const UpdateBlockInfo &infos, TransferManage
         env->GetPkgManager()->ClosePkgStream(outStream);
         return USCRIPT_ERROR_EXECUTE;
     }
-    int32_t ret = ExecuteTransferCommand(fd, lines, tm, context, infos.partitionName);
+    int32_t ret = ExecuteTransferCommand(fd, lines, tm, context, infos);
     fsync(fd);
     close(fd);
     fd = -1;
@@ -481,12 +481,12 @@ static std::string GetPartName(const std::string &partitionName)
     return partitionName[0] == '/' ? partitionName.substr(1) : partitionName;
 }
 
-int32_t UScriptInstructionShaCheck::DoBlocksVerify(Uscript::UScriptEnv &env, const std::string &partitionName, const std::string &devPath)
+int32_t UScriptInstructionShaCheck::DoBlocksVerify(Uscript::UScriptEnv &env, const std::string &partitionName,
+    const std::string &devPath)
 {
     UpdateBlockInfo infos {};
     infos.partitionName = partitionName;
     infos.transferName = GetPartName(partitionName) + "transfer.list";
-    infos.devPath = devPath;
     uint8_t *transferListBuffer = nullptr;
     size_t transferListSize = 0;
     Hpackage::PkgManager::StreamPtr outStream = nullptr;
@@ -505,6 +505,7 @@ int32_t UScriptInstructionShaCheck::DoBlocksVerify(Uscript::UScriptEnv &env, con
     auto transferParams = tm->GetTransferParams();
     transferParams->env = &env;
     transferParams->canWrite = false;
+    transferParams->devPath = devPath;
     transferParams->storeBase = std::string("/data/updater") + partitionName + "_tmp";
     transferParams->retryFile = std::string("/data/updater") + partitionName + "_retry";
 
@@ -514,7 +515,7 @@ int32_t UScriptInstructionShaCheck::DoBlocksVerify(Uscript::UScriptEnv &env, con
         LOG(ERROR) << "Error to create new store space";
         return USCRIPT_ERROR_EXECUTE;
     }
-    int fd = open(infos.devPath.c_str(), O_RDWR | O_LARGEFILE);
+    int fd = open(devPath.c_str(), O_RDWR | O_LARGEFILE);
     if (fd == -1) {
         LOG(ERROR) << "Failed to open block";
         return USCRIPT_ERROR_EXECUTE;
