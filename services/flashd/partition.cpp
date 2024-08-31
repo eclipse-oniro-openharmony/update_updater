@@ -23,6 +23,8 @@
 #include "flashd_utils.h"
 #include "fs_manager/mount.h"
 #include "utils.h"
+#include "ptable_manager.h"
+#include "applypatch/data_writer.h"
 
 namespace Flashd {
 int Partition::DoFlash(const uint8_t *buffer, int bufferSize) const
@@ -40,6 +42,25 @@ int Partition::DoFlash(const uint8_t *buffer, int bufferSize) const
 }
 
 int Partition::DoErase() const
+{
+#ifdef UPDATER_USE_PTABLE
+    DevicePtable::GetInstance().LoadPartitionInfo();
+    DevicePtable &devicePtb = DevicePtable::GetInstance();
+    Ptable::PtnInfo ptnInfo;
+
+    if (!devicePtb.GetPartionInfoByName(devName_, ptnInfo)) {
+        FLASHD_LOGE("DoErase: cannot find the lun index of partition: %s", devName_.c_str());
+        return FLASHING_ARG_INVALID;
+    }
+    if (ptnInfo.writeMode == "WRITE_IOCTL") {
+        FLASHD_LOGI("erase ext partition");
+        return DoEraseExt(ptnInfo);
+    }
+#endif
+    return DoErasePartition();
+}
+
+int Partition::DoErasePartition() const
 {
     auto fd = open(Updater::Utils::GetPartitionRealPath(devName_).c_str(), O_RDWR);
     if (fd < 0) {
@@ -70,6 +91,25 @@ int Partition::DoErase() const
     fsync(fd);
 #endif
     close(fd);
+    return 0;
+}
+
+int Partition::DoEraseExt(const Ptable::PtnInfo &ptnInfo) const
+{
+    uint64_t partitionSize = ptnInfo.partitionSize;
+    std::unique_ptr<DataWriter> dataWriter = DataWriter::CreateDataWriter(ptnInfo.writeMode,
+        ptnInfo.writePath, devName_, ptnInfo.startAddr);
+
+    if (!dataWriter) {
+        FLASHD_LOGE("DataWriter creation failed");
+        return FLASHING_ARG_INVALID;
+    }
+    std::vector<uint8_t> zeroBuffer(partitionSize, 0);
+    if (!dataWriter->Write(zeroBuffer.data(), partitionSize, nullptr)) {
+        FLASHD_LOGE("erase %s failed", devName_.c_str());
+        return FLASHING_PART_WRITE_ERROR;
+    }
+
     return 0;
 }
 
