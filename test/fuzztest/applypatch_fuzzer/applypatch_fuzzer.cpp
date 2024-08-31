@@ -22,6 +22,7 @@
 #include <string>
 #include <vector>
 #include <fstream>
+#include <cstdio>
 #include "log/log.h"
 
 using namespace Updater;
@@ -57,6 +58,10 @@ namespace OHOS {
         }
         ApplyPatch(bspatchPath, oldFilePath, newFilePath);
         ApplyPatch(imgpatchPath, oldFilePath, newFilePath);
+        remove(bspatchPath);
+        remove(imgpatchPath);
+        remove(oldFilePath);
+        remove(newFilePath);
     }
 }
 
