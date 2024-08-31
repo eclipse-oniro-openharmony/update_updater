@@ -30,6 +30,8 @@ public:
     int DoFlash(const uint8_t *buffer, int bufferSize) const;
     int DoFormat() const;
     int DoErase() const;
+    int DoErasePartition() const;
+    int DoEraseExt(const Ptable::PtnInfo &ptnInfo) const;
 
 private:
     uint64_t GetBlockDeviceSize(int fd) const;
