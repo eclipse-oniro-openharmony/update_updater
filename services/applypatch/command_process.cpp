@@ -223,7 +223,7 @@ CommandResult StashCommandFn::Execute(const Command &params)
         return FAILED;
     }
     int res = srcBlk.VerifySha256(buffer, srcBlockSize, shaStr);
-    if (res != 0 && !params.GetTransferParams->canWrite) {
+    if (res != 0 && !params.GetTransferParams()->canWrite) {
         BlockVerify(params, res, buffer, srcBlockSize, shaStr);
     }
     if (res != 0) {
