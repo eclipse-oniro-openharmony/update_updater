@@ -44,7 +44,7 @@ int32_t NormalImagePatch::ApplyImagePatch(const PatchParam &param, size_t &start
     offset += sizeof(int64_t);
     size_t patchOffset = static_cast<size_t>(ReadLE<int64_t>(param.patch + offset));
     offset += sizeof(int64_t);
-    if (srcStart > param.oldSize ||  param.oldSize - srcStart < param.oldSize ||
+    if (srcStart > param.oldSize ||  param.oldSize - srcStart < srcLen ||
         patchOffset > param.patchSize) {
         PATCH_LOGE("error, srcStart: %zu srcLen: %zu , param.oldSize: %zu, patchOffset: %zu",
             srcStart, srcLen, param.oldSize, patchOffset);
@@ -97,7 +97,7 @@ int32_t CompressedImagePatch::StartReadHeader(const PatchParam &param, PatchHead
     }
     PATCH_LOGI("ApplyImagePatch srcStart %zu srcLen %zu patchOffset: %zu expandedLen:%zu %zu",
         header.srcStart, header.srcLength, header.patchOffset, header.expandedLen, header.targetSize);
-    if (header.srcStart > param.oldSize || param.oldSize - header.srcStart < param.oldSize ||
+    if (header.srcStart > param.oldSize || param.oldSize - header.srcStart < header.srcLength ||
         header.patchOffset > param.patchSize) {
         PATCH_LOGE("Failed to check patch");
         return -1;
