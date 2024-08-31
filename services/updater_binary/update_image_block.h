@@ -49,7 +49,9 @@ public:
     virtual ~UScriptInstructionShaCheck() {}
     int32_t Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context) override;
 private:
-    int ExecReadShaInfo(Uscript::UScriptEnv &env, const std::string &devPath, const ShaInfo &shaInfo);
+    int ExecReadShaInfo(Uscript::UScriptEnv &env, const std::string &devPath, const ShaInfo &shaInfo,
+        const std::string &partitionName);
+    int32_t DoBlocksVerify(Uscript::UScriptEnv &env, const std::string &partitionName, const std::string &devPath);
     void PrintAbnormalBlockHash(const std::string &devPath, const std::string &blockPairs);
     std::string CalculateBlockSha(const std::string &devPath, const std::string &blockPairs);
     int32_t SetShaInfo(Uscript::UScriptContext &context, ShaInfo &shaInfo);

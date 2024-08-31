@@ -41,7 +41,7 @@ public:
     }
 
     explicit BlockSet(std::vector<BlockPair> &&pairs);
-	
+
     ~BlockSet() {}
 
     // Insert block to set after parsing from a string type or vector type
@@ -109,5 +109,19 @@ private:
     int32_t LoadSourceBuffer(const Command &cmd, size_t &pos, std::vector<uint8_t> &sourceBuffer,
         bool &isOverlap, size_t &srcBlockSize);
 };
+
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif
+#endif /* __cpluscplus */
+void BlockVerify(const Command &cmd, int &ret, std::vector<uint8_t> &buffer,
+    const size_t size, const std::string srcHash);
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif
+#endif /* __cpluscplus */
+
 } // namespace Updater
 #endif // UPDATER_BLOCKSET_H
