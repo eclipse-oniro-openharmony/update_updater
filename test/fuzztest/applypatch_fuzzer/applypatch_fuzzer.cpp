@@ -58,10 +58,9 @@ namespace OHOS {
         }
         ApplyPatch(bspatchPath, oldFilePath, newFilePath);
         ApplyPatch(imgpatchPath, oldFilePath, newFilePath);
-        remove(bspatchPath);
-        remove(imgpatchPath);
-        remove(oldFilePath);
-        remove(newFilePath);
+        if (remove(bspatchPath) != 0 || remove(imgpatchPath) != 0  || remove(oldFilePath)) {
+            LOG(WARNING) << "Failed to delete file";
+        }
     }
 }
 
