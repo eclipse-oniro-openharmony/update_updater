@@ -51,6 +51,12 @@ group("unittest") {
       "test/unittest/updater_binary:binary_unittest",
       "test/unittest/utils:utils_test",
     ]
+    if (updater_cfg_file == "") {
+      deps += [
+        "test/unittest/script:user_instruction",
+        "test/unittest/script:user_instruction_invalid",
+      ]
+    }
     if (updater_ui_support) {
       deps += [
         "test/unittest/service_test:updater_service_unittest",
