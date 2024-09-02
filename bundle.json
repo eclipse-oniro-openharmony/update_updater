@@ -58,6 +58,7 @@
                 "bounds_checking_function",
                 "bzip2",
                 "cJSON",
+                "libdrm",
                 "libpng",
                 "libuv",
                 "lz4",
@@ -65,9 +66,7 @@
                 "selinux",
                 "zlib"
             ],
-            "third_party": [
-                "libdrm"
-            ]
+            "third_party": []
         },
         "build": {
             "sub_component": [

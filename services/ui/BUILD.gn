@@ -96,12 +96,12 @@ ohos_static_library("libui") {
     "${updater_path}/interfaces/kits/packages:libpackageExt",
     "${updater_path}/services/log:libupdaterlog",
     "${updater_path}/utils:libutils",
-    "//third_party/libdrm:libdrm",
   ]
 
   external_deps = [
     "bounds_checking_function:libsec_static",
     "cJSON:cjson",
+    "libdrm:libdrm",
     "libpng:libpng",
   ]
 

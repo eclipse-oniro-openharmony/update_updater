@@ -59,7 +59,6 @@ ohos_fuzztest("UpdaterStartUpdaterProcFuzzTest") {
     "${updater_path}/services/package:libupdaterpackage",
     "${updater_path}/services/sdcard_update:libsdupdate",
     "${updater_path}/utils:libutils",
-    "//third_party/libdrm:libdrm",
   ]
 
   external_deps = [
@@ -67,6 +66,7 @@ ohos_fuzztest("UpdaterStartUpdaterProcFuzzTest") {
     "bzip2:libbz2",
     "cJSON:cjson_static",
     "init:libbegetutil_static",
+    "libdrm:libdrm",
     "libpng:libpng",
     "lz4:liblz4_static",
     "openssl:libcrypto_shared",
@@ -83,7 +83,5 @@ ohos_fuzztest("UpdaterStartUpdaterProcFuzzTest") {
     "-Wno-unused-variable",
     "-fno-omit-frame-pointer",
   ]
-  sources = [
-    "UpdaterStartUpdaterProc_fuzzer.cpp",
-  ]
+  sources = [ "UpdaterStartUpdaterProc_fuzzer.cpp" ]
 }

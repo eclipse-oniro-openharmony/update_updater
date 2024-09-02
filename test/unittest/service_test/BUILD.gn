@@ -61,7 +61,6 @@ ohos_unittest("updater_service_unittest") {
     "${updater_path}/services/package:libupdaterpackage",
     "${updater_path}/services/write_state:libwritestate",
     "${updater_path}/utils:libutils",
-    "//third_party/libdrm:libdrm",
   ]
 
   external_deps = [
@@ -71,6 +70,7 @@ ohos_unittest("updater_service_unittest") {
     "cJSON:cjson",
     "hilog:libhilog",
     "init:libbegetutil_static",
+    "libdrm:libdrm",
     "openssl:libcrypto_shared",
     "openssl:libssl_static",
     "ui_lite:libupdater_layout",
