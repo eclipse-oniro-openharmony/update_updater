@@ -78,7 +78,8 @@ private:
     bool RegisterForRetry(const std::string &cmd);
     bool CommandsExecute(int fd, Command &cmd);
     bool CommandParserPreCheck(const std::vector<std::string> &context);
-    void InitCommandParser(std::vector<std::string>::const_iterator ct, std::string &retryCmd);
+    std::vector<std::string>::const_iterator InitCommandParser(std::vector<std::string>::const_iterator ct,
+        std::string &retryCmd);
     std::unique_ptr<TransferParams> transferParams_;
 };
 } // namespace Updater

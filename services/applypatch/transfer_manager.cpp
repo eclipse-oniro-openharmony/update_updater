@@ -59,7 +59,8 @@ static bool JudgeBlockVerifyCmdType(Command &cmd)
     return true;
 }
 
-void TransferManager::InitCommandParser(std::vector<std::string>::const_iterator ct, std::string &retryCmd)
+std::vector<std::string>::const_iterator TransferManager::InitCommandParser(std::vector<std::string>::const_iterator ct,
+    std::string &retryCmd)
 {
     transferParams_->version = Utils::String2Int<size_t>(*ct++, Utils::N_DEC);
     transferParams_->blockCount = Utils::String2Int<size_t>(*ct++, Utils::N_DEC);
