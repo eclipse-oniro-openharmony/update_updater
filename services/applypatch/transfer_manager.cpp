@@ -69,6 +69,7 @@ std::vector<std::string>::const_iterator TransferManager::InitCommandParser(std:
     if (transferParams_->env != nullptr && transferParams_->env->IsRetry()) {
         retryCmd = ReloadForRetry();
     }
+    return ct;
 }
 
 bool TransferManager::CommandParserPreCheck(const std::vector<std::string> &context)
