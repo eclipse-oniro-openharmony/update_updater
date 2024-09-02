@@ -296,7 +296,7 @@ int32_t BlockSet::LoadSourceBuffer(const Command &cmd, size_t &pos, std::vector<
 __attribute__((weak)) int BlockVerify(const Command &cmd, std::vector<uint8_t> &buffer,
     const size_t size, const std::string srcHash)
 {
-    return;
+    return -1;
 }
 
 
