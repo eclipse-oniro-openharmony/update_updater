@@ -224,7 +224,7 @@ CommandResult StashCommandFn::Execute(const Command &params)
     }
     int res = srcBlk.VerifySha256(buffer, srcBlockSize, shaStr);
     if (res != 0 && !params.GetTransferParams()->canWrite) {
-        res = BlockVerify(params, buffer, srcBlockSize, shaStr);
+        res = BlockVerify(params, buffer, srcBlockSize, shaStr, pos);
     }
     if (res != 0) {
         LOG(WARNING) << "failed to load source blocks for stash";

@@ -294,7 +294,7 @@ int32_t BlockSet::LoadSourceBuffer(const Command &cmd, size_t &pos, std::vector<
 }
 
 __attribute__((weak)) int BlockVerify(const Command &cmd, std::vector<uint8_t> &buffer,
-    const size_t size, const std::string srcHash)
+    const size_t size, const std::string srcHash, size_t &pos)
 {
     return -1;
 }
@@ -314,7 +314,7 @@ int32_t BlockSet::LoadTargetBuffer(const Command &cmd, std::vector<uint8_t> &buf
     int res = stat(storePath.c_str(), &storeStat);
     int verifyRes = VerifySha256(buffer, blockSize, srcHash);
     if (verifyRes != 0 && !cmd.GetTransferParams()->canWrite) {
-        return BlockVerify(cmd, buffer, blockSize, srcHash);
+        return BlockVerify(cmd, buffer, blockSize, srcHash, pos);
     }
     if (verifyRes == 0) {
         if (isOverlap && res != 0) {
