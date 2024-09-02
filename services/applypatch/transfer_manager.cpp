@@ -91,7 +91,7 @@ bool TransferManager::CommandsParser(int fd, const std::vector<std::string> &con
 
     std::string retryCmd = "";
     std::vector<std::string>::const_iterator ct = context.begin();
-    InitCommandParser(ct, retryCmd);
+    ct = InitCommandParser(ct, retryCmd);
     size_t totalSize = transferParams_->blockCount;
     size_t initBlock = 0;
     for (; ct != context.end(); ct++) {
