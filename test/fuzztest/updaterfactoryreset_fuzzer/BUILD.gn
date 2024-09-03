@@ -69,11 +69,9 @@ ohos_fuzztest("UpdaterFactoryResetFuzzTest") {
     "lz4:liblz4_static",
     "openssl:libcrypto_shared",
     "openssl:libssl_shared",
+    "ui_lite:libupdater_layout",
     "zlib:libz",
   ]
-  if (updater_ui_support) {
-    external_deps += [ "ui_lite:libupdater_layout" ]
-  }
 
   cflags = [
     "-g",
