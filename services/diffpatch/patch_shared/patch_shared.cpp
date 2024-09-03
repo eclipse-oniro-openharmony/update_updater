@@ -31,9 +31,10 @@
 #include <securec.h>
 #include "hilog/log.h"
 
+constexpr int64_t MAX_BUF_SIZE = 1024;
+
 int HiLogPrint(LogType type, LogLevel level, unsigned int domain, const char *tag, const char *fmt, ...)
 {
-    constexpr int MAX_BUF_SIZE = 1024;
     va_list ap;
     va_start(ap, fmt);
     char buf[MAX_BUF_SIZE] = {0};
