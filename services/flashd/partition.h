@@ -19,6 +19,9 @@
 #include <string>
 
 #include "image_writer/image_writer.h"
+#ifdef UPDATER_USE_PTABLE
+#include "ptable.h"
+#endif
 
 namespace Flashd {
 class Partition {
@@ -30,6 +33,10 @@ public:
     int DoFlash(const uint8_t *buffer, int bufferSize) const;
     int DoFormat() const;
     int DoErase() const;
+    int DoErasePartition() const;
+#ifdef UPDATER_USE_PTABLE
+    int DoEraseExt(const Ptable::PtnInfo &ptnInfo) const;
+#endif
 
 private:
     uint64_t GetBlockDeviceSize(int fd) const;
