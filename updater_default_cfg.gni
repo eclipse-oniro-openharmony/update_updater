@@ -16,7 +16,7 @@ import("//build/ohos.gni")
 init_feature_ab_partition = false
 declare_args() {
   updater_cfg_file = ""
-  updater_ui_support = true
+  updater_ui_support = false
   if (!defined(global_parts_info.arkui_ui_lite)) {
     updater_ui_support = false
   }
