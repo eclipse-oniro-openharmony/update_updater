@@ -94,6 +94,7 @@ int Partition::DoErasePartition() const
     return 0;
 }
 
+#ifdef UPDATER_USE_PTABLE
 int Partition::DoEraseExt(const Ptable::PtnInfo &ptnInfo) const
 {
     uint64_t partitionSize = ptnInfo.partitionSize;
@@ -112,6 +113,7 @@ int Partition::DoEraseExt(const Ptable::PtnInfo &ptnInfo) const
 
     return 0;
 }
+#endif
 
 int Partition::DoFormat() const
 {
