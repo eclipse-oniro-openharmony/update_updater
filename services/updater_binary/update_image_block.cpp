@@ -493,6 +493,7 @@ int32_t UScriptInstructionShaCheck::DoBlocksVerify(Uscript::UScriptEnv &env, con
 
     if (ExtractFileByName(env, infos.transferName, outStream,
                           transferListBuffer, transferListSize) != USCRIPT_SUCCESS) {
+        LOG(ERROR) << "Error to extract " << infos.transferName;
         return USCRIPT_ERROR_EXECUTE;
     }
 
@@ -510,8 +511,8 @@ int32_t UScriptInstructionShaCheck::DoBlocksVerify(Uscript::UScriptEnv &env, con
     transferParams->retryFile = std::string("/data/updater") + partitionName + "_retry";
 
     LOG(INFO) << "Store base path is " << transferParams->storeBase;
-    int32_t ret = Store::CreateNewSpace(transferParams->storeBase, !transferParams->env->IsRetry());
-    if (ret == -1) {
+    transferParams->storeCreated = Store::CreateNewSpace(transferParams->storeBase, !transferParams->env->IsRetry());
+    if (transferParams->storeCreated == -1) {
         LOG(ERROR) << "Error to create new store space";
         return USCRIPT_ERROR_EXECUTE;
     }
@@ -522,7 +523,11 @@ int32_t UScriptInstructionShaCheck::DoBlocksVerify(Uscript::UScriptEnv &env, con
     }
     if (!tm->CommandsParser(fd, lines)) {
         close(fd);
+        LOG(ERROR) << "Failed to block verify";
         return USCRIPT_ERROR_EXECUTE;
+    }
+    if (transferParams->storeCreated != -1) {
+        Store::DoFreeSpace(transferParams->storeBase);
     }
     close(fd);
     return USCRIPT_SUCCESS;

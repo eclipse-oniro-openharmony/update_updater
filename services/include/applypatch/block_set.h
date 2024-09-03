@@ -115,7 +115,7 @@ private:
 extern "C" {
 #endif
 #endif /* __cpluscplus */
-int BlockVerify(const Command &cmd, std::vector<uint8_t> &buffer,
+int32_t BlockVerify(const Command &cmd, std::vector<uint8_t> &buffer,
     const size_t size, const std::string srcHash, size_t &pos);
 #ifdef __cplusplus
 #if __cplusplus

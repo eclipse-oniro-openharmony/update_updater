@@ -222,7 +222,7 @@ CommandResult StashCommandFn::Execute(const Command &params)
         LOG(ERROR) << "Error to load block data";
         return FAILED;
     }
-    int res = srcBlk.VerifySha256(buffer, srcBlockSize, shaStr);
+    int32_t res = srcBlk.VerifySha256(buffer, srcBlockSize, shaStr);
     if (res != 0 && !params.GetTransferParams()->canWrite) {
         res = BlockVerify(params, buffer, srcBlockSize, shaStr, pos);
     }
