@@ -45,7 +45,6 @@ int HiLogPrint(LogType type, LogLevel level, unsigned int domain, const char *ta
     va_end(ap);
     /* save log to log partition */
     printf("%s", buf);
-    va_end(ap);
     return 0;
 }
 
@@ -142,6 +141,10 @@ static int32_t ExtractFileByNameFunc(Uscript::UScriptEnv &env, const std::string
     }
     ret = outStream->GetBuffer(outBuf, buffSize);
     LOG(INFO) << "outBuf data size is: " << buffSize;
+    if (outBuf == nullptr) {
+        LOG(ERROR) << "Error to get outBuf";
+        return USCRIPT_ERROR_EXECUTE;
+    }
 
     return USCRIPT_SUCCESS;
 }
@@ -362,20 +365,20 @@ static int32_t ExecuteUpdateBlock(Uscript::UScriptEnv &env, const UpdateBlockInf
     Hpackage::PkgManager::StreamPtr outStream = nullptr;
     uint8_t *transferListBuffer = nullptr;
     size_t transferListSize = 0;
-    uint8_t *ancoSizeBuffer = nullptr;
-    size_t ancoSizeListSize = 0;
+    uint8_t *fileSizeBuffer = nullptr;
+    size_t fileListSize = 0;
     const std::string fileName = "anco_size";
-    if (ExtractFileByNameFunc(env, fileName, outStream, ancoSizeBuffer,
-                              ancoSizeListSize) != USCRIPT_SUCCESS) {
+    if (ExtractFileByNameFunc(env, fileName, outStream, fileSizeBuffer,
+                              fileListSize) != USCRIPT_SUCCESS) {
         return USCRIPT_ERROR_EXECUTE;
     }
-    std::string str(reinterpret_cast<char*>(ancoSizeBuffer), ancoSizeListSize);
+    env.GetPkgManager()->ClosePkgStream(outStream);
+    std::string str(reinterpret_cast<char*>(fileSizeBuffer), fileListSize);
     int64_t maxStashSize = std::stoll(str);
     if (CreateFixedSizeEmptyFile(infos, destImage, maxStashSize) != 0) {
         LOG(ERROR) << "Failed to create empty file";
         return USCRIPT_ERROR_EXECUTE;
     }
-    env.GetPkgManager()->ClosePkgStream(outStream);
 
     if (ExtractFileByNameFunc(env, infos.transferName,
         outStream, transferListBuffer, transferListSize) != USCRIPT_SUCCESS) {
