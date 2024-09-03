@@ -16,7 +16,9 @@
 #define UPDATER_FS_MANAGER_MOUNT_H
 
 #include <string>
+#ifndef UPDATE_PATCH_SHARED
 #include "fs_manager/fs_manager.h"
+#endif
 
 namespace Updater {
 void LoadFstab(); /* Load fstab */
@@ -28,6 +30,8 @@ int MountSdcard(std::string &mountPoint, std::string &path);
 int SetupPartitions(bool isMountData = true);
 const std::string GetBlockDeviceByMountPoint(const std::string &mountPoint);
 const std::vector<std::string> GetBlockDevicesByMountPoint(const std::string &mountPoint);
+#ifndef UPDATE_PATCH_SHARED
 MountStatus GetMountStatusForPath(const std::string &path);
+#endif
 } // Updater
 #endif // UPDATER_FS_MANAGER_MOUNT_H

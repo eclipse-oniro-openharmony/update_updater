@@ -45,6 +45,7 @@ static std::string GetFstabFile()
     return "";
 }
 
+#ifndef UPDATE_PATCH_SHARED
 MountStatus GetMountStatusForPath(const std::string &path)
 {
     FstabItem *item = FindFstabItemForPath(*g_fstab, path.c_str());
@@ -53,6 +54,7 @@ MountStatus GetMountStatusForPath(const std::string &path)
     }
     return GetMountStatusForMountPoint(item->mountPoint);
 }
+#endif
 
 void LoadFstab()
 {
