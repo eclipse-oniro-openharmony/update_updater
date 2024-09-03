@@ -136,6 +136,7 @@ bool LoadTarget(const Command &params, size_t &pos, std::vector<uint8_t> &buffer
         result = FAILED;
         return false;
     }
+    result = SUCCESS;
     return true;
 }
 
@@ -158,6 +159,9 @@ CommandResult DiffAndMoveCommandFn::Execute(const Command &params)
     std::vector<uint8_t> buffer;
     CommandResult result = FAILED;
     if (!LoadTarget(params, pos, buffer, targetBlock, result)) {
+        return result;
+    }
+    if (!params.GetTransferParams()->canWrite) {
         return result;
     }
 
@@ -218,7 +222,11 @@ CommandResult StashCommandFn::Execute(const Command &params)
         LOG(ERROR) << "Error to load block data";
         return FAILED;
     }
-    if (srcBlk.VerifySha256(buffer, srcBlockSize, shaStr) != 0) {
+    int32_t res = srcBlk.VerifySha256(buffer, srcBlockSize, shaStr);
+    if (res != 0 && !params.GetTransferParams()->canWrite) {
+        res = BlockVerify(params, buffer, srcBlockSize, shaStr, pos);
+    }
+    if (res != 0) {
         LOG(WARNING) << "failed to load source blocks for stash";
         return SUCCESS;
     }

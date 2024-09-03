@@ -293,6 +293,13 @@ int32_t BlockSet::LoadSourceBuffer(const Command &cmd, size_t &pos, std::vector<
     return 1;
 }
 
+__attribute__((weak)) int32_t BlockVerify(const Command &cmd, std::vector<uint8_t> &buffer,
+    const size_t size, const std::string srcHash, size_t &pos)
+{
+    return -1;
+}
+
+
 int32_t BlockSet::LoadTargetBuffer(const Command &cmd, std::vector<uint8_t> &buffer, size_t &blockSize,
     size_t pos, std::string &srcHash)
 {
@@ -305,7 +312,11 @@ int32_t BlockSet::LoadTargetBuffer(const Command &cmd, std::vector<uint8_t> &buf
     std::string storePath = storeBase + "/" + srcHash;
     struct stat storeStat {};
     int res = stat(storePath.c_str(), &storeStat);
-    if (VerifySha256(buffer, blockSize, srcHash) == 0) {
+    int32_t verifyRes = VerifySha256(buffer, blockSize, srcHash);
+    if (verifyRes != 0 && !cmd.GetTransferParams()->canWrite) {
+        return BlockVerify(cmd, buffer, blockSize, srcHash, pos);
+    }
+    if (verifyRes == 0) {
         if (isOverlap && res != 0) {
             cmd.GetTransferParams()->freeStash = srcHash;
             ret = Store::WriteDataToStore(storeBase, srcHash, buffer, blockSize * H_BLOCK_SIZE);

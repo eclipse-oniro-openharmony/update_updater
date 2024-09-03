@@ -365,6 +365,7 @@ static int32_t ExecuteUpdateBlock(Uscript::UScriptEnv &env, Uscript::UScriptCont
     /* Save Script Env to transfer manager */
     transferParams->env = &env;
 
+    transferParams->canWrite = true;
     std::vector<std::string> lines =
         Updater::Utils::SplitString(std::string(reinterpret_cast<const char*>(transferListBuffer)), "\n");
     // Close stream opened before.
@@ -472,6 +473,66 @@ int32_t UScriptInstructionBlockCheck::Execute(Uscript::UScriptEnv &env, Uscript:
     return USCRIPT_SUCCESS;
 }
 
+static std::string GetPartName(const std::string &partitionName)
+{
+    if (partitionName.empty()) {
+        return "";
+    }
+    return partitionName[0] == '/' ? partitionName.substr(1) : partitionName;
+}
+
+int32_t UScriptInstructionShaCheck::DoBlocksVerify(Uscript::UScriptEnv &env, const std::string &partitionName,
+    const std::string &devPath)
+{
+    UpdateBlockInfo infos {};
+    infos.partitionName = partitionName;
+    infos.transferName = GetPartName(partitionName) + "transfer.list";
+    uint8_t *transferListBuffer = nullptr;
+    size_t transferListSize = 0;
+    Hpackage::PkgManager::StreamPtr outStream = nullptr;
+
+    if (ExtractFileByName(env, infos.transferName, outStream,
+                          transferListBuffer, transferListSize) != USCRIPT_SUCCESS) {
+        LOG(ERROR) << "Error to extract " << infos.transferName;
+        return USCRIPT_ERROR_EXECUTE;
+    }
+
+    std::vector<std::string> lines =
+        Updater::Utils::SplitString(std::string(reinterpret_cast<const char*>(transferListBuffer)), "\n");
+    // Close stream opened before.
+    env.GetPkgManager()->ClosePkgStream(outStream);
+
+    std::unique_ptr<TransferManager> tm = std::make_unique<TransferManager>();
+    auto transferParams = tm->GetTransferParams();
+    transferParams->env = &env;
+    transferParams->canWrite = false;
+    transferParams->devPath = devPath;
+    transferParams->storeBase = std::string("/data/updater") + partitionName + "_tmp";
+    transferParams->retryFile = std::string("/data/updater") + partitionName + "_retry";
+
+    LOG(INFO) << "Store base path is " << transferParams->storeBase;
+    transferParams->storeCreated = Store::CreateNewSpace(transferParams->storeBase, !transferParams->env->IsRetry());
+    if (transferParams->storeCreated == -1) {
+        LOG(ERROR) << "Error to create new store space";
+        return USCRIPT_ERROR_EXECUTE;
+    }
+    int fd = open(devPath.c_str(), O_RDWR | O_LARGEFILE);
+    if (fd == -1) {
+        LOG(ERROR) << "Failed to open block";
+        return USCRIPT_ERROR_EXECUTE;
+    }
+    if (!tm->CommandsParser(fd, lines)) {
+        close(fd);
+        LOG(ERROR) << "Failed to block verify";
+        return USCRIPT_ERROR_EXECUTE;
+    }
+    if (transferParams->storeCreated != -1) {
+        Store::DoFreeSpace(transferParams->storeBase);
+    }
+    close(fd);
+    return USCRIPT_SUCCESS;
+}
+
 bool UScriptInstructionShaCheck::IsTargetShaDiff(const std::string &devPath, const ShaInfo &shaInfo)
 {
     std::string tgtResultSha = CalculateBlockSha(devPath, shaInfo.targetPairs);
@@ -484,18 +545,20 @@ bool UScriptInstructionShaCheck::IsTargetShaDiff(const std::string &devPath, con
 }
 
 int UScriptInstructionShaCheck::ExecReadShaInfo(Uscript::UScriptEnv &env, const std::string &devPath,
-    const ShaInfo &shaInfo)
+    const ShaInfo &shaInfo, const std::string &partitionName)
 {
     UPDATER_INIT_RECORD;
     std::string resultSha = CalculateBlockSha(devPath, shaInfo.blockPairs);
     if (resultSha != shaInfo.contrastSha && IsTargetShaDiff(devPath, shaInfo)) {
-        LOG(ERROR) << "Different sha256, cannot continue";
-        LOG(ERROR) << "blockPairs:" << shaInfo.blockPairs;
-        LOG(ERROR) << "resultSha: " << resultSha << ", shaInfo.contrastSha: " << shaInfo.contrastSha;
-        PrintAbnormalBlockHash(devPath, shaInfo.blockPairs);
-        UPDATER_LAST_WORD(devPath.substr(devPath.find_last_of("/") + 1), USCRIPT_ERROR_EXECUTE);
-        env.PostMessage(UPDATER_RETRY_TAG, VERIFY_FAILED_REBOOT);
-        return USCRIPT_ERROR_EXECUTE;
+        if (DoBlocksVerify(env, partitionName, devPath) != USCRIPT_SUCCESS) {
+            LOG(ERROR) << "Different sha256, cannot continue";
+            LOG(ERROR) << "blockPairs:" << shaInfo.blockPairs;
+            LOG(ERROR) << "resultSha: " << resultSha << ", shaInfo.contrastSha: " << shaInfo.contrastSha;
+            PrintAbnormalBlockHash(devPath, shaInfo.blockPairs);
+            UPDATER_LAST_WORD(devPath.substr(devPath.find_last_of("/") + 1), USCRIPT_ERROR_EXECUTE);
+            env.PostMessage(UPDATER_RETRY_TAG, VERIFY_FAILED_REBOOT);
+            return USCRIPT_ERROR_EXECUTE;
+        }
     }
     LOG(INFO) << "UScriptInstructionShaCheck::Execute Success";
     return USCRIPT_SUCCESS;
@@ -645,7 +708,7 @@ int32_t UScriptInstructionShaCheck::Execute(Uscript::UScriptEnv &env, Uscript::U
         UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE);
         return ReturnAndPushParam(USCRIPT_ERROR_EXECUTE, context);
     }
-    ret = ExecReadShaInfo(env, devPath, shaInfo);
+    ret = ExecReadShaInfo(env, devPath, shaInfo, partitionName);
     return ReturnAndPushParam(ret, context);
 }
 }
