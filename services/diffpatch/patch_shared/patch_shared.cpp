@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024. Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,7 +33,7 @@ using namespace Hpackage;
 using namespace Updater;
 
 namespace Updater {
-constexpr int WRITEFILLSIZE = 4096;
+constexpr int WRITE_FILE_SIZE = 4096;
 struct UpdateBlockInfo {
     std::string partitionName;
     std::string transferName;
@@ -308,13 +308,13 @@ static int CreateFixedSizeEmptyFile(const UpdateBlockInfo &infos, const std::str
     }
 
     /* fill the remaining space with zero values */
-    int writeFileTmp = (size - static_cast<int64_t>(fileSize)) / WRITEFILLSIZE;
-    char zerolist[WRITEFILLSIZE] = {0};
+    int writeFileTmp = (size - static_cast<int64_t>(fileSize)) / WRITE_FILE_SIZE;
+    char zerolist[WRITE_FILE_SIZE] = {0};
     while (writeFileTmp > 0) {
-        file.write(zerolist, WRITEFILLSIZE);
+        file.write(zerolist, WRITE_FILE_SIZE);
         writeFileTmp--;
     }
-    writeFileTmp = (size - static_cast<int64_t>(fileSize)) % WRITEFILLSIZE;
+    writeFileTmp = (size - static_cast<int64_t>(fileSize)) % WRITE_FILE_SIZE;
     char zero = 0;
     while (writeFileTmp > 0) {
         file.write(&zero, 1);
@@ -331,7 +331,7 @@ static std::string GetFileName(const std::string &srcImage)
         Updater::Utils::SplitString(std::string(srcImage), "/");
     LOG(INFO) << "lines.size is " << lines.size();
     if (lines.size() == 0) {
-        return nullptr;
+        return "";
     }
     return lines[lines.size() - 1];
 }

@@ -72,7 +72,7 @@ ohos_unittest("updater_service_unittest") {
     "init:libbegetutil_static",
     "libdrm:libdrm",
     "openssl:libcrypto_shared",
-    "openssl:libssl_shared",
+    "openssl:libssl_static",
     "ui_lite:libupdater_layout",
     "zlib:libz",
   ]

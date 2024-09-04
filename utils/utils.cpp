@@ -899,16 +899,17 @@ void SetFileAttributes(const std::string& file, uid_t owner, gid_t group, mode_t
     RestoreconRecurse(file.c_str());
 #endif // WITH_SELINUX
     if (chown(file.c_str(), USER_ROOT_AUTHORITY, GROUP_ROOT_AUTHORITY) != 0) {
-        LOG(ERROR) << "Chown failed: " << file << " " << USER_ROOT_AUTHORITY << "," << GROUP_ROOT_AUTHORITY;
+        LOG(WARNING) << "Chown failed: " << file << " " << USER_ROOT_AUTHORITY << "," << GROUP_ROOT_AUTHORITY;
     }
     if (chmod(file.c_str(), mode) != EOK) {
-        LOG(ERROR) << "chmod failed: " << file << " " << mode;
+        LOG(WARNING) << "Chmod failed: " << file << " " << mode;
     }
     if (chown(file.c_str(), owner, group) != 0) {
-        LOG(ERROR) << "Chown failed: " << file << " " << owner << "," << group;
+        LOG(WARNING) << "Chown failed: " << file << " " << owner << "," << group;
     }
 }
 #endif
+
 } // Utils
 void __attribute__((weak)) InitLogger(const std::string &tag)
 {

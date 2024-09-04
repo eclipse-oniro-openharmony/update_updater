@@ -171,7 +171,6 @@
             <option name="push" value="src/test_logic.us -> /data/updater/src" src="res"/>
             <option name="push" value="src/hash_signed_data -> /data/updater/src" src="res"/>
             <option name="push" value="src/updater_fake_pkg.zip -> /data/updater/src" src="res"/>
-            <option name="push" value="src/signing_cert.crt -> /data/updater/src" src="res"/>
             <option name="push" value="updater/updater/libuser_instruction_invalid.so -> /data/updater/lib" src="out"/>
             <option name="push" value="updater/updater/libuser_instruction.so -> /data/updater/lib" src="out"/>
         </preparer>
@@ -226,7 +225,6 @@
     </target>
     <target name="bin_flow_update_test">
         <preparer>
-            <option name="push" value="src/signing_cert.crt -> /data/updater/src" src="res"/>
             <option name="push" value="updater/update.bin -> /data/updater/package" src="res"/>
             <option name="push" value="updater/updater_flow.zip -> /data/updater/package" src="res"/>
         </preparer>
