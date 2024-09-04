@@ -85,6 +85,13 @@ public:
     int32_t Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context) override;
 };
 
+class UScriptInstructionPkgExtractNoRet : public UScriptInstructionPkgExtract {
+public:
+    UScriptInstructionPkgExtractNoRet() {}
+    ~UScriptInstructionPkgExtractNoRet() override {}
+    void ExecuteNoRet(Uscript::UScriptEnv &env, Uscript::UScriptContext &context);
+};
+
 class UScriptInstructionUpdateFromBin : public Uscript::UScriptInstruction {
 public:
     UScriptInstructionUpdateFromBin() {}
