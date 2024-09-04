@@ -298,7 +298,7 @@ int32_t UScriptInstructionPkgExtractRetSuc::Execute(Uscript::UScriptEnv &env, Us
 {
     int32_t ret = UScriptInstructionPkgExtract::Execute(env, context);
     if (ret != USCRIPT_SUCCESS) {
-        LOG(INFO) << "Fail to extract file, ret = " << ret;
+        LOG(ERROR) << "Error to extract file, ret = " << ret;
     }
     return USCRIPT_SUCCESS;
 }
