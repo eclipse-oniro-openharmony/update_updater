@@ -230,20 +230,16 @@ void UpdaterDoReboot(const std::string& rebootTarget, const std::string &extData
     if (rebootTarget.empty()) {
         if (WriteUpdaterMiscMsg(msg) != true) {
             LOG(INFO) << "UpdaterDoReboot: WriteUpdaterMessage empty error";
-            return;
         }
     } else {
         if (!ReadUpdaterMiscMsg(msg)) {
             LOG(ERROR) << "UpdaterDoReboot read misc failed";
-            return;
         }
         if (!SetRebootMisc(rebootTarget, extData, msg)) {
             LOG(ERROR) << "UpdaterDoReboot set misc failed";
-            return;
         }
         if (!WriteUpdaterMiscMsg(msg)) {
             LOG(INFO) << "UpdaterDoReboot: WriteUpdaterMiscMsg error";
-            return;
         }
     }
     sync();
