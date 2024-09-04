@@ -71,7 +71,7 @@ ohos_fuzztest("UpdaterStartUpdaterProcFuzzTest") {
     "lz4:liblz4_static",
     "openssl:libcrypto_shared",
     "openssl:libssl_shared",
-    "ui_lite:libupdater_layout"
+    "ui_lite:libupdater_layout",
     "zlib:libz",
   ]
 
