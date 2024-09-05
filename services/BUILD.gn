@@ -88,7 +88,7 @@ ohos_static_library("libupdater_static") {
     "-Wl,--whole-archive",
     rebase_path("${target_out_dir}/flashd/libflashd.a"),
     "-Wl,--no-whole-archive",
-]
+  ]
 
   if (defined(use_ptable)) {
     include_dirs += [ "${updater_path}/services/ptable_parse" ]
