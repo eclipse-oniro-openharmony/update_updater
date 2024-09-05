@@ -413,7 +413,6 @@ UpdaterStatus HandlePipeMsg(UpdaterParams &upParams, int pipeRead, bool &retryUp
     return UPDATE_SUCCESS;
 }
 
-
 UpdaterStatus CheckProcStatus(pid_t pid, bool retryUpdate)
 {
     int status;
