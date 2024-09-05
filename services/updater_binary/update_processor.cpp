@@ -38,6 +38,7 @@
 #include "updater_main.h"
 #include "updater/updater_const.h"
 #include "update_bin/bin_process.h"
+#include "scope_guard.h"
 
 using namespace Uscript;
 using namespace Hpackage;
@@ -460,49 +461,47 @@ int ProcessUpdater(bool retry, int pipeFd, const std::string &packagePath, const
     UPDATER_INIT_RECORD;
     UpdaterInit::GetInstance().InvokeEvent(UPDATER_BINARY_INIT_EVENT);
     Dump::GetInstance().RegisterDump("DumpHelperLog", std::make_unique<DumpHelperLog>());
-    FILE *pipeWrite = fdopen(pipeFd, "w");
+    std::unique_ptr<FILE, decltype(&fclose)> pipeWrite(fdopen(pipeFd, "w"), fclose);
     if (pipeWrite == nullptr) {
         LOG(ERROR) << "Fail to fdopen, err: " << strerror(errno);
         UPDATER_LAST_WORD(EXIT_INVALID_ARGS);
         return EXIT_INVALID_ARGS;
     }
+    int ret = -1;
+    Detail::ScopeGuard guard([&] {
+        (void)fprintf(pipeWrite.get(), "subProcessResult:%d\n", ret);
+        (void)fflush(pipeWrite.get());
+    });
     // line buffered, make sure parent read per line.
-    setlinebuf(pipeWrite);
+    setlinebuf(pipeWrite.get());
     PkgManager::PkgManagerPtr pkgManager = PkgManager::CreatePackageInstance();
     if (pkgManager == nullptr) {
         LOG(ERROR) << "pkgManager is nullptr";
-        fclose(pipeWrite);
-        pipeWrite = nullptr;
         UPDATER_LAST_WORD(EXIT_INVALID_ARGS);
         return EXIT_INVALID_ARGS;
     }
 
     std::vector<std::string> components;
-    int32_t ret = pkgManager->LoadPackage(packagePath, keyPath, components);
+    ret = pkgManager->LoadPackage(packagePath, keyPath, components);
     if (ret != PKG_SUCCESS) {
         LOG(ERROR) << "Fail to load package";
-        fclose(pipeWrite);
-        pipeWrite = nullptr;
         PkgManager::ReleasePackageInstance(pkgManager);
         UPDATER_LAST_WORD(EXIT_INVALID_ARGS);
         return EXIT_INVALID_ARGS;
     }
 #ifdef UPDATER_USE_PTABLE
-    DevicePtable& devicePtb = DevicePtable::GetInstance();
-    devicePtb.LoadPartitionInfo();
+    DevicePtable::GetInstance().LoadPartitionInfo();
 #endif
 
     ret = Updater::ExecUpdate(pkgManager, retry, packagePath,
         [&pipeWrite](const char *cmd, const char *content) {
-            if (pipeWrite != nullptr) {
-                fprintf(pipeWrite, "%s:%s\n", cmd, content);
-                fflush(pipeWrite);
+            if (pipeWrite.get() != nullptr) {
+                (void)fprintf(pipeWrite.get(), "%s:%s\n", cmd, content);
+                (void)fflush(pipeWrite.get());
             }
         });
     PkgManager::ReleasePackageInstance(pkgManager);
 #ifndef UPDATER_UT
-    fclose(pipeWrite);
-    pipeWrite = nullptr;
     if (ret == 0) {
         SetActiveSlot();
     }
