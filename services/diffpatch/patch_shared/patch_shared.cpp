@@ -27,6 +27,26 @@
 #include "utils.h"
 #include "pkg_manager.h"
 #include "updater_env.h"
+#include <cstdarg>
+#include <securec.h>
+#include "hilog/log.h"
+
+constexpr int64_t MAX_BUF_SIZE = 1024;
+
+int HiLogPrint(LogType type, LogLevel level, unsigned int domain, const char *tag, const char *fmt, ...)
+{
+    va_list ap;
+    va_start(ap, fmt);
+    char buf[MAX_BUF_SIZE] = {0};
+    if (vsnprintf_s(buf, MAX_BUF_SIZE, MAX_BUF_SIZE - 1, fmt, ap) == -1) {
+        va_end(ap);
+        return 0;
+    }
+    va_end(ap);
+    /* save log to log partition */
+    printf("%s", buf);
+    return 0;
+}
 
 using namespace Uscript;
 using namespace Hpackage;
@@ -121,6 +141,10 @@ static int32_t ExtractFileByNameFunc(Uscript::UScriptEnv &env, const std::string
     }
     ret = outStream->GetBuffer(outBuf, buffSize);
     LOG(INFO) << "outBuf data size is: " << buffSize;
+    if (outBuf == nullptr) {
+        LOG(ERROR) << "Error to get outBuf";
+        return USCRIPT_ERROR_EXECUTE;
+    }
 
     return USCRIPT_SUCCESS;
 }
@@ -180,8 +204,7 @@ static int32_t DoExecuteUpdateBlock(const UpdateBlockInfo &infos, TransferManage
     if (ret == Uscript::USCRIPT_SUCCESS) {
         PartitionRecord::GetInstance().RecordPartitionUpdateStatus(infos.partitionName, true);
     }
-    (void)Utils::DeleteFile(infos.devPath);
-    
+
     return ret;
 }
 
@@ -297,7 +320,7 @@ static int CreateFixedSizeEmptyFile(const UpdateBlockInfo &infos, const std::str
         return -1;
     }
     size_t fileSize = Updater::Utils::GetFileSize(infos.devPath);
-    if (static_cast<int64_t>(fileSize) >= size) {
+    if (fileSize >= (static_cast<size_t>(size))) {
         LOG(INFO) << "no need copy";
         return 0;
     }
@@ -308,13 +331,13 @@ static int CreateFixedSizeEmptyFile(const UpdateBlockInfo &infos, const std::str
     }
 
     /* fill the remaining space with zero values */
-    int writeFileTmp = (size - static_cast<int64_t>(fileSize)) / WRITEFILLSIZE;
-    char zerolist[WRITEFILLSIZE] = {0};
+    int writeFileTmp = (size - fileSize) / WRITE_FILE_SIZE;
+    char zerolist[WRITE_FILE_SIZE] = {0};
     while (writeFileTmp > 0) {
-        file.write(zerolist, WRITEFILLSIZE);
+        file.write(zerolist, WRITE_FILE_SIZE);
         writeFileTmp--;
     }
-    writeFileTmp = (size - static_cast<int64_t>(fileSize)) % WRITEFILLSIZE;
+    writeFileTmp = (size - fileSize) % WRITE_FILE_SIZE;
     char zero = 0;
     while (writeFileTmp > 0) {
         file.write(&zero, 1);
@@ -342,6 +365,21 @@ static int32_t ExecuteUpdateBlock(Uscript::UScriptEnv &env, const UpdateBlockInf
     Hpackage::PkgManager::StreamPtr outStream = nullptr;
     uint8_t *transferListBuffer = nullptr;
     size_t transferListSize = 0;
+    uint8_t *fileSizeBuffer = nullptr;
+    size_t fileListSize = 0;
+    const std::string fileName = "anco_size";
+    if (ExtractFileByNameFunc(env, fileName, outStream, fileSizeBuffer,
+                              fileListSize) != USCRIPT_SUCCESS) {
+        return USCRIPT_ERROR_EXECUTE;
+    }
+    env.GetPkgManager()->ClosePkgStream(outStream);
+    std::string str(reinterpret_cast<char*>(fileSizeBuffer), fileListSize);
+    int64_t maxStashSize = std::stoll(str);
+    if (CreateFixedSizeEmptyFile(infos, destImage, maxStashSize) != 0) {
+        LOG(ERROR) << "Failed to create empty file";
+        return USCRIPT_ERROR_EXECUTE;
+    }
+
     if (ExtractFileByNameFunc(env, infos.transferName,
         outStream, transferListBuffer, transferListSize) != USCRIPT_SUCCESS) {
         return USCRIPT_ERROR_EXECUTE;
@@ -359,28 +397,15 @@ static int32_t ExecuteUpdateBlock(Uscript::UScriptEnv &env, const UpdateBlockInf
         transferParams->patchDataBuffer, transferParams->patchDataSize) != USCRIPT_SUCCESS) {
         return USCRIPT_ERROR_EXECUTE;
     }
-    env.GetPkgManager()->ClosePkgStream(outStream);
-    uint8_t *ancoSizeBuffer = nullptr;
-    size_t ancoSizeListSize = 0;
-    const std::string fileName = "anco_size";
-    if (ExtractFileByNameFunc(env, fileName, outStream, ancoSizeBuffer,
-                              ancoSizeListSize) != USCRIPT_SUCCESS) {
-        return USCRIPT_ERROR_EXECUTE;
-    }
-    env.GetPkgManager()->ClosePkgStream(outStream);
-    std::string str(reinterpret_cast<char*>(ancoSizeBuffer), ancoSizeListSize);
-    int64_t maxStashSize = std::stoll(str);
-    if (CreateFixedSizeEmptyFile(infos, destImage, maxStashSize) != 0) {
-        LOG(ERROR) << "Failed to create empty file";
-        return USCRIPT_ERROR_EXECUTE;
-    }
 
     LOG(INFO) << "Ready to start a thread to handle new data processing";
     if (InitThread(infos, tm.get()) != 0) {
         LOG(ERROR) << "Failed to create pthread";
+        env.GetPkgManager()->ClosePkgStream(outStream);
         return USCRIPT_ERROR_EXECUTE;
     }
     int32_t ret = DoExecuteUpdateBlock(infos, tm.get(), lines, targetPath, destImage);
+    env.GetPkgManager()->ClosePkgStream(outStream);
     return ret;
 }
 
@@ -388,7 +413,7 @@ int RestoreOriginalFile(const std::string &packagePath, const std::string &srcIm
 {
     UpdateBlockInfo infos {};
     if (GetUpdateBlockInfo(infos, packagePath, srcImage, targetPath) != 0) {
-        return -1;
+        return USCRIPT_ERROR_EXECUTE;
     }
     std::string destName = GetFileName(srcImage);
     std::string destImage = targetPath + "/" + destName;
@@ -396,7 +421,7 @@ int RestoreOriginalFile(const std::string &packagePath, const std::string &srcIm
     PkgManager::PkgManagerPtr pkgManager = PkgManager::CreatePackageInstance();
     if (pkgManager == nullptr) {
         LOG(ERROR) << "pkgManager is nullptr";
-        return -1;
+        return USCRIPT_ERROR_EXECUTE;
     }
 
     std::vector<std::string> components;
@@ -404,19 +429,22 @@ int RestoreOriginalFile(const std::string &packagePath, const std::string &srcIm
     int32_t ret = pkgManager->LoadPackage(pckPath, components, PkgFile::PKG_TYPE_ZIP);
     if (ret != PKG_SUCCESS) {
         LOG(ERROR) << "Fail to load package";
-        return -1;
+        return USCRIPT_ERROR_EXECUTE;
     }
     PostMessageFunction postMessage = nullptr;
     UScriptEnv *env = new (std::nothrow) UpdaterEnv(pkgManager, postMessage, false);
     if (env == nullptr) {
         LOG(ERROR) << "Fail to creat env";
-        return -1;
+        return USCRIPT_ERROR_EXECUTE;
     }
 
     int result = ExecuteUpdateBlock(*env, infos, targetPath, destImage);
     if (result != 0) {
+        (void)Utils::DeleteFile(destImage);
         LOG(ERROR) << "restore original file fail.";
     }
+    (void)Utils::DeleteFile(packagePath);
+    (void)Utils::DeleteFile(infos.devPath);
     delete env;
     env = nullptr;
     return result;

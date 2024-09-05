@@ -482,7 +482,7 @@ void CompressLogs(const std::string &logName)
 
 size_t GetFileSize(const std::string &filePath)
 {
-    int ret = 0;
+    size_t ret = 0;
     std::ifstream ifs(filePath, std::ios::binary | std::ios::in);
     if (ifs.is_open()) {
         ifs.seekg(0, std::ios::end);
