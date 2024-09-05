@@ -59,7 +59,7 @@ namespace OHOS {
             ret &= WriteDataToFile("BSDIFF40", magicNumSize, bspatchPath);
             ret &= WriteDataToFile(reinterpret_cast<const char*>(data), size, bspatchPath, true);
             ApplyPatch(bspatchPath, oldFilePath, newFilePath);
-        }else{
+        } else {
             ret &= WriteDataToFile("PKGDIFF0", magicNumSize, imgpatchPath);
             ret &= WriteDataToFile(reinterpret_cast<const char*>(data), size, imgpatchPath, true);
             ApplyPatch(imgpatchPath, oldFilePath, newFilePath);
