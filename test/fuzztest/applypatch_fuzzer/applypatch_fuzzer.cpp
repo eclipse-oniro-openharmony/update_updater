@@ -30,10 +30,11 @@ using namespace Updater;
 namespace OHOS {
     bool WriteDataToFile(const char* data, size_t size, const char* filePath, bool isAppend = false)
     {
+        std::ofstream ofs;
         if (isAppend) {
-            std::ofstream ofs(filePath, std::ios::app | std::ios::binary);
+            ofs.open(filePath, std::ios::app | std::ios::binary);
         } else {
-            std::ofstream ofs(filePath, std::ios::ate | std::ios::binary);
+            ofs.open(filePath, std::ios::ate | std::ios::binary);
         }
         if (!ofs.is_open()) {
             LOG(ERROR) << "open " << filePath << " failed";
