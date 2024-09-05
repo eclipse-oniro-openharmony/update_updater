@@ -108,7 +108,7 @@ int32_t UpdaterInstructionFactory::CreateInstructionInstance(UScriptInstructionP
     } else if (name == "pkg_extract") {
         instr = new UScriptInstructionPkgExtract();
     } else if (name == "pkg_extract_no_ret") {
-        instr = new UScriptInstructionPkgExtractNoRet();
+        instr = new UScriptInstructionPkgExtractRetSuc();
     } else if (name == "update_from_bin") {
         instr = new UScriptInstructionBinFlowWrite();
     }
@@ -294,10 +294,13 @@ int32_t UScriptInstructionPkgExtract::Execute(Uscript::UScriptEnv &env, Uscript:
     return ret;
 }
 
-void UScriptInstructionPkgExtractNoRet::ExecuteNoRet(Uscript::UScriptEnv &env, Uscript::UScriptContext &context)
+int32_t UScriptInstructionPkgExtractRetSuc::Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context)
 {
-    UScriptInstructionPkgExtract::Execute(env, context);
-    return;
+    int32_t ret = UScriptInstructionPkgExtract::Execute(env, context);
+    if (ret != USCRIPT_SUCCESS) {
+        LOG(ERROR) << "Error to extract file, ret = " << ret;
+    }
+    return USCRIPT_SUCCESS;
 }
 
 int32_t UScriptInstructionUpdateFromBin::Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context)
