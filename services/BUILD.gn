@@ -87,7 +87,7 @@ ohos_static_library("libupdater_static") {
   ldflags = [
     "-Wl,--whole-archive",
     rebase_path("${target_out_dir}/flashd/libflashd.a"),
-    "-WI,--no-whole-archive",
+    "-Wl,--no-whole-archive",
 ]
 
   if (defined(use_ptable)) {
