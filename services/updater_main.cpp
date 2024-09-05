@@ -126,7 +126,6 @@ static UpdaterStatus UpdatePreCheck(UpdaterParams &upParams, const std::string p
     UPDATER_INIT_RECORD;
     int32_t ret = PreProcess::GetInstance().DoUpdateAuth(pkgPath);
     if (ret != 0) {
-        UPDATER_LAST_WORD("auth", ret);
         return UPDATE_ERROR;
     }
 
@@ -199,13 +198,13 @@ static UpdaterStatus VerifyPackages(UpdaterParams &upParams)
             UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_VERIFYPKGFAIL), true);
             auto endTime = std::chrono::system_clock::now();
             upParams.installTime[i] = endTime - startTime;
-            UPDATER_LAST_WORD(verifyret);
             return UPDATE_CORRUPT;
         }
         auto endTime = std::chrono::system_clock::now();
         upParams.installTime[i] = endTime - startTime;
     }
     if (VerifySpecialPkgs(upParams) != PKG_SUCCESS) {
+        UPDATER_LAST_WORD(UPDATE_CORRUPT);
         return UPDATE_CORRUPT;
     }
     ProgressSmoothHandler(UPDATER_UI_INSTANCE.GetCurrentPercent(),
@@ -375,7 +374,6 @@ static UpdaterStatus PreUpdatePackages(UpdaterParams &upParams)
 
     // verify packages first
     if (VerifyPackages(upParams) != UPDATE_SUCCESS) {
-        UPDATER_LAST_WORD(UPDATE_CORRUPT);
         return UPDATE_CORRUPT; // verify package failed must return UPDATE_CORRUPT, ux need it !!!
     }
 

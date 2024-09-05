@@ -83,6 +83,12 @@ ohos_static_library("libupdater_static") {
     "${updater_path}/services/ui:libui",
   ]
 
+force link flashd library ldflags = [
+  "-WI,--whole-archive",
+  "rebase_path("${target_out_dir}/flashd/libflashd.a")",
+  "-WI,--no-whole-archive",
+]
+
   if (defined(use_ptable)) {
     include_dirs += [ "${updater_path}/services/ptable_parse" ]
     deps += [ "${updater_path}/services/ptable_parse:libptableparse" ]
@@ -173,7 +179,7 @@ ohos_static_library("libupdater") {
     "cJSON:cjson",
     "init:libbegetutil_static",
     "openssl:libcrypto_shared",
-    "openssl:libssl_shared",
+    "openssl:libssl_static",
     "zlib:libz",
   ]
 
