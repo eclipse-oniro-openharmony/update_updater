@@ -23,6 +23,7 @@
 #include "updater_main.h"
 #include "updater_ui_facade.h"
 #include "utils.h"
+#include "updater_ui_stub.h"
 
 namespace Updater {
 namespace {
@@ -99,13 +100,14 @@ DEFINE_ASYN_CALLBACK(OnLabelSDCardEvt)
 
 DEFINE_ASYN_CALLBACK(OnLabelSDCardNoDelayEvt)
 {
-    LOG(INFO) << "On Label SDCard";
+    LOG(INFO) << "On Label SDCard No Delay";
     if (!GetFacade().SetMode(UPDATERMODE_SDCARD)) {
         return;
     }
     Utils::UsSleep(CALLBACK_DELAY);
     UpdaterParams upParams;
     upParams.updateMode = SDCARD_UPDATE;
+    UPDATER_UI_INSTANCE.ShowProgressPage();
     if (auto res = UpdaterFromSdcard(upParams); res != UPDATE_SUCCESS) {
         Utils::RemoveUpdateInfoFromMisc("sdcard_update");
         GetFacade().ShowLogRes(res == UPDATE_CORRUPT ? TR(LOGRES_VERIFY_FAILED) : TR(LOGRES_UPDATE_FAILED));
