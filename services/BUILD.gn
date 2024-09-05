@@ -83,10 +83,11 @@ ohos_static_library("libupdater_static") {
     "${updater_path}/services/ui:libui",
   ]
 
-force link flashd library ldflags = [
-  "-WI,--whole-archive",
-  "rebase_path("${target_out_dir}/flashd/libflashd.a")",
-  "-WI,--no-whole-archive",
+  # force link flashd library
+  ldflags = [
+    "-Wl,--whole-archive",
+    rebase_path("${target_out_dir}/flashd/libflashd.a"),
+    "-WI,--no-whole-archive",
 ]
 
   if (defined(use_ptable)) {
@@ -103,7 +104,7 @@ force link flashd library ldflags = [
     "init:libbegetutil_static",
     "libdrm:libdrm",
     "openssl:libcrypto_shared",
-    "openssl:libssl_shared",
+    "openssl:libssl_static",
     "zlib:libz",
   ]
   if (updater_ui_support) {

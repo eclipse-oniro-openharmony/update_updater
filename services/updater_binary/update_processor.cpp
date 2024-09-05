@@ -461,16 +461,15 @@ int ProcessUpdater(bool retry, int pipeFd, const std::string &packagePath, const
     UPDATER_INIT_RECORD;
     UpdaterInit::GetInstance().InvokeEvent(UPDATER_BINARY_INIT_EVENT);
     Dump::GetInstance().RegisterDump("DumpHelperLog", std::make_unique<DumpHelperLog>());
-    std::unique_ptr<FILE, decltype(&fclose)> pipeWrite(fdopen(pipeFd, "w"),fclose);
+    std::unique_ptr<FILE, decltype(&fclose)> pipeWrite(fdopen(pipeFd, "w"), fclose);
     if (pipeWrite == nullptr) {
         LOG(ERROR) << "Fail to fdopen, err: " << strerror(errno);
         UPDATER_LAST_WORD(EXIT_INVALID_ARGS);
         return EXIT_INVALID_ARGS;
     }
-
     int ret = -1;
-    Detail::ScopeGuardguard([&]{
-        (void)fprintf(pipeWrite.get(),"subProccessResult:%d/n", ret);
+    Detail::ScopeGuard guard([&] {
+        (void)fprintf(pipeWrite.get(), "subProcessResult:%d\n", ret);
         (void)fflush(pipeWrite.get());
     });
     // line buffered, make sure parent read per line.

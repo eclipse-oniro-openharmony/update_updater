@@ -402,16 +402,17 @@ UpdaterStatus HandlePipeMsg(UpdaterParams &upParams, int pipeRead, bool &retryUp
         if (pch != nullptr) {
             *pch = '\0';
         }
-        if (strstr(buffer, "subProccessResult") != nullptr) {
-            LOG(INFO) << "subProccessResult: " << buffer;
+        if (strstr(buffer, "subProcessResult") != nullptr) {
+            LOG(INFO) << "subProcessResult: " << buffer;
             break;
         }
         HandleChildOutput(buffer, MAX_BUFFER_SIZE, retryUpdate, upParams);
     }
+    LOG(INFO) << "HandlePipeMsg end";
     fclose(fromChild);
     return UPDATE_SUCCESS;
 }
-LOG(INFO) << "HandlePipeMsgend";
+
 
 UpdaterStatus CheckProcStatus(pid_t pid, bool retryUpdate)
 {
