@@ -122,7 +122,7 @@ DEFINE_ASYN_CALLBACK(OnLabelSDCardNoDelayEvt)
 
 DEFINE_ASYN_CALLBACK(OnLabelSDUpdateResEvt)
 {
-    LOG(INFO) << "On Label SDCard To Reserve Userdata"; 
+    LOG(INFO) << "On Label SDCard To Reserve Userdata";
     if (!GetFacade().SetMode(UPDATERMODE_SDCARD)) {
         return;
     }
