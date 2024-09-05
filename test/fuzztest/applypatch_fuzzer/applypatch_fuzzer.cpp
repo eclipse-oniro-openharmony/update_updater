@@ -24,12 +24,17 @@
 #include <fstream>
 #include <cstdio>
 #include "log/log.h"
+#include <fuzzer/FuzzedDataProvider.h>
 
 using namespace Updater;
 namespace OHOS {
-    bool WriteDataToFile(const char* data, size_t size, const char* filePath)
+    bool WriteDataToFile(const char* data, size_t size, const char* filePath, bool isAppend = false)
     {
-        std::ofstream ofs(filePath, std::ios::ate | std::ios::binary);
+        if (isAppend) {
+            std::ofstream ofs(filePath, std::ios::app | std::ios::binary);
+        } else {
+            std::ofstream ofs(filePath, std::ios::ate | std::ios::binary);
+        }
         if (!ofs.is_open()) {
             LOG(ERROR) << "open " << filePath << " failed";
             return false;
@@ -41,17 +46,28 @@ namespace OHOS {
 
     void FuzzApplyPatch(const uint8_t* data, size_t size)
     {
-        bool ret = true;
-        const char* patchPath = "/data/applyPatchfuzzPatchFile";
+        FuzzedDataProvider fdp(data, size);
+        
+        const int magicNumSize = 4;
+        const char* bspatchPath = "/data/applyPatchfuzzBspatch";
+        const char* imgpatchPath = "/data/applyPatchfuzzImgpatch";
         const char* oldFilePath = "/data/applyPatchfuzzOldFile";
         const char* newFilePath = "/data/applyPatchfuzzNewFile";
-        ret &= WriteDataToFile(reinterpret_cast<const char*>(data), size, patchPath);
-        ret &= WriteDataToFile(reinterpret_cast<const char*>(data), size, oldFilePath);
+        bool isPkgFormat = false;
+        bool ret = WriteDataToFile(reinterpret_cast<const char*>(data), size, oldFilePath);
+        isPkgFormat = fdp.ConsumeBool();
+        if (isPkgFormat) {
+            ret &= WriteDataToFile("BSDIFF40", magicNumSize, bspatchPath);
+            ret &= WriteDataToFile(reinterpret_cast<const char*>(data), size, bspatchPath, true);
+            ApplyPatch(bspatchPath, oldFilePath, newFilePath);
+        }else{
+            ret &= WriteDataToFile("PKGDIFF0", magicNumSize, imgpatchPath);
+            ret &= WriteDataToFile(reinterpret_cast<const char*>(data), size, imgpatchPath, true);
+            ApplyPatch(imgpatchPath, oldFilePath, newFilePath);
+        }
         if (!ret) {
             LOG(ERROR) << "create file failed";
-            return;
         }
-        ApplyPatch(patchPath, oldFilePath, newFilePath);
     }
 }
 
