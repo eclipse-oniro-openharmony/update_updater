@@ -80,7 +80,6 @@ ohos_static_library("libupdater_static") {
   deps += [
     "${updater_path}/interfaces/kits/misc_info:libmiscinfo",
     "${updater_path}/services/sdcard_update:libsdupdate",
-    "${updater_path}/services/ui:libui",
   ]
 
   if (defined(use_ptable)) {
@@ -106,6 +105,7 @@ ohos_static_library("libupdater_static") {
 
   if (updater_ui_support) {
     external_deps += [ "ui_lite:libupdater_layout" ]
+    deps += [ "${updater_path}/services/ui:libui" ]
   }
 
   if (build_selinux) {
