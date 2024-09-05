@@ -47,7 +47,6 @@ namespace OHOS {
     void FuzzApplyPatch(const uint8_t* data, size_t size)
     {
         FuzzedDataProvider fdp(data, size);
-        
         const int magicNumSize = 4;
         const char* bspatchPath = "/data/applyPatchfuzzBspatch";
         const char* imgpatchPath = "/data/applyPatchfuzzImgpatch";
@@ -66,7 +65,7 @@ namespace OHOS {
             ApplyPatch(imgpatchPath, oldFilePath, newFilePath);
         }
         if (!ret) {
-            LOG(ERROR) << "create file failed";
+            LOG(ERROR) << "an invalid fuzztest due to input file creation failure";
         }
     }
 }
