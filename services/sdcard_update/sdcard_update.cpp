@@ -68,13 +68,16 @@ bool CheckPathNeedMountSD(UpdaterParams &upParams)
     return true;
 }
 
-bool DoMountSdcard(std::vector<std::string> &sdcardStr, std::string &mountPoint)
+bool DoMountSdCard(std::vector<std::string> &sdCardStr, std::string &mountPoint, UpdaterParams &upParams)
 {
     bool mountSuccess = false;
-    unsigned int retryTimes = 20;
+    unsigned int retryTimes = 20; // Wait 20s
+    if (upParams.sdExtMode == SDCARD_MAINIMG || upParams.sdExtMode == SDCARD_NORMAL_UPDATE) {
+        retryTimes = 60; // Wait 60s
+    }
     for (unsigned int retryCount = 1; retryCount <= retryTimes; retryCount++) {
         LOG(INFO) << "the retry time is: " << retryCount;
-        for (auto item : sdcardStr) {
+        for (auto item : sdCardStr) {
             if (MountSdcard(item, mountPoint) == 0) {
                 mountSuccess = true;
                 LOG(INFO) << "mount " << item << " sdcard success!";
@@ -119,7 +122,7 @@ UpdaterStatus CheckSdcardPkgs(UpdaterParams &upParams)
     }
     if ((Utils::CheckUpdateMode(Updater::SDCARD_MODE) && !Utils::CheckUpdateMode(Updater::SDCARD_INTRAL_MODE)) ||
         (Utils::CheckUpdateMode(Updater::SDCARD_INTRAL_MODE) && CheckPathNeedMountSD(upParams))) {
-            if (!DoMountSdcard(sdcardStr, mountPoint)) {
+            if (!DoMountSdCard(sdcardStr, mountPoint, upParams)) {
                 LOG(ERROR) << "mount sdcard fail!";
                 return UPDATE_ERROR;
             }
