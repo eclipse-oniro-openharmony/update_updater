@@ -40,7 +40,7 @@ HWTEST_F(UpdaterKitsUnitTest, updater_kits_test01, TestSize.Level1)
 {
     const std::vector<std::string> packageName1 = {""};
     int ret = RebootAndInstallUpgradePackage(MISC_FILE, packageName1);
-    EXPECT_EQ(ret, 1);
+    EXPECT_EQ(ret, 2); // 2 : path not exit
 
     const std::vector<std::string> packageName2 = {"/data/updater/updater/updater_without_updater_binary.zip"};
     auto fp = std::unique_ptr<FILE, decltype(&fclose)>(fopen(MISC_FILE.c_str(), "wb+"), fclose);
