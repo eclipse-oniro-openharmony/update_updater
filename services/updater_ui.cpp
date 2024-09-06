@@ -22,6 +22,7 @@
 #include "scope_guard.h"
 #include "updater_main.h"
 #include "updater_ui_facade.h"
+#include "updater/updater_const.h"
 #include "utils.h"
 #include "updater_ui_stub.h"
 
@@ -108,6 +109,35 @@ DEFINE_ASYN_CALLBACK(OnLabelSDCardNoDelayEvt)
     UpdaterParams upParams;
     upParams.updateMode = SDCARD_UPDATE;
     UPDATER_UI_INSTANCE.ShowProgressPage();
+    if (auto res = UpdaterFromSdcard(upParams); res != UPDATE_SUCCESS) {
+        Utils::RemoveUpdateInfoFromMisc("sdcard_update");
+        GetFacade().ShowLogRes(res == UPDATE_CORRUPT ? TR(LOGRES_VERIFY_FAILED) : TR(LOGRES_UPDATE_FAILED));
+        GetFacade().ShowFailedPage();
+        return;
+    }
+    GetFacade().ShowLogRes(TR(LABEL_UPD_OK_DONE));
+    GetFacade().ShowSuccessPage();
+    Utils::UsSleep(SUCCESS_DELAY);
+    PostUpdater(true);
+    Utils::UpdaterDoReboot("");
+}
+
+DEFINE_ASYN_CALLBACK(OnLabelSDUpdateResEvt)
+{
+    LOG(INFO) << "On Label SDCard To Reserve Userdata";
+    if (!GetFacade().SetMode(UPDATERMODE_SDCARD)) {
+        return;
+    }
+    Utils::UsSleep(CALLBACK_DELAY);
+    UpdaterParams upParams;
+    upParams.updateMode = SDCARD_UPDATE;
+    Utils::SetMessageToMisc("boot-updater", 0, "sdcard_intral_update"); // set retain userdata
+    if (!Utils::CheckUpdateMode(Updater::SDCARD_INTRAL_MODE)) {
+        LOG(ERROR) << "sdcard_intral_update write to misc failed";
+        GetFacade().ShowFailedPage();
+        return;
+    }
+    LOG(INFO) << "sdcard_intral_update write to misc success";
     if (auto res = UpdaterFromSdcard(upParams); res != UPDATE_SUCCESS) {
         Utils::RemoveUpdateInfoFromMisc("sdcard_update");
         GetFacade().ShowLogRes(res == UPDATE_CORRUPT ? TR(LOGRES_VERIFY_FAILED) : TR(LOGRES_UPDATE_FAILED));
