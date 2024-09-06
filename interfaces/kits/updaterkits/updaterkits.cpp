@@ -132,12 +132,12 @@ static bool IsPackagePath(const std::string &path)
     return true;
 }
 
-static bool AddPkgPath(struct UpdateMessage &msg, size_t updateOffset, const std::vector<std::string> &packageName)
+static int AddPkgPath(struct UpdateMessage &msg, size_t updateOffset, const std::vector<std::string> &packageName)
 {
     for (auto path : packageName) {
         if (updateOffset > sizeof(msg.update)) {
             LOG(ERROR) << "updaterkits: updateOffset > msg.update, return false";
-            return false;
+            return 4; // 4 : path is too long
         }
         int ret;
         if (IsPackagePath(path)) {
@@ -149,11 +149,11 @@ static bool AddPkgPath(struct UpdateMessage &msg, size_t updateOffset, const std
         }
         if (ret < 0) {
             LOG(ERROR) << "updaterkits: copy updater message failed";
-            return false;
+            return 5; // 5 : The library function is incorrect
         }
         updateOffset += static_cast<size_t>(ret);
     }
-    return true;
+    return 0;
 }
 
 bool RebootAndInstallSdcardPackage(const std::string &miscFile, const std::vector<std::string> &packageName)
@@ -165,7 +165,7 @@ bool RebootAndInstallSdcardPackage(const std::string &miscFile, const std::vecto
         return false;
     }
 
-    if (packageName.size() != 0 && !AddPkgPath(msg, static_cast<size_t>(ret), packageName)) {
+    if (packageName.size() != 0 && AddPkgPath(msg, static_cast<size_t>(ret), packageName) != 0) {
         LOG(ERROR) << "get sdcard pkg path fail";
         return false;
     }
@@ -175,19 +175,19 @@ bool RebootAndInstallSdcardPackage(const std::string &miscFile, const std::vecto
     return true;
 }
 
-bool RebootAndInstallUpgradePackage(const std::string &miscFile, const std::vector<std::string> &packageName,
+int RebootAndInstallUpgradePackage(const std::string &miscFile, const std::vector<std::string> &packageName,
     const std::string &upgradeType)
 {
     if (packageName.size() == 0 && upgradeType == UPGRADE_TYPE_OTA) {
         LOG(ERROR) << "updaterkits: invalid argument. one of arugments is empty";
-        return false;
+        return 1; // 1 : Invalid input
     }
 
     for (auto path : packageName) {
         if (IsPackagePath(path)) {
             if (access(path.c_str(), R_OK) < 0) {
             LOG(ERROR) << "updaterkits: " << path << " is not readable";
-            return false;
+            return 2; // 2 : pkg not exit
             }
         }
     }
@@ -202,11 +202,12 @@ bool RebootAndInstallUpgradePackage(const std::string &miscFile, const std::vect
     }
     if (ret < 0) {
         LOG(ERROR) << "updaterkits: copy updater message failed";
-        return false;
+        return 3; // 3 : The library function is incorrect
     }
 
-    if (!AddPkgPath(updateMsg, static_cast<size_t>(ret), packageName)) {
-        return false;
+    int addRet = AddPkgPath(updateMsg, static_cast<size_t>(ret), packageName);
+    if (addRet != 0) {
+        return addRet;
     }
     if (upgradeType == UPGRADE_TYPE_OTA) {
         WriteToMiscAndResultFileRebootToUpdater(updateMsg);
@@ -215,7 +216,7 @@ bool RebootAndInstallUpgradePackage(const std::string &miscFile, const std::vect
     }
 
     // Never get here.
-    return true;
+    return 0;
 }
 
 bool RebootAndCleanUserData(const std::string &miscFile, const std::string &cmd)
