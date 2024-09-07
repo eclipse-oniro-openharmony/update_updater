@@ -118,7 +118,10 @@ bool UpdateCommander::ExecUpdate() const
     const std::string miscFile = "/dev/block/by-name/misc";
     std::vector<std::string> filePath;
     filePath.push_back(filePath_);
-    return RebootAndInstallUpgradePackage(miscFile, filePath);
+    if (RebootAndInstallUpgradePackage(miscFile, filePath) == 0) {
+        return true;
+    }
+    return false;
 }
 
 void UpdateCommander::PostCommand()
