@@ -72,7 +72,10 @@ void UpdateProcessorUnitTest::TearDownTestCase(void) {}
 HWTEST_F(UpdateProcessorUnitTest, UpdateProcessor_001, TestSize.Level1)
 {
     const string packagePath = "/data/updater/updater/updater_write_misc_img.zip";
+    int fd = open("/dev/null", O_RDWR);
+    dup2(fd, STDOUT_FILENO);
     int32_t ret = ProcessUpdater(false, STDOUT_FILENO, packagePath, GetTestCertName());
+    close(fd);
     EXPECT_EQ(ret, 0);
 }
 
@@ -85,7 +88,10 @@ HWTEST_F(UpdateProcessorUnitTest, UpdateProcessor_002, TestSize.Level1)
     EXPECT_EQ(ret, 0);
 
     const string packagePath = "/data/updater/updater/updater_write_diff_misc_img.zip";
+    int fd = open("/dev/null", O_RDWR);
+    dup2(fd, STDOUT_FILENO);
     ret = ProcessUpdater(false, STDOUT_FILENO, packagePath, GetTestCertName());
+    close(fd);
     EXPECT_EQ(ret, 0);
 }
 
@@ -98,7 +104,10 @@ HWTEST_F(UpdateProcessorUnitTest, UpdateProcessor_003, TestSize.Level1)
     EXPECT_EQ(ret, 0);
 
     const string packagePath = "/data/updater/updater/updater_write_diff_misc_img.zip";
+    int fd = open("/dev/null", O_RDWR);
+    dup2(fd, STDOUT_FILENO);
     ret = ProcessUpdater(false, STDOUT_FILENO, packagePath, GetTestCertName());
+    close(fd);
     EXPECT_EQ(ret, USCRIPT_INVALID_PARAM);
 }
 
