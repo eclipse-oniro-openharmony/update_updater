@@ -277,6 +277,12 @@ bool EmmcPtable::GetPtableImageBuffer(uint8_t *imageBuf, const uint32_t imgBufSi
         LOG(ERROR) << "input invalid";
         return false;
     }
+
+    if (!LoadPtableFromDevice()) {
+        LOG(ERROR) << "LoadPtableFromDevice failed";
+        return false;
+    }
+
     if (memcpy_s(imageBuf, imgBufSize, emmcPtnDataInfo_.data, GPT_PARTITION_SIZE) != EOK) {
         LOG(ERROR) << "memcpy_s failed";
         return false;
