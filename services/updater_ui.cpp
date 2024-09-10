@@ -131,6 +131,7 @@ DEFINE_ASYN_CALLBACK(OnLabelSDUpdateResEvt)
     Utils::UsSleep(CALLBACK_DELAY);
     UpdaterParams upParams;
     upParams.updateMode = SDCARD_UPDATE;
+    UPDATER_UI_INSTANCE.ShowProgressPage();
     Utils::SetMessageToMisc("boot-updater", 0, "sdcard_intral_update"); // set retain userdata
     if (!Utils::CheckUpdateMode(Updater::SDCARD_INTRAL_MODE)) {
         LOG(ERROR) << "sdcard_intral_update write to misc failed";
