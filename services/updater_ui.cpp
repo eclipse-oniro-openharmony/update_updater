@@ -17,6 +17,7 @@
 #include <thread>
 #include "control/callback_manager.h"
 #include "language/language_ui.h"
+#include "driver/graphic_engine.h"
 #include "log/log.h"
 #include "page/page_manager.h"
 #include "scope_guard.h"
@@ -65,6 +66,7 @@ void DoProgress()
 DEFINE_ASYN_CALLBACK(OnRebootEvt)
 {
     LOG(INFO) << "On Label Reboot";
+    GraphicEngine::GetInstance().StopEngine();
     PostUpdater(false);
     Utils::UpdaterDoReboot("");
 }
@@ -211,6 +213,7 @@ DEFINE_ASYN_CALLBACK(OnConfirmRstEvt)
 DEFINE_ASYN_CALLBACK(OnMenuShutdownEvt)
 {
     LOG(DEBUG) << "shutdown";
+    GraphicEngine::GetInstance().StopEngine();
     Utils::DoShutdown();
 }
 
