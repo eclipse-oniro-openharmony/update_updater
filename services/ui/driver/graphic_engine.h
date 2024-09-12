@@ -36,7 +36,7 @@ public:
     OHOS::BufferInfo *GetFBBufferInfo() override;
     uint16_t GetScreenWidth() override;
     uint16_t GetScreenHeight() override;
-
+    void StopEngine(void);
 private:
     void FlushThreadLoop() const;
     void InitFontEngine(const char *fontPath) const;

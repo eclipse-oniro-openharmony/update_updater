@@ -105,6 +105,16 @@ void GraphicEngine::FlushThreadLoop() const
         InitFlushBatteryStatusExt();
         Utils::UsSleep(THREAD_USLEEP_TIME);
     }
+    // clear screen after stop
+    uint8_t pixelBytes = OHOS::DrawUtils::GetByteSizeByColorMode(colorMode_);
+    (void)memset_s(buffInfo_->virAddr, width_ * height_ * pixelBytes, 0, width_ * height_ * pixelBytes);
+    sfDev_->Flip(reinterpret_cast<uint8_t *>(buffInfo_->virAddr));
+}
+
+void GraphicEngine::StopEngine(void)
+{
+    flushStop_ = true;
+    Utils::UsSleep(THREAD_USLEEP_TIME * 10); // 10: wait for stop 100ms
 }
 
 OHOS::BufferInfo *GraphicEngine::GetFBBufferInfo()
