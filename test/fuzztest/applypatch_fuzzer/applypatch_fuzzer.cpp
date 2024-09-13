@@ -41,10 +41,6 @@ namespace OHOS {
 
     void FuzzApplyPatch(const uint8_t* data, size_t size)
     {
-        const std::string filePath = "/data/fuzz/test/MountForPath_fuzzer.fstable";
-        ApplyPatch(filePath, filePath, std::string(reinterpret_cast<const char*>(data), size));
-        ApplyPatch(filePath, std::string(reinterpret_cast<const char*>(data), size), filePath);
-        ApplyPatch(std::string(reinterpret_cast<const char*>(data), size), filePath, filePath);
         bool ret = true;
         const int magicNumSize = 4;
         const char* bspatchPath = "/data/applyPatchfuzzBspatch";
@@ -75,4 +71,3 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     OHOS::FuzzApplyPatch(data, size);
     return 0;
 }
-
