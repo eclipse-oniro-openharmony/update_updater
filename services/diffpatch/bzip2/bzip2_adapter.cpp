@@ -187,7 +187,7 @@ int32_t BZip2BufferReadAdapter::Open()
         PATCH_LOGE("State error %d", init_);
         return -1;
     }
-    if (dataLength_ > buffer_.length) {
+    if (buffer_.length < offset_ || dataLength_ > buffer_.length - offset_) {
         PATCH_LOGE("Invalid buffer length");
         return -1;
     }
