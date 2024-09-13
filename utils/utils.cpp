@@ -486,7 +486,7 @@ size_t GetFileSize(const std::string &filePath)
     std::ifstream ifs(filePath, std::ios::binary | std::ios::in);
     if (ifs.is_open()) {
         ifs.seekg(0, std::ios::end);
-        ret = ifs.tellg();
+        ret = static_cast<size_t>(ifs.tellg());
     }
     return ret;
 }
