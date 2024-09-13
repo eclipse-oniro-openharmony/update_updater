@@ -99,7 +99,7 @@ int32_t CompressedImagePatch::StartReadHeader(const PatchParam &param, PatchHead
         header.srcStart, header.srcLength, header.patchOffset, header.expandedLen, header.targetSize);
     if (header.srcStart > param.oldSize || param.oldSize - header.srcStart < header.srcLength ||
         header.patchOffset > param.patchSize) {
-        PATCH_LOGE("Failed to check patch, srcStart: %zu , param.oldSize: %zu, patchOffset: %zu",
+        PATCH_LOGE("Failed to check patch, srcStart: %zu srcLength: %zu, param.oldSize: %zu, patchOffset: %zu",
             header.srcStart, header.srcLength, param.oldSize, header.patchOffset);
         return -1;
     }
