@@ -331,13 +331,13 @@ static int CreateFixedSizeEmptyFile(const UpdateBlockInfo &infos, const std::str
     }
 
     /* fill the remaining space with zero values */
-    int writeFileTmp = (size - fileSize) / WRITE_FILE_SIZE;
+    int writeFileTmp = ((static_cast<size_t>(size)) - fileSize) / WRITE_FILE_SIZE;
     char zerolist[WRITE_FILE_SIZE] = {0};
     while (writeFileTmp > 0) {
         file.write(zerolist, WRITE_FILE_SIZE);
         writeFileTmp--;
     }
-    writeFileTmp = (size - fileSize) % WRITE_FILE_SIZE;
+    writeFileTmp = ((static_cast<size_t>(size)) - fileSize) % WRITE_FILE_SIZE;
     char zero = 0;
     while (writeFileTmp > 0) {
         file.write(&zero, 1);
