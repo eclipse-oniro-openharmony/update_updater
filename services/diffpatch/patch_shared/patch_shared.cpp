@@ -53,7 +53,7 @@ using namespace Hpackage;
 using namespace Updater;
 
 namespace Updater {
-constexpr int WRITEFILLSIZE = 4096;
+constexpr size_t WRITE_FILE_SIZE = 4096;
 struct UpdateBlockInfo {
     std::string partitionName;
     std::string transferName;
@@ -331,7 +331,7 @@ static int CreateFixedSizeEmptyFile(const UpdateBlockInfo &infos, const std::str
     }
 
     /* fill the remaining space with zero values */
-    int writeFileTmp = ((static_cast<size_t>(size)) - fileSize) / WRITE_FILE_SIZE;
+    size_t writeFileTmp = ((static_cast<size_t>(size)) - fileSize) / WRITE_FILE_SIZE;
     char zerolist[WRITE_FILE_SIZE] = {0};
     while (writeFileTmp > 0) {
         file.write(zerolist, WRITE_FILE_SIZE);
