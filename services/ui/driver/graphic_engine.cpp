@@ -89,7 +89,7 @@ void GraphicEngine::InitFlushThread()
     flushStop_ = false;
     flushLoop_ = std::thread([this] {
         this->FlushThreadLoop();
-        });
+    });
     flushLoop_.detach();
     LOG(INFO) << "init flush thread";
 }
@@ -103,7 +103,7 @@ void GraphicEngine::FlushThreadLoop() const
     while (!flushStop_) {
         OHOS::TaskManager::GetInstance()->TaskHandler();
         InitFlushBatteryStatusExt();
-        Utils::UsSleep(THREAD_USLEEP_TIME);
+        Utils::UsSleep(sleepTime_);
     }
     // clear screen after stop
     uint8_t pixelBytes = OHOS::DrawUtils::GetByteSizeByColorMode(colorMode_);
@@ -115,6 +115,11 @@ void GraphicEngine::StopEngine(void)
 {
     flushStop_ = true;
     Utils::UsSleep(THREAD_USLEEP_TIME * 10); // 10: wait for stop 100ms
+}
+
+void GraphicEngine::SetSleepTime(uint32_t sleepTime)
+{
+    sleepTime_ = sleepTime;
 }
 
 OHOS::BufferInfo *GraphicEngine::GetFBBufferInfo()
