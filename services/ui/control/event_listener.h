@@ -96,6 +96,7 @@ public:
     bool ProcessPowerKey(OHOS::UIView &view, const OHOS::KeyEvent &event);
     bool ProcessVolumeKey(OHOS::UIView &view, const OHOS::KeyEvent &event);
 private:
+    OHOS::UIView *GetFirstFocusableViewByDir(uint8_t dir);
     static bool isButtonPressed_;
 };
 }
