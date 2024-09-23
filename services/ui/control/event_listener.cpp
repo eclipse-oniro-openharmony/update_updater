@@ -188,9 +188,42 @@ bool KeyListener::ProcessVolumeKey(OHOS::UIView &view, const OHOS::KeyEvent &eve
     }
     if (auto it = dirMap.find(event.GetKeyId()); it != dirMap.end() &&
         event.GetState() == OHOS::InputDevice::STATE_RELEASE) {
-        OHOS::FocusManager::GetInstance()->RequestFocusByDirection(it->second);
+        if (OHOS::FocusManager::GetInstance()->RequestFocusByDirection(it->second)) {
+            return true;
+        }
+        LOG(WARNING) << "request focus failed";
+        OHOS::UIView *candidate = GetFirstFocusableViewByDir(it->second);
+        if (candidate != nullptr) {
+            OHOS::FocusManager::GetInstance()->RequestFocus(candidate);
+        }
     }
     return true;
+}
+
+OHOS::UIView *KeyListener::GetFirstFocusableViewByDir(uint8_t dir)
+{
+    OHOS::UIView *cur = OHOS::FocusManager::GetInstance()->GetFocusedView();
+    if (cur == nullptr || (dir != OHOS::FOCUS_DIRECTION_UP && dir != OHOS::FOCUS_DIRECTION_DOWN)) {
+        return cur;
+    }
+    OHOS::UIView *parent = cur->GetParent();
+    if (parent == nullptr || !parent->IsViewGroup()) {
+        return cur;
+    }
+    OHOS::UIView *candidate = static_cast<OHOS::UIViewGroup *>(parent)->GetChildrenHead();
+    OHOS::UIView *topFocusableView = cur;
+    OHOS::UIView *bottomFocusableView = cur;
+    while (candidate != nullptr) {
+        if (candidate->IsFocusable() && candidate->IsVisible()) {
+            if (candidate->GetY() < topFocusableView->GetY()) {
+                topFocusableView = candidate;
+            } else if (candidate->GetY() > bottomFocusableView->GetY()) {
+                bottomFocusableView = candidate;
+            }
+        }
+        candidate = candidate->GetNextSibling();
+    }
+    return dir == OHOS::FOCUS_DIRECTION_UP ? bottomFocusableView : topFocusableView;
 }
 
 void KeyListener::SetButtonPressed(bool isPressed)
