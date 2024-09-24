@@ -106,6 +106,7 @@ void GraphicEngine::FlushThreadLoop() const
         Utils::UsSleep(THREAD_USLEEP_TIME);
     }
     // clear screen after stop
+    UiRotation::GetInstance().SetDegree(UI_ROTATION_DEGREE::UI_ROTATION_0);
     uint8_t pixelBytes = OHOS::DrawUtils::GetByteSizeByColorMode(colorMode_);
     (void)memset_s(buffInfo_->virAddr, width_ * height_ * pixelBytes, 0, width_ * height_ * pixelBytes);
     sfDev_->Flip(reinterpret_cast<uint8_t *>(buffInfo_->virAddr));
