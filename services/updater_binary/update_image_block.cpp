@@ -486,7 +486,7 @@ int32_t UScriptInstructionShaCheck::DoBlocksVerify(Uscript::UScriptEnv &env, con
 {
     UpdateBlockInfo infos {};
     infos.partitionName = partitionName;
-    infos.transferName = GetPartName(partitionName) + "transfer.list";
+    infos.transferName = GetPartName(partitionName) + ".transfer.list";
     uint8_t *transferListBuffer = nullptr;
     size_t transferListSize = 0;
     Hpackage::PkgManager::StreamPtr outStream = nullptr;
