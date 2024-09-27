@@ -25,9 +25,9 @@
 
 namespace Updater {
 class GraphicEngine : public OHOS::SoftEngine {
-    static constexpr uint32_t THREAD_USLEEP_TIME = 10000;
     DISALLOW_COPY_MOVE(GraphicEngine);
 public:
+    static constexpr uint32_t THREAD_USLEEP_TIME = 10000;
     GraphicEngine() = default;
     virtual ~GraphicEngine() = default;
     static GraphicEngine &GetInstance();
@@ -37,6 +37,7 @@ public:
     uint16_t GetScreenWidth() override;
     uint16_t GetScreenHeight() override;
     void StopEngine(void);
+    void SetSleepTime(uint32_t sleepTime);
 private:
     void FlushThreadLoop() const;
     void InitFontEngine(const char *fontPath) const;
@@ -51,6 +52,7 @@ private:
     uint16_t width_ = 0;
     uint8_t colorMode_ = 0;
     bool flushStop_ = true;
+    uint32_t sleepTime_ = THREAD_USLEEP_TIME;
     std::mutex mtx_ {};
 };
 

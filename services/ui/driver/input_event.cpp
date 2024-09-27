@@ -122,6 +122,7 @@ int InputEvent::HdfInit()
     }
 
     OHOS::InputDeviceManager::GetInstance()->Add(&KeysInputDevice::GetInstance());
+    OHOS::InputDeviceManager::GetInstance()->SetPeriod(0);
     addInputDeviceHelper_();
     LOG(INFO) << "add InputDevice done";
 

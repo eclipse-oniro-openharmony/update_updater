@@ -17,6 +17,7 @@
 #include "common/image_decode_ability.h"
 #include "common/task_manager.h"
 #include "draw/draw_utils.h"
+#include "font/ui_font_cache_manager.h"
 #include "font/ui_font_header.h"
 #include "log/log.h"
 #include "updater_ui_const.h"
@@ -68,9 +69,12 @@ void GraphicEngine::Init(uint32_t bkgColor, uint8_t mode, const char *fontPath)
 void GraphicEngine::InitFontEngine(const char *fontPath) const
 {
     constexpr uint32_t uiFontMemAlignment = 4;
-    static uint32_t fontMemBaseAddr[OHOS::MIN_FONT_PSRAM_LENGTH / uiFontMemAlignment];
+    constexpr uint32_t fontPsramSize = OHOS::MIN_FONT_PSRAM_LENGTH * 2; // 2 : alloc more ram to optimize perfomance
+    constexpr uint32_t fontCacheSize = 0xC8000; // fontCacheSize should match with psram length
+    static uint32_t fontMemBaseAddr[fontPsramSize / uiFontMemAlignment];
     static uint8_t icuMemBaseAddr[OHOS::SHAPING_WORD_DICT_LENGTH];
-    OHOS::GraphicStartUp::InitFontEngine(reinterpret_cast<uintptr_t>(fontMemBaseAddr), OHOS::MIN_FONT_PSRAM_LENGTH,
+    OHOS::UIFontCacheManager::GetInstance()->SetBitmapCacheSize(fontCacheSize);
+    OHOS::GraphicStartUp::InitFontEngine(reinterpret_cast<uintptr_t>(fontMemBaseAddr), fontPsramSize,
         fontPath, DEFAULT_FONT_FILENAME);
     OHOS::GraphicStartUp::InitLineBreakEngine(reinterpret_cast<uintptr_t>(icuMemBaseAddr),
         OHOS::SHAPING_WORD_DICT_LENGTH, fontPath, DEFAULT_LINE_BREAK_RULE_FILENAME);
@@ -89,7 +93,7 @@ void GraphicEngine::InitFlushThread()
     flushStop_ = false;
     flushLoop_ = std::thread([this] {
         this->FlushThreadLoop();
-        });
+    });
     flushLoop_.detach();
     LOG(INFO) << "init flush thread";
 }
@@ -103,7 +107,7 @@ void GraphicEngine::FlushThreadLoop() const
     while (!flushStop_) {
         OHOS::TaskManager::GetInstance()->TaskHandler();
         InitFlushBatteryStatusExt();
-        Utils::UsSleep(THREAD_USLEEP_TIME);
+        Utils::UsSleep(sleepTime_);
     }
     // clear screen after stop
     UiRotation::GetInstance().SetDegree(UI_ROTATION_DEGREE::UI_ROTATION_0);
@@ -116,6 +120,11 @@ void GraphicEngine::StopEngine(void)
 {
     flushStop_ = true;
     Utils::UsSleep(THREAD_USLEEP_TIME * 10); // 10: wait for stop 100ms
+}
+
+void GraphicEngine::SetSleepTime(uint32_t sleepTime)
+{
+    sleepTime_ = sleepTime;
 }
 
 OHOS::BufferInfo *GraphicEngine::GetFBBufferInfo()
