@@ -40,6 +40,7 @@
 #include "parameter.h"
 #include "securec.h"
 #include "updater/updater_const.h"
+#include "scope_guard.h"
 
 namespace Updater {
 using namespace Hpackage;
@@ -49,6 +50,7 @@ constexpr uint8_t SHIFT_RIGHT_FOUR_BITS = 4;
 constexpr int MAX_TIME_SIZE = 20;
 constexpr size_t PARAM_SIZE = 32;
 constexpr const char *PREFIX_PARTITION_NODE = "/dev/block/by-name/";
+constexpr mode_t DEFAULT_DIR_MODE =0775;
 
 namespace {
 void UpdateInfoInMisc(const std::string headInfo, const std::optional<int> message, bool isRemove)
@@ -388,6 +390,21 @@ bool CopyFile(const std::string &src, const std::string &dest, bool isAppend)
     fout.close();
     SyncFile(dest); // no way to get fd from ofstream, so reopen to sync this file
     return true;
+}
+
+bool DirIsExit(const std::string &dirPath)
+{
+    DIR *dp;
+    if ((dp = opendir(dirPath.c_str())) == nullptr) {
+        return false;
+    }
+    closedir(dp);
+    return true;
+}
+
+bool CopyDir(const std::string &srcPath, const std::string &dstPath)
+{
+
 }
 
 std::string GetLocalBoardId()
