@@ -392,7 +392,7 @@ bool CopyFile(const std::string &src, const std::string &dest, bool isAppend)
     return true;
 }
 
-bool DirIsExit(const std::string &dirPath)
+bool DirIsExist(const std::string &dirPath)
 {
     DIR *dp;
     if ((dp = opendir(dirPath.c_str())) == nullptr) {
