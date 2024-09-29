@@ -404,7 +404,49 @@ bool DirIsExit(const std::string &dirPath)
 
 bool CopyDir(const std::string &srcPath, const std::string &dstPath)
 {
-
+    DIR *dir = opendir(srcPath.c_str());
+    if (dir == nullptr) {
+        LOG(ERROR) << "opendir failed, path: " << srcPath.c_str() << ", err: " << strerror(errno);
+        return false;
+    }
+    ON_SCOPE_EXIT(closedir) {
+        closedir(dir);
+    };
+    bool existFlag = DirIsExist(dstPath);
+    if ((!existFlag) && (mkdir(dstPath.c_str(), DEFAULT_DIR_MODE) != 0)) {
+        LOG(ERROR) << "mkdir failed, path: " << dstPath.c_str() << ", err: " << strerror(errno);
+        return false;
+    }
+    ON_SCOPE_EXIT(rmdir) {
+        if (!existFlag) {
+            remove(dstPath.c_str());
+        }
+    };
+    dirent *dirent = nullptr;
+    while ((dirent = readdir(dir)) != nullptr) {
+        if (strcmp(dirent->d_name, ".") == 0 || strcmp(dirent->d_name, "..") == 0) {
+            continue;
+        }
+        if (dirent->d_type == DT_DIR) {
+            std::string fullSourcePath = srcPath + dirent->d_name + "/";
+            std::string fullDestPath = dstPath + dirent->d_name + "/";
+            if (!CopyDir(fullSourcePath, fullDestPath)) {
+                LOG(ERROR) << "copydir failed, fullSourcePath: " << fullSourcePath.c_str()
+                          << ", fullDestPath: " << fullDestPath.c_str();
+                return false;
+            }
+        } else {
+            std::string fullSourcePath = srcPath + dirent->d_name;
+            std::string fullDestPath = dstPath + dirent->d_name;
+            if (!CopyFile(fullSourcePath, fullDestPath)) {
+                LOG(ERROR) << "copyfile failed, fullSourcePath: " << fullSourcePath.c_str()
+                          << ", fullDestPath: " << fullDestPath.c_str();
+                return false;
+            }
+        }
+    }
+    CANCEL_SCOPE_EXIT_GUARD(rmdir);
+    return true;
 }
 
 std::string GetLocalBoardId()
