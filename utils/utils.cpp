@@ -392,16 +392,6 @@ bool CopyFile(const std::string &src, const std::string &dest, bool isAppend)
     return true;
 }
 
-bool DirIsExist(const std::string &dirPath)
-{
-    DIR *dp;
-    if ((dp = opendir(dirPath.c_str())) == nullptr) {
-        return false;
-    }
-    closedir(dp);
-    return true;
-}
-
 bool CopyDir(const std::string &srcPath, const std::string &dstPath)
 {
     DIR *dir = opendir(srcPath.c_str());
@@ -412,7 +402,7 @@ bool CopyDir(const std::string &srcPath, const std::string &dstPath)
     ON_SCOPE_EXIT(closedir) {
         closedir(dir);
     };
-    bool existFlag = DirIsExist(dstPath);
+    bool existFlag = (access(dstPath.c_str(), 0) == 0);
     if ((!existFlag) && (mkdir(dstPath.c_str(), DEFAULT_DIR_MODE) != 0)) {
         LOG(ERROR) << "mkdir failed, path: " << dstPath.c_str() << ", err: " << strerror(errno);
         return false;
