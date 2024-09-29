@@ -50,7 +50,7 @@ constexpr uint8_t SHIFT_RIGHT_FOUR_BITS = 4;
 constexpr int MAX_TIME_SIZE = 20;
 constexpr size_t PARAM_SIZE = 32;
 constexpr const char *PREFIX_PARTITION_NODE = "/dev/block/by-name/";
-constexpr mode_t DEFAULT_DIR_MODE =0775;
+constexpr mode_t DEFAULT_DIR_MODE = 0775;
 
 namespace {
 void UpdateInfoInMisc(const std::string headInfo, const std::optional<int> message, bool isRemove)
