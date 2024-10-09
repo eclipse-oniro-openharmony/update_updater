@@ -29,7 +29,7 @@ namespace {
 int32_t GetUpgradePkgInfo(UpgradePkgInfo *upgradePackageInfo,
     std::vector<std::pair<std::string, ComponentInfo>> &files,
     const UpgradePkgInfoExt *pkgInfoExt,
-    ComponentInfoExt compInfo[])
+    std::vector<ComponentInfoExt> &compInfo)
 {
     upgradePackageInfo->updateFileVersion = pkgInfoExt->updateFileVersion;
     if (pkgInfoExt->softwareVersion != nullptr) {
@@ -77,7 +77,7 @@ int32_t GetUpgradePkgInfo(UpgradePkgInfo *upgradePackageInfo,
 int32_t GetZipPkgInfo(PkgManager::PkgInfoPtr pkgInfo,
     std::vector<std::pair<std::string, ZipFileInfo>> &files,
     const UpgradePkgInfoExt *pkgInfoExt,
-    ComponentInfoExt compInfo[])
+    std::vector<ComponentInfoExt> &compInfo)
 {
     pkgInfo->signMethod = pkgInfoExt->signMethod;
     pkgInfo->digestMethod  = pkgInfoExt->digestMethod;
@@ -97,7 +97,7 @@ int32_t GetZipPkgInfo(PkgManager::PkgInfoPtr pkgInfo,
 int32_t GetLz4PkgInfo(PkgManager::PkgInfoPtr pkgInfo,
     std::vector<std::pair<std::string, Lz4FileInfo>> &files,
     const UpgradePkgInfoExt *pkgInfoExt,
-    ComponentInfoExt compInfo[])
+    std::vector<ComponentInfoExt> &compInfo)
 {
     pkgInfo->signMethod = pkgInfoExt->signMethod;
     pkgInfo->digestMethod  = pkgInfoExt->digestMethod;
@@ -120,11 +120,11 @@ int32_t GetLz4PkgInfo(PkgManager::PkgInfoPtr pkgInfo,
 }
 
 int32_t CreatePackage(const UpgradePkgInfoExt *pkgInfoExt,
-    ComponentInfoExt compInfo[],
+    std::vector<ComponentInfoExt> &compInfo,
     const char *path,
     const char *keyPath)
 {
-    if (pkgInfoExt == nullptr || path == nullptr || keyPath == nullptr) {
+    if (pkgInfoExt == nullptr || path == nullptr || keyPath == nullptr || pkgInfoExt->entryCount > compInfo.size()) {
         LOG(ERROR) << "Check param fail ";
         return PKG_INVALID_PARAM;
     }
