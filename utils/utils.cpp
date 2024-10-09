@@ -746,7 +746,7 @@ std::vector<std::string> ParseParams(int argc, char **argv)
             LOG(ERROR) << "ReadUpdaterMessage COMMAND_FILE failed!";
         }
     }
-    STAGE(UPDATE_STAGE_OUT) << "Init Params: " << boot.update;
+
     boot.update[sizeof(boot.update) - 1] = '\0';
     std::vector<std::string> parseParams = Utils::SplitString(boot.update, "\n");
     if (argc != 0 && argv != nullptr) {

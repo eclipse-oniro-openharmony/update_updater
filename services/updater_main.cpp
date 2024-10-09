@@ -754,6 +754,8 @@ static UpdaterStatus StartUpdater(const std::vector<std::string> &args,
 
     for (const auto &arg : args) {
         extractedArgs.push_back(const_cast<char *>(arg.c_str()));
+        STAGE(UPDATE_STAGE_OUT) << "option:" << arg;
+        LOG(INFO) << "option:" << arg;
     }
     extractedArgs.push_back(nullptr);
     extractedArgs.insert(extractedArgs.begin(), argv[0]);
@@ -761,7 +763,6 @@ static UpdaterStatus StartUpdater(const std::vector<std::string> &args,
         switch (rc) {
             case 0: {
                 std::string option = OPTIONS[optionIndex].name;
-                LOG(INFO) << "option: " << option;
                 if (optionsFuncTab.find(option) != optionsFuncTab.end()) {
                     auto optionsFunc = optionsFuncTab.at(option);
                     optionsFunc();
