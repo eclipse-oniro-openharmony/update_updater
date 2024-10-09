@@ -120,7 +120,7 @@ static int CreatePackageZip(const std::vector<std::string> &fstabFile)
     pkgInfo.signMethod = PKG_SIGN_METHOD_RSA;
     pkgInfo.pkgType = PKG_PACK_TYPE_ZIP;
     std::string filePath;
-    ComponentInfoExt comp[fstabFile.size()];
+    std::vector<ComponentInfoExt> comp(fstabFile.size());
     for (size_t i = 0; i < fstabFile.size(); i++) {
         comp[i].componentAddr = strdup(fstabFile[i].c_str());
         filePath = TEST_PATH_TO;
