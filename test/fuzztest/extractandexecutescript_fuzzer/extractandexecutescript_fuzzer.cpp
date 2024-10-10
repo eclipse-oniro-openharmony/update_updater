@@ -253,7 +253,7 @@ protected:
         pkgInfo.signMethod = PKG_SIGN_METHOD_RSA;
         pkgInfo.pkgType = PKG_PACK_TYPE_UPGRADE;
         std::string filePath;
-        ComponentInfoExt comp[inputFile.size()];
+        std::vector<ComponentInfoExt> comp(inputFile.size());
         for (size_t i = 0; i < inputFile.size(); i++) {
             comp[i].componentAddr = strdup(inputFile[i].c_str());
             filePath = TEST_PATH_TO;

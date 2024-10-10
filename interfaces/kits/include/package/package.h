@@ -107,7 +107,7 @@ struct ComponentInfoExt {
  * @param keyPath       path of the key used for signature
  * @return              update package creation result
  */
-int32_t CreatePackage(const UpgradePkgInfoExt *pkgInfo, ComponentInfoExt comp[],
+int32_t CreatePackage(const UpgradePkgInfoExt *pkgInfo, std::vector<ComponentInfoExt> &comp,
     const char *path, const char *keyPath);
 
 /**

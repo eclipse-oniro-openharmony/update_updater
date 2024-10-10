@@ -44,36 +44,36 @@ public:
 public:
     int TestInvalidCreatePackage()
     {
-        ComponentInfoExt info {};
+        std::vector<ComponentInfoExt> info;
         uint8_t pkgType = PkgPackType::PKG_PACK_TYPE_UPGRADE;
-        int ret = CreatePackage(nullptr, &info, nullptr, GetFuzzPrivateKeyName(0).c_str());
+        int ret = CreatePackage(nullptr, info, nullptr, GetFuzzPrivateKeyName(0).c_str());
 
         UpgradePkgInfoExt pkgInfoExt {};
         pkgInfoExt.pkgType = pkgType;
-        ret = CreatePackage(&pkgInfoExt, &info, nullptr, GetFuzzPrivateKeyName(0).c_str());
+        ret = CreatePackage(&pkgInfoExt, info, nullptr, GetFuzzPrivateKeyName(0).c_str());
 
         constexpr uint32_t digestLen = 32;
         ret = VerifyPackage(nullptr, GetFuzzCertName(0).c_str(), nullptr, nullptr, digestLen);
 
         std::string packagePath = TEST_PATH_TO + testPackageName;
         pkgInfoExt.pkgType = pkgType;
-        ret = CreatePackage(&pkgInfoExt, &info, packagePath.c_str(), GetFuzzPrivateKeyName(0).c_str());
+        ret = CreatePackage(&pkgInfoExt, info, packagePath.c_str(), GetFuzzPrivateKeyName(0).c_str());
 
         pkgType = PkgPackType::PKG_PACK_TYPE_ZIP;
         pkgInfoExt.pkgType = pkgType;
-        ret = CreatePackage(&pkgInfoExt, &info, packagePath.c_str(), GetFuzzPrivateKeyName(0).c_str());
+        ret = CreatePackage(&pkgInfoExt, info, packagePath.c_str(), GetFuzzPrivateKeyName(0).c_str());
 
         pkgType = PkgPackType::PKG_PACK_TYPE_LZ4;
         pkgInfoExt.pkgType = pkgType;
-        ret = CreatePackage(&pkgInfoExt, &info, packagePath.c_str(), GetFuzzPrivateKeyName(0).c_str());
+        ret = CreatePackage(&pkgInfoExt, info, packagePath.c_str(), GetFuzzPrivateKeyName(0).c_str());
 
         pkgType = PkgPackType::PKG_PACK_TYPE_GZIP;
         pkgInfoExt.pkgType = pkgType;
-        ret = CreatePackage(&pkgInfoExt, &info, packagePath.c_str(), GetFuzzPrivateKeyName(0).c_str());
+        ret = CreatePackage(&pkgInfoExt, info, packagePath.c_str(), GetFuzzPrivateKeyName(0).c_str());
 
         pkgType = PkgPackType::PKG_PACK_TYPE_NONE;
         pkgInfoExt.pkgType = pkgType;
-        ret = CreatePackage(&pkgInfoExt, &info, packagePath.c_str(), GetFuzzPrivateKeyName(0).c_str());
+        ret = CreatePackage(&pkgInfoExt, info, packagePath.c_str(), GetFuzzPrivateKeyName(0).c_str());
         return ret;
     }
 
@@ -94,7 +94,7 @@ public:
         std::string filePath;
         uint32_t componentIdBase = 100;
         uint8_t componentFlags = 22;
-        ComponentInfoExt comp[testFileNames_.size()];
+        std::vector<ComponentInfoExt> comp(testFileNames_.size());
         for (size_t n = 0; n < testFileNames_.size(); n++) {
             comp[n].componentAddr = strdup(testFileNames_[n].c_str());
             filePath = TEST_PATH_FROM;
