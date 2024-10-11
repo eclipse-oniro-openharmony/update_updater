@@ -847,13 +847,15 @@ int UpdaterMain(int argc, char **argv)
         } else if (upParams.factoryResetMode == "user_wipe_data" ||
             upParams.factoryResetMode == "menu_wipe_data" || upParams.factoryResetMode == "factory_wipe_data") {
             UPDATER_UI_INSTANCE.ShowFailedPage();
+        } else if (CheckUpdateMode(USB_MODE)) {
+            (void)UPDATER_UI_INSTANCE.SetMode(UPDATEMODE_USBUPDATE);
+            UPDATER_UI_INSTANCE.ShowFailedPage();
         } else {
-            if (!CheckUpdateMode(USB_MODE)) {
-                UPDATER_UI_INSTANCE.ShowMainpage();
-                UPDATER_UI_INSTANCE.Sleep(50); /* wait for page flush 50ms */
-                UPDATER_UI_INSTANCE.SaveScreen();
-            }
+            UPDATER_UI_INSTANCE.ShowMainpage();
         }
+        UPDATER_UI_INSTANCE.Sleep(50); /* wait for page flush 50ms */
+        UPDATER_UI_INSTANCE.SaveScreen();
+        ClearMisc();
         // Wait for user input
         while (true) {
             Utils::UsSleep(DISPLAY_TIME);
