@@ -847,9 +847,6 @@ int UpdaterMain(int argc, char **argv)
         } else if (upParams.factoryResetMode == "user_wipe_data" ||
             upParams.factoryResetMode == "menu_wipe_data" || upParams.factoryResetMode == "factory_wipe_data") {
             UPDATER_UI_INSTANCE.ShowFailedPage();
-        } else if (CheckUpdateMode(USB_MODE)) {
-            (void)UPDATER_UI_INSTANCE.SetMode(UPDATERMODE_USBUPDATE);
-            UPDATER_UI_INSTANCE.ShowFailedPage();
         } else {
             if (!CheckUpdateMode(END_USB_MODE)) {
                 UPDATER_UI_INSTANCE.ShowMainpage();
