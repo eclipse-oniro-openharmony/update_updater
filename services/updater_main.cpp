@@ -841,6 +841,8 @@ int UpdaterMain(int argc, char **argv)
                 return 0;
             }
         } else if (mode == SDCARD_UPDATE) {
+            UPDATER_UI_INSTANCE.ShowLogRes(
+                status == UPDATE_CORRUPT ? TR(LOGRES_VERIFY_FAILED) : TR(LOGRES_UPDATE_FAILED));
             UPDATER_UI_INSTANCE.ShowFailedPage();
         } else if (upParams.factoryResetMode == "user_wipe_data" ||
             upParams.factoryResetMode == "menu_wipe_data" || upParams.factoryResetMode == "factory_wipe_data") {
@@ -849,11 +851,12 @@ int UpdaterMain(int argc, char **argv)
             (void)UPDATER_UI_INSTANCE.SetMode(UPDATERMODE_USBUPDATE);
             UPDATER_UI_INSTANCE.ShowFailedPage();
         } else {
-            UPDATER_UI_INSTANCE.ShowMainpage();
+            if (!CheckUpdateMode(END_USB_MODE)) {
+                UPDATER_UI_INSTANCE.ShowMainpage();
+                UPDATER_UI_INSTANCE.Sleep(50); /* wait for page flush 50ms */
+                UPDATER_UI_INSTANCE.SaveScreen();
+            }
         }
-        UPDATER_UI_INSTANCE.Sleep(50); /* wait for page flush 50ms */
-        UPDATER_UI_INSTANCE.SaveScreen();
-        ClearMisc();
         // Wait for user input
         while (true) {
             Utils::UsSleep(DISPLAY_TIME);
