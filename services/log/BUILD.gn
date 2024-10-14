@@ -34,10 +34,6 @@ ohos_shared_library("libupdaterlog_shared") {
     "log.cpp",
   ]
 
-  if (build_variant == "user") {
-    cflags = [ "-DIS_RELEASE_VERSION" ]
-  }
-
   include_dirs = [
     "${updater_path}/services/include",
     "${updater_path}/utils/include",
@@ -72,10 +68,6 @@ ohos_static_library("libupdaterlog") {
     "dump.cpp",
     "log.cpp",
   ]
-
-  if (build_variant == "user") {
-    cflags = [ "-DIS_RELEASE_VERSION" ]
-  }
 
   include_dirs = [
     "${updater_path}/services/include",
