@@ -32,8 +32,8 @@ int32_t GetUpgradePkgInfo(UpgradePkgInfo *upgradePackageInfo,
     const UpgradePkgInfoExt *pkgInfoExt,
     std::vector<ComponentInfoExt> &compInfo)
 {
-    if (pkgInfo->entryCount > MAX_ENTRY_COUNT) {
-        LOG(ERROR) << "entry count oversized " << pkgInfo->entryCount << ", " << MAX_ENTRY_COUNT;
+    if (pkgInfoExt->entryCount > MAX_ENTRY_COUNT) {
+        LOG(ERROR) << "entry count oversized " << pkgInfoExt->entryCount << ", " << MAX_ENTRY_COUNT;
         return PKG_INVALID_PARAM;
     }
 
@@ -85,8 +85,8 @@ int32_t GetZipPkgInfo(PkgManager::PkgInfoPtr pkgInfo,
     const UpgradePkgInfoExt *pkgInfoExt,
     std::vector<ComponentInfoExt> &compInfo)
 {
-    if (pkgInfo->entryCount > MAX_ENTRY_COUNT) {
-        LOG(ERROR) << "entry count oversized " << pkgInfo->entryCount << ", " << MAX_ENTRY_COUNT;
+    if (pkgInfoExt->entryCount > MAX_ENTRY_COUNT) {
+        LOG(ERROR) << "entry count oversized " << pkgInfoExt->entryCount << ", " << MAX_ENTRY_COUNT;
         return PKG_INVALID_PARAM;
     }
 
@@ -110,8 +110,8 @@ int32_t GetLz4PkgInfo(PkgManager::PkgInfoPtr pkgInfo,
     const UpgradePkgInfoExt *pkgInfoExt,
     std::vector<ComponentInfoExt> &compInfo)
 {
-    if (pkgInfo->entryCount > MAX_ENTRY_COUNT) {
-        LOG(ERROR) << "entry count oversized " << pkgInfo->entryCount << ", " << MAX_ENTRY_COUNT;
+    if (pkgInfoExt->entryCount > MAX_ENTRY_COUNT) {
+        LOG(ERROR) << "entry count oversized " << pkgInfoExt->entryCount << ", " << MAX_ENTRY_COUNT;
         return PKG_INVALID_PARAM;
     }
 
