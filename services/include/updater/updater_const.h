@@ -50,10 +50,10 @@ constexpr const char *UPLOAD_LOG_TIME_FILE = "upload_time";
 constexpr const char *SDCARD_MODE = "sdcard_update";
 constexpr const char *OTA_MODE = "update_package";
 constexpr const char *USB_MODE = "usb_update";
-constexpr const char *END_USB_MODE = "end_usb_update";
 constexpr const char *SDCARD_INTRAL_MODE = "sdcard_intral_update";
 constexpr const char *UPDATRE_SCRIPT_ZIP = "/etc/updater_script.zip";
 constexpr const char *FACTORY_INTERNAL_MODE = "factory_internal_update";
+constexpr const char *USB_UPDATE_FAIL = "usb_update_fail";
 
 // sd update ext mode
 constexpr const char *SDCARD_NORMAL_UPDATE = "sdUpdate";
