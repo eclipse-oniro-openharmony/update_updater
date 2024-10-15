@@ -608,7 +608,6 @@ UpdaterStatus DoUpdaterEntry(UpdaterParams &upParams)
         LOG(INFO) << "start sdcard update";
         UPDATER_UI_INSTANCE.ShowProgressPage();
         status = UpdaterFromSdcard(upParams);
-        PostUpdatePackages(upParams, status == UPDATE_SUCCESS);
         return status;
     } else if (upParams.updatePackage.size() > 0) {
         UPDATER_UI_INSTANCE.ShowProgressPage();
