@@ -570,13 +570,13 @@ UpdaterStatus UpdaterFromSdcard(UpdaterParams &upParams)
 
 UpdaterStatus InstallUpdaterPackages(UpdaterParams &upParams)
 {
-    UpdaterInit::GetInstance().InvokeEvent(UPDATER_PRE_UPDATE_EVENT);
+    UpdaterInit::GetInstance().InvokeEvent(UPDATER_PRE_UPDATE_PACKAGE_EVENT);
     UpdaterStatus status = PreUpdatePackages(upParams);
     if (status == UPDATE_SUCCESS) {
         status = DoUpdatePackages(upParams);
     }
     PostUpdatePackages(upParams, status == UPDATE_SUCCESS);
-    UpdaterInit::GetInstance().InvokeEvent(UPDATER_POST_UPDATE_EVENT);
+    UpdaterInit::GetInstance().InvokeEvent(UPDATER_POST_UPDATE_PACKAGE_EVENT);
     return status;
 }
 
