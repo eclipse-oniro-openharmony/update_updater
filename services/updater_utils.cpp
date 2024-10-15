@@ -179,7 +179,8 @@ void PostUpdater(bool clearMisc)
 {
     STAGE(UPDATE_STAGE_BEGIN) << "PostUpdater";
 
-    if (!CheckUpdateMode(SDCARD_MODE) && !CheckUpdateMode(USB_MODE)) {
+    if (!CheckUpdateMode(SDCARD_MODE) && !CheckUpdateMode(USB_MODE) &&
+        GetMountStatusForMountPoint("/log") != MountStatus::MOUNT_MOUNTED) {
         (void)SetupPartitions();
     } else {
         (void)SetupPartitions(false);
@@ -203,7 +204,8 @@ void PostUpdater(bool clearMisc)
     if (access(Flashd::FLASHD_FILE_PATH, 0) == 0 && !DeleteUpdaterPath(Flashd::FLASHD_FILE_PATH)) {
         LOG(ERROR) << "DeleteUpdaterPath failed";
     }
-    if (!CheckUpdateMode(SDCARD_MODE) && !CheckUpdateMode(USB_MODE)) {
+    if (!CheckUpdateMode(SDCARD_MODE) && !CheckUpdateMode(USB_MODE) &&
+        GetMountStatusForMountPoint("/log") != MountStatus::MOUNT_MOUNTED) {
         SaveLogs();
     }
 }
