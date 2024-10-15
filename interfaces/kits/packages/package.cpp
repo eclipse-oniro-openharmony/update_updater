@@ -24,6 +24,7 @@
 using namespace Updater;
 using namespace Hpackage;
 constexpr uint32_t VERIFY_FINSH_PERCENT = 100;
+constexpr uint32_t MAX_ENTRY_COUNT = 4096;
 
 namespace {
 int32_t GetUpgradePkgInfo(UpgradePkgInfo *upgradePackageInfo,
@@ -31,6 +32,11 @@ int32_t GetUpgradePkgInfo(UpgradePkgInfo *upgradePackageInfo,
     const UpgradePkgInfoExt *pkgInfoExt,
     std::vector<ComponentInfoExt> &compInfo)
 {
+    if (pkgInfoExt->entryCount > MAX_ENTRY_COUNT) {
+        LOG(ERROR) << "entry count oversized " << pkgInfoExt->entryCount << ", " << MAX_ENTRY_COUNT;
+        return PKG_INVALID_PARAM;
+    }
+
     upgradePackageInfo->updateFileVersion = pkgInfoExt->updateFileVersion;
     if (pkgInfoExt->softwareVersion != nullptr) {
         upgradePackageInfo->softwareVersion = pkgInfoExt->softwareVersion;
@@ -79,6 +85,11 @@ int32_t GetZipPkgInfo(PkgManager::PkgInfoPtr pkgInfo,
     const UpgradePkgInfoExt *pkgInfoExt,
     std::vector<ComponentInfoExt> &compInfo)
 {
+    if (pkgInfoExt->entryCount > MAX_ENTRY_COUNT) {
+        LOG(ERROR) << "entry count oversized " << pkgInfoExt->entryCount << ", " << MAX_ENTRY_COUNT;
+        return PKG_INVALID_PARAM;
+    }
+
     pkgInfo->signMethod = pkgInfoExt->signMethod;
     pkgInfo->digestMethod  = pkgInfoExt->digestMethod;
     pkgInfo->entryCount = pkgInfoExt->entryCount;
@@ -99,6 +110,11 @@ int32_t GetLz4PkgInfo(PkgManager::PkgInfoPtr pkgInfo,
     const UpgradePkgInfoExt *pkgInfoExt,
     std::vector<ComponentInfoExt> &compInfo)
 {
+    if (pkgInfoExt->entryCount > MAX_ENTRY_COUNT) {
+        LOG(ERROR) << "entry count oversized " << pkgInfoExt->entryCount << ", " << MAX_ENTRY_COUNT;
+        return PKG_INVALID_PARAM;
+    }
+
     pkgInfo->signMethod = pkgInfoExt->signMethod;
     pkgInfo->digestMethod  = pkgInfoExt->digestMethod;
     pkgInfo->entryCount = pkgInfoExt->entryCount;
