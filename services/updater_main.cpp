@@ -800,7 +800,7 @@ void RebootAfterUpdateSuccess(const UpdaterParams &upParams)
     if (IsNeedWipe() ||
         upParams.sdExtMode == SDCARD_UPDATE_FROM_DEV ||
         upParams.sdExtMode == SDCARD_UPDATE_FROM_DATA) {
-        Utils::UpdaterDoReboot("updater", "--user_wipe_data");
+        Utils::UpdaterDoReboot("updater", "Updater wipe data after upgrade success", "--user_wipe_data");
         return;
     }
     if (upParams.factoryResetMode == "factory_wipe_data") {
@@ -809,7 +809,8 @@ void RebootAfterUpdateSuccess(const UpdaterParams &upParams)
         Utils::UsSleep(120 * DISPLAY_TIME); // 120 : 120s
     }
     upParams.forceUpdate || upParams.factoryResetMode == "factory_wipe_data" ?
-        Utils::DoShutdown() : Utils::UpdaterDoReboot("");
+        Utils::DoShutdown("Updater update success go shut down") :
+            Utils::UpdaterDoReboot("", "Updater update success");
 }
 
 int UpdaterMain(int argc, char **argv)
@@ -836,7 +837,7 @@ int UpdaterMain(int argc, char **argv)
             if (upParams.forceReboot) {
                 Utils::UsSleep(5 * DISPLAY_TIME); // 5 : 5s
                 PostUpdater(true);
-                Utils::UpdaterDoReboot("");
+                Utils::UpdaterDoReboot("", "Updater night update fail");
                 return 0;
             }
         } else if (mode == SDCARD_UPDATE) {

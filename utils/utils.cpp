@@ -40,7 +40,6 @@
 #include "parameter.h"
 #include "securec.h"
 #include "updater/updater_const.h"
-#include "scope_guard.h"
 
 namespace Updater {
 using namespace Hpackage;
@@ -50,7 +49,6 @@ constexpr uint8_t SHIFT_RIGHT_FOUR_BITS = 4;
 constexpr int MAX_TIME_SIZE = 20;
 constexpr size_t PARAM_SIZE = 32;
 constexpr const char *PREFIX_PARTITION_NODE = "/dev/block/by-name/";
-constexpr mode_t DEFAULT_DIR_MODE = 0775;
 
 namespace {
 void UpdateInfoInMisc(const std::string headInfo, const std::optional<int> message, bool isRemove)
@@ -224,9 +222,10 @@ bool SetRebootMisc(const std::string& rebootTarget, const std::string &extData, 
     return true;
 }
 
-void UpdaterDoReboot(const std::string& rebootTarget, const std::string &extData)
+void UpdaterDoReboot(const std::string& rebootTarget, const std::string &rebootReason, const std::string &extData)
 {
     LOG(INFO) << ", rebootTarget: " << rebootTarget;
+    LOG(INFO) << ", rebootReason: " << rebootReason;
     LoadFstab();
     struct UpdateMessage msg = {};
     if (rebootTarget.empty()) {
@@ -246,7 +245,7 @@ void UpdaterDoReboot(const std::string& rebootTarget, const std::string &extData
     }
     sync();
 #ifndef UPDATER_UT
-    DoReboot(rebootTarget.c_str());
+    DoRebootExt(rebootTarget.c_str(), rebootReason.c_str());
     while (true) {
         pause();
     }
@@ -255,7 +254,7 @@ void UpdaterDoReboot(const std::string& rebootTarget, const std::string &extData
 #endif
 }
 
-void DoShutdown()
+void DoShutdown(const std::string &shutdownReason)
 {
     UpdateMessage msg = {};
     if (!WriteUpdaterMiscMsg(msg)) {
@@ -263,7 +262,7 @@ void DoShutdown()
         return;
     }
     sync();
-    DoReboot("shutdown");
+    DoRebootExt("shutdown", shutdownReason.c_str());
 }
 
 std::string GetCertName()

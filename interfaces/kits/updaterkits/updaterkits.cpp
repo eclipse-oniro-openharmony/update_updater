@@ -39,7 +39,7 @@ static bool WriteToMiscAndRebootToUpdater(const struct UpdateMessage &updateMsg)
     }
 #ifndef UPDATER_UT
     WriteUpdaterMiscMsg(updateMsg);
-    DoReboot("updater");
+    DoReboot("updater", "reboot to updater to trigger update");
     while (true) {
         pause();
     }
@@ -114,7 +114,7 @@ static bool WriteToMiscAndResultFileRebootToUpdater(const struct UpdateMessage &
     // Flag after the misc in written
     std::string writeMiscAfter = "0x80000008";
     WriteUpdaterResultFile(pkgPath, writeMiscAfter);
-    DoReboot("updater");
+    DoReboot("updater", "reboot to updater to trigger update");
     while (true) {
         pause();
     }

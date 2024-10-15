@@ -140,7 +140,7 @@ int UpdatePartitions::DoNewPartitions(PartitonList &newPartList)
     } else if (ret > 1) {
         LOG(INFO) << "do_partitions success reboot";
 #ifndef UPDATER_UT
-        Utils::UpdaterDoReboot("updater");
+        Utils::UpdaterDoReboot("updater", "Updater finish do new partitions");
 #endif
     }
     return ret;

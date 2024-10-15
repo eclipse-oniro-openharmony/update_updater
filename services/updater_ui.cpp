@@ -68,7 +68,7 @@ DEFINE_ASYN_CALLBACK(OnRebootEvt)
     LOG(INFO) << "On Label Reboot";
     GraphicEngine::GetInstance().StopEngine();
     PostUpdater(false);
-    Utils::UpdaterDoReboot("");
+    Utils::UpdaterDoReboot("", "Updater reboot btn event");
 }
 
 DEFINE_SYNC_CALLBACK(OnLabelResetEvt)
@@ -98,7 +98,7 @@ DEFINE_ASYN_CALLBACK(OnLabelSDCardEvt)
         return;
     }
     PostUpdater(true);
-    Utils::UpdaterDoReboot("");
+    Utils::UpdaterDoReboot("", "Updater sdcard update success reboot");
 }
 
 DEFINE_ASYN_CALLBACK(OnLabelSDCardNoDelayEvt)
@@ -121,7 +121,7 @@ DEFINE_ASYN_CALLBACK(OnLabelSDCardNoDelayEvt)
     GetFacade().ShowSuccessPage();
     Utils::UsSleep(SUCCESS_DELAY);
     PostUpdater(true);
-    Utils::UpdaterDoReboot("");
+    Utils::UpdaterDoReboot("", "Updater sdcard update success reboot");
 }
 
 DEFINE_ASYN_CALLBACK(OnLabelSDUpdateResEvt)
@@ -151,7 +151,7 @@ DEFINE_ASYN_CALLBACK(OnLabelSDUpdateResEvt)
     GetFacade().ShowSuccessPage();
     Utils::UsSleep(SUCCESS_DELAY);
     PostUpdater(true);
-    Utils::UpdaterDoReboot("");
+    Utils::UpdaterDoReboot("", "Updater sdcard update success reboot");
 }
 
 DEFINE_SYNC_CALLBACK(OnLabelCancelEvt)
@@ -206,7 +206,7 @@ DEFINE_ASYN_CALLBACK(OnConfirmRstEvt)
         GetFacade().ShowSuccessPage();
         PostUpdater(true);
         Utils::UsSleep(SUCCESS_DELAY);
-        Utils::UpdaterDoReboot("");
+        Utils::UpdaterDoReboot("", "Updater factory reset success");
     }
 }
 
@@ -214,7 +214,7 @@ DEFINE_ASYN_CALLBACK(OnMenuShutdownEvt)
 {
     LOG(DEBUG) << "shutdown";
     GraphicEngine::GetInstance().StopEngine();
-    Utils::DoShutdown();
+    Utils::DoShutdown("Updater shutdown btn event");
 }
 
 DEFINE_ASYN_CALLBACK(OnMenuClearCacheEvt)
