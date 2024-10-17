@@ -846,12 +846,12 @@ int UpdaterMain(int argc, char **argv)
         } else if (upParams.factoryResetMode == "user_wipe_data" ||
             upParams.factoryResetMode == "menu_wipe_data" || upParams.factoryResetMode == "factory_wipe_data") {
             UPDATER_UI_INSTANCE.ShowFailedPage();
+        } else if (CheckUpdateMode(USB_UPDATE_FAIL)) {
+            (void)UPDATER_UI_INSTANCE.SetMode(UPDATERMODE_USBUPDATE);
+            UPDATER_UI_INSTANCE.ShowFailedPage();
         } else {
-            if (!CheckUpdateMode(USB_UPDATE_FAIL)) {
-                UPDATER_UI_INSTANCE.ShowMainpage();
-                UPDATER_UI_INSTANCE.Sleep(50); /* wait for page flush 50ms */
-                UPDATER_UI_INSTANCE.SaveScreen();
-            }
+            UPDATER_UI_INSTANCE.ShowMainpage();
+            UPDATER_UI_INSTANCE.SaveScreen();
         }
         // Wait for user input
         while (true) {

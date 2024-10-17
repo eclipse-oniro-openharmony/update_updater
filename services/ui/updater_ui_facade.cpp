@@ -265,6 +265,7 @@ void UpdaterUiFacade::Sleep(int ms) const
 
 void UpdaterUiFacade::SaveScreen() const
 {
+    Sleep(50); /* wait for page flush 50ms */
     UpdaterUiTools::SaveUxBuffToFile("/tmp/mainpage.png");
 }
 
