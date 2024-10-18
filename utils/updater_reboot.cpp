@@ -27,15 +27,15 @@ int main(int argc, char **argv)
     }
     if (argc == 1) {
         Updater::LOG(Updater::INFO) << "Updater::Utils::UpdaterDoReboot nullptr";
-        Updater::Utils::UpdaterDoReboot("", "Updater reboot param is null");
+        Updater::Utils::UpdaterDoReboot("", "Updater_reboot default reboot");
     } else {
         std::string updaterStr = "updater";
         if (!memcmp(argv[1], updaterStr.c_str(), updaterStr.length())) {
-            Updater::Utils::UpdaterDoReboot(argv[1], "Updater command reboot to updater");
+            Updater::Utils::UpdaterDoReboot(argv[1], "Updater_reboot command reboot to updater");
         } else if (strcmp(argv[1], "flashd") == 0) {
-            Updater::Utils::UpdaterDoReboot(argv[1], "Updater command reboot to flashd");
+            Updater::Utils::UpdaterDoReboot(argv[1], "Updater_reboot command reboot to flashd");
         } else if (strncmp(argv[1], "flashd:", strlen("flashd:")) == 0) {
-            Updater::Utils::UpdaterDoReboot("flashd", "Updater command reboot to flashd",
+            Updater::Utils::UpdaterDoReboot("flashd", "Updater_reboot command reboot to flashd",
                 argv[1] + strlen("flashd:"));
         } else {
             Updater::LOG(Updater::INFO) << "param must be updater/flashd!";
