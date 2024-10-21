@@ -224,9 +224,10 @@ bool SetRebootMisc(const std::string& rebootTarget, const std::string &extData, 
     return true;
 }
 
-void UpdaterDoReboot(const std::string& rebootTarget, const std::string &extData)
+void UpdaterDoReboot(const std::string& rebootTarget, const std::string &rebootReason, const std::string &extData)
 {
     LOG(INFO) << ", rebootTarget: " << rebootTarget;
+    LOG(INFO) << ", rebootReason: " << rebootReason;
     LoadFstab();
     struct UpdateMessage msg = {};
     if (rebootTarget.empty()) {
@@ -246,7 +247,7 @@ void UpdaterDoReboot(const std::string& rebootTarget, const std::string &extData
     }
     sync();
 #ifndef UPDATER_UT
-    DoReboot(rebootTarget.c_str());
+    DoRebootExt(rebootTarget.c_str(), rebootReason.c_str());
     while (true) {
         pause();
     }
@@ -255,7 +256,7 @@ void UpdaterDoReboot(const std::string& rebootTarget, const std::string &extData
 #endif
 }
 
-void DoShutdown()
+void DoShutdown(const std::string &shutdownReason)
 {
     UpdateMessage msg = {};
     if (!WriteUpdaterMiscMsg(msg)) {
@@ -263,7 +264,7 @@ void DoShutdown()
         return;
     }
     sync();
-    DoReboot("shutdown");
+    DoRebootExt("shutdown", shutdownReason.c_str());
 }
 
 std::string GetCertName()

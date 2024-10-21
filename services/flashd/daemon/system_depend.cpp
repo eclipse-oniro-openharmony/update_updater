@@ -54,7 +54,7 @@ namespace SystemDepend {
     {
         FLASHD_LOGE("Flashd RebootDevice cmd is %s", cmd.c_str());
         Updater::PostUpdater(true);
-        Updater::Utils::UpdaterDoReboot("");
+        Updater::Utils::UpdaterDoReboot("", "Updater flashd reboot command");
         return true;
     }
 }

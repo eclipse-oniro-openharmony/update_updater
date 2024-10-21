@@ -79,7 +79,7 @@ void HwFaultRetry::RebootRetry()
     PostUpdater(false);
     sync();
 #ifndef UPDATER_UT
-    DoReboot("updater");
+    DoReboot("updater:Updater fault retry");
     while (true) {
         pause();
     }

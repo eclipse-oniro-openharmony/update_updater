@@ -64,8 +64,9 @@ int32_t DeleteFile(const std::string& filename);
 std::vector<std::string> SplitString(const std::string &str, const std::string del = " \t");
 std::string Trim(const std::string &str);
 std::string ConvertSha256Hex(const uint8_t* shaDigest, size_t length);
-void UpdaterDoReboot(const std::string& rebootTarget, const std::string& extData = "");
-void DoShutdown();
+void UpdaterDoReboot(const std::string& rebootTarget, const std::string &rebootReason,
+    const std::string& extData = "");
+void DoShutdown(const std::string &shutdownReason);
 std::string GetCertName();
 bool WriteFully(int fd, const uint8_t *data, size_t size);
 bool ReadFully(int fd, void* data, size_t size);
