@@ -196,7 +196,7 @@ int CheckStatvfs(const uint64_t totalPkgSize)
             return UPDATE_ERROR;
         }
     }
-
+    LOG(INFO) << "Number of free blocks = " << updaterVfs.f_bfree << ", Number of free inodes = " << updaterVfs.f_ffree;
     if (static_cast<uint64_t>(updaterVfs.f_bfree) * static_cast<uint64_t>(updaterVfs.f_bsize) <= totalPkgSize) {
         LOG(ERROR) << "Can not update, free space is not enough";
         UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_SPACE_NOTENOUGH), true);
