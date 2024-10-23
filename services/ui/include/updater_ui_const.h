@@ -24,6 +24,7 @@ constexpr const char *DRM_DEV_PATH = "/dev/dri/card0";
 constexpr const char *UPDATERMODE_SDCARD = "sdcard";
 constexpr const char *UPDATERMODE_FACTORYRST = "factoryRst";
 constexpr const char *UPDATERMODE_REBOOTFACTORYRST = "rebootFactoryRst";
+constexpr const char *UPDATERMODE_ATFACTORYRST = "atFactoryRst";
 constexpr const char *UPDATERMODE_OTA = "ota";
 constexpr const char *UPDATERMODE_RECOVER = "recover";
 constexpr const char *UPDATERMODE_NIGHTUPDATE = "night_update";
