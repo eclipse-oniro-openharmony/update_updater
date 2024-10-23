@@ -111,7 +111,7 @@ int32_t Store::WriteDataToStore(const std::string &dirPath, const std::string &f
 
     int fd = open(pathTmp.c_str(), O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
     if (fd == -1) {
-        LOG(ERROR) << "Failed to create store";
+        LOG(ERROR) << "Failed to create store, " << strerror(errno);
         return -1;
     }
     if (size < 0 || !WriteFully(fd, buffer.data(), static_cast<size_t>(size))) {
