@@ -71,28 +71,27 @@ HWTEST_F(UpdaterUnitTest, updater_StartUpdaterProc, TestSize.Level1)
 {
     std::string packagePath = "/data/updater/updater/updater_without_updater_binary.zip";
     PkgManager::PkgManagerPtr pkgManager = PkgManager::CreatePackageInstance();
-    int maxTemperature;
     UpdaterStatus status;
-    status = StartUpdaterProc(pkgManager, packagePath, 0, maxTemperature);
+    status = StartUpdaterProc(pkgManager, packagePath, 0);
     EXPECT_EQ(status, UPDATE_CORRUPT);
 
     packagePath = "/data/updater/updater/updater_with_incorrect_binary.zip";
-    status = StartUpdaterProc(pkgManager, packagePath, 0, maxTemperature);
+    status = StartUpdaterProc(pkgManager, packagePath, 0);
     EXPECT_EQ(status, UPDATE_CORRUPT);
 
     packagePath = "/data/updater/updater/updater.zip";
     std::vector<std::string> components;
     int32_t ret = pkgManager->LoadPackage(packagePath, GetTestCertName(), components);
     EXPECT_EQ(ret, 0);
-    status = StartUpdaterProc(pkgManager, packagePath, 0, maxTemperature);
+    status = StartUpdaterProc(pkgManager, packagePath, 0);
     EXPECT_EQ(status, UPDATE_SUCCESS);
 
     // retrycount is greater than 0.
-    status = StartUpdaterProc(pkgManager, packagePath, 1, maxTemperature);
+    status = StartUpdaterProc(pkgManager, packagePath, 1);
     EXPECT_EQ(status, UPDATE_RETRY);
 
     packagePath = "/data/updater/updater/updater_binary_abnormal.zip";
-    status = StartUpdaterProc(pkgManager, packagePath, 1, maxTemperature);
+    status = StartUpdaterProc(pkgManager, packagePath, 1);
     PkgManager::ReleasePackageInstance(pkgManager);
     EXPECT_EQ(status, UPDATE_ERROR);
 }

@@ -108,8 +108,9 @@ int32_t BlocksPatch::ApplyPatch()
 
 int32_t BlocksPatch::ReadHeader(int64_t &controlDataSize, int64_t &diffDataSize, int64_t &newSize)
 {
-    if (patchInfo_.buffer == nullptr || patchInfo_.length <= PATCH_MIN) {
-        PATCH_LOGE("Invalid parm");
+    if (patchInfo_.buffer == nullptr || patchInfo_.length < patchInfo_.start ||
+        patchInfo_.length - patchInfo_.start <= PATCH_MIN) {
+        PATCH_LOGE("Invalid parm. length:%zu, start:%zu", patchInfo_.length, patchInfo_.start);
         return -1;
     }
     BlockBuffer patchData = {patchInfo_.buffer + patchInfo_.start, patchInfo_.length - patchInfo_.start};

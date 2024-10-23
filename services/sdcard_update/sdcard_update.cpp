@@ -98,6 +98,12 @@ UpdaterStatus CheckSdcardPkgs(UpdaterParams &upParams)
         LOG(INFO) << "get sd card from dev succeed, skip get package from sd card";
         return UPDATE_SUCCESS;
     }
+
+    if (GetSdcardInternalPkgs(upParams) == UPDATE_SUCCESS) {
+        LOG(INFO) << "get sdcard internal pkgs succeed";
+        return UPDATE_SUCCESS;
+    }
+
     std::string mountPoint = std::string(SDCARD_PATH);
     std::vector<std::string> sdcardStr = GetBlockDevicesByMountPoint(mountPoint);
     if (sdcardStr.empty()) {
@@ -124,5 +130,11 @@ UpdaterStatus CheckSdcardPkgs(UpdaterParams &upParams)
         return UPDATE_ERROR;
     }
     return UPDATE_SUCCESS;
+}
+
+__attribute__((weak)) UpdaterStatus GetSdcardInternalPkgs(UpdaterParams &upParams)
+{
+    LOG(INFO) << "not implemented get normal update sdcard pkgs";
+    return UPDATE_ERROR;
 }
 } // Updater

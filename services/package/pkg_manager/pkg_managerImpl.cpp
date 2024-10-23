@@ -15,8 +15,10 @@
 #include "pkg_manager_impl.h"
 #include <algorithm>
 #include <cctype>
+#include <cinttypes>
 #include <cstdio>
 #include <cstring>
+#include <fcntl.h>
 #include <functional>
 #include <iterator>
 #include <unistd.h>
@@ -30,6 +32,7 @@
 #include "pkg_upgradefile.h"
 #include "pkg_verify_util.h"
 #include "pkg_zipfile.h"
+#include "scope_guard.h"
 #include "securec.h"
 #include "updater/updater_const.h"
 #include "utils.h"
@@ -984,6 +987,57 @@ int32_t PkgManagerImpl::VerifyAccPackage(const std::string &packagePath, const s
     }
 
     ClosePkgStream(pkgStream);
+    return PKG_SUCCESS;
+}
+
+int32_t PkgManagerImpl::VerifyOtaPackage(const std::string &devPath, uint64_t offset, size_t size)
+{
+#ifndef DIFF_PATCH_SDK
+    constexpr size_t pageSize = 4096;
+    size_t offsetAligned = (offset / pageSize) * pageSize;
+    if (size == 0 || size + offset < offsetAligned || offset < offsetAligned) {
+        PKG_LOGE("invalid param %zu %" PRIu64 " %zu", size, offset, offsetAligned);
+        return PKG_INVALID_PARAM;
+    }
+    char devRealPath[PATH_MAX + 1] = {};
+    if (realpath(devPath.c_str(), devRealPath) == nullptr) {
+        PKG_LOGE("realPath is nullptr, err %s", strerror(errno));
+        return PKG_INVALID_PARAM;
+    }
+    int fd = open(devRealPath, O_RDONLY | O_LARGEFILE);
+    if (fd < 0) {
+        PKG_LOGE("open %s fail, %s", devRealPath, strerror(errno));
+        return PKG_INVALID_FILE;
+    }
+    ON_SCOPE_EXIT(closePath) {
+        close(fd);
+    };
+    uint8_t *pMap = static_cast<uint8_t *>(mmap64(nullptr, size + offset - offsetAligned, PROT_READ, MAP_PRIVATE,
+        fd, offsetAligned));
+    if (pMap == MAP_FAILED) {
+        PKG_LOGE("mmap64 %s fail, %s %zu %" PRIu64, devRealPath, strerror(errno), size, offset);
+        return PKG_NONE_MEMORY;
+    }
+    ON_SCOPE_EXIT(unmapMem) {
+        munmap(pMap, size + offset - offsetAligned);
+    };
+    PkgBuffer buffer(pMap + (offset - offsetAligned), size);
+    PkgStreamPtr pkgStream = nullptr;
+    int32_t ret = CreatePkgStream(pkgStream, devRealPath, buffer);
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("create package stream fail %s %s", devRealPath, strerror(errno));
+        return ret;
+    }
+    ON_SCOPE_EXIT(closeStream) {
+        ClosePkgStream(pkgStream);
+    };
+    PkgVerifyUtil verifyUtil {};
+    ret = verifyUtil.VerifyPackageSign(pkgStream);
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("verify pkcs7 signature failed.");
+        return ret;
+    }
+#endif
     return PKG_SUCCESS;
 }
 

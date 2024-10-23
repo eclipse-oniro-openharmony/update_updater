@@ -51,6 +51,7 @@ struct TransferParams {
     std::string storeBase;
     std::string freeStash;
     std::string retryFile;
+    std::string devPath;
     uint8_t *patchDataBuffer;
     size_t patchDataSize;
 };

@@ -23,6 +23,7 @@ ohos_unittest("binary_unittest") {
   sources = [
     "update_image_block_test.cpp",
     "update_image_patch_unittest.cpp",
+    "update_partitions_unittest.cpp",
     "update_processor_unittest.cpp",
   ]
 
@@ -46,6 +47,7 @@ ohos_unittest("binary_unittest") {
     "${updater_path}/services/include",
     "${updater_path}/utils/include",
     "${updater_path}/utils/json",
+    "${updater_path}/services/package/pkg_algorithm",
     "${updater_path}/services/include/applypatch",
     "${updater_path}/services/script/script_manager",
     "${updater_path}/services/script/script_interpreter",

@@ -186,13 +186,14 @@ static int32_t GetUpdateBlockInfo(struct UpdateBlockInfo &infos, Uscript::UScrip
 }
 
 static int32_t ExecuteTransferCommand(int fd, const std::vector<std::string> &lines, TransferManagerPtr tm,
-    Uscript::UScriptContext &context, const std::string &partitionName)
+    Uscript::UScriptContext &context, const UpdateBlockInfo &infos)
 {
     auto transferParams = tm->GetTransferParams();
     auto writerThreadInfo = transferParams->writerThreadInfo.get();
 
-    transferParams->storeBase = std::string("/data/updater") + partitionName + "_tmp";
-    transferParams->retryFile = std::string("/data/updater") + partitionName + "_retry";
+    transferParams->storeBase = std::string("/data/updater") + infos.partitionName + "_tmp";
+    transferParams->retryFile = std::string("/data/updater") + infos.partitionName + "_retry";
+    transferParams->devPath = infos.devPath;
     LOG(INFO) << "Store base path is " << transferParams->storeBase;
     int32_t ret = Store::CreateNewSpace(transferParams->storeBase, !transferParams->env->IsRetry());
     if (ret == -1) {
@@ -289,7 +290,7 @@ static int32_t DoExecuteUpdateBlock(const UpdateBlockInfo &infos, TransferManage
         env->GetPkgManager()->ClosePkgStream(outStream);
         return USCRIPT_ERROR_EXECUTE;
     }
-    int32_t ret = ExecuteTransferCommand(fd, lines, tm, context, infos.partitionName);
+    int32_t ret = ExecuteTransferCommand(fd, lines, tm, context, infos);
     fsync(fd);
     close(fd);
     fd = -1;
@@ -471,21 +472,26 @@ int32_t UScriptInstructionBlockCheck::Execute(Uscript::UScriptEnv &env, Uscript:
     return USCRIPT_SUCCESS;
 }
 
+bool UScriptInstructionShaCheck::IsTargetShaDiff(const std::string &devPath, const ShaInfo &shaInfo)
+{
+    std::string tgtResultSha = CalculateBlockSha(devPath, shaInfo.targetPairs);
+    if (tgtResultSha.empty()) {
+        LOG(WARNING) << "target sha is empty";
+        return true;
+    }
+    LOG(INFO) << "tgtResultSha: " << tgtResultSha << ", shaInfo.targetSha: " << shaInfo.targetSha;
+    return (tgtResultSha != shaInfo.targetSha);
+}
+
 int UScriptInstructionShaCheck::ExecReadShaInfo(Uscript::UScriptEnv &env, const std::string &devPath,
     const ShaInfo &shaInfo)
 {
     UPDATER_INIT_RECORD;
     std::string resultSha = CalculateBlockSha(devPath, shaInfo.blockPairs);
-    std::string tgtResultSha = CalculateBlockSha(devPath, shaInfo.targetPairs);
-    if (resultSha.empty() && tgtResultSha.empty()) {
-        LOG(ERROR) << "All sha is empty";
-        return USCRIPT_ERROR_EXECUTE;
-    }
-
-    bool isTargetDiff = tgtResultSha.empty() ? true : (tgtResultSha != shaInfo.targetSha);
-    if (resultSha != shaInfo.contrastSha && isTargetDiff) {
+    if (resultSha != shaInfo.contrastSha && IsTargetShaDiff(devPath, shaInfo)) {
         LOG(ERROR) << "Different sha256, cannot continue";
         LOG(ERROR) << "blockPairs:" << shaInfo.blockPairs;
+        LOG(ERROR) << "resultSha: " << resultSha << ", shaInfo.contrastSha: " << shaInfo.contrastSha;
         PrintAbnormalBlockHash(devPath, shaInfo.blockPairs);
         UPDATER_LAST_WORD(devPath.substr(devPath.find_last_of("/") + 1), USCRIPT_ERROR_EXECUTE);
         env.PostMessage(UPDATER_RETRY_TAG, VERIFY_FAILED_REBOOT);

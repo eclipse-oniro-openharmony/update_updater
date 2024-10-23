@@ -83,7 +83,7 @@ const std::vector<std::string> UpdaterEnv::GetInstructionNames() const
     static std::vector<std::string> updaterCmds = {
         "sha_check", "first_block_check", "block_update",
         "raw_image_write", "update_partitions", "image_patch",
-        "image_sha_check", "pkg_extract", "update_from_bin"
+        "image_sha_check", "pkg_extract", "pkg_extract_no_ret", "update_from_bin"
     };
     return updaterCmds;
 }
@@ -107,6 +107,8 @@ int32_t UpdaterInstructionFactory::CreateInstructionInstance(UScriptInstructionP
         instr = new USInstrImageShaCheck();
     } else if (name == "pkg_extract") {
         instr = new UScriptInstructionPkgExtract();
+    } else if (name == "pkg_extract_no_ret") {
+        instr = new UScriptInstructionPkgExtractRetSuc();
     } else if (name == "update_from_bin") {
         instr = new UScriptInstructionBinFlowWrite();
     }
@@ -290,6 +292,15 @@ int32_t UScriptInstructionPkgExtract::Execute(Uscript::UScriptEnv &env, Uscript:
     manager->ClosePkgStream(outStream);
     LOG(INFO)<<"UScriptInstructionPkgExtract finish";
     return ret;
+}
+
+int32_t UScriptInstructionPkgExtractRetSuc::Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context)
+{
+    int32_t ret = UScriptInstructionPkgExtract::Execute(env, context);
+    if (ret != USCRIPT_SUCCESS) {
+        LOG(ERROR) << "Error to extract file, ret = " << ret;
+    }
+    return USCRIPT_SUCCESS;
 }
 
 int32_t UScriptInstructionUpdateFromBin::Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context)

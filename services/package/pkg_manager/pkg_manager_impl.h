@@ -77,7 +77,7 @@ public:
         uint64_t fileLen, Updater::RingBuffer *buffer) override;
     int32_t VerifyAccPackage(const std::string &packagePath, const std::string &keyPath) override;
     int32_t VerifyOtaPackage(const std::string &packagePath) override;
-
+    int32_t VerifyOtaPackage(const std::string &devPath, uint64_t offset, size_t size) override;
     int32_t VerifyBinFile(const std::string &packagePath, const std::string &keyPath,
         const std::string &version, const PkgBuffer &digest) override;
 
