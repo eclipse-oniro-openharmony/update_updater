@@ -42,7 +42,7 @@ private:
     static constexpr uint32_t LBA_LENGTH = 512;
     static constexpr uint32_t GPT_PARTITION_INFO_LENGTH = 128;
     static constexpr uint32_t PROTECTIVE_MBR_SIZE = 512;
-    static constexpr uint32_t MIN_EMMC_WRITE_SIZE = 4096;
+    static constexpr uint32_t MIN_EMMC_WRITE_SIZE = 512;
     static constexpr uint32_t EMMC_BLOCK_SIZE = 512;
 
     struct EmmcPartitionDataInfo {
@@ -53,7 +53,7 @@ private:
 
     struct EmmcPartitionDataInfo emmcPtnDataInfo_;
 
-    bool EmmcReadGpt(uint8_t *ptableData);
+    bool EmmcReadGpt(uint8_t *ptableData, uint32_t len);
     bool UpdateCommInitializeGptPartition(uint8_t *gptImage, const uint32_t len);
     bool ReadEmmcGptImageToRam();
     uint64_t GetDeviceCapacity();

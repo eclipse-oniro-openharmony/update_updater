@@ -13,7 +13,7 @@
 
 import("//build/ohos.gni")
 
-enable_ohos_startup_init_feature_ab_partition = false
+init_feature_ab_partition = false
 declare_args() {
   updater_cfg_file = ""
   updater_ui_support = true

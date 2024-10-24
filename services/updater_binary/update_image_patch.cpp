@@ -266,6 +266,10 @@ int32_t USInstrImageShaCheck::CheckHash(const CheckPara &para)
         LOG(ERROR) << "PatchMapFile error";
         return USCRIPT_ERROR_EXECUTE;
     }
+    if (!std::all_of(para.srcSize.begin(), para.srcSize.end(), ::isdigit)) {
+        LOG(ERROR) << "para size error " << para.srcSize;
+        return USCRIPT_ERROR_EXECUTE;
+    }
     size_t length = std::stoul(para.srcSize);
     UpdatePatch::BlockBuffer data = { mapBuffer.memory, length };
     std::string resultSha = UpdatePatch::GeneraterBufferHash(data);

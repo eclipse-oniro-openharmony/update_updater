@@ -81,7 +81,7 @@ UpdaterStatus DoInstallUpdaterPackage(Hpackage::PkgManager::PkgManagerPtr pkgMan
     UpdaterParams &upParams, PackageUpdateMode updateMode);
 
 UpdaterStatus StartUpdaterProc(Hpackage::PkgManager::PkgManagerPtr pkgManager,
-    UpdaterParams &upParams, int &maxTemperature);
+    UpdaterParams &upParams);
 
 int GetUpdatePackageInfo(Hpackage::PkgManager::PkgManagerPtr pkgManager, const std::string& path);
 

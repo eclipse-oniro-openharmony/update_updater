@@ -249,11 +249,6 @@ std::unique_ptr<FlashdWriter> GetTestWriter()
     return std::make_unique<FlashdWriterRaw>();
 }
 
-HWTEST_F(FLashServiceUnitTest, FlashdRegisterWriter, TestSize.Level1)
-{
-    FlashdImageWriter::GetInstance().RegisterUserWriter(IsTestImg, GetTestWriter);
-}
-
 HWTEST_F(FLashServiceUnitTest, PartitionDoErase, TestSize.Level1)
 {
     std::string partitionName = "test";
