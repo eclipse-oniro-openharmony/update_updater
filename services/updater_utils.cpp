@@ -182,7 +182,7 @@ void CheckSetupPartitions()
     bool isOtaMode = CheckUpdateMode(OTA_MODE);
     bool isSdCardIntralMode = CheckUpdateMode(SDCARD_INTRAL_MODE);
     bool isLogMounted = GetMountStatusForMountPoint("/log") == MountStatus::MOUNT_MOUNTED;
-    if (!(isSdCardMode || isUsbMode) && (isOtaMode || !isLogMounted) || isSdCardIntralMode) {
+    if ((!(isSdCardMode || isUsbMode) && (isOtaMode || !isLogMounted)) || isSdCardIntralMode) {
         (void)SetupPartitions();
     } else {
         (void)SetupPartitions(false);
