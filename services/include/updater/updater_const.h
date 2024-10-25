@@ -44,6 +44,7 @@ constexpr const char *PREFIX_UFS_NODE = "/dev/block/sd";
 constexpr const char *SDCARD_PACKAGE_SUFFIX = ".zip";
 constexpr const char *POWEROFF = "shutdown";
 constexpr const char *BOOTDEV_TYPE = "/proc/bootdevice/type";
+constexpr const char *UPLOAD_LOG_TIME_FILE = "upload_time";
 
 // update mode
 constexpr const char *SDCARD_MODE = "sdcard_update";
