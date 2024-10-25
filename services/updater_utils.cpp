@@ -179,7 +179,7 @@ void PostUpdater(bool clearMisc)
 {
     STAGE(UPDATE_STAGE_BEGIN) << "PostUpdater";
 
-    if ((!(CheckUpdateMode(SDCARD_MODE) || CheckUpdateMode(USB_MODE)) &&
+    if (!(CheckUpdateMode(SDCARD_MODE) || CheckUpdateMode(USB_MODE)) &&
         (CheckUpdateMode(OTA_MODE) || GetMountStatusForMountPoint("/log") != MountStatus::MOUNT_MOUNTED)
         || CheckUpdateMode(SDCARD_INTRAL_MODE)) {
         (void)SetupPartitions();
