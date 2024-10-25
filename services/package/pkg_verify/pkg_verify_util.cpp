@@ -30,6 +30,7 @@ namespace {
 constexpr uint32_t ZIP_EOCD_FIXED_PART_LEN = 22;
 constexpr uint32_t PKG_FOOTER_SIZE = 6;
 constexpr uint32_t PKG_HASH_CONTENT_LEN = SHA256_DIGEST_LENGTH;
+constexpr uint32_t INTERCEPT_HASH_LENGTH = 8;
 }
 
 int32_t PkgVerifyUtil::VerifySourceDigest(std::vector<uint8_t> &signature, std::vector<uint8_t> &sourceDigest,
@@ -208,7 +209,9 @@ int32_t PkgVerifyUtil::HashCheck(const PkgStreamPtr srcData, const size_t dataLe
 
     if (memcmp(hash.data(), sourceDigest.data(), digestLen) != EOK) {
         PKG_LOGW("Failed to memcmp data.");
-        UPDATER_LAST_WORD(PKG_INVALID_DIGEST);
+        UPDATER_LAST_WORD(PKG_INVALID_DIGEST,
+                          ConvertShaHex(hash).substr(0, INTERCEPT_HASH_LENGTH),
+                          ConvertShaHex(sourceDigest).substr(0, INTERCEPT_HASH_LENGTH));
         return PKG_INVALID_DIGEST;
     }
 
