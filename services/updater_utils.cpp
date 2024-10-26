@@ -175,16 +175,24 @@ bool IsSDCardExist(const std::string &sdcardPath)
     }
 }
 
-void PostUpdater(bool clearMisc)
+void CheckSetupPartitions()
 {
-    STAGE(UPDATE_STAGE_BEGIN) << "PostUpdater";
-
-    if (!CheckUpdateMode(SDCARD_MODE) && !CheckUpdateMode(USB_MODE) && (CheckUpdateMode(OTA_MODE) ||
-        GetMountStatusForMountPoint("/log") != MountStatus::MOUNT_MOUNTED)) {
+    bool isSdCardMode = CheckUpdateMode(SDCARD_MODE);
+    bool isUsbMode = CheckUpdateMode(USB_MODE);
+    bool isOtaMode = CheckUpdateMode(OTA_MODE);
+    bool isSdCardIntralMode = CheckUpdateMode(SDCARD_INTRAL_MODE);
+    bool isLogMounted = GetMountStatusForMountPoint("/log") == MountStatus::MOUNT_MOUNTED;
+    if ((!(isSdCardMode || isUsbMode) && (isOtaMode || !isLogMounted)) || isSdCardIntralMode) {
         (void)SetupPartitions();
     } else {
         (void)SetupPartitions(false);
     }
+}
+
+void PostUpdater(bool clearMisc)
+{
+    STAGE(UPDATE_STAGE_BEGIN) << "PostUpdater";
+    CheckSetupPartitions();
     UpdaterInit::GetInstance().InvokeEvent(UPDATER_POST_INIT_EVENT);
     // clear update misc partition.
     if (clearMisc && !ClearMisc()) {
