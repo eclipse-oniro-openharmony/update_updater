@@ -976,7 +976,7 @@ int32_t PkgManagerImpl::VerifyAccPackage(const std::string &packagePath, const s
     }
 
     PkgVerifyUtil verifyUtil;
-    if (verifyUtil.VerifyPackageSign(pkgStream) != PKG_SUCCESS) {
+    if (verifyUtil.VerifyPackageSign(pkgStream, packagePath) != PKG_SUCCESS) {
         ret = verifyUtil.VerifyAccPackageSign(pkgStream, keyPath);
     }
     if (ret != PKG_SUCCESS) {
@@ -1032,7 +1032,7 @@ int32_t PkgManagerImpl::VerifyOtaPackage(const std::string &devPath, uint64_t of
         ClosePkgStream(pkgStream);
     };
     PkgVerifyUtil verifyUtil {};
-    ret = verifyUtil.VerifyPackageSign(pkgStream);
+    ret = verifyUtil.VerifyPackageSign(pkgStream, devRealPath);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("verify pkcs7 signature failed.");
         return ret;
@@ -1052,7 +1052,7 @@ int32_t PkgManagerImpl::VerifyOtaPackage(const std::string &packagePath)
     }
 
     PkgVerifyUtil verifyUtil;
-    ret = verifyUtil.VerifyPackageSign(pkgStream);
+    ret = verifyUtil.VerifyPackageSign(pkgStream, packagePath);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("Verify zpkcs7 signature failed.");
         UPDATER_LAST_WORD(ret);
