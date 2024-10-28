@@ -188,7 +188,7 @@ public:
         EXPECT_EQ(ret, PKG_INVALID_PARAM);
         ret = pkgVerify.GetSignature(nullptr, testData, data, commentTotalLenAll);
         EXPECT_NE(ret, PKG_SUCCESS);
-        ret = pkgVerify.HashCheck(nullptr, testData, data);
+        ret = pkgVerify.HashCheck(nullptr, testData, data, "");
         EXPECT_EQ(ret, PKG_INVALID_PARAM);
         ret = pkgVerify.ParsePackage(nullptr, testData, testData, commentTotalLenAll);
         EXPECT_NE(ret, PKG_SUCCESS);
