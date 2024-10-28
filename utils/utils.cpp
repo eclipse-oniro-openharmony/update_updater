@@ -628,7 +628,6 @@ void WriteDumpResult(const std::string &result, const std::string &fileName)
             return;
         }
     }
-    LOG(INFO) << "WriteDumpResult: " << result;
     const std::string resultPath = std::string(UPDATER_PATH) + "/" + fileName;
     FILE *fp = fopen(resultPath.c_str(), "w+");
     if (fp == nullptr) {

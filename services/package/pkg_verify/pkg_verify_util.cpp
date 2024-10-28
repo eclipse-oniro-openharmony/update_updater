@@ -14,8 +14,9 @@
  */
 
 #include "pkg_verify_util.h"
+#include <ctime>
+#include <sys/stat.h>
 #include <unistd.h>
-#include <time.h>
 #include "dump.h"
 #include "openssl_util.h"
 #include "pkcs7_signed_data.h"
@@ -95,7 +96,7 @@ int32_t PkgVerifyUtil::VerifySign(std::vector<uint8_t> &signData, std::vector<ui
     return PKG_SUCCESS;
 }
 
-int32_t PkgVerifyUtil::VerifyPackageSign(const PkgStreamPtr pkgStream, const std::string path) const
+int32_t PkgVerifyUtil::VerifyPackageSign(const PkgStreamPtr pkgStream, const std::string &path) const
 {
     if (pkgStream == nullptr) {
         UPDATER_LAST_WORD(PKG_INVALID_PARAM);
@@ -186,18 +187,17 @@ int32_t PkgVerifyUtil::Pkcs7verify(std::vector<uint8_t> &signature, std::vector<
 }
 
 int32_t PkgVerifyUtil::HashCheck(const PkgStreamPtr srcData, const size_t dataLen,
-    const std::vector<uint8_t> &hash, const std::string path) const
+    const std::vector<uint8_t> &hash, const std::string &path) const
 {
     Updater::UPDATER_INIT_RECORD;
     struct stat statInfo {};
     std::string fileInfo = "valid info";
-    off_t size = 0;
-    if (stat(path, statInfo) != 0) {
-        LOG(ERROR) << "get file info error";
+    if (stat(path.c_str(), &statInfo) != 0) {
+        PKG_LOGE("get file info error");
     } else {
-        fileInfo = "pkg size is " + std::string(statInfo.st_size) +
+        fileInfo = "pkg size is " + std::to_string(statInfo.st_size) +
             " , pkg last change time is " + ctime(&statInfo.st_mtime);
-        LOG(INFO) << fileInfo;
+        PKG_LOGE(fileInfo.c_str());
     }
     if (srcData == nullptr || dataLen == 0) {
         UPDATER_LAST_WORD(PKG_INVALID_PARAM);
