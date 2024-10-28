@@ -197,7 +197,7 @@ int32_t PkgVerifyUtil::HashCheck(const PkgStreamPtr srcData, const size_t dataLe
     } else {
         fileInfo = "pkg size is " + std::to_string(statInfo.st_size) +
             " , pkg last change time is " + ctime(&statInfo.st_mtime);
-        PKG_LOGE(fileInfo.c_str());
+        PKG_LOGI(fileInfo.c_str());
     }
     if (srcData == nullptr || dataLen == 0) {
         UPDATER_LAST_WORD(PKG_INVALID_PARAM);
