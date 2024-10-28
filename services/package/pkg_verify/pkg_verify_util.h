@@ -27,7 +27,7 @@ public:
 
     ~PkgVerifyUtil() {}
 
-    int32_t VerifyPackageSign(const Hpackage::PkgStreamPtr PkgStream) const;
+    int32_t VerifyPackageSign(const Hpackage::PkgStreamPtr PkgStream, const std::string &path) const;
     int32_t VerifySign(std::vector<uint8_t> &signData, std::vector<uint8_t> &digest) const;
     int32_t VerifySourceDigest(std::vector<uint8_t> &signature, std::vector<uint8_t> &sourceDigest,
         const std::string &keyPath) const;
@@ -46,7 +46,7 @@ public:
     int32_t Pkcs7verify(std::vector<uint8_t> &signature, std::vector<uint8_t> &hash) const;
 
     int32_t HashCheck(const PkgStreamPtr srcData, const size_t dataLen,
-        const std::vector<uint8_t> &hash) const;
+        const std::vector<uint8_t> &hash, const std::string &path) const;
 };
 } // namespace Hpackage
 #endif
