@@ -240,10 +240,20 @@ bool GetBatteryCapacity(int &capacity)
     return false;
 }
 
+__attribute__((weak)) bool IsSpareBoardBoot(void)
+{
+    LOG(INFO) << "no need check spareboardboot";
+    return false;
+}
+
 bool IsBatteryCapacitySufficient()
 {
     if (Utils::CheckUpdateMode(OTA_MODE)) {
         LOG(INFO) << "this is OTA update, on need to determine the battery";
+        return true;
+    }
+    if (IsSpareBoardBoot()) {
+        LOG(INFO) << "this is spare board boot, no need to determine the battery";
         return true;
     }
     static constexpr auto levelIdx = "lowBatteryLevel";
