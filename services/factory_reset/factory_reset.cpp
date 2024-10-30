@@ -51,21 +51,10 @@ int FactoryResetProcess::FactoryResetFunc(FactoryResetMode mode, const std::stri
         return 1;
     }
     int resetStatus = iter->second(mode, path);
-    // ON_SCOPE_EXIT(factoryResetPost) {
-    //     if (mode == FACTORY_WIPE_DATA &&
-    //         (FactoryResetPostFunc_ == nullptr || FactoryResetPostFunc_(resetStatus) != 0)) {
-    //         LOG(ERROR) << "FactoryResetPostFunc_ fail";
-    //     }
-    // };
     if (resetStatus != 0) {
         LOG(ERROR) << "Do factory reset failed! tag: " << mode;
         return 1;
     }
-    // if (CommonResetPostFunc_ == nullptr || CommonResetPostFunc_(mode) != 0) {
-    //     resetStatus = 1;
-    //     LOG(ERROR) << "CommonResetPostFunc_ fail";
-    //     return -1;
-    // }
     return 0;
 }
 
