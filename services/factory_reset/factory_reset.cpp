@@ -97,7 +97,7 @@ static int UserResetPre()
     return 0;
 }
 
-void UserResetProcess::RegisterUserResetPreFunc(UserResetPreFunc ptr)
+void FactoryResetProcess::RegisterUserResetPreFunc(UserResetPreFunc ptr)
 {
     UserResetPreFunc_ = std::move(ptr);
 }
@@ -108,7 +108,7 @@ static int UserResetPost()
     return 0;
 }
 
-void UserResetProcess::RegisterUserResetPostFunc(UserResetPostFunc ptr)
+void FactoryResetProcess::RegisterUserResetPostFunc(UserResetPostFunc ptr)
 {
     UserResetPostFunc_ = std::move(ptr);
 }
@@ -128,7 +128,7 @@ int FactoryResetProcess::DoUserReset(FactoryResetMode mode, const std::string &p
         ERROR_CODE(CODE_FACTORY_RESET_FAIL);
     }
     if (UserResetPostFunc_ == nullptr || UserResetPostFunc_() != 0 || ret != 0) {
-        LOG(ERROR) << "UserResetPostFunc_ fail";
+        LOG(ERROR) << "UserResetPostFunc_ fail or FormatPartition failed";
         return -1;
     }
     if (CommonResetPostFunc_ == nullptr || CommonResetPostFunc_(mode) != 0) {
@@ -185,11 +185,11 @@ extern "C" __attribute__((constructor)) void RegisterFactoryResetPostFunc(void)
 
 extern "C" __attribute__((constructor)) void RegisterUserResetPreFunc(void)
 {
-    UserResetProcess::GetInstance().RegisterUserResetPreFunc(UserResetPre);
+    FactoryResetProcess::GetInstance().RegisterUserResetPreFunc(UserResetPre);
 }
 
 extern "C" __attribute__((constructor)) void RegisterUserResetPostFunc(void)
 {
-    UserResetProcess::GetInstance().RegisterUserResetPostFunc(UserResetPost);
+    FactoryResetProcess::GetInstance().RegisterUserResetPostFunc(UserResetPost);
 }
 } // Updater
