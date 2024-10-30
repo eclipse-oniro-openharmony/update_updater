@@ -28,12 +28,12 @@ FactoryResetProcess &FactoryResetProcess::GetInstance()
 
 FactoryResetProcess::FactoryResetProcess()
 {
-    RegisterFunc(USER_WIPE_DATA, [this](FactoryResetMode mode, const std::string &path) {
-        return DoUserReset(mode, path); });
-    RegisterFunc(FACTORY_WIPE_DATA, [this](FactoryResetMode mode, const std::string &path) {
-        return DoFactoryReset(mode, path); });
-    RegisterFunc(MENU_WIPE_DATA, [this](FactoryResetMode mode, const std::string &path) {
-        return DoUserReset(mode, path); });
+    RegisterFunc(USER_WIPE_DATA,
+        [this](FactoryResetMode mode, const std::string &path) { return DoUserReset(mode, path); });
+    RegisterFunc(FACTORY_WIPE_DATA,
+        [this](FactoryResetMode mode, const std::string &path) { return DoFactoryReset(mode, path); });
+    RegisterFunc(MENU_WIPE_DATA,
+        [this](FactoryResetMode mode, const std::string &path) { return DoUserReset(mode, path); });
 }
 
 void FactoryResetProcess::RegisterFunc(FactoryResetMode mode, ResetFunc func)
