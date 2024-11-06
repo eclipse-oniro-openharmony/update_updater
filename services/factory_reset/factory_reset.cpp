@@ -91,8 +91,9 @@ void FactoryResetProcess::RegisterFactoryResetPostFunc(FactoryResetPostFunc ptr)
     FactoryResetPostFunc_ = std::move(ptr);
 }
 
-static int UserResetPre()
+static int UserResetPre(FactoryResetMode mode)
 {
+    void(mode);
     LOG(INFO) << "UserResetPre";
     return 0;
 }
@@ -102,8 +103,9 @@ void FactoryResetProcess::RegisterUserResetPreFunc(UserResetPreFunc ptr)
     UserResetPreFunc_ = std::move(ptr);
 }
 
-static int UserResetPost()
+static int UserResetPost(FactoryResetMode mode)
 {
+    void(mode);
     LOG(INFO) << "UserResetPost";
     return 0;
 }
