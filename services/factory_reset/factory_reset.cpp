@@ -118,7 +118,7 @@ void FactoryResetProcess::RegisterUserResetPostFunc(UserResetPostFunc ptr)
 int FactoryResetProcess::DoUserReset(FactoryResetMode mode, const std::string &path)
 {
     STAGE(UPDATE_STAGE_BEGIN) << "User FactoryReset";
-    if (UserResetPreFunc_ == nullptr || UserResetPreFunc_() != 0) {
+    if (UserResetPreFunc_ == nullptr || UserResetPreFunc_(mode) != 0) {
         LOG(ERROR) << "UserResetPreFunc_ fail";
         return -1;
     }
@@ -129,7 +129,7 @@ int FactoryResetProcess::DoUserReset(FactoryResetMode mode, const std::string &p
         STAGE(UPDATE_STAGE_FAIL) << "User FactoryReset";
         ERROR_CODE(CODE_FACTORY_RESET_FAIL);
     }
-    if (UserResetPostFunc_ == nullptr || UserResetPostFunc_() != 0 || ret != 0) {
+    if (UserResetPostFunc_ == nullptr || UserResetPostFunc_(mode) != 0 || ret != 0) {
         LOG(ERROR) << "UserResetPostFunc_ fail or FormatPartition failed";
         return -1;
     }
