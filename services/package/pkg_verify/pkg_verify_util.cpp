@@ -14,6 +14,8 @@
  */
 
 #include "pkg_verify_util.h"
+#include <ctime>
+#include <sys/stat.h>
 #include <unistd.h>
 #include "dump.h"
 #include "openssl_util.h"
@@ -93,7 +95,7 @@ int32_t PkgVerifyUtil::VerifySign(std::vector<uint8_t> &signData, std::vector<ui
     return PKG_SUCCESS;
 }
 
-int32_t PkgVerifyUtil::VerifyPackageSign(const PkgStreamPtr pkgStream) const
+int32_t PkgVerifyUtil::VerifyPackageSign(const PkgStreamPtr pkgStream, const std::string &path) const
 {
     if (pkgStream == nullptr) {
         UPDATER_LAST_WORD(PKG_INVALID_PARAM);
@@ -117,10 +119,10 @@ int32_t PkgVerifyUtil::VerifyPackageSign(const PkgStreamPtr pkgStream) const
     }
     size_t srcDataLen = pkgStream->GetFileLength() - commentTotalLenAll - 2;
 
-    ret =  HashCheck(pkgStream, srcDataLen, hash);
+    ret = HashCheck(pkgStream, srcDataLen, hash, path);
     if (ret != PKG_SUCCESS) {
         srcDataLen = pkgStream->GetFileLength() - signatureSize - ZIP_EOCD_FIXED_PART_LEN;
-        ret = HashCheck(pkgStream, srcDataLen, hash);
+        ret = HashCheck(pkgStream, srcDataLen, hash, path);
     }
     PKG_LOGI("verify package signature %s", ret == PKG_SUCCESS ? "successfull" : "failed");
     return ret;
@@ -184,9 +186,18 @@ int32_t PkgVerifyUtil::Pkcs7verify(std::vector<uint8_t> &signature, std::vector<
 }
 
 int32_t PkgVerifyUtil::HashCheck(const PkgStreamPtr srcData, const size_t dataLen,
-    const std::vector<uint8_t> &hash) const
+    const std::vector<uint8_t> &hash, const std::string &path) const
 {
     Updater::UPDATER_INIT_RECORD;
+    struct stat statInfo {};
+    std::string fileInfo = "valid info";
+    if (stat(path.c_str(), &statInfo) != 0) {
+        PKG_LOGE("get file info error");
+    } else {
+        fileInfo = "pkg size is " + std::to_string(statInfo.st_size) +
+            " , pkg last change time is " + ctime(&statInfo.st_mtime);
+        PKG_LOGI(fileInfo.c_str());
+    }
     if (srcData == nullptr || dataLen == 0) {
         UPDATER_LAST_WORD(PKG_INVALID_PARAM);
         return PKG_INVALID_PARAM;
@@ -195,20 +206,20 @@ int32_t PkgVerifyUtil::HashCheck(const PkgStreamPtr srcData, const size_t dataLe
     size_t digestLen = hash.size();
     if (digestLen != PKG_HASH_CONTENT_LEN) {
         PKG_LOGE("calc pkg sha256 digest failed.");
-        UPDATER_LAST_WORD(PKG_INVALID_PARAM);
+        UPDATER_LAST_WORD(PKG_INVALID_PARAM, fileInfo);
         return PKG_INVALID_PARAM;
     }
     std::vector<uint8_t> sourceDigest(digestLen);
     int32_t ret = CalcSha256Digest(srcData, dataLen, sourceDigest);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("calc pkg sha256 digest failed.");
-        UPDATER_LAST_WORD(ret);
+        UPDATER_LAST_WORD(ret, fileInfo);
         return ret;
     }
 
     if (memcmp(hash.data(), sourceDigest.data(), digestLen) != EOK) {
         PKG_LOGW("Failed to memcmp data.");
-        UPDATER_LAST_WORD(PKG_INVALID_DIGEST);
+        UPDATER_LAST_WORD(PKG_INVALID_DIGEST, fileInfo);
         return PKG_INVALID_DIGEST;
     }
 
