@@ -93,7 +93,7 @@ void FactoryResetProcess::RegisterFactoryResetPostFunc(FactoryResetPostFunc ptr)
 
 static int UserResetPre(FactoryResetMode mode)
 {
-    void(mode);
+    (void)mode;
     LOG(INFO) << "UserResetPre";
     return 0;
 }
@@ -105,7 +105,7 @@ void FactoryResetProcess::RegisterUserResetPreFunc(UserResetPreFunc ptr)
 
 static int UserResetPost(FactoryResetMode mode)
 {
-    void(mode);
+    (void)mode;
     LOG(INFO) << "UserResetPost";
     return 0;
 }
