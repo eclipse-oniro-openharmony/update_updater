@@ -25,8 +25,8 @@ namespace Updater {
 using CommonResetPostFunc = std::function<int(FactoryResetMode)>;
 using FactoryResetPreFunc = std::function<int(void)>;
 using FactoryResetPostFunc = std::function<int(int)>;
-using UserResetPreFunc = std::function<int(void)>;
-using UserResetPostFunc = std::function<int(void)>;
+using UserResetPreFunc = std::function<int(FactoryResetMode)>;
+using UserResetPostFunc = std::function<int(FactoryResetMode)>;
 class FactoryResetProcess {
     DISALLOW_COPY_MOVE(FactoryResetProcess);
 public:
