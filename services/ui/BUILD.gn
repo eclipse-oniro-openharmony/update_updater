@@ -16,9 +16,6 @@ import("//build/ohos.gni")
 
 updater_path = rebase_path("${updater_absolutely_path}", ".")
 config("updater_ui_support_cfg") {
-  if (updater_ui_support) {
-    defines = [ "UPDATER_UI_SUPPORT" ]
-  }
   include_dirs = [
     "${updater_path}/interfaces/kits/include",
     "${updater_path}/services/ui",
@@ -28,9 +25,6 @@ config("updater_ui_support_cfg") {
     "${updater_path}/services/ui/view",
     "${updater_path}/services/ui/language",
   ]
-}
-
-ohos_static_library("libui") {
   defines = [
     "ENABLE_BITMAP_FONT = 0",
     "ENABLE_ICU = 1",
@@ -39,7 +33,12 @@ ohos_static_library("libui") {
     "ENABLE_STATIC_FONT = 0",
     "ENABLE_VECTOR_FONT = 1",
   ]
+  if (updater_ui_support) {
+    defines += [ "UPDATER_UI_SUPPORT" ]
+  }
+}
 
+ohos_static_library("libui") {
   public_configs = [ ":updater_ui_support_cfg" ]
 
   sources = [
