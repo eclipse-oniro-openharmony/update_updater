@@ -28,6 +28,7 @@ extern "C" {
 #endif
 #endif /* __cplusplus */
 void InitDisplayDriverExt(void);
+void InitEngineExt(void);
 #ifdef __cplusplus
 #if __cplusplus
 }
