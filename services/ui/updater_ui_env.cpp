@@ -22,6 +22,7 @@
 #include "common/graphic_startup.h"
 #include "common/screen.h"
 #include "components/root_view.h"
+#include "font/ui_font.h"
 #include "graphic_engine.h"
 #include "input_event.h"
 #include "language/language_ui.h"
@@ -37,6 +38,11 @@ constexpr std::array BRIGHTNESS_FILES {
 };
 
 constexpr uint32_t WHITE_BGCOLOR = 0x000000ff;
+}
+
+__attribute__((weak)) void InitEngineExt(void)
+{
+    LOG(INFO) << "InitEngineExt extension function";
 }
 
 __attribute__((weak)) void InitDisplayDriverExt(void)
@@ -61,6 +67,7 @@ void UpdaterUiEnv::InitEngine()
     OHOS::GraphicStartUp::Init();
     GraphicEngine::GetInstance().Init(WHITE_BGCOLOR, OHOS::ColorMode::ARGB8888, VECTOR_FONT_DIR);
     InitRootView();
+    InitEngineExt();
     LOG(INFO) << "UxInitEngine done";
 }
 
