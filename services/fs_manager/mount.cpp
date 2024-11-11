@@ -307,12 +307,13 @@ int SetupPartitions(bool isMountData)
         std::string mountPoint(item->mountPoint);
         std::string fsType(item->fsType);
         if (mountPoint == "/" || mountPoint == "/tmp" || fsType == "none" ||
-            mountPoint == "/sdcard") {
+            mountPoint == "/sdcard" || mountPoint == INTERNAL_DATA_PATH) {
             continue;
         }
 
         if (mountPoint == "/data" && isMountData) {
-            if (MountForPath(mountPoint) != 0) {
+            // factory wireless upgrade use /internaldata to mount userdata
+            if (GetMountStatusForMountPoint(INTERNAL_DATA_PATH) != MOUNT_MOUNTED && MountForPath(mountPoint) != 0) {
                 LOG(ERROR) << "Expected partition " << mountPoint << " is not mounted.";
                 UPDATER_LAST_WORD(-1);
                 return -1;
