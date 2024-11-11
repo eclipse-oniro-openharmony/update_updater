@@ -25,6 +25,7 @@
 #include <linux/fs.h>
 #include "log/dump.h"
 #include "log/log.h"
+#include "updater/updater_const.h"
 #include "utils.h"
 
 namespace Updater {
