@@ -39,6 +39,7 @@ constexpr const char *MISC_FILE = "/dev/block/platform/soc/10100000.himci.eMMC/b
 constexpr const char *MISC_PATH = "/misc";
 constexpr const char *UPDATER_BINARY = "updater_binary";
 constexpr const char *SDCARD_PATH = "/sdcard";
+constexpr const char *INTERNAL_DATA_PATH = "/internaldata";
 constexpr const char *UPDATER_HDC_LOG = "/data/updater/log/flashd_hdc.log";
 constexpr const char *PREFIX_UFS_NODE = "/dev/block/sd";
 constexpr const char *SDCARD_PACKAGE_SUFFIX = ".zip";
