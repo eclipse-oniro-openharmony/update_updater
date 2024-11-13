@@ -146,7 +146,7 @@ std::vector<uint64_t> GetStashSizeList(const UpdaterParams &upParams)
         std::vector<std::string> fileIds;
         if (pkgManager->LoadPackageWithoutUnPack(upParams.updatePackage[i], fileIds) != PKG_SUCCESS) {
             LOG(ERROR) << "LoadPackageWithoutUnPack failed " << upParams.updatePackage[i];
-            return ReleasePkgManager(pkgManager)
+            return ReleasePkgManager(pkgManager);
         }
 
         const FileInfo *info = pkgManager->GetFileInfo(maxStashFileName);
