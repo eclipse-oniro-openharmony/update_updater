@@ -19,7 +19,7 @@
 #include <sys/stat.h>
 #include <sys/statvfs.h>
 #include <regex>
-#include <float.h>
+#include <cfloat>
 
 #include "applypatch/partition_record.h"
 #include "flashd/flashd.h"
