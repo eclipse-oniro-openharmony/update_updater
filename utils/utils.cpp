@@ -28,6 +28,7 @@
 #include <sys/syscall.h>
 #include <unistd.h>
 #include <vector>
+#include <cfloat>
 #include "fs_manager/mount.h"
 #include "init_reboot.h"
 #include "log/log.h"
@@ -967,10 +968,10 @@ bool ConvertToLongLong(const std::string &str, int64_t &value)
     char *endPtr;
     errno = 0;
 
-    value = std::strtoll(str.c_str(), &endPtr, 10); // 10: decimal scale
+    value = std::strtoll(str.c_str(), &endPtr, 10); // 10 : decimal scale
 #ifndef UPDATER_UT
-    if (endPtr == str.c_str() || *endPtr != '\0' || (errno == ERANGE && (value == LLONG_MAX ||
-        value == LLONG_MIN))) {
+    if (endPtr == str.c_str() || *endPtr != '\0' || (errno == ERANGE && (value == INT64_MAX ||
+        value == INT64_MIN))) {
         LOG(ERROR) << "Convert string to int64_t failed";
         return false;
     }
@@ -978,32 +979,48 @@ bool ConvertToLongLong(const std::string &str, int64_t &value)
     return true;
 }
 
-bool ConvertToLongLong(const std::string &str, int64_t &value)
+bool ConvertToLong(const std::string &str, int32_t &value)
 {
     char *endPtr;
     errno = 0;
 
-    value = std::strtoll(str.c_str(), &endPtr, 10); // 10: decimal scale
+    value = std::strtol(str.c_str(), &endPtr, 10); // 10 : decimal scale
 #ifndef UPDATER_UT
-    if (endPtr == str.c_str() || *endPtr != '\0' || (errno == ERANGE && (value == LLONG_MAX ||
-        value == LLONG_MIN))) {
-        LOG(ERROR) << "Convert string to int64_t failed";
+    if (endPtr == str.c_str() || *endPtr != '\0' || (errno == ERANGE && (value == INT32_MAX ||
+        value == INT32_MIN))) {
+        LOG(ERROR) << "Convert string to int32_t failed";
         return false;
     }
 #endif
     return true;
 }
 
-bool ConvertToLongLong(const std::string &str, int64_t &value)
+bool ConvertToUnsignedLong(const std::string &str, uint32_t &value)
 {
     char *endPtr;
     errno = 0;
 
-    value = std::strtoll(str.c_str(), &endPtr, 10); // 10: decimal scale
+    value = std::strtoul(str.c_str(), &endPtr, 16); // 16 : hexadecimal scale
 #ifndef UPDATER_UT
-    if (endPtr == str.c_str() || *endPtr != '\0' || (errno == ERANGE && (value == LLONG_MAX ||
-        value == LLONG_MIN))) {
-        LOG(ERROR) << "Convert string to int64_t failed";
+    if (endPtr == str.c_str() || *endPtr != '\0' || (errno == ERANGE && (value == UINT32_MAX ||
+        value == 0))) {
+        LOG(ERROR) << "Convert string to uint32_t failed";
+        return false;
+    }
+#endif
+    return true;
+}
+
+bool ConvertToDouble(const std::string &str, double &value)
+{
+    char *endPtr;
+    errno = 0;
+
+    value = std::strtod(str.c_str(), &endPtr);
+#ifndef UPDATER_UT
+    if (endPtr == str.c_str() || *endPtr != '\0' || (errno == ERANGE && (value == DBL_MAX ||
+        value == -DBL_MAX || value == DBL_MIN))) {
+        LOG(ERROR) << "Convert string to double failed";
         return false;
     }
 #endif
