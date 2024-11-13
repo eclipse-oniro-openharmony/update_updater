@@ -124,6 +124,22 @@ UpdaterStatus IsSpaceCapacitySufficient(const UpdaterParams &upParams)
     return UPDATE_SUCCESS;
 }
 
+static bool ConvertToLongLong(const std::string& str, int64_t& value)
+{
+    char *endPtr;
+    errno = 0;
+
+    value = std::strtoll(str.c_str(), &endPtr, 10); // 10: decimal scale
+#ifndef UPDATER_UT
+    if (endPtr == str.c_str() || *endPtr != '\0' || (errno == ERANGE && (value == LLONG_MAX ||
+        value == LLONG_MIN))) {
+        LOG(ERROR) << "Convert string to int64_t failed";
+        return false;
+    }
+#endif
+    return true;
+}
+
 static std::vector<uint64_t> ReleasePkgManager(PkgManager::PkgManagerPtr pkgManager)
 {
     PkgManager::ReleasePackageInstance(pkgManager);
@@ -171,12 +187,9 @@ std::vector<uint64_t> GetStashSizeList(const UpdaterParams &upParams)
         }
         PkgBuffer data {};
         outStream->GetBuffer(data);
-        char *endPtr;
-        errno = 0;
         std::string str(reinterpret_cast<char*>(data.buffer), data.length);
-        int64_t maxStashSize = std::strtoll(str.c_str(), &endPtr, 10); // 10: decimal scale
-        if (endPtr == str.c_str() || *endPtr != '\0' || (errno == ERANGE && (maxStashSize == LLONG_MAX ||
-            maxStashSize == LLONG_MIN))) {
+        int64_t maxStashSize = 0;
+        if (!ConvertToLongLong(str, maxStashSize)) {
             LOG(ERROR) << "Convert string to int64_t failed";
             return ReleasePkgManager(pkgManager);
         }
