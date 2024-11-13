@@ -962,6 +962,54 @@ bool IsEsDevice()
     return true;
 }
 
+bool ConvertToLongLong(const std::string &str, int64_t &value)
+{
+    char *endPtr;
+    errno = 0;
+
+    value = std::strtoll(str.c_str(), &endPtr, 10); // 10: decimal scale
+#ifndef UPDATER_UT
+    if (endPtr == str.c_str() || *endPtr != '\0' || (errno == ERANGE && (value == LLONG_MAX ||
+        value == LLONG_MIN))) {
+        LOG(ERROR) << "Convert string to int64_t failed";
+        return false;
+    }
+#endif
+    return true;
+}
+
+bool ConvertToLongLong(const std::string &str, int64_t &value)
+{
+    char *endPtr;
+    errno = 0;
+
+    value = std::strtoll(str.c_str(), &endPtr, 10); // 10: decimal scale
+#ifndef UPDATER_UT
+    if (endPtr == str.c_str() || *endPtr != '\0' || (errno == ERANGE && (value == LLONG_MAX ||
+        value == LLONG_MIN))) {
+        LOG(ERROR) << "Convert string to int64_t failed";
+        return false;
+    }
+#endif
+    return true;
+}
+
+bool ConvertToLongLong(const std::string &str, int64_t &value)
+{
+    char *endPtr;
+    errno = 0;
+
+    value = std::strtoll(str.c_str(), &endPtr, 10); // 10: decimal scale
+#ifndef UPDATER_UT
+    if (endPtr == str.c_str() || *endPtr != '\0' || (errno == ERANGE && (value == LLONG_MAX ||
+        value == LLONG_MIN))) {
+        LOG(ERROR) << "Convert string to int64_t failed";
+        return false;
+    }
+#endif
+    return true;
+}
+
 #ifndef __WIN32
 void SetFileAttributes(const std::string& file, uid_t owner, gid_t group, mode_t mode)
 {
