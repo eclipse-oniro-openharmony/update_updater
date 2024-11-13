@@ -103,6 +103,7 @@ void TrimString (std::string &str);
 bool RestoreconPath(const std::string &path);
 std::string TrimUpdateMode(const std::string &mode);
 bool IsEsDevice();
+bool ConvertToLongLong(const std::string &str, int64_t &value);
 #ifndef __WIN32
 void SetFileAttributes(const std::string& file, uid_t owner, gid_t group, mode_t mode);
 #endif
