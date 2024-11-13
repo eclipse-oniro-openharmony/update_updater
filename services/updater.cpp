@@ -124,29 +124,6 @@ UpdaterStatus IsSpaceCapacitySufficient(const UpdaterParams &upParams)
     return UPDATE_SUCCESS;
 }
 
-static bool ConvertToLongLong(const std::string& str, int64_t& value)
-{
-    char *endPtr;
-    errno = 0;
-
-    value = std::strtoll(str.c_str(), &endPtr, 10); // 10: decimal scale
-#ifndef UPDATER_UT
-    if (endPtr == str.c_str() || *endPtr != '\0' || (errno == ERANGE && (value == LLONG_MAX ||
-        value == LLONG_MIN))) {
-        LOG(ERROR) << "Convert string to int64_t failed";
-        return false;
-    }
-#endif
-    return true;
-}
-
-static std::vector<uint64_t> ReleasePkgManager(PkgManager::PkgManagerPtr pkgManager)
-{
-    PkgManager::ReleasePackageInstance(pkgManager);
-    UPDATER_LAST_WORD(UPDATE_CORRUPT);
-    return std::vector<uint64_t> {};
-}
-
 std::vector<uint64_t> GetStashSizeList(const UpdaterParams &upParams)
 {
     const std::string maxStashFileName = "all_max_stash";
@@ -160,9 +137,12 @@ std::vector<uint64_t> GetStashSizeList(const UpdaterParams &upParams)
         }
 
         std::vector<std::string> fileIds;
-        if (pkgManager->LoadPackageWithoutUnPack(upParams.updatePackage[i], fileIds) != PKG_SUCCESS) {
+        int ret = pkgManager->LoadPackageWithoutUnPack(upParams.updatePackage[i], fileIds);
+        if (ret != PKG_SUCCESS) {
             LOG(ERROR) << "LoadPackageWithoutUnPack failed " << upParams.updatePackage[i];
-            return ReleasePkgManager(pkgManager);
+            PkgManager::ReleasePackageInstance(pkgManager);
+            UPDATER_LAST_WORD(UPDATE_CORRUPT);
+            return  std::vector<uint64_t> {};
         }
 
         const FileInfo *info = pkgManager->GetFileInfo(maxStashFileName);
@@ -174,16 +154,21 @@ std::vector<uint64_t> GetStashSizeList(const UpdaterParams &upParams)
         }
 
         PkgManager::StreamPtr outStream = nullptr;
-        int ret = pkgManager->CreatePkgStream(outStream, maxStashFileName, info->unpackedSize,
+        ret = pkgManager->CreatePkgStream(outStream, maxStashFileName, info->unpackedSize,
             PkgStream::PkgStreamType_MemoryMap);
         if (outStream == nullptr || ret != PKG_SUCCESS) {
             LOG(ERROR) << "Create stream fail " << maxStashFileName << " in " << upParams.updatePackage[i];
-            return ReleasePkgManager(pkgManager);
+            PkgManager::ReleasePackageInstance(pkgManager);
+            UPDATER_LAST_WORD(UPDATE_CORRUPT);
+            return std::vector<uint64_t> {};
         }
 
-        if (pkgManager->ExtractFile(maxStashFileName, outStream) != PKG_SUCCESS) {
+        ret = pkgManager->ExtractFile(maxStashFileName, outStream);
+        if (ret != PKG_SUCCESS) {
             LOG(ERROR) << "ExtractFile fail " << maxStashFileName << " in " << upParams.updatePackage[i];
-            return ReleasePkgManager(pkgManager);
+            PkgManager::ReleasePackageInstance(pkgManager);
+            UPDATER_LAST_WORD(UPDATE_CORRUPT);
+            return std::vector<uint64_t> {};
         }
         PkgBuffer data {};
         outStream->GetBuffer(data);
@@ -191,7 +176,9 @@ std::vector<uint64_t> GetStashSizeList(const UpdaterParams &upParams)
         int64_t maxStashSize = 0;
         if (!ConvertToLongLong(str, maxStashSize)) {
             LOG(ERROR) << "Convert string to int64_t failed";
-            return ReleasePkgManager(pkgManager);
+            PkgManager::ReleasePackageInstance(pkgManager);
+            UPDATER_LAST_WORD(UPDATE_CORRUPT);
+            return std::vector<uint64_t> {};
         }
         stashSizeList.push_back(static_cast<uint64_t>(maxStashSize));
         PkgManager::ReleasePackageInstance(pkgManager);
