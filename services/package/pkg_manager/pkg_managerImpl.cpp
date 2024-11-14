@@ -413,6 +413,7 @@ int32_t PkgManagerImpl::LoadPackageWithStreamForApp(AppPkgInfo &info,
         PKG_LOGE("Read img hash data fail %s", info.pkgType.c_str());
         delete pkgFile;
         pkgFile = nullptr;
+        ClosePkgStream(stream);
         UPDATER_LAST_WORD(ret);
         return ret;
     }
@@ -424,6 +425,7 @@ int32_t PkgManagerImpl::LoadPackageWithStreamForApp(AppPkgInfo &info,
         PKG_LOGE("Load package fail %s", info.packagePath.c_str());
         delete pkgFile;
         pkgFile = nullptr;
+        ClosePkgStream(stream);
         UPDATER_LAST_WORD(ret);
         return ret;
     }
