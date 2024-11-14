@@ -970,7 +970,7 @@ bool ConvertToLongLong(const std::string &str, int64_t &value)
     value = std::strtoll(str.c_str(), &endPtr, 10); // 10 : decimal scale
 #ifndef UPDATER_UT
     if (endPtr == str.c_str() || *endPtr != '\0' || errno == ERANGE) {
-        LOG(ERROR) << "Convert string to int64_t failed, str " << str << "converted to value " << value;
+        LOG(ERROR) << "Convert string to int64_t failed, str " << str << " converted to value " << value;
         return false;
     }
 #endif
@@ -985,7 +985,7 @@ bool ConvertToLong(const std::string &str, int32_t &value)
     value = std::strtol(str.c_str(), &endPtr, 10); // 10 : decimal scale
 #ifndef UPDATER_UT
     if (endPtr == str.c_str() || *endPtr != '\0' || errno == ERANGE) {
-        LOG(ERROR) << "Convert string to int32_t failed, str " << str << "converted to value " << value;
+        LOG(ERROR) << "Convert string to int32_t failed, str " << str << " converted to value " << value;
         return false;
     }
 #endif
@@ -1000,7 +1000,7 @@ bool ConvertToUnsignedLong(const std::string &str, uint32_t &value)
     value = std::strtoul(str.c_str(), &endPtr, 16); // 16 : hexadecimal scale
 #ifndef UPDATER_UT
     if (endPtr == str.c_str() || *endPtr != '\0' || errno == ERANGE) {
-        LOG(ERROR) << "Convert string to uint32_t failed, str " << str << "converted to value " << value;
+        LOG(ERROR) << "Convert string to uint32_t failed, str " << str << " converted to value " << value;
         return false;
     }
 #endif
@@ -1015,7 +1015,7 @@ bool ConvertToDouble(const std::string &str, double &value)
     value = std::strtod(str.c_str(), &endPtr);
 #ifndef UPDATER_UT
     if (endPtr == str.c_str() || *endPtr != '\0' || errno == ERANGE) {
-        LOG(ERROR) << "Convert string to double failed, str " << str << "converted to value " << value;
+        LOG(ERROR) << "Convert string to double failed, str " << str << " converted to value " << value;
         return false;
     }
 #endif
