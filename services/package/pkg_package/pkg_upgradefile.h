@@ -189,6 +189,8 @@ private:
 private:
     UpgradePkgInfo pkgInfo_ {};
     size_t packedFileSize_ {0};
+
+protected:
     const ImgHashData *hashCheck_ = nullptr;
 };
 } // namespace Hpackage
