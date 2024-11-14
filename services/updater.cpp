@@ -124,18 +124,27 @@ UpdaterStatus IsSpaceCapacitySufficient(const UpdaterParams &upParams)
     return UPDATE_SUCCESS;
 }
 
-static int64_t ConvertStrToLongLong(PkgManager::StreamPtr outStream)
+static bool ConvertStrToLongLong(PkgManager::StreamPtr outStream, int64_t &value)
 {
     PkgBuffer data {};
+    if (outStream == nullptr) {
+        LOG(ERROR) << "outStream is nullptr";
+        UPDATER_LAST_WORD(UPDATE_CORRUPT);
+        return false;
+    }
     outStream->GetBuffer(data);
+    if (data.buffer == nullptr) {
+        LOG(ERROR) << "data.buffer is nullptr";
+        UPDATER_LAST_WORD(UPDATE_CORRUPT);
+        return false;
+    }
     std::string str(reinterpret_cast<char*>(data.buffer), data.length);
-    int64_t value = 0;
     if (!Utils::ConvertToLongLong(str, value)) {
         LOG(ERROR) << "ConvertToLongLong failed";
         UPDATER_LAST_WORD(UPDATE_CORRUPT);
-        return INT64_MAX;
+        return false;
     }
-    return value;
+    return true;
 }
 
 std::vector<uint64_t> GetStashSizeList(const UpdaterParams &upParams)
@@ -182,8 +191,8 @@ std::vector<uint64_t> GetStashSizeList(const UpdaterParams &upParams)
             UPDATER_LAST_WORD(UPDATE_CORRUPT);
             return std::vector<uint64_t> {};
         }
-        int64_t maxStashSize = ConvertStrToLongLong(outStream);
-        if (maxStashSize == INT64_MAX) {
+        int64_t maxStashSize = 0;
+        if (!ConvertStrToLongLong(outStream, maxStashSize)) {
             PkgManager::ReleasePackageInstance(pkgManager);
             UPDATER_LAST_WORD(UPDATE_CORRUPT);
             return std::vector<uint64_t> {};
