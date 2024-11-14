@@ -28,7 +28,6 @@
 #include <sys/syscall.h>
 #include <unistd.h>
 #include <vector>
-#include <cfloat>
 #include "fs_manager/mount.h"
 #include "init_reboot.h"
 #include "log/log.h"
