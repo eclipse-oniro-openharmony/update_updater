@@ -374,12 +374,9 @@ static int32_t ExecuteUpdateBlock(Uscript::UScriptEnv &env, const UpdateBlockInf
     }
     env.GetPkgManager()->ClosePkgStream(outStream);
     std::string str(reinterpret_cast<char*>(fileSizeBuffer), fileListSize);
-    char *endPtr;
-    errno = 0;
-    int64_t maxStashSize = std::strtoll(str.c_str(), &endPtr, 10); // 10: decimal scale
-    if (endPtr == str.c_str() || *endPtr != '\0' || (errno == ERANGE && (maxStashSize == LLONG_MAX ||
-        maxStashSize == LLONG_MIN))) {
-        LOG(ERROR) << "Convert string to int64_t failed";
+    int64_t maxStashSize = 0;
+    if (!Utils::ConvertToLongLong(str, maxStashSize)) {
+        LOG(ERROR) << "ConvertToLongLong failed";
         return USCRIPT_ERROR_EXECUTE;
     }
     if (CreateFixedSizeEmptyFile(infos, destImage, maxStashSize) != 0) {
