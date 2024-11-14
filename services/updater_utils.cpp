@@ -19,7 +19,6 @@
 #include <sys/stat.h>
 #include <sys/statvfs.h>
 #include <regex>
-#include <cfloat>
 
 #include "applypatch/partition_record.h"
 #include "flashd/flashd.h"
@@ -77,12 +76,9 @@ void ReadInstallTime(UpdaterParams &upParams)
             break;
         }
         if (IsDouble(buf)) {
-            char *endPtr;
-            errno = 0;
-            double timeDistance = std::strtod(buf.c_str(), &endPtr);
-            if (endPtr == buf.c_str() || *endPtr != '\0' || (errno == ERANGE && (timeDistance == DBL_MAX ||
-                timeDistance == -DBL_MAX || timeDistance == DBL_MIN))) {
-                LOG(ERROR) << "Convert string to double failed";
+            double timeDistance = 0;
+            if (!Utils::ConvertToDouble(buf, timeDistance)) {
+                LOG(ERROR) << "ConvertToDouble failed";
                 return;
             }
             upParams.installTime[index++] = std::chrono::duration<double>(timeDistance);
