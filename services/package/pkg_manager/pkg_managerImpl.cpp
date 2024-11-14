@@ -421,7 +421,7 @@ int32_t PkgManagerImpl::LoadPackageWithStreamForApp(AppPkgInfo &info,
             return Verify(info->digestMethod, digest, signature);
         });
     if (ret != PKG_SUCCESS) {
-        PKG_LOGE("Load package fail %s", packagePath.c_str());
+        PKG_LOGE("Load package fail %s", info.packagePath.c_str());
         delete pkgFile;
         pkgFile = nullptr;
         UPDATER_LAST_WORD(ret);

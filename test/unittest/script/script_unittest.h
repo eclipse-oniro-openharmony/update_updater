@@ -137,6 +137,11 @@ public:
     {
         return PKG_SUCCESS;
     }
+    int32_t LoadPackageWithStreamForApp(AppPkgInfo &info,
+        std::vector<std::string> &fileIds, StreamPtr stream) override
+    {
+        return PKG_SUCCESS;
+    }
 };
 }
 #endif // SCRIPT_UNITTEST_H
