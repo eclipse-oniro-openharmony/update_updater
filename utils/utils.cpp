@@ -964,7 +964,7 @@ bool IsEsDevice()
 
 bool ConvertToLongLong(const std::string &str, int64_t &value)
 {
-    char *endPtr;
+    char *endPtr = nullptr;
     errno = 0;
 
     value = std::strtoll(str.c_str(), &endPtr, 10); // 10 : decimal scale
@@ -979,7 +979,7 @@ bool ConvertToLongLong(const std::string &str, int64_t &value)
 
 bool ConvertToLong(const std::string &str, int32_t &value)
 {
-    char *endPtr;
+    char *endPtr = nullptr;
     errno = 0;
 
     value = std::strtol(str.c_str(), &endPtr, 10); // 10 : decimal scale
@@ -994,7 +994,7 @@ bool ConvertToLong(const std::string &str, int32_t &value)
 
 bool ConvertToUnsignedLong(const std::string &str, uint32_t &value)
 {
-    char *endPtr;
+    char *endPtr = nullptr;
     errno = 0;
 
     value = std::strtoul(str.c_str(), &endPtr, 16); // 16 : hexadecimal scale
@@ -1009,7 +1009,7 @@ bool ConvertToUnsignedLong(const std::string &str, uint32_t &value)
 
 bool ConvertToDouble(const std::string &str, double &value)
 {
-    char *endPtr;
+    char *endPtr = nullptr;
     errno = 0;
 
     value = std::strtod(str.c_str(), &endPtr);
