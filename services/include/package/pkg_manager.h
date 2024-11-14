@@ -38,7 +38,7 @@ struct AppPkgInfo {
     std::string packagePath;
     std::string pkgType;
     std::string keyPath;
-    uin8_t type;
+    uint8_t type;
 };
 
 /**
