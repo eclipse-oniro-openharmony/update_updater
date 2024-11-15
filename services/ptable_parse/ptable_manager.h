@@ -41,7 +41,7 @@ public:
     bool GetPartionInfoByName(const std::string &partitionName, Ptable::PtnInfo &ptnInfo);
     static void RegisterPtable(uint32_t bitIndex, PtableConstructor constructor);
 #ifdef UPDATER_UT
-    void SetPtable(std::unique<Ptable> &&ptable)
+    void SetPtable(std::unique_ptr<Ptable> &&ptable)
     {
         pPtable_ = std::move(ptable);
     }
