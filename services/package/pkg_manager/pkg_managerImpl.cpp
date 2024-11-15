@@ -392,6 +392,45 @@ int32_t PkgManagerImpl::LoadPackage(const std::string &packagePath, std::vector<
     return LoadPackageWithStream(packagePath, fileIds, type, stream);
 }
 
+int32_t PkgManagerImpl::LoadPackageWithStreamForApp(AppPkgInfo &info,
+    std::vector<std::string> &fileIds, StreamPtr stream)
+{
+    int32_t ret = SetSignVerifyKeyName(info.keyPath);
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("Invalid keyname");
+        return ret;
+    }
+    ret = PKG_SUCCESS;
+    PkgFilePtr pkgFile = CreatePackage(stream, static_cast<PkgFile::PkgType>(info.type), nullptr);
+    if (pkgFile == nullptr) {
+        PKG_LOGE("Create package fail %s", info.packagePath.c_str());
+        ClosePkgStream(stream);
+        UPDATER_LAST_WORD(ret);
+        return PKG_INVALID_PARAM;
+    }
+    ret = pkgFile->ReadImgHashDataFile(info.pkgType);
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("Read img hash data fail %s", info.pkgType.c_str());
+        delete pkgFile;
+        pkgFile = nullptr;
+        UPDATER_LAST_WORD(ret);
+        return ret;
+    }
+    ret = pkgFile->LoadPackage(fileIds,
+        [this](const PkgInfoPtr info, const std::vector<uint8_t> &digest, const std::vector<uint8_t> &signature)->int {
+            return Verify(info->digestMethod, digest, signature);
+        });
+    if (ret != PKG_SUCCESS) {
+        PKG_LOGE("Load package fail %s", info.packagePath.c_str());
+        delete pkgFile;
+        pkgFile = nullptr;
+        UPDATER_LAST_WORD(ret);
+        return ret;
+    }
+    pkgFiles_.push_back(pkgFile);
+    return PKG_SUCCESS;
+}
+
 int32_t PkgManagerImpl::LoadPackageWithStream(const std::string &packagePath, const std::string &keyPath,
     std::vector<std::string> &fileIds, uint8_t type, StreamPtr stream)
 {

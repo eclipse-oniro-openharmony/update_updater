@@ -79,6 +79,12 @@ public:
         pkgStream_ = nullptr;
     }
 
+    int32_t ReadImgHashDataFile(const std::string &pkgType) override
+    {
+        UNUSED(pkgType);
+        return PKG_SUCCESS;
+    }
+
     static int32_t ConvertBufferToString(std::string &fileName, const PkgBuffer &buffer);
 
     static int32_t ConvertStringToBuffer(const std::string &fileName, const PkgBuffer &buffer, size_t &realLen);

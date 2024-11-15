@@ -34,6 +34,13 @@ using PkgFilePtr = PkgFile *;
 using PkgStreamPtr = PkgStream *;
 using PkgEntryPtr = PkgEntry *;
 
+struct AppPkgInfo {
+    std::string packagePath;
+    std::string pkgType;
+    std::string keyPath;
+    uint8_t type;
+};
+
 /**
  * Input and output stream definition
  */
@@ -143,6 +150,8 @@ public:
     virtual PkgType GetPkgType() const = 0;
 
     virtual void ClearPkgStream() = 0;
+
+    virtual int32_t ReadImgHashDataFile(const std::string &pkgType) = 0;
 };
 
 class PkgEntry {
@@ -184,6 +193,16 @@ public:
         dataOffset_ += offset;
     }
 
+    uint32_t GetFileNum()
+    {
+        return fileNum_;
+    }
+
+    void SetFileNum(uint32_t num)
+    {
+        fileNum_ = num;
+    }
+
 protected:
     int32_t Init(FileInfoPtr localFileInfo, const FileInfoPtr fileInfo,
         PkgStreamPtr inStream);
@@ -194,6 +213,7 @@ protected:
     size_t headerOffset_ {0};
     size_t dataOffset_ {0};
     std::string fileName_ {};
+    uint32_t fileNum_ = 0;
 };
 
 using PkgDecodeProgress = std::function<void(int type, size_t writeDataLen, const void *context)>;
@@ -352,6 +372,9 @@ public:
 
     virtual int32_t LoadPackageWithStream(const std::string &packagePath, const std::string &keyPath,
         std::vector<std::string> &fileIds, uint8_t type, StreamPtr stream) = 0;
+
+    virtual int32_t LoadPackageWithStreamForApp(AppPkgInfo &info,
+        std::vector<std::string> &fileIds, StreamPtr stream) = 0;
 
     virtual int32_t ParsePackage(StreamPtr stream, std::vector<std::string> &fileIds, int32_t type) = 0;
 

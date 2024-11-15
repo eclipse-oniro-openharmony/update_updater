@@ -985,10 +985,11 @@ int32_t UpgradeFileEntry::Verify(PkgBuffer &buffer, size_t len, size_t offset)
     bool checkRet = false;
     if (pkgFile->GetUpgradeFileVer() >= UPGRADE_FILE_VERSION_V3) {
         checkRet = CheckDataHashNew(pkgFile->GetImgHashData(), fileName_.c_str(),
-                                    offset, end, hashVal.data(),  hashVal.size());
+                                    offset, end, hashVal.data(), hashVal.size());
     } else {
-        checkRet = check_data_hash(pkgFile->GetImgHashData(), fileName_.c_str(),
-                                   offset, end, hashVal.data(),  hashVal.size());
+        std::string imgName = fileName_ + (fileNum_ == 0 ? "" : std::to_string(fileNum_));
+        checkRet = check_data_hash(pkgFile->GetImgHashData(), imgName.c_str(),
+                                   offset, end, hashVal.data(), hashVal.size());
     }
     if (!checkRet) {
         PKG_LOGE("check image hash value fail, name: %s, offset: %zu, end: %u", fileName_.c_str(), offset, end);
