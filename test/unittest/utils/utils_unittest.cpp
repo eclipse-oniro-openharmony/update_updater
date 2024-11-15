@@ -186,4 +186,32 @@ HWTEST_F(UtilsUnitTest, TrimUpdateMode, TestSize.Level0)
     const std::string emptyStr = "";
     EXPECT_EQ(Utils::TrimUpdateMode(emptyStr), "");
 }
+
+HWTEST_F(UtilsUnitTest, ConvertStrToNumber_test_001, TestSize.Level0)
+{
+    const std::string str = "12345";
+    int64_t value;
+    EXPECT_EQ(Utils::ConvertToLongLong(str, value), true);
+}
+
+HWTEST_F(UtilsUnitTest, ConvertStrToNumber_test_002, TestSize.Level0)
+{
+    const std::string str = "12345";
+    int32_t value;
+    EXPECT_EQ(Utils::ConvertToLong(str, value), true);
+}
+
+HWTEST_F(UtilsUnitTest, ConvertStrToNumber_test_003, TestSize.Level0)
+{
+    const std::string str = "12345";
+    uint32_t value;
+    EXPECT_EQ(Utils::ConvertToUnsignedLong(str, value), true);
+}
+
+HWTEST_F(UtilsUnitTest, ConvertStrToNumber_test_004, TestSize.Level0)
+{
+    const std::string str = "1.2345";
+    double value;
+    EXPECT_EQ(Utils::ConvertToDouble(str, value), true);
+}
 } // updater_ut

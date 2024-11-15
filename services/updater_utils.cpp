@@ -76,7 +76,12 @@ void ReadInstallTime(UpdaterParams &upParams)
             break;
         }
         if (IsDouble(buf)) {
-            upParams.installTime[index++] = std::chrono::duration<double>(std::stod(buf));
+            double timeDistance = 0;
+            if (!Utils::ConvertToDouble(buf, timeDistance)) {
+                LOG(ERROR) << "ConvertToDouble failed";
+                return;
+            }
+            upParams.installTime[index++] = std::chrono::duration<double>(timeDistance);
         } else {
             LOG(ERROR) << "read install time is invalid";
         }

@@ -374,7 +374,11 @@ static int32_t ExecuteUpdateBlock(Uscript::UScriptEnv &env, const UpdateBlockInf
     }
     env.GetPkgManager()->ClosePkgStream(outStream);
     std::string str(reinterpret_cast<char*>(fileSizeBuffer), fileListSize);
-    int64_t maxStashSize = std::stoll(str);
+    int64_t maxStashSize = 0;
+    if (!Utils::ConvertToLongLong(str, maxStashSize)) {
+        LOG(ERROR) << "ConvertToLongLong failed";
+        return USCRIPT_ERROR_EXECUTE;
+    }
     if (CreateFixedSizeEmptyFile(infos, destImage, maxStashSize) != 0) {
         LOG(ERROR) << "Failed to create empty file";
         return USCRIPT_ERROR_EXECUTE;
