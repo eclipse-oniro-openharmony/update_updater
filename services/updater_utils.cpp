@@ -180,7 +180,7 @@ bool IsSDCardExist(const std::string &sdcardPath)
     }
 }
 
-void IsMountDataAndSaveLogs(void)
+bool IsMountDataAndSaveLogs(void)
 {
     bool isSdCardMode = CheckUpdateMode(SDCARD_MODE);
     bool isUsbMode = CheckUpdateMode(USB_MODE);
