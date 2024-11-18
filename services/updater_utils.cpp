@@ -194,7 +194,7 @@ void PostUpdater(bool clearMisc)
 {
     STAGE(UPDATE_STAGE_BEGIN) << "PostUpdater";
     bool isMountDataAndSaveLogs = IsMountDataAndSaveLogs();
-    SetupPartitions(isMountDataAndSaveLogs);
+    (void)SetupPartitions(isMountDataAndSaveLogs);
     UpdaterInit::GetInstance().InvokeEvent(UPDATER_POST_INIT_EVENT);
     // clear update misc partition.
     if (clearMisc && !ClearMisc()) {
