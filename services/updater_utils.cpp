@@ -106,7 +106,7 @@ bool DeleteUpdaterPath(const std::string &path)
             (currentName.compare(UPDATER_RESULT_FILE) == 0) ||
             (currentName.compare(UPDATER_LOCALE_FILE) == 0) ||
             (currentName.compare(MODULE_UPDATE_RESULT_FILE) == 0) ||
-            (currentName.compare(UPLOAD_LOG_TIME_FILE) == 0)
+            (currentName.compare(UPLOAD_LOG_TIME_FILE) == 0) ||
             (currentName.compare(INSTALL_TIME_FILE) == 0)) {
             continue;
         }
