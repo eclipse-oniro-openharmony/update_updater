@@ -404,7 +404,6 @@ int32_t PkgManagerImpl::LoadPackageWithStreamForApp(AppPkgInfo &info,
     PkgFilePtr pkgFile = CreatePackage(stream, static_cast<PkgFile::PkgType>(info.type), nullptr);
     if (pkgFile == nullptr) {
         PKG_LOGE("Create package fail %s", info.packagePath.c_str());
-        ClosePkgStream(stream);
         UPDATER_LAST_WORD(ret);
         return PKG_INVALID_PARAM;
     }
