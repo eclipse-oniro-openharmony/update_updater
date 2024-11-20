@@ -106,7 +106,8 @@ bool DeleteUpdaterPath(const std::string &path)
             (currentName.compare(UPDATER_RESULT_FILE) == 0) ||
             (currentName.compare(UPDATER_LOCALE_FILE) == 0) ||
             (currentName.compare(MODULE_UPDATE_RESULT_FILE) == 0) ||
-            (currentName.compare(UPLOAD_LOG_TIME_FILE) == 0)) {
+            (currentName.compare(UPLOAD_LOG_TIME_FILE) == 0) ||
+            (currentName.compare(INSTALL_TIME_FILE) == 0)) {
             continue;
         }
         if (sdcardTmp && currentName.find(SDCARD_PACKAGE_SUFFIX) != std::string::npos) {
@@ -194,7 +195,7 @@ void PostUpdater(bool clearMisc)
 {
     STAGE(UPDATE_STAGE_BEGIN) << "PostUpdater";
     bool isMountDataAndSaveLogs = IsMountDataAndSaveLogs();
-    SetupPartitions(isMountDataAndSaveLogs);
+    (void)SetupPartitions(isMountDataAndSaveLogs);
     UpdaterInit::GetInstance().InvokeEvent(UPDATER_POST_INIT_EVENT);
     // clear update misc partition.
     if (clearMisc && !ClearMisc()) {
