@@ -294,10 +294,12 @@ UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, Upda
     int ret = GetUpdatePackageInfo(pkgManager, upParams.updatePackage[upParams.pkgLocation]);
     if (ret != 0) {
         LOG(ERROR) << "get update package info fail";
+        UPDATER_LAST_WORD(UPDATE_CORRUPT, "GetUpdatePackageInfo failed");
         return UPDATE_CORRUPT;
     }
     if (!PreStartBinaryEntry(upParams.updatePackage[upParams.pkgLocation])) {
         LOG(ERROR) << "pre binary process failed";
+        UPDATER_LAST_WORD(UPDATE_ERROR, "PreStartBinaryEntry failed");
         return UPDATE_ERROR;
     }
 
@@ -305,6 +307,7 @@ UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, Upda
     UpdaterStatus updateRet = StartUpdaterProc(pkgManager, upParams);
     if (updateRet != UPDATE_SUCCESS) {
         UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_INSTALL_FAIL));
+        UPDATER_LAST_WORD(updateRet, "StartUpdaterProc failed");
         LOG(ERROR) << "Install package failed.";
     }
     if (WriteResult(upParams.updatePackage[upParams.pkgLocation],
@@ -467,7 +470,7 @@ UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, UpdaterPara
     int pfd[DEFAULT_PIPE_NUM]; /* communication between parent and child */
     if (pipe(pfd) < 0) {
         LOG(ERROR) << "Create pipe failed: ";
-        UPDATER_LAST_WORD(UPDATE_ERROR);
+        UPDATER_LAST_WORD(UPDATE_ERROR, "Create pipe failed");
         return UPDATE_ERROR;
     }
     if (pkgManager == nullptr) {
@@ -501,7 +504,7 @@ UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, UpdaterPara
     pid_t pid = fork();
     if (pid < 0) {
         ERROR_CODE(CODE_FORK_FAIL);
-        UPDATER_LAST_WORD(UPDATE_ERROR);
+        UPDATER_LAST_WORD(UPDATE_ERROR, "fork failed");
         return UPDATE_ERROR;
     }
 
@@ -516,6 +519,7 @@ UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, UpdaterPara
     close(pipeWrite); // close write endpoint
     bool retryUpdate = false;
     if (HandlePipeMsg(upParams, pipeRead, retryUpdate) != UPDATE_SUCCESS) {
+        UPDATER_LAST_WORD(UPDATE_ERROR, "HandlePipeMsg failed");
         return UPDATE_ERROR;
     }
 
