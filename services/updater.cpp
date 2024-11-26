@@ -421,6 +421,7 @@ UpdaterStatus HandlePipeMsg(UpdaterParams &upParams, int pipeRead, bool &retryUp
     FILE* fromChild = fdopen(pipeRead, "r");
     if (fromChild == nullptr) {
         LOG(ERROR) << "fdopen pipeRead failed";
+        UPDATER_LAST_WORD(UPDATE_ERROR);
         return UPDATE_ERROR;
     }
     while (fgets(buffer, MAX_BUFFER_SIZE - 1, fromChild) != nullptr) {
@@ -464,8 +465,23 @@ UpdaterStatus CheckProcStatus(pid_t pid, bool retryUpdate)
     return UPDATE_SUCCESS;
 }
 
-static std::string GetBinaryPath(PkgManager::PkgManagerPtr pkgManager, UpdaterParams &upParams)
+UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, UpdaterParams &upParams)
 {
+    UPDATER_INIT_RECORD;
+    int pfd[DEFAULT_PIPE_NUM]; /* communication between parent and child */
+    if (pipe(pfd) < 0) {
+        LOG(ERROR) << "Create pipe failed: ";
+        UPDATER_LAST_WORD(UPDATE_ERROR);
+        return UPDATE_ERROR;
+    }
+    if (pkgManager == nullptr) {
+        LOG(ERROR) << "pkgManager is nullptr";
+        UPDATER_LAST_WORD(UPDATE_CORRUPT);
+        return UPDATE_CORRUPT;
+    }
+
+    int pipeRead = pfd[0];
+    int pipeWrite = pfd[1];
     std::string fullPath = GetWorkPath() + std::string(UPDATER_BINARY);
     (void)Utils::DeleteFile(fullPath);
 
@@ -485,27 +501,6 @@ static std::string GetBinaryPath(PkgManager::PkgManagerPtr pkgManager, UpdaterPa
 #ifdef WITH_SELINUX
     Restorecon(fullPath.c_str());
 #endif // WITH_SELINUX
-    return fullPath;
-}
-
-UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, UpdaterParams &upParams)
-{
-    UPDATER_INIT_RECORD;
-    int pfd[DEFAULT_PIPE_NUM]; /* communication between parent and child */
-    if (pipe(pfd) < 0) {
-        LOG(ERROR) << "Create pipe failed: ";
-        UPDATER_LAST_WORD(UPDATE_ERROR, "Create pipe failed");
-        return UPDATE_ERROR;
-    }
-    if (pkgManager == nullptr) {
-        LOG(ERROR) << "pkgManager is nullptr";
-        UPDATER_LAST_WORD(UPDATE_CORRUPT);
-        return UPDATE_CORRUPT;
-    }
-
-    int pipeRead = pfd[0];
-    int pipeWrite = pfd[1];
-    std::string fullPath = GetBinaryPath(pkgManager, upParams);
 
     pid_t pid = fork();
     if (pid < 0) {
@@ -525,7 +520,6 @@ UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, UpdaterPara
     close(pipeWrite); // close write endpoint
     bool retryUpdate = false;
     if (HandlePipeMsg(upParams, pipeRead, retryUpdate) != UPDATE_SUCCESS) {
-        UPDATER_LAST_WORD(UPDATE_ERROR, "HandlePipeMsg failed");
         return UPDATE_ERROR;
     }
 
