@@ -66,8 +66,17 @@ void HwFaultRetry::SetRetryCount(const uint32_t count)
     retryCount_ = count;
 }
 
+void HwFaultRetry::SetEffectiveValue(bool value)
+{
+    effective_ = value;
+}
+
 void HwFaultRetry::RebootRetry()
 {
+    if (!effective_) {
+        LOG(WARNING) << "Special scenarios do not take effect, not need retry.";
+        return;
+    }
     if (retryCount_ >= MAX_RETRY_COUNT) {
         LOG(INFO) << "retry more than 3 times, no need retry";
         return;

@@ -76,4 +76,14 @@ HWTEST_F(HwfaultRetryUnitTest, RetryMoreThanMax, TestSize.Level1)
     bool ret = Utils::CheckFaultInfo(IO_FAILED_REBOOT);
     EXPECT_EQ(ret, false);
 }
+
+HWTEST_F(HwfaultRetryUnitTest, SetEffectiveValueTest, TestSize.Level1)
+{
+    HwFaultRetry::GetInstance().SetEffectiveValue(false);
+    HwFaultRetry::GetInstance().SetFaultInfo(VERIFY_FAILED_REBOOT);
+    HwFaultRetry::GetInstance().SetRetryCount(0);
+    HwFaultRetry::GetInstance().DoRetryAction();
+ 
+    EXPECT_FALSE(Utils::CheckFaultInfo(VERIFY_FAILED_REBOOT));
+}
 }

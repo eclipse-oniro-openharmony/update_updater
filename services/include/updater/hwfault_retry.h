@@ -33,6 +33,7 @@ public:
     void RegisterFunc(const std::string &faultInfo, RetryFunc func);
     void SetFaultInfo(const std::string &faultInfo);
     void SetRetryCount(const uint32_t count);
+    void SetEffectiveValue(bool value);
 
 private:
     void RebootRetry();
@@ -40,6 +41,7 @@ private:
     std::unordered_map<std::string, RetryFunc> retryMap_;
     std::string faultInfo_;
     uint32_t retryCount_ {};
+    bool effective_ = true;
 };
 } // Updater
 #endif // UPDATER_HWFAULT_RETRY_H
