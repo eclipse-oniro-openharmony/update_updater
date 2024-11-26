@@ -75,7 +75,7 @@ public:
     {
         for (const auto &[key, value] : helpers_) {
             if (value != nullptr) {
-                value->ClearDump(str);
+                value->ClearDump();
             }
         }
     }
