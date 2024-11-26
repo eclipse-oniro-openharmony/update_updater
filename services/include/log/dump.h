@@ -29,7 +29,7 @@
 
 #define UPDATER_LAST_WORD Updater::Dump::GetInstance().DumpInfo
 #define UPDATER_INIT_RECORD DumpStageHelper stageHelper(__FUNCTION__)
-#define UPDATER_CLEAR_RECORD Updater::Dump::GetInstance().ClearDump
+#define UPDATER_CLEAR_RECORD Updater::Dump::GetInstance().ClearDump()
 
 namespace Updater {
 class DumpHelper {
