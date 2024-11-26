@@ -29,11 +29,13 @@
 
 #define UPDATER_LAST_WORD Updater::Dump::GetInstance().DumpInfo
 #define UPDATER_INIT_RECORD DumpStageHelper stageHelper(__FUNCTION__)
+#define UPDATER_CLEAR_RECORD Updater::Dump::GetInstance().ClearDump
 
 namespace Updater {
 class DumpHelper {
 public:
     virtual void RecordDump(const std::string &str) = 0;
+    virtual void ClearDump(void) = 0;
     virtual ~DumpHelper() {}
 };
 
@@ -43,6 +45,7 @@ public:
     {
         LOG(ERROR) << str;
     }
+    void ClearDump(void) override {}
     ~DumpHelperLog() override {}
 };
 
@@ -65,6 +68,14 @@ public:
         for (const auto &[key, value] : helpers_) {
             if (value != nullptr) {
                 value->RecordDump(str);
+            }
+        }
+    }
+    void ClearDump(void)
+    {
+        for (const auto &[key, value] : helpers_) {
+            if (value != nullptr) {
+                value->ClearDump(str);
             }
         }
     }
