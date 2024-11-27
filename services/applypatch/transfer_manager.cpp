@@ -42,6 +42,9 @@ bool TransferManager::CommandsExecute(int fd, Command &cmd)
         return false;
     }
     CommandResult ret = cf->Execute(cmd);
+    if (!params.GetTransferParams()->canWrite) {
+        return ret == SUCCESS;
+    }
     if (!CheckResult(ret, cmd.GetCommandLine(), cmd.GetCommandType())) {
         return false;
     }
@@ -156,12 +159,17 @@ bool TransferManager::CheckResult(const CommandResult result, const std::string 
             }
             break;
         case NEED_RETRY:
-            LOG(INFO) << "Running command need retry!";
+            LOG(INFO) << "IO failed. Running command need retry!";
             if (transferParams_->env != nullptr) {
                 transferParams_->env->PostMessage("retry_update", IO_FAILED_REBOOT);
             }
             return false;
         case FAILED:
+            LOG(INFO) << "Block update failed. Running command need retry!";
+            if (transferParams_->env != nullptr) {
+                transferParams_->env->PostMessage("retry_update", BLOCK_UPDATE_FAILED_REBOOT);
+            }
+            return false;
         default:
             LOG(ERROR) << "Running command failed";
             return false;
