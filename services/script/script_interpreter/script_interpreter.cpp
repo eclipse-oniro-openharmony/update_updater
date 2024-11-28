@@ -42,6 +42,8 @@ int32_t ScriptInterpreter::ExecuteScript(ScriptManagerImpl *manager, Hpackage::P
     }
     int32_t ret = inter->LoadScript(pkgStream);
     if (ret != USCRIPT_SUCCESS) {
+        delete inter;
+        inter = nullptr;
         USCRIPT_LOGE("Fail to loadScript script %s", pkgStream->GetFileName().c_str());
         UPDATER_LAST_WORD(USCRIPT_ERROR_CREATE_OBJ);
         return ret;
