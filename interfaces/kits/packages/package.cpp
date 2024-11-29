@@ -301,8 +301,13 @@ int32_t ExtraPackageFile(const char *packagePath, [[maybe_unused]] const char *k
         PkgManager::ReleasePackageInstance(manager);
         return PKG_INVALID_STREAM;
     }
-    manager->ExtractFile(file, outStream);
-
+    ret = manager->ExtractFile(file, outStream);
+    if (ret != PKG_SUCCESS) {
+        LOG(ERROR) << "extract file failed" << file;
+        manager->ClosePkgStream(outStream);
+        PkgManager::ReleasePackageInstance(manager);
+        return PKG_INVALID_FILE;
+    }
     manager->ClosePkgStream(outStream);
     PkgManager::ReleasePackageInstance(manager);
     return PKG_SUCCESS;
