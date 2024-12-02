@@ -111,12 +111,12 @@ ohos_unittest("flashd_unittest") {
     "//third_party/libuv:uv",
     "//third_party/lz4:liblz4_static",
     "//third_party/openssl:libcrypto_shared",
-    "//third_party/zlib:libz",
   ]
 
   external_deps = [
     "hilog:libhilog",
     "init:libbegetutil_static",
+    "zlib:libz",
   ]
   configs = [ "${updater_path}/test/unittest:utest_config" ]
   install_enable = true
