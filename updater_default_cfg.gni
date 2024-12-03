@@ -24,6 +24,7 @@ declare_args() {
   updater_absolutely_path = "//base/update/updater"
   hdc_base = "//developtools/hdc"
   updater_sign_on_server = false
+  updater_optional_deps = true
 }
 
 if (updater_cfg_file != "") {
