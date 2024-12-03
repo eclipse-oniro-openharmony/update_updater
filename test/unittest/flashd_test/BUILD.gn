@@ -117,7 +117,7 @@ ohos_unittest("flashd_unittest") {
     "hilog:libhilog",
     "init:libbegetutil_static",
   ]
-  if (updater_optional_deps) {
+  if (updater_zlib_enable) {
     external_deps += [ "zlib:libz" ]
   }
   configs = [ "${updater_path}/test/unittest:utest_config" ]
