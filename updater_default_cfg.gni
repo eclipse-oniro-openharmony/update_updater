@@ -24,7 +24,12 @@ declare_args() {
   updater_absolutely_path = "//base/update/updater"
   hdc_base = "//developtools/hdc"
   updater_sign_on_server = false
-  updater_optional_deps = true
+  updater_zlib_enable = true
+
+  if (defined(global_parts_info) &&
+      !defined(global_parts_info.third_party_zlib)) {
+    updater_zlib_enable = false
+  }
 }
 
 if (updater_cfg_file != "") {
