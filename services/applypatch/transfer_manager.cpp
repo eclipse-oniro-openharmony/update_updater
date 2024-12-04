@@ -42,9 +42,6 @@ bool TransferManager::CommandsExecute(int fd, Command &cmd)
         return false;
     }
     CommandResult ret = cf->Execute(cmd);
-    if (!cmd.GetTransferParams()->canWrite) {
-        return ret == SUCCESS;
-    }
     if (!CheckResult(ret, cmd.GetCommandLine(), cmd.GetCommandType())) {
         return false;
     }
