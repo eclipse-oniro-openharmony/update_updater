@@ -80,6 +80,7 @@ constexpr const char *MMC_SIZE_FILE = "/data/class/block/mmcblk0/size";
 constexpr const char *UPDATER_RETRY_TAG = "retry_update";
 constexpr const char *VERIFY_FAILED_REBOOT = "reboot_verify_failed";
 constexpr const char *IO_FAILED_REBOOT = "reboot_IO_failed";
+constexpr const char *BLOCK_UPDATE_FAILED_REBOOT = "reboot_block_update_failed";
 
 constexpr int MAX_RETRY_COUNT = 3;
 constexpr int MINIMAL_ARGC_LIMIT = 2;
