@@ -23,6 +23,7 @@
 namespace Updater {
 void LoadFstab(); /* Load fstab */
 void LoadSpecificFstab(const std::string &fstabName);
+void ErasePartition(const std::string &devPath);
 int FormatPartition(const std::string &path, bool isZeroErase = false);
 int UmountForPath(const std::string &path);
 int MountForPath(const std::string &path);
