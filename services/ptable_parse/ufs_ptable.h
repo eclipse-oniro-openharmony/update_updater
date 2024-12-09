@@ -41,7 +41,7 @@ public:
     static constexpr uint32_t MAX_LUN_NUMBERS = 26;
     static constexpr uint32_t MIN_UFS_WRITE_SIZE = 4096;
     static constexpr uint32_t GPT_PTABLE_BACKUP_SIZE = 33; // back ptable at the end of lun
-    static constexpr uint32_t READ_LINK_BUFFER_LENTH = 1024;
+    static constexpr uint32_t READ_LINK_BUFFER_LENTH = 1024; // readlink buffer size
 
     struct UfsPartitionDataInfo {
         bool isGptVaild;

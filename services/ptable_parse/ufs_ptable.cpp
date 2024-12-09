@@ -50,7 +50,7 @@ bool UfsPtable::IsUsbPath(const char* filePath)
     const char* targetUsbString = "usb";
     const char* targetXhciString = "xhci";
     char linkBuf[READ_LINK_BUFFER_LENTH] = {0};
-    sszie_t retSize = readlink(filePath, linkBuf, READ_LINK_BUFFER_LENTH - 1);
+    ssize_t retSize = readlink(filePath, linkBuf, READ_LINK_BUFFER_LENTH - 1);
     LOG(INFO) << "readlibk " << filePath << " retSzie " << retSize << ", linkBuf is: " << linkBuf;
     if (retSize > 0 && (strstr(linkBuf, targetUsbString) != nullptr || strstr(linkBuf,targetXhciString) != nullptr)) {
         return true;
