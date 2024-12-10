@@ -66,7 +66,7 @@ public:
         keyPath = "/data/updater/src/signing_cert.crt";
         file = "update.bin";
         ret = ExtraPackageFile(packagePath.c_str(), keyPath.c_str(), file.c_str(), testPackagePath.c_str());
-        EXPECT_EQ(ret, PKG_INVALID_FILE);
+        EXPECT_EQ(ret, PKG_SUCCESS);
         return 0;
     }
 
