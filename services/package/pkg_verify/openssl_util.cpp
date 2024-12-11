@@ -218,11 +218,11 @@ int32_t CalcSha256Digest(const PkgStreamPtr srcData, const size_t dataLen, std::
             UPDATER_LAST_WORD(-1);
             return -1;
         }
-        SHA256_Update(&ctx, buffer.buffer, blockLen);
+        SHA256_Update(&ctx, buffer.buffer, readLen);
         offset += readLen;
         remainLen -= readLen;
     }
-    if (remainLen > 0) {
+    while (remainLen > 0) {
         ret = srcData->Read(buffer, offset, remainLen, readLen);
         if (ret != 0) {
             PKG_LOGE("Fail read data");
@@ -230,6 +230,9 @@ int32_t CalcSha256Digest(const PkgStreamPtr srcData, const size_t dataLen, std::
             return -1;
         }
         SHA256_Update(&ctx, buffer.buffer, readLen);
+        offset += readLen;
+        PKG_LOGE("use new remainLen");
+        remainLen -= readLen;
     }
 
     if (SHA256_Final(result.data(), &ctx) != 1) {
