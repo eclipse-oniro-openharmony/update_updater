@@ -122,11 +122,8 @@ int UmountForPath(const std::string& path)
     }
     return 0;
 }
-
-static int MountNtfsWithRetry(std::string source, std::string target)
+static int LoopToMount(char *argv[], std::string source, std::string target)
 {
-    char *argv[] = {const_cast<char *>("system/bin/mount.ntfs"),
-        const_cast<char *>(source.c_str()), const_cast<char *>(target.c_str()), nullptr};
     int num = 0;
     do {
         pid_t child = fork();
@@ -163,6 +160,20 @@ static int MountNtfsWithRetry(std::string source, std::string target)
     return -1;
 }
 
+static int MountNtfsWithRetry(std::string source, std::string target)
+{
+    char *argv[] = {const_cast<char *>("system/bin/mount.ntfs"),
+        const_cast<char *>(source.c_str()), const_cast<char *>(target.c_str()), nullptr};
+    return LoopToMount(argv, source, target);
+}
+
+static int MountExfatWithRetry(std::string source, std::string target)
+{
+    char *argv[] = {const_cast<char *>("system/bin/mount.exfat"),
+        const_cast<char *>(source.c_str()), const_cast<char *>(target.c_str()), nullptr};
+    return LoopToMount(argv, source, target);
+}
+
 int MountSdcard(std::string &path, std::string &mountPoint)
 {
     if (path.empty() || mountPoint.empty()) {
@@ -185,6 +196,10 @@ int MountSdcard(std::string &path, std::string &mountPoint)
     }
     if (MountNtfsWithRetry(path, mountPoint) == 0) {
         LOG(INFO) << "mount success, sdcard type is ntfs";
+        return 0;
+    }
+    if (MountExfatWithRetry(path, mountPoint) == 0) {
+        LOG(INFO) << "mount success, sdcard type is exfat";
         return 0;
     }
     return -1;
