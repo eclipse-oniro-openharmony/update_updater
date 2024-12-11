@@ -78,7 +78,7 @@ public:
     uint8_t *GetPtableImageUfsLunPmbrStart(uint8_t *imageBuf, const uint32_t lunIndex);
     uint8_t *GetPtableImageUfsLunGptHeaderStart(uint8_t *imageBuf, const uint32_t lunIndex);
     uint8_t *GetPtableImageUfsLunEntryStart(uint8_t *imageBuf, const uint32_t lunIndex);
-    bool IsUsbPath(const char* filePath);
+    bool IsUsbPath(const uint32_t lunIndex);
 };
 } // namespace Updater
 #endif // UPDATER_UFS_PTABLE_H

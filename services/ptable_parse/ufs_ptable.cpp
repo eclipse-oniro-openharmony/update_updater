@@ -45,13 +45,15 @@ uint32_t UfsPtable::GetPtableExtraOffset(void)
 }
 
 // avoid u disk being recognized as a valid gpt lun device
-bool UfsPtable::IsUsbPath(const char* filePath)
+bool UfsPtable::IsUsbPath(const uint32_t lunIndex)
 {
+    char lunIndexName = 'a' + lunIndex;
     const char* targetUsbString = "usb";
     const char* targetXhciString = "xhci";
     char linkBuf[READ_LINK_BUFFER_LENTH] = {0};
-    ssize_t retSize = readlink(filePath, linkBuf, READ_LINK_BUFFER_LENTH - 1);
-    LOG(INFO) << "readlibk " << filePath << " retSzie " << retSize << ", linkBuf is: " << linkBuf;
+    std::string filePath = std::string(PREFIX_SYS_CLASS_BLOCK) + lunIndexName;
+    ssize_t retSize = readlink(filePath.c_str(), linkBuf, READ_LINK_BUFFER_LENTH - 1);
+    LOG(INFO) << "readlink " << filePath << " retSzie " << retSize << ", linkBuf is: " << linkBuf;
     if (retSize > 0 && (strstr(linkBuf, targetUsbString) != nullptr || strstr(linkBuf, targetXhciString) != nullptr)) {
         return true;
     }
@@ -101,7 +103,7 @@ void UfsPtable::SetDeviceLunNum()
             break;
         }
 #ifndef UPDATER_UT
-        if (CheckDeviceLunRemoveable(lunIndex) || IsUsbPath(ufsNode.c_str())) {
+        if (CheckDeviceLunRemoveable(lunIndex) || IsUsbPath(lunIndex)) {
             LOG(ERROR) << "device " << ufsNode << " is removable, may be a u disk";
             break;
         }
