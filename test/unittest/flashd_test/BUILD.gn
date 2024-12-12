@@ -111,7 +111,7 @@ ohos_unittest("flashd_unittest") {
     "libuv:uv",
     "lz4:liblz4_static",
     "openssl:libcrypto_shared",
-]
+  ]
   if (updater_zlib_enable) {
     external_deps += [ "zlib:libz" ]
   }
