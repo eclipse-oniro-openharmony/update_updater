@@ -147,6 +147,7 @@ ohos_unittest("flashd_utils_unittest") {
     "init:libbegetutil_static",
     "libuv:uv",
   ]
+  deps = []
   configs = [ "${updater_path}/test/unittest:utest_config" ]
   install_enable = true
   part_name = "updater"
