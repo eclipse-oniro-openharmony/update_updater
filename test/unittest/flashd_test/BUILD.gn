@@ -83,11 +83,6 @@ ohos_unittest("flashd_unittest") {
     "${updater_path}/services/ptable_parse",
     "${updater_path}/utils/include",
     "${updater_path}/utils/json",
-    "//base/startup/init/services/include/param",
-    "//third_party/bounds_checking_function/include",
-    "//third_party/cJSON",
-    "//third_party/lz4/lib",
-    "//third_party/libuv",
   ]
 
   deps = [
@@ -103,19 +98,19 @@ ohos_unittest("flashd_unittest") {
     "${updater_path}/services/package:libupdaterpackage",
     "${updater_path}/services/script:libupdaterscript",
     "${updater_path}/utils:libutils",
-    "//third_party/bounds_checking_function:libsec_static",
-    "//third_party/bzip2:libbz2",
-    "//third_party/cJSON:cjson",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
-    "//third_party/libuv:uv",
-    "//third_party/lz4:liblz4_static",
-    "//third_party/openssl:libcrypto_shared",
   ]
 
   external_deps = [
+    "bounds_checking_function:libsec_static",
+    "bzip2:libbz2",
+    "cJSON:cjson",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "init:libbegetutil_static",
+    "libuv:uv",
+    "lz4:liblz4_static",
+    "openssl:libcrypto_shared",
   ]
   if (updater_zlib_enable) {
     external_deps += [ "zlib:libz" ]
@@ -141,7 +136,6 @@ ohos_unittest("flashd_utils_unittest") {
     "${updater_path}/services/include",
     "${updater_path}/utils/include",
     "${updater_path}/services/flashd",
-    "//third_party/libuv",
     "${updater_path}/interfaces/kits/include",
     "${updater_path}/services/common",
     "${updater_path}/services/flashd/common",
@@ -151,8 +145,9 @@ ohos_unittest("flashd_utils_unittest") {
     "c_utils:utils",
     "hilog:libhilog",
     "init:libbegetutil_static",
+    "libuv:uv",
   ]
-  deps = [ "//third_party/libuv:uv" ]
+  deps = []
   configs = [ "${updater_path}/test/unittest:utest_config" ]
   install_enable = true
   part_name = "updater"
