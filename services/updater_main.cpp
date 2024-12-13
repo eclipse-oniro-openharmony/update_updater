@@ -707,6 +707,7 @@ std::unordered_map<std::string, std::function<void ()>> InitOptionsFuncTab(char*
         {"sdcard_update", [&]() -> void
         {
             upParams.updateMode = SDCARD_UPDATE;
+            upParams.sdExtMode = SDCARD_NORMAL_UPDATE;
         }},
         {"UPDATE:MAINIMG", [&]() -> void
         {
