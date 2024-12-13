@@ -101,13 +101,13 @@ ohos_unittest("flashd_unittest") {
   ]
 
   external_deps = [
-    "hilog:libhilog",
-    "init:libbegetutil_static",
     "bounds_checking_function:libsec_static",
     "bzip2:libbz2",
     "cJSON:cjson",
     "googletest:gmock_main",
     "googletest:gtest_main",
+    "hilog:libhilog",
+    "init:libbegetutil_static",
     "libuv:uv",
     "lz4:liblz4_static",
     "openssl:libcrypto_shared",
