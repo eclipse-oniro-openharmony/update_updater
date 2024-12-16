@@ -47,6 +47,10 @@ uint32_t UfsPtable::GetPtableExtraOffset(void)
 // avoid u disk being recognized as a valid gpt lun device
 bool UfsPtable::IsUsbPath(const uint32_t lunIndex)
 {
+    constexpr uint32_t minRemoveableStartIdx = 3;
+    if (lunIndex <= minRemoveableStartIdx) {
+        return false;
+    }
     char lunIndexName = 'a' + lunIndex;
     const char* targetUsbString = "usb";
     const char* targetXhciString = "xhci";
