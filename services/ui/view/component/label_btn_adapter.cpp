@@ -86,6 +86,9 @@ LabelBtnAdapter::LabelBtnAdapter(const UxViewInfo &info)
         LOG(DEBUG) << "init focus listener for " << viewId_;
         InitFocus(txtColor, bgColor, StrToColor(spec.focusedTxtColor),
             StrToColor(spec.focusedBgColor));
+    } else {
+        this->SetFocusable(false);
+        this->SetTouchable(false);
     }
 }
 
