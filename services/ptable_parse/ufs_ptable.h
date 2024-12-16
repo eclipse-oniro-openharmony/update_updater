@@ -61,6 +61,7 @@ public:
     virtual std::string GetDeviceLunNodePath(const uint32_t lun);
     virtual int32_t GetLunNumFromNode(const std::string &ufsNode);
     virtual bool CheckDeviceLunRemoveable(const uint32_t lunIndex);
+    virtual bool IsUsbPath(const uint32_t lunIndex);
 #ifndef UPDATER_UT
 private:
 #else
@@ -78,7 +79,6 @@ public:
     uint8_t *GetPtableImageUfsLunPmbrStart(uint8_t *imageBuf, const uint32_t lunIndex);
     uint8_t *GetPtableImageUfsLunGptHeaderStart(uint8_t *imageBuf, const uint32_t lunIndex);
     uint8_t *GetPtableImageUfsLunEntryStart(uint8_t *imageBuf, const uint32_t lunIndex);
-    bool IsUsbPath(const uint32_t lunIndex);
 };
 } // namespace Updater
 #endif // UPDATER_UFS_PTABLE_H
