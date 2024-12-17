@@ -214,4 +214,11 @@ HWTEST_F(UtilsUnitTest, ConvertStrToNumber_test_004, TestSize.Level0)
     double value;
     EXPECT_EQ(Utils::ConvertToDouble(str, value), true);
 }
+
+HWTEST_F(UtilsUnitTest, ConvertStrToNumber_test_005, TestSize.Level0)
+{
+    const std::string str = "1.2345";
+    float value;
+    EXPECT_EQ(Utils::ConvertToFloat(str, value), true);
+}
 } // updater_ut

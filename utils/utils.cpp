@@ -1022,6 +1022,21 @@ bool ConvertToDouble(const std::string &str, double &value)
     return true;
 }
 
+bool ConvertToFloat(const std::string &str, float &value)
+{
+    char *endPtr = nullptr;
+    errno = 0;
+
+    value = std::strtof(str.c_str(), &endPtr);
+#ifndef UPDATER_UT
+    if (endPtr == str.c_str() || *endPtr != '\0' || errno == ERANGE) {
+        LOG(ERROR) << "Convert string to float failed, str " << str << " converted to value " << value;
+        return false;
+    }
+#endif
+    return true;
+}
+
 #ifndef __WIN32
 void SetFileAttributes(const std::string& file, uid_t owner, gid_t group, mode_t mode)
 {
