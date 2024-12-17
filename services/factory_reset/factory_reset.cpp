@@ -33,7 +33,7 @@ FactoryResetProcess::FactoryResetProcess()
     RegisterFunc(FACTORY_WIPE_DATA,
         [this](FactoryResetMode mode, const std::string &path) { return DoFactoryReset(mode, path); });
     RegisterFunc(MENU_WIPE_DATA,
-        [this](FactoryResetMode mode, const std::string &path) { return DoUserReset(mode, path); });
+        [this](FactoryResetMode mode, const std::string &path) { return DoFactoryReset(mode, path); });
 }
 
 void FactoryResetProcess::RegisterFunc(FactoryResetMode mode, ResetFunc func)

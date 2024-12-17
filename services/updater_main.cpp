@@ -623,28 +623,28 @@ UpdaterStatus DoUpdaterEntry(UpdaterParams &upParams)
     } else if (upParams.updatePackage.size() > 0) {
         UPDATER_UI_INSTANCE.ShowProgressPage();
         status = InstallUpdaterPackages(upParams);
-    } else if (upParams.factoryResetMode == "factory_wipe_data") {
+    } else if (upParams.factoryResetMode == "factory_wipe_data" || upParams.factoryResetMode == "menu_wipe_data") {
         UPDATER_UI_INSTANCE.ShowProgressPage();
         LOG(INFO) << "Factory level FactoryReset begin";
         status = UPDATE_SUCCESS;
 #if !defined(UPDATER_UT) && defined(UPDATER_UI_SUPPORT)
         DoProgress();
 #endif
-        if (FactoryReset(FACTORY_WIPE_DATA, "/data") != 0) {
+        if (FactoryReset(upParams.factoryResetMode == "factory_wipe_data" ?
+            FACTORY_WIPE_DATA : MENU_WIPE_DATA, "/data") != 0) {
             LOG(ERROR) << "FactoryReset factory level failed";
             status = UPDATE_ERROR;
         }
         UPDATER_UI_INSTANCE.ShowLogRes(
             (status != UPDATE_SUCCESS) ? TR(LOGRES_FACTORY_FAIL) : TR(LOGRES_FACTORY_DONE));
-    } else if (upParams.factoryResetMode == "user_wipe_data" || upParams.factoryResetMode == "menu_wipe_data") {
+    } else if (upParams.factoryResetMode == "user_wipe_data") {
         UPDATER_UI_INSTANCE.ShowProgressPage();
         LOG(INFO) << "User level FactoryReset begin";
         status = UPDATE_SUCCESS;
 #if !defined(UPDATER_UT) && defined(UPDATER_UI_SUPPORT)
         DoProgress();
 #endif
-        if (FactoryReset(upParams.factoryResetMode == "user_wipe_data" ?
-            USER_WIPE_DATA : MENU_WIPE_DATA, "/data") != 0) {
+        if (FactoryReset(USER_WIPE_DATA, "/data") != 0) {
             LOG(ERROR) << "FactoryReset user level failed";
             status = UPDATE_ERROR;
         }
@@ -825,7 +825,8 @@ void RebootAfterUpdateSuccess(const UpdaterParams &upParams)
         LOG(INFO) << "factory wipe data, sleep...";
         Utils::UsSleep(120 * DISPLAY_TIME); // 120 : 120s
     }
-    upParams.forceUpdate || upParams.factoryResetMode == "factory_wipe_data" ?
+    upParams.forceUpdate || upParams.factoryResetMode == "factory_wipe_data" ||
+        upParams.factoryResetMode ==  "menu_wipe_data" ?
         Utils::DoShutdown("Updater update success go shut down") :
             Utils::UpdaterDoReboot("", "Updater update success");
 }
