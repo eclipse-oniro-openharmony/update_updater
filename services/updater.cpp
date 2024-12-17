@@ -329,7 +329,11 @@ void SetProgress(const std::vector<std::string> &output, UpdaterParams &upParams
         return;
     }
     auto outputInfo = Trim(output[1]);
-    float frac = std::stof(output[1]);
+    float frac = 0;
+    if (!Utils::ConvertToFloat(output[1], frac)) {
+        LOG(ERROR) << "ConvertToFloat failed";
+        return;
+    }
     int tmpProgressValue = 0;
     if (frac >= -EPSINON && frac <= EPSINON) {
         return;
@@ -381,7 +385,10 @@ void HandleChildOutput(const std::string &buffer, int32_t bufferLen, bool &retry
         if (progress.size() != DEFAULT_PROCESS_NUM) {
             LOG(ERROR) << "show progress with wrong arguments";
         } else {
-            frac = std::stof(progress[0]);
+            if (!Utils::ConvertToFloat(progress[0], frac)) {
+                LOG(ERROR) << "ConvertToFloat failed";
+                return;
+            }
             g_percentage = static_cast<int>(frac * FULL_PERCENT_PROGRESS);
         }
     } else if (outputHeader == "set_progress") {
