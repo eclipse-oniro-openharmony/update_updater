@@ -34,12 +34,14 @@ public:
     void SetFaultInfo(const std::string &faultInfo);
     void SetRetryCount(const uint32_t count);
     void SetEffectiveValue(bool value);
+    void SetRebootCmd(const std::string &rebootCmd);
 
 private:
     void RebootRetry();
 
-    std::unordered_map<std::string, RetryFunc> retryMap_;
-    std::string faultInfo_;
+    std::unordered_map<std::string, RetryFunc> retryMap_ {};
+    std::string faultInfo_ {};
+    std::string rebootCmd_ {};
     uint32_t retryCount_ {};
     bool effective_ = true;
 };

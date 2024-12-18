@@ -26,6 +26,7 @@
 #include "threadpool/thread_pool.h"
 #include "scope_guard.h"
 #include "securec.h"
+#include "updater/updater_const.h"
 
 using namespace std;
 using namespace Hpackage;
@@ -124,6 +125,7 @@ int32_t UScriptInstructionBinFlowWrite::ExtractBinFile(Uscript::UScriptEnv &env,
 
     ret = pkgManager->ExtractFile(upgradeFileName, processStream);
     if (ret != USCRIPT_SUCCESS) {
+        env.PostMessage(UPDATE_RETRY_TAG, EXTRACT_BIN_FAIL_RETRY);
         LOG(ERROR) << "Error to extract" << upgradeFileName;
         pkgManager->ClosePkgStream(processStream);
         return USCRIPT_ERROR_EXECUTE;
