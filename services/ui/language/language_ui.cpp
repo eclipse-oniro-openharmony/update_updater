@@ -176,7 +176,6 @@ Language LanguageUI::ParseLanguage() const
 #ifndef UPDATER_UT
     //read language type(en-Latn-US/zh-Hans) from misc
     constexpr const char *CHINESE_LANGUAGE_PREFIX = "zh";
-    constexpr const char *ENGLISH_LANGUAGE_PREFIX = "en";
     constexpr const char *SPANISH_LANGUAGE_PREFIX = "es";
     struct UpdaterPara para {};
     if (!ReadUpdaterParaMisc(para)) {
