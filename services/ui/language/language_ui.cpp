@@ -175,8 +175,9 @@ Language LanguageUI::ParseLanguage() const
     Language DEFAULT_LOCALE = defaultLanguage_;
 #ifndef UPDATER_UT
     //read language type(en-Latn-US/zh-Hans) from misc
-    constexpr const char *CHINSES_LANGUAGE_PREFIX = "zh";
+    constexpr const char *CHINESE_LANGUAGE_PREFIX = "zh";
     constexpr const char *ENGLISH_LANGUAGE_PREFIX = "en";
+    constexpr const char *SPANISH_LANGUAGE_PREFIX = "es";
     struct UpdaterPara para {};
     if (!ReadUpdaterParaMisc(para)) {
         LOG(ERROR) << "ReadUpdaterParaMisc failed";
@@ -185,9 +186,11 @@ Language LanguageUI::ParseLanguage() const
     if (strcmp(para.language, "") == 0) {
         LOG(INFO) << "Language in misc is empty";
         return Language::CHINESE;
-    } else if (strncmp(para.language, CHINSES_LANGUAGE_PREFIX, strlen(CHINSES_LANGUAGE_PREFIX)) == 0) {
+    } else if (strncmp(para.language, CHINESE_LANGUAGE_PREFIX, strlen(CHINESE_LANGUAGE_PREFIX)) == 0) {
         return Language::CHINESE;
-    } else if (strncmp(para.language, ENGLISH_LANGUAGE_PREFIX, strlen(ENGLISH_LANGUAGE_PREFIX)) == 0) {
+    } else if (strncmp(para.language, SPANISH_LANGUAGE_PREFIX, strlen(SPANISH_LANGUAGE_PREFIX)) == 0) {
+        return Language::SPANISH;
+    } else {
         return Language::ENGLISH;
     }
 #endif
