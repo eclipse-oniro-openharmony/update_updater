@@ -825,7 +825,8 @@ void RebootAfterUpdateSuccess(const UpdaterParams &upParams)
         LOG(INFO) << "factory wipe data, sleep...";
         Utils::UsSleep(120 * DISPLAY_TIME); // 120 : 120s
     }
-    upParams.forceUpdate || upParams.factoryResetMode == "factory_wipe_data" ?
+    upParams.forceUpdate || upParams.factoryResetMode == "factory_wipe_data" ||
+        upParams.factoryResetMode == "menu_wipe_data" ?
         Utils::DoShutdown("Updater update success go shut down") :
             Utils::UpdaterDoReboot("", "Updater update success");
 }
