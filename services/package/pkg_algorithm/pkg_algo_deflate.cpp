@@ -173,7 +173,8 @@ int32_t PkgAlgoDeflate::UnpackCalculate(PkgAlgorithmContext &context, const PkgS
         }
         unpackRet = inflate(&zstream, Z_SYNC_FLUSH);
         if (unpackRet < Z_OK) {
-            PKG_LOGE("fail inflate ret:%d", unpackRet);
+            PKG_LOGE("fail inflate ret:%d, error is %s", unpackRet,
+                (zstream.msg == nullptr ? "no error" : zstream.msg));
             break;
         }
 
