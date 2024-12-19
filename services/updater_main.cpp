@@ -75,6 +75,8 @@ constexpr struct option OPTIONS[] = {
     { "UPDATE:SD", no_argument, nullptr, 0 },
     { "UPDATE:SDFROMDEV", no_argument, nullptr, 0 },
     { "sdcard_intral_update", optional_argument, nullptr, 0},
+    { "shrink_info", required_argument, nullptr, 0 },
+    { "virtual_shrink_info", required_argument, nullptr, 0 },
     {"wipe_data_factory_lowlevel", no_argument, nullptr, 0},
     { "wipe_data_at_factoryreset_0", no_argument, nullptr, 0 },
     { nullptr, 0, nullptr, 0 },
@@ -743,6 +745,14 @@ std::unordered_map<std::string, std::function<void ()>> InitOptionsFuncTab(char*
         {"sdcard_intral_update", [&]() -> void
         {
             upParams.updateMode = SDCARD_UPDATE;
+        }},
+        {"shrink_info", [&]() -> void
+        {
+            upParams.shrinkInfo = std::string(optarg);
+        }},
+        {"virtual_shrink_info", [&]() -> void
+        {
+            upParams.virtualShrinkInfo = std::string(optarg);
         }}
     };
     return optionsFuncTab;
