@@ -51,6 +51,8 @@ struct UpdaterParams {
     float initialProgress = 0; /* The upgrade starts at the progress bar location */
     float currentPercentage = 0; /* The proportion of progress bars occupied by the upgrade process */
     unsigned int pkgLocation = 0;
+    std::string shrinkInfo = "";
+    std::string virtualShrinkInfo = "";
     std::string miscCmd {"boot_updater"};
     std::vector<std::string> updatePackage {};
     std::vector<std::chrono::duration<double>> installTime {};
