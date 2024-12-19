@@ -360,6 +360,21 @@ static UpdaterStatus CalcProgress(const UpdaterParams &upParams,
     return UPDATE_SUCCESS;
 }
 
+int CheckMountData()
+{
+    int retryTime = 3;
+    for (int i = 0; i < retryTime; i++) {
+        if (SetupPartitions() == 0) {
+            return 0;
+		}
+        LOG(INFO) << "retry mount userdata number:" << i;
+        Utils::UsSleep(DISPLAY_TIME); 
+    }
+    UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_SETPART_FAIL), true);
+    UPDATER_LAST_WORD(UPDATE_ERROR);
+    return UPDATE_ERROR;
+}
+
 static UpdaterStatus PreUpdatePackages(UpdaterParams &upParams)
 {
     UPDATER_INIT_RECORD;
@@ -368,9 +383,7 @@ static UpdaterStatus PreUpdatePackages(UpdaterParams &upParams)
     UpdaterStatus status = UPDATE_UNKNOWN;
 
     upParams.installTime.resize(upParams.updatePackage.size(), std::chrono::duration<double>(0));
-    if (SetupPartitions() != 0) {
-        UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_SETPART_FAIL), true);
-        UPDATER_LAST_WORD(UPDATE_ERROR);
+    if (CheckMountData() != 0) {
         return UPDATE_ERROR;
     }
     const std::string resultPath = std::string(UPDATER_PATH) + "/" + std::string(UPDATER_RESULT_FILE);
