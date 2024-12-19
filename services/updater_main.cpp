@@ -366,9 +366,9 @@ int CheckMountData()
     for (int i = 0; i < retryTime; i++) {
         if (SetupPartitions() == 0) {
             return 0;
-		}
+        }
         LOG(INFO) << "retry mount userdata number:" << i;
-        Utils::UsSleep(DISPLAY_TIME); 
+        Utils::UsSleep(DISPLAY_TIME);
     }
     UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_SETPART_FAIL), true);
     UPDATER_LAST_WORD(UPDATE_ERROR);
