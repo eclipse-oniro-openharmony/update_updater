@@ -362,7 +362,7 @@ static UpdaterStatus CalcProgress(const UpdaterParams &upParams,
 
 int CheckMountData()
 {
-    int retryTime = 3;
+    constexpr int retryTime = 3;
     for (int i = 0; i < retryTime; i++) {
         if (SetupPartitions() == 0) {
             return 0;
