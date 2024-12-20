@@ -15,7 +15,8 @@
             "visible" : true,
             "fontSize" : 10,
             "bgColor" : "#ffffffff",
-            "fontColor" : "#ffffffff"
+            "fontColor" : "#ffffffff",
+            "style" : "normal"
         }
     ]
 }
