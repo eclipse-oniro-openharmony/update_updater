@@ -26,6 +26,7 @@ struct UxLabelInfo {
     std::string align;
     std::string fontColor;
     std::string bgColor;
+    std::string style;
 };
 struct UxViewInfo;
 class TextLabelAdapter : public OHOS::UILabel, public ComponentCommon<TextLabelAdapter> {

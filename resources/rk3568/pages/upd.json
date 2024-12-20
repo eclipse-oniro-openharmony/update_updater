@@ -86,7 +86,8 @@
         "UILabel": {
             "bgColor": "#000000ff",
             "fontColor": "#ffffffe6",
-            "align" : "center"
+            "align" : "center",
+            "style" : "normal"
         },
         "UIImageView": {
             "imgCnt" : 1,

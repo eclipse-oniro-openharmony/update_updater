@@ -107,7 +107,8 @@ HWTEST_F(UpdaterUiLayoutParserUnitTest, test_label_parser, TestSize.Level0)
         "Reboot to normal system",
         "center",
         "#ffffffff",
-        "#ffffffff"
+        "#ffffffff",
+        "normal"
     } };
     EXPECT_EQ(pageInfo.viewInfos[0], expectedLabel);
 }
@@ -149,7 +150,8 @@ HWTEST_F(UpdaterUiLayoutParserUnitTest, test_all, TestSize.Level1)
         "Reboot to normal system",
         "center",
         "#ffffffff",
-        "#ffffffff"
+        "#ffffffff",
+        "normal"
     } };
     EXPECT_EQ(pageInfo.viewInfos[0], expectedLabel);
 
@@ -177,7 +179,8 @@ HWTEST_F(UpdaterUiLayoutParserUnitTest, test_all_default, TestSize.Level0)
         "Reboot to normal system",
         "center",
         "#ffffffff",
-        "#000000ff"
+        "#000000ff",
+        "normal"
     } };
     expected.commonInfo.visible = false;
     EXPECT_EQ(expected.commonInfo, pageInfo.viewInfos[0].commonInfo);

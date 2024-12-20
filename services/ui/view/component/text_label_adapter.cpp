@@ -24,7 +24,7 @@ TextLabelAdapter::TextLabelAdapter(const UxViewInfo &info)
     SetViewCommonInfo(info.commonInfo);
     this->SetAlign(GetAlign(spec.align), OHOS::TEXT_ALIGNMENT_CENTER);
     this->SetText(TranslateText(spec.text).c_str());
-    this->SetFont(DEFAULT_FONT_FILENAME, spec.fontSize);
+    this->SetFont((spec.style == "bold") ? BOLD_FONT_FILENAME : DEFAULT_FONT_FILENAME, spec.fontSize);
     this->SetStyle(OHOS::STYLE_LINE_HEIGHT, UPDATER_UI_FONT_HEIGHT_RATIO * spec.fontSize);
     auto fontColor = StrToColor(spec.fontColor);
     this->SetStyle(OHOS::STYLE_TEXT_COLOR, fontColor.full);

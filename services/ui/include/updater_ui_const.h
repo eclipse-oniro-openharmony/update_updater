@@ -18,6 +18,7 @@
 
 namespace Updater {
 constexpr const char *DEFAULT_FONT_FILENAME = "HarmonyOS_Sans_SC_Regular_Small.ttf";
+constexpr const char *BOLD_FONT_FILENAME = "HarmonyOS_Sans_SC_Bold_Small.ttf";
 constexpr const char *FB_DEV_PATH = "/dev/graphics/fb0";
 constexpr const char *DRM_DEV_PATH = "/dev/dri/card0";
 
