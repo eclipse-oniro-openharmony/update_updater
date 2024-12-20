@@ -310,9 +310,9 @@ HWTEST_F(UpdaterUiComponentUnitTest, test_label_btn_adapter_constructor, TestSiz
 
 HWTEST_F(UpdaterUiComponentUnitTest, test_label_btn_adapter_on_press, TestSize.Level0)
 {
-    LabelBtnAdapter labelBtn1 {UxViewInfo {{0, 0, 50, 50, "id", "UILabel", true},
+    LabelBtnAdapter labelBtn1 {UxViewInfo {{0, 0, 50, 50, "id", "UILabelButton", true},
         UxLabelBtnInfo {100, "", "#000000ff", "#ffffffff", "#ffffffff", "#000000ff", true}}};
-    LabelBtnAdapter labelBtn2 {UxViewInfo {{100, 100, 50, 50, "id", "UILabel", true},
+    LabelBtnAdapter labelBtn2 {UxViewInfo {{100, 100, 50, 50, "id", "UILabelButton", true},
         UxLabelBtnInfo {100, "", "#000000ff", "#ffffffff", "#ffffffff", "#000000ff", true}}};
     OHOS::FocusManager::GetInstance()->RequestFocus(&labelBtn2);
     labelBtn1.OnPressEvent(OHOS::PressEvent {OHOS::Point {}});
@@ -337,7 +337,7 @@ HWTEST_F(UpdaterUiComponentUnitTest, test_label_btn_adapter_is_valid, TestSize.L
 
 HWTEST_F(UpdaterUiComponentUnitTest, test_label_btn_adapter_set_text, TestSize.Level0)
 {
-    LabelBtnAdapter labelBtn {UxViewInfo {{0, 0, 0, 0, "id", "UILabel", false},
+    LabelBtnAdapter labelBtn {UxViewInfo {{0, 0, 0, 0, "id", "UILabelButton", false},
         UxLabelBtnInfo {100, "", "#000000ff", "#000000ff", "#000000ff", "#000000ff", false}}};
     constexpr auto testString = "test text";
     labelBtn.SetText(testString);
@@ -360,7 +360,7 @@ HWTEST_F(UpdaterUiComponentUnitTest, test_text_label_adapter_is_info_valid, Test
 HWTEST_F(UpdaterUiComponentUnitTest, test_text_label_adapter_constructor, TestSize.Level0)
 {
     constexpr auto labelText = "hello";
-    UxLabelInfo specInfo {100, "hello", "center", "#000000ff", "#000000ff"};
+    UxLabelInfo specInfo {100, "hello", "center", "#000000ff", "#000000ff", "normal"};
     UxViewCommonInfo commonInfo {0, 0, 0, 0, "id", "UILabel", false};
     UxViewInfo info {commonInfo, specInfo};
     TextLabelAdapter textLabel {info};
@@ -379,7 +379,7 @@ HWTEST_F(UpdaterUiComponentUnitTest, test_text_label_adapter_constructor, TestSi
 HWTEST_F(UpdaterUiComponentUnitTest, test_text_label_adapter_set_text, TestSize.Level0)
 {
     TextLabelAdapter textLabel {UxViewInfo {{0, 0, 0, 0, "id", "UILabel", false},
-        UxLabelInfo {255, "", "", "#000000ff", "#000000ff"}}};
+        UxLabelInfo {255, "", "", "#000000ff", "#000000ff", "normal"}}};
     constexpr auto testString = "test text";
     textLabel.SetText(testString);
     EXPECT_STREQ(textLabel.GetText(), testString);
