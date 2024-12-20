@@ -8,7 +8,8 @@
         "UILabel" : {
             "bgColor" : "#000000ff",
             "fontColor" : "#ffffffff",
-            "align" : "center"
+            "align" : "center",
+            "style" : "normal"
         }
     },
     "coms" : [
