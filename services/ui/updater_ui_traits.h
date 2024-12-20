@@ -75,7 +75,8 @@ DEFINE_TRAIT(UxLabelInfo, TextLabelAdapter::COMPONENT_TYPE,
     (std::string, text),
     (std::string, align),
     (std::string, fontColor),
-    (std::string, bgColor)
+    (std::string, bgColor),
+    (std::string, style)
 );
 
 DEFINE_TRAIT(UxImageInfo, ImgViewAdapter::COMPONENT_TYPE,
