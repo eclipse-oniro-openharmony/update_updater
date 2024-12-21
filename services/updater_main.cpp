@@ -360,7 +360,7 @@ static UpdaterStatus CalcProgress(const UpdaterParams &upParams,
     return UPDATE_SUCCESS;
 }
 
-int CheckMountData()
+static int CheckMountData()
 {
     constexpr int retryTime = 3;
     for (int i = 0; i < retryTime; i++) {
