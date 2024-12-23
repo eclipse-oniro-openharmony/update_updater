@@ -31,7 +31,8 @@ public:
     bool WritePartitionTable() override;
     bool EditPartitionBuf(uint8_t *imageBuf, uint64_t imgBufSize, std::vector<PtnInfo> &modifyList) override;
     bool GetPtableImageBuffer(uint8_t *imageBuf, const uint32_t imgBufSize) override;
-
+    bool CorrectBufByPtnList(uint8_t *imageBuf, uint64_t imgBufSize, const std::vector<PtnInfo> &srcInfo,
+                             const std::vector<PtnInfo> &dstInfo) override;
 #ifndef UPDATER_UT
 protected:
 #else

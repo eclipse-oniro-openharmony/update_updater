@@ -962,6 +962,21 @@ bool IsEsDevice()
     return true;
 }
 
+bool ConvertToUnsignedLongLong(const std::string &str, uint64_t &value)
+{
+    char *endPtr = nullptr;
+    errno = 0;
+ 
+    value = std::strtoull(str.c_str(), &endPtr, 0);
+#ifndef UPDATER_UT
+    if (endPtr == str.c_str() || *endPtr != '\0' || errno == ERANGE) {
+        LOG(ERROR) << "Convert string to int64_t failed, str " << str << " converted to value " << value;
+        return false;
+    }
+#endif
+    return true;
+}
+
 bool ConvertToLongLong(const std::string &str, int64_t &value)
 {
     char *endPtr = nullptr;
