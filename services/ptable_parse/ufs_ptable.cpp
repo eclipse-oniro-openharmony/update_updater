@@ -157,13 +157,18 @@ bool UfsPtable::UfsReadGpt(const uint8_t *gptImage, const uint32_t len,
         }
         it++;
     }
+    UfsPatchGptEntry(gptImage, lun, blockSize);
+    return true;
+}
 
+void UfsPtable::UfsPatchGptEntry(const uint8_t *gptImage, const uint32_t lun, const uint32_t blockSize)
+{
     uint32_t partEntryCnt = blockSize / PARTITION_ENTRY_SIZE;
     uint32_t partition0 = GET_LLWORD_FROM_BYTE(gptImage + blockSize + PARTITION_ENTRIES_OFFSET);
 
     uint32_t count = 0;
     const uint8_t *data = nullptr;
-    bool tail_part_flag = false;
+    bool tailPartFlag = false;
     for (uint32_t i = 0; i < (MAX_PARTITION_NUM / partEntryCnt) && count < MAX_PARTITION_NUM; i++) {
         data = gptImage + (partition0 + i) * blockSize;
         for (uint32_t j = 0; j < partEntryCnt; j++) {
@@ -188,25 +193,24 @@ bool UfsPtable::UfsReadGpt(const uint8_t *gptImage, const uint32_t len,
             ParsePartitionName(nameOffset, MAX_GPT_NAME_SIZE, newPtnInfo.dispName, MAX_GPT_NAME_SIZE / 2);
             (void)memcpy_s(newPtnInfo.partitionTypeGuid, sizeof(newPtnInfo.partitionTypeGuid),
                 typeGuid, sizeof(typeGuid));
-            newPtnInfo.isTailPart = tail_part_flag;
+            newPtnInfo.isTailPart = tailPartFlag;
             newPtnInfo.lun = lun;
-            newPtnInfo.gptEntryBufOffset = (partition0 + i) * blockSize + j * PARTITION_ENTRY_SIZE - 2 * blockSize;
+            newPtnInfo.gptEntryBufOffset = (partition0 + i) * blockSize + j * PARTITION_ENTRY_SIZE - 2 * blockSize; // 2 : pmbr and gpt header
             if (newPtnInfo.dispName == USERDATA_PARTITION) {
-                tail_part_flag = true;
+                tailPartFlag = true;
                 usrDataPtnIndex_ = std::distance(partitionInfo_.begin(), startIter);
             }
             startIter = ++(partitionInfo_.insert(startIter, newPtnInfo));
             count++;
         }
     }
-    if (tail_part_flag) {
+    if (tailPartFlag) {
         endPtnIndex_ = static_cast<int>(std::distance(partitionInfo_.begin(), startIter)) - 1;
         startPtnIndex_ = endPtnIndex_  + 1 - count;
         hasTailpart_ = partitionInfo_[endPtnIndex_].isTailPart;
     }
-    return true;
+    return;
 }
-
 
 void UfsPtable::UfsPatchGptHeader(UfsPartitionDataInfo &ptnDataInfo, const uint32_t blockSize)
 {
@@ -535,7 +539,7 @@ bool UfsPtable::CorrectBufByPtnList(uint8_t *imageBuf, uint64_t imgBufSize, cons
     uint8_t* ufsLunEntryStart = GetPtableImageUfsLunEntryStart(imageBuf, dstInfo[usrDataPtnIndex_].lun);
     const uint32_t editLen = PARTITION_ENTRY_SIZE * MAX_PARTITION_NUM;
     std::vector<uint8_t> newBuf(ufsLunEntryStart, ufsLunEntryStart + editLen);
-    for(int i =  startPtnIndex_; i <= endPtnIndex_; i++) {
+    for (int i = startPtnIndex_; i <= endPtnIndex_; i++) {
         if (srcInfo[i].startAddr == dstInfo[i].startAddr && srcInfo[i].partitionSize == dstInfo[i].partitionSize
             && srcInfo[i].dispName == dstInfo[i].dispName) {
             continue;
