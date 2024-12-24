@@ -116,7 +116,7 @@ UpdaterStatus IsSpaceCapacitySufficient(const UpdaterParams &upParams)
     LOG(INFO) << "get max stash size: " << maxStashSize;
     uint64_t totalPkgSize = maxStashSize + MIN_UPDATE_SPACE;
     uint64_t shrinkSize = 0;
-    if (!upParams.virtualShrinkInfo.empty() && ConvertToUnsignedLongLong(upParams.virtualShrinkInfo, shrinkSize)) {
+    if (!upParams.virtualShrinkInfo.empty() && Utils::ConvertToUnsignedLongLong(upParams.virtualShrinkInfo, shrinkSize)) {
         totalPkgSize += shrinkSize * 3 / 2; // 3 / 2 = 1.5
     }
     LOG(INFO) << "needed totalPkgSize = " << totalPkgSize;
