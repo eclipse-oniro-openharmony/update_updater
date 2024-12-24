@@ -970,7 +970,7 @@ bool ConvertToUnsignedLongLong(const std::string &str, uint64_t &value)
     value = std::strtoull(str.c_str(), &endPtr, 0);
 #ifndef UPDATER_UT
     if (endPtr == str.c_str() || *endPtr != '\0' || errno == ERANGE) {
-        LOG(ERROR) << "Convert string to int64_t failed, str " << str << " converted to value " << value;
+        LOG(ERROR) << "Convert string to uint64_t failed, str " << str << " converted to value " << value;
         return false;
     }
 #endif

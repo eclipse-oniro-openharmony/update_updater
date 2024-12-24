@@ -157,11 +157,11 @@ bool UfsPtable::UfsReadGpt(const uint8_t *gptImage, const uint32_t len,
         }
         it++;
     }
-    UfsPatchGptEntry(gptImage, lun, blockSize, startIter);
+    UfsReadGptEntry(gptImage, lun, blockSize, startIter);
     return true;
 }
 
-void UfsPtable::UfsPatchGptEntry(const uint8_t *gptImage, const uint32_t lun,
+void UfsPtable::UfsReadGptEntry(const uint8_t *gptImage, const uint32_t lun,
                                  const uint32_t blockSize, std::vector<PtnInfo>::iterator startIter)
 {
     uint32_t partEntryCnt = blockSize / PARTITION_ENTRY_SIZE;
