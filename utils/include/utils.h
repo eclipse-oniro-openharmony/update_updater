@@ -103,6 +103,7 @@ void TrimString (std::string &str);
 bool RestoreconPath(const std::string &path);
 std::string TrimUpdateMode(const std::string &mode);
 bool IsEsDevice();
+bool ConvertToUnsignedLongLong(const std::string &str, uint64_t &value);
 bool ConvertToLongLong(const std::string &str, int64_t &value);
 bool ConvertToLong(const std::string &str, int32_t &value);
 bool ConvertToUnsignedLong(const std::string &str, uint32_t &value);

@@ -113,9 +113,14 @@ UpdaterStatus IsSpaceCapacitySufficient(const UpdaterParams &upParams)
         return UPDATE_ERROR;
     }
     uint64_t maxStashSize =  *max_element(stashSizeList.begin(), stashSizeList.end());
-    LOG(INFO) << "get max stash size:" << maxStashSize;
+    LOG(INFO) << "get max stash size: " << maxStashSize;
     uint64_t totalPkgSize = maxStashSize + MIN_UPDATE_SPACE;
-
+    uint64_t shrinkSize = 0;
+    if (!upParams.virtualShrinkInfo.empty() &&
+        Utils::ConvertToUnsignedLongLong(upParams.virtualShrinkInfo, shrinkSize)) {
+        totalPkgSize += shrinkSize * 3 / 2; // 3 / 2 = 1.5
+    }
+    LOG(INFO) << "needed totalPkgSize = " << totalPkgSize;
     if (CheckStatvfs(totalPkgSize) != UPDATE_SUCCESS) {
         LOG(ERROR) << "CheckStatvfs error";
         UPDATER_LAST_WORD(UPDATE_ERROR);

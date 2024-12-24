@@ -157,12 +157,19 @@ bool UfsPtable::UfsReadGpt(const uint8_t *gptImage, const uint32_t len,
         }
         it++;
     }
+    UfsReadGptEntry(gptImage, lun, blockSize, startIter);
+    return true;
+}
 
+void UfsPtable::UfsReadGptEntry(const uint8_t *gptImage, const uint32_t lun,
+                                const uint32_t blockSize, std::vector<PtnInfo>::iterator startIter)
+{
     uint32_t partEntryCnt = blockSize / PARTITION_ENTRY_SIZE;
     uint32_t partition0 = GET_LLWORD_FROM_BYTE(gptImage + blockSize + PARTITION_ENTRIES_OFFSET);
 
     uint32_t count = 0;
     const uint8_t *data = nullptr;
+    bool tailPartFlag = false;
     for (uint32_t i = 0; i < (MAX_PARTITION_NUM / partEntryCnt) && count < MAX_PARTITION_NUM; i++) {
         data = gptImage + (partition0 + i) * blockSize;
         for (uint32_t j = 0; j < partEntryCnt; j++) {
@@ -187,14 +194,25 @@ bool UfsPtable::UfsReadGpt(const uint8_t *gptImage, const uint32_t len,
             ParsePartitionName(nameOffset, MAX_GPT_NAME_SIZE, newPtnInfo.dispName, MAX_GPT_NAME_SIZE / 2);
             (void)memcpy_s(newPtnInfo.partitionTypeGuid, sizeof(newPtnInfo.partitionTypeGuid),
                 typeGuid, sizeof(typeGuid));
+            newPtnInfo.isTailPart = tailPartFlag;
             newPtnInfo.lun = lun;
+            // 2 : pmbr and gpt header
+            newPtnInfo.gptEntryBufOffset = (partition0 + i) * blockSize + j * PARTITION_ENTRY_SIZE - 2 * blockSize;
+            if (newPtnInfo.dispName == USERDATA_PARTITION) {
+                tailPartFlag = true;
+                usrDataPtnIndex_ = std::distance(partitionInfo_.begin(), startIter);
+            }
             startIter = ++(partitionInfo_.insert(startIter, newPtnInfo));
             count++;
         }
     }
-    return true;
+    if (tailPartFlag) {
+        endPtnIndex_ = static_cast<int>(std::distance(partitionInfo_.begin(), startIter)) - 1;
+        startPtnIndex_ = endPtnIndex_  + 1 - count;
+        hasTailpart_ = partitionInfo_[endPtnIndex_].isTailPart;
+    }
+    return;
 }
-
 
 void UfsPtable::UfsPatchGptHeader(UfsPartitionDataInfo &ptnDataInfo, const uint32_t blockSize)
 {
@@ -275,7 +293,7 @@ bool UfsPtable::ParsePartitionFromBuffer(uint8_t *ptbImgBuffer, const uint32_t i
 
     SetDeviceLunNum();
     LOG(INFO) << "lun number of ptable:" << deviceLunNum_;
-
+    ufsPtnDataInfo_.clear();
     for (uint32_t i = 0; i < deviceLunNum_; i++) {
         UfsPartitionDataInfo newLunPtnDataInfo;
         (void)memset_s(newLunPtnDataInfo.data, TMP_DATA_SIZE, 0, TMP_DATA_SIZE);
@@ -505,6 +523,46 @@ uint8_t *UfsPtable::GetPtableImageUfsLunEntryStart(uint8_t *imageBuf, const uint
         ptableData_.lbaLen + ptableData_.gptHeaderLen;
     LOG(INFO) << "GetPtableImageUfsLunEntryStart : " << std::hex << entryStart << std::dec;
     return imageBuf + entryStart;
+}
+
+bool UfsPtable::CorrectBufByPtnList(uint8_t *imageBuf, uint64_t imgBufSize, const std::vector<PtnInfo> &srcInfo,
+                                    const std::vector<PtnInfo> &dstInfo)
+{
+    if (imageBuf == nullptr || imgBufSize == 0 || srcInfo.size() != dstInfo.size()) {
+        LOG(ERROR) << "invalid input. imgBufSize : " << imgBufSize << " srcInfo.size: " << srcInfo.size()
+                   << " dstInfo.size:" << dstInfo.size();
+        return false;
+    }
+    if (usrDataPtnIndex_ < 0 || endPtnIndex_ < 0 || usrDataPtnIndex_ >= dstInfo.size()
+        || endPtnIndex_ >= dstInfo.size()) {
+        LOG(ERROR) << "invaild dst ptn info list";
+        return false;
+    }
+    uint8_t* ufsLunEntryStart = GetPtableImageUfsLunEntryStart(imageBuf, dstInfo[usrDataPtnIndex_].lun);
+    const uint32_t editLen = PARTITION_ENTRY_SIZE * MAX_PARTITION_NUM;
+    std::vector<uint8_t> newBuf(ufsLunEntryStart, ufsLunEntryStart + editLen);
+    for (int i = startPtnIndex_; i <= endPtnIndex_; i++) {
+        if (srcInfo[i].startAddr == dstInfo[i].startAddr && srcInfo[i].partitionSize == dstInfo[i].partitionSize
+            && srcInfo[i].dispName == dstInfo[i].dispName) {
+            continue;
+        }
+        LOG(INFO) << srcInfo[i].dispName << "should adjust";
+        std::vector<uint8_t> newEntryBuf(ufsLunEntryStart + dstInfo[i].gptEntryBufOffset,
+                                         ufsLunEntryStart + dstInfo[i].gptEntryBufOffset + PARTITION_ENTRY_SIZE);
+        PUT_LONG_LONG(newEntryBuf.data() + FIRST_LBA_OFFSET, dstInfo[i].startAddr / GetDeviceBlockSize());
+        PUT_LONG_LONG(newEntryBuf.data() + LAST_LBA_OFFSET,
+                      (dstInfo[i].startAddr + dstInfo[i].partitionSize) / GetDeviceBlockSize() - 1);
+        if (srcInfo[i].gptEntryBufOffset > editLen - PARTITION_ENTRY_SIZE) {
+            LOG(ERROR) << "srcInfo[" << i << "] error. gptEntryBufOffset = " << srcInfo[i].gptEntryBufOffset;
+            return false;
+        }
+        std::copy(newEntryBuf.begin(), newEntryBuf.end(), newBuf.begin() + srcInfo[i].gptEntryBufOffset);
+    }
+    if (memcpy_s(ufsLunEntryStart, imgBufSize - (ufsLunEntryStart - imageBuf), newBuf.data(), editLen) != 0) {
+        LOG(ERROR) << "memcpy fail. destSize :" << imgBufSize - (ufsLunEntryStart - imageBuf);
+        return false;
+    }
+    return true;
 }
 
 bool UfsPtable::EditPartitionBuf(uint8_t *imageBuf, uint64_t imgBufSize, std::vector<PtnInfo> &modifyList)

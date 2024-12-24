@@ -31,7 +31,8 @@ public:
     bool WritePartitionTable() override;
     bool EditPartitionBuf(uint8_t *imageBuf, uint64_t imgBufSize, std::vector<PtnInfo> &modifyList) override;
     bool GetPtableImageBuffer(uint8_t *imageBuf, const uint32_t imgBufSize) override;
-
+    bool CorrectBufByPtnList(uint8_t *imageBuf, uint64_t imgBufSize, const std::vector<PtnInfo> &srcInfo,
+                             const std::vector<PtnInfo> &dstInfo) override;
 #ifndef UPDATER_UT
 protected:
 #else
@@ -69,6 +70,8 @@ public:
 #endif
     bool WriteBackupPartitionTable(uint32_t lunIdx, uint64_t lunSize);
     bool UfsReadGpt(const uint8_t *gptImage, const uint32_t len, const uint32_t lun, const uint32_t blockSize);
+    void UfsReadGptEntry(const uint8_t *gptImage, const uint32_t lun,
+                         const uint32_t blockSize, std::vector<PtnInfo>::iterator startIter);
     bool ParseGptHeaderByUfsLun(const uint8_t *gptImage, const uint32_t len, const uint32_t lun,
         const uint32_t blockSize);
     void UfsPatchGptHeader(UfsPartitionDataInfo &ptnDataInfo, const uint32_t blockSize);

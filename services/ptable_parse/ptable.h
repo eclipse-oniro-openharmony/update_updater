@@ -35,6 +35,8 @@ public:
         uint64_t partitionSize {};
         uint8_t partitionTypeGuid[GPT_PARTITION_TYPE_GUID_LEN] {};
         uint32_t lun {};
+        int gptEntryBufOffset {};
+        bool isTailPart {false};
         std::string dispName {};
         std::string writeMode {"WRITE_RAW"};
         std::string writePath {};
@@ -64,6 +66,31 @@ public:
     virtual bool EditPartitionBuf(uint8_t *imageBuf, uint64_t imgBufSize, std::vector<PtnInfo> &modifyList) = 0;
     virtual bool GetPtableImageBuffer(uint8_t *imageBuf, const uint32_t imgBufSize) = 0;
     virtual void AddChildPtable(std::unique_ptr<Ptable> child) {}
+    virtual bool CorrectBufByPtnList(uint8_t *imageBuf, uint64_t imgBufSize, const std::vector<PtnInfo> &srcInfo,
+                                    const std::vector<PtnInfo> &dstInfo)
+    {
+        return false;
+    }
+
+    int GetEndPtnIndex()
+    {
+        return endPtnIndex_;
+    }
+
+    int GetUsrDataPtnIndex()
+    {
+        return usrDataPtnIndex_;
+    }
+
+    void SetUsrDataPtnIndex(int usrDataPtnIndex)
+    {
+        usrDataPtnIndex_ = usrDataPtnIndex;
+    }
+
+    bool HasTailPart()
+    {
+        return hasTailpart_;
+    }
 
 #ifndef UPDATER_UT
 protected:
@@ -160,6 +187,11 @@ public:
     std::vector<PtnInfo> partitionInfo_;
     PtableData ptableData_;
     uint64_t reservedSize_ {0};
+
+    int startPtnIndex_ {-1};
+    int endPtnIndex_ {-1};
+    int usrDataPtnIndex_ {-1};
+    bool hasTailpart_ {false};
 
     PtableData GetPtableData() const;
     bool MemReadWithOffset(const std::string &filePath, const uint64_t offset,
