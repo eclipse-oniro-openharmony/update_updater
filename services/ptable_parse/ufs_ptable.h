@@ -71,7 +71,7 @@ public:
     bool WriteBackupPartitionTable(uint32_t lunIdx, uint64_t lunSize);
     bool UfsReadGpt(const uint8_t *gptImage, const uint32_t len, const uint32_t lun, const uint32_t blockSize);
     void UfsReadGptEntry(const uint8_t *gptImage, const uint32_t lun,
-                          const uint32_t blockSize, std::vector<PtnInfo>::iterator startIter);
+                         const uint32_t blockSize, std::vector<PtnInfo>::iterator startIter);
     bool ParseGptHeaderByUfsLun(const uint8_t *gptImage, const uint32_t len, const uint32_t lun,
         const uint32_t blockSize);
     void UfsPatchGptHeader(UfsPartitionDataInfo &ptnDataInfo, const uint32_t blockSize);

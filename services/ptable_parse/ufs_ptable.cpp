@@ -162,7 +162,7 @@ bool UfsPtable::UfsReadGpt(const uint8_t *gptImage, const uint32_t len,
 }
 
 void UfsPtable::UfsReadGptEntry(const uint8_t *gptImage, const uint32_t lun,
-                                 const uint32_t blockSize, std::vector<PtnInfo>::iterator startIter)
+                                const uint32_t blockSize, std::vector<PtnInfo>::iterator startIter)
 {
     uint32_t partEntryCnt = blockSize / PARTITION_ENTRY_SIZE;
     uint32_t partition0 = GET_LLWORD_FROM_BYTE(gptImage + blockSize + PARTITION_ENTRIES_OFFSET);
