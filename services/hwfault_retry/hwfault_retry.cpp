@@ -39,7 +39,7 @@ HwFaultRetry::HwFaultRetry()
     RegisterFunc(VERIFY_FAILED_REBOOT, rebootFunc);
     RegisterFunc(IO_FAILED_REBOOT, rebootFunc);
     RegisterFunc(BLOCK_UPDATE_FAILED_REBOOT, rebootFunc);
-    RegisterFunc(EXTRACT_BIN_FAIL_RETRY, rebootFunc);
+    RegisterFunc(PROCESS_BIN_FAIL_RETRY, rebootFunc);
 }
 
 void HwFaultRetry::RegisterFunc(const std::string &faultInfo, RetryFunc func)
