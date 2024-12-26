@@ -25,8 +25,10 @@
 using BlockPair = std::pair<size_t, size_t>;
 static constexpr int H_BLOCK_SIZE = 4096;
 static constexpr int H_CMD_ARGS_LIMIT = 2;
+static constexpr int H_NEW_CMD_ARGS_START = 1;
 static constexpr int H_DIFF_CMD_ARGS_START = 3;
 static constexpr int H_MOVE_CMD_ARGS_START = 1;
+static constexpr int H_COPY_CMD_ARGS_START = 1;
 static constexpr int H_ZERO_NUMBER = 0;
 
 

@@ -22,6 +22,7 @@
 
 namespace Updater {
 void GetPartitionSuffix(std::string &suffix);
+void GetActivePartitionSuffix(std::string &suffix);
 void SetActiveSlot();
 } // Updater
 #endif /* SLOT_INFO_H */

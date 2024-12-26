@@ -87,7 +87,7 @@ int32_t ImageDiff::MakePatch(const std::string &patchName)
 
 int32_t ImageDiff::SplitImage(const PatchBuffer &oldInfo, const PatchBuffer &newInfo)
 {
-    size_t blockCount = newInfo.length / limit_ + 1;
+    size_t blockCount = (newInfo.length % limit_ == 0) ? (newInfo.length / limit_) : (newInfo.length / limit_ + 1);
     size_t oldBlockSize = oldInfo.length / blockCount;
     size_t newBlockSize = newInfo.length / blockCount;
     int32_t type = (oldInfo.length == 0) ? BLOCK_RAW : BLOCK_NORMAL;

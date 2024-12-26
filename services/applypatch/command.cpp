@@ -33,7 +33,8 @@ bool Command::Init(const std::string &cmdLine)
 
 Command::~Command()
 {
-    fd_.reset();
+    srcFd_.reset();
+    targetFd_.reset();
 }
 
 CommandType Command::GetCommandType() const
@@ -59,14 +60,34 @@ std::string Command::GetCommandLine() const
     return cmdLine_;
 }
 
-void Command::SetFileDescriptor(int fd)
+void Command::SetSrcFileDescriptor(int fd)
 {
-    fd_ = std::make_unique<int>(fd);
+    srcFd_ = std::make_unique<int>(fd);
 }
 
-int Command::GetFileDescriptor() const
+int Command::GetSrcFileDescriptor() const
 {
-    return *fd_;
+    return *srcFd_;
+}
+
+void Command::SetTargetFileDescriptor(int fd)
+{
+    targetFd_ = std::make_unique<int>(fd);
+}
+
+int Command::GetTargetFileDescriptor() const
+{
+    return *targetFd_;
+}
+    
+void Command::SetIsStreamCmd(bool isStreamCmd)
+{
+    isStreamCmd_ = isStreamCmd;
+}
+
+bool Command::IsStreamCmd() const
+{
+    return isStreamCmd_;
 }
 
 TransferParams* Command::GetTransferParams() const
@@ -94,6 +115,8 @@ CommandType Command::ParseCommandType(const std::string &firstCmd)
         return CommandType::STASH;
     } else if (firstCmd == "zero") {
         return CommandType::ZERO;
+    } else if (firstCmd == "copy") {
+        return CommandType::COPY;
     }
     return CommandType::LAST;
 }

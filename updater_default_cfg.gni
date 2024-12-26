@@ -13,7 +13,7 @@
 
 import("//build/ohos.gni")
 
-init_feature_ab_partition = false
+init_feature_ab_partition = true
 declare_args() {
   updater_cfg_file = ""
   updater_ui_support = true
@@ -45,7 +45,7 @@ template("updater_gen") {
   } else {
     ohos_executable(target_name) {
       if (!is_asan && !is_emulator && target_name == "updater_binary") {
-        static_link = true
+        static_link = false
       }
       forward_variables_from(invoker, "*")
 

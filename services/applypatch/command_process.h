@@ -31,6 +31,8 @@ public:
     NewCommandFn() {}
     ~NewCommandFn() override {}
     CommandResult Execute(const Command &params) override;
+private:
+    int32_t StreamExecute(const Command &params);
 };
 
 class ZeroAndEraseCommandFn : public CommandFunction {

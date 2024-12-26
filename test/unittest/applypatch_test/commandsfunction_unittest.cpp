@@ -74,7 +74,8 @@ HWTEST_F(CommandFunctionUnitTest, command_function_test_001, TestSize.Level1)
         return;
     }
     lseek64(fd, 0, SEEK_SET);
-    cmd->SetFileDescriptor(fd);
+    cmd->SetSrcFileDescriptor(fd);
+    cmd->SetTargetFileDescriptor(fd);
     std::string cmdLine = std::string("erase 2,0,1");
     CommandResult ret = CommandFunctionUnitTest::TestCommandFnExec(cmd, cmdLine);
     EXPECT_EQ(ret, 0);

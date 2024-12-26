@@ -124,7 +124,8 @@ HWTEST_F(BlockSetUnitTest, blockset_test_005, TestSize.Level1)
     transferParams->writerThreadInfo = std::make_unique<WriterThreadInfo>();
     Command *cmd = new Command(transferParams.get());
     cmd->Init(cmdLine);
-    cmd->SetFileDescriptor(fd);
+    cmd->SetSrcFileDescriptor(fd);
+    cmd->SetTargetFileDescriptor(fd);
     BlockSet targetBlock;
     size_t blockSize = H_BLOCK_SIZE;
     std::vector<uint8_t> srcBuffer(blockSize);

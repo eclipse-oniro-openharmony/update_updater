@@ -30,6 +30,7 @@
 #include "updater/updater_const.h"
 #include "updater/hwfault_retry.h"
 #include "utils.h"
+#include "slot_info/slot_info.h"
 
 using namespace Uscript;
 using namespace Hpackage;
@@ -177,6 +178,15 @@ static int32_t GetUpdateBlockInfo(struct UpdateBlockInfo &infos, Uscript::UScrip
 
     LOG(INFO) << "ExecuteUpdateBlock::updating  " << infos.partitionName << " ...";
     infos.devPath = GetBlockDeviceByMountPoint(infos.partitionName);
+#ifndef UPDATER_UT
+    if (infos.partitionName != "/userdata") {
+        std::string suffix = "";
+        GetPartitionSuffix(suffix);
+        infos.devPath += suffix;
+    }
+#else
+    infos.devPath = "/data/updater" + infos.partitionName;
+#endif
     LOG(INFO) << "ExecuteUpdateBlock::updating  dev path : " << infos.devPath;
     if (infos.devPath.empty()) {
         LOG(ERROR) << "cannot get block device of partition";
@@ -373,7 +383,7 @@ static int32_t ExecuteUpdateBlock(Uscript::UScriptEnv &env, Uscript::UScriptCont
 
     LOG(INFO) << "Start unpack new data thread done. Get patch data: " << infos.patchDataName;
     if (ExtractFileByName(env, infos.patchDataName, outStream,
-        transferParams->patchDataBuffer, transferParams->patchDataSize) != USCRIPT_SUCCESS) {
+        transferParams->dataBuffer, transferParams->dataBufferSize) != USCRIPT_SUCCESS) {
         return USCRIPT_ERROR_EXECUTE;
     }
 
@@ -452,6 +462,15 @@ int32_t UScriptInstructionBlockCheck::Execute(Uscript::UScriptEnv &env, Uscript:
         return ReturnAndPushParam(USCRIPT_ERROR_EXECUTE, context);
     }
     auto devPath = GetBlockDeviceByMountPoint(partitionName);
+#ifndef UPDATER_UT
+    if (partitionName != "/userdata") {
+        std::string suffix = "";
+        GetPartitionSuffix(suffix);
+        devPath += suffix;
+    }
+#else
+    devPath = "/data/updater" + partitionName;
+#endif
     LOG(INFO) << "UScriptInstructionBlockCheck::dev path : " << devPath;
     time_t mountTime = 0;
     uint16_t mountCount = 0;
@@ -712,6 +731,16 @@ int32_t UScriptInstructionShaCheck::Execute(Uscript::UScriptEnv &env, Uscript::U
         UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE, "cannot get block device of partition");
         return ReturnAndPushParam(USCRIPT_ERROR_EXECUTE, context);
     }
+#ifndef UPDATER_UT
+    if (partitionName != "/userdata") {
+        std::string suffix = "";
+        GetPartitionSuffix(suffix);
+        devPath += suffix;
+    }
+    LOG(INFO) << "write partition path: " << devPath;
+#else
+    devPath = "/data/updater" + partitionName;
+#endif
     ret = ExecReadShaInfo(env, devPath, shaInfo, partitionName);
     return ReturnAndPushParam(ret, context);
 }

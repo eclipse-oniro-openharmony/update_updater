@@ -35,7 +35,8 @@ TransferManager::TransferManager()
 
 bool TransferManager::CommandsExecute(int fd, Command &cmd)
 {
-    cmd.SetFileDescriptor(fd);
+    cmd.SetSrcFileDescriptor(fd);
+    cmd.SetTargetFileDescriptor(fd);
     CommandFunction* cf = CommandFunctionFactory::GetInstance().GetCommandFunction(cmd.GetCommandHead());
     if (cf == nullptr) {
         LOG(ERROR) << "Failed to get cmd exec";
