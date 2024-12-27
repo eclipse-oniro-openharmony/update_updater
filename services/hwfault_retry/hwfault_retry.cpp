@@ -78,6 +78,11 @@ void HwFaultRetry::SetRebootCmd(const std::string &rebootCmd)
     rebootCmd_ = rebootCmd;
 }
 
+bool HwFaultRetry::IsRetry(void)
+{
+    return isRetry_;
+}
+
 void HwFaultRetry::RebootRetry()
 {
     if (!effective_) {
@@ -88,9 +93,10 @@ void HwFaultRetry::RebootRetry()
         LOG(INFO) << "retry more than 3 times, no need retry";
         return;
     }
-
+    LOG(INFO) << "enter into reboot retry";
     Utils::AddUpdateInfoToMisc("retry_count", retryCount_ + 1);
     Utils::SetFaultInfoToMisc(faultInfo_);
+    isRetry_ = true;
 
     PostUpdater(false);
     sync();
