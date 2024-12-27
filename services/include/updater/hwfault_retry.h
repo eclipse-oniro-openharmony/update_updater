@@ -35,6 +35,7 @@ public:
     void SetRetryCount(const uint32_t count);
     void SetEffectiveValue(bool value);
     void SetRebootCmd(const std::string &rebootCmd);
+    bool IsRetry(void);
 
 private:
     void RebootRetry();
