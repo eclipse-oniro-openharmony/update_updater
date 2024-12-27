@@ -270,6 +270,11 @@ bool UScriptInstructionBinFlowWrite::CheckEsDeviceUpdate(const Hpackage::FileInf
     return true;
 }
 
+void UScriptInstructionBinFlowWrite::SetProportion(float proportion)
+{
+    fullUpdateProportion_ = proportion;
+}
+
 int32_t UScriptInstructionBinFlowWrite::ComponentProcess(Uscript::UScriptEnv &env, PkgManager::StreamPtr stream,
                                                          const std::string &name, const Hpackage::FileInfo &fileInfo)
 {
