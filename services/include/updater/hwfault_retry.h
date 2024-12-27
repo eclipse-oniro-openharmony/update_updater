@@ -44,6 +44,7 @@ private:
     std::string rebootCmd_ {};
     uint32_t retryCount_ {};
     bool effective_ = true;
+    bool isRetry_ = false;
 };
 } // Updater
 #endif // UPDATER_HWFAULT_RETRY_H
