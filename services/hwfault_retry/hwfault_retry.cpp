@@ -38,6 +38,7 @@ HwFaultRetry::HwFaultRetry()
     RegisterFunc(VERIFY_FAILED_REBOOT, rebootFunc);
     RegisterFunc(IO_FAILED_REBOOT, rebootFunc);
     RegisterFunc(BLOCK_UPDATE_FAILED_REBOOT, rebootFunc);
+    RegisterFunc(PROCESS_BIN_FAIL_RETRY, rebootFunc);
 }
 
 void HwFaultRetry::RegisterFunc(const std::string &faultInfo, RetryFunc func)
@@ -72,6 +73,16 @@ void HwFaultRetry::SetEffectiveValue(bool value)
     effective_ = value;
 }
 
+void HwFaultRetry::SetRebootCmd(const std::string &rebootCmd)
+{
+    rebootCmd_ = rebootCmd;
+}
+
+bool HwFaultRetry::IsRetry(void)
+{
+    return isRetry_;
+}
+
 void HwFaultRetry::RebootRetry()
 {
     if (!effective_) {
@@ -82,14 +93,19 @@ void HwFaultRetry::RebootRetry()
         LOG(INFO) << "retry more than 3 times, no need retry";
         return;
     }
-
+    LOG(INFO) << "enter into reboot retry";
     Utils::AddUpdateInfoToMisc("retry_count", retryCount_ + 1);
     Utils::SetFaultInfoToMisc(faultInfo_);
+    isRetry_ = true;
 
     PostUpdater(false);
     sync();
 #ifndef UPDATER_UT
-    DoReboot("updater:Updater fault retry");
+    if (rebootCmd_.empty()) {
+        DoReboot("updater:Updater fault retry");
+    } else {
+        DoReboot(rebootCmd_.c_str());
+    }
     while (true) {
         pause();
     }

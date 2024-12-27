@@ -26,6 +26,7 @@
 #include "threadpool/thread_pool.h"
 #include "scope_guard.h"
 #include "securec.h"
+#include "updater/updater_const.h"
 
 using namespace std;
 using namespace Hpackage;
@@ -85,6 +86,7 @@ int32_t UScriptInstructionBinFlowWrite::Execute(Uscript::UScriptEnv &env, Uscrip
     producer.join();
     if (isStopRun_) {
         LOG(ERROR) << "Error to Execute bin file update";
+        env.PostMessage(UPDATER_RETRY_TAG, PROCESS_BIN_FAIL_RETRY);
         return USCRIPT_ERROR_EXECUTE;
     }
     return USCRIPT_SUCCESS;
