@@ -51,6 +51,7 @@ const uint8_t ZIP_EOCD_SIGNATURE_BIG_ENDIAN[4] = {0x50, 0x4b, 0x05, 0x06};
 int32_t ZipPkgParse::DoParseZipPkg(PkgStreamPtr pkgStream, PkgSignComment &pkgSignComment,
     size_t &readLen, const uint16_t &signCommentAppendLen, uint16_t &signCommentTotalLen) const
 {
+    UPDATER_INIT_RECORD;
     size_t fileLen = pkgStream->GetFileLength();
     size_t eocdTotalLen = ZIP_EOCD_FIXED_PART_LEN + signCommentTotalLen;
     if (fileLen <= eocdTotalLen) {
@@ -88,6 +89,7 @@ int32_t ZipPkgParse::DoParseZipPkg(PkgStreamPtr pkgStream, PkgSignComment &pkgSi
 
 int32_t ZipPkgParse::ParseZipPkg(PkgStreamPtr pkgStream, PkgSignComment &pkgSignComment) const
 {
+    UPDATER_INIT_RECORD;
     if (pkgStream == nullptr) {
         UPDATER_LAST_WORD(PKG_INVALID_PARAM);
         return PKG_INVALID_PARAM;

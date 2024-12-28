@@ -278,6 +278,7 @@ int32_t PkgManagerImpl::ParsePackage(StreamPtr stream, std::vector<std::string> 
 int32_t PkgManagerImpl::LoadPackage(const std::string &packagePath, const std::string &keyPath,
     std::vector<std::string> &fileIds)
 {
+    UPDATER_INIT_RECORD;
     if (access(packagePath.c_str(), 0) != 0) {
         UPDATER_LAST_WORD(PKG_INVALID_FILE);
         return PKG_INVALID_FILE;
@@ -382,6 +383,7 @@ int32_t PkgManagerImpl::ExtraAndLoadPackage(const std::string &path, const std::
 int32_t PkgManagerImpl::LoadPackage(const std::string &packagePath, std::vector<std::string> &fileIds,
     PkgFile::PkgType type)
 {
+    UPDATER_INIT_RECORD;
     PkgStreamPtr stream = nullptr;
     int32_t ret = CreatePkgStream(stream, packagePath, 0, PkgStream::PKgStreamType_FileMap);
     if (ret != PKG_SUCCESS) {
@@ -395,6 +397,7 @@ int32_t PkgManagerImpl::LoadPackage(const std::string &packagePath, std::vector<
 int32_t PkgManagerImpl::LoadPackageWithStreamForApp(AppPkgInfo &info,
     std::vector<std::string> &fileIds, StreamPtr stream)
 {
+    UPDATER_INIT_RECORD;
     int32_t ret = SetSignVerifyKeyName(info.keyPath);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("Invalid keyname");
@@ -446,6 +449,7 @@ int32_t PkgManagerImpl::LoadPackageWithStream(const std::string &packagePath, co
 int32_t PkgManagerImpl::LoadPackageWithStream(const std::string &packagePath,
     std::vector<std::string> &fileIds, PkgFile::PkgType type, PkgStreamPtr stream)
 {
+    UPDATER_INIT_RECORD;
     int32_t ret = PKG_SUCCESS;
     PkgFilePtr pkgFile = CreatePackage(stream, type, nullptr);
     if (pkgFile == nullptr) {
@@ -471,6 +475,7 @@ int32_t PkgManagerImpl::LoadPackageWithStream(const std::string &packagePath,
 
 int32_t PkgManagerImpl::ExtractFile(const std::string &path, PkgManager::StreamPtr output)
 {
+    UPDATER_INIT_RECORD;
     if (output == nullptr) {
         PKG_LOGE("Invalid stream");
         UPDATER_LAST_WORD(PKG_INVALID_STREAM);
@@ -568,6 +573,7 @@ int32_t PkgManagerImpl::CreatePkgStream(StreamPtr &stream, const std::string &fi
 
 int32_t PkgManagerImpl::DoCreatePkgStream(PkgStreamPtr &stream, const std::string &fileName, int32_t type)
 {
+    UPDATER_INIT_RECORD;
     static char const *modeFlags[] = { "rb", "wb+" };
     char realPath[PATH_MAX + 1] = {};
 #ifdef _WIN32
@@ -1005,6 +1011,7 @@ void PkgManagerImpl::PostDecodeProgress(int type, size_t writeDataLen, const voi
 
 int32_t PkgManagerImpl::VerifyAccPackage(const std::string &packagePath, const std::string &keyPath)
 {
+    UPDATER_INIT_RECORD;
     PkgStreamPtr pkgStream = nullptr;
     int32_t ret = CreatePkgStream(pkgStream, packagePath, 0, PkgStream::PkgStreamType_Read);
     if (ret != PKG_SUCCESS) {
@@ -1081,6 +1088,7 @@ int32_t PkgManagerImpl::VerifyOtaPackage(const std::string &devPath, uint64_t of
 
 int32_t PkgManagerImpl::VerifyOtaPackage(const std::string &packagePath)
 {
+    UPDATER_INIT_RECORD;
     PkgStreamPtr pkgStream = nullptr;
     int32_t ret = CreatePkgStream(pkgStream, packagePath, 0, PkgStream::PkgStreamType_Read);
     if (ret != PKG_SUCCESS) {

@@ -198,6 +198,7 @@ int UpdatePartitions::SetNewPartition(const std::string &filePath, const FileInf
 
 int32_t UpdatePartitions::Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context)
 {
+    UPDATER_INIT_RECORD;
     LOG(INFO) << "enter UpdatePartitions::Execute ";
     if (context.GetParamCount() != 1) {
         LOG(ERROR) << "Invalid UpdatePartitions::Execute param";

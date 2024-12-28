@@ -354,6 +354,7 @@ int32_t GZipPkgFile::SavePackage(size_t &offset)
 
 int32_t GZipPkgFile::LoadPackage(std::vector<std::string> &fileNames, VerifyFunction verifier)
 {
+    UPDATER_INIT_RECORD;
     UNUSED(verifier);
     if (!CheckState({ PKG_FILE_STATE_IDLE }, PKG_FILE_STATE_WORKING)) {
         PKG_LOGE("error state curr %d ", state_);

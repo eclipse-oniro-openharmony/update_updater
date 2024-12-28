@@ -113,6 +113,7 @@ bool HashDataVerifier::LoadHashDataFromPackage(void)
 
 bool HashDataVerifier::LoadPkcs7FromPackage(const std::string &pkgPath)
 {
+    UPDATER_INIT_RECORD;
     PkgManager::StreamPtr pkgStream = nullptr;
     int32_t ret = manager_->CreatePkgStream(pkgStream, pkgPath, 0, PkgStream::PkgStreamType_Read);
     if (ret != PKG_SUCCESS) {
@@ -139,6 +140,7 @@ bool HashDataVerifier::LoadPkcs7FromPackage(const std::string &pkgPath)
 bool HashDataVerifier::VerifyHashData(const std::string &preName,
     const std::string &fileName, PkgManager::StreamPtr stream) const
 {
+    UPDATER_INIT_RECORD;
     if (!isNeedVerify_) {
         return true;
     }

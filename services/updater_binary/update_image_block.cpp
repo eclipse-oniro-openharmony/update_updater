@@ -435,6 +435,7 @@ bool UScriptInstructionBlockCheck::ExecReadBlockInfo(const std::string &devPath,
 
 int32_t UScriptInstructionBlockCheck::Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context)
 {
+    UPDATER_INIT_RECORD;
     if (context.GetParamCount() != 1) {
         LOG(ERROR) << "Invalid param";
         UPDATER_LAST_WORD(USCRIPT_INVALID_PARAM);
@@ -602,6 +603,7 @@ void UScriptInstructionShaCheck::PrintAbnormalBlockHash(const std::string &devPa
 
 std::string UScriptInstructionShaCheck::CalculateBlockSha(const std::string &devPath, const std::string &blockPairs)
 {
+    UPDATER_INIT_RECORD;
     if (blockPairs.empty()) {
         LOG(ERROR) << "Failed to get blockPairs";
         return "";
@@ -646,6 +648,7 @@ std::string UScriptInstructionShaCheck::CalculateBlockSha(const std::string &dev
 
 int32_t UScriptInstructionShaCheck::SetShaInfo(Uscript::UScriptContext &context, ShaInfo &shaInfo)
 {
+    UPDATER_INIT_RECORD;
     int32_t ret = context.GetParam(1, shaInfo.blockPairs);
     if (ret != USCRIPT_SUCCESS) {
         LOG(ERROR) << "Failed to get param blockPairs";
@@ -676,6 +679,7 @@ int32_t UScriptInstructionShaCheck::SetShaInfo(Uscript::UScriptContext &context,
 
 int32_t UScriptInstructionShaCheck::Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context)
 {
+    UPDATER_INIT_RECORD;
     int32_t paramCount = context.GetParamCount();
     if (paramCount != SHA_CHECK_PARAMS && paramCount != SHA_CHECK_TARGET_PARAMS) {
         LOG(ERROR) << "Invalid param";

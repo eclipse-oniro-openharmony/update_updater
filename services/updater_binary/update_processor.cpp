@@ -186,6 +186,7 @@ bool UScriptInstructionRawImageWrite::WriteRawImage(const std::string &partition
 
 int32_t UScriptInstructionRawImageWrite::Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context)
 {
+    UPDATER_INIT_RECORD;
     std::string partitionName;
     int32_t ret = context.GetParam(0, partitionName);
     if (ret != USCRIPT_SUCCESS) {
@@ -241,6 +242,7 @@ int32_t UScriptInstructionRawImageWrite::Execute(Uscript::UScriptEnv &env, Uscri
 
 int32_t UScriptInstructionPkgExtract::Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context)
 {
+    UPDATER_INIT_RECORD;
     std::string pkgFileName;
     int32_t ret = context.GetParam(0, pkgFileName);
     if (ret != USCRIPT_SUCCESS) {

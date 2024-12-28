@@ -25,6 +25,7 @@ using namespace Uscript;
 namespace BasicInstruction {
 int32_t ScriptRegisterCmd::Execute(UScriptEnv &env, UScriptContext &context)
 {
+    UPDATER_INIT_RECORD;
     ScriptInstructionHelper* helper = ScriptInstructionHelper::GetBasicInstructionHelper();
     if (helper == nullptr) {
         USCRIPT_LOGE("Fail to get instruction helper");

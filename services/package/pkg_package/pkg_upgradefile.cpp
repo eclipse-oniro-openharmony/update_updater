@@ -264,6 +264,7 @@ int32_t UpgradePkgFile::SavePackage(size_t &signOffset)
 int32_t UpgradePkgFile::ReadSignData(std::vector<uint8_t> &signData,
     size_t &parsedLen, DigestAlgorithm::DigestAlgorithmPtr algorithm)
 {
+    UPDATER_INIT_RECORD;
     size_t readBytes = 0;
     size_t signLen = parsedLen;
     PkgBuffer buffer(HASH_TLV_SIZE);
@@ -306,6 +307,7 @@ int32_t UpgradePkgFile::ReadSignData(std::vector<uint8_t> &signData,
 int32_t UpgradePkgFile::ReadImgHashTLV(std::vector<uint8_t> &imgHashBuf, size_t &parsedLen,
                                        DigestAlgorithm::DigestAlgorithmPtr algorithm, uint32_t needType)
 {
+    UPDATER_INIT_RECORD;
     size_t readBytes = 0;
     PkgBuffer buffer(HASH_TLV_SIZE);
     int32_t ret = pkgStream_->Read(buffer, parsedLen, buffer.length, readBytes);
@@ -340,6 +342,7 @@ int32_t UpgradePkgFile::ReadImgHashTLV(std::vector<uint8_t> &imgHashBuf, size_t 
 
 int32_t UpgradePkgFile::ReadImgHashData(size_t &parsedLen, DigestAlgorithm::DigestAlgorithmPtr algorithm)
 {
+    UPDATER_INIT_RECORD;
 #ifndef DIFF_PATCH_SDK
     if ((!Updater::Utils::CheckUpdateMode(Updater::SDCARD_MODE) &&
         !Updater::Utils::CheckUpdateMode(Updater::USB_MODE) &&
@@ -390,6 +393,7 @@ int32_t UpgradePkgFile::ReadImgHashData(size_t &parsedLen, DigestAlgorithm::Dige
 int32_t UpgradePkgFile::ReadPackageInfo(std::vector<uint8_t> &signData, size_t &parsedLen,
     DigestAlgorithm::DigestAlgorithmPtr algorithm)
 {
+    UPDATER_INIT_RECORD;
     PkgBuffer buffer(GetUpgradeSignatureLen() + UPGRADE_RESERVE_LEN);
     size_t readBytes = 0;
     int32_t ret = pkgStream_->Read(buffer, parsedLen, buffer.length, readBytes);
@@ -434,6 +438,7 @@ int32_t UpgradePkgFile::ReadPackageInfo(std::vector<uint8_t> &signData, size_t &
 
 int32_t UpgradePkgFile::LoadPackage(std::vector<std::string> &fileNames, VerifyFunction verifier)
 {
+    UPDATER_INIT_RECORD;
     if (verifier == nullptr) {
         PKG_LOGE("Check verifier nullptr");
         UPDATER_LAST_WORD(PKG_INVALID_SIGNATURE);

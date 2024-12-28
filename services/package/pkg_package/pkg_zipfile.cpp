@@ -120,6 +120,7 @@ int32_t ZipPkgFile::SavePackage(size_t &signOffset)
 int32_t ZipPkgFile::LoadPackage(std::vector<std::string> &fileNames, PkgBuffer &buffer,
     uint32_t endDirLen, size_t endDirPos, size_t &readLen)
 {
+    UPDATER_INIT_RECORD;
     size_t fileLen = pkgStream_->GetFileLength();
     EndCentralDir endDir;
     endDir.signature = ReadLE32(buffer.buffer + offsetof(EndCentralDir, signature));
@@ -184,6 +185,7 @@ int32_t ZipPkgFile::GetFileLength(size_t &fileLen)
 
 int32_t ZipPkgFile::LoadPackage(std::vector<std::string>& fileNames, VerifyFunction verifier)
 {
+    UPDATER_INIT_RECORD;
     UNUSED(verifier);
     PKG_LOGI("LoadPackage %s :%zu", pkgStream_->GetFileName().c_str(), pkgStream_->GetFileLength());
 
