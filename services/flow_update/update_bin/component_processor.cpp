@@ -17,6 +17,7 @@
 #include <fcntl.h>
 #include "applypatch/data_writer.h"
 #include "applypatch/partition_record.h"
+#include "dump.h"
 #include "log.h"
 #include "parameter.h"
 #ifdef UPDATER_USE_PTABLE
@@ -141,10 +142,12 @@ int32_t BoardIdCheckProcessor::DoProcess(Uscript::UScriptEnv &env)
 
 int32_t RawImgProcessor::PreProcess(Uscript::UScriptEnv &env)
 {
+    UPDATER_INIT_RECORD;
     std::string partitionName = name_;
     LOG(INFO) << "RawImgProcessor::PreProcess " << partitionName;
     if (env.GetPkgManager() == nullptr) {
         LOG(ERROR) << "Error to get pkg manager";
+        UPDATER_LAST_WORD(partitionName, "Error to get pkg manager");
         return USCRIPT_ERROR_EXECUTE;
     }
 
@@ -154,16 +157,20 @@ int32_t RawImgProcessor::PreProcess(Uscript::UScriptEnv &env)
     if (GetWritePathAndOffset(partitionName, writePath, offset, partitionSize) != USCRIPT_SUCCESS) {
         LOG(ERROR) << "Get partition:%s WritePathAndOffset fail \'" <<
             partitionName.substr(1, partitionName.size()) << "\'.";
+        UPDATER_LAST_WORD("Get partition:%s WritePathAndOffset fail \'" <<
+            partitionName.substr(1, partitionName.size()) << "\'.");
         return USCRIPT_ERROR_EXECUTE;
     }
     const FileInfo *info = env.GetPkgManager()->GetFileInfo(partitionName);
     if (info == nullptr) {
         LOG(ERROR) << "Error to get file info";
+        UPDATER_LAST_WORD("Error to get file info");
         return USCRIPT_ERROR_EXECUTE;
     }
 #ifdef UPDATER_USE_PTABLE
     if (partitionSize < info->unpackedSize) {
         LOG(ERROR) << "partition size: " << partitionSize << " is short than image size: " << totalSize_;
+        UPDATER_LAST_WORD(partitionName, "partition size: " << partitionSize << " is short than image size: " << totalSize_);
         return USCRIPT_ERROR_EXECUTE;
     }
 #endif
@@ -172,6 +179,7 @@ int32_t RawImgProcessor::PreProcess(Uscript::UScriptEnv &env)
         static_cast<UpdaterEnv *>(&env), offset);
     if (writer_ == nullptr) {
         LOG(ERROR) << "Error to create writer";
+        UPDATER_LAST_WORD(partitionName, "Error to create writer");
         return USCRIPT_ERROR_EXECUTE;
     }
 #ifdef UPDATER_UT
@@ -185,11 +193,13 @@ int32_t RawImgProcessor::PreProcess(Uscript::UScriptEnv &env)
 
 int32_t RawImgProcessor::DoProcess(Uscript::UScriptEnv &env)
 {
+    UPDATER_INIT_RECORD;
     std::string partitionName = name_;
     // Extract partition information
     const FileInfo *info = env.GetPkgManager()->GetFileInfo(partitionName);
     if (info == nullptr) {
         LOG(ERROR) << "Error to get file info";
+        UPDATER_LAST_WORD(partitionName, "Error to get file info");
         return USCRIPT_ERROR_EXECUTE;
     }
 
@@ -202,6 +212,7 @@ int32_t RawImgProcessor::DoProcess(Uscript::UScriptEnv &env)
     int ret = env.GetPkgManager()->CreatePkgStream(outStream, partitionName, processor, writer_.get());
     if (ret != USCRIPT_SUCCESS || outStream == nullptr) {
         LOG(ERROR) << "Error to create output stream";
+        UPDATER_LAST_WORD(partitionName, "Error to create output stream");
         return USCRIPT_ERROR_EXECUTE;
     }
 
@@ -209,6 +220,7 @@ int32_t RawImgProcessor::DoProcess(Uscript::UScriptEnv &env)
     if (ret != USCRIPT_SUCCESS) {
         LOG(ERROR) << "Error to extract file";
         env.GetPkgManager()->ClosePkgStream(outStream);
+        UPDATER_LAST_WORD(partitionName, "Error to extract file");
         return USCRIPT_ERROR_EXECUTE;
     }
     env.GetPkgManager()->ClosePkgStream(outStream);

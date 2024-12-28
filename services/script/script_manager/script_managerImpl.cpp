@@ -205,6 +205,7 @@ int32_t ScriptManagerImpl::ExtractAndExecuteScript(PkgManager::PkgManagerPtr man
 
 int32_t ScriptManagerImpl::ExecuteScript(int32_t priority)
 {
+    UPDATER_INIT_RECORD;
     if (priority >= MAX_PRIORITY || priority < 0) {
         USCRIPT_LOGE("ExecuteScript priority not support %d", priority);
         UPDATER_LAST_WORD(USCRIPT_INVALID_PRIORITY, priority);

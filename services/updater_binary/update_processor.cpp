@@ -384,6 +384,7 @@ int UScriptInstructionUpdateFromBin::UnCompressDataProducer(const PkgBuffer &buf
 int ExecUpdate(PkgManager::PkgManagerPtr pkgManager, int retry, const std::string &pkgPath,
     PostMessageFunction postMessage)
 {
+    UPDATER_INIT_RECORD;
     Hpackage::HashDataVerifier scriptVerifier {pkgManager};
     if (!scriptVerifier.LoadHashDataAndPkcs7(pkgPath)) {
         LOG(ERROR) << "Fail to load hash data";
