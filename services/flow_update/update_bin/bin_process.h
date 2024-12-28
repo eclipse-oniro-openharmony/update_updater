@@ -28,6 +28,7 @@ public:
     UScriptInstructionBinFlowWrite() {}
     virtual ~UScriptInstructionBinFlowWrite() {}
     int32_t Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context) override;
+    void SetProportion(float proportion);
 
 protected:
     virtual int32_t ProcessBinFile(Uscript::UScriptEnv &env, Uscript::UScriptContext &context,
