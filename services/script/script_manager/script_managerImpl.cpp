@@ -171,27 +171,27 @@ int32_t ScriptManagerImpl::ExtractAndExecuteScript(PkgManager::PkgManagerPtr man
     const FileInfo *info = manager->GetFileInfo(scriptName);
     if (info == nullptr) {
         USCRIPT_LOGE("Error to get file info");
-        UPDATER_LAST_WORD(USCRIPT_INVALID_PARAM);
+        UPDATER_LAST_WORD(USCRIPT_INVALID_PARAM, "Error to get file info");
         return USCRIPT_INVALID_PARAM;
     }
     int32_t ret = manager->CreatePkgStream(outStream, path + "/" + scriptName,
         info->unpackedSize, PkgStream::PkgStreamType_MemoryMap);
     if (ret != USCRIPT_SUCCESS) {
         USCRIPT_LOGE("Failed to create script stream %s", scriptName.c_str());
-        UPDATER_LAST_WORD(ret);
+        UPDATER_LAST_WORD(ret, "Failed to create script stream " + scriptName);
         return ret;
     }
     ret = manager->ExtractFile(scriptName, outStream);
     if (ret != USCRIPT_SUCCESS) {
         manager->ClosePkgStream(outStream);
         USCRIPT_LOGE("Failed to extract script stream %s", scriptName.c_str());
-        UPDATER_LAST_WORD(ret);
+        UPDATER_LAST_WORD(ret, "Failed to extract script stream" + scriptName);
         return ret;
     }
     if (scriptVerifier_ == nullptr || !scriptVerifier_->VerifyHashData("build_tools/", scriptName, outStream)) {
         manager->ClosePkgStream(outStream);
         USCRIPT_LOGE("verify script %s by hash signed data failed", scriptName.c_str());
-        UPDATER_LAST_WORD(ret);
+        UPDATER_LAST_WORD(ret, "verify script by hash signed data failed" + scriptName.c_str());
         return USCRIPT_INVALID_SCRIPT;
     }
     ret = ScriptInterpreter::ExecuteScript(this, outStream);
@@ -205,7 +205,7 @@ int32_t ScriptManagerImpl::ExtractAndExecuteScript(PkgManager::PkgManagerPtr man
 
 int32_t ScriptManagerImpl::ExecuteScript(int32_t priority)
 {
-    UPDATER_INIT_RECORD;
+    Updater::UPDATER_INIT_RECORD;
     if (priority >= MAX_PRIORITY || priority < 0) {
         USCRIPT_LOGE("ExecuteScript priority not support %d", priority);
         UPDATER_LAST_WORD(USCRIPT_INVALID_PRIORITY, priority);
@@ -214,7 +214,7 @@ int32_t ScriptManagerImpl::ExecuteScript(int32_t priority)
     PkgManager::PkgManagerPtr manager = scriptEnv_->GetPkgManager();
     if (manager == nullptr) {
         USCRIPT_LOGE("Failed to get pkg manager");
-        UPDATER_LAST_WORD(USCRIPT_INVALID_PARAM);
+        UPDATER_LAST_WORD(USCRIPT_INVALID_PARAM, "Failed to get pkg manager");
         return USCRIPT_INVALID_PARAM;
     }
     if (scriptFiles_[priority].size() == 0) {
@@ -233,6 +233,7 @@ int32_t ScriptManagerImpl::ExecuteScript(int32_t priority)
             ret = ExtractAndExecuteScript(manager, scriptFiles_[priority][i]);
             if (ret != USCRIPT_SUCCESS) {
                 USCRIPT_LOGE("Failed to execute script %s", scriptFiles_[priority][i].c_str());
+                UPDATER_LAST_WORD(ret, "Failed to execute script " + scriptFiles_[priority][i]);
                 retCode = ret;
             }
         }
@@ -267,13 +268,13 @@ int32_t ScriptManagerImpl::AddScript(const std::string &scriptName, int32_t prio
     PkgManager::PkgManagerPtr manager = scriptEnv_->GetPkgManager();
     if (manager == nullptr) {
         USCRIPT_LOGE("Failed to get pkg manager");
-        UPDATER_LAST_WORD(USCRIPT_INVALID_PARAM);
+        UPDATER_LAST_WORD(USCRIPT_INVALID_PARAM, "Failed to get pkg manager");
         return USCRIPT_INVALID_PARAM;
     }
 
     if (manager->GetFileInfo(scriptName) == nullptr) {
         USCRIPT_LOGE("Failed to access script %s", scriptName.c_str());
-        UPDATER_LAST_WORD(USCRIPT_INVALID_SCRIPT);
+        UPDATER_LAST_WORD(USCRIPT_INVALID_SCRIPT, "Failed to access script " + scriptName);
         return USCRIPT_INVALID_SCRIPT;
     }
     scriptFiles_[priority].push_back(scriptName);

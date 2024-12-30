@@ -28,7 +28,7 @@ static int32_t g_instanceId = 0;
 
 int32_t ScriptInterpreter::ExecuteScript(ScriptManagerImpl *manager, Hpackage::PkgManager::StreamPtr pkgStream)
 {
-    UPDATER_INIT_RECORD;
+    Updater::UPDATER_INIT_RECORD;
     if (pkgStream == nullptr) {
         USCRIPT_LOGE("Param error");
         UPDATER_LAST_WORD(USCRIPT_INVALID_PARAM);
@@ -38,7 +38,7 @@ int32_t ScriptInterpreter::ExecuteScript(ScriptManagerImpl *manager, Hpackage::P
     auto inter = new (std::nothrow) ScriptInterpreter(manager);
     if (inter == nullptr) {
         USCRIPT_LOGE("Fail to create ScriptInterpreter for script %s", pkgStream->GetFileName().c_str());
-        UPDATER_LAST_WORD(USCRIPT_ERROR_CREATE_OBJ);
+        UPDATER_LAST_WORD(USCRIPT_ERROR_CREATE_OBJ, pkgStream->GetFileName());
         return USCRIPT_ERROR_CREATE_OBJ;
     }
     int32_t ret = inter->LoadScript(pkgStream);
@@ -46,7 +46,7 @@ int32_t ScriptInterpreter::ExecuteScript(ScriptManagerImpl *manager, Hpackage::P
         delete inter;
         inter = nullptr;
         USCRIPT_LOGE("Fail to loadScript script %s", pkgStream->GetFileName().c_str());
-        UPDATER_LAST_WORD(USCRIPT_ERROR_CREATE_OBJ);
+        UPDATER_LAST_WORD(ret, "Fail to loadScript script" + pkgStream->GetFileName);
         return ret;
     }
     ret = inter->Execute();

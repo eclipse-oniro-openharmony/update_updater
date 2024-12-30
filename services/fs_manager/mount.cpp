@@ -316,7 +316,7 @@ int SetupPartitions(bool isMountData)
 
     if (g_fstab == NULL || g_fstab->head == NULL) {
         LOG(ERROR) << "Fstab is invalid";
-        UPDATER_LAST_WORD(-1);
+        UPDATER_LAST_WORD(-1, "Fstab is invalid");
         return -1;
     }
     for (const FstabItem *item = g_fstab->head; item != nullptr; item = item->next) {
@@ -331,7 +331,7 @@ int SetupPartitions(bool isMountData)
             // factory wireless upgrade use /internaldata to mount userdata
             if (GetMountStatusForMountPoint(INTERNAL_DATA_PATH) != MOUNT_MOUNTED && MountForPath(mountPoint) != 0) {
                 LOG(ERROR) << "Expected partition " << mountPoint << " is not mounted.";
-                UPDATER_LAST_WORD(-1);
+                UPDATER_LAST_WORD(-1, "Expected partition " + mountPoint + " is not mounted.");
                 return -1;
             }
             Utils::SetParameter("updater.data.ready", "1");
@@ -340,7 +340,7 @@ int SetupPartitions(bool isMountData)
         }
         if (UmountForPath(mountPoint) != 0) {
             LOG(ERROR) << "Umount " << mountPoint << " failed";
-            UPDATER_LAST_WORD(-1);
+            UPDATER_LAST_WORD(-1, "Umount " mountPoint + " failed");
             return -1;
         }
     }

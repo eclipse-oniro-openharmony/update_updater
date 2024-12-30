@@ -152,7 +152,7 @@ bool UScriptInstructionRawImageWrite::WriteRawImage(const std::string &partition
     const FileInfo *info = env.GetPkgManager()->GetFileInfo(partitionName);
     if (info == nullptr) {
         LOG(ERROR) << "Error to get file info";
-        UPDATER_LAST_WORD(false);
+        UPDATER_LAST_WORD("Error to get file info", partitionName);
         return false;
     }
     totalSize_ = info->unpackedSize;
@@ -169,7 +169,7 @@ bool UScriptInstructionRawImageWrite::WriteRawImage(const std::string &partition
         partitionName, RawImageWriteProcessor, writer.get());
     if (ret != USCRIPT_SUCCESS || outStream == nullptr) {
         LOG(ERROR) << "Error to create output stream";
-        UPDATER_LAST_WORD(false);
+        UPDATER_LAST_WORD("Error to create output stream", partitionName);
         return false;
     }
 
@@ -177,7 +177,7 @@ bool UScriptInstructionRawImageWrite::WriteRawImage(const std::string &partition
     if (ret != USCRIPT_SUCCESS) {
         LOG(ERROR) << "Error to extract file";
         env.GetPkgManager()->ClosePkgStream(outStream);
-        UPDATER_LAST_WORD(false);
+        UPDATER_LAST_WORD("Error to extract file", partitionName);
         return false;
     }
     env.GetPkgManager()->ClosePkgStream(outStream);
@@ -191,7 +191,7 @@ int32_t UScriptInstructionRawImageWrite::Execute(Uscript::UScriptEnv &env, Uscri
     int32_t ret = context.GetParam(0, partitionName);
     if (ret != USCRIPT_SUCCESS) {
         LOG(ERROR) << "Error to get partitionName";
-        UPDATER_LAST_WORD(ret);
+        UPDATER_LAST_WORD(ret, "Error to get partitionName");
         return ret;
     }
 
@@ -206,7 +206,7 @@ int32_t UScriptInstructionRawImageWrite::Execute(Uscript::UScriptEnv &env, Uscri
     LOG(INFO) << "UScriptInstructionRawImageWrite::Execute " << partitionName;
     if (env.GetPkgManager() == nullptr) {
         LOG(ERROR) << "Error to get pkg manager";
-        UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE);
+        UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE, "UScriptInstructionRawImageWrite::Execute " + partitionName);
         return USCRIPT_ERROR_EXECUTE;
     }
 
@@ -216,7 +216,7 @@ int32_t UScriptInstructionRawImageWrite::Execute(Uscript::UScriptEnv &env, Uscri
     if (GetWritePathAndOffset(partitionName, writePath, offset, partitionSize) != USCRIPT_SUCCESS) {
         LOG(ERROR) << "Get partition:%s WritePathAndOffset fail \'" <<
             partitionName.substr(1, partitionName.size()) << "\'.";
-        UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE);
+        UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE, "GetWritePathAndOffset fail " + partitionName);
         return USCRIPT_ERROR_EXECUTE;
     }
 
@@ -224,12 +224,12 @@ int32_t UScriptInstructionRawImageWrite::Execute(Uscript::UScriptEnv &env, Uscri
         static_cast<UpdaterEnv *>(&env), offset);
     if (writer == nullptr) {
         LOG(ERROR) << "Error to create writer";
-        UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE);
+        UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE, "Error to create writer");
         return USCRIPT_ERROR_EXECUTE;
     }
     if (!WriteRawImage(partitionName, writer, partitionSize, env)) {
         DataWriter::ReleaseDataWriter(writer);
-        UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE);
+        UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE, "WriteRawImage failed");
         return USCRIPT_ERROR_EXECUTE;
     }
     PartitionRecord::GetInstance().RecordPartitionUpdateStatus(partitionName, true);
@@ -247,7 +247,7 @@ int32_t UScriptInstructionPkgExtract::Execute(Uscript::UScriptEnv &env, Uscript:
     int32_t ret = context.GetParam(0, pkgFileName);
     if (ret != USCRIPT_SUCCESS) {
         LOG(ERROR) << "Error to get pkgFileName";
-        UPDATER_LAST_WORD(ret);
+        UPDATER_LAST_WORD(ret, "Error to get pkgFileName");
         return ret;
     }
 
@@ -255,7 +255,7 @@ int32_t UScriptInstructionPkgExtract::Execute(Uscript::UScriptEnv &env, Uscript:
     ret = context.GetParam(1, destPath);
     if (ret != USCRIPT_SUCCESS) {
         LOG(ERROR) << "Error to get destPath";
-        UPDATER_LAST_WORD(ret);
+        UPDATER_LAST_WORD(ret, "Error to get destPath");
         return ret;
     }
 
@@ -263,14 +263,14 @@ int32_t UScriptInstructionPkgExtract::Execute(Uscript::UScriptEnv &env, Uscript:
     PkgManager::PkgManagerPtr manager = env.GetPkgManager();
     if (manager == nullptr) {
         LOG(ERROR) << "Error to get pkg manager";
-        UPDATER_LAST_WORD(USCRIPT_INVALID_PARAM);
+        UPDATER_LAST_WORD(USCRIPT_INVALID_PARAM, "Error to get pkg manager");
         return USCRIPT_INVALID_PARAM;
     }
 
     const FileInfo *info = manager->GetFileInfo(pkgFileName);
     if (info == nullptr) {
         LOG(ERROR) << "Error to get file info";
-        UPDATER_LAST_WORD(USCRIPT_INVALID_PARAM);
+        UPDATER_LAST_WORD("Error to get file info", pkgFileName);
         return USCRIPT_INVALID_PARAM;
     }
 
@@ -279,7 +279,7 @@ int32_t UScriptInstructionPkgExtract::Execute(Uscript::UScriptEnv &env, Uscript:
         PkgStream::PkgStreamType_Write);
     if (ret != USCRIPT_SUCCESS) {
         LOG(ERROR) << "Error to create output stream";
-        UPDATER_LAST_WORD(USCRIPT_INVALID_PARAM);
+        UPDATER_LAST_WORD(USCRIPT_INVALID_PARAM, "Error to create output stream");
         return USCRIPT_ERROR_EXECUTE;
     }
 
@@ -287,7 +287,7 @@ int32_t UScriptInstructionPkgExtract::Execute(Uscript::UScriptEnv &env, Uscript:
     if (ret != USCRIPT_SUCCESS) {
         LOG(ERROR) << "Error to extract file";
         manager->ClosePkgStream(outStream);
-        UPDATER_LAST_WORD(USCRIPT_INVALID_PARAM);
+        UPDATER_LAST_WORD("Error to create output stream", pkgFileName);
         return USCRIPT_ERROR_EXECUTE;
     }
 
@@ -390,13 +390,13 @@ int ExecUpdate(PkgManager::PkgManagerPtr pkgManager, int retry, const std::strin
     Hpackage::HashDataVerifier scriptVerifier {pkgManager};
     if (!scriptVerifier.LoadHashDataAndPkcs7(pkgPath)) {
         LOG(ERROR) << "Fail to load hash data";
-        UPDATER_LAST_WORD(EXIT_VERIFY_SCRIPT_ERROR);
+        UPDATER_LAST_WORD("LoadHashDataAndPkcs7 failed", pkgPath);
         return EXIT_VERIFY_SCRIPT_ERROR;
     }
     UpdaterEnv* env = new (std::nothrow) UpdaterEnv(pkgManager, postMessage, retry);
     if (env == nullptr) {
         LOG(ERROR) << "Fail to creat env";
-        UPDATER_LAST_WORD(EXIT_PARSE_SCRIPT_ERROR);
+        UPDATER_LAST_WORD(EXIT_PARSE_SCRIPT_ERROR, "Fail to creat env");
         return EXIT_PARSE_SCRIPT_ERROR;
     }
     int ret = 0;
@@ -405,7 +405,7 @@ int ExecUpdate(PkgManager::PkgManagerPtr pkgManager, int retry, const std::strin
         LOG(ERROR) << "Fail to creat scriptManager";
         ScriptManager::ReleaseScriptManager();
         delete env;
-        UPDATER_LAST_WORD(EXIT_PARSE_SCRIPT_ERROR);
+        UPDATER_LAST_WORD(EXIT_PARSE_SCRIPT_ERROR, "Fail to creat scriptManager");
         return EXIT_PARSE_SCRIPT_ERROR;
     }
 
@@ -418,7 +418,7 @@ int ExecUpdate(PkgManager::PkgManagerPtr pkgManager, int retry, const std::strin
         ScriptManager::ReleaseScriptManager();
         delete env;
         env = nullptr;
-        UPDATER_LAST_WORD(USCRIPT_ERROR_CREATE_THREAD);
+        UPDATER_LAST_WORD(USCRIPT_ERROR_CREATE_THREAD, "Fail to create progress thread");
         return USCRIPT_ERROR_CREATE_THREAD;
     }
 
@@ -478,7 +478,7 @@ int ProcessUpdater(bool retry, int pipeFd, const std::string &packagePath, const
     std::unique_ptr<FILE, decltype(&fclose)> pipeWrite(fdopen(pipeFd, "w"), fclose);
     if (pipeWrite == nullptr) {
         LOG(ERROR) << "Fail to fdopen, err: " << strerror(errno);
-        UPDATER_LAST_WORD(EXIT_INVALID_ARGS);
+        UPDATER_LAST_WORD(strerror(errno), "Fail to fdopen");
         return EXIT_INVALID_ARGS;
     }
     int ret = -1;
@@ -491,7 +491,7 @@ int ProcessUpdater(bool retry, int pipeFd, const std::string &packagePath, const
     PkgManager::PkgManagerPtr pkgManager = PkgManager::CreatePackageInstance();
     if (pkgManager == nullptr) {
         LOG(ERROR) << "pkgManager is nullptr";
-        UPDATER_LAST_WORD(EXIT_INVALID_ARGS);
+        UPDATER_LAST_WORD(EXIT_INVALID_ARGS, "pkgManager is nullptr");
         return EXIT_INVALID_ARGS;
     }
 
@@ -500,7 +500,7 @@ int ProcessUpdater(bool retry, int pipeFd, const std::string &packagePath, const
     if (ret != PKG_SUCCESS) {
         LOG(ERROR) << "Fail to load package";
         PkgManager::ReleasePackageInstance(pkgManager);
-        UPDATER_LAST_WORD(EXIT_INVALID_ARGS);
+        UPDATER_LAST_WORD("Fail to load package", packagePath, keyPath);
         return EXIT_INVALID_ARGS;
     }
 #ifdef UPDATER_USE_PTABLE

@@ -87,6 +87,7 @@ int32_t SingleCertHelper::CertChainCheck(STACK_OF(X509) * certStack, X509 *cert)
 
 int32_t SingleCertHelper::InitRootCert()
 {
+    UPDATER_INIT_RECORD;
 #ifndef DIFF_PATCH_SDK
     X509 *rootCert = GetX509CertFromPemFile(Utils::GetCertName());
     if (rootCert == nullptr) {

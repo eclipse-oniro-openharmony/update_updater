@@ -53,17 +53,18 @@ Pkcs7SignedData::~Pkcs7SignedData()
 int32_t Pkcs7SignedData::GetHashFromSignBlock(const uint8_t *srcData, const size_t dataLen,
     std::vector<uint8_t> &hash)
 {
+    Updater::UPDATER_INIT_RECORD;
     int32_t ret = ParsePkcs7Data(srcData, dataLen);
     if (ret != 0) {
         PKG_LOGE("parse pkcs7 data fail");
-        UPDATER_LAST_WORD(ret);
+        UPDATER_LAST_WORD(ret, "parse pkcs7 data fail");
         return ret;
     }
 
     ret = Verify();
     if (ret != 0) {
         PKG_LOGE("verify pkcs7 data fail");
-        UPDATER_LAST_WORD(ret);
+        UPDATER_LAST_WORD(ret, "verify pkcs7 data fail");
         return ret;
     }
     hash.assign(digest_.begin(), digest_.end());
@@ -73,13 +74,14 @@ int32_t Pkcs7SignedData::GetHashFromSignBlock(const uint8_t *srcData, const size
 
 int32_t Pkcs7SignedData::ParsePkcs7Data(const uint8_t *srcData, const size_t dataLen)
 {
+    Updater::UPDATER_INIT_RECORD;
     if (srcData == nullptr || dataLen == 0) {
-        UPDATER_LAST_WORD(-1);
+        UPDATER_LAST_WORD(-1, "srcData or dataLen is invalid");
         return -1;
     }
     if (Init(srcData, dataLen) != 0) {
         PKG_LOGE("init pkcs7 data fail");
-        UPDATER_LAST_WORD(-1);
+        UPDATER_LAST_WORD(-1, "init pkcs7 data fail");
         return -1;
     }
 
@@ -123,12 +125,12 @@ int32_t Pkcs7SignedData::Init(const uint8_t *sourceData, const uint32_t sourceDa
     BIO *p7Bio = BIO_new(BIO_s_mem());
     if (p7Bio == nullptr) {
         PKG_LOGE("BIO_new error!");
-        UPDATER_LAST_WORD(-1);
+        UPDATER_LAST_WORD(-1, "BIO_new error!");
         return -1;
     }
     if (static_cast<uint32_t>(BIO_write(p7Bio, sourceData, sourceDataLen)) != sourceDataLen) {
         PKG_LOGE("BIO_write error!");
-        UPDATER_LAST_WORD(-1);
+        UPDATER_LAST_WORD(-1, "BIO_write error!");
         BIO_free(p7Bio);
         return -1;
     }
@@ -141,7 +143,7 @@ int32_t Pkcs7SignedData::Init(const uint8_t *sourceData, const uint32_t sourceDa
     if (pkcs7_ == nullptr) {
         PKG_LOGE("d2i_PKCS7_bio failed!");
         BIO_free(p7Bio);
-        UPDATER_LAST_WORD(-1);
+        UPDATER_LAST_WORD(-1, "d2i_PKCS7_bio failed!");
         return -1;
     }
 
@@ -149,14 +151,14 @@ int32_t Pkcs7SignedData::Init(const uint8_t *sourceData, const uint32_t sourceDa
     if (type != NID_pkcs7_signed) {
         PKG_LOGE("Invalid pkcs7 data type %d", type);
         BIO_free(p7Bio);
-        UPDATER_LAST_WORD(-1);
+        UPDATER_LAST_WORD(type, "Invalid pkcs7 data type");
         return -1;
     }
 
     BIO_free(p7Bio);
     if (CertVerify::GetInstance().Init() != 0) {
         PKG_LOGE("init cert verify fail");
-        UPDATER_LAST_WORD(-1);
+        UPDATER_LAST_WORD(-1,"init cert verify fail");
         return -1;
     }
     return 0;
@@ -174,11 +176,12 @@ int32_t Pkcs7SignedData::Init(const uint8_t *sourceData, const uint32_t sourceDa
  */
 int32_t Pkcs7SignedData::DoParse()
 {
+    Updater::UPDATER_INIT_RECORD;
     std::vector<uint8_t> contentInfo;
     int32_t ret = ParseContentInfo(contentInfo);
     if (ret != 0) {
         PKG_LOGE("parse pkcs7 contentInfo fail");
-        UPDATER_LAST_WORD(-1);
+        UPDATER_LAST_WORD(-1, "parse pkcs7 contentInfo fail");
         return -1;
     }
 
@@ -186,7 +189,7 @@ int32_t Pkcs7SignedData::DoParse()
         ret = GetDigestFromContentInfo(contentInfo);
         if (ret != 0) {
             PKG_LOGE("invalid pkcs7 contentInfo fail");
-            UPDATER_LAST_WORD(-1);
+            UPDATER_LAST_WORD(-1, "invalid pkcs7 contentInfo fail");
             return -1;
         }
     }
@@ -209,25 +212,25 @@ int32_t Pkcs7SignedData::ParseContentInfo(std::vector<uint8_t> &digestBlock) con
     PKCS7_SIGNED *signData = pkcs7_->d.sign;
     if (signData == nullptr) {
         PKG_LOGE("invalid pkcs7 signed data!");
-        UPDATER_LAST_WORD(-1);
+        UPDATER_LAST_WORD(-1, "invalid pkcs7 signed data!");
         return -1;
     }
 
     PKCS7 *contentInfo = signData->contents;
     if (contentInfo == nullptr) {
         PKG_LOGE("pkcs7 content is nullptr!");
-        UPDATER_LAST_WORD(-1);
+        UPDATER_LAST_WORD(-1, "pkcs7 content is nullptr!");
         return -1;
     }
     if (OBJ_obj2nid(contentInfo->type) != NID_pkcs7_data) {
         PKG_LOGE("invalid pkcs7 signed data type");
-        UPDATER_LAST_WORD(-1);
+        UPDATER_LAST_WORD(-1, "invalid pkcs7 signed data type");
         return -1;
     }
 
     if (GetASN1OctetStringData(contentInfo->d.data, digestBlock) != 0) {
         PKG_LOGE("get pkcs7 contentInfo fail");
-        UPDATER_LAST_WORD(-1);
+        UPDATER_LAST_WORD(-1, "get pkcs7 contentInfo fail");
         return -1;
     }
 
@@ -239,7 +242,7 @@ int32_t Pkcs7SignedData::GetDigestFromContentInfo(std::vector<uint8_t> &digestBl
     Updater::UPDATER_INIT_RECORD;
     if (digestBlock.size() <= sizeof(uint32_t)) {
         PKG_LOGE("invalid digest block info.");
-        UPDATER_LAST_WORD(-1);
+        UPDATER_LAST_WORD(-1, "invalid digest block info.");
         return -1;
     }
 
@@ -250,7 +253,7 @@ int32_t Pkcs7SignedData::GetDigestFromContentInfo(std::vector<uint8_t> &digestBl
     offset += static_cast<size_t>(sizeof(uint16_t));
     if ((GetDigestLength(algoId) != digestLen) || ((digestLen + offset) != digestBlock.size())) {
         PKG_LOGE("invalid digestLen[%zu] and digestBlock len[%zu]", digestLen, digestBlock.size());
-        UPDATER_LAST_WORD(-1);
+        UPDATER_LAST_WORD(-1, "invalid digestLen[%zu] and digestBlock len[%zu]", digestLen, digestBlock.size());
         return -1;
     }
     digest_.assign(digestBlock.begin() + offset, digestBlock.end());
@@ -309,25 +312,26 @@ int32_t Pkcs7SignedData::GetDigest(std::vector<uint8_t> &digestBlock,
 int32_t Pkcs7SignedData::ReadSig(const uint8_t *sourceData, const uint32_t sourceDataLen,
     std::vector<std::vector<uint8_t>> &sigs)
 {
+    Updater::UPDATER_INIT_RECORD;
     if (sourceData == nullptr || sourceDataLen == 0) {
-        UPDATER_LAST_WORD(PKCS7_INVALID_PARAM_ERR);
+        UPDATER_LAST_WORD(PKCS7_INVALID_PARAM_ERR, "sourceData is nullptr or sourceDataLen is 0");
         return PKCS7_INVALID_PARAM_ERR;
     }
     if (Init(sourceData, sourceDataLen) != 0) {
         PKG_LOGE("init pkcs7 data fail");
-        UPDATER_LAST_WORD(PKCS7_INIT_ERR);
+        UPDATER_LAST_WORD(PKCS7_INIT_ERR, "init pkcs7 data fail");
         return PKCS7_INIT_ERR;
     }
     STACK_OF(PKCS7_SIGNER_INFO) *p7SignerInfos = PKCS7_get_signer_info(pkcs7_);
     if (p7SignerInfos == nullptr) {
         PKG_LOGE("get pkcs7 signers failed!");
-        UPDATER_LAST_WORD(PKCS7_INVALID_VALUE_ERR);
+        UPDATER_LAST_WORD(PKCS7_INVALID_VALUE_ERR, "get pkcs7 signers failed!");
         return PKCS7_INVALID_VALUE_ERR;
     }
     int signerInfoNum = sk_PKCS7_SIGNER_INFO_num(p7SignerInfos);
     if (signerInfoNum <= 0) {
         PKG_LOGE("invalid signers info num %d!", signerInfoNum);
-        UPDATER_LAST_WORD(PKCS7_INVALID_VALUE_ERR);
+        UPDATER_LAST_WORD(PKCS7_INVALID_VALUE_ERR, "invalid signers info num %d!", signerInfoNum);
         return PKCS7_INVALID_VALUE_ERR;
     }
     for (int i = 0; i < signerInfoNum; i++) {
@@ -342,7 +346,7 @@ int32_t Pkcs7SignedData::ReadSig(const uint8_t *sourceData, const uint32_t sourc
     }
     if (sigs.size() == 0) {
         PKG_LOGE("no valid sigs!");
-        UPDATER_LAST_WORD(PKCS7_HAS_NO_VALID_SIG_ERR);
+        UPDATER_LAST_WORD(PKCS7_HAS_NO_VALID_SIG_ERR, "no valid sigs!");
         return PKCS7_HAS_NO_VALID_SIG_ERR;
     }
     return PKCS7_SUCCESS;
@@ -354,14 +358,14 @@ int32_t Pkcs7SignedData::SignerInfosParse()
     STACK_OF(PKCS7_SIGNER_INFO) *p7SignerInfos = PKCS7_get_signer_info(pkcs7_);
     if (p7SignerInfos == nullptr) {
         PKG_LOGE("get pkcs7 signers info failed!");
-        UPDATER_LAST_WORD(-1);
+        UPDATER_LAST_WORD(-1, "get pkcs7 signers info failed!");
         return -1;
     }
 
     int signerInfoNum = sk_PKCS7_SIGNER_INFO_num(p7SignerInfos);
     if (signerInfoNum <= 0) {
         PKG_LOGE("invalid signers info num %d!", signerInfoNum);
-        UPDATER_LAST_WORD(-1);
+        UPDATER_LAST_WORD(-1, "invalid signers info num %d!", signerInfoNum);
         return -1;
     }
 
@@ -381,13 +385,14 @@ int32_t Pkcs7SignedData::SignerInfosParse()
 
 int32_t Pkcs7SignedData::SignerInfoParse(PKCS7_SIGNER_INFO *p7SignerInfo, Pkcs7SignerInfo &signerInfo)
 {
+    Updater::UPDATER_INIT_RECORD;
     if (p7SignerInfo == nullptr) {
         return -1;
     }
     PKCS7_ISSUER_AND_SERIAL *p7IssuerAndSerial = p7SignerInfo->issuer_and_serial;
     if (p7IssuerAndSerial == nullptr) {
         PKG_LOGE("signer cert info is nullptr!");
-        UPDATER_LAST_WORD(-1);
+        UPDATER_LAST_WORD(-1, "signer cert info is nullptr!");
         return -1;
     }
     signerInfo.issuerName = p7IssuerAndSerial->issuer;
@@ -416,27 +421,28 @@ int32_t Pkcs7SignedData::SignerInfoParse(PKCS7_SIGNER_INFO *p7SignerInfo, Pkcs7S
 int32_t Pkcs7SignedData::Pkcs7SignleSignerVerify(const Pkcs7SignerInfo &signerInfo, const std::vector<uint8_t> &hash,
     const std::vector<uint8_t> &sig) const
 {
+    Updater::UPDATER_INIT_RECORD;
     if (pkcs7_ == nullptr) {
-        UPDATER_LAST_WORD(-1);
+        UPDATER_LAST_WORD(-1, "pkcs7_ is nullptr");
         return -1;
     }
     STACK_OF(X509) *certStack = pkcs7_->d.sign->cert;
     if (certStack == nullptr) {
         PKG_LOGE("certStack is empty!");
-        UPDATER_LAST_WORD(-1);
+        UPDATER_LAST_WORD(-1, "certStack is empty!");
         return -1;
     }
 
     X509 *cert = X509_find_by_issuer_and_serial(certStack, signerInfo.issuerName, signerInfo.serialNumber);
     if (cert == nullptr) {
         PKG_LOGE("cert is empty");
-        UPDATER_LAST_WORD(-1);
+        UPDATER_LAST_WORD(-1, "cert is empty");
         return -1;
     }
 
     if (CertVerify::GetInstance().CheckCertChain(certStack, cert) != 0) {
         PKG_LOGE("public cert check fail");
-        UPDATER_LAST_WORD(-1);
+        UPDATER_LAST_WORD(-1, "public cert check fail");
         return -1;
     }
 
@@ -448,14 +454,14 @@ int32_t Pkcs7SignedData::VerifyDigest(X509 *cert, const Pkcs7SignerInfo &signer,
 {
     Updater::UPDATER_INIT_RECORD;
     if (cert == nullptr) {
-        UPDATER_LAST_WORD(-1);
+        UPDATER_LAST_WORD(-1, "cert is null");
         return -1;
     }
 
     EVP_PKEY *pubKey = X509_get_pubkey(cert);
     if (pubKey == nullptr) {
         PKG_LOGE("get pubkey from cert fail");
-        UPDATER_LAST_WORD(-1);
+        UPDATER_LAST_WORD(-1, "get pubkey from cert fail");
         return -1;
     }
 

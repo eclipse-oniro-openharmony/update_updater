@@ -280,11 +280,11 @@ int32_t PkgManagerImpl::LoadPackage(const std::string &packagePath, const std::s
 {
     UPDATER_INIT_RECORD;
     if (access(packagePath.c_str(), 0) != 0) {
-        UPDATER_LAST_WORD(PKG_INVALID_FILE);
+        UPDATER_LAST_WORD(PKG_INVALID_FILE, "access pkgpath failed");
         return PKG_INVALID_FILE;
     }
     if (SetSignVerifyKeyName(keyPath) != PKG_SUCCESS) {
-        UPDATER_LAST_WORD(PKG_INVALID_FILE);
+        UPDATER_LAST_WORD(PKG_INVALID_FILE, "SetSignVerifyKeyName failed");
         return PKG_INVALID_FILE;
     }
     // Check if package already loaded
@@ -299,7 +299,7 @@ int32_t PkgManagerImpl::LoadPackage(const std::string &packagePath, const std::s
         int32_t ret = LoadPackage(packagePath, fileIds, pkgType);
         if (ret != PKG_SUCCESS) {
             ClearPkgFile();
-            UPDATER_LAST_WORD(ret);
+            UPDATER_LAST_WORD(ret, "LoadPackage failed");
             PKG_LOGE("Parse %s fail ", packagePath.c_str());
             return ret;
         }
@@ -321,7 +321,7 @@ int32_t PkgManagerImpl::LoadPackage(const std::string &packagePath, const std::s
             ret = ExtraAndLoadPackage(GetFilePath(packagePath), name, pkgType, fileIds);
             if (ret != PKG_SUCCESS) {
                 ClearPkgFile();
-                UPDATER_LAST_WORD(ret);
+                UPDATER_LAST_WORD(ret, "ExtraAndLoadPackage failed");
                 PKG_LOGE("unpack %s fail in package %s ", name.c_str(), packagePath.c_str());
                 return ret;
             }
@@ -388,7 +388,7 @@ int32_t PkgManagerImpl::LoadPackage(const std::string &packagePath, std::vector<
     int32_t ret = CreatePkgStream(stream, packagePath, 0, PkgStream::PKgStreamType_FileMap);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("Create input stream fail %s", packagePath.c_str());
-        UPDATER_LAST_WORD(ret);
+        UPDATER_LAST_WORD(ret, "CreatePkgStream failed");
         return ret;
     }
     return LoadPackageWithStream(packagePath, fileIds, type, stream);
@@ -407,7 +407,7 @@ int32_t PkgManagerImpl::LoadPackageWithStreamForApp(AppPkgInfo &info,
     PkgFilePtr pkgFile = CreatePackage(stream, static_cast<PkgFile::PkgType>(info.type), nullptr);
     if (pkgFile == nullptr) {
         PKG_LOGE("Create package fail %s", info.packagePath.c_str());
-        UPDATER_LAST_WORD(ret);
+        UPDATER_LAST_WORD(ret, "Create package fail");
         return PKG_INVALID_PARAM;
     }
     ret = pkgFile->ReadImgHashDataFile(info.pkgType);
@@ -415,7 +415,7 @@ int32_t PkgManagerImpl::LoadPackageWithStreamForApp(AppPkgInfo &info,
         PKG_LOGE("Read img hash data fail %s", info.pkgType.c_str());
         delete pkgFile;
         pkgFile = nullptr;
-        UPDATER_LAST_WORD(ret);
+        UPDATER_LAST_WORD(ret, "ReadImgHashDataFile failed");
         return ret;
     }
     ret = pkgFile->LoadPackage(fileIds,
@@ -426,7 +426,7 @@ int32_t PkgManagerImpl::LoadPackageWithStreamForApp(AppPkgInfo &info,
         PKG_LOGE("Load package fail %s", info.packagePath.c_str());
         delete pkgFile;
         pkgFile = nullptr;
-        UPDATER_LAST_WORD(ret);
+        UPDATER_LAST_WORD(ret, "Load package fail");
         return ret;
     }
     pkgFiles_.push_back(pkgFile);
@@ -455,7 +455,7 @@ int32_t PkgManagerImpl::LoadPackageWithStream(const std::string &packagePath,
     if (pkgFile == nullptr) {
         PKG_LOGE("Create package fail %s", packagePath.c_str());
         ClosePkgStream(stream);
-        UPDATER_LAST_WORD(ret);
+        UPDATER_LAST_WORD(ret, "Create package fail");
         return PKG_INVALID_PARAM;
     }
 
@@ -466,7 +466,7 @@ int32_t PkgManagerImpl::LoadPackageWithStream(const std::string &packagePath,
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("Load package fail %s", packagePath.c_str());
         delete pkgFile;
-        UPDATER_LAST_WORD(ret);
+        UPDATER_LAST_WORD(ret, "Load package fail");
         return ret;
     }
     pkgFiles_.push_back(pkgFile);
@@ -478,7 +478,7 @@ int32_t PkgManagerImpl::ExtractFile(const std::string &path, PkgManager::StreamP
     UPDATER_INIT_RECORD;
     if (output == nullptr) {
         PKG_LOGE("Invalid stream");
-        UPDATER_LAST_WORD(PKG_INVALID_STREAM);
+        UPDATER_LAST_WORD(PKG_INVALID_STREAM, "Invalid stream");
         return PKG_INVALID_STREAM;
     }
     int32_t ret = PKG_INVALID_FILE;
@@ -581,11 +581,11 @@ int32_t PkgManagerImpl::DoCreatePkgStream(PkgStreamPtr &stream, const std::strin
 #else
     if (type == PkgStream::PkgStreamType_Read && realpath(fileName.c_str(), realPath) == nullptr) {
 #endif
-        UPDATER_LAST_WORD(PKG_INVALID_FILE);
+        UPDATER_LAST_WORD(PKG_INVALID_FILE, "realPath failed");
         return PKG_INVALID_FILE;
     }
     if (CheckFile(fileName, type) != PKG_SUCCESS) {
-        UPDATER_LAST_WORD(PKG_INVALID_FILE);
+        UPDATER_LAST_WORD(PKG_INVALID_FILE, "CheckFile failed");
         PKG_LOGE("Fail to check file %s ", fileName.c_str());
         return PKG_INVALID_FILE;
     }
@@ -603,7 +603,7 @@ int32_t PkgManagerImpl::DoCreatePkgStream(PkgStreamPtr &stream, const std::strin
         file = fopen(fileName.c_str(), modeFlags[type]);
     }
     if (file == nullptr) {
-        UPDATER_LAST_WORD(PKG_INVALID_FILE);
+        UPDATER_LAST_WORD(PKG_INVALID_FILE, "Fail to open file " + fileName);
         PKG_LOGE("Fail to open file %s ", fileName.c_str());
         return PKG_INVALID_FILE;
     }
@@ -618,17 +618,17 @@ int32_t PkgManagerImpl::CreatePkgStream(PkgStreamPtr &stream, const std::string 
     if (type == PkgStream::PkgStreamType_Write || type == PkgStream::PkgStreamType_Read) {
         int32_t ret = DoCreatePkgStream(stream, fileName, type);
         if (ret != PKG_SUCCESS) {
-            UPDATER_LAST_WORD(ret);
+            UPDATER_LAST_WORD(ret, "DoCreatePkgStream failed");
             return ret;
         }
     } else if (type == PkgStream::PkgStreamType_MemoryMap || type == PkgStream::PKgStreamType_FileMap) {
         if ((size == 0) && (access(fileName.c_str(), 0) != 0)) {
-            UPDATER_LAST_WORD(PKG_INVALID_FILE);
+            UPDATER_LAST_WORD(PKG_INVALID_FILE, "can not access file " + fileName);
             return PKG_INVALID_FILE;
         }
         size_t fileSize = (size == 0) ? GetFileSize(fileName) : size;
         if (fileSize <= 0) {
-            UPDATER_LAST_WORD(PKG_INVALID_FILE);
+            UPDATER_LAST_WORD(PKG_INVALID_FILE, "Fail to check file size " + fileName);
             PKG_LOGE("Fail to check file size %s ", fileName.c_str());
             return PKG_INVALID_FILE;
         }
@@ -639,14 +639,14 @@ int32_t PkgManagerImpl::CreatePkgStream(PkgStreamPtr &stream, const std::string 
             memoryMap = FileMap(fileName);
         }
         if (memoryMap == nullptr) {
-            UPDATER_LAST_WORD(PKG_INVALID_FILE);
+            UPDATER_LAST_WORD(PKG_INVALID_FILE, "Fail to map memory " + fileName);
             PKG_LOGE("Fail to map memory %s ", fileName.c_str());
             return PKG_INVALID_FILE;
         }
         PkgBuffer buffer(memoryMap, fileSize);
         stream = new MemoryMapStream(this, fileName, buffer);
     } else {
-        UPDATER_LAST_WORD(-1);
+        UPDATER_LAST_WORD(-1, "type is not read or write " + fileName);
         return -1;
     }
     std::lock_guard<std::mutex> lock(mapLock_);
@@ -1093,7 +1093,7 @@ int32_t PkgManagerImpl::VerifyOtaPackage(const std::string &packagePath)
     int32_t ret = CreatePkgStream(pkgStream, packagePath, 0, PkgStream::PkgStreamType_Read);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("CreatePackage fail %s", packagePath.c_str());
-        UPDATER_LAST_WORD(PKG_INVALID_FILE);
+        UPDATER_LAST_WORD(PKG_INVALID_FILE, "CreatePackage fail");
         return ret;
     }
 
@@ -1101,7 +1101,7 @@ int32_t PkgManagerImpl::VerifyOtaPackage(const std::string &packagePath)
     ret = verifyUtil.VerifyPackageSign(pkgStream, packagePath);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("Verify zpkcs7 signature failed.");
-        UPDATER_LAST_WORD(ret);
+        UPDATER_LAST_WORD(ret, "Verify zpkcs7 signature failed");
         ClosePkgStream(pkgStream);
         return ret;
     }

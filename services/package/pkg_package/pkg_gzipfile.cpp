@@ -262,7 +262,7 @@ int32_t GZipFileEntry::DecodeHeader(PkgBuffer &buffer, size_t headerOffset, size
     PkgStreamPtr inStream = pkgFile_->GetPkgStream();
     if (inStream == nullptr || buffer.buffer == nullptr) {
         PKG_LOGE("outStream or inStream null for %s", fileInfo_.fileInfo.identity.c_str());
-        UPDATER_LAST_WORD(PKG_INVALID_PARAM);
+        UPDATER_LAST_WORD(PKG_INVALID_PARAM, "outStream or inStream null for " + fileInfo_.fileInfo.identity);
         return PKG_INVALID_PARAM;
     }
     size_t offset = sizeof(GZipHeader);
@@ -295,7 +295,7 @@ int32_t GZipFileEntry::DecodeHeader(PkgBuffer &buffer, size_t headerOffset, size
     int32_t ret = inStream->Read(buffer, blockOffset, buffer.length, readLen);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("Fail to read file %s", inStream->GetFileName().c_str());
-        UPDATER_LAST_WORD(ret);
+        UPDATER_LAST_WORD(ret, "Fail to read file " + inStream->GetFileName());
         return ret;
     }
     fileInfo_.fileInfo.unpackedSize = ReadLE32(buffer.buffer + sizeof(uint32_t));
@@ -354,11 +354,11 @@ int32_t GZipPkgFile::SavePackage(size_t &offset)
 
 int32_t GZipPkgFile::LoadPackage(std::vector<std::string> &fileNames, VerifyFunction verifier)
 {
-    UPDATER_INIT_RECORD;
+    Updater::UPDATER_INIT_RECORD;
     UNUSED(verifier);
     if (!CheckState({ PKG_FILE_STATE_IDLE }, PKG_FILE_STATE_WORKING)) {
         PKG_LOGE("error state curr %d ", state_);
-        UPDATER_LAST_WORD(PKG_INVALID_STATE);
+        UPDATER_LAST_WORD(PKG_INVALID_STATE, "error state curr");
         return PKG_INVALID_STATE;
     }
     PKG_LOGI("LoadPackage %s ", pkgStream_->GetFileName().c_str());
@@ -368,7 +368,7 @@ int32_t GZipPkgFile::LoadPackage(std::vector<std::string> &fileNames, VerifyFunc
     int32_t ret = pkgStream_->Read(buffer, srcOffset, buffer.length, readLen);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("Fail to read file %s", pkgStream_->GetFileName().c_str());
-        UPDATER_LAST_WORD(ret);
+        UPDATER_LAST_WORD(ret, "Fail to read file " + pkgStream_->GetFileName());
         return ret;
     }
 
@@ -376,20 +376,20 @@ int32_t GZipPkgFile::LoadPackage(std::vector<std::string> &fileNames, VerifyFunc
     // Check magic number
     if (header->magic != GZIP_MAGIC) {
         PKG_LOGE("Invalid gzip file %s", pkgStream_->GetFileName().c_str());
-        UPDATER_LAST_WORD(PKG_INVALID_STATE);
+        UPDATER_LAST_WORD(PKG_INVALID_STATE, "Invalid gzip file " + pkgStream_->GetFileName());
         return PKG_INVALID_FILE;
     }
     // Does not support encryption
     if ((header->flags & ENCRYPTED) != 0) {
         PKG_LOGE("Not support encrypted ");
-        UPDATER_LAST_WORD(PKG_INVALID_STATE);
+        UPDATER_LAST_WORD(PKG_INVALID_STATE, "Not support encrypted");
         return PKG_INVALID_FILE;
     }
 
     GZipFileEntry *entry = new GZipFileEntry(this, nodeId_++);
     if (entry == nullptr) {
         PKG_LOGE("Fail create gzip node for %s", pkgStream_->GetFileName().c_str());
-        UPDATER_LAST_WORD(PKG_INVALID_STATE);
+        UPDATER_LAST_WORD(PKG_INVALID_STATE, "Fail create gzip node for " + pkgStream_->GetFileName());
         return PKG_LZ4_FINISH;
     }
     ret = entry->DecodeHeader(buffer, srcOffset, srcOffset, readLen);
