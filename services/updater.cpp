@@ -482,7 +482,7 @@ UpdaterStatus CheckProcStatus(pid_t pid, bool retryUpdate)
     return UPDATE_SUCCESS;
 }
 
-static std::string GetBinaryPath()
+static std::string GetBinaryPath(PkgManager::PkgManagerPtr pkgManager, UpdaterParams &upParams)
 {
     std::string fullPath = GetWorkPath() + std::string(UPDATER_BINARY);
     (void)Utils::DeleteFile(fullPath);
@@ -515,7 +515,7 @@ UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, UpdaterPara
 
     int pipeRead = pfd[0];
     int pipeWrite = pfd[1];
-    std::string fullPath = GetBinaryPath();
+    std::string fullPath = GetBinaryPath(pkgManager, upParams);
     if (chmod(fullPath.c_str(), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) != 0) {
         LOG(ERROR) << "Failed to change mode";
     }
