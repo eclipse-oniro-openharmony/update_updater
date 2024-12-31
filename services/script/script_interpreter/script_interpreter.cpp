@@ -46,7 +46,7 @@ int32_t ScriptInterpreter::ExecuteScript(ScriptManagerImpl *manager, Hpackage::P
         delete inter;
         inter = nullptr;
         USCRIPT_LOGE("Fail to loadScript script %s", pkgStream->GetFileName().c_str());
-        UPDATER_LAST_WORD(ret, "Fail to loadScript script" + pkgStream->GetFileName);
+        UPDATER_LAST_WORD(ret, "Fail to loadScript script" + pkgStream->GetFileName());
         return ret;
     }
     ret = inter->Execute();

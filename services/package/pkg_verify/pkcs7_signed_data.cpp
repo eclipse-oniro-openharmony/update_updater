@@ -158,7 +158,7 @@ int32_t Pkcs7SignedData::Init(const uint8_t *sourceData, const uint32_t sourceDa
     BIO_free(p7Bio);
     if (CertVerify::GetInstance().Init() != 0) {
         PKG_LOGE("init cert verify fail");
-        UPDATER_LAST_WORD(-1,"init cert verify fail");
+        UPDATER_LAST_WORD(-1, "init cert verify fail");
         return -1;
     }
     return 0;

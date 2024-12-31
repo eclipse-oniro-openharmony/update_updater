@@ -340,7 +340,7 @@ int SetupPartitions(bool isMountData)
         }
         if (UmountForPath(mountPoint) != 0) {
             LOG(ERROR) << "Umount " << mountPoint << " failed";
-            UPDATER_LAST_WORD(-1, "Umount " mountPoint + " failed");
+            UPDATER_LAST_WORD(-1, "Umount " + mountPoint + " failed");
             return -1;
         }
     }

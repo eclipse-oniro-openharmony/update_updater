@@ -191,7 +191,7 @@ int32_t ScriptManagerImpl::ExtractAndExecuteScript(PkgManager::PkgManagerPtr man
     if (scriptVerifier_ == nullptr || !scriptVerifier_->VerifyHashData("build_tools/", scriptName, outStream)) {
         manager->ClosePkgStream(outStream);
         USCRIPT_LOGE("verify script %s by hash signed data failed", scriptName.c_str());
-        UPDATER_LAST_WORD(ret, "verify script by hash signed data failed" + scriptName.c_str());
+        UPDATER_LAST_WORD(ret, "verify script by hash signed data failed" + scriptName);
         return USCRIPT_INVALID_SCRIPT;
     }
     ret = ScriptInterpreter::ExecuteScript(this, outStream);

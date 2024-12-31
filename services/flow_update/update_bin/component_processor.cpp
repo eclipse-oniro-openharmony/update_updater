@@ -157,8 +157,7 @@ int32_t RawImgProcessor::PreProcess(Uscript::UScriptEnv &env)
     if (GetWritePathAndOffset(partitionName, writePath, offset, partitionSize) != USCRIPT_SUCCESS) {
         LOG(ERROR) << "Get partition:%s WritePathAndOffset fail \'" <<
             partitionName.substr(1, partitionName.size()) << "\'.";
-        UPDATER_LAST_WORD("Get partition:%s WritePathAndOffset fail \'" <<
-            partitionName.substr(1, partitionName.size()) << "\'.");
+        UPDATER_LAST_WORD("WritePathAndOffset fail", partitionName);
         return USCRIPT_ERROR_EXECUTE;
     }
     const FileInfo *info = env.GetPkgManager()->GetFileInfo(partitionName);
@@ -170,7 +169,7 @@ int32_t RawImgProcessor::PreProcess(Uscript::UScriptEnv &env)
 #ifdef UPDATER_USE_PTABLE
     if (partitionSize < info->unpackedSize) {
         LOG(ERROR) << "partition size: " << partitionSize << " is short than image size: " << totalSize_;
-        UPDATER_LAST_WORD(partitionName, "partition size: " << partitionSize << " is short than image size: " << totalSize_);
+        UPDATER_LAST_WORD(partitionName, partitionSize, totalSize_);
         return USCRIPT_ERROR_EXECUTE;
     }
 #endif

@@ -456,7 +456,7 @@ int32_t UpgradePkgFile::LoadPackage(std::vector<std::string> &fileNames, VerifyF
         GetUpgradeSignatureLen() + UPGRADE_RESERVE_LEN;
     if (fileLen < buffSize) {
         PKG_LOGE("Invalid file %s fileLen:%zu ", pkgStream_->GetFileName().c_str(), fileLen);
-        UPDATER_LAST_WORD(PKG_INVALID_STATE, "Invalid file " + pkgStream_->GetFileName().c_str(), fileLen);
+        UPDATER_LAST_WORD(PKG_INVALID_STATE, "Invalid file " + pkgStream_->GetFileName(), fileLen);
         return PKG_INVALID_FILE;
     }
 
