@@ -535,8 +535,8 @@ bool UfsPtable::CorrectBufByPtnList(uint8_t *imageBuf, uint64_t imgBufSize, cons
                    << " dstInfo.size:" << dstSize;
         return false;
     }
-    if (usrDataPtnIndex_ < 0 || endPtnIndex_ < 0 || usrDataPtnIndex_ >= dstSize
-        || endPtnIndex_ >= dstSize) {
+    if (usrDataPtnIndex_ < 0 || endPtnIndex_ < 0 || usrDataPtnIndex_ >= dstSize ||
+        endPtnIndex_ >= dstSize) {
         LOG(ERROR) << "invaild dst ptn info list";
         return false;
     }
