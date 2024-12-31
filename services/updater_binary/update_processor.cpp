@@ -197,8 +197,7 @@ int32_t UScriptInstructionRawImageWrite::Execute(Uscript::UScriptEnv &env, Uscri
 
     if (env.IsRetry()) {
         LOG(DEBUG) << "Retry updater, check if current partition updated already during last time";
-        bool isUpdated = PartitionRecord::GetInstance().IsPartitionUpdated(partitionName);
-        if (isUpdated) {
+        if (PartitionRecord::GetInstance().IsPartitionUpdated(partitionName)) {
             LOG(INFO) << partitionName << " already updated, skip";
             return USCRIPT_SUCCESS;
         }

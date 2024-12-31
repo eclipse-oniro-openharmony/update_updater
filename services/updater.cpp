@@ -43,6 +43,7 @@
 #ifdef UPDATER_USE_PTABLE
 #include "ptable_parse/ptable_manager.h"
 #endif
+#include "scope_guard.h"
 #include "updater/hwfault_retry.h"
 #include "updater/updater_preprocess.h"
 #include "updater/updater_const.h"
@@ -82,7 +83,7 @@ int32_t ExtractUpdaterBinary(PkgManager::PkgManagerPtr manager, std::string &pac
     if (!verifier.LoadHashDataAndPkcs7(packagePath) ||
         !verifier.VerifyHashData("build_tools/", updaterBinary, outStream)) {
         LOG(ERROR) << "verify updater_binary failed";
-        UPDATER_LAST_WORD(UPDATE_CORRUPT,"verify updater_binary failed");
+        UPDATER_LAST_WORD(UPDATE_CORRUPT, "verify updater_binary failed");
         return UPDATE_CORRUPT;
     }
     manager->ClosePkgStream(outStream);
@@ -166,11 +167,13 @@ std::vector<uint64_t> GetStashSizeList(const UpdaterParams &upParams)
             UPDATER_LAST_WORD(UPDATE_CORRUPT, "pkgManager is nullptr");
             return std::vector<uint64_t> {};
         }
+        ON_SCOPE_EXIT(releasePackage) {
+            PkgManager::ReleasePackageInstance(pkgManager);
+        }
 
         std::vector<std::string> fileIds;
         if (pkgManager->LoadPackageWithoutUnPack(upParams.updatePackage[i], fileIds) != PKG_SUCCESS) {
             LOG(ERROR) << "LoadPackageWithoutUnPack failed " << upParams.updatePackage[i];
-            PkgManager::ReleasePackageInstance(pkgManager);
             UPDATER_LAST_WORD(UPDATE_CORRUPT, "LoadPackageWithoutUnPack failed");
             return std::vector<uint64_t> {};
         }
@@ -179,7 +182,6 @@ std::vector<uint64_t> GetStashSizeList(const UpdaterParams &upParams)
         if (info == nullptr) {
             LOG(INFO) << "all_max_stash not exist " << upParams.updatePackage[i];
             stashSizeList.push_back(0);
-            PkgManager::ReleasePackageInstance(pkgManager);
             continue;
         }
 
@@ -188,20 +190,17 @@ std::vector<uint64_t> GetStashSizeList(const UpdaterParams &upParams)
             PkgStream::PkgStreamType_MemoryMap);
         if (outStream == nullptr || ret != PKG_SUCCESS) {
             LOG(ERROR) << "Create stream fail " << maxStashFileName << " in " << upParams.updatePackage[i];
-            PkgManager::ReleasePackageInstance(pkgManager);
             UPDATER_LAST_WORD(UPDATE_CORRUPT, "CreatePkgStream failed");
             return std::vector<uint64_t> {};
         }
 
         if (pkgManager->ExtractFile(maxStashFileName, outStream) != PKG_SUCCESS) {
             LOG(ERROR) << "ExtractFile fail " << maxStashFileName << " in " << upParams.updatePackage[i];
-            PkgManager::ReleasePackageInstance(pkgManager);
             UPDATER_LAST_WORD(UPDATE_CORRUPT, "ExtractFile failed");
             return std::vector<uint64_t> {};
         }
         int64_t maxStashSize = 0;
         if (!ConvertStrToLongLong(outStream, maxStashSize)) {
-            PkgManager::ReleasePackageInstance(pkgManager);
             UPDATER_LAST_WORD(UPDATE_CORRUPT, "ConvertStrToLongLong failed");
             return std::vector<uint64_t> {};
         }
@@ -483,6 +482,22 @@ UpdaterStatus CheckProcStatus(pid_t pid, bool retryUpdate)
     return UPDATE_SUCCESS;
 }
 
+static std::string GetBinaryPath()
+{
+    std::string fullPath = GetWorkPath() + std::string(UPDATER_BINARY);
+    (void)Utils::DeleteFile(fullPath);
+
+    if (ExtractUpdaterBinary(pkgManager, upParams.updatePackage[upParams.pkgLocation], UPDATER_BINARY) != 0) {
+        LOG(INFO) << "There is no valid updater_binary in package, use updater_binary in device";
+        fullPath = "/bin/updater_binary";
+    }
+
+#ifdef UPDATER_UT
+    fullPath = "/data/updater/updater_binary";
+#endif
+    return fullPath;
+}
+
 UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, UpdaterParams &upParams)
 {
     UPDATER_INIT_RECORD;
@@ -500,17 +515,7 @@ UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, UpdaterPara
 
     int pipeRead = pfd[0];
     int pipeWrite = pfd[1];
-    std::string fullPath = GetWorkPath() + std::string(UPDATER_BINARY);
-    (void)Utils::DeleteFile(fullPath);
-
-    if (ExtractUpdaterBinary(pkgManager, upParams.updatePackage[upParams.pkgLocation], UPDATER_BINARY) != 0) {
-        LOG(INFO) << "There is no valid updater_binary in package, use updater_binary in device";
-        fullPath = "/bin/updater_binary";
-    }
-
-#ifdef UPDATER_UT
-    fullPath = "/data/updater/updater_binary";
-#endif
+    std::string fullPath = GetBinaryPath();
 
     if (chmod(fullPath.c_str(), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) != 0) {
         LOG(ERROR) << "Failed to change mode";

@@ -296,8 +296,7 @@ int32_t PkgManagerImpl::LoadPackage(const std::string &packagePath, const std::s
     PkgFile::PkgType pkgType = GetPkgTypeByName(packagePath);
     unzipToFile_ = ((pkgType == PkgFile::PKG_TYPE_GZIP) ? true : unzipToFile_);
     if (pkgType == PkgFile::PKG_TYPE_UPGRADE) {
-        int32_t ret = LoadPackage(packagePath, fileIds, pkgType);
-        if (ret != PKG_SUCCESS) {
+        if (LoadPackage(packagePath, fileIds, pkgType) != PKG_SUCCESS) {
             ClearPkgFile();
             UPDATER_LAST_WORD(ret, "LoadPackage failed");
             PKG_LOGE("Parse %s fail ", packagePath.c_str());
