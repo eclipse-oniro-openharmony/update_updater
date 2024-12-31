@@ -300,7 +300,7 @@ int32_t PkgManagerImpl::LoadPackage(const std::string &packagePath, const std::s
             ClearPkgFile();
             UPDATER_LAST_WORD("LoadPackage failed", packagePath);
             PKG_LOGE("Parse %s fail ", packagePath.c_str());
-            return ret;
+            return PKG_INVALID_FILE;
         }
     } else if (pkgType != PkgFile::PKG_TYPE_NONE) {
         std::vector<std::string> innerFileNames;
