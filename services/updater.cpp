@@ -169,7 +169,7 @@ std::vector<uint64_t> GetStashSizeList(const UpdaterParams &upParams)
         }
         ON_SCOPE_EXIT(releasePackage) {
             PkgManager::ReleasePackageInstance(pkgManager);
-        }
+        };
 
         std::vector<std::string> fileIds;
         if (pkgManager->LoadPackageWithoutUnPack(upParams.updatePackage[i], fileIds) != PKG_SUCCESS) {
@@ -516,7 +516,6 @@ UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, UpdaterPara
     int pipeRead = pfd[0];
     int pipeWrite = pfd[1];
     std::string fullPath = GetBinaryPath();
-
     if (chmod(fullPath.c_str(), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) != 0) {
         LOG(ERROR) << "Failed to change mode";
     }
