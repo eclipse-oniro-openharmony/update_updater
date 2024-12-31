@@ -298,7 +298,7 @@ int32_t PkgManagerImpl::LoadPackage(const std::string &packagePath, const std::s
     if (pkgType == PkgFile::PKG_TYPE_UPGRADE) {
         if (LoadPackage(packagePath, fileIds, pkgType) != PKG_SUCCESS) {
             ClearPkgFile();
-            UPDATER_LAST_WORD(ret, "LoadPackage failed");
+            UPDATER_LAST_WORD("LoadPackage failed", packagePath);
             PKG_LOGE("Parse %s fail ", packagePath.c_str());
             return ret;
         }
