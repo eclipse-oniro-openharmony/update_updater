@@ -67,10 +67,7 @@ public:
     virtual bool GetPtableImageBuffer(uint8_t *imageBuf, const uint32_t imgBufSize) = 0;
     virtual void AddChildPtable(std::unique_ptr<Ptable> child) {}
     virtual bool CorrectBufByPtnList(uint8_t *imageBuf, uint64_t imgBufSize, const std::vector<PtnInfo> &srcInfo,
-                                    const std::vector<PtnInfo> &dstInfo)
-    {
-        return false;
-    }
+                                     const std::vector<PtnInfo> &dstInfo);
 
     int GetEndPtnIndex()
     {

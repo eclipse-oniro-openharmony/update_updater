@@ -528,13 +528,15 @@ uint8_t *UfsPtable::GetPtableImageUfsLunEntryStart(uint8_t *imageBuf, const uint
 bool UfsPtable::CorrectBufByPtnList(uint8_t *imageBuf, uint64_t imgBufSize, const std::vector<PtnInfo> &srcInfo,
                                     const std::vector<PtnInfo> &dstInfo)
 {
-    if (imageBuf == nullptr || imgBufSize == 0 || srcInfo.size() != dstInfo.size()) {
-        LOG(ERROR) << "invalid input. imgBufSize : " << imgBufSize << " srcInfo.size: " << srcInfo.size()
-                   << " dstInfo.size:" << dstInfo.size();
+    int srcSize = static_cast<int>(srcInfo.size());
+    int dstSize = static_cast<int>(dstInfo.size());
+    if (imageBuf == nullptr || imgBufSize == 0 || srcSize != dstSize) {
+        LOG(ERROR) << "invalid input. imgBufSize : " << imgBufSize << " srcInfo.size: " << srcSize
+                   << " dstInfo.size:" << dstSize;
         return false;
     }
-    if (usrDataPtnIndex_ < 0 || endPtnIndex_ < 0 || usrDataPtnIndex_ >= dstInfo.size()
-        || endPtnIndex_ >= dstInfo.size()) {
+    if (usrDataPtnIndex_ < 0 || endPtnIndex_ < 0 || usrDataPtnIndex_ >= dstSize
+        || endPtnIndex_ >= dstSize) {
         LOG(ERROR) << "invaild dst ptn info list";
         return false;
     }
@@ -552,7 +554,7 @@ bool UfsPtable::CorrectBufByPtnList(uint8_t *imageBuf, uint64_t imgBufSize, cons
         PUT_LONG_LONG(newEntryBuf.data() + FIRST_LBA_OFFSET, dstInfo[i].startAddr / GetDeviceBlockSize());
         PUT_LONG_LONG(newEntryBuf.data() + LAST_LBA_OFFSET,
                       (dstInfo[i].startAddr + dstInfo[i].partitionSize) / GetDeviceBlockSize() - 1);
-        if (srcInfo[i].gptEntryBufOffset > editLen - PARTITION_ENTRY_SIZE) {
+        if (srcInfo[i].gptEntryBufOffset > static_cast<int>(editLen - PARTITION_ENTRY_SIZE)) {
             LOG(ERROR) << "srcInfo[" << i << "] error. gptEntryBufOffset = " << srcInfo[i].gptEntryBufOffset;
             return false;
         }
