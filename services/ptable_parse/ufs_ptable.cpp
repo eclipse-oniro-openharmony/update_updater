@@ -196,9 +196,8 @@ void UfsPtable::UfsReadGptEntry(const uint8_t *gptImage, const uint32_t lun,
                 typeGuid, sizeof(typeGuid));
             newPtnInfo.isTailPart = tailPartFlag;
             newPtnInfo.lun = lun;
-            // 2 : pmbr and gpt header
-            newPtnInfo.gptEntryBufOffset = static_cast<int>((partition0 + i) * blockSize +
-                                                            j * PARTITION_ENTRY_SIZE - 2 * blockSize);
+            newPtnInfo.gptEntryBufOffset = static_cast<int>((partition0 + i) * blockSize + j * PARTITION_ENTRY_SIZE -
+                                                            2 * blockSize); // 2 : pmbr and gpt header
             if (newPtnInfo.dispName == USERDATA_PARTITION) {
                 tailPartFlag = true;
                 usrDataPtnIndex_ = std::distance(partitionInfo_.begin(), startIter);
