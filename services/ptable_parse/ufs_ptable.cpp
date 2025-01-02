@@ -197,7 +197,7 @@ void UfsPtable::UfsReadGptEntry(const uint8_t *gptImage, const uint32_t lun,
             newPtnInfo.isTailPart = tailPartFlag;
             newPtnInfo.lun = lun;
             // 2 : pmbr and gpt header
-            newPtnInfo.gptEntryBufOffset = (partition0 + i) * blockSize + j * PARTITION_ENTRY_SIZE - 2 * blockSize;
+            newPtnInfo.gptEntryBufOffset = static_cast<int>((partition0 + i) * blockSize + j * PARTITION_ENTRY_SIZE - 2 * blockSize);
             if (newPtnInfo.dispName == USERDATA_PARTITION) {
                 tailPartFlag = true;
                 usrDataPtnIndex_ = std::distance(partitionInfo_.begin(), startIter);
@@ -208,7 +208,7 @@ void UfsPtable::UfsReadGptEntry(const uint8_t *gptImage, const uint32_t lun,
     }
     if (tailPartFlag) {
         endPtnIndex_ = static_cast<int>(std::distance(partitionInfo_.begin(), startIter)) - 1;
-        startPtnIndex_ = endPtnIndex_  + 1 - count;
+        startPtnIndex_ = endPtnIndex_  + 1 - static_cast<int>(count);
         hasTailpart_ = partitionInfo_[endPtnIndex_].isTailPart;
     }
     return;
