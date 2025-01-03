@@ -198,17 +198,18 @@ int UpdatePartitions::SetNewPartition(const std::string &filePath, const FileInf
 
 int32_t UpdatePartitions::Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context)
 {
+    UPDATER_INIT_RECORD;
     LOG(INFO) << "enter UpdatePartitions::Execute ";
     if (context.GetParamCount() != 1) {
         LOG(ERROR) << "Invalid UpdatePartitions::Execute param";
-        UPDATER_LAST_WORD(USCRIPT_INVALID_PARAM);
+        UPDATER_LAST_WORD(USCRIPT_INVALID_PARAM, "Invalid UpdatePartitions::Execute param");
         return USCRIPT_INVALID_PARAM;
     }
     std::string filePath;
     int32_t ret = context.GetParam(0, filePath);
     if (ret != USCRIPT_SUCCESS) {
         LOG(ERROR) << "Fail to get filePath";
-        UPDATER_LAST_WORD(USCRIPT_INVALID_PARAM);
+        UPDATER_LAST_WORD(ret, "Fail to get filePath");
         return USCRIPT_INVALID_PARAM;
     } else {
         LOG(INFO) << "UpdatePartitions::Execute filePath " << filePath;
@@ -216,7 +217,7 @@ int32_t UpdatePartitions::Execute(Uscript::UScriptEnv &env, Uscript::UScriptCont
     const FileInfo *info = env.GetPkgManager()->GetFileInfo(filePath);
     if (info == nullptr) {
         LOG(ERROR) << "Error to get file info";
-        UPDATER_LAST_WORD(USCRIPT_INVALID_PARAM);
+        UPDATER_LAST_WORD(USCRIPT_INVALID_PARAM, "Error to get file info");
         return USCRIPT_ERROR_EXECUTE;
     }
     return SetNewPartition(filePath, info, env);

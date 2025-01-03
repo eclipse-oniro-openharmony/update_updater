@@ -68,6 +68,7 @@ PkgEntryPtr PkgFileImpl::AddPkgEntry(const std::string &fileName)
 
 int32_t PkgFileImpl::ExtractFile(const PkgEntryPtr node, PkgStreamPtr output)
 {
+    Updater::UPDATER_INIT_RECORD;
     PKG_LOGI("ExtractFile %s", output->GetFileName().c_str());
     if (!CheckState({PKG_FILE_STATE_WORKING}, PKG_FILE_STATE_WORKING)) {
         PKG_LOGE("error state curr %d ", state_);

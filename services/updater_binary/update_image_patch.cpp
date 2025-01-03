@@ -173,10 +173,11 @@ std::string USInstrImagePatch::GetSourceFile(const ImagePatchPara &para)
 
 int32_t USInstrImagePatch::ExecuteImagePatch(Uscript::UScriptEnv &env, Uscript::UScriptContext &context)
 {
+    UPDATER_INIT_RECORD;
     ImagePatchPara para {};
     int32_t ret = GetParam(context, para);
     if (ret != USCRIPT_SUCCESS) {
-        UPDATER_LAST_WORD(ret);
+        UPDATER_LAST_WORD(ret, "GetParam error");
         LOG(ERROR) << "GetParam error";
         return ret;
     }
@@ -191,14 +192,14 @@ int32_t USInstrImagePatch::ExecuteImagePatch(Uscript::UScriptEnv &env, Uscript::
 
     std::string srcFile = GetSourceFile(para);
     if (srcFile.empty()) {
-        UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE);
+        UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE, "get source file error");
         LOG(ERROR) << "get source file error";
         return USCRIPT_ERROR_EXECUTE;
     }
     UpdatePatch::MemMapInfo srcData {};
     ret = UpdatePatch::PatchMapFile(srcFile, srcData);
     if (ret != 0) {
-        UPDATER_LAST_WORD(ret);
+        UPDATER_LAST_WORD(ret, "Failed to mmap src file error");
         LOG(ERROR) << "Failed to mmap src file error:" << ret;
         return -1;
     }
@@ -206,7 +207,7 @@ int32_t USInstrImagePatch::ExecuteImagePatch(Uscript::UScriptEnv &env, Uscript::
     PkgManager::StreamPtr patchStream = nullptr;
     ret = CreatePatchStream(env, para, patchStream);
     if (ret != USCRIPT_SUCCESS) {
-        UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE);
+        UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE, "CreatePatchStream error");
         LOG(ERROR) << "CreatePatchStream error";
         return USCRIPT_ERROR_EXECUTE;
     }
@@ -291,14 +292,14 @@ int32_t USInstrImageShaCheck::ExecuteShaCheck(Uscript::UScriptEnv &env, Uscript:
     CheckPara para {};
     int32_t ret = GetParam(context, para);
     if (ret != USCRIPT_SUCCESS) {
-        UPDATER_LAST_WORD(ret);
+        UPDATER_LAST_WORD(ret, "GetParam error");
         LOG(ERROR) << "GetParam error";
         return ret;
     }
 
     ret = CheckHash(para);
     if (ret != USCRIPT_SUCCESS) {
-        UPDATER_LAST_WORD(ret);
+        UPDATER_LAST_WORD(ret, "CheckHash error");
         env.PostMessage(UPDATER_RETRY_TAG, VERIFY_FAILED_REBOOT);
         LOG(ERROR) << "CheckHash error";
         return ret;

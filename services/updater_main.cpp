@@ -100,24 +100,24 @@ static int OtaUpdatePreCheck(PkgManager::PkgManagerPtr pkgManager, const std::st
     UPDATER_INIT_RECORD;
     if (pkgManager == nullptr) {
         LOG(ERROR) << "pkgManager is nullptr";
-        UPDATER_LAST_WORD(PKG_INVALID_FILE);
+        UPDATER_LAST_WORD(PKG_INVALID_FILE, "pkgManager is nullptr");
         return UPDATE_CORRUPT;
     }
     char realPath[PATH_MAX + 1] = {0};
     if (realpath(packagePath.c_str(), realPath) == nullptr) {
         LOG(ERROR) << "realpath error";
-        UPDATER_LAST_WORD(PKG_INVALID_FILE);
+        UPDATER_LAST_WORD(PKG_INVALID_FILE, "realpath error");
         return PKG_INVALID_FILE;
     }
     if (access(realPath, F_OK) != 0) {
         LOG(ERROR) << "package does not exist!";
-        UPDATER_LAST_WORD(PKG_INVALID_FILE);
+        UPDATER_LAST_WORD(PKG_INVALID_FILE, "package does not exist!");
         return PKG_INVALID_FILE;
     }
 
     int32_t ret = pkgManager->VerifyOtaPackage(packagePath);
     if (ret != PKG_SUCCESS) {
-        LOG(INFO) << "VerifyOtaPackage fail ret :"<< ret;
+        LOG(INFO) << "VerifyOtaPackage fail ret :" << ret;
         UPDATER_LAST_WORD("sign", ret);
         return ret;
     }
@@ -141,13 +141,13 @@ static UpdaterStatus UpdatePreCheck(UpdaterParams &upParams, const std::string p
     if (GetUpdatePackageInfo(pkgManager, pkgPath) != PKG_SUCCESS) {
         PkgManager::ReleasePackageInstance(pkgManager);
         LOG(ERROR) << "Verify update bin file Fail!";
-        UPDATER_LAST_WORD(UPDATE_ERROR);
+        UPDATER_LAST_WORD(UPDATE_ERROR, "Verify update bin file Fail!");
         return UPDATE_ERROR;
     }
     if (PreProcess::GetInstance().DoUpdatePreProcess(upParams, pkgManager) != PKG_SUCCESS) {
         PkgManager::ReleasePackageInstance(pkgManager);
         LOG(ERROR) << "Version Check Fail!";
-        UPDATER_LAST_WORD(UPDATE_ERROR);
+        UPDATER_LAST_WORD(UPDATE_ERROR, "Version Check Fail!");
         return UPDATE_ERROR;
     }
     if (PreProcess::GetInstance().DoUpdateClear() != 0) {
@@ -170,13 +170,14 @@ __attribute__((weak)) void UpdaterVerifyFailEntry(bool verifyret)
 
 static UpdaterStatus VerifyPackages(UpdaterParams &upParams)
 {
+    UPDATER_INIT_RECORD;
     LOG(INFO) << "Verify packages start...";
     UPDATER_UI_INSTANCE.ShowProgressPage();
     UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_VERIFYPKG));
 
     if (upParams.callbackProgress == nullptr) {
         UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_VERIFYPKGFAIL), true);
-        UPDATER_LAST_WORD(UPDATE_CORRUPT);
+        UPDATER_LAST_WORD(UPDATE_CORRUPT, "upParams.callbackProgress is null");
         return UPDATE_CORRUPT;
     }
     upParams.callbackProgress(0.0);
@@ -208,7 +209,7 @@ static UpdaterStatus VerifyPackages(UpdaterParams &upParams)
         upParams.installTime[i] = endTime - startTime;
     }
     if (VerifySpecialPkgs(upParams) != PKG_SUCCESS) {
-        UPDATER_LAST_WORD(UPDATE_CORRUPT);
+        UPDATER_LAST_WORD(UPDATE_CORRUPT, "VerifySpecialPkgs failed");
         return UPDATE_CORRUPT;
     }
     ProgressSmoothHandler(UPDATER_UI_INSTANCE.GetCurrentPercent(),
@@ -286,13 +287,14 @@ bool IsBatteryCapacitySufficient()
 
 UpdaterStatus InstallUpdaterPackage(UpdaterParams &upParams, PkgManager::PkgManagerPtr manager)
 {
+    UPDATER_INIT_RECORD;
     UpdaterStatus status = UPDATE_UNKNOWN;
     STAGE(UPDATE_STAGE_BEGIN) << "Install package";
     if (upParams.retryCount == 0) {
         // First time enter updater, record retryCount in case of abnormal reset.
         if (!PartitionRecord::GetInstance().ClearRecordPartitionOffset()) {
             LOG(ERROR) << "ClearRecordPartitionOffset failed";
-            UPDATER_LAST_WORD(UPDATE_ERROR);
+            UPDATER_LAST_WORD(UPDATE_ERROR, "ClearRecordPartitionOffset failed");
             return UPDATE_ERROR;
         }
         SetMessageToMisc(upParams.miscCmd, upParams.retryCount + 1, "retry_count");
@@ -344,7 +346,7 @@ static UpdaterStatus CalcProgress(const UpdaterParams &upParams,
     pkgStartPosition.push_back(VERIFY_PERCENT);
     if (allPkgSize == 0) {
         LOG(ERROR) << "All packages's size is 0.";
-        UPDATER_LAST_WORD(UPDATE_ERROR);
+        UPDATER_LAST_WORD(UPDATE_ERROR, "All packages's size is 0.");
         return UPDATE_ERROR;
     }
     int64_t startSize = 0;
@@ -362,6 +364,7 @@ static UpdaterStatus CalcProgress(const UpdaterParams &upParams,
 
 static int CheckMountData()
 {
+    UPDATER_INIT_RECORD;
     constexpr int retryTime = 3;
     for (int i = 0; i < retryTime; i++) {
         if (SetupPartitions() == 0) {
@@ -371,7 +374,7 @@ static int CheckMountData()
         Utils::UsSleep(DISPLAY_TIME);
     }
     UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_SETPART_FAIL), true);
-    UPDATER_LAST_WORD(UPDATE_ERROR);
+    UPDATER_LAST_WORD(UPDATE_ERROR, "retry mount userdata more than three times");
     return UPDATE_ERROR;
 }
 
@@ -404,13 +407,13 @@ static UpdaterStatus PreUpdatePackages(UpdaterParams &upParams)
 
     // Only handle UPATE_ERROR and UPDATE_SUCCESS here.Let package verify handle others.
     if (IsSpaceCapacitySufficient(upParams) == UPDATE_ERROR) {
-        UPDATER_LAST_WORD(status);
+        UPDATER_LAST_WORD(status, "space nott enough");
         return status;
     }
     if (upParams.retryCount == 0 && !IsBatteryCapacitySufficient()) {
         UPDATER_UI_INSTANCE.ShowUpdInfo(TR(LOG_LOWPOWER));
         UPDATER_UI_INSTANCE.Sleep(UI_SHOW_DURATION);
-        UPDATER_LAST_WORD(UPDATE_ERROR);
+        UPDATER_LAST_WORD(UPDATE_ERROR, "Battery is not sufficient for install package.");
         LOG(ERROR) << "Battery is not sufficient for install package.";
         return UPDATE_SKIP;
     }
@@ -418,7 +421,7 @@ static UpdaterStatus PreUpdatePackages(UpdaterParams &upParams)
 #ifdef UPDATER_USE_PTABLE
     if (!PtablePreProcess::GetInstance().DoPtableProcess(upParams)) {
         LOG(ERROR) << "DoPtableProcess failed";
-        UPDATER_LAST_WORD(UPDATE_ERROR);
+        UPDATER_LAST_WORD(UPDATE_ERROR, "DoPtableProcess failed");
         return UPDATE_ERROR;
     }
 #endif
@@ -427,6 +430,7 @@ static UpdaterStatus PreUpdatePackages(UpdaterParams &upParams)
 
 static UpdaterStatus DoInstallPackages(UpdaterParams &upParams, std::vector<double> &pkgStartPosition)
 {
+    UPDATER_INIT_RECORD;
     UpdaterStatus status = UPDATE_UNKNOWN;
     if (upParams.pkgLocation == upParams.updatePackage.size()) {
         LOG(WARNING) << "all packages has been installed, directly return success";
@@ -454,7 +458,7 @@ static UpdaterStatus DoInstallPackages(UpdaterParams &upParams, std::vector<doub
         if (status != UPDATE_SUCCESS) {
             LOG(ERROR) << "InstallUpdaterPackage failed! Pkg is " << upParams.updatePackage[upParams.pkgLocation];
             if (!CheckResultFail()) {
-                UPDATER_LAST_WORD(status);
+                UPDATER_LAST_WORD(status, "InstallUpdaterPackage failed");
             }
             PkgManager::ReleasePackageInstance(manager);
             return status;
@@ -477,7 +481,7 @@ UpdaterStatus DoUpdatePackages(UpdaterParams &upParams)
     double updateStartPosition = 0.0;
     status = CalcProgress(upParams, pkgStartPosition, updateStartPosition);
     if (status != UPDATE_SUCCESS) {
-        UPDATER_LAST_WORD(status);
+        UPDATER_LAST_WORD(status, "CalcProgress failed");
         return status;
     }
     for (unsigned int i = 0; i < upParams.updatePackage.size(); i++) {
@@ -493,7 +497,7 @@ UpdaterStatus DoUpdatePackages(UpdaterParams &upParams)
     upParams.callbackProgress(value);
     status = DoInstallPackages(upParams, pkgStartPosition);
     if (status != UPDATE_SUCCESS) {
-        UPDATER_LAST_WORD(status);
+        UPDATER_LAST_WORD(status, "DoInstallPackages failed");
         return status;
     }
     if (upParams.forceUpdate) {

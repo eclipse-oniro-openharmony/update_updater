@@ -43,6 +43,7 @@
 #ifdef UPDATER_USE_PTABLE
 #include "ptable_parse/ptable_manager.h"
 #endif
+#include "scope_guard.h"
 #include "updater/hwfault_retry.h"
 #include "updater/updater_preprocess.h"
 #include "updater/updater_const.h"
@@ -63,25 +64,26 @@ int g_tmpValue;
 int32_t ExtractUpdaterBinary(PkgManager::PkgManagerPtr manager, std::string &packagePath,
     const std::string &updaterBinary)
 {
+    UPDATER_INIT_RECORD;
     PkgManager::StreamPtr outStream = nullptr;
     int32_t ret = manager->CreatePkgStream(outStream,  GetWorkPath() + updaterBinary,
         0, PkgStream::PkgStreamType_Write);
     if (ret != PKG_SUCCESS) {
         LOG(ERROR) << "ExtractUpdaterBinary create stream fail";
-        UPDATER_LAST_WORD(UPDATE_CORRUPT);
+        UPDATER_LAST_WORD(UPDATE_CORRUPT, "ExtractUpdaterBinary create stream fail");
         return UPDATE_CORRUPT;
     }
     ret = manager->ExtractFile(updaterBinary, outStream);
     if (ret != PKG_SUCCESS) {
         LOG(ERROR) << "ExtractUpdaterBinary extract file failed";
-        UPDATER_LAST_WORD(UPDATE_CORRUPT);
+        UPDATER_LAST_WORD(UPDATE_CORRUPT, "ExtractUpdaterBinary extract file failed");
         return UPDATE_CORRUPT;
     }
     HashDataVerifier verifier {manager};
     if (!verifier.LoadHashDataAndPkcs7(packagePath) ||
         !verifier.VerifyHashData("build_tools/", updaterBinary, outStream)) {
         LOG(ERROR) << "verify updater_binary failed";
-        UPDATER_LAST_WORD(UPDATE_CORRUPT);
+        UPDATER_LAST_WORD(UPDATE_CORRUPT, "verify updater_binary failed");
         return UPDATE_CORRUPT;
     }
     manager->ClosePkgStream(outStream);
@@ -109,7 +111,7 @@ UpdaterStatus IsSpaceCapacitySufficient(const UpdaterParams &upParams)
     std::vector<uint64_t> stashSizeList = GetStashSizeList(upParams);
     if (stashSizeList.size() == 0) {
         LOG(ERROR) << "get stash size error";
-        UPDATER_LAST_WORD(UPDATE_ERROR);
+        UPDATER_LAST_WORD(UPDATE_ERROR, "get stash size error");
         return UPDATE_ERROR;
     }
     uint64_t maxStashSize =  *max_element(stashSizeList.begin(), stashSizeList.end());
@@ -123,7 +125,7 @@ UpdaterStatus IsSpaceCapacitySufficient(const UpdaterParams &upParams)
     LOG(INFO) << "needed totalPkgSize = " << totalPkgSize;
     if (CheckStatvfs(totalPkgSize) != UPDATE_SUCCESS) {
         LOG(ERROR) << "CheckStatvfs error";
-        UPDATER_LAST_WORD(UPDATE_ERROR);
+        UPDATER_LAST_WORD(UPDATE_ERROR, "CheckStatvfs error");
         return UPDATE_ERROR;
     }
     return UPDATE_SUCCESS;
@@ -131,22 +133,23 @@ UpdaterStatus IsSpaceCapacitySufficient(const UpdaterParams &upParams)
 
 static bool ConvertStrToLongLong(PkgManager::StreamPtr outStream, int64_t &value)
 {
+    UPDATER_INIT_RECORD;
     PkgBuffer data {};
     if (outStream == nullptr) {
         LOG(ERROR) << "outStream is nullptr";
-        UPDATER_LAST_WORD(UPDATE_CORRUPT);
+        UPDATER_LAST_WORD(UPDATE_CORRUPT, "outStream is nullptr");
         return false;
     }
     outStream->GetBuffer(data);
     if (data.buffer == nullptr) {
         LOG(ERROR) << "data.buffer is nullptr";
-        UPDATER_LAST_WORD(UPDATE_CORRUPT);
+        UPDATER_LAST_WORD(UPDATE_CORRUPT, "data.buffer is nullptr");
         return false;
     }
     std::string str(reinterpret_cast<char*>(data.buffer), data.length);
     if (!Utils::ConvertToLongLong(str, value)) {
         LOG(ERROR) << "ConvertToLongLong failed";
-        UPDATER_LAST_WORD(UPDATE_CORRUPT);
+        UPDATER_LAST_WORD(UPDATE_CORRUPT, "ConvertToLongLong failed");
         return false;
     }
     return true;
@@ -154,21 +157,24 @@ static bool ConvertStrToLongLong(PkgManager::StreamPtr outStream, int64_t &value
 
 std::vector<uint64_t> GetStashSizeList(const UpdaterParams &upParams)
 {
+    UPDATER_INIT_RECORD;
     const std::string maxStashFileName = "all_max_stash";
     std::vector<uint64_t> stashSizeList;
     for (unsigned int i = upParams.pkgLocation; i < upParams.updatePackage.size(); i++) {
         PkgManager::PkgManagerPtr pkgManager = Hpackage::PkgManager::CreatePackageInstance();
         if (pkgManager == nullptr) {
             LOG(ERROR) << "pkgManager is nullptr";
-            UPDATER_LAST_WORD(UPDATE_CORRUPT);
+            UPDATER_LAST_WORD(UPDATE_CORRUPT, "pkgManager is nullptr");
             return std::vector<uint64_t> {};
         }
+        ON_SCOPE_EXIT(releasePackage) {
+            PkgManager::ReleasePackageInstance(pkgManager);
+        };
 
         std::vector<std::string> fileIds;
         if (pkgManager->LoadPackageWithoutUnPack(upParams.updatePackage[i], fileIds) != PKG_SUCCESS) {
             LOG(ERROR) << "LoadPackageWithoutUnPack failed " << upParams.updatePackage[i];
-            PkgManager::ReleasePackageInstance(pkgManager);
-            UPDATER_LAST_WORD(UPDATE_CORRUPT);
+            UPDATER_LAST_WORD(UPDATE_CORRUPT, "LoadPackageWithoutUnPack failed");
             return std::vector<uint64_t> {};
         }
 
@@ -176,7 +182,6 @@ std::vector<uint64_t> GetStashSizeList(const UpdaterParams &upParams)
         if (info == nullptr) {
             LOG(INFO) << "all_max_stash not exist " << upParams.updatePackage[i];
             stashSizeList.push_back(0);
-            PkgManager::ReleasePackageInstance(pkgManager);
             continue;
         }
 
@@ -185,21 +190,18 @@ std::vector<uint64_t> GetStashSizeList(const UpdaterParams &upParams)
             PkgStream::PkgStreamType_MemoryMap);
         if (outStream == nullptr || ret != PKG_SUCCESS) {
             LOG(ERROR) << "Create stream fail " << maxStashFileName << " in " << upParams.updatePackage[i];
-            PkgManager::ReleasePackageInstance(pkgManager);
-            UPDATER_LAST_WORD(UPDATE_CORRUPT);
+            UPDATER_LAST_WORD(UPDATE_CORRUPT, "CreatePkgStream failed");
             return std::vector<uint64_t> {};
         }
 
         if (pkgManager->ExtractFile(maxStashFileName, outStream) != PKG_SUCCESS) {
             LOG(ERROR) << "ExtractFile fail " << maxStashFileName << " in " << upParams.updatePackage[i];
-            PkgManager::ReleasePackageInstance(pkgManager);
-            UPDATER_LAST_WORD(UPDATE_CORRUPT);
+            UPDATER_LAST_WORD(UPDATE_CORRUPT, "ExtractFile failed");
             return std::vector<uint64_t> {};
         }
         int64_t maxStashSize = 0;
         if (!ConvertStrToLongLong(outStream, maxStashSize)) {
-            PkgManager::ReleasePackageInstance(pkgManager);
-            UPDATER_LAST_WORD(UPDATE_CORRUPT);
+            UPDATER_LAST_WORD(UPDATE_CORRUPT, "ConvertStrToLongLong failed");
             return std::vector<uint64_t> {};
         }
         stashSizeList.push_back(static_cast<uint64_t>(maxStashSize));
@@ -210,17 +212,18 @@ std::vector<uint64_t> GetStashSizeList(const UpdaterParams &upParams)
 
 int CheckStatvfs(const uint64_t totalPkgSize)
 {
+    UPDATER_INIT_RECORD;
     struct statvfs64 updaterVfs;
     if (access("/sdcard/updater", 0) == 0) {
         if (statvfs64("/sdcard", &updaterVfs) < 0) {
             LOG(ERROR) << "Statvfs read /sdcard error!";
-            UPDATER_LAST_WORD(UPDATE_ERROR);
+            UPDATER_LAST_WORD(UPDATE_ERROR, "Statvfs read /sdcard error!");
             return UPDATE_ERROR;
         }
     } else {
         if (statvfs64("/data", &updaterVfs) < 0) {
             LOG(ERROR) << "Statvfs read /data error!";
-            UPDATER_LAST_WORD(UPDATE_ERROR);
+            UPDATER_LAST_WORD(UPDATE_ERROR, "Statvfs read /data error!");
             return UPDATE_ERROR;
         }
     }
@@ -229,7 +232,7 @@ int CheckStatvfs(const uint64_t totalPkgSize)
         LOG(ERROR) << "Can not update, free space is not enough";
         UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_SPACE_NOTENOUGH), true);
         UPDATER_UI_INSTANCE.Sleep(UI_SHOW_DURATION);
-        UPDATER_LAST_WORD(UPDATE_ERROR);
+        UPDATER_LAST_WORD(UPDATE_ERROR, "Can not update, free space is not enough");
         return UPDATE_ERROR;
     }
     return UPDATE_SUCCESS;
@@ -275,13 +278,13 @@ UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, Upda
     UPDATER_UI_INSTANCE.ShowProgressPage();
     if (upParams.callbackProgress == nullptr) {
         LOG(ERROR) << "CallbackProgress is nullptr";
-        UPDATER_LAST_WORD(UPDATE_CORRUPT);
+        UPDATER_LAST_WORD(UPDATE_CORRUPT, "CallbackProgress is nullptr");
         return UPDATE_CORRUPT;
     }
     upParams.callbackProgress(upParams.initialProgress * FULL_PERCENT_PROGRESS);
     if (pkgManager == nullptr) {
         LOG(ERROR) << "pkgManager is nullptr";
-        UPDATER_LAST_WORD(UPDATE_CORRUPT);
+        UPDATER_LAST_WORD(UPDATE_CORRUPT, "pkgManager is nullptr");
         return UPDATE_CORRUPT;
     }
 
@@ -289,7 +292,7 @@ UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, Upda
         upParams.sdExtMode == SDCARD_UPDATE_FROM_DATA || Utils::CheckUpdateMode(Updater::SDCARD_INTRAL_MODE) ||
         Utils::CheckUpdateMode(Updater::FACTORY_INTERNAL_MODE)) != 0) {
         UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_SETPART_FAIL), true);
-        UPDATER_LAST_WORD(UPDATE_ERROR);
+        UPDATER_LAST_WORD(UPDATE_ERROR, "SetupPartitions failed");
         return UPDATE_ERROR;
     }
 
@@ -405,6 +408,7 @@ void HandleChildOutput(const std::string &buffer, int32_t bufferLen, bool &retry
 
 void ExcuteSubProc(const UpdaterParams &upParams, const std::string &fullPath, int pipeWrite)
 {
+    UPDATER_INIT_RECORD;
     // Set process scheduler to normal if current scheduler is
     // SCHED_FIFO, which may cause bad performance.
     int policy = syscall(SYS_sched_getscheduler, getpid());
@@ -423,17 +427,18 @@ void ExcuteSubProc(const UpdaterParams &upParams, const std::string &fullPath, i
     execl(fullPath.c_str(), fullPath.c_str(), upParams.updatePackage[upParams.pkgLocation].c_str(),
             std::to_string(pipeWrite).c_str(), retryPara.c_str(), nullptr);
     LOG(ERROR) << "Execute updater binary failed";
-    UPDATER_LAST_WORD(UPDATE_ERROR);
+    UPDATER_LAST_WORD(UPDATE_ERROR, "Execute updater binary failed");
     exit(-1);
 }
 
 UpdaterStatus HandlePipeMsg(UpdaterParams &upParams, int pipeRead, bool &retryUpdate)
 {
+    UPDATER_INIT_RECORD;
     char buffer[MAX_BUFFER_SIZE] = {0};
     FILE* fromChild = fdopen(pipeRead, "r");
     if (fromChild == nullptr) {
         LOG(ERROR) << "fdopen pipeRead failed";
-        UPDATER_LAST_WORD(UPDATE_ERROR);
+        UPDATER_LAST_WORD(UPDATE_ERROR, "fdopen pipeRead failed");
         return UPDATE_ERROR;
     }
     while (fgets(buffer, MAX_BUFFER_SIZE - 1, fromChild) != nullptr) {
@@ -477,23 +482,8 @@ UpdaterStatus CheckProcStatus(pid_t pid, bool retryUpdate)
     return UPDATE_SUCCESS;
 }
 
-UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, UpdaterParams &upParams)
+static std::string GetBinaryPath(PkgManager::PkgManagerPtr pkgManager, UpdaterParams &upParams)
 {
-    UPDATER_INIT_RECORD;
-    int pfd[DEFAULT_PIPE_NUM]; /* communication between parent and child */
-    if (pipe(pfd) < 0) {
-        LOG(ERROR) << "Create pipe failed: ";
-        UPDATER_LAST_WORD(UPDATE_ERROR);
-        return UPDATE_ERROR;
-    }
-    if (pkgManager == nullptr) {
-        LOG(ERROR) << "pkgManager is nullptr";
-        UPDATER_LAST_WORD(UPDATE_CORRUPT);
-        return UPDATE_CORRUPT;
-    }
-
-    int pipeRead = pfd[0];
-    int pipeWrite = pfd[1];
     std::string fullPath = GetWorkPath() + std::string(UPDATER_BINARY);
     (void)Utils::DeleteFile(fullPath);
 
@@ -505,7 +495,27 @@ UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, UpdaterPara
 #ifdef UPDATER_UT
     fullPath = "/data/updater/updater_binary";
 #endif
+    return fullPath;
+}
 
+UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, UpdaterParams &upParams)
+{
+    UPDATER_INIT_RECORD;
+    int pfd[DEFAULT_PIPE_NUM]; /* communication between parent and child */
+    if (pipe(pfd) < 0) {
+        LOG(ERROR) << "Create pipe failed: ";
+        UPDATER_LAST_WORD(UPDATE_ERROR, "Create pipe failed");
+        return UPDATE_ERROR;
+    }
+    if (pkgManager == nullptr) {
+        LOG(ERROR) << "pkgManager is nullptr";
+        UPDATER_LAST_WORD(UPDATE_CORRUPT, "pkgManager is nullptr");
+        return UPDATE_CORRUPT;
+    }
+
+    int pipeRead = pfd[0];
+    int pipeWrite = pfd[1];
+    std::string fullPath = GetBinaryPath(pkgManager, upParams);
     if (chmod(fullPath.c_str(), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) != 0) {
         LOG(ERROR) << "Failed to change mode";
     }
@@ -532,6 +542,7 @@ UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, UpdaterPara
     close(pipeWrite); // close write endpoint
     bool retryUpdate = false;
     if (HandlePipeMsg(upParams, pipeRead, retryUpdate) != UPDATE_SUCCESS) {
+        UPDATER_LAST_WORD(UPDATE_ERROR, "HandlePipeMsg failed");
         return UPDATE_ERROR;
     }
 

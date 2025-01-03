@@ -55,12 +55,12 @@ bool HashDataVerifier::LoadHashDataAndPkcs7(const std::string &pkgPath)
     // load pkcs7 from package
     if (!LoadPkcs7FromPackage(pkgPath)) {
         PKG_LOGE("load pkcs7 from %s failed", pkgPath.c_str());
-        UPDATER_LAST_WORD(PKG_INVALID_FILE, pkgPath);
+        UPDATER_LAST_WORD(PKG_INVALID_FILE, "LoadPkcs7FromPackage failed " + pkgPath);
         return false;
     }
     if (!LoadHashDataFromPackage()) {
         PKG_LOGE("load pkcs7 from %s failed", pkgPath.c_str());
-        UPDATER_LAST_WORD(PKG_INVALID_FILE, pkgPath);
+        UPDATER_LAST_WORD(PKG_INVALID_FILE, "LoadHashDataFromPackage failed " + pkgPath);
         return false;
     }
     return true;
@@ -83,7 +83,7 @@ bool HashDataVerifier::LoadHashDataFromPackage(void)
     auto info = manager_->GetFileInfo(UPDATER_HASH_SIGNED_DATA);
     if (info == nullptr || info->unpackedSize == 0) {
         PKG_LOGE("hash signed data not find in pkg manager");
-        UPDATER_LAST_WORD(false);
+        UPDATER_LAST_WORD(false, "hash signed data not find in pkg manager");
         return false;
     }
     // 1 more byte bigger than unpacked size to ensure a ending '\0' in buffer
@@ -91,21 +91,21 @@ bool HashDataVerifier::LoadHashDataFromPackage(void)
     int32_t ret = manager_->CreatePkgStream(outStream, "", buffer);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("create stream fail");
-        UPDATER_LAST_WORD(false);
+        UPDATER_LAST_WORD(false, "create stream fail");
         return false;
     }
     ret = manager_->ExtractFile(UPDATER_HASH_SIGNED_DATA, outStream);
     if (ret != PKG_SUCCESS) {
         manager_->ClosePkgStream(outStream);
         PKG_LOGE("extract file failed");
-        UPDATER_LAST_WORD(false);
+        UPDATER_LAST_WORD(false, "extract file failed");
         return false;
     }
     hsd_ = LoadHashSignedData(reinterpret_cast<const char *>(buffer.data.data()));
     manager_->ClosePkgStream(outStream);
     if (hsd_ == nullptr) {
         PKG_LOGE("load hash signed data failed");
-        UPDATER_LAST_WORD(false);
+        UPDATER_LAST_WORD(false, "load hash signed data failed");
         return false;
     }
     return true;
@@ -113,12 +113,12 @@ bool HashDataVerifier::LoadHashDataFromPackage(void)
 
 bool HashDataVerifier::LoadPkcs7FromPackage(const std::string &pkgPath)
 {
+    Updater::UPDATER_INIT_RECORD;
     PkgManager::StreamPtr pkgStream = nullptr;
     int32_t ret = manager_->CreatePkgStream(pkgStream, pkgPath, 0, PkgStream::PkgStreamType_Read);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("CreatePackage fail %s", pkgPath.c_str());
         UPDATER_LAST_WORD(PKG_INVALID_FILE, pkgPath);
-        UPDATER_LAST_WORD(false);
         return false;
     }
 
@@ -130,7 +130,7 @@ bool HashDataVerifier::LoadPkcs7FromPackage(const std::string &pkgPath)
         signatureSize, signature, commentTotalLenAll);
     manager_->ClosePkgStream(pkgStream);
     if (ret != PKG_SUCCESS) {
-        UPDATER_LAST_WORD(ret);
+        UPDATER_LAST_WORD(ret, "GetSignature failed");
         return false;
     }
     return pkcs7_ != nullptr && pkcs7_->ParsePkcs7Data(signature.data(), signature.size()) == 0;
@@ -145,7 +145,7 @@ bool HashDataVerifier::VerifyHashData(const std::string &preName,
     Updater::UPDATER_INIT_RECORD;
     if (stream == nullptr) {
         PKG_LOGE("stream is null");
-        UPDATER_LAST_WORD(false);
+        UPDATER_LAST_WORD(false, "stream is null");
         return false;
     }
 
@@ -172,7 +172,7 @@ bool HashDataVerifier::VerifyHashData(const std::string &preName,
     // then using cert from pkcs7 to verify hash data
     if (pkcs7_ == nullptr || pkcs7_->Verify(hash, sig, false) != 0) {
         PKG_LOGE("verify hash signed data for %s failed", fileName.c_str());
-        UPDATER_LAST_WORD(PKG_INVALID_SIGNATURE, fileName);
+        UPDATER_LAST_WORD(PKG_INVALID_SIGNATURE, "verify hash signed data failed for " + fileName);
         return false;
     }
     PKG_LOGI("verify hash signed data for %s successfully", fileName.c_str());

@@ -401,7 +401,7 @@ bool UScriptInstructionBlockCheck::ExecReadBlockInfo(const std::string &devPath,
     int fd = open(devPath.c_str(), O_RDWR | O_LARGEFILE);
     if (fd == -1) {
         LOG(ERROR) << "Failed to open file";
-        UPDATER_LAST_WORD(false);
+        UPDATER_LAST_WORD("Failed to open file", devPath);
         return false;
     }
     std::vector<uint8_t> block_buff(H_BLOCK_SIZE);
@@ -414,7 +414,7 @@ bool UScriptInstructionBlockCheck::ExecReadBlockInfo(const std::string &devPath,
         if (lseek64(fd, static_cast<off64_t>(it->first * H_BLOCK_SIZE), SEEK_SET) == -1) {
             LOG(ERROR) << "Failed to seek";
             close(fd);
-            UPDATER_LAST_WORD(false);
+            UPDATER_LAST_WORD(false, "Failed to seek");
             return false;
         }
         size_t size = (it->second - it->first) * H_BLOCK_SIZE;
@@ -422,7 +422,7 @@ bool UScriptInstructionBlockCheck::ExecReadBlockInfo(const std::string &devPath,
         if (!Utils::ReadFully(fd, block_buff.data() + pos, size)) {
             LOG(ERROR) << "Failed to read";
             close(fd);
-            UPDATER_LAST_WORD(false);
+            UPDATER_LAST_WORD(false, "Failed to read");
             return false;
         }
         pos += size;
@@ -435,6 +435,7 @@ bool UScriptInstructionBlockCheck::ExecReadBlockInfo(const std::string &devPath,
 
 int32_t UScriptInstructionBlockCheck::Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context)
 {
+    UPDATER_INIT_RECORD;
     if (context.GetParamCount() != 1) {
         LOG(ERROR) << "Invalid param";
         UPDATER_LAST_WORD(USCRIPT_INVALID_PARAM);
@@ -447,7 +448,7 @@ int32_t UScriptInstructionBlockCheck::Execute(Uscript::UScriptEnv &env, Uscript:
     int32_t ret = context.GetParam(0, partitionName);
     if (ret != USCRIPT_SUCCESS) {
         LOG(ERROR) << "Failed to get param";
-        UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE);
+        UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE, "Failed to get param " + partitionName);
         return ReturnAndPushParam(USCRIPT_ERROR_EXECUTE, context);
     }
     auto devPath = GetBlockDeviceByMountPoint(partitionName);
@@ -456,7 +457,7 @@ int32_t UScriptInstructionBlockCheck::Execute(Uscript::UScriptEnv &env, Uscript:
     uint16_t mountCount = 0;
     if (devPath.empty() || (!ExecReadBlockInfo(devPath, context, mountTime, mountCount))) {
         LOG(ERROR) << "cannot get block device of partition";
-        UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE);
+        UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE, devPath);
         return ReturnAndPushParam(USCRIPT_ERROR_EXECUTE, context);
     }
 
@@ -602,6 +603,7 @@ void UScriptInstructionShaCheck::PrintAbnormalBlockHash(const std::string &devPa
 
 std::string UScriptInstructionShaCheck::CalculateBlockSha(const std::string &devPath, const std::string &blockPairs)
 {
+    UPDATER_INIT_RECORD;
     if (blockPairs.empty()) {
         LOG(ERROR) << "Failed to get blockPairs";
         return "";
@@ -610,7 +612,7 @@ std::string UScriptInstructionShaCheck::CalculateBlockSha(const std::string &dev
     int fd = open(devPath.c_str(), O_RDWR | O_LARGEFILE);
     if (fd == -1) {
         LOG(ERROR) << "Failed to open file";
-        UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE);
+        UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE, devPath);
         return "";
     }
 
@@ -624,14 +626,14 @@ std::string UScriptInstructionShaCheck::CalculateBlockSha(const std::string &dev
         if (lseek64(fd, static_cast<off64_t>(it->first * H_BLOCK_SIZE), SEEK_SET) == -1) {
             LOG(ERROR) << "Failed to seek";
             close(fd);
-            UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE);
+            UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE, "Failed to seek");
             return "";
         }
         for (size_t i = it->first; i < it->second; ++i) {
             if (!Utils::ReadFully(fd, block_buff.data(), H_BLOCK_SIZE)) {
                 LOG(ERROR) << "Failed to read";
                 close(fd);
-                UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE);
+                UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE, "Failed to read");
                 return "";
             }
             SHA256_Update(&ctx, block_buff.data(), H_BLOCK_SIZE);
@@ -646,17 +648,18 @@ std::string UScriptInstructionShaCheck::CalculateBlockSha(const std::string &dev
 
 int32_t UScriptInstructionShaCheck::SetShaInfo(Uscript::UScriptContext &context, ShaInfo &shaInfo)
 {
+    UPDATER_INIT_RECORD;
     int32_t ret = context.GetParam(1, shaInfo.blockPairs);
     if (ret != USCRIPT_SUCCESS) {
         LOG(ERROR) << "Failed to get param blockPairs";
-        UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE);
+        UPDATER_LAST_WORD(ret, "Failed to get param blockPairs");
         return USCRIPT_ERROR_EXECUTE;
     }
 
     ret = context.GetParam(SHA_CHECK_SECOND, shaInfo.contrastSha);
     if (ret != USCRIPT_SUCCESS) {
         LOG(ERROR) << "Failed to get param contrastSha";
-        UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE);
+        UPDATER_LAST_WORD(ret, "Failed to get param contrastSha");
         return USCRIPT_ERROR_EXECUTE;
     }
 
@@ -676,10 +679,11 @@ int32_t UScriptInstructionShaCheck::SetShaInfo(Uscript::UScriptContext &context,
 
 int32_t UScriptInstructionShaCheck::Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context)
 {
+    UPDATER_INIT_RECORD;
     int32_t paramCount = context.GetParamCount();
     if (paramCount != SHA_CHECK_PARAMS && paramCount != SHA_CHECK_TARGET_PARAMS) {
         LOG(ERROR) << "Invalid param";
-        UPDATER_LAST_WORD(USCRIPT_INVALID_PARAM);
+        UPDATER_LAST_WORD(USCRIPT_INVALID_PARAM, "Invalid param");
         return ReturnAndPushParam(USCRIPT_INVALID_PARAM, context);
     }
     if (env.IsRetry() && !Utils::CheckFaultInfo(VERIFY_FAILED_REBOOT)) {
@@ -690,7 +694,7 @@ int32_t UScriptInstructionShaCheck::Execute(Uscript::UScriptEnv &env, Uscript::U
     int32_t ret = context.GetParam(0, partitionName);
     if (ret != USCRIPT_SUCCESS) {
         LOG(ERROR) << "Failed to get param";
-        UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE);
+        UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE, "Failed to get param");
         return ReturnAndPushParam(USCRIPT_ERROR_EXECUTE, context);
     }
 
@@ -705,7 +709,7 @@ int32_t UScriptInstructionShaCheck::Execute(Uscript::UScriptEnv &env, Uscript::U
     LOG(INFO) << "UScriptInstructionShaCheck::dev path : " << devPath;
     if (devPath.empty()) {
         LOG(ERROR) << "cannot get block device of partition";
-        UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE);
+        UPDATER_LAST_WORD(USCRIPT_ERROR_EXECUTE, "cannot get block device of partition");
         return ReturnAndPushParam(USCRIPT_ERROR_EXECUTE, context);
     }
     ret = ExecReadShaInfo(env, devPath, shaInfo, partitionName);

@@ -24,10 +24,11 @@ using namespace Uscript;
 namespace BasicInstruction {
 int32_t ScriptLoadScript::Execute(UScriptEnv &env, UScriptContext &context)
 {
+    Updater::UPDATER_INIT_RECORD;
     ScriptInstructionHelper* helper = ScriptInstructionHelper::GetBasicInstructionHelper();
     if (helper == nullptr) {
         USCRIPT_LOGE("Failed to get instruction helper");
-        UPDATER_LAST_WORD(USCRIPT_INVALID_PARAM);
+        UPDATER_LAST_WORD(USCRIPT_INVALID_PARAM, "Failed to get instruction helper");
         return USCRIPT_INVALID_PARAM;
     }
 
@@ -36,13 +37,13 @@ int32_t ScriptLoadScript::Execute(UScriptEnv &env, UScriptContext &context)
     int32_t ret = context.GetParam(0, scriptName);
     if (ret != USCRIPT_SUCCESS) {
         USCRIPT_LOGE("Failed to get param");
-        UPDATER_LAST_WORD(ret);
+        UPDATER_LAST_WORD(ret, "Failed to get scriptName");
         return ret;
     }
     ret = context.GetParam(1, priority);
     if (ret != USCRIPT_SUCCESS) {
         USCRIPT_LOGE("Failed to get param");
-        UPDATER_LAST_WORD(ret);
+        UPDATER_LAST_WORD(ret, "Failed to get priority");
         return ret;
     }
     USCRIPT_LOGI("ScriptLoadScript %s priority:%d", scriptName.c_str(), priority);

@@ -38,6 +38,7 @@ constexpr uint32_t INTERCEPT_HASH_LENGTH = 8;
 int32_t PkgVerifyUtil::VerifySourceDigest(std::vector<uint8_t> &signature, std::vector<uint8_t> &sourceDigest,
     const std::string & keyPath) const
 {
+    Updater::UPDATER_INIT_RECORD;
     std::vector<std::vector<uint8_t>> sigs;
     Pkcs7SignedData pkcs7;
     SignAlgorithm::SignAlgorithmPtr signAlgorithm = PkgAlgorithmFactory::GetVerifyAlgorithm(
@@ -57,8 +58,9 @@ int32_t PkgVerifyUtil::VerifySourceDigest(std::vector<uint8_t> &signature, std::
 
 int32_t PkgVerifyUtil::VerifyAccPackageSign(const PkgStreamPtr pkgStream, const std::string &keyPath) const
 {
+    Updater::UPDATER_INIT_RECORD;
     if (pkgStream == nullptr) {
-        UPDATER_LAST_WORD(PKG_INVALID_PARAM);
+        UPDATER_LAST_WORD(PKG_INVALID_PARAM, "pkgStream is null");
         return PKG_INVALID_PARAM;
     }
     size_t signatureSize = 0;
@@ -66,7 +68,7 @@ int32_t PkgVerifyUtil::VerifyAccPackageSign(const PkgStreamPtr pkgStream, const 
     uint16_t commentTotalLenAll = 0;
     if (GetSignature(pkgStream, signatureSize, signature, commentTotalLenAll) != PKG_SUCCESS) {
         PKG_LOGE("get package signature fail!");
-        UPDATER_LAST_WORD(PKG_INVALID_SIGNATURE);
+        UPDATER_LAST_WORD(PKG_INVALID_SIGNATURE, "get package signature fail!");
         return PKG_INVALID_SIGNATURE;
     }
     size_t srcDataLen = pkgStream->GetFileLength() - commentTotalLenAll -2;
@@ -80,17 +82,18 @@ int32_t PkgVerifyUtil::VerifyAccPackageSign(const PkgStreamPtr pkgStream, const 
 
 int32_t PkgVerifyUtil::VerifySign(std::vector<uint8_t> &signData, std::vector<uint8_t> &digest) const
 {
+    Updater::UPDATER_INIT_RECORD;
     std::vector<uint8_t> hash;
     int32_t ret = Pkcs7verify(signData, hash);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("pkcs7 verify fail!");
-        UPDATER_LAST_WORD(ret);
+        UPDATER_LAST_WORD(ret, "pkcs7 verify fail!");
         return ret;
     }
     size_t hashLen = hash.size();
     if ((hashLen != digest.size()) || memcmp(hash.data(), digest.data(), hashLen) != EOK) {
         PKG_LOGE("Failed to memcmp data.");
-        UPDATER_LAST_WORD(PKG_INVALID_DIGEST);
+        UPDATER_LAST_WORD(PKG_INVALID_DIGEST, "Failed to memcmp data.");
         return PKG_INVALID_DIGEST;
     }
     return PKG_SUCCESS;
@@ -98,8 +101,9 @@ int32_t PkgVerifyUtil::VerifySign(std::vector<uint8_t> &signData, std::vector<ui
 
 int32_t PkgVerifyUtil::VerifyPackageSign(const PkgStreamPtr pkgStream, const std::string &path) const
 {
+    Updater::UPDATER_INIT_RECORD;
     if (pkgStream == nullptr) {
-        UPDATER_LAST_WORD(PKG_INVALID_PARAM);
+        UPDATER_LAST_WORD(PKG_INVALID_PARAM, "pkgStream is null");
         return PKG_INVALID_PARAM;
     }
     size_t signatureSize = 0;
@@ -107,7 +111,7 @@ int32_t PkgVerifyUtil::VerifyPackageSign(const PkgStreamPtr pkgStream, const std
     uint16_t commentTotalLenAll = 0;
     if (GetSignature(pkgStream, signatureSize, signature, commentTotalLenAll) != PKG_SUCCESS) {
         PKG_LOGE("get package signature fail!");
-        UPDATER_LAST_WORD(PKG_INVALID_SIGNATURE);
+        UPDATER_LAST_WORD(PKG_INVALID_SIGNATURE, "get package signature fail!");
         return PKG_INVALID_SIGNATURE;
     }
 
@@ -115,7 +119,7 @@ int32_t PkgVerifyUtil::VerifyPackageSign(const PkgStreamPtr pkgStream, const std
     int32_t ret = Pkcs7verify(signature, hash);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("pkcs7 verify fail!");
-        UPDATER_LAST_WORD(ret);
+        UPDATER_LAST_WORD(ret, "pkcs7 verify fail!");
         return ret;
     }
     size_t srcDataLen = pkgStream->GetFileLength() - commentTotalLenAll - 2;
@@ -135,11 +139,12 @@ int32_t PkgVerifyUtil::VerifyPackageSign(const PkgStreamPtr pkgStream, const std
 int32_t PkgVerifyUtil::GetSignature(const PkgStreamPtr pkgStream, size_t &signatureSize,
     std::vector<uint8_t> &signature, uint16_t &commentTotalLenAll) const
 {
+    Updater::UPDATER_INIT_RECORD;
     size_t signatureStart = 0;
     int32_t ret = ParsePackage(pkgStream, signatureStart, signatureSize, commentTotalLenAll);
     if (ret != PKG_SUCCESS || signatureSize < PKG_FOOTER_SIZE) {
         PKG_LOGE("Parse package failed.");
-        UPDATER_LAST_WORD(-1);
+        UPDATER_LAST_WORD(-1, "Parse package failed.");
         return -1;
     }
 
@@ -149,7 +154,7 @@ int32_t PkgVerifyUtil::GetSignature(const PkgStreamPtr pkgStream, size_t &signat
     ret = pkgStream->Read(signData, signatureStart, signDataLen, readLen);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("read signature failed %s", pkgStream->GetFileName().c_str());
-        UPDATER_LAST_WORD(ret);
+        UPDATER_LAST_WORD(ret, "read signature failed " + pkgStream->GetFileName());
         return ret;
     }
     signature.assign(signData.buffer, signData.buffer + readLen);
@@ -167,6 +172,7 @@ int32_t PkgVerifyUtil::GetSignature(const PkgStreamPtr pkgStream, size_t &signat
 int32_t PkgVerifyUtil::ParsePackage(const PkgStreamPtr pkgStream, size_t &signatureStart,
     size_t &signatureSize, uint16_t &commentTotalLenAll) const
 {
+    Updater::UPDATER_INIT_RECORD;
     ZipPkgParse zipParse;
     PkgSignComment pkgSignComment {};
     int32_t ret = zipParse.ParseZipPkg(pkgStream, pkgSignComment);

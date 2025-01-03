@@ -29,7 +29,7 @@
 #define ftello64 ftello
 #define fseeko64 fseek
 #endif
-
+using namespace Updater;
 namespace Hpackage {
 const std::string PkgStreamImpl::GetFileName() const
 {
@@ -77,23 +77,23 @@ int32_t FileStream::Read(PkgBuffer &data, size_t start, size_t needRead, size_t 
     Updater::UPDATER_INIT_RECORD;
     if (stream_ == nullptr) {
         PKG_LOGE("Invalid stream");
-        UPDATER_LAST_WORD(PKG_INVALID_STREAM);
+        UPDATER_LAST_WORD(PKG_INVALID_STREAM, "Invalid stream");
         return PKG_INVALID_STREAM;
     }
     if (data.length < needRead) {
         PKG_LOGE("insufficient buffer capacity");
-        UPDATER_LAST_WORD(PKG_INVALID_STREAM);
+        UPDATER_LAST_WORD(PKG_INVALID_STREAM, "insufficient buffer capacity");
         return PKG_INVALID_STREAM;
     }
     readLen = 0;
     if (fseeko64(stream_, start, SEEK_SET) != 0) {
         PKG_LOGE("read data fail");
-        UPDATER_LAST_WORD(PKG_INVALID_STREAM);
+        UPDATER_LAST_WORD(PKG_INVALID_STREAM, "fseeko64 fail");
         return PKG_INVALID_STREAM;
     }
     if (start > GetFileLength()) {
         PKG_LOGE("Invalid start");
-        UPDATER_LAST_WORD(PKG_INVALID_STREAM);
+        UPDATER_LAST_WORD(PKG_INVALID_STREAM, "Invalid start");
         return PKG_INVALID_STREAM;
     }
     if (data.buffer == nullptr) {
@@ -103,7 +103,7 @@ int32_t FileStream::Read(PkgBuffer &data, size_t start, size_t needRead, size_t 
     readLen = fread(data.buffer, 1, needRead, stream_);
     if (readLen == 0) {
         PKG_LOGE("read data fail");
-        UPDATER_LAST_WORD(PKG_INVALID_STREAM);
+        UPDATER_LAST_WORD(PKG_INVALID_STREAM, "read data fail");
         return PKG_INVALID_STREAM;
     }
     return PKG_SUCCESS;
