@@ -70,6 +70,7 @@ bool CheckPathNeedMountSD(UpdaterParams &upParams)
 
 bool DoMountSdCard(std::vector<std::string> &sdCardStr, std::string &mountPoint, UpdaterParams &upParams)
 {
+#ifndef UPDATER_UT
     bool mountSuccess = false;
     unsigned int retryTimes = 20; // Wait 20s
     if (upParams.sdExtMode == SDCARD_MAINIMG || upParams.sdExtMode == SDCARD_NORMAL_UPDATE) {
@@ -90,6 +91,9 @@ bool DoMountSdCard(std::vector<std::string> &sdCardStr, std::string &mountPoint,
         sleep(1); // sleep 1 second to wait for sd card recognition
     }
     return mountSuccess;
+#else
+    return true;
+#endif
 }
 
 UpdaterStatus CheckSdcardPkgs(UpdaterParams &upParams)
