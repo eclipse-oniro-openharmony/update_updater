@@ -332,4 +332,34 @@ HWTEST_F(UpdaterUtilUnitTest, CheckPathNeedMountSD, TestSize.Level0)
     upParams.updatePackage.push_back("/data/sdcard/updater_full.zip");
     EXPECT_EQ(CheckPathNeedMountSD(upParams), false);
 }
+
+HWTEST_F(UpdaterUtilUnitTest, GetSdcardPkgsFromDev, TestSize.Level0)
+{
+    UpdaterParams upParams;
+    EXPECT_EQ(GetSdcardPkgsFromDev(upParams), UPDATE_ERROR);
+}
+
+HWTEST_F(UpdaterUtilUnitTest, DoMountSdCard, TestSize.Level0)
+{
+    UpdaterParams upParams;
+    std::string str = "";
+    std::vector<std::string> vec;
+    EXPECT_EQ(DoMountSdCard(vec, str, upParams), true);
+}
+
+HWTEST_F(UpdaterUtilUnitTest, GetSdcardPkgsPath, TestSize.Level0)
+{
+    UpdaterParams upParams;
+    EXPECT_EQ(GetSdcardPkgsPath(upParams), UPDATE_SUCCESS);
+
+    upParams.update_package.push_back("/sdcard/updater/updater_full.zip");
+    EXPECT_EQ(GetSdcardPkgsPath(upParams), UPDATE_SUCCESS);
+    upParams.update_package.clear();
+}
+
+HWTEST_F(UpdaterUtilUnitTest, GetSdcardInternalPkgs, TestSize.Level0)
+{
+    UpdaterParams upParams;
+    EXPECT_EQ(GetSdcardInternalPkgs(upParams), UPDATE_ERROR);
+}
 }
