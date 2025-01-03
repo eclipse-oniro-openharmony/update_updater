@@ -40,6 +40,12 @@ std::vector<Ptable::PtnInfo> Ptable::GetPtablePartitionInfo() const
     return partitionInfo_;
 }
 
+bool Ptable::CorrectBufByPtnList(uint8_t *imageBuf, uint64_t imgBufSize, const std::vector<PtnInfo> &srcInfo,
+                                 const std::vector<PtnInfo> &dstInfo)
+{
+    return false;
+}
+
 uint32_t Ptable::GetPtablePartitionNum() const
 {
     return partitionInfo_.size();
