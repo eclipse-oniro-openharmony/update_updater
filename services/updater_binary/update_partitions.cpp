@@ -132,6 +132,12 @@ int UpdatePartitions::ParsePartitionInfo(const std::string &partitionInfo, Parti
 int UpdatePartitions::DoNewPartitions(PartitonList &newPartList)
 {
     int ret = DoPartitions(newPartList);
+    for (auto &partition : newPartList) {
+        if (partition != nullptr) {
+            free(partition);
+            partition = nullptr;
+        }
+    };
     newPartList.clear();
     if (ret <= 0) {
         LOG(INFO) << "do_partitions FAIL ";
