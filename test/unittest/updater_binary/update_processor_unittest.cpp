@@ -133,7 +133,7 @@ HWTEST_F(UpdateProcessorUnitTest, UpdateProcessor_004, TestSize.Level1)
 
 HWTEST_F(UpdateProcessorUnitTest, UpdateProcessor_005, TestSize.Level1)
 {
-    const string packagePath = "/data/updater/updater/updater_write_misc_img.zip";
+    const string packagePath = "/data/updater/updater/updater_write_extract_img.zip";
     int32_t ret = ProcessUpdater(false, -1, packagePath, GetTestCertName());
     EXPECT_EQ(ret, 1);
 }
