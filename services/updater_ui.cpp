@@ -26,6 +26,7 @@
 #include "updater/updater_const.h"
 #include "utils.h"
 #include "updater_ui_stub.h"
+#include "updater_main.h"
 
 namespace Updater {
 namespace {
@@ -70,7 +71,7 @@ DEFINE_ASYN_CALLBACK(OnRebootEvt)
     LOG(INFO) << "On Label Reboot";
     GraphicEngine::GetInstance().StopEngine();
     PostUpdater(false);
-    Utils::UpdaterDoReboot("", "Updater reboot btn event");
+    NotifyReboot("", "Updater reboot btn event");
 }
 
 DEFINE_SYNC_CALLBACK(OnLabelResetEvt)
@@ -100,7 +101,7 @@ DEFINE_ASYN_CALLBACK(OnLabelSDCardEvt)
         return;
     }
     PostUpdater(true);
-    Utils::UpdaterDoReboot("", "Updater sdcard update success reboot");
+    NotifyReboot("", "Updater sdcard update success reboot");
 }
 
 DEFINE_ASYN_CALLBACK(OnLabelSDCardNoDelayEvt)
@@ -123,7 +124,7 @@ DEFINE_ASYN_CALLBACK(OnLabelSDCardNoDelayEvt)
     GetFacade().ShowSuccessPage();
     Utils::UsSleep(SUCCESS_DELAY);
     PostUpdater(true);
-    Utils::UpdaterDoReboot("", "Updater sdcard update success reboot");
+    NotifyReboot("", "Updater sdcard update success reboot");
 }
 
 DEFINE_ASYN_CALLBACK(OnLabelSDUpdateResEvt)
@@ -153,7 +154,7 @@ DEFINE_ASYN_CALLBACK(OnLabelSDUpdateResEvt)
     GetFacade().ShowSuccessPage();
     Utils::UsSleep(SUCCESS_DELAY);
     PostUpdater(true);
-    Utils::UpdaterDoReboot("", "Updater sdcard update success reboot");
+    NotifyReboot("", "Updater sdcard update success reboot");
 }
 
 DEFINE_SYNC_CALLBACK(OnLabelCancelEvt)
@@ -208,7 +209,7 @@ DEFINE_ASYN_CALLBACK(OnConfirmRstEvt)
         GetFacade().ShowSuccessPage();
         PostUpdater(true);
         Utils::UsSleep(SUCCESS_DELAY);
-        Utils::UpdaterDoReboot("", "Updater factory reset success");
+        NotifyReboot("", "Updater factory reset success");
     }
 }
 

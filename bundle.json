@@ -40,7 +40,8 @@
         "syscap": [],
         "features": [
             "updater_ui_support",
-            "updater_cfg_file"
+            "updater_cfg_file",
+            "updater_dcc_support"
         ],
         "adapted_system_type": [ "standard" ],
         "rom": "",
