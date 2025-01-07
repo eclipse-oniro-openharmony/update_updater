@@ -65,13 +65,13 @@ common_sources = [
   "${HDC_PATH}/common/file_descriptor.cpp",
   "${HDC_PATH}/common/forward.cpp",
   "${HDC_PATH}/common/header.cpp",
-  "${HDC_PATH}/common/uv_status.cpp",
   "${HDC_PATH}/common/session.cpp",
   "${HDC_PATH}/common/task.cpp",
   "${HDC_PATH}/common/tcp.cpp",
   "${HDC_PATH}/common/tlv.cpp",
   "${HDC_PATH}/common/transfer.cpp",
   "${HDC_PATH}/common/usb.cpp",
+  "${HDC_PATH}/common/uv_status.cpp",
 ]
 
 config("flashd_hdc_config") {
