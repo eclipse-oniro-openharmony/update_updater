@@ -205,7 +205,6 @@ std::vector<uint64_t> GetStashSizeList(const UpdaterParams &upParams)
             return std::vector<uint64_t> {};
         }
         stashSizeList.push_back(static_cast<uint64_t>(maxStashSize));
-        PkgManager::ReleasePackageInstance(pkgManager);
     }
     return stashSizeList;
 }
