@@ -137,7 +137,10 @@ ohos_executable("write_updater") {
     "${updater_path}/services/include/",
   ]
 
-  deps = [ "${updater_path}/interfaces/kits/misc_info:libmiscinfo" ]
+  deps = [
+    "${updater_path}/interfaces/kits/misc_info:libmiscinfo",
+    "${updater_path}/utils:libutils"
+  ]
   external_deps = [
     "bounds_checking_function:libsec_static",
     "init:libbegetutil_static",

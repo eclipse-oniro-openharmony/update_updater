@@ -21,6 +21,7 @@ declare_args() {
     updater_ui_support = false
   }
   updater_hdc_depend = true
+  updater_dcc_support = false
   updater_absolutely_path = "//base/update/updater"
   hdc_base = "//developtools/hdc"
   updater_sign_on_server = false
