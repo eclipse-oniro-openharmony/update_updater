@@ -84,7 +84,8 @@ void HdcDaemon::InitMod(bool bEnableTCP, bool bEnableUSB)
         ((HdcDaemonUSB *)clsUSBServ)->Initial();
     }
 
-    clsJdwp = new HdcJdwp(&loopMain);
+    LoopStatus ls(&loopMain, "not support");
+    clsJdwp = new HdcJdwp(&loopMain, &ls);
     ((HdcJdwp *)clsJdwp)->Initial();
 
     // enable security
