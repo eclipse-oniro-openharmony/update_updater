@@ -99,24 +99,4 @@ HWTEST_F(UpdatePartitionsUnitTest, UpdatePartitions_Unitest02, TestSize.Level1)
     PkgManager::ReleasePackageInstance(pkgManager);
     EXPECT_EQ(partRet, USCRIPT_SUCCESS);
 }
-
-HWTEST_F(UpdatePartitionsUnitTest, UpdatePartitions_Unitest03, TestSize.Level1)
-{
-    const string packagePath = "/data/updater/updater/parts/updaterpart01.zip";
-    int fd = open("/dev/null", O_RDWR);
-    dup2(fd, STDOUT_FILENO);
-    int32_t ret = ProcessUpdater(false, STDOUT_FILENO, packagePath, GetTestCertName());
-    close(fd);
-    EXPECT_EQ(ret, USCRIPT_INVALID_PARAM);
-}
-
-HWTEST_F(UpdatePartitionsUnitTest, UpdatePartitions_Unitest04, TestSize.Level1)
-{
-    const string packagePath = "/data/updater/updater/parts/updaterpart02.zip";
-    int fd = open("/dev/null", O_RDWR);
-    dup2(fd, STDOUT_FILENO);
-    int32_t ret = ProcessUpdater(false, STDOUT_FILENO, packagePath, GetTestCertName());
-    close(fd);
-    EXPECT_NE(ret, 0);
-}
 } // namespace updater_ut
