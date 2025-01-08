@@ -119,5 +119,38 @@ HWTEST_F(UpdaterUnitTest, updater_UpdateSdcard, TestSize.Level1)
     upParams.updateMode = SDCARD_UPDATE;
     status = UpdaterFromSdcard(upParams);
     EXPECT_EQ(status, UPDATE_SUCCESS);
+    std::vector<std::string> output;
+    SetProgress(output, upParams);
+ 
+    upParams.callbackProgress = [] (float value) { ; };
+    SetProgress(output, upParams);
+ 
+    output.push_back("0");
+    output.push_back("str");
+    SetProgress(output, upParams);
+ 
+    output.clear();
+    output.push_back("0");
+    output.push_back("0");
+    SetProgress(output, upParams);
+ 
+    output.clear();
+    output.push_back("0");
+    output.push_back("0.1");
+    SetProgress(output, upParams);
+ 
+    status = UpdaterFromSdcard(upParams);
+    EXPECT_EQ(status, UPDATE_SUCCESS);
+}
+ 
+HWTEST_F(UpdaterUnitTest, updater_StashProgressInfo, TestSize.Level1)
+{
+    int ret = CheckStatvfs(1);
+    EXPECT_EQ(status, UPDATE_SUCCESS);
+ 
+    ProgressSmoothHandler(1, 5); // 5: progress
+    SetTmpProgressValue(0);
+    ret = GetTmpProgressValue();
+    EXPECT_EQ(status, 0);
 }
 } // namespace updater_ut
