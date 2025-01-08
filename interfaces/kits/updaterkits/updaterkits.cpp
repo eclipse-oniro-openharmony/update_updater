@@ -136,7 +136,7 @@ static bool IsPackagePath(const std::string &path)
 
 static void UpdateOptExpand(std::string& updateOpt)
 {
-    if (updateOpt.find("--shrink_info=") == std::string::npos ||
+    if (updateOpt.find("--shrink_info=") == std::string::npos &&
         updateOpt.find("--virtual_shrink_info=") == std::string::npos) {
         return;
     }
