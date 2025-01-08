@@ -46,18 +46,15 @@ static void Handledlopen(const struct UpdateMessage &updateMsg, const std::strin
         return;
     }
     auto getFunc =
-        (bool(*)(const std::string &, const std::string &))dlsym(handleMiscLib, HANDLE_MISC_INFO);
+        (void(*)(const std::string &, const std::string &))dlsym(handleMiscLib, HANDLE_MISC_INFO);
     if (getFunc == nullptr) {
         LOG(ERROR) << "getFunc is nullptr";
         dlclose(handleMiscLib);
         return;
     }
-    bool ret = getFunc(updateMsg.update, upgradeType);
+    getFunc(updateMsg.update, upgradeType);
     dlclose(handleMiscLib);
     handleMiscLib = nullptr;
-    if (!ret) {
-        LOG(ERROR) << "handle misc info fail";
-    }
 }
 #endif
 
