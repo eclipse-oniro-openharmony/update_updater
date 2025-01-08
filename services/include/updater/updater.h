@@ -47,7 +47,7 @@ enum NotifyAction {
     GET_INSTALL_STATUS,
     SET_UPDATE_STATUS,
     GET_UPDATE_STATUS
-}
+};
 
 struct UpdaterParams {
     bool forceUpdate = false;
