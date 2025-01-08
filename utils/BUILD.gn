@@ -139,7 +139,7 @@ ohos_executable("write_updater") {
 
   deps = [
     "${updater_path}/interfaces/kits/misc_info:libmiscinfo",
-    "${updater_path}/utils:libutils"
+    "${updater_path}/utils:libutils",
   ]
   external_deps = [
     "bounds_checking_function:libsec_static",
