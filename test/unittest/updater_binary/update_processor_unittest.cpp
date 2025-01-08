@@ -130,4 +130,21 @@ HWTEST_F(UpdateProcessorUnitTest, UpdateProcessor_004, TestSize.Level1)
     ringBuffer.Pop(recvBuffer, UScriptInstructionUpdateFromBin::STASH_BUFFER_SIZE, len);
     EXPECT_EQ(len, BUFFER_SIZE);
 }
+
+HWTEST_F(UpdateProcessorUnitTest, UpdateProcessor_005, TestSize.Level1)
+{
+    const string packagePath = "/data/updater/updater/updater_write_extract_img.zip";
+    int32_t ret = ProcessUpdater(false, -1, packagePath, GetTestCertName());
+    EXPECT_EQ(ret, 1);
+}
+ 
+HWTEST_F(UpdateProcessorUnitTest, UpdateProcessor_006, TestSize.Level1)
+{
+    const string packagePath = "/data/updater/updater/updater_write_not_exist.zip";
+    int fd = open("/dev/null", O_RDWR);
+    dup2(fd, STDOUT_FILENO);
+    int32_t ret = ProcessUpdater(false, STDOUT_FILENO, packagePath, GetTestCertName());
+    close(fd);
+    EXPECT_EQ(ret, EXIT_INVALID_ARGS);
+}
 } // namespace updater_ut
