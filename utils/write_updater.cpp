@@ -79,20 +79,19 @@ static void HandleMiscInfo(int argc, char **argv)
         cout << "libupdater_handle_misc.z.so is not exist";
         return;
     }
-    auto handleMiscLib = dlopen(HANDLE_MISC_LIB, RTLD_LAZY);
-    if (handleMiscLib == nullptr) {
-        cout << "dlopen libupdater_handle_misc fail";
+    auto handle = Utils::LoadLibrary(HANDLE_MISC_LIB);
+    if (handle == nullptr) {
+        cout << "load libupdater_handle_misc fail";
         return;
     }
-    auto getFunc = (void(*)(int, char **))dlsym(handleMiscLib, NOTIFY_MISC_INFO);
+    auto getFunc = (void(*)(int, char **))Utils::GetFunction(handle, NOTIFY_MISC_INFO);
     if (getFunc == nullptr) {
         cout << "getFunc is nullptr";
-        dlclose(handleMiscLib);
+        Utils::CloseLibradry(handle);
         return;
     }
     getFunc(argc, argv);
-    dlclose(handleMiscLib);
-    handleMiscLib = nullptr;
+    Utils::CloseLibradry(handle);
 }
 
 int main(int argc, char **argv)

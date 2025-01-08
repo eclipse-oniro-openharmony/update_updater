@@ -40,24 +40,19 @@ static void Handledlopen(const struct UpdateMessage &updateMsg, const std::strin
         LOG(WARNING) << "libupdater_handle_misc.z.so is not exist";
         return;
     }
-    auto handleMiscLib = dlopen(HANDLE_MISC_LIB, RTLD_LAZY);
-    if (handleMiscLib == nullptr) {
-        LOG(ERROR) << "dlopen libupdater_handle_misc fail";
+    auto handle = Utils::LoadLibrary(HANDLE_MISC_LIB);
+    if (handle == nullptr) {
+        cout << "load libupdater_handle_misc fail";
         return;
     }
-    auto getFunc =
-        (bool(*)(const std::string &, const std::string &))dlsym(handleMiscLib, HANDLE_MISC_INFO);
+    auto getFunc = (void(*)(const std::string &, const std::string &))Utils::GetFunction(handle, HANDLE_MISC_INFO);
     if (getFunc == nullptr) {
-        LOG(ERROR) << "getFunc is nullptr";
-        dlclose(handleMiscLib);
+        cout << "getFunc is nullptr";
+        Utils::CloseLibradry(handle);
         return;
     }
-    bool ret = getFunc(updateMsg.update, upgradeType);
-    dlclose(handleMiscLib);
-    handleMiscLib = nullptr;
-    if (!ret) {
-        LOG(ERROR) << "handle misc info fail";
-    }
+    getFunc(updateMsg.update, upgradeType);
+    Utils::CloseLibradry(handle);
 }
 #endif
 

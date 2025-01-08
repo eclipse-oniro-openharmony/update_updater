@@ -19,6 +19,7 @@
 #include <cstdint>
 #include <cstdlib>
 #include <dirent.h>
+#include <dlfcn.h>
 #include <fcntl.h>
 #include <limits>
 #include <linux/reboot.h>
@@ -147,6 +148,43 @@ bool IsDirExist(const std::string &path)
         return true;
     }
     return false;
+}
+
+void* LoadLibrary(const std::string &libName)
+{
+    if (libName.empty()) {
+        LOG(ERROR) << "lib name is empty";
+        return nullptr;
+    }
+    void* handle = dlopen(libName.c_str(), RTLD_LAZY);
+    if (handle == nullptr) {
+        LOG(ERROR) << "dlopen fail, lib name = " << libName;
+        return nullptr;
+    }
+    return handle;
+}
+
+void CloseLibradry(void* handle)
+{
+    if (handle == nullptr) {
+        LOG(ERROR) << "handle is nulptr";
+        return;
+    }
+    dlclose(handle);
+    handle = nullptr;
+}
+
+void* GetFunction(void* handle, const std::string &funcName)
+{
+    if (handle == nullptr) {
+        LOG(ERROR) << "handle is nullptr";
+        return nullptr;
+    }
+    if (funcName.empty()) {
+        LOG(ERROR) << "func name is empty";
+        return nullptr;
+    }
+    return dlsym(handle, funcName.c_str());
 }
 } // Utils
 } // updater
