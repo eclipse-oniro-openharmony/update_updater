@@ -134,6 +134,21 @@ static bool IsPackagePath(const std::string &path)
     return true;
 }
 
+static void UpdateOptExpand(std::string& updateOpt)
+{
+    if (updateOpt.find("--shrink_info=") == std::string::npos ||
+        updateOpt.find("--virtual_shrink_info=") == std::string::npos) {
+        return;
+    }
+    struct stat file_stat;
+    int ret = stat("/data/service/el1/0/hyperhold", &file_stat);
+    if (ret != 0) {
+        return;
+    }
+    std::string inode = std::to_string(file_stat.st_ino);
+    updateOpt += "," + inode;
+}
+
 static int AddPkgPath(struct UpdateMessage &msg, size_t updateOffset, const std::vector<std::string> &packageName)
 {
     for (auto path : packageName) {
@@ -146,6 +161,7 @@ static int AddPkgPath(struct UpdateMessage &msg, size_t updateOffset, const std:
             ret = snprintf_s(msg.update + updateOffset, sizeof(msg.update) - updateOffset,
                 sizeof(msg.update) - 1 - updateOffset, "--update_package=%s\n", path.c_str());
         } else {
+            UpdateOptExpand(path);
             ret = snprintf_s(msg.update + updateOffset, sizeof(msg.update) - updateOffset,
                 sizeof(msg.update) - 1 - updateOffset, "%s\n", path.c_str());
         }
