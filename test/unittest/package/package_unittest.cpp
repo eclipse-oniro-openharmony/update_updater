@@ -78,6 +78,7 @@ public:
         pkgInfoExt.pkgType = pkgType;
         ret = CreatePackage(&pkgInfoExt, compInfo, packagePath.c_str(), GetTestPrivateKeyName(0).c_str());
         EXPECT_EQ(ret, PKG_INVALID_PARAM);
+	hqs
         return 0;
     }
 
