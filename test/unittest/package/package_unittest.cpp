@@ -78,6 +78,10 @@ public:
         pkgInfoExt.pkgType = pkgType;
         ret = CreatePackage(&pkgInfoExt, compInfo, packagePath.c_str(), GetTestPrivateKeyName(0).c_str());
         EXPECT_EQ(ret, PKG_INVALID_PARAM);
+
+        pkgInfoExt.entryCount = 4097; // 4097: max entry count
+        ret = CreatePackage(&pkgInfoExt, compInfo, packagePath.c_str(), GetTestPrivateKeyName(0).c_str());
+        EXPECT_EQ(ret, PKG_INVALID_PARAM);
         return 0;
     }
 
