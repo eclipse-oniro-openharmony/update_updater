@@ -84,7 +84,7 @@ static void HandleMiscInfo(int argc, char **argv)
         cout << "dlopen libupdater_handle_misc fail";
         return;
     }
-    auto getFunc = (bool(*)(int, char **))dlsym(handleMiscLib, NOTIFY_MISC_INFO);
+    auto getFunc = (void(*)(int, char **))dlsym(handleMiscLib, NOTIFY_MISC_INFO);
     if (getFunc == nullptr) {
         cout << "getFunc is nullptr";
         dlclose(handleMiscLib);
