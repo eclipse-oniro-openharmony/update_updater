@@ -233,4 +233,9 @@ DEFINE_ASYN_CALLBACK(OnMenuClearCacheEvt)
     DoProgress();
     GetFacade().ShowMainpage();
 }
+
+__attribute__((weak)) bool DoSmoothProgress(float value)
+{
+    return false;
+}
 } // namespace Updater
