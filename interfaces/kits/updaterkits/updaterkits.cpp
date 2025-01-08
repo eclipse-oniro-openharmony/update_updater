@@ -29,6 +29,7 @@
 using namespace Updater;
 using Updater::Utils::SplitString;
 
+#ifndef UPDATER_UT
 constexpr const char *HANDLE_MISC_LIB = "libupdater_handle_misc.z.so";
 constexpr const char *HANDLE_MISC_INFO = "HandleUpdateMiscInfo";
 constexpr const char *HANDLE_MISC_LIB_PATH = "/system/lib64/libupdater_handle_misc.z.so";
@@ -58,6 +59,7 @@ static void Handledlopen(const struct UpdateMessage &updateMsg, const std::strin
         LOG(ERROR) << "handle misc info fail";
     }
 }
+#endif
 
 static bool WriteToMiscAndRebootToUpdater(const struct UpdateMessage &updateMsg)
 {
