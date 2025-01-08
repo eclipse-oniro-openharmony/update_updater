@@ -96,7 +96,7 @@ float UpdaterUiFacade::GetCurrentPercent(void)
 
 void UpdaterUiFacade::ShowProgress(float value) const
 {
-    if (!CheckMode().first || (value > FULL_PERCENT_PROGRESS) || DoSmoothProgress()) {
+    if (!CheckMode().first || (value > FULL_PERCENT_PROGRESS) || DoSmoothProgress(value)) {
         return;
     }
     static float lastValue = 0.0;
