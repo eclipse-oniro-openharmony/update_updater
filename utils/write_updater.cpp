@@ -87,11 +87,11 @@ static void HandleMiscInfo(int argc, char **argv)
     auto getFunc = (void(*)(int, char **))Utils::GetFunction(handle, NOTIFY_MISC_INFO);
     if (getFunc == nullptr) {
         cout << "getFunc is nullptr";
-        Utils::CloseLibradry(handle);
+        Utils::CloseLibrary(handle);
         return;
     }
     getFunc(argc, argv);
-    Utils::CloseLibradry(handle);
+    Utils::CloseLibrary(handle);
 }
 
 int main(int argc, char **argv)

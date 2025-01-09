@@ -30,7 +30,7 @@ bool RemoveDir(const std::string &path);
 bool IsFileExist(const std::string &path);
 bool IsDirExist(const std::string &path);
 void* LoadLibrary(const std::string &libName);
-void CloseLibradry(void* handle);
+void CloseLibrary(void* handle);
 void* GetFunction(void* handle, const std::string &funcName);
 } // Utils
 } // Updater

@@ -158,13 +158,13 @@ void* LoadLibrary(const std::string &libName)
     }
     void* handle = dlopen(libName.c_str(), RTLD_LAZY);
     if (handle == nullptr) {
-        LOG(ERROR) << "dlopen fail, lib name = " << libName;
+        LOG(ERROR) << "dlopen fail, lib name = " << libName << "; dlerror = " << dlerror();
         return nullptr;
     }
     return handle;
 }
 
-void CloseLibradry(void* handle)
+void CloseLibrary(void* handle)
 {
     if (handle == nullptr) {
         LOG(ERROR) << "handle is nulptr";

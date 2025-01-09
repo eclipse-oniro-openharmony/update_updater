@@ -48,11 +48,11 @@ static void Handledlopen(const struct UpdateMessage &updateMsg, const std::strin
     auto getFunc = (void(*)(const std::string &, const std::string &))Utils::GetFunction(handle, HANDLE_MISC_INFO);
     if (getFunc == nullptr) {
         LOG(ERROR) << "getFunc is nullptr";
-        Utils::CloseLibradry(handle);
+        Utils::CloseLibrary(handle);
         return;
     }
     getFunc(updateMsg.update, upgradeType);
-    Utils::CloseLibradry(handle);
+    Utils::CloseLibrary(handle);
 }
 #endif
 
