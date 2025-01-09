@@ -42,12 +42,12 @@ static void Handledlopen(const struct UpdateMessage &updateMsg, const std::strin
     }
     auto handle = Utils::LoadLibrary(HANDLE_MISC_LIB);
     if (handle == nullptr) {
-        cout << "load libupdater_handle_misc fail";
+        LOG(ERROR) << "load libupdater_handle_misc fail";
         return;
     }
     auto getFunc = (void(*)(const std::string &, const std::string &))Utils::GetFunction(handle, HANDLE_MISC_INFO);
     if (getFunc == nullptr) {
-        cout << "getFunc is nullptr";
+        LOG(ERROR) << "getFunc is nullptr";
         Utils::CloseLibradry(handle);
         return;
     }
