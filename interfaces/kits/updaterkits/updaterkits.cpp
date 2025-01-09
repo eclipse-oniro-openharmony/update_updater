@@ -34,7 +34,7 @@ constexpr const char *HANDLE_MISC_LIB = "libupdater_handle_misc.z.so";
 constexpr const char *HANDLE_MISC_INFO = "HandleUpdateMiscInfo";
 constexpr const char *HANDLE_MISC_LIB_PATH = "/system/lib64/libupdater_handle_misc.z.so";
 
-static void Handledlopen(const struct UpdateMessage &updateMsg, const std::string &upgradeType)
+static void HandleMiscMsg(const struct UpdateMessage &updateMsg, const std::string &upgradeType)
 {
     if (!Utils::IsFileExist(HANDLE_MISC_LIB_PATH)) {
         LOG(WARNING) << "libupdater_handle_misc.z.so is not exist";
@@ -66,7 +66,7 @@ static bool WriteToMiscAndRebootToUpdater(const struct UpdateMessage &updateMsg)
         return false;
     }
 #ifndef UPDATER_UT
-    Handledlopen(updateMsg, "");
+    HandleMiscMsg(updateMsg, "");
     WriteUpdaterMiscMsg(updateMsg);
     DoReboot("updater:reboot to updater to trigger update");
     while (true) {
@@ -140,7 +140,7 @@ static bool WriteToMiscAndResultFileRebootToUpdater(const struct UpdateMessage &
     std::string writeMiscBefore = "0x80000000";
     WriteUpdaterResultFile(pkgPath, writeMiscBefore);
 #ifndef UPDATER_UT
-    Handledlopen(updateMsg, upgradeType);
+    HandleMiscMsg(updateMsg, upgradeType);
     WriteUpdaterMiscMsg(updateMsg);
     // Flag after the misc in written
     std::string writeMiscAfter = "0x80000008";
