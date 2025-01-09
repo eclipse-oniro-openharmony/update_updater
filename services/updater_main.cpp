@@ -168,6 +168,18 @@ __attribute__((weak)) void UpdaterVerifyFailEntry(bool verifyret)
     return;
 }
 
+__attribute__((weak)) UpdaterStatus NotifyActionResult(UpdaterParams &upParams,
+    UpdaterStatus &status, const std::vector<NotifyAction> &notifyActionVec)
+{
+    return UPDATE_SUCCESS;
+}
+
+__attribute__((weak)) void NotifyReboot(const std::string& rebootTarget,
+    const std::string &rebootReason, const std::string &extData)
+{
+    Updater::Utils::UpdaterDoReboot(rebootTarget, rebootReason, extData);
+}
+
 static UpdaterStatus VerifyPackages(UpdaterParams &upParams)
 {
     UPDATER_INIT_RECORD;
@@ -378,6 +390,24 @@ static int CheckMountData()
     return UPDATE_ERROR;
 }
 
+static UpdaterStatus CheckVerifyPackages(UpdaterParams &upParams)
+{
+    // verify packages first
+    UpdaterStatus status = VerifyPackages(upParams);
+    if (NotifyActionResult(upParams, status, {SET_INSTALL_STATUS}) != UPDATE_SUCCESS) {
+        LOG(ERROR) << "set status fail";
+        return UPDATE_CORRUPT;
+    }
+    if (status != UPDATE_SUCCESS) {
+        return UPDATE_CORRUPT;
+    }
+    if (NotifyActionResult(upParams, status, {PROCESS_PACKAGE, GET_INSTALL_STATUS}) != UPDATE_SUCCESS) {
+        LOG(ERROR) << "notify action fail";
+        return UPDATE_CORRUPT;
+    }
+    return UPDATE_SUCCESS;
+}
+
 static UpdaterStatus PreUpdatePackages(UpdaterParams &upParams)
 {
     UPDATER_INIT_RECORD;
@@ -400,9 +430,9 @@ static UpdaterStatus PreUpdatePackages(UpdaterParams &upParams)
         return UPDATE_SUCCESS;
     }
 
-    // verify packages first
-    if (VerifyPackages(upParams) != UPDATE_SUCCESS) {
-        return UPDATE_CORRUPT; // verify package failed must return UPDATE_CORRUPT, ux need it !!!
+    if (CheckVerifyPackages(upParams) != UPDATE_SUCCESS) {
+        LOG(ERROR) << "verify packages fail";
+        return UPDATE_CORRUPT;
     }
 
     // Only handle UPATE_ERROR and UPDATE_SUCCESS here.Let package verify handle others.
@@ -496,12 +526,20 @@ UpdaterStatus DoUpdatePackages(UpdaterParams &upParams)
         UPDATER_UI_INSTANCE.GetCurrentPercent() : (updateStartPosition * FULL_PERCENT_PROGRESS);
     upParams.callbackProgress(value);
     status = DoInstallPackages(upParams, pkgStartPosition);
+    if (NotifyActionResult(upParams, status, {SET_UPDATE_STATUS}) != UPDATE_SUCCESS) {
+        LOG(ERROR) << "set status fail";
+        return UPDATE_CORRUPT;
+    }
     if (status != UPDATE_SUCCESS) {
         UPDATER_LAST_WORD(status, "DoInstallPackages failed");
         return status;
     }
     if (upParams.forceUpdate) {
         UPDATER_UI_INSTANCE.ShowLogRes(TR(LABEL_UPD_OK_SHUTDOWN));
+    }
+    if (NotifyActionResult(upParams, status, {GET_UPDATE_STATUS}) != UPDATE_SUCCESS) {
+        LOG(ERROR) << "get status fail";
+        return UPDATE_CORRUPT;
     }
     UPDATER_UI_INSTANCE.ShowSuccessPage();
     return status;
@@ -556,8 +594,9 @@ static UpdaterStatus PreSdcardUpdatePackages(UpdaterParams &upParams)
         return UPDATE_SKIP;
     }
 
-    if (VerifyPackages(upParams) != UPDATE_SUCCESS) {
-        return UPDATE_CORRUPT; // verify package failed must return UPDATE_CORRUPT, ux need it !!!
+    if (CheckVerifyPackages(upParams) != UPDATE_SUCCESS) {
+        LOG(ERROR) << "verify packages fail";
+        return UPDATE_CORRUPT;
     }
 #ifdef UPDATER_USE_PTABLE
     if (!PtablePreProcess::GetInstance().DoPtableProcess(upParams)) {
@@ -844,7 +883,7 @@ void RebootAfterUpdateSuccess(const UpdaterParams &upParams)
     if (IsNeedWipe() ||
         upParams.sdExtMode == SDCARD_UPDATE_FROM_DEV ||
         upParams.sdExtMode == SDCARD_UPDATE_FROM_DATA) {
-        Utils::UpdaterDoReboot("updater", "Updater wipe data after upgrade success", "--user_wipe_data");
+        NotifyReboot("updater", "Updater wipe data after upgrade success", "--user_wipe_data");
         return;
     }
     if (upParams.factoryResetMode == "factory_wipe_data") {
@@ -855,7 +894,7 @@ void RebootAfterUpdateSuccess(const UpdaterParams &upParams)
     upParams.forceUpdate || upParams.factoryResetMode == "factory_wipe_data" ||
         upParams.factoryResetMode == "menu_wipe_data" ?
         Utils::DoShutdown("Updater update success go shut down") :
-            Utils::UpdaterDoReboot("", "Updater update success");
+            NotifyReboot("", "Updater update success");
 }
 
 int UpdaterMain(int argc, char **argv)
@@ -882,7 +921,7 @@ int UpdaterMain(int argc, char **argv)
             if (upParams.forceReboot) {
                 Utils::UsSleep(5 * DISPLAY_TIME); // 5 : 5s
                 PostUpdater(true);
-                Utils::UpdaterDoReboot("", "Updater night update fail");
+                NotifyReboot("", "Updater night update fail");
                 return 0;
             }
         } else if (mode == SDCARD_UPDATE) {

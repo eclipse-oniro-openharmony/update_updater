@@ -41,6 +41,14 @@ enum PackageUpdateMode {
     UNKNOWN_UPDATE,
 };
 
+enum NotifyAction {
+    PROCESS_PACKAGE = 0,
+    SET_INSTALL_STATUS,
+    GET_INSTALL_STATUS,
+    SET_UPDATE_STATUS,
+    GET_UPDATE_STATUS
+};
+
 struct UpdaterParams {
     bool forceUpdate = false;
     bool forceReboot = false;

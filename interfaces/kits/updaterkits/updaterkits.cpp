@@ -14,6 +14,7 @@
  */
 #include "updaterkits/updaterkits.h"
 
+#include <dlfcn.h>
 #include <string>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -28,6 +29,33 @@
 using namespace Updater;
 using Updater::Utils::SplitString;
 
+#ifndef UPDATER_UT
+constexpr const char *HANDLE_MISC_LIB = "libupdater_handle_misc.z.so";
+constexpr const char *HANDLE_MISC_INFO = "HandleUpdateMiscInfo";
+constexpr const char *HANDLE_MISC_LIB_PATH = "/system/lib64/libupdater_handle_misc.z.so";
+
+static void HandleMiscMsg(const struct UpdateMessage &updateMsg, const std::string &upgradeType)
+{
+    if (!Utils::IsFileExist(HANDLE_MISC_LIB_PATH)) {
+        LOG(WARNING) << "libupdater_handle_misc.z.so is not exist";
+        return;
+    }
+    auto handle = Utils::LoadLibrary(HANDLE_MISC_LIB);
+    if (handle == nullptr) {
+        LOG(ERROR) << "load libupdater_handle_misc fail";
+        return;
+    }
+    auto getFunc = (void(*)(const std::string &, const std::string &))Utils::GetFunction(handle, HANDLE_MISC_INFO);
+    if (getFunc == nullptr) {
+        LOG(ERROR) << "getFunc is nullptr";
+        Utils::CloseLibrary(handle);
+        return;
+    }
+    getFunc(updateMsg.update, upgradeType);
+    Utils::CloseLibrary(handle);
+}
+#endif
+
 static bool WriteToMiscAndRebootToUpdater(const struct UpdateMessage &updateMsg)
 {
     // Write package name to misc, then trigger reboot.
@@ -38,6 +66,7 @@ static bool WriteToMiscAndRebootToUpdater(const struct UpdateMessage &updateMsg)
         return false;
     }
 #ifndef UPDATER_UT
+    HandleMiscMsg(updateMsg, "");
     WriteUpdaterMiscMsg(updateMsg);
     DoReboot("updater:reboot to updater to trigger update");
     while (true) {
@@ -96,7 +125,8 @@ static std::string ParsePkgPath(const struct UpdateMessage &updateMsg)
     return pkgPath;
 }
 
-static bool WriteToMiscAndResultFileRebootToUpdater(const struct UpdateMessage &updateMsg)
+static bool WriteToMiscAndResultFileRebootToUpdater(const struct UpdateMessage &updateMsg,
+    const std::string &upgradeType)
 {
     // Write package name to misc, then trigger reboot.
     const char *bootCmd = "boot_updater";
@@ -110,6 +140,7 @@ static bool WriteToMiscAndResultFileRebootToUpdater(const struct UpdateMessage &
     std::string writeMiscBefore = "0x80000000";
     WriteUpdaterResultFile(pkgPath, writeMiscBefore);
 #ifndef UPDATER_UT
+    HandleMiscMsg(updateMsg, upgradeType);
     WriteUpdaterMiscMsg(updateMsg);
     // Flag after the misc in written
     std::string writeMiscAfter = "0x80000008";
@@ -211,7 +242,7 @@ int RebootAndInstallUpgradePackage(const std::string &miscFile, const std::vecto
         return addRet;
     }
     if (upgradeType == UPGRADE_TYPE_OTA) {
-        WriteToMiscAndResultFileRebootToUpdater(updateMsg);
+        WriteToMiscAndResultFileRebootToUpdater(updateMsg, upgradeType);
     } else {
         WriteToMiscAndRebootToUpdater(updateMsg);
     }

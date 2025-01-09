@@ -12,15 +12,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <dlfcn.h>
 #include <iostream>
 #include "fs_manager/mount.h"
 #include "misc_info/misc_info.h"
 #include "securec.h"
 #include "updater/updater_const.h"
 #include "parameter.h"
+#include "utils.h"
+#include "utils_fs.h"
 
 using namespace std;
 using namespace Updater;
+
+constexpr const char *HANDLE_MISC_LIB = "libupdater_handle_misc.z.so";
+constexpr const char *NOTIFY_MISC_INFO = "NotifyWriteMiscInfo";
+constexpr const char *HANDLE_MISC_LIB_PATH = "/system/lib64/libupdater_handle_misc.z.so";
 
 static void PrintPrompts()
 {
@@ -64,6 +71,27 @@ static int WriteUpdaterPara(int argc, UpdaterPara &para)
         return -1;
     }
     return 0;
+}
+
+static void HandleMiscInfo(int argc, char **argv)
+{
+    if (!Utils::IsFileExist(HANDLE_MISC_LIB_PATH)) {
+        cout << "libupdater_handle_misc.z.so is not exist";
+        return;
+    }
+    auto handle = Utils::LoadLibrary(HANDLE_MISC_LIB);
+    if (handle == nullptr) {
+        cout << "load libupdater_handle_misc fail";
+        return;
+    }
+    auto getFunc = (void(*)(int, char **))Utils::GetFunction(handle, NOTIFY_MISC_INFO);
+    if (getFunc == nullptr) {
+        cout << "getFunc is nullptr";
+        Utils::CloseLibrary(handle);
+        return;
+    }
+    getFunc(argc, argv);
+    Utils::CloseLibrary(handle);
 }
 
 int main(int argc, char **argv)
@@ -111,5 +139,6 @@ int main(int argc, char **argv)
         cout << "WriteUpdaterMessage failed!" << endl;
         return -1;
     }
+    HandleMiscInfo(argc, argv);
     return 0;
 }
