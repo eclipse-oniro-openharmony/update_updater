@@ -40,7 +40,9 @@ enum UpdaterInitEvent {
     // factory reset
     FACTORY_RESET_INIT_EVENT,
 
-    UPDATER_INIT_EVENT_BUTT
+    UPDATER_INIT_EVENT_BUTT,
+
+    UPDATER_NOTIFY_EVENT
 };
 
 using InitHandler = void (*)(void);

@@ -169,7 +169,7 @@ __attribute__((weak)) void UpdaterVerifyFailEntry(bool verifyret)
 }
 
 __attribute__((weak)) UpdaterStatus NotifyActionResult(UpdaterParams &upParams,
-    UpdaterStatus &status, NotifyAction notifyAction)
+    UpdaterStatus &status, std::vector<NotifyAction> notifyActionVec)
 {
     return UPDATE_SUCCESS;
 }
@@ -394,19 +394,15 @@ static UpdaterStatus CheckVerifyPackages(UpdaterParams &upParams)
 {
     // verify packages first
     UpdaterStatus status = VerifyPackages(upParams);
-    if (NotifyActionResult(upParams, status, SET_INSTALL_STATUS) != UPDATE_SUCCESS) {
+    if (NotifyActionResult(upParams, status, {SET_INSTALL_STATUS}) != UPDATE_SUCCESS) {
         LOG(ERROR) << "set status fail";
         return UPDATE_CORRUPT;
     }
     if (status != UPDATE_SUCCESS) {
         return UPDATE_CORRUPT;
     }
-    if (NotifyActionResult(upParams, status, SEND_PACKAGE) != UPDATE_SUCCESS) {
-        LOG(ERROR) << "send package fail";
-        return UPDATE_CORRUPT;
-    }
-    if (NotifyActionResult(upParams, status, GET_INSTALL_STATUS) != UPDATE_SUCCESS) {
-        LOG(ERROR) << "get status fail";
+    if (NotifyActionResult(upParams, status, {SEND_PACKAGE, GET_INSTALL_STATUS}) != UPDATE_SUCCESS) {
+        LOG(ERROR) << "notify action fail";
         return UPDATE_CORRUPT;
     }
     return UPDATE_SUCCESS;
@@ -530,7 +526,7 @@ UpdaterStatus DoUpdatePackages(UpdaterParams &upParams)
         UPDATER_UI_INSTANCE.GetCurrentPercent() : (updateStartPosition * FULL_PERCENT_PROGRESS);
     upParams.callbackProgress(value);
     status = DoInstallPackages(upParams, pkgStartPosition);
-    if (NotifyActionResult(upParams, status, SET_UPDATE_STATUS) != UPDATE_SUCCESS) {
+    if (NotifyActionResult(upParams, status, {SET_UPDATE_STATUS}) != UPDATE_SUCCESS) {
         LOG(ERROR) << "set status fail";
         return UPDATE_CORRUPT;
     }
@@ -541,7 +537,7 @@ UpdaterStatus DoUpdatePackages(UpdaterParams &upParams)
     if (upParams.forceUpdate) {
         UPDATER_UI_INSTANCE.ShowLogRes(TR(LABEL_UPD_OK_SHUTDOWN));
     }
-    if (NotifyActionResult(upParams, status, GET_UPDATE_STATUS) != UPDATE_SUCCESS) {
+    if (NotifyActionResult(upParams, status, {GET_UPDATE_STATUS}) != UPDATE_SUCCESS) {
         LOG(ERROR) << "get status fail";
         return UPDATE_CORRUPT;
     }

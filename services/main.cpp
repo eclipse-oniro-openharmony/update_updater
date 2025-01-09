@@ -22,11 +22,6 @@
 
 using namespace Updater;
 
-__attribute__((weak)) void CheckConnect()
-{
-    return;
-}
-
 int main(int argc, char **argv)
 {
     // prepare modes vector by macro DEFINE_MODE which subscribe UPDATER_MAIN_PRE_EVENT event
@@ -38,7 +33,7 @@ int main(int argc, char **argv)
         LOG(WARNING) << "read misc message failed";
     }
 
-    CheckConnect();
+    UpdaterInit::GetInstance().InvokeEvent(UPDATER_NOTIFY_EVENT);
 
     // select modes by bootMode.cond which would check misc message
     auto bootMode = SelectMode(boot).value_or(BOOT_MODE(Updater, "updater.hdc.configfs"));
