@@ -42,7 +42,7 @@ enum PackageUpdateMode {
 };
 
 enum NotifyAction {
-    SEND_PACKAGE = 0,
+    PROCESS_PACKAGE = 0,
     SET_INSTALL_STATUS,
     GET_INSTALL_STATUS,
     SET_UPDATE_STATUS,

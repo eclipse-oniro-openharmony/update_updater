@@ -169,7 +169,7 @@ __attribute__((weak)) void UpdaterVerifyFailEntry(bool verifyret)
 }
 
 __attribute__((weak)) UpdaterStatus NotifyActionResult(UpdaterParams &upParams,
-    UpdaterStatus &status, std::vector<NotifyAction> notifyActionVec)
+    UpdaterStatus &status, const std::vector<NotifyAction> &notifyActionVec)
 {
     return UPDATE_SUCCESS;
 }
@@ -401,7 +401,7 @@ static UpdaterStatus CheckVerifyPackages(UpdaterParams &upParams)
     if (status != UPDATE_SUCCESS) {
         return UPDATE_CORRUPT;
     }
-    if (NotifyActionResult(upParams, status, {SEND_PACKAGE, GET_INSTALL_STATUS}) != UPDATE_SUCCESS) {
+    if (NotifyActionResult(upParams, status, {PROCESS_PACKAGE, GET_INSTALL_STATUS}) != UPDATE_SUCCESS) {
         LOG(ERROR) << "notify action fail";
         return UPDATE_CORRUPT;
     }
