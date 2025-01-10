@@ -89,7 +89,7 @@ public:
         return hasTailpart_;
     }
 
-    bool ClearPtnInfo()
+    void ClearPtnInfo()
     {
         partitionInfo_.clear();
     }
