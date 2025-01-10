@@ -23,7 +23,7 @@
 namespace Updater {
 namespace Detail {
 template<typename T>
-inline constexpr bool G_IS_NUM = std::is_integral_v<T> && !std::is_same_v<T, bool>;
+inline constexpr bool G_IS_NUM = (std::is_integral_v<T> && !std::is_same_v<T, bool>) || std::is_same_v<T, float>;
 
 template<typename T>
 inline constexpr bool G_IS_BOOL = std::is_same_v<bool, T>;
