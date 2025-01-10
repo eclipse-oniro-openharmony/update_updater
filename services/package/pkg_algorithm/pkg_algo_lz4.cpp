@@ -42,7 +42,7 @@ PkgAlgorithmLz4::PkgAlgorithmLz4(const Lz4FileInfo &config) : PkgAlgorithm(),
 int32_t PkgAlgorithmLz4::AdpLz4Compress(const uint8_t *src, uint8_t *dest,
     uint32_t srcSize, uint32_t dstCapacity) const
 {
-    if (compressionLevel_ < LZ4HC_CLEVEL_MIN) { // hc 最小是3
+    if (compressionLevel_ < LZ4HC_CLEVEL_MIN) { // hc 最小是2
         return LZ4_compress_default(reinterpret_cast<const char *>(src), reinterpret_cast<char *>(dest),
             static_cast<int32_t>(srcSize), static_cast<int32_t>(dstCapacity));
     }
