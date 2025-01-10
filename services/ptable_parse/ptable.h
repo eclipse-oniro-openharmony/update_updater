@@ -89,6 +89,11 @@ public:
         return hasTailpart_;
     }
 
+    void ClearPtnInfo()
+    {
+        partitionInfo_.clear();
+    }
+
 #ifndef UPDATER_UT
 protected:
 #else
