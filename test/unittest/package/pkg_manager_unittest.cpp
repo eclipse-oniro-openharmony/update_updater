@@ -643,7 +643,7 @@ HWTEST_F(PkgMangerTest, TestLz4Buffer, TestSize.Level1)
     EXPECT_EQ(0, test.TestDecompressLz4(lz4Info, uncompressedData, digest));
     int32_t ret = 0;
     for (int32_t i = 0; i < LZ4F_MAX_BLOCKID; i++) {
-        lz4Info.compressionLevel = 2;
+        lz4Info.compressionLevel = 1;
         lz4Info.blockSizeID = i;
         ret = test.TestCompressBuffer(lz4Info.fileInfo, uncompressedData, digest);
         if (ret == 0) {
