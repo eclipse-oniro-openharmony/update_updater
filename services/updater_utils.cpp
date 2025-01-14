@@ -192,7 +192,7 @@ bool IsMountDataAndSaveLogs(void)
     return (!(isSdCardMode || isUsbMode) && (isDataAlreadyMounted || !isLogMounted)) || isSdCardIntralMode;
 }
 
-static DeleteUpdaterTmpFiles()
+static void DeleteUpdaterTmpFiles()
 {
     if (access(UPDATER_PATH, 0) == 0 && access(SDCARD_CARD_PATH, 0) != 0 && !DeleteUpdaterPath(UPDATER_PATH)) {
         LOG(ERROR) << "DeleteUpdaterPath failed";
