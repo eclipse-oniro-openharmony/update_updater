@@ -23,6 +23,7 @@
 #include "applypatch/command.h"
 #include "applypatch/store.h"
 #include "applypatch/transfer_manager.h"
+#include "log/dump.h"
 #include "log/log.h"
 #include "patch/update_patch.h"
 #include "securec.h"
@@ -207,12 +208,15 @@ size_t BlockSet::TotalBlockSize() const
 
 int32_t BlockSet::VerifySha256(const std::vector<uint8_t> &buffer, const size_t size, const std::string &expected)
 {
+    UPDATER_INIT_RECORD;
     uint8_t digest[SHA256_DIGEST_LENGTH];
     SHA256(buffer.data(), size * H_BLOCK_SIZE, digest);
     std::string hexdigest = Utils::ConvertSha256Hex(digest, SHA256_DIGEST_LENGTH);
     if (hexdigest == expected) {
         return 0;
     }
+    LOG(ERROR) << "hexdigest is " << hexdigest << ", expected is " << expected;
+    UPDATER_LAST_WORD(hexdigest, expected);
     return -1;
 }
 

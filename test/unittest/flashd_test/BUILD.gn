@@ -62,6 +62,7 @@ ohos_unittest("flashd_unittest") {
     "${updater_path}/services/flashd/partition.cpp",
     "${updater_path}/services/hdi/client/update_hdi_client.cpp",
     "${updater_path}/services/hdi/server/update_hdi_impl.cpp",
+    "${updater_path}/services/hwfault_retry/hwfault_retry.cpp",
     "${updater_path}/services/updater_utils.cpp",
     "flashd_unittest.cpp",
   ]

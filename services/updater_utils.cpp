@@ -26,6 +26,7 @@
 #include "misc_info/misc_info.h"
 #include "package/pkg_manager.h"
 #include "securec.h"
+#include "updater/hwfault_retry.h"
 #include "updater/updater.h"
 #include "updater/updater_const.h"
 #include "updater_main.h"
@@ -191,6 +192,19 @@ bool IsMountDataAndSaveLogs(void)
     return (!(isSdCardMode || isUsbMode) && (isDataAlreadyMounted || !isLogMounted)) || isSdCardIntralMode;
 }
 
+static void DeleteUpdaterTmpFiles()
+{
+    if (access(UPDATER_PATH, 0) == 0 && access(SDCARD_CARD_PATH, 0) != 0 && !DeleteUpdaterPath(UPDATER_PATH)) {
+        LOG(ERROR) << "DeleteUpdaterPath failed";
+    }
+    if (access(SDCARD_CARD_PATH, 0) == 0 && !DeleteUpdaterPath(SDCARD_CARD_PATH)) {
+        LOG(ERROR) << "Delete sdcard path failed";
+    }
+    if (access(Flashd::FLASHD_FILE_PATH, 0) == 0 && !DeleteUpdaterPath(Flashd::FLASHD_FILE_PATH)) {
+        LOG(ERROR) << "DeleteUpdaterPath failed";
+    }
+}
+
 void PostUpdater(bool clearMisc)
 {
     STAGE(UPDATE_STAGE_BEGIN) << "PostUpdater";
@@ -204,16 +218,8 @@ void PostUpdater(bool clearMisc)
     if (!access(COMMAND_FILE, 0) && unlink(COMMAND_FILE) != 0) {
         LOG(ERROR) << "Delete command failed";
     }
-
-    // delete updater tmp files
-    if (access(UPDATER_PATH, 0) == 0 && access(SDCARD_CARD_PATH, 0) != 0 && !DeleteUpdaterPath(UPDATER_PATH)) {
-        LOG(ERROR) << "DeleteUpdaterPath failed";
-    }
-    if (access(SDCARD_CARD_PATH, 0) == 0 && !DeleteUpdaterPath(SDCARD_CARD_PATH)) {
-        LOG(ERROR) << "Delete sdcard path failed";
-    }
-    if (access(Flashd::FLASHD_FILE_PATH, 0) == 0 && !DeleteUpdaterPath(Flashd::FLASHD_FILE_PATH)) {
-        LOG(ERROR) << "DeleteUpdaterPath failed";
+    if (!HwFaultRetry::GetInstance().IsRetry()) {
+        DeleteUpdaterTmpFiles();
     }
     if (isMountDataAndSaveLogs) {
         SaveLogs();
