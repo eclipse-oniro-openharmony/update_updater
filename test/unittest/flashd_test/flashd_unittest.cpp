@@ -235,6 +235,45 @@ HWTEST_F(FLashServiceUnitTest, FlashdWriterRawWriter, TestSize.Level1)
     EXPECT_EQ(-1, ret);
 }
 
+HWTEST_F(FLashServiceUnitTest, RegisterUserWriter, TestSize.Level0)
+{
+    std::string partName = "";
+    std::string temp = "";
+    uint8_t *buffer = reinterpret_cast<uint8_t*>(temp.data());
+    int bufferSize = partName.size();
+    std::unique_ptr<FlashdWriter> writer = FlashdImageWriter::GetInstance().GetWriter(partName, buffer, bufferSize);
+    if (writer == nullptr) {
+        std::cout << "writer is nullptr";
+    }
+    EXPECT_NE(nullptr, writer);
+    LOG(INFO) << "RegisterUserWriter finish";
+}
+
+HWTEST_F(FLashServiceUnitTest, UpdateCommanderPostCommand, TestSize.Level0)
+{
+    LoadFstab();
+    std::unique_ptr<Flashd::Commander> commander = nullptr;
+    Flashd::UpdaterState ret = UpdaterState::DOING;
+    auto callbackFail = [&ret](Flashd::CmdType type, Flashd::UpdaterState state, const std::string &msg) {
+        ret = state;
+    };
+    commander = Flashd::CommanderFactory::GetInstance().CreateCommander(Hdc::CMDSTR_UPDATE_SYSTEM, callbackFail);
+    EXPECT_NE(nullptr, commander);
+    commander->PostCommand();
+    EXPECT_NE(nullptr, commander);
+    LOG(INFO) << "UpdateCommanderPostCommand finish";
+}
+
+HWTEST_F(FLashServiceUnitTest, PartitionGetBlockDeviceSize, TestSize.Level1)
+{
+    std::string partitionName = "test";
+    Partition partTest(partitionName);
+    int fd = 1;
+    int ret = partTest.GetBlockDeviceSize(fd);
+    LOG(INFO) << "PartitionGetBlockDeviceSize ret: " << ret;
+    EXPECT_EQ(0, ret);
+}
+
 bool IsTestImg(const std::string &partition, const uint8_t *data, size_t len)
 {
     if (data == nullptr) {

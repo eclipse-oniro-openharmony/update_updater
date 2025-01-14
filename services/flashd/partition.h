@@ -38,9 +38,13 @@ public:
     int DoEraseExt(const Ptable::PtnInfo &ptnInfo) const;
 #endif
 
+#ifdef UPDATER_UT
+    uint64_t GetBlockDeviceSize(int fd) const;
+#else
 private:
     uint64_t GetBlockDeviceSize(int fd) const;
-
+#endif
+private:
     std::string devName_ = "";
     std::unique_ptr<FlashdWriter> writer_ = nullptr;
 };
