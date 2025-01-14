@@ -64,7 +64,9 @@ HWTEST_F(UpdateProgressTest, UpdateProgressTest01, TestSize.Level1)
     float progress = 1.0f;
     SetUpdateProgress(progress);
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
-    EXPECT_EQ(env.GetPostMessage(), env.GetPostMessage());
+    std::stringstream ss;
+    ss << "show_progress " << std::to_string(progress) << "," << std::to_string(0.0f);
+    EXPECT_EQ(env.GetPostMessage(), ss.str());
     SetProgressExitFlag(thread);
 }
 }
