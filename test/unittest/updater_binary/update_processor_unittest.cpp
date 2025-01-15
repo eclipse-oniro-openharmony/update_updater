@@ -72,10 +72,12 @@ void UpdateProcessorUnitTest::TearDownTestCase(void) {}
 HWTEST_F(UpdateProcessorUnitTest, UpdateProcessor_001, TestSize.Level1)
 {
     const string packagePath = "/data/updater/updater/updater_write_misc_img.zip";
-    int fd = open("/dev/null", O_RDWR);
-    dup2(fd, STDOUT_FILENO);
-    int32_t ret = ProcessUpdater(false, STDOUT_FILENO, packagePath, GetTestCertName());
-    close(fd);
+    int pfd[2]; // 2: pipe read, pipe write
+    int ret = pipe(pfd);
+    EXPECT_GE(ret, 0);
+    ret = ProcessUpdater(false, pfd[1], packagePath, GetTestCertName());
+    close(pfd[0]);
+    close(pfd[1]);
     EXPECT_EQ(ret, 0);
 }
 
@@ -88,10 +90,12 @@ HWTEST_F(UpdateProcessorUnitTest, UpdateProcessor_002, TestSize.Level1)
     EXPECT_EQ(ret, 0);
 
     const string packagePath = "/data/updater/updater/updater_write_diff_misc_img.zip";
-    int fd = open("/dev/null", O_RDWR);
-    dup2(fd, STDOUT_FILENO);
-    ret = ProcessUpdater(false, STDOUT_FILENO, packagePath, GetTestCertName());
-    close(fd);
+    int pfd[2]; // 2: pipe read, pipe write
+    ret = pipe(pfd);
+    EXPECT_GE(ret, 0);
+    ret = ProcessUpdater(false, pfd[1], packagePath, GetTestCertName());
+    close(pfd[0]);
+    close(pfd[1]);
     EXPECT_EQ(ret, 0);
 }
 
@@ -104,10 +108,12 @@ HWTEST_F(UpdateProcessorUnitTest, UpdateProcessor_003, TestSize.Level1)
     EXPECT_EQ(ret, 0);
 
     const string packagePath = "/data/updater/updater/updater_write_diff_misc_img.zip";
-    int fd = open("/dev/null", O_RDWR);
-    dup2(fd, STDOUT_FILENO);
-    ret = ProcessUpdater(false, STDOUT_FILENO, packagePath, GetTestCertName());
-    close(fd);
+    int pfd[2]; // 2: pipe read, pipe write
+    ret = pipe(pfd);
+    EXPECT_GE(ret, 0);
+    ret = ProcessUpdater(false, pfd[1], packagePath, GetTestCertName());
+    close(pfd[0]);
+    close(pfd[1]);
     EXPECT_EQ(ret, USCRIPT_INVALID_PARAM);
 }
 
@@ -141,10 +147,32 @@ HWTEST_F(UpdateProcessorUnitTest, UpdateProcessor_005, TestSize.Level1)
 HWTEST_F(UpdateProcessorUnitTest, UpdateProcessor_006, TestSize.Level1)
 {
     const string packagePath = "/data/updater/updater/updater_write_not_exist.zip";
-    int fd = open("/dev/null", O_RDWR);
-    dup2(fd, STDOUT_FILENO);
-    int32_t ret = ProcessUpdater(false, STDOUT_FILENO, packagePath, GetTestCertName());
-    close(fd);
+    int pfd[2]; // 2: pipe read, pipe write
+    int ret = pipe(pfd);
+    EXPECT_GE(ret, 0);
+    ret = ProcessUpdater(false, pfd[1], packagePath, GetTestCertName());
+    close(pfd[0]);
+    close(pfd[1]);
     EXPECT_EQ(ret, EXIT_INVALID_ARGS);
+}
+
+HWTEST_F(UpdateProcessorUnitTest, UpdaterEnv_Unitest01, TestSize.Level1)
+{
+    PkgManager::PkgManagerPtr pkgManager = PkgManager::CreatePackageInstance();
+    UpdaterEnv *env = new UpdaterEnv(pkgManager, nullptr, false);
+    EXPECT_NE(env, nullptr);
+    env->PostMessage("set_progress", "0.1");
+    free(env);
+    env = nullptr;
+ 
+    env = new UpdaterEnv(pkgManager, [](const char *cmd, const char *content) {}, false);
+    EXPECT_NE(env, nullptr);
+    env->PostMessage("set_progress", "0.1");
+    UScriptInstructionFactoryPtr factory = env->GetInstructionFactory();
+    factory = env->GetInstructionFactory();
+    EXPECT_NE(factory, nullptr);
+    free(env);
+    env = nullptr;
+    PkgManager::ReleasePackageInstance(pkgManager);
 }
 } // namespace updater_ut
