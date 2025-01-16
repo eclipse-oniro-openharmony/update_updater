@@ -591,7 +591,7 @@ static UpdaterStatus PreSdcardUpdatePackages(UpdaterParams &upParams)
         return UPDATE_SKIP;
     }
     UpdaterStatus status = VerifyPackages(upParams);
-    if (VerifyPackages(upParams) != UPDATE_SUCCESS) {
+    if (status != UPDATE_SUCCESS) {
         return UPDATE_CORRUPT;
     }
 #ifdef UPDATER_USE_PTABLE
