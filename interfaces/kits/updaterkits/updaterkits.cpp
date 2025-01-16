@@ -92,7 +92,7 @@ static void WriteUpdaterResultFile(const std::string &pkgPath, const std::string
         LOG(ERROR) << "open updater result file failed";
         return;
     }
-    std::string resultInfo = pkgPath + "|fail|" + result + "||\n";
+    std::string resultInfo = pkgPath + "|notstart|" + result + "||\n";
     if (fwrite(resultInfo.c_str(), resultInfo.size() + 1, 1, fp) <= 0) {
         LOG(WARNING) << "write updater result file failed, err:" << errno;
     }
