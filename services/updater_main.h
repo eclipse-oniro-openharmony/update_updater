@@ -71,6 +71,8 @@ void UpdaterVerifyFailEntry(bool verifyret);
 bool IsSpareBoardBoot(void);
 bool IsNeedWipe();
 void NotifyReboot(const std::string& rebootTarget, const std::string &rebootReason, const std::string &extData = "");
+UpdaterStatus NotifyActionResult(UpdaterParams &upParams,
+    UpdaterStatus &status, const std::vector<NotifyAction> &notifyActionVec);
 #ifdef __cplusplus
 #if __cplusplus
 }
