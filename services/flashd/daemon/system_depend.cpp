@@ -32,6 +32,7 @@ envirments
 
 namespace Hdc {
 namespace SystemDepend {
+#ifndef UPDATER_UT
     bool SetDevItem(const char *key, const char *value)
     {
         bool ret = true;
@@ -57,5 +58,6 @@ namespace SystemDepend {
         Updater::Utils::UpdaterDoReboot("", "Updater flashd reboot command");
         return true;
     }
+#endif
 }
 }  // namespace Hdc

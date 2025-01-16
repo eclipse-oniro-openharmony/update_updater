@@ -37,6 +37,7 @@ void Commander::NotifyFail(CmdType type, const std::string &msg) const
 
 void Commander::UpdateProgress(CmdType type) const
 {
+#ifndef UPDATER_UT
     if (!IsCallbackVaild()) {
         return;
     }
@@ -56,6 +57,7 @@ void Commander::UpdateProgress(CmdType type) const
     }
     preProcess = currentProcess;
     callback_(type, UpdaterState::DOING, std::to_string(currentProcess));
+#endif
 }
 
 bool Commander::IsCallbackVaild() const

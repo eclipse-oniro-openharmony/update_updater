@@ -88,7 +88,7 @@ bool UpdateCommander::DoUpdate(const uint8_t *payload, int payloadSize)
         FLASHD_LOGE("file fd is invaild");
         return false;
     }
-
+#ifndef UPDATER_UT
     auto writeSize = std::min(static_cast<size_t>(payloadSize), fileSize_ - currentSize_);
     if (writeSize <= 0) {
         FLASHD_LOGW("all the data has been written");
@@ -109,6 +109,7 @@ bool UpdateCommander::DoUpdate(const uint8_t *payload, int payloadSize)
         NotifySuccess(CmdType::UPDATE);
         return true;
     }
+#endif
     UpdateProgress(CmdType::UPDATE);
     return true;
 }
@@ -118,9 +119,11 @@ bool UpdateCommander::ExecUpdate() const
     const std::string miscFile = "/dev/block/by-name/misc";
     std::vector<std::string> filePath;
     filePath.push_back(filePath_);
+#ifndef UPDATER_UT
     if (RebootAndInstallUpgradePackage(miscFile, filePath) == 0) {
         return true;
     }
+#endif
     return false;
 }
 
