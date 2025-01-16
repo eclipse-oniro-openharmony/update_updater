@@ -30,7 +30,6 @@ public:
     }
     ~FactoryResetUnitTest() {}
     FactoryResetProcess* factoryResetProcess;
-    std::unordered_map<FactoryResetMode, FactoryResetProcess::ResetFunc> resetTab_;
     std::function<int(FactoryResetMode)> CommonResetPostFunc_;
 
     static void SetUpTestCase(void) {}
@@ -38,7 +37,6 @@ public:
     void SetUp()
     {
         factoryResetProcess = new FactoryResetProcess();
-        factoryResetProcess->resetTab_ = resetTab_;
         factoryResetProcess->CommonResetPostFunc_ = CommonResetPostFunc_;
     }
     void TearDown()
@@ -51,52 +49,46 @@ public:
 
 HWTEST_F(FactoryResetUnitTest, FactoryResetFunc01, TestSize.Level0)
 {
-    int ret = factoryResetProcess->GetInstance().FactoryResetFunc(FactoryResetMode::INVALID_MODE, "/data");
+    int ret = factoryResetProcess->GetInstance().DoFactoryReset(FactoryResetMode::INVALID_MODE, "/data");
     EXPECT_EQ(ret, 1);
 }
 
 HWTEST_F(FactoryResetUnitTest, FactoryResetFunc02, TestSize.Level0)
 {
-    resetTab_[FactoryResetMode::USER_WIPE_DATA] = [](FactoryResetMode, const std::string &) { return 0; };
-    int ret = factoryResetProcess->GetInstance().FactoryResetFunc(FactoryResetMode::USER_WIPE_DATA, "/data");
+    int ret = factoryResetProcess->GetInstance().DoFactoryReset(FactoryResetMode::USER_WIPE_DATA, "/data");
     EXPECT_EQ(ret, 1);
 }
 
 HWTEST_F(FactoryResetUnitTest, FactoryResetFunc03, TestSize.Level0)
 {
     CommonResetPostFunc_ = [](FactoryResetMode) { return 0; };
-    resetTab_[FactoryResetMode::USER_WIPE_DATA] = [](FactoryResetMode, const std::string &) { return 0; };
-    int ret = factoryResetProcess->GetInstance().FactoryResetFunc(FactoryResetMode::USER_WIPE_DATA, "/data");
+    int ret = factoryResetProcess->GetInstance().DoFactoryReset(FactoryResetMode::USER_WIPE_DATA, "/data");
     EXPECT_EQ(ret, 1);
 }
 
 HWTEST_F(FactoryResetUnitTest, FactoryResetFunc04, TestSize.Level0)
 {
-    resetTab_[FactoryResetMode::FACTORY_WIPE_DATA] = [](FactoryResetMode, const std::string &) { return 0; };
-    int ret = factoryResetProcess->GetInstance().FactoryResetFunc(FactoryResetMode::FACTORY_WIPE_DATA, "/data");
+    int ret = factoryResetProcess->GetInstance().DoFactoryReset(FactoryResetMode::FACTORY_WIPE_DATA, "/data");
     EXPECT_EQ(ret, 1);
 }
 
 HWTEST_F(FactoryResetUnitTest, FactoryResetFunc05, TestSize.Level0)
 {
     CommonResetPostFunc_ = [](FactoryResetMode) { return 0; };
-    resetTab_[FactoryResetMode::FACTORY_WIPE_DATA] = [](FactoryResetMode, const std::string &) { return 0; };
-    int ret = factoryResetProcess->GetInstance().FactoryResetFunc(FactoryResetMode::FACTORY_WIPE_DATA, "/data");
+    int ret = factoryResetProcess->GetInstance().DoFactoryReset(FactoryResetMode::FACTORY_WIPE_DATA, "/data");
     EXPECT_EQ(ret, 1);
 }
 
 HWTEST_F(FactoryResetUnitTest, FactoryResetFunc06, TestSize.Level0)
 {
-    resetTab_[FactoryResetMode::MENU_WIPE_DATA] = [](FactoryResetMode, const std::string &) { return 0; };
-    int ret = factoryResetProcess->GetInstance().FactoryResetFunc(FactoryResetMode::MENU_WIPE_DATA, "/data");
+    int ret = factoryResetProcess->GetInstance().DoFactoryReset(FactoryResetMode::MENU_WIPE_DATA, "/data");
     EXPECT_EQ(ret, 1);
 }
 
 HWTEST_F(FactoryResetUnitTest, FactoryResetFunc07, TestSize.Level0)
 {
     CommonResetPostFunc_ = [](FactoryResetMode) { return 0; };
-    resetTab_[FactoryResetMode::MENU_WIPE_DATA] = [](FactoryResetMode, const std::string &) { return 0; };
-    int ret = factoryResetProcess->GetInstance().FactoryResetFunc(FactoryResetMode::MENU_WIPE_DATA, "/data");
+    int ret = factoryResetProcess->GetInstance().DoFactoryReset(FactoryResetMode::MENU_WIPE_DATA, "/data");
     EXPECT_EQ(ret, 1);
 }
 }

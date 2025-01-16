@@ -26,37 +26,7 @@ FactoryResetProcess &FactoryResetProcess::GetInstance()
     return resetProcessor;
 }
 
-FactoryResetProcess::FactoryResetProcess()
-{
-    RegisterFunc(USER_WIPE_DATA,
-        [this](FactoryResetMode mode, const std::string &path) { return DoUserReset(mode, path); });
-    RegisterFunc(FACTORY_WIPE_DATA,
-        [this](FactoryResetMode mode, const std::string &path) { return DoFactoryReset(mode, path); });
-    RegisterFunc(MENU_WIPE_DATA,
-        [this](FactoryResetMode mode, const std::string &path) { return DoUserReset(mode, path); });
-}
-
-void FactoryResetProcess::RegisterFunc(FactoryResetMode mode, ResetFunc func)
-{
-    if (!resetTab_.emplace(mode, func).second) {
-        LOG(ERROR) << "emplace: " << mode << " fail";
-    }
-}
-
-int FactoryResetProcess::FactoryResetFunc(FactoryResetMode mode, const std::string &path)
-{
-    auto iter = resetTab_.find(mode);
-    if (iter == resetTab_.end() || iter->second == nullptr) {
-        LOG(ERROR) << "Invalid factory reset tag: " << mode;
-        return 1;
-    }
-    int resetStatus = iter->second(mode, path);
-    if (resetStatus != 0) {
-        LOG(ERROR) << "Do factory reset failed! tag: " << mode;
-        return 1;
-    }
-    return 0;
-}
+FactoryResetProcess::FactoryResetProcess() {}
 
 static int CommonResetPost(bool flag)
 {
@@ -69,7 +39,7 @@ void FactoryResetProcess::RegisterCommonResetPostFunc(CommonResetPostFunc ptr)
     CommonResetPostFunc_ = std::move(ptr);
 }
 
-static int FactoryResetPre()
+static int FactoryResetPre(FactoryResetMode mode)
 {
     LOG(INFO) << "FactoryResetPre";
     return 0;
@@ -80,7 +50,7 @@ void FactoryResetProcess::RegisterFactoryResetPreFunc(FactoryResetPreFunc ptr)
     FactoryResetPreFunc_ = std::move(ptr);
 }
 
-static int FactoryResetPost(int status)
+static int FactoryResetPost(FactoryResetMode mode, int status)
 {
     LOG(INFO) << "FactoryResetPost";
     return 0;
@@ -91,63 +61,11 @@ void FactoryResetProcess::RegisterFactoryResetPostFunc(FactoryResetPostFunc ptr)
     FactoryResetPostFunc_ = std::move(ptr);
 }
 
-static int UserResetPre(FactoryResetMode mode)
-{
-    (void)mode;
-    LOG(INFO) << "UserResetPre";
-    return 0;
-}
-
-void FactoryResetProcess::RegisterUserResetPreFunc(UserResetPreFunc ptr)
-{
-    UserResetPreFunc_ = std::move(ptr);
-}
-
-static int UserResetPost(FactoryResetMode mode)
-{
-    (void)mode;
-    LOG(INFO) << "UserResetPost";
-    return 0;
-}
-
-void FactoryResetProcess::RegisterUserResetPostFunc(UserResetPostFunc ptr)
-{
-    UserResetPostFunc_ = std::move(ptr);
-}
-
-int FactoryResetProcess::DoUserReset(FactoryResetMode mode, const std::string &path)
-{
-    STAGE(UPDATE_STAGE_BEGIN) << "User FactoryReset";
-    if (UserResetPreFunc_ == nullptr || UserResetPreFunc_(mode) != 0) {
-        LOG(ERROR) << "UserResetPreFunc_ fail";
-        return -1;
-    }
-    LOG(INFO) << "Begin erasing data";
-    int ret = FormatPartition(path, true);
-    if (ret != 0) {
-        LOG(ERROR) << "User level FactoryReset failed";
-        STAGE(UPDATE_STAGE_FAIL) << "User FactoryReset";
-        ERROR_CODE(CODE_FACTORY_RESET_FAIL);
-    }
-    if (UserResetPostFunc_ == nullptr || UserResetPostFunc_(mode) != 0 || ret != 0) {
-        LOG(ERROR) << "UserResetPostFunc_ fail or FormatPartition failed";
-        return -1;
-    }
-    if (CommonResetPostFunc_ == nullptr || CommonResetPostFunc_(mode) != 0) {
-        LOG(ERROR) << "CommonResetPostFunc_ fail";
-        return -1;
-    }
-    LOG(INFO) << "User level FactoryReset success";
-    STAGE(UPDATE_STAGE_SUCCESS) << "User FactoryReset";
-
-    return 0;
-}
-
 int FactoryResetProcess::DoFactoryReset(FactoryResetMode mode, const std::string &path)
 {
     int resetStatus = 0;
     STAGE(UPDATE_STAGE_BEGIN) << "Factory FactoryReset";
-    if (FactoryResetPreFunc_ == nullptr || FactoryResetPreFunc_() != 0) {
+    if (FactoryResetPreFunc_ == nullptr || FactoryResetPreFunc_(mode) != 0) {
         LOG(ERROR) << "FactoryResetPreFunc_ fail";
         return -1;
     }
@@ -161,7 +79,7 @@ int FactoryResetProcess::DoFactoryReset(FactoryResetMode mode, const std::string
         LOG(ERROR) << "CommonResetPostFunc_ fail";
         resetStatus = -1;
     }
-    if (FactoryResetPostFunc_ == nullptr || FactoryResetPostFunc_(resetStatus) != 0) {
+    if (FactoryResetPostFunc_ == nullptr || FactoryResetPostFunc_(mode, resetStatus) != 0) {
         LOG(ERROR) << "FactoryResetPostFunc_ fail";
         return -1;
     }
@@ -183,15 +101,5 @@ extern "C" __attribute__((constructor)) void RegisterFactoryResetPreFunc(void)
 extern "C" __attribute__((constructor)) void RegisterFactoryResetPostFunc(void)
 {
     FactoryResetProcess::GetInstance().RegisterFactoryResetPostFunc(FactoryResetPost);
-}
-
-extern "C" __attribute__((constructor)) void RegisterUserResetPreFunc(void)
-{
-    FactoryResetProcess::GetInstance().RegisterUserResetPreFunc(UserResetPre);
-}
-
-extern "C" __attribute__((constructor)) void RegisterUserResetPostFunc(void)
-{
-    FactoryResetProcess::GetInstance().RegisterUserResetPostFunc(UserResetPost);
 }
 } // Updater
