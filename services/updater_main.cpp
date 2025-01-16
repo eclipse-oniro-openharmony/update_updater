@@ -393,8 +393,8 @@ static int CheckMountData()
 static UpdaterStatus CheckVerifyPackages(UpdaterParams &upParams)
 {
     UpdaterStatus status = UPDATE_SUCCESS;
-    if (NotifyActionResult(upParams, status, {PROCESS_PACKAGE, SET_INSTALL_STATUS, GET_INSTALL_STATUS})
-        != UPDATE_SUCCESS) {
+    if (NotifyActionResult(upParams, status, {PROCESS_PACKAGE, SET_INSTALL_STATUS, GET_INSTALL_STATUS}) !=
+        UPDATE_SUCCESS) {
         LOG(ERROR) << "notify action fail";
         return UPDATE_CORRUPT;
     }
