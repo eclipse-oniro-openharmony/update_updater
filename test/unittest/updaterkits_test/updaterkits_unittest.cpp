@@ -70,7 +70,7 @@ HWTEST_F(UpdaterKitsUnitTest, updater_kits_test02, TestSize.Level1)
     EXPECT_EQ(ret, true);
 
     char testPath[1024] = {0}; // 1024: max len
-    for (int i = 0; i < sizeof(testPath); i++) {
+    for (int i = 0; i < sizeof(testPath) - 1; i++) {
         testPath[i] = 'a';
     }
     pkgPath.push_back(testPath);
