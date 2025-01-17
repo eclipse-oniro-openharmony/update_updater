@@ -503,7 +503,9 @@ int ProcessUpdater(bool retry, int pipeFd, const std::string &packagePath, const
         return EXIT_INVALID_ARGS;
     }
 #ifdef UPDATER_USE_PTABLE
-    DevicePtable::GetInstance().LoadPartitionInfo();
+    if (!DevicePtable::GetInstance().LoadPartitionInfo()) {
+        return EXIT_EXEC_SCRIPT_ERROR;
+    }
 #endif
 
     ret = Updater::ExecUpdate(pkgManager, retry, packagePath,

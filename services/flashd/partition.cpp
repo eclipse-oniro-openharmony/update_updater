@@ -44,7 +44,9 @@ int Partition::DoFlash(const uint8_t *buffer, int bufferSize) const
 int Partition::DoErase() const
 {
 #ifdef UPDATER_USE_PTABLE
-    DevicePtable::GetInstance().LoadPartitionInfo();
+    if (!DevicePtable::GetInstance().LoadPartitionInfo()) {
+        return FLASHING_ARG_INVALID;
+    }
     DevicePtable &devicePtb = DevicePtable::GetInstance();
     Ptable::PtnInfo ptnInfo;
 

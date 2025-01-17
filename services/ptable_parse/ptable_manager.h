@@ -33,8 +33,8 @@ public:
         STORAGE_UFS,
     };
 
-    virtual void LoadPartitionInfo([[maybe_unused]] Hpackage::PkgManager *pkgManager = nullptr) = 0;
-    void ReloadDevicePartition(Hpackage::PkgManager *pkgManager);
+    virtual bool LoadPartitionInfo([[maybe_unused]] Hpackage::PkgManager *pkgManager = nullptr) = 0;
+    bool ReloadDevicePartition(Hpackage::PkgManager *pkgManager);
     bool WritePtableToDevice();
     void PrintPtableInfo();
     bool GetPartionInfoByName(const std::string &partitionName, Ptable::PtnInfo &ptnInfo, int32_t &index);
@@ -84,7 +84,7 @@ public:
         return instance;
     }
 
-    void LoadPartitionInfo([[maybe_unused]] Hpackage::PkgManager *pkgManager = nullptr) override;
+    bool LoadPartitionInfo([[maybe_unused]] Hpackage::PkgManager *pkgManager = nullptr) override;
 
 protected:
     PackagePtable();
@@ -102,7 +102,7 @@ public:
         return instance;
     }
 
-    void LoadPartitionInfo([[maybe_unused]] Hpackage::PkgManager *pkgManager = nullptr) override;
+    bool LoadPartitionInfo([[maybe_unused]] Hpackage::PkgManager *pkgManager = nullptr) override;
     bool ComparePtable(PtableManager &newPtbManager);
     bool ComparePartition(PtableManager &newPtbManager, const std::string partitionName);
 protected:

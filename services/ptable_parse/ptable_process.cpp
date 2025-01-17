@@ -55,9 +55,13 @@ bool PtableProcess(UpdaterParams &upParams)
             return false;
         }
         DevicePtable& devicePtb = DevicePtable::GetInstance();
-        devicePtb.LoadPartitionInfo();
+        if (!devicePtb.LoadPartitionInfo()) {
+            return false;
+        }
         PackagePtable& packagePtb = PackagePtable::GetInstance();
-        packagePtb.LoadPartitionInfo(pkgManager);
+        if (!packagePtb.LoadPartitionInfo(pkgManager)) {
+            return false;
+        }
         if (!devicePtb.ComparePtable(packagePtb)) {
             LOG(INFO) << "Ptable NOT changed, no need to process!";
             Hpackage::PkgManager::ReleasePackageInstance(pkgManager);

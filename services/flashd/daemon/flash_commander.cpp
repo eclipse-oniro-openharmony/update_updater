@@ -80,7 +80,9 @@ void FlashCommander::DoCommand(const uint8_t *payload, int payloadSize)
 bool FlashCommander::InitPartition(const std::string &partName, const uint8_t *buffer, int bufferSize)
 {
 #ifdef UPDATER_USE_PTABLE
-    DevicePtable::GetInstance().LoadPartitionInfo();
+    if (!DevicePtable::GetInstance().LoadPartitionInfo()) {
+        return false;
+    }
 #endif
     std::unique_ptr<FlashdWriter> writer = FlashdImageWriter::GetInstance().GetWriter(
         partName, buffer, bufferSize);
