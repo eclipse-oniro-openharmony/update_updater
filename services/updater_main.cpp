@@ -392,20 +392,13 @@ static int CheckMountData()
 
 static UpdaterStatus CheckVerifyPackages(UpdaterParams &upParams)
 {
-    // verify packages first
-    UpdaterStatus status = VerifyPackages(upParams);
-    if (NotifyActionResult(upParams, status, {SET_INSTALL_STATUS}) != UPDATE_SUCCESS) {
-        LOG(ERROR) << "set status fail";
-        return UPDATE_CORRUPT;
-    }
-    if (status != UPDATE_SUCCESS) {
-        return UPDATE_CORRUPT;
-    }
-    if (NotifyActionResult(upParams, status, {PROCESS_PACKAGE, GET_INSTALL_STATUS}) != UPDATE_SUCCESS) {
+    UpdaterStatus status = UPDATE_SUCCESS;
+    if (NotifyActionResult(upParams, status, {PROCESS_PACKAGE, SET_INSTALL_STATUS, GET_INSTALL_STATUS}) !=
+        UPDATE_SUCCESS) {
         LOG(ERROR) << "notify action fail";
         return UPDATE_CORRUPT;
     }
-    return UPDATE_SUCCESS;
+    return status;
 }
 
 static UpdaterStatus PreUpdatePackages(UpdaterParams &upParams)
@@ -430,8 +423,8 @@ static UpdaterStatus PreUpdatePackages(UpdaterParams &upParams)
         return UPDATE_SUCCESS;
     }
 
-    if (CheckVerifyPackages(upParams) != UPDATE_SUCCESS) {
-        LOG(ERROR) << "verify packages fail";
+    // verify package first
+    if (VerifyPackages(upParams) != UPDATE_SUCCESS) {
         return UPDATE_CORRUPT;
     }
 
@@ -455,6 +448,10 @@ static UpdaterStatus PreUpdatePackages(UpdaterParams &upParams)
         return UPDATE_ERROR;
     }
 #endif
+    if (CheckVerifyPackages(upParams) != UPDATE_SUCCESS) {
+        LOG(ERROR) << "verify packages fail";
+        return UPDATE_CORRUPT;
+    }
     return UPDATE_SUCCESS;
 }
 
@@ -593,9 +590,8 @@ static UpdaterStatus PreSdcardUpdatePackages(UpdaterParams &upParams)
         LOG(ERROR) << "Battery is not sufficient for install package.";
         return UPDATE_SKIP;
     }
-
-    if (CheckVerifyPackages(upParams) != UPDATE_SUCCESS) {
-        LOG(ERROR) << "verify packages fail";
+    UpdaterStatus status = VerifyPackages(upParams);
+    if (status != UPDATE_SUCCESS) {
         return UPDATE_CORRUPT;
     }
 #ifdef UPDATER_USE_PTABLE
@@ -604,6 +600,10 @@ static UpdaterStatus PreSdcardUpdatePackages(UpdaterParams &upParams)
         return UPDATE_ERROR;
     }
 #endif
+    if (CheckVerifyPackages(upParams) != UPDATE_SUCCESS) {
+        LOG(ERROR) << "verify packages fail";
+        return UPDATE_CORRUPT;
+    }
     return UPDATE_SUCCESS;
 }
 
