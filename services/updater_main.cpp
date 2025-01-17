@@ -87,7 +87,7 @@ constexpr double FULL_PERCENT = 100.00;
 int FactoryReset(FactoryResetMode mode, const std::string &path)
 {
     UpdaterInit::GetInstance().InvokeEvent(FACTORY_RESET_INIT_EVENT);
-    auto ret = FactoryResetProcess::GetInstance().FactoryResetFunc(mode, path);
+    auto ret = FactoryResetProcess::GetInstance().DoFactoryReset(mode, path);
     if (ret == 0) {
         LOG(INFO) << "restorecon for " << path;
         RestoreconPath(path); // restore selinux context for /data after factory reset success
@@ -886,15 +886,8 @@ void RebootAfterUpdateSuccess(const UpdaterParams &upParams)
         NotifyReboot("updater", "Updater wipe data after upgrade success", "--user_wipe_data");
         return;
     }
-    if (upParams.factoryResetMode == "factory_wipe_data") {
-        Utils::SetParameter("odm.factory.updater.succssful_flg", "1");
-        LOG(INFO) << "factory wipe data, sleep...";
-        Utils::UsSleep(120 * DISPLAY_TIME); // 120 : 120s
-    }
-    upParams.forceUpdate || upParams.factoryResetMode == "factory_wipe_data" ||
-        upParams.factoryResetMode == "menu_wipe_data" ?
-        Utils::DoShutdown("Updater update success go shut down") :
-            NotifyReboot("", "Updater update success");
+    upParams.forceUpdate ? Utils::DoShutdown("Updater update success go shut down") :
+        NotifyReboot("", "Updater update success");
 }
 
 int UpdaterMain(int argc, char **argv)

@@ -23,10 +23,8 @@
 
 namespace Updater {
 using CommonResetPostFunc = std::function<int(FactoryResetMode)>;
-using FactoryResetPreFunc = std::function<int(void)>;
-using FactoryResetPostFunc = std::function<int(int)>;
-using UserResetPreFunc = std::function<int(FactoryResetMode)>;
-using UserResetPostFunc = std::function<int(FactoryResetMode)>;
+using FactoryResetPreFunc = std::function<int(FactoryResetMode)>;
+using FactoryResetPostFunc = std::function<int(FactoryResetMode, int)>;
 class FactoryResetProcess {
     DISALLOW_COPY_MOVE(FactoryResetProcess);
 public:
@@ -34,25 +32,15 @@ public:
     virtual ~FactoryResetProcess() = default;
 
     static FactoryResetProcess &GetInstance();
-    using ResetFunc = std::function<int(FactoryResetMode, const std::string &)>;
     void RegisterCommonResetPostFunc(CommonResetPostFunc ptr);
     void RegisterFactoryResetPreFunc(FactoryResetPreFunc ptr);
     void RegisterFactoryResetPostFunc(FactoryResetPostFunc ptr);
-    void RegisterUserResetPreFunc(UserResetPreFunc ptr);
-    void RegisterUserResetPostFunc(UserResetPostFunc ptr);
-    int FactoryResetFunc(FactoryResetMode mode, const std::string &path);
+    int DoFactoryReset(FactoryResetMode mode, const std::string &path);
 
 private:
     CommonResetPostFunc CommonResetPostFunc_ = nullptr;
     FactoryResetPreFunc FactoryResetPreFunc_ = nullptr;
     FactoryResetPostFunc FactoryResetPostFunc_ = nullptr;
-    UserResetPreFunc UserResetPreFunc_ = nullptr;
-    UserResetPostFunc UserResetPostFunc_ = nullptr;
-    std::unordered_map<FactoryResetMode, ResetFunc> resetTab_;
-
-    int DoUserReset(FactoryResetMode mode, const std::string &path);
-    int DoFactoryReset(FactoryResetMode mode, const std::string &path);
-    void RegisterFunc(FactoryResetMode mode, ResetFunc func);
 };
 
 } // namespace Updater
