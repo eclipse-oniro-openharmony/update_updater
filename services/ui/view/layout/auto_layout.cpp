@@ -52,7 +52,7 @@ bool AutoLayout::SetCompLocation(JsonNode &node)
         LOG(ERROR) << "helper_ null error";
         return false;
     }
-    return helper_->SetComLocation(node);
+    return helper_->SetCompLocation(node);
 }
 
 bool AutoLayout::IsInited()
