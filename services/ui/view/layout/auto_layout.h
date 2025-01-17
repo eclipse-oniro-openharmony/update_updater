@@ -23,6 +23,7 @@ public:
     void RegisterHelper(std::unique_ptr<LayoutInterface> ptr);
     static AutoLayout &GetInstance();
     void SetJsonLocation(JsonNode &root);
+    bool SetCompLocation(JsonNode &node);
     void Init();
     bool IsInited();
 private:

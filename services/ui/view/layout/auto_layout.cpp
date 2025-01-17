@@ -46,6 +46,15 @@ void AutoLayout::SetJsonLocation(JsonNode &root)
     helper_->SetJsonLocation(root);
 }
 
+bool AutoLayout::SetCompLocation(JsonNode &node)
+{
+    if (helper_ == nullptr) {
+        LOG(ERROR) << "helper_ null error";
+        return false;
+    }
+    return helper_->SetCompLocation(node);
+}
+
 bool AutoLayout::IsInited()
 {
     return isInited_;
