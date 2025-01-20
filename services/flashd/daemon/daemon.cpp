@@ -26,7 +26,7 @@ HdcDaemon::HdcDaemon(bool serverOrDaemonIn)
     clsTCPServ = nullptr;
     clsUSBServ = nullptr;
     clsJdwp = nullptr;
-    enableSecure = false;
+    authEnable = false;
 }
 
 HdcDaemon::~HdcDaemon()
@@ -90,7 +90,7 @@ void HdcDaemon::InitMod(bool bEnableTCP, bool bEnableUSB)
     // enable security
     string secure;
     SystemDepend::GetDevItem("ro.hdc.secure", secure);
-    enableSecure = (Base::Trim(secure) == "1");
+    authEnable = (Base::Trim(secure) == "1");
 }
 
 // clang-format off
@@ -218,7 +218,7 @@ bool HdcDaemon::DaemonSessionHandshake(HSession hSession, const uint32_t channel
         handshake.sessionId = 0;
         handshake.connectKey = "";
     }
-    if (enableSecure && !HandDaemonAuth(hSession, channelId, handshake)) {
+    if (authEnable && !HandDaemonAuth(hSession, channelId, handshake)) {
         return false;
     }
     // handshake auth OK.Can append the sending device information to HOST
