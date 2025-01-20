@@ -22,7 +22,6 @@
 #include "updater/updater_const.h"
 #include "utils.h"
 #include "securec.h"
-#include "hwfault_retry.h"
 
 namespace Updater {
 HwFaultRetry &HwFaultRetry::GetInstance()
