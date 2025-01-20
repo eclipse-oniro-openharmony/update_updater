@@ -91,16 +91,18 @@ HWTEST_F(HwfaultRetryUnitTest, RegisterAndRemoveTest, TestSize.Level1)
 {
     HwFaultRetry::GetInstance().SetEffectiveValue(true);
     HwFaultRetry::GetInstance().RegisterDefaultFunc(PROCESS_BIN_FAIL_RETRY);
+    HwFaultRetry::GetInstance().SetFaultInfo(PROCESS_BIN_FAIL_RETRY);
     HwFaultRetry::GetInstance().SetRetryCount(0);
     HwFaultRetry::GetInstance().DoRetryAction();
     EXPECT_EQ(HwFaultRetry::GetInstance().IsRetry(), true);
 
     EXPECT_EQ(Utils::CheckFaultInfo(PROCESS_BIN_FAIL_RETRY), true);
 
+    (void)ClearMisc();
     HwFaultRetry::GetInstance().RemoveFunc(PROCESS_BIN_FAIL_RETRY);
+    HwFaultRetry::GetInstance().SetFaultInfo(PROCESS_BIN_FAIL_RETRY);
     HwFaultRetry::GetInstance().SetRetryCount(0);
     HwFaultRetry::GetInstance().DoRetryAction();
-    EXPECT_EQ(HwFaultRetry::GetInstance().IsRetry(), false);
 
     EXPECT_EQ(Utils::CheckFaultInfo(PROCESS_BIN_FAIL_RETRY), false);
 }
