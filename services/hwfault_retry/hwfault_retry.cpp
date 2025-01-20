@@ -22,6 +22,7 @@
 #include "updater/updater_const.h"
 #include "utils.h"
 #include "securec.h"
+#include "hwfault_retry.h"
 
 namespace Updater {
 HwFaultRetry &HwFaultRetry::GetInstance()
@@ -53,7 +54,14 @@ void HwFaultRetry::RegisterDefaultFunc(const std::string &faultInfo)
                                 return this->RebootRetry();
                             }).second) {
         LOG(ERROR) << "emplace: " << faultInfo.c_str() << " fail";
-    }   
+    }
+}
+
+void HwFaultRetry::RemoveFunc(const std::string &faultInfo)
+{
+    if (retryMap_.erase(faultInfo) == 0) {
+        LOG(ERROR) << "erase " << faultInfo.c_str() << " fail";
+    }
 }
 
 void HwFaultRetry::DoRetryAction()
