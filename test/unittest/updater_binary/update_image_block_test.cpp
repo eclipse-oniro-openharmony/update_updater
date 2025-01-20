@@ -66,7 +66,6 @@ HWTEST_F(UpdateImageBlockTest, update_image_block_test_001, TestSize.Level1)
     EXPECT_GE(ret, 0);
     ret = ProcessUpdater(false, pfd[1], packagePath, GetTestCertName());
     close(pfd[0]);
-    close(pfd[1]);
     EXPECT_EQ(ret, 0);
 }
 
@@ -79,7 +78,6 @@ HWTEST_F(UpdateImageBlockTest, update_image_block_test_002, TestSize.Level1)
     EXPECT_GE(ret, 0);
     ret = ProcessUpdater(false, pfd[1], packagePath, GetTestCertName());
     close(pfd[0]);
-    close(pfd[1]);
     EXPECT_EQ(ret, 0);
 }
 
@@ -92,7 +90,6 @@ HWTEST_F(UpdateImageBlockTest, update_image_block_test_003, TestSize.Level1)
     EXPECT_GE(ret, 0);
     ret = ProcessUpdater(false, pfd[1], packagePath, GetTestCertName());
     close(pfd[0]);
-    close(pfd[1]);
     EXPECT_EQ(ret, USCRIPT_INVALID_PARAM);
 }
 
@@ -103,6 +100,7 @@ HWTEST_F(UpdateImageBlockTest, update_image_block_test_004, TestSize.Level1)
     int ret = pipe(pfd);
     EXPECT_GE(ret, 0);
     ret = ProcessUpdater(false, pfd[1], packagePath, GetTestCertName());
+    close(pfd[0]);
     EXPECT_NE(ret, 0);
 }
 }
