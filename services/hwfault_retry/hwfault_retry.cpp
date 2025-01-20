@@ -22,6 +22,7 @@
 #include "updater/updater_const.h"
 #include "utils.h"
 #include "securec.h"
+#include "hwfault_retry.h"
 
 namespace Updater {
 HwFaultRetry &HwFaultRetry::GetInstance()
@@ -38,7 +39,6 @@ HwFaultRetry::HwFaultRetry()
     RegisterFunc(VERIFY_FAILED_REBOOT, rebootFunc);
     RegisterFunc(IO_FAILED_REBOOT, rebootFunc);
     RegisterFunc(BLOCK_UPDATE_FAILED_REBOOT, rebootFunc);
-    RegisterFunc(PROCESS_BIN_FAIL_RETRY, rebootFunc);
 }
 
 void HwFaultRetry::RegisterFunc(const std::string &faultInfo, RetryFunc func)
@@ -46,6 +46,15 @@ void HwFaultRetry::RegisterFunc(const std::string &faultInfo, RetryFunc func)
     if (!retryMap_.emplace(faultInfo, func).second) {
         LOG(ERROR) << "emplace: " << faultInfo.c_str() << " fail";
     }
+}
+
+void HwFaultRetry::RegisterDefaultFunc(const std::string &faultInfo)
+{
+    if (!retryMap_.emplace(faultInfo, [this]() {
+                                return this->RebootRetry();
+                            }).second) {
+        LOG(ERROR) << "emplace: " << faultInfo.c_str() << " fail";
+    }   
 }
 
 void HwFaultRetry::DoRetryAction()
