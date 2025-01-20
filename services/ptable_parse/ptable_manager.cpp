@@ -53,7 +53,7 @@ bool PtableManager::IsUfsDevice()
     return GetBootdevType() != 0;
 }
 
-void PtableManager::ReloadDevicePartition(Hpackage::PkgManager *pkgManager)
+bool PtableManager::ReloadDevicePartition(Hpackage::PkgManager *pkgManager)
 {
     return LoadPartitionInfo(pkgManager);
 }
@@ -288,43 +288,43 @@ void PtableManager::InitCompositePtable()
 // class PackagePtable
 PackagePtable::PackagePtable() : PtableManager() {}
 
-void PackagePtable::LoadPartitionInfo([[maybe_unused]] Hpackage::PkgManager *pkgManager)
+bool PackagePtable::LoadPartitionInfo([[maybe_unused]] Hpackage::PkgManager *pkgManager)
 {
     if (pkgManager == nullptr) {
         LOG(ERROR) << "pkgManager is nullptr";
-        return;
+        return false;
     }
     if (!InitPtableManager()) {
         LOG(ERROR) << "init ptable manager error";
-        return;
+        return false;
     }
 
     uint32_t imgBufSize = pPtable_->GetDefaultImageSize();
     if (imgBufSize <= 0) {
         LOG(ERROR) << "Invalid imgBufSize";
-        return;
+        return false;
     }
     uint8_t *imageBuf = new(std::nothrow) uint8_t[imgBufSize]();
 
     if (imageBuf == nullptr) {
         LOG(ERROR) << "new ptable_buffer error";
-        return;
+        return false;
     }
     if (!GetPtableBufferFromPkg(pkgManager, imageBuf, imgBufSize)) {
         LOG(ERROR) << "get ptable buffer failed";
         delete [] imageBuf;
-        return;
+        return false;
     }
 
     if (!pPtable_->ParsePartitionFromBuffer(imageBuf, imgBufSize)) {
         LOG(ERROR) << "get ptable from ptable image buffer failed";
         delete [] imageBuf;
-        return;
+        return false;
     }
     delete [] imageBuf;
     LOG(INFO) << "print package partition info:";
     pPtable_->PrintPtableInfo();
-    return;
+    return true;
 }
 
 bool PackagePtable::GetPtableBufferFromPkg(Hpackage::PkgManager *pkgManager, uint8_t *&imageBuf, uint32_t size)
@@ -372,21 +372,21 @@ bool PackagePtable::GetPtableBufferFromPkg(Hpackage::PkgManager *pkgManager, uin
 // class DevicePtable
 DevicePtable::DevicePtable() : PtableManager() {}
 
-void DevicePtable::LoadPartitionInfo([[maybe_unused]] Hpackage::PkgManager *pkgManager)
+bool DevicePtable::LoadPartitionInfo([[maybe_unused]] Hpackage::PkgManager *pkgManager)
 {
     (void)pkgManager;
     if (!InitPtableManager()) {
         LOG(ERROR) << "init ptable manager error";
-        return;
+        return false;
     }
     if (!pPtable_->LoadPtableFromDevice()) {
         LOG(ERROR) << "load device parititon to ram fail";
-        return;
+        return false;
     }
 
     LOG(INFO) << "print device partition info:";
     pPtable_->PrintPtableInfo();
-    return;
+    return true;
 }
 
 bool DevicePtable::ComparePartition(PtableManager &newPtbManager, const std::string partitionName)

@@ -28,7 +28,10 @@ public:
 
     ~PtableManagerTest() {}
 
-    void LoadPartitionInfo([[maybe_unused]] Hpackage::PkgManager *pkgManager = nullptr) override {}
+    bool LoadPartitionInfo([[maybe_unused]] Hpackage::PkgManager *pkgManager = nullptr) override
+    {
+        return true;
+    }
 
     int32_t TestGetPartitionInfoIndexByName(const std::vector<Ptable::PtnInfo> &ptnInfo, const std::string &name)
     {
