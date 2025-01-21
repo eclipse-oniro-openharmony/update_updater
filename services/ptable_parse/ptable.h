@@ -21,6 +21,11 @@
 #include "json_node.h"
 
 namespace Updater {
+#ifndef UPDATER_UT
+constexpr const char *PTABLE_TEMP_PATH = "";
+#else
+constexpr const char *PTABLE_TEMP_PATH = "";
+#endif
 class Ptable {
 public:
     Ptable() = default;

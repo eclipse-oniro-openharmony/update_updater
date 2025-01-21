@@ -285,6 +285,11 @@ void PtableManager::InitCompositePtable()
     }
 }
 
+bool PtableManager::LoadPartitionInfoWithFile()
+{
+    
+}
+
 // class PackagePtable
 PackagePtable::PackagePtable() : PtableManager() {}
 

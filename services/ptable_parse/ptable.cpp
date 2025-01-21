@@ -22,6 +22,7 @@
 #include "applypatch/data_writer.h"
 #include "log/log.h"
 #include "securec.h"
+#include "utils.h"
 
 namespace Updater {
 constexpr const char *PTABLE_CONFIG_PATH = "/etc/ptable_data.json";
@@ -613,5 +614,13 @@ bool Ptable::ChangeGpt(uint8_t *gptBuf, uint64_t gptSize, GptParseInfo gptInfo, 
         readSize += static_cast<uint64_t>(ptnEntrySize);
     }
     return true;
+}
+
+bool Ptable::WritePartitionBufToFile(uint8_t *ptbImgBuffer, const uint32_t imgBufSize)
+{
+    if (ptbImgBuffer == nullptr || imgBufSize == 0) {
+        LOG(ERROR) << "Invalid param";
+        return false;
+    }
 }
 } // namespace Updater
