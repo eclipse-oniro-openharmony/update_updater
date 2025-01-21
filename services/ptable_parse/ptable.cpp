@@ -619,8 +619,55 @@ bool Ptable::ChangeGpt(uint8_t *gptBuf, uint64_t gptSize, GptParseInfo gptInfo, 
 bool Ptable::WritePartitionBufToFile(uint8_t *ptbImgBuffer, const uint32_t imgBufSize)
 {
     if (ptbImgBuffer == nullptr || imgBufSize == 0) {
-        LOG(ERROR) << "Invalid param";
+        LOG(ERROR) << "Invalid param ";
         return false;
     }
+    std::ofstream ptbFile(PTABLE_TEMP_PATH, std::ios::ate | std::ios::binary);
+    if (ptbFile.fail()) {
+        LOG(ERROR) << "Failed to open " << PTABLE_TEMP_PATH << strerror(errno);
+        return false;
+    }
+    ptbFile.write(reinterpret_cast<const char*>(ptbImgBuffer), imgBufSize);
+    ptbFile.flush();
+    sync();
+    return true;
+}
+
+bool Ptable::ReadPartitionFileToBuffer(uint8_t *ptbImgBuffer, uint32_t &imgBufSize)
+{
+    if (ptbImgBuffer == nullptr || imgBufSize == 0) {
+        LOG(ERROR) << "Invalid param ";
+        return false;
+    }
+
+    std::ifstream ptbFile(PTABLE_TEMP_PATH, std::ios::in | std::ios::binary);
+    if (!ptbFile.is_open()) {
+        LOG(ERROR) << "open " << PTABLE_TEMP_PATH << " failed " << strerror(errno);
+        return false;
+    }
+
+    ptbFile.seekg(0, std::ios::end);
+    uint32_t fileSize = ptbFile.tellg();
+    if (fileSize <= 0 || fileSize > imgBufSize) {
+        LOG(ERROR) << "ptbFile is error";
+        return false;
+    }
+
+    ptbFile.seekg(0, std::ios::beg);
+    if (!ptbFile.read(reinterpret_cast<char*>(ptbImgBuffer), fileSize)) {
+        LOG(ERROR) << "read ptable file to buffer failed " << fileSize << strerror(errno);
+        return false;
+    }
+    imgBufSize = fileSize;
+    return true;
+}
+
+void Ptable::DeletePartitionTmpFile()
+{
+    if (Utils::DeleteFile(PTABLE_TEMP_PATH) != 0) {
+        LOG(ERROR) << "delete ptable tmp file fail " << PTABLE_TEMP_PATH << strerror(errno);
+        return;
+    }
+    LOG(INFO) << "delete ptable tmp file success " << PTABLE_TEMP_PATH;
 }
 } // namespace Updater
