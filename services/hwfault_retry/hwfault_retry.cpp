@@ -38,13 +38,28 @@ HwFaultRetry::HwFaultRetry()
     RegisterFunc(VERIFY_FAILED_REBOOT, rebootFunc);
     RegisterFunc(IO_FAILED_REBOOT, rebootFunc);
     RegisterFunc(BLOCK_UPDATE_FAILED_REBOOT, rebootFunc);
-    RegisterFunc(PROCESS_BIN_FAIL_RETRY, rebootFunc);
 }
 
 void HwFaultRetry::RegisterFunc(const std::string &faultInfo, RetryFunc func)
 {
     if (!retryMap_.emplace(faultInfo, func).second) {
         LOG(ERROR) << "emplace: " << faultInfo.c_str() << " fail";
+    }
+}
+
+void HwFaultRetry::RegisterDefaultFunc(const std::string &faultInfo)
+{
+    if (!retryMap_.emplace(faultInfo, [this]() {
+                                return this->RebootRetry();
+                            }).second) {
+        LOG(ERROR) << "emplace: " << faultInfo.c_str() << " fail";
+    }
+}
+
+void HwFaultRetry::RemoveFunc(const std::string &faultInfo)
+{
+    if (retryMap_.erase(faultInfo) == 0) {
+        LOG(ERROR) << "erase " << faultInfo.c_str() << " fail";
     }
 }
 

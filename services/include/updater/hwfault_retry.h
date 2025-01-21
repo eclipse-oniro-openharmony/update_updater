@@ -31,6 +31,8 @@ public:
     using RetryFunc = std::function<void ()>;
     void DoRetryAction();
     void RegisterFunc(const std::string &faultInfo, RetryFunc func);
+    void RegisterDefaultFunc(const std::string &faultInfo);
+    void RemoveFunc(const std::string &faultInfo);
     void SetFaultInfo(const std::string &faultInfo);
     void SetRetryCount(const uint32_t count);
     void SetEffectiveValue(bool value);
