@@ -19,6 +19,7 @@
 #include "log/log.h"
 #include "securec.h"
 #include "updater/updater_const.h"
+#include "utils.h"
 
 namespace Updater {
 std::string PtableManager::ptbImgTag_ = "";
