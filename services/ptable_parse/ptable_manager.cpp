@@ -287,7 +287,68 @@ void PtableManager::InitCompositePtable()
 
 bool PtableManager::LoadPartitionInfoWithFile()
 {
-    
+    if (!Utils::IsFileExist(PTABLE_TEMP_PATH)) {
+        LOG(ERROR) << "ptable file is not exist, no need write";
+        return false;
+    }
+
+    if (!InitPtableManager()) {
+        LOG(ERROR) << "init ptable manager error";
+        return false;
+    }
+    uint32_t imgBufSize = pPtable_->GetDefaultImageSize();
+    if (imgBufSize <= 0) {
+        LOG(ERROR) << "Invalid imgBufSize";
+        return false;
+    }
+    uint8_t *imageBuf = new(std::nothrow) uint8_t[imgBufSize]();
+    if (imageBuf == nullptr) {
+        LOG(ERROR) << "new ptable_buffer error";
+        return false;
+    }
+
+    if (!pPtable_->ReadPartitionFileToBuffer(imageBuf, imgBufSize)) {
+        LOG(ERROR) << "ptable file read fail";
+        delete [] imageBuf;
+        return false;
+    }
+
+    if (!pPtable_->ParsePartitionFromBuffer(imageBuf, imgBufSize)) {
+        LOG(ERROR) << "parse ptable buff fail";
+        delete [] imageBuf;
+        return false;
+    }
+
+    delete [] imageBuf;
+    LOG(INFO) << "print package partition info:";
+    pPtable_->PrintPtableInfo();
+    return true;
+}
+
+bool PtableManager::WritePtableWithFile()
+{
+    if (pPtable_ == nullptr) {
+        LOG(ERROR) << "pPtable_ is nullptr";
+        pPtable_->DeletePartitionTmpFile();
+        return true;
+    }
+
+    if (!LoadPartitionInfoWithFile()) {
+        LOG(ERROR) << "load partition info with file fail";
+        pPtable_->DeletePartitionTmpFile();
+        return true;
+    }
+
+#ifndef UPDATER_UT
+    if (!pPtable_->WritePartitionTable()) {
+        LOG(ERROR) << "Write ptable to device failed! Please load ptable first!";
+        pPtable_->DeletePartitionTmpFile();
+        return false;
+    }
+#endif
+    pPtable_->DeletePartitionTmpFile();
+    LOG(INFO) << "write patble with file success";
+    return true;
 }
 
 // class PackagePtable
