@@ -16,12 +16,14 @@
 #include <algorithm>
 #include <fstream>
 #include "dump.h"
+#include "scope_guard.h"
 #include "script_context.h"
 #include "script_manager_impl.h"
 #include "scanner.h"
 #include "script_utils.h"
 
 using namespace std;
+using namespace Updater;
 
 namespace Uscript {
 static int32_t g_instanceId = 0;
@@ -41,17 +43,19 @@ int32_t ScriptInterpreter::ExecuteScript(ScriptManagerImpl *manager, Hpackage::P
         UPDATER_LAST_WORD(USCRIPT_ERROR_CREATE_OBJ, pkgStream->GetFileName());
         return USCRIPT_ERROR_CREATE_OBJ;
     }
+    ON_SCOPE_EXIT(ReleaseScriptInterpreter) {
+        if (inter) {
+            delete inter;
+            inter = nullptr;
+        }
+    };
     int32_t ret = inter->LoadScript(pkgStream);
     if (ret != USCRIPT_SUCCESS) {
-        delete inter;
-        inter = nullptr;
         USCRIPT_LOGE("Fail to loadScript script %s", pkgStream->GetFileName().c_str());
         UPDATER_LAST_WORD(ret, "Fail to loadScript script" + pkgStream->GetFileName());
         return ret;
     }
     ret = inter->Execute();
-    delete inter;
-    inter = nullptr;
     USCRIPT_LOGI("ExecuteScript finish ret: %d  script: %s ",
         ret, pkgStream->GetFileName().c_str());
     return ret;
