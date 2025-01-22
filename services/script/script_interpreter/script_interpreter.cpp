@@ -38,21 +38,19 @@ int32_t ScriptInterpreter::ExecuteScript(ScriptManagerImpl *manager, Hpackage::P
     }
     USCRIPT_LOGI("ExecuteScript %s", pkgStream->GetFileName().c_str());
     auto inter = new (std::nothrow) ScriptInterpreter(manager);
+    if (inter == nullptr) {
+        USCRIPT_LOGE("Fail to create ScriptInterpreter for script %s", pkgStream->GetFileName().c_str());
+        UPDATER_LAST_WORD(USCRIPT_ERROR_CREATE_OBJ, pkgStream->GetFileName());
+        return USCRIPT_ERROR_CREATE_OBJ;
+    }
     ON_SCOPE_EXIT(ReleaseScriptInterpreter) {
         if (inter) {
             delete inter;
             inter = nullptr;
         }
     };
-    if (inter == nullptr) {
-        USCRIPT_LOGE("Fail to create ScriptInterpreter for script %s", pkgStream->GetFileName().c_str());
-        UPDATER_LAST_WORD(USCRIPT_ERROR_CREATE_OBJ, pkgStream->GetFileName());
-        return USCRIPT_ERROR_CREATE_OBJ;
-    }
     int32_t ret = inter->LoadScript(pkgStream);
     if (ret != USCRIPT_SUCCESS) {
-        delete inter;
-        inter = nullptr;
         USCRIPT_LOGE("Fail to loadScript script %s", pkgStream->GetFileName().c_str());
         UPDATER_LAST_WORD(ret, "Fail to loadScript script" + pkgStream->GetFileName());
         return ret;
