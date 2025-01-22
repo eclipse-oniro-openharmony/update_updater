@@ -311,16 +311,19 @@ bool PtableManager::LoadPartitionInfoWithFile()
     if (!pPtable_->ReadPartitionFileToBuffer(imageBuf, imgBufSize)) {
         LOG(ERROR) << "ptable file read fail";
         delete [] imageBuf;
+        imageBuf = nullptr;
         return false;
     }
 
     if (!pPtable_->ParsePartitionFromBuffer(imageBuf, imgBufSize)) {
         LOG(ERROR) << "parse ptable buff fail";
         delete [] imageBuf;
+        imageBuf = nullptr;
         return false;
     }
 
     delete [] imageBuf;
+    imageBuf = nullptr;
     LOG(INFO) << "print package partition info:";
     pPtable_->PrintPtableInfo();
     return true;
