@@ -507,7 +507,7 @@ int ProcessUpdater(bool retry, int pipeFd, const std::string &packagePath, const
         LOG(ERROR) << "write patble with file fail";
         PkgManager::ReleasePackageInstance(pkgManager);
         UPDATER_LAST_WORD("Error to write ptable with file");
-        return USCRIPT_ERROR_EXECUTE;
+        return EXIT_EXEC_SCRIPT_ERROR;
     }
     if (!DevicePtable::GetInstance().LoadPartitionInfo()) {
         return EXIT_EXEC_SCRIPT_ERROR;
