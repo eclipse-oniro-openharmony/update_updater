@@ -16,6 +16,7 @@
 #include <algorithm>
 #include <fstream>
 #include "dump.h"
+#include "scope_guard.h"
 #include "script_context.h"
 #include "script_manager_impl.h"
 #include "scanner.h"
@@ -36,6 +37,12 @@ int32_t ScriptInterpreter::ExecuteScript(ScriptManagerImpl *manager, Hpackage::P
     }
     USCRIPT_LOGI("ExecuteScript %s", pkgStream->GetFileName().c_str());
     auto inter = new (std::nothrow) ScriptInterpreter(manager);
+    ON_SCOPE_EXIT(ReleaseScriptInterpreter) {
+        if (inter) {
+            delete inter;
+            inter = nullptr;
+        }
+    };
     if (inter == nullptr) {
         USCRIPT_LOGE("Fail to create ScriptInterpreter for script %s", pkgStream->GetFileName().c_str());
         UPDATER_LAST_WORD(USCRIPT_ERROR_CREATE_OBJ, pkgStream->GetFileName());
@@ -50,8 +57,6 @@ int32_t ScriptInterpreter::ExecuteScript(ScriptManagerImpl *manager, Hpackage::P
         return ret;
     }
     ret = inter->Execute();
-    delete inter;
-    inter = nullptr;
     USCRIPT_LOGI("ExecuteScript finish ret: %d  script: %s ",
         ret, pkgStream->GetFileName().c_str());
     return ret;
