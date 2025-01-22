@@ -23,6 +23,7 @@
 #include "script_utils.h"
 
 using namespace std;
+using namespace Updater;
 
 namespace Uscript {
 static int32_t g_instanceId = 0;
