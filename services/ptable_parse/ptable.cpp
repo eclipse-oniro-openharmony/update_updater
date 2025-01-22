@@ -627,7 +627,10 @@ bool Ptable::WritePartitionBufToFile(uint8_t *ptbImgBuffer, const uint32_t imgBu
         LOG(ERROR) << "Failed to open " << PTABLE_TEMP_PATH << strerror(errno);
         return false;
     }
-    ptbFile.write(reinterpret_cast<const char*>(ptbImgBuffer), imgBufSize);
+    if (ptbFile.write(reinterpret_cast<const char*>(ptbImgBuffer), imgBufSize) != 0) {
+        LOG(ERROR) << "Failed to write ptable tmp file " << imgBufSize << strerror(errno);
+        return false;
+    }
     ptbFile.flush();
     sync();
     return true;
