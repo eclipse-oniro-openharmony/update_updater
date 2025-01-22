@@ -22,9 +22,9 @@
 
 namespace Updater {
 #ifndef UPDATER_UT
-constexpr const char *PTABLE_TEMP_PATH = "";
+constexpr const char *PTABLE_TEMP_PATH = "/tmp/update_ptable.img";
 #else
-constexpr const char *PTABLE_TEMP_PATH = "";
+constexpr const char *PTABLE_TEMP_PATH = "/data/update/update_ptable.img";
 #endif
 class Ptable {
 public:
