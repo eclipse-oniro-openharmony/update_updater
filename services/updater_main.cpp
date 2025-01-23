@@ -425,7 +425,7 @@ static UpdaterStatus PreUpdatePackages(UpdaterParams &upParams)
 
     // verify package first
     if (VerifyPackages(upParams) != UPDATE_SUCCESS) {
-        return UPDATE_CORRUPT;
+        return UPDATE_CORRUPT; // verify package failed must return UPDATE_CORRUPT, ux need it !!!
     }
 
     // Only handle UPATE_ERROR and UPDATE_SUCCESS here.Let package verify handle others.
@@ -592,7 +592,7 @@ static UpdaterStatus PreSdcardUpdatePackages(UpdaterParams &upParams)
     }
     UpdaterStatus status = VerifyPackages(upParams);
     if (status != UPDATE_SUCCESS) {
-        return UPDATE_CORRUPT;
+        return UPDATE_CORRUPT; // verify package failed must return UPDATE_CORRUPT, ux need it !!!
     }
 #ifdef UPDATER_USE_PTABLE
     if (!PtablePreProcess::GetInstance().DoPtableProcess(upParams)) {
@@ -873,14 +873,14 @@ static UpdaterStatus StartUpdater(const std::vector<std::string> &args,
 // add updater mode
 REGISTER_MODE(Updater, "updater.hdc.configfs");
 
-__attribute__((weak)) bool IsNeedWipe()
+__attribute__((weak)) bool IsNeedWipe(const UpdaterParams &upParams)
 {
     return false;
 }
 
 void RebootAfterUpdateSuccess(const UpdaterParams &upParams)
 {
-    if (IsNeedWipe() ||
+    if (IsNeedWipe(upParams) ||
         upParams.sdExtMode == SDCARD_UPDATE_FROM_DEV ||
         upParams.sdExtMode == SDCARD_UPDATE_FROM_DATA) {
         NotifyReboot("updater", "Updater wipe data after upgrade success", "--user_wipe_data");
