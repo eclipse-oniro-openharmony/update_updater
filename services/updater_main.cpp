@@ -174,8 +174,8 @@ __attribute__((weak)) UpdaterStatus NotifyActionResult(UpdaterParams &upParams,
     return UPDATE_SUCCESS;
 }
 
-__attribute__((weak)) void NotifyReboot(const std::string& rebootTarget,
-    const std::string &rebootReason, const std::string &extData)
+__attribute__((weak)) void NotifyReboot(const std::string& rebootTarget, const std::string &rebootReason,
+    const std::string &extData, const std::string &sdExtMode)
 {
     Updater::Utils::UpdaterDoReboot(rebootTarget, rebootReason, extData);
 }
@@ -883,7 +883,7 @@ void RebootAfterUpdateSuccess(const UpdaterParams &upParams)
     if (IsNeedWipe(upParams) ||
         upParams.sdExtMode == SDCARD_UPDATE_FROM_DEV ||
         upParams.sdExtMode == SDCARD_UPDATE_FROM_DATA) {
-        NotifyReboot("updater", "Updater wipe data after upgrade success", "--user_wipe_data");
+        NotifyReboot("updater", "Updater wipe data after upgrade success", "--user_wipe_data", upParams.sdExtMode);
         return;
     }
     upParams.forceUpdate ? Utils::DoShutdown("Updater update success go shut down") :
