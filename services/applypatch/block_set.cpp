@@ -215,8 +215,6 @@ int32_t BlockSet::VerifySha256(const std::vector<uint8_t> &buffer, const size_t 
     if (hexdigest == expected) {
         return 0;
     }
-    LOG(ERROR) << "hexdigest is " << hexdigest << ", expected is " << expected;
-    UPDATER_LAST_WORD(hexdigest, expected);
     return -1;
 }
 
