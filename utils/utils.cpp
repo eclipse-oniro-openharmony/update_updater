@@ -1007,12 +1007,12 @@ bool ConvertToLong(const std::string &str, int32_t &value)
     return true;
 }
 
-bool ConvertToUnsignedLong(const std::string &str, uint32_t &value)
+bool ConvertToUnsignedLong(const std::string &str, uint32_t &value, int base)
 {
     char *endPtr = nullptr;
     errno = 0;
 
-    value = std::strtoul(str.c_str(), &endPtr, 16); // 16 : hexadecimal scale
+    value = std::strtoul(str.c_str(), &endPtr, base);
 #ifndef UPDATER_UT
     if (endPtr == str.c_str() || *endPtr != '\0' || errno == ERANGE) {
         LOG(ERROR) << "Convert string to uint32_t failed, str " << str << " converted to value " << value;
