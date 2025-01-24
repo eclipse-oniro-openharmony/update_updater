@@ -140,12 +140,12 @@ static void UpdateOptExpand(std::string& updateOpt)
         updateOpt.find("--virtual_shrink_info=") == std::string::npos) {
         return;
     }
-    struct stat file_stat;
-    int ret = stat("/data/service/el1/0/hyperhold", &file_stat);
+    struct stat fileStat;
+    int ret = stat("/data/service/el1/0/hyperhold", &fileStat);
     if (ret != 0) {
         return;
     }
-    std::string inode = std::to_string(file_stat.st_ino);
+    std::string inode = std::to_string(fileStat.st_ino);
     updateOpt += "," + inode;
 }
 
