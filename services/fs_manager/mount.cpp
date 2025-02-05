@@ -306,6 +306,7 @@ int FormatPartition(const std::string &path, bool isZeroErase)
 
     // Umount first
     if (UmountRetry(path) != 0) {
+        LOG(ERROR) << "UmountRetry " << path << " failed";
         return -1;
     }
 
