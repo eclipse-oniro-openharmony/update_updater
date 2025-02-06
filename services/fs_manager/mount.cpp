@@ -267,6 +267,20 @@ void ErasePartition(const std::string &devPath)
     return;
 }
 
+static int UmountRetry(const std::string &path)
+{
+    int retryCount = 6; // 6: retry times for unmount
+    while (retryCount-- > 0) {
+        if (UmountForPath(path) == 0) {
+            LOG(INFO) << "Umount " << path << " success";
+            return 0;
+        }
+        sleep(1);
+    }
+    LOG(ERROR) << "Umount " << path << "failed: " << retryCount << " times";
+    return -1;
+}
+
 int FormatPartition(const std::string &path, bool isZeroErase)
 {
     if (g_fstab == nullptr) {
@@ -291,7 +305,8 @@ int FormatPartition(const std::string &path, bool isZeroErase)
     }
 
     // Umount first
-    if (UmountForPath(path) != 0) {
+    if (UmountRetry(path) != 0) {
+        LOG(ERROR) << "UmountRetry " << path << " failed";
         return -1;
     }
 
