@@ -143,7 +143,7 @@ bool TransferManager::CommandsParser(int fd, const std::vector<std::string> &con
 void TransferManager::UpdateProgress(size_t &initBlock, size_t totalSize)
 {
     float p = static_cast<float>(transferParams_->written - initBlock) / totalSize\
-                                    * Uscript::GetScriptProportion();
+        * Uscript::GetScriptProportion() * Uscript::GetTotalProportion();
     SetUpdateProgress(p);
     initBlock = transferParams_->written;
 }
