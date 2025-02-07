@@ -68,6 +68,7 @@ common_sources = [
   "${HDC_PATH}/common/session.cpp",
   "${HDC_PATH}/common/task.cpp",
   "${HDC_PATH}/common/tcp.cpp",
+  "${HDC_PATH}/common/tlv.cpp",
   "${HDC_PATH}/common/transfer.cpp",
   "${HDC_PATH}/common/usb.cpp",
 ]
