@@ -96,7 +96,7 @@ float UpdaterUiFacade::GetCurrentPercent(void)
 
 void UpdaterUiFacade::ShowProgress(float value) const
 {
-    if (!CheckMode().first || (value > FULL_PERCENT_PROGRESS) || DoSmoothProgress(value)) {
+    if (!CheckMode().first || (value > FULL_PERCENT_PROGRESS)) {
         return;
     }
     static float lastValue = 0.0;
@@ -104,11 +104,6 @@ void UpdaterUiFacade::ShowProgress(float value) const
         LOG(INFO) << "current progress " << value;
         lastValue = value;
     }
-    return DoShowProgress(value);
-}
-
-void UpdaterUiFacade::DoShowProgress(float value) const
-{
     if (auto it = progressMap_.find(mode_); it->second != nullptr) {
         g_currentPercent = value;
         it->second->ShowProgress(value);

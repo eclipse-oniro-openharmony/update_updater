@@ -70,7 +70,6 @@ int32_t VerifySpecialPkgs([[maybe_unused]]UpdaterParams &upParams);
 void UpdaterVerifyFailEntry(bool verifyret);
 bool IsSpareBoardBoot(void);
 bool IsNeedWipe();
-void PostExitBinaryEntry();
 #ifdef __cplusplus
 #if __cplusplus
 }

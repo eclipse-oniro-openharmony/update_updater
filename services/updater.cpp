@@ -270,12 +270,6 @@ __attribute__((weak)) bool PreStartBinaryEntry([[maybe_unused]] const std::strin
     return true;
 }
 
-__attribute__((weak)) void PostExitBinaryEntry()
-{
-    LOG(INFO) << "post binary process";
-    return;
-}
-
 UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, UpdaterParams &upParams,
     PackageUpdateMode updateMode)
 {
@@ -327,7 +321,6 @@ UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, Upda
         updateRet == UPDATE_SUCCESS ? "verify_success" : "verify_fail") != UPDATE_SUCCESS) {
         LOG(ERROR) << "write update state fail";
     }
-    PostExitBinaryEntry();
     return updateRet;
 }
 

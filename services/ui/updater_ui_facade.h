@@ -48,7 +48,6 @@ public:
     void ShowMainpage() const;
     void ShowProgressWarning(bool isShow) const;
     bool IsInProgress() const;
-    void DoShowProgress(float value) const;
 
     void Sleep(int ms) const;
     void SaveScreen() const;

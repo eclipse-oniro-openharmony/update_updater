@@ -24,13 +24,5 @@
 
 namespace Updater {
 void DoProgress();
-
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
-bool DoSmoothProgress(float value);
-#ifdef __cplusplus
-}
-#endif /* __cplusplus */
 } // namespace Updater
 #endif /* UPDATE_UI_HOS_UPDATER_H */

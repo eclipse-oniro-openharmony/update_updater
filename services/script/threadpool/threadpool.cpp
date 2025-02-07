@@ -21,6 +21,7 @@ namespace Uscript {
 static thread_local float g_scriptProportion = 1.0f;
 static ThreadPool* g_threadPool = nullptr;
 static std::mutex g_initMutex;
+static std::atomic<float> g_totalProportion(1.0f);
 
 void SetScriptProportion(float proportion)
 {
@@ -30,6 +31,16 @@ void SetScriptProportion(float proportion)
 float GetScriptProportion()
 {
     return g_scriptProportion;
+}
+
+void SetTotalProportion(float proportion)
+{
+    g_totalProportion.store(proportion);
+}
+
+float GetTotalProportion()
+{
+    return g_totalProportion.load();
 }
 
 ThreadPool* ThreadPool::CreateThreadPool(int number)

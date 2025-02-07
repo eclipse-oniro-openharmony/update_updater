@@ -34,6 +34,8 @@ struct TaskNode {
 
 void SetScriptProportion(float proportion);
 float GetScriptProportion();
+void SetTotalProportion(float proportion);
+float GetTotalProportion();
 
 class ThreadPool {
 public:
