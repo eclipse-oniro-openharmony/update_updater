@@ -123,7 +123,6 @@ bool LoadTarget(const Command &params, size_t &pos, std::vector<uint8_t> &buffer
         return false;
     }
     if (targetBlock.VerifySha256(tgtBuffer, targetBlock.TotalBlockSize(), tgtHash) == 0) {
-        LOG(ERROR) << "Will write same sha256 blocks to target, no need to write";
         result = SUCCESS;
         return false;
     }
