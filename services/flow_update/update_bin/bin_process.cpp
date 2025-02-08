@@ -311,7 +311,8 @@ int32_t UScriptInstructionBinFlowWrite::ComponentProcess(Uscript::UScriptEnv &en
         LOG(ERROR) << "GetProcessor failed, partition name: " << name;
         return USCRIPT_ERROR_EXECUTE;
     }
-    processor->SetPkgFileInfo(stream->GetReadOffset(), stream->GetFileLength(), fullUpdateProportion_);
+    processor->SetPkgFileInfo(stream->GetReadOffset(), stream->GetFileLength(),
+        fullUpdateProportion_ * GetTotalProportion());
     LOG(INFO) << "component read offset " << stream->GetReadOffset();
 
     if (processor->PreProcess(env) != USCRIPT_SUCCESS) {

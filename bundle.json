@@ -311,6 +311,13 @@
                         "header_files": [],
                         "header_base": "//base/update/updater/interfaces/kits/include"
                     }
+                },
+                {
+                    "name": "//base/update/updater/services/script:libthreadpool",
+                    "header": {
+                        "header_files": [],
+                        "header_base": "//base/update/updater/services/script/threadpool"
+                    }
                 }
             ],
             "test": [
