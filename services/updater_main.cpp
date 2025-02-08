@@ -873,22 +873,29 @@ static UpdaterStatus StartUpdater(const std::vector<std::string> &args,
 // add updater mode
 REGISTER_MODE(Updater, "updater.hdc.configfs");
 
-__attribute__((weak)) bool IsNeedWipe(const UpdaterParams &upParams)
+__attribute__((weak)) bool IsNeedWipe()
 {
     return false;
 }
 
-void NotifySdUpdateReboot(const UpdaterParams &upParams)
+__attribute__((weak)) bool NotifySdUpdateReboot(const UpdaterParams &upParams)
 {
-    NotifyReboot("updater", "Updater wipe data after upgrade success", "--user_wipe_data")
+    if (upParams.sdExtMode == SDCARD_UPDATE_FROM_DEV ||
+        upParams.sdExtMode == SDCARD_UPDATE_FROM_DATA) {
+        NotifyReboot("updater", "Updater wipe data after upgrade success", "--user_wipe_data");
+        return;
+    }
+    return false;
 }
 
 void RebootAfterUpdateSuccess(const UpdaterParams &upParams)
 {
-    if (IsNeedWipe(upParams) ||
-        upParams.sdExtMode == SDCARD_UPDATE_FROM_DEV ||
-        upParams.sdExtMode == SDCARD_UPDATE_FROM_DATA) {
-        NotifySdUpdateReboot(upParams);
+    if (IsNeedWipe()) {
+        NotifyReboot("updater", "Updater wipe data after upgrade success", "--user_wipe_data");
+        return;
+    }
+    if (NotifySdUpdateReboot(upParams)) {
+        LOG(INFO) << "sd update and wipe data";
         return;
     }
     upParams.forceUpdate ? Utils::DoShutdown("Updater update success go shut down") :
