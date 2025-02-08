@@ -70,7 +70,7 @@ int32_t VerifySpecialPkgs([[maybe_unused]]UpdaterParams &upParams);
 void UpdaterVerifyFailEntry(bool verifyret);
 bool IsSpareBoardBoot(void);
 bool IsNeedWipe();
-bool NotifySdUpdateReboot(const UpdaterParams &upParams = {});
+bool NotifySdUpdateReboot(const UpdaterParams &upParams);
 void NotifyReboot(const std::string& rebootTarget, const std::string &rebootReason, const std::string &extData = "");
 UpdaterStatus NotifyActionResult(UpdaterParams &upParams,
     UpdaterStatus &status, const std::vector<NotifyAction> &notifyActionVec);
