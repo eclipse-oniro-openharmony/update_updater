@@ -883,7 +883,7 @@ __attribute__((weak)) bool NotifySdUpdateReboot(const UpdaterParams &upParams)
     if (upParams.sdExtMode == SDCARD_UPDATE_FROM_DEV ||
         upParams.sdExtMode == SDCARD_UPDATE_FROM_DATA) {
         NotifyReboot("updater", "Updater wipe data after upgrade success", "--user_wipe_data");
-        return;
+        return true;
     }
     return false;
 }
