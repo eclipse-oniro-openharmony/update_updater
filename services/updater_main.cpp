@@ -880,7 +880,7 @@ __attribute__((weak)) bool IsNeedWipe(const UpdaterParams &upParams)
 
 void NotifySdUpdateReboot(const UpdaterParams &upParams)
 {
-    NotifyReboot("updater", "Updater wipe data after upgrade success", "--user_wipe_data")
+    NotifyReboot("updater", "Updater wipe data after upgrade success", "--user_wipe_data");
 }
 
 void RebootAfterUpdateSuccess(const UpdaterParams &upParams)
