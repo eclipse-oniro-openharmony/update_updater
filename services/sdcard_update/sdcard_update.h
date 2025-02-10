@@ -21,6 +21,8 @@
 
 namespace Updater {
 UpdaterStatus CheckSdcardPkgs(UpdaterParams &upParams);
+UpdaterStatus FindAndMountSdcard(UpdaterParams &upParams);
+UpdaterStatus GetPkgsFromSdcard(UpdaterParams &upParams);
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -30,13 +32,13 @@ extern "C" {
 UpdaterStatus GetSdcardPkgsPath(UpdaterParams &upParams);
 UpdaterStatus GetSdcardPkgsFromDev(UpdaterParams &upParams);
 UpdaterStatus GetSdcardInternalPkgs(UpdaterParams &upParams);
+UpdaterStatus MountAndGetPkgs(UpdaterParams &upParams);
 #ifdef __cplusplus
 #if __cplusplus
 }
 #endif
 #endif
 
-bool CheckPathNeedMountSD(UpdaterParams &upParams);
 bool DoMountSdCard(std::vector<std::string> &sdCardStr, std::string &mountPoint, UpdaterParams &upParams);
 } // namespace Updater
 #endif // SDCARD_UPDATE_H
