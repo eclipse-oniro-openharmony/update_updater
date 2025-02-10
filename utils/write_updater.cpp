@@ -76,7 +76,6 @@ static int WriteUpdaterPara(int argc, UpdaterPara &para)
 static void HandleMiscInfo(int argc, char **argv)
 {
     if (!Utils::IsFileExist(HANDLE_MISC_LIB_PATH)) {
-        cout << "libupdater_handle_misc.z.so is not exist";
         return;
     }
     auto handle = Utils::LoadLibrary(HANDLE_MISC_LIB);

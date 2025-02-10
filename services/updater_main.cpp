@@ -425,7 +425,7 @@ static UpdaterStatus PreUpdatePackages(UpdaterParams &upParams)
 
     // verify package first
     if (VerifyPackages(upParams) != UPDATE_SUCCESS) {
-        return UPDATE_CORRUPT;
+        return UPDATE_CORRUPT; // verify package failed must return UPDATE_CORRUPT, ux need it !!!
     }
 
     // Only handle UPATE_ERROR and UPDATE_SUCCESS here.Let package verify handle others.
@@ -592,7 +592,7 @@ static UpdaterStatus PreSdcardUpdatePackages(UpdaterParams &upParams)
     }
     UpdaterStatus status = VerifyPackages(upParams);
     if (status != UPDATE_SUCCESS) {
-        return UPDATE_CORRUPT;
+        return UPDATE_CORRUPT; // verify package failed must return UPDATE_CORRUPT, ux need it !!!
     }
 #ifdef UPDATER_USE_PTABLE
     if (!PtablePreProcess::GetInstance().DoPtableProcess(upParams)) {
@@ -878,12 +878,24 @@ __attribute__((weak)) bool IsNeedWipe()
     return false;
 }
 
-void RebootAfterUpdateSuccess(const UpdaterParams &upParams)
+__attribute__((weak)) bool NotifySdUpdateReboot(const UpdaterParams &upParams)
 {
-    if (IsNeedWipe() ||
-        upParams.sdExtMode == SDCARD_UPDATE_FROM_DEV ||
+    if (upParams.sdExtMode == SDCARD_UPDATE_FROM_DEV ||
         upParams.sdExtMode == SDCARD_UPDATE_FROM_DATA) {
         NotifyReboot("updater", "Updater wipe data after upgrade success", "--user_wipe_data");
+        return true;
+    }
+    return false;
+}
+
+void RebootAfterUpdateSuccess(const UpdaterParams &upParams)
+{
+    if (IsNeedWipe()) {
+        NotifyReboot("updater", "Updater wipe data after upgrade success", "--user_wipe_data");
+        return;
+    }
+    if (NotifySdUpdateReboot(upParams)) {
+        LOG(INFO) << "sd update and wipe data";
         return;
     }
     upParams.forceUpdate ? Utils::DoShutdown("Updater update success go shut down") :
