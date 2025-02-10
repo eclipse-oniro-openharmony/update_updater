@@ -351,6 +351,6 @@ HWTEST_F(UpdaterUtilUnitTest, CheckSdcardPkgs, TestSize.Level0)
     upParams.updatePackage.clear();
 
     upParams.updatePackage.push_back("/sdcard/updater/updater_full.zip");
-    EXPECT_EQ(GetSdcardPkgsPath(upParams), UPDATE_SUCCESS);
+    EXPECT_EQ(CheckSdcardPkgs(upParams), UPDATE_SUCCESS);
 }
 }
