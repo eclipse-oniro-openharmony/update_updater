@@ -320,19 +320,6 @@ HWTEST_F(UpdaterUtilUnitTest, StartUpdaterProcTest, TestSize.Level1)
     EXPECT_EQ(StartUpdaterProc(pkgManager, upParams), UPDATE_ERROR);
 }
 
-HWTEST_F(UpdaterUtilUnitTest, CheckPathNeedMountSD, TestSize.Level0)
-{
-    UpdaterParams upParams;
-    upParams.updatePackage.push_back("/data/updater/updater_full.zip");
-    EXPECT_EQ(CheckPathNeedMountSD(upParams), false);
-    upParams.updatePackage.clear();
-    upParams.updatePackage.push_back("/sdcard/updater/updater_full.zip");
-    EXPECT_EQ(CheckPathNeedMountSD(upParams), true);
-    upParams.updatePackage.clear();
-    upParams.updatePackage.push_back("/data/sdcard/updater_full.zip");
-    EXPECT_EQ(CheckPathNeedMountSD(upParams), false);
-}
-
 HWTEST_F(UpdaterUtilUnitTest, GetSdcardPkgsFromDev, TestSize.Level0)
 {
     UpdaterParams upParams;
@@ -357,9 +344,13 @@ HWTEST_F(UpdaterUtilUnitTest, GetSdcardPkgsPath, TestSize.Level0)
     upParams.updatePackage.clear();
 }
 
-HWTEST_F(UpdaterUtilUnitTest, GetSdcardInternalPkgs, TestSize.Level0)
+HWTEST_F(UpdaterUtilUnitTest, CheckSdcardPkgs, TestSize.Level0)
 {
     UpdaterParams upParams;
-    EXPECT_EQ(GetSdcardInternalPkgs(upParams), UPDATE_ERROR);
+    EXPECT_EQ(CheckSdcardPkgs(upParams), UPDATE_SUCCESS);
+    upParams.updatePackage.clear();
+
+    upParams.updatePackage.push_back("/sdcard/updater/updater_full.zip");
+    EXPECT_EQ(GetSdcardPkgsPath(upParams), UPDATE_SUCCESS);
 }
 }
