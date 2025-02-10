@@ -127,7 +127,7 @@ __attribute__((weak)) UpdaterStatus MountAndGetPkgs(UpdaterParams &upParams)
     return GetPkgsFromSdcard(upParams);
 }
 
-UpdaterStatus GetPkgsFromSdcard(UpdaterParams &upParams)
+UpdaterStatus CheckSdcardPkgs(UpdaterParams &upParams)
 {
 #ifndef UPDATER_UT
     auto sdParam = "updater.data.configs";
