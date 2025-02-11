@@ -42,6 +42,7 @@ public:
     Language ParseLanguage() const;
     Language GetCurLanguage() const;
     void SetDefaultLanguage(Language language);
+    Language ParseLangIfZh(const char *globalLang);
 private:
     ~LanguageUI() = default;
     LanguageUI();
