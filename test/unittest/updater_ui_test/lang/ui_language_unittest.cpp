@@ -131,7 +131,7 @@ HWTEST_F(UpdaterUiLangUnitTest, testParseLangIfZh, TestSize.Level0)
 {
     std::string globalLang {};
 
-    EXPECT_EQ(LanguageUI::GetInstance().ParseLangIfZh(nullptr), Language::CHINESE)n
+    EXPECT_EQ(LanguageUI::GetInstance().ParseLangIfZh(nullptr), Language::CHINESE);
 
     globalLang = "zh";
     EXPECT_EQ(LanguageUI::GetInstance().ParseLangIfZh(globalLang.c_str()), Language::CHINESE);
