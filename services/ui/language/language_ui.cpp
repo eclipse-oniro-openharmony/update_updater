@@ -170,11 +170,43 @@ bool LanguageUI::LoadLangRes(const JsonNode &node)
     return true;
 }
 
+Language LanguageUI::ParseLangIfZh(std::string globalLang)
+{
+    constexpr const char *CN_REGION_UNDERLINE = "_CN";
+    constexpr const char *CN_REGION_DASH = "-CN";
+    const char *ptrChar = nullptr;
+    bool isSuffix = false;
+    if (globalLang == nullptr) {
+        LOG(ERROR) << "null error";
+        return Language::CHINESE;
+    }
+    ptrChar = strstr(globalLang, "-") == nullptr ? strstr(globalLang, "_") : strstr(globalLang, "-");
+    if (ptrChar == nullptr) {
+        LOG(ERROR) << "global param doesn't contain '-' or '_'";
+        return Language::CHINESE;
+    }
+    if (strncmp(ptrChar, CN_REGION_DASH, strlen(CN_REGION_DASH)) == 0 || strncmp(ptrChar, CN_REGION_UNDERLINE,
+        strlen(CN_REGION_UNDERLINE)) == 0) {
+        LOG(INFO) << "check region type at prefix";
+        return Language::CHINESE;
+    }
+    if (strlen(ptrChar) >= strlen(CN_REGION_DASH)) {
+        ptrChar = ptrChar + strlen(ptrChar) - strlen(CN_REGION_DASH);
+        isSuffix = true;
+    }
+    if (isSuffix && (strncmp(ptrChar, CN_REGION_DASH, strlen(CN_REGION_DASH)) == 0 ||
+        strncmp(ptrChar, CN_REGION_UNDERLINE, strlen(CN_REGION_UNDERLINE)) == 0)) {
+        LOG(INFO) << "check region type at suffix";
+        return Language::CHINESE;
+    }
+    return Language::ENGLISH;
+}
+
 Language LanguageUI::ParseLanguage() const
 {
     Language DEFAULT_LOCALE = defaultLanguage_;
 #ifndef UPDATER_UT
-    //read language type(en-Latn-US/zh-Hans) from misc
+    // read locale type(en-Latn-CN/zh-Hans-CN) from misc
     constexpr const char *CHINESE_LANGUAGE_PREFIX = "zh";
     constexpr const char *SPANISH_LANGUAGE_PREFIX = "es";
     struct UpdaterPara para {};
@@ -186,7 +218,7 @@ Language LanguageUI::ParseLanguage() const
         LOG(INFO) << "Language in misc is empty";
         return Language::CHINESE;
     } else if (strncmp(para.language, CHINESE_LANGUAGE_PREFIX, strlen(CHINESE_LANGUAGE_PREFIX)) == 0) {
-        return Language::CHINESE;
+        return ParseLangIfZh(para.language);
     } else if (strncmp(para.language, SPANISH_LANGUAGE_PREFIX, strlen(SPANISH_LANGUAGE_PREFIX)) == 0) {
         return Language::SPANISH;
     } else {
