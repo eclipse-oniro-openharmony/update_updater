@@ -170,7 +170,7 @@ bool LanguageUI::LoadLangRes(const JsonNode &node)
     return true;
 }
 
-Language LanguageUI::ParseLangIfZh(std::string globalLang)
+Language LanguageUI::ParseLangIfZh(const char *globalLang)
 {
     constexpr const char *CN_REGION_UNDERLINE = "_CN";
     constexpr const char *CN_REGION_DASH = "-CN";
