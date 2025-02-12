@@ -22,12 +22,16 @@
 #include <thread>
 #include <unistd.h>
 #include <vector>
+#ifndef UPDATER_UT
 #include "language/language_ui.h"
+#endif
 #include "log/dump.h"
 #include "log/log.h"
 #include "fs_manager/mount.h"
 #include "securec.h"
+#ifndef UPDATER_UT
 #include "ui/updater_ui_stub.h"
+#endif
 #include "updater/updater_const.h"
 #include "utils.h"
 
@@ -58,15 +62,6 @@ __attribute__((weak)) UpdaterStatus GetSdcardPkgsFromDev(UpdaterParams &upParams
     return UPDATE_ERROR;
 }
 
-bool CheckPathNeedMountSD(UpdaterParams &upParams)
-{
-    for (auto pkgPath : upParams.updatePackage) {
-        if (pkgPath.find("/sdcard") != 0) {
-            return false;
-        }
-    }
-    return true;
-}
 
 bool DoMountSdCard(std::vector<std::string> &sdCardStr, std::string &mountPoint, UpdaterParams &upParams)
 {
@@ -96,21 +91,9 @@ bool DoMountSdCard(std::vector<std::string> &sdCardStr, std::string &mountPoint,
 #endif
 }
 
-UpdaterStatus CheckSdcardPkgs(UpdaterParams &upParams)
+UpdaterStatus FindAndMountSdcard(UpdaterParams &upParams)
 {
 #ifndef UPDATER_UT
-    auto sdParam = "updater.data.configs";
-    Utils::SetParameter(sdParam, "1");
-    if (upParams.sdExtMode == SDCARD_UPDATE_FROM_DEV && GetSdcardPkgsFromDev(upParams) == UPDATE_SUCCESS) {
-        LOG(INFO) << "get sd card from dev succeed, skip get package from sd card";
-        return UPDATE_SUCCESS;
-    }
- 
-    if (GetSdcardInternalPkgs(upParams) == UPDATE_SUCCESS) {
-        LOG(INFO) << "get sdcard internal pkgs succeed";
-        return UPDATE_SUCCESS;
-    }
- 
     std::string mountPoint = std::string(SDCARD_PATH);
     std::vector<std::string> sdcardStr = GetBlockDevicesByMountPoint(mountPoint);
     if (sdcardStr.empty()) {
@@ -118,20 +101,20 @@ UpdaterStatus CheckSdcardPkgs(UpdaterParams &upParams)
             (errno == ENOENT) ? TR(LOG_SDCARD_NOTFIND) : TR(LOG_SDCARD_ABNORMAL), true);
         return UPDATE_ERROR;
     }
-    if (Utils::CheckUpdateMode(Updater::SDCARD_INTRAL_MODE)) {
-        if (MountForPath("/data") != 0) {
-            LOG(ERROR) << "data partition mount fail";
-            return UPDATE_ERROR;
-        }
+    if (!DoMountSdCard(sdcardStr, mountPoint, upParams)) {
+        LOG(ERROR) << "mount sdcard fail!";
+        return UPDATE_ERROR;
     }
-    if ((Utils::CheckUpdateMode(Updater::SDCARD_MODE) && !Utils::CheckUpdateMode(Updater::SDCARD_INTRAL_MODE)) ||
-        (Utils::CheckUpdateMode(Updater::SDCARD_INTRAL_MODE) && CheckPathNeedMountSD(upParams))) {
-            if (!DoMountSdCard(sdcardStr, mountPoint, upParams)) {
-                LOG(ERROR) << "mount sdcard fail!";
-                return UPDATE_ERROR;
-            }
-        }
 #endif
+    return UPDATE_SUCCESS;
+}
+
+UpdaterStatus GetPkgsFromSdcard(UpdaterParams &upParams)
+{
+    if (FindAndMountSdcard(upParams) != UPDATE_SUCCESS) {
+        LOG(ERROR) << "mount sdcard fail!";
+        return UPDATE_ERROR;
+    }
     if (GetSdcardPkgsPath(upParams) != UPDATE_SUCCESS) {
         LOG(ERROR) << "there is no package in sdcard/updater, please check";
         return UPDATE_ERROR;
@@ -139,9 +122,17 @@ UpdaterStatus CheckSdcardPkgs(UpdaterParams &upParams)
     return UPDATE_SUCCESS;
 }
 
-__attribute__((weak)) UpdaterStatus GetSdcardInternalPkgs(UpdaterParams &upParams)
+__attribute__((weak)) UpdaterStatus MountAndGetPkgs(UpdaterParams &upParams)
 {
-    LOG(INFO) << "not implemented get normal update sdcard pkgs";
-    return UPDATE_ERROR;
+    return GetPkgsFromSdcard(upParams);
+}
+
+UpdaterStatus CheckSdcardPkgs(UpdaterParams &upParams)
+{
+#ifndef UPDATER_UT
+    auto sdParam = "updater.data.configs";
+    Utils::SetParameter(sdParam, "1");
+#endif
+    return MountAndGetPkgs(upParams);
 }
 } // Updater
