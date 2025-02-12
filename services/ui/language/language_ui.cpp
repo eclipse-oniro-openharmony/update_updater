@@ -176,8 +176,8 @@ Language LanguageUI::ParseLangIfZh(const char *globalLang) const
     constexpr const char *CN_REGION_DASH = "-CN";
     const char *ptrChar = nullptr;
     bool isSuffix = false;
-    if (globalLang == nullptr) {
-        LOG(ERROR) << "null error";
+    if (globalLang == nullptr || *globalLang == '\0') {
+        LOG(ERROR) << "globalLang null error";
         return Language::CHINESE;
     }
     ptrChar = strstr(globalLang, "-") == nullptr ? strstr(globalLang, "_") : strstr(globalLang, "-");
