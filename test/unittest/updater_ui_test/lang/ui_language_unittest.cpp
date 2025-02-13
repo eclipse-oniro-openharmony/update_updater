@@ -131,11 +131,6 @@ HWTEST_F(UpdaterUiLangUnitTest, testParseLangIfZh, TestSize.Level0)
 {
     std::string globalLang {};
 
-    EXPECT_EQ(LanguageUI::GetInstance().ParseLangIfZh(nullptr), Language::CHINESE);
-
-    globalLang = "";
-    EXPECT_EQ(LanguageUI::GetInstance().ParseLangIfZh(globalLang.c_str()), Language::CHINESE);
-
     globalLang = "zh";
     EXPECT_EQ(LanguageUI::GetInstance().ParseLangIfZh(globalLang.c_str()), Language::CHINESE);
 
@@ -145,7 +140,7 @@ HWTEST_F(UpdaterUiLangUnitTest, testParseLangIfZh, TestSize.Level0)
     globalLang = "zh_CN";
     EXPECT_EQ(LanguageUI::GetInstance().ParseLangIfZh(globalLang.c_str()), Language::CHINESE);
 
-    globalLang = "zh-U";
+    globalLang = "zh-US";
     EXPECT_EQ(LanguageUI::GetInstance().ParseLangIfZh(globalLang.c_str()), Language::ENGLISH);
 
     globalLang = "zh-Hans-CN";
@@ -156,6 +151,34 @@ HWTEST_F(UpdaterUiLangUnitTest, testParseLangIfZh, TestSize.Level0)
 
     globalLang = "zh-Hans-US";
     EXPECT_EQ(LanguageUI::GetInstance().ParseLangIfZh(globalLang.c_str()), Language::ENGLISH);
+
+    globalLang = "zh-Hans";
+    EXPECT_EQ(LanguageUI::GetInstance().ParseLangIfZh(globalLang.c_str()), Language::ENGLISH);
+
+    globalLang = "zh-CN-Hans";
+    EXPECT_EQ(LanguageUI::GetInstance().ParseLangIfZh(globalLang.c_str()), Language::CHINESE);
+
+    // abnormal situations, globalLang doesn't starts with "zh"
+    globalLang = "";
+    EXPECT_EQ(LanguageUI::GetInstance().ParseLangIfZh(globalLang.c_str()), Language::CHINESE);
+
+    globalLang = "z";
+    EXPECT_EQ(LanguageUI::GetInstance().ParseLangIfZh(globalLang.c_str()), Language::CHINESE);
+
+    globalLang = "en";
+    EXPECT_EQ(LanguageUI::GetInstance().ParseLangIfZh(globalLang.c_str()), Language::CHINESE);
+
+    globalLang = "-CN";
+    EXPECT_EQ(LanguageUI::GetInstance().ParseLangIfZh(globalLang.c_str()), Language::CHINESE);
+
+    globalLang = "-U";
+    EXPECT_EQ(LanguageUI::GetInstance().ParseLangIfZh(globalLang.c_str()), Language::ENGLISH);
+
+    globalLang = "en-Latn-US";
+    EXPECT_EQ(LanguageUI::GetInstance().ParseLangIfZh(globalLang.c_str()), Language::ENGLISH);
+
+    globalLang = "en-Latn-CN";
+    EXPECT_EQ(LanguageUI::GetInstance().ParseLangIfZh(globalLang.c_str()), Language::CHINESE);
 }
 
 HWTEST_F(UpdaterUiLangUnitTest, testInit01, TestSize.Level0)
