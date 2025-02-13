@@ -158,7 +158,7 @@ HWTEST_F(UpdaterUiLangUnitTest, testParseLangIfZh, TestSize.Level0)
     globalLang = "zh-CN-Hans";
     EXPECT_EQ(LanguageUI::GetInstance().ParseLangIfZh(globalLang), Language::CHINESE);
 
-    // abnormal situations, globalLang doesn't starts with "zh"
+    // abnormal situations, globalLang doesn't start with "zh"
     globalLang = "";
     EXPECT_EQ(LanguageUI::GetInstance().ParseLangIfZh(globalLang), Language::CHINESE);
 
