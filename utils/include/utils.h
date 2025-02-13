@@ -106,7 +106,7 @@ bool IsEsDevice();
 bool ConvertToUnsignedLongLong(const std::string &str, uint64_t &value);
 bool ConvertToLongLong(const std::string &str, int64_t &value);
 bool ConvertToLong(const std::string &str, int32_t &value);
-bool ConvertToUnsignedLong(const std::string &str, uint32_t &value);
+bool ConvertToUnsignedLong(const std::string &str, uint32_t &value, int base = 0);
 bool ConvertToDouble(const std::string &str, double &value);
 bool ConvertToFloat(const std::string &str, float &value);
 #ifndef __WIN32
