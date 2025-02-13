@@ -170,33 +170,29 @@ bool LanguageUI::LoadLangRes(const JsonNode &node)
     return true;
 }
 
-Language LanguageUI::ParseLangIfZh(const char *globalLang) const
+Language LanguageUI::ParseLangIfZh(const std::string &globalLang) const
 {
-    constexpr const char *CN_REGION_UNDERLINE = "_CN";
-    constexpr const char *CN_REGION_DASH = "-CN";
-    const char *ptrChar = nullptr;
-    bool isSuffix = false;
-    if (globalLang == nullptr || *globalLang == '\0') {
-        LOG(ERROR) << "globalLang null error";
+    const std::string ZH_CN_REGION_UNDERLINE_PREFIX = "zh_CN";
+    const std::string ZH_CN_REGION_DASH_PREFIX = "zh-CN";
+    const std::string CN_REGION_UNDERLINE_SUFFIX = "_CN";
+    const std::string CN_REGION_DASH_SUFFIX = "-CN";
+
+    if (globalLang.empty()) {
+        LOG(ERROR) << "globalLang is empty";
         return Language::CHINESE;
     }
-    ptrChar = strstr(globalLang, "-") == nullptr ? strstr(globalLang, "_") : strstr(globalLang, "-");
-    if (ptrChar == nullptr) {
-        LOG(ERROR) << "global param doesn't contain '-' or '_'";
+    if (globalLang.find("-") == std::string::npos && globalLang.find("_") == std::string::npos) {
+        LOG(ERROR) << "globalLang doesn't contain '-' or '_'";
         return Language::CHINESE;
     }
-    if (strncmp(ptrChar, CN_REGION_DASH, strlen(CN_REGION_DASH)) == 0 || strncmp(ptrChar, CN_REGION_UNDERLINE,
-        strlen(CN_REGION_UNDERLINE)) == 0) {
-        LOG(INFO) << "check region type at prefix";
+    if (globalLang.find(ZH_CN_REGION_UNDERLINE_PREFIX) == 0 || globalLang.find(ZH_CN_REGION_DASH_PREFIX) == 0) {
+        LOG(INFO) << "starts with zh_CN or zh-CN";
         return Language::CHINESE;
     }
-    if (strlen(ptrChar) >= strlen(CN_REGION_DASH)) {
-        ptrChar = ptrChar + strlen(ptrChar) - strlen(CN_REGION_DASH);
-        isSuffix = true;
-    }
-    if (isSuffix && (strncmp(ptrChar, CN_REGION_DASH, strlen(CN_REGION_DASH)) == 0 ||
-        strncmp(ptrChar, CN_REGION_UNDERLINE, strlen(CN_REGION_UNDERLINE)) == 0)) {
-        LOG(INFO) << "check region type at suffix";
+    if ((globalLang.size() >= CN_REGION_DASH_SUFFIX.size()) && (std::equal(CN_REGION_DASH_SUFFIX.rbegin(),
+        CN_REGION_DASH_SUFFIX.rend(), globalLang.rbegin()) || std::equal(CN_REGION_UNDERLINE_SUFFIX.rbegin(),
+        CN_REGION_UNDERLINE_SUFFIX.rend(), globalLang.rbegin()))) {
+        LOG(INFO) << "ends with _CN or -CN";
         return Language::CHINESE;
     }
     return Language::ENGLISH;
