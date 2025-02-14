@@ -189,9 +189,9 @@ Language LanguageUI::ParseLangIfZh(const std::string &globalLang) const
         LOG(INFO) << "starts with zh_CN or zh-CN";
         return Language::CHINESE;
     }
-    if ((globalLang.size() >= CN_REGION_DASH_SUFFIX.size()) && (std::equal(CN_REGION_DASH_SUFFIX.rbegin(),
-        CN_REGION_DASH_SUFFIX.rend(), globalLang.rbegin()) || std::equal(CN_REGION_UNDERLINE_SUFFIX.rbegin(),
-        CN_REGION_UNDERLINE_SUFFIX.rend(), globalLang.rbegin()))) {
+    if ((globalLang.size() >= CN_REGION_DASH_SUFFIX.size()) &&
+        (globalLang.rfind(CN_REGION_DASH_SUFFIX) == globalLang.size() - CN_REGION_DASH_SUFFIX.size() ||
+        globalLang.rfind(CN_REGION_UNDERLINE_SUFFIX) == globalLang.size() - CN_REGION_UNDERLINE_SUFFIX.size())) {
         LOG(INFO) << "ends with _CN or -CN";
         return Language::CHINESE;
     }
@@ -214,10 +214,13 @@ Language LanguageUI::ParseLanguage() const
         LOG(INFO) << "Language in misc is empty";
         return Language::CHINESE;
     } else if (strncmp(para.language, CHINESE_LANGUAGE_PREFIX, strlen(CHINESE_LANGUAGE_PREFIX)) == 0) {
+        LOG(INFO) << "para language starts with zh";
         return ParseLangIfZh(para.language);
     } else if (strncmp(para.language, SPANISH_LANGUAGE_PREFIX, strlen(SPANISH_LANGUAGE_PREFIX)) == 0) {
+        LOG(INFO) << "parsed language is Spanish";
         return Language::SPANISH;
     } else {
+        LOG(INFO) << "parsed language is English";
         return Language::ENGLISH;
     }
 #endif
