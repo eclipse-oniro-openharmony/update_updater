@@ -50,7 +50,7 @@ public:
 
     std::string GetPkgTime(const std::string &pkgPath) const;
 
-    void WriteHash(std::vector<uint8_t> &sourceDigest, const std::string &pkgPath) const;
+    void WriteHash(std::vector<uint8_t> &hash, const std::string &pkgPath) const;
 };
 } // namespace Hpackage
 #endif

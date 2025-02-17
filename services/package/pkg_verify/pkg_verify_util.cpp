@@ -209,10 +209,10 @@ std::string PkgVerifyUtil::GetPkgTime(const std::string &pkgPath) const
     return fileInfo;
 }
 
-void PkgVerifyUtil::WriteHash(std::vector<uint8_t> &sourceDigest, const std::string &pkgPath) const
+void PkgVerifyUtil::WriteHash(std::vector<uint8_t> &hash, const std::string &pkgPath) const
 {
     Updater::UPDATER_INIT_RECORD;
-    std::string path = "/data/updatar/hash_file";
+    std::string path = "/data/updater/hash_file";
     if (access(path.c_str(), F_OK) != 0) {
         std::ofstream file(path, std::ios::out);
         if (!file) {
@@ -229,7 +229,10 @@ void PkgVerifyUtil::WriteHash(std::vector<uint8_t> &sourceDigest, const std::str
     }
     std::string lastHash {};
     if (getline(file, lastHash)) {
-        UPDATER_LAST_WORD(lastHash, hash.data(), GetPkgTime(pkgPath));
+        std::vector<unsigned char> lastHashVector {};
+        lastHashVector.assign(lastHash.begin(), lastHash.end());
+        UPDATER_LAST_WORD(ConvertShaHex(static_cast<std::vector<uint8_t>>(lastHashVector)),
+                          ConvertShaHex(hash), GetPkgTime(pkgPath));
     }
 }
 
