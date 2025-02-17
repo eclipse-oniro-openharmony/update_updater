@@ -195,10 +195,8 @@ int32_t PkgVerifyUtil::Pkcs7verify(std::vector<uint8_t> &signature, std::vector<
     return pkcs7.GetHashFromSignBlock(signature.data(), signature.size(), hash);
 }
 
-int32_t PkgVerifyUtil::HashCheck(const PkgStreamPtr srcData, const size_t dataLen,
-    const std::vector<uint8_t> &hash, const std::string &path) const
+std::string PkgVerifyUtil::GetPkgTime(const std::string &pkgPath) const
 {
-    Updater::UPDATER_INIT_RECORD;
     struct stat statInfo {};
     std::string fileInfo = "valid info";
     if (stat(path.c_str(), &statInfo) != 0) {
@@ -208,6 +206,37 @@ int32_t PkgVerifyUtil::HashCheck(const PkgStreamPtr srcData, const size_t dataLe
             " , pkg last change time is " + ctime(&statInfo.st_mtime);
         PKG_LOGI(fileInfo.c_str());
     }
+    return fileInfo;
+}
+
+void PkgVerifyUtil::WriteHash(std::vector<uint8_t> &sourceDigest, const std::string &pkgPath) const
+{
+    std::string path = "/data/updatar/hash_file";
+    if (access(path.c_str(), F_OK) != 0) {
+        std::ofstream file(path, std::ios::out);
+        if (!file) {
+            PKG_LOGE("open file failed");
+            return;
+        }
+        file.write(reinterpret_cast<char *>(hash.data()), sizeof(hash));
+        return;
+    }
+    std::ifstream file(path, std::ios::in);
+    if (!file) {
+        PKG_LOGE("open file failed");
+        return;
+    }
+    std::string lastHash {};
+    if (getline(file, lastHash)) {
+        UPDATER_LAST_WORD(lastHash, hash.data(), GetPkgTime(pkgPath));
+    }
+}
+
+int32_t PkgVerifyUtil::HashCheck(const PkgStreamPtr srcData, const size_t dataLen,
+    const std::vector<uint8_t> &hash, const std::string &path) const
+{
+    Updater::UPDATER_INIT_RECORD;
+    std::string fileInfo = GetPkgTime(path);
     if (srcData == nullptr || dataLen == 0) {
         UPDATER_LAST_WORD(PKG_INVALID_PARAM);
         return PKG_INVALID_PARAM;
@@ -232,6 +261,7 @@ int32_t PkgVerifyUtil::HashCheck(const PkgStreamPtr srcData, const size_t dataLe
         UPDATER_LAST_WORD(PKG_INVALID_DIGEST,
                           ConvertShaHex(hash).substr(0, INTERCEPT_HASH_LENGTH),
                           ConvertShaHex(sourceDigest).substr(0, INTERCEPT_HASH_LENGTH), fileInfo);
+        WriteHash(sourceDigest, path);
         return PKG_INVALID_DIGEST;
     }
 
