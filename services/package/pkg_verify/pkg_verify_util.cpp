@@ -199,7 +199,7 @@ std::string PkgVerifyUtil::GetPkgTime(const std::string &pkgPath) const
 {
     struct stat statInfo {};
     std::string fileInfo = "valid info";
-    if (stat(path.c_str(), &statInfo) != 0) {
+    if (stat(pkgPath.c_str(), &statInfo) != 0) {
         PKG_LOGE("get file info error");
     } else {
         fileInfo = "pkg size is " + std::to_string(statInfo.st_size) +
