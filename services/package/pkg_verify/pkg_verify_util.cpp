@@ -211,6 +211,7 @@ std::string PkgVerifyUtil::GetPkgTime(const std::string &pkgPath) const
 
 void PkgVerifyUtil::WriteHash(std::vector<uint8_t> &sourceDigest, const std::string &pkgPath) const
 {
+    Updater::UPDATER_INIT_RECORD;
     std::string path = "/data/updatar/hash_file";
     if (access(path.c_str(), F_OK) != 0) {
         std::ofstream file(path, std::ios::out);
