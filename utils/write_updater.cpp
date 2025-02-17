@@ -61,7 +61,7 @@ static int WriteUpdaterPara(int argc, UpdaterPara &para)
         cout << "please input correct updater command!" << endl;
         return -1;
     }
-    int res = GetParameter("persist.global.language", "", para.language, MAX_PARA_SIZE);
+    int res = GetParameter("persist.global.locale", "", para.language, MAX_PARA_SIZE);
     if (res <= 0) {
         cout << "Get language parameter failed" << endl;
         return -1;

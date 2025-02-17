@@ -170,11 +170,39 @@ bool LanguageUI::LoadLangRes(const JsonNode &node)
     return true;
 }
 
+Language LanguageUI::ParseLangIfZh(const std::string &globalLang) const
+{
+    const std::string ZH_CN_REGION_UNDERLINE_PREFIX = "zh_CN";
+    const std::string ZH_CN_REGION_DASH_PREFIX = "zh-CN";
+    const std::string CN_REGION_UNDERLINE_SUFFIX = "_CN";
+    const std::string CN_REGION_DASH_SUFFIX = "-CN";
+
+    if (globalLang.empty()) {
+        LOG(ERROR) << "globalLang is empty";
+        return Language::CHINESE;
+    }
+    if (globalLang.find("-") == std::string::npos && globalLang.find("_") == std::string::npos) {
+        LOG(ERROR) << "globalLang doesn't contain '-' or '_'";
+        return Language::CHINESE;
+    }
+    if (globalLang.find(ZH_CN_REGION_UNDERLINE_PREFIX) == 0 || globalLang.find(ZH_CN_REGION_DASH_PREFIX) == 0) {
+        LOG(INFO) << "starts with zh_CN or zh-CN";
+        return Language::CHINESE;
+    }
+    if ((globalLang.size() >= CN_REGION_DASH_SUFFIX.size()) &&
+        (globalLang.rfind(CN_REGION_DASH_SUFFIX) == globalLang.size() - CN_REGION_DASH_SUFFIX.size() ||
+        globalLang.rfind(CN_REGION_UNDERLINE_SUFFIX) == globalLang.size() - CN_REGION_UNDERLINE_SUFFIX.size())) {
+        LOG(INFO) << "ends with _CN or -CN";
+        return Language::CHINESE;
+    }
+    return Language::ENGLISH;
+}
+
 Language LanguageUI::ParseLanguage() const
 {
     Language DEFAULT_LOCALE = defaultLanguage_;
 #ifndef UPDATER_UT
-    //read language type(en-Latn-US/zh-Hans) from misc
+    // read locale type(en-Latn-CN/zh-Hans-CN) from misc
     constexpr const char *CHINESE_LANGUAGE_PREFIX = "zh";
     constexpr const char *SPANISH_LANGUAGE_PREFIX = "es";
     struct UpdaterPara para {};
@@ -186,10 +214,13 @@ Language LanguageUI::ParseLanguage() const
         LOG(INFO) << "Language in misc is empty";
         return Language::CHINESE;
     } else if (strncmp(para.language, CHINESE_LANGUAGE_PREFIX, strlen(CHINESE_LANGUAGE_PREFIX)) == 0) {
-        return Language::CHINESE;
+        LOG(INFO) << "para language starts with zh";
+        return ParseLangIfZh(para.language);
     } else if (strncmp(para.language, SPANISH_LANGUAGE_PREFIX, strlen(SPANISH_LANGUAGE_PREFIX)) == 0) {
+        LOG(INFO) << "parsed language is Spanish";
         return Language::SPANISH;
     } else {
+        LOG(INFO) << "parsed language is English";
         return Language::ENGLISH;
     }
 #endif
