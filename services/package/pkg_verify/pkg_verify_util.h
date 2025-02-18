@@ -47,6 +47,10 @@ public:
 
     int32_t HashCheck(const PkgStreamPtr srcData, const size_t dataLen,
         const std::vector<uint8_t> &hash, const std::string &path) const;
+
+    std::string GetPkgTime(const std::string &pkgPath) const;
+
+    void WriteHash(std::vector<uint8_t> &hash, const std::string &pkgPath) const;
 };
 } // namespace Hpackage
 #endif
