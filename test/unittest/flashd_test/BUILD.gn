@@ -38,6 +38,7 @@ ohos_unittest("flashd_unittest") {
     "${HDC_PATH}/common/file_descriptor.cpp",
     "${HDC_PATH}/common/forward.cpp",
     "${HDC_PATH}/common/header.cpp",
+    "${HDC_PATH}/common/heartbeat.cpp",
     "${HDC_PATH}/common/session.cpp",
     "${HDC_PATH}/common/task.cpp",
     "${HDC_PATH}/common/tcp.cpp",
