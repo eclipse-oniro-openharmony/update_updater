@@ -38,6 +38,7 @@ public:
     uint16_t GetScreenHeight() override;
     void StopEngine(void);
     void SetSleepTime(uint32_t sleepTime);
+    void DisableClearStop(void);
 private:
     void FlushThreadLoop() const;
     void InitFontEngine(const char *fontPath) const;
@@ -52,6 +53,7 @@ private:
     uint16_t width_ = 0;
     uint8_t colorMode_ = 0;
     bool flushStop_ = true;
+    bool stopClear_ = true;
     uint32_t sleepTime_ = THREAD_USLEEP_TIME;
     std::mutex mtx_ {};
 };
@@ -63,6 +65,7 @@ extern "C" {
 #endif /* __cplusplus */
 void InitFlushBatteryStatusExt(void);
 void PostInitSurfDev(std::unique_ptr<SurfaceDev> &surfDev, GrSurface &surface);
+void SetBrightness(int value);
 #ifdef __cplusplus
 #if __cplusplus
 }

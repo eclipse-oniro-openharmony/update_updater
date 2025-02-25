@@ -102,6 +102,11 @@ __attribute__((weak)) void InitFlushBatteryStatusExt(void)
 {
 }
 
+__attribute__((weak)) void SetBrightness(int value)
+{
+    LOG(INFO) << "not pc, not set backlight";
+}
+
 void GraphicEngine::FlushThreadLoop() const
 {
     while (!flushStop_) {
@@ -110,14 +115,23 @@ void GraphicEngine::FlushThreadLoop() const
         Utils::UsSleep(sleepTime_);
     }
     // clear screen after stop
-    UiRotation::GetInstance().SetDegree(UI_ROTATION_DEGREE::UI_ROTATION_0);
-    uint8_t pixelBytes = OHOS::DrawUtils::GetByteSizeByColorMode(colorMode_);
-    (void)memset_s(buffInfo_->virAddr, width_ * height_ * pixelBytes, 0, width_ * height_ * pixelBytes);
-    sfDev_->Flip(reinterpret_cast<uint8_t *>(buffInfo_->virAddr));
+    LOG(INFO) << "disable clear stop stopClear_ = " << stopClear_;
+    if (stopClear_) {
+        UiRotation::GetInstance().SetDegree(UI_ROTATION_DEGREE::UI_ROTATION_0);
+        uint8_t pixelBytes = OHOS::DrawUtils::GetByteSizeByColorMode(colorMode_);
+        (void)memset_s(buffInfo_->virAddr, width_ * height_ * pixelBytes, 0, width_ * height_ * pixelBytes);
+        sfDev_->Flip(reinterpret_cast<uint8_t *>(buffInfo_->virAddr));
+    }
+}
+
+void GraphicEngine::DisableClearStop(void)
+{
+    stopClear_ = false;
 }
 
 void GraphicEngine::StopEngine(void)
 {
+    SetBrightness(0);
     flushStop_ = true;
     Utils::UsSleep(THREAD_USLEEP_TIME * 10); // 10: wait for stop 100ms
 }
