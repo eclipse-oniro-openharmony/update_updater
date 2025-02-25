@@ -104,7 +104,7 @@ __attribute__((weak)) void InitFlushBatteryStatusExt(void)
 
 __attribute__((weak)) void SetBrightness(int value)
 {
-    LOG(INFO) << "not pc, not set backlight";
+    LOG(INFO) << "not set backlight";
 }
 
 void GraphicEngine::FlushThreadLoop() const
