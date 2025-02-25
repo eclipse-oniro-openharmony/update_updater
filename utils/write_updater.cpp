@@ -63,8 +63,12 @@ static int WriteUpdaterPara(int argc, UpdaterPara &para)
     }
     int res = GetParameter("persist.global.locale", "", para.language, MAX_PARA_SIZE);
     if (res <= 0) {
-        cout << "Get language parameter failed" << endl;
-        return -1;
+        cout << "Get persist.global.locale parameter failed" << endl;
+        res = GetParameter("const.global.locale", "", para.language, MAX_PARA_SIZE);
+        if (res <= 0) {
+            cout << "Get const.global.locale parameter failed" << endl;
+            return -1;
+        }
     }
     if (!WriteUpdaterParaMisc(para)) {
         cout << "WriteUpdaterParaMisc failed!" << endl;
