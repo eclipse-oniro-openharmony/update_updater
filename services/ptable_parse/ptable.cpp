@@ -651,8 +651,8 @@ bool Ptable::ReadPartitionFileToBuffer(uint8_t *ptbImgBuffer, uint32_t &imgBufSi
     }
 
     ptbFile.seekg(0, std::ios::end);
-    uint32_t fileSize = ptbFile.tellg();
-    if (fileSize <= 0 || fileSize > imgBufSize) {
+    uint32_t fileSize = static_cast<uint32_t>(ptbFile.tellg());
+    if (ptbFile.tellg() <= 0 || fileSize > imgBufSize) {
         LOG(ERROR) << "ptbFile is error";
         return false;
     }
