@@ -23,6 +23,7 @@
 #include "log/log.h"
 #include "securec.h"
 #include "utils.h"
+#include "fs_manager.h"
 
 namespace Updater {
 constexpr const char *PTABLE_CONFIG_PATH = "/etc/ptable_data.json";
@@ -456,7 +457,8 @@ void Ptable::PrintPtableInfo() const
     for (size_t i = 0; i < partitionInfo_.size(); i++) {
         LOG(INFO) << "ptable.entry[" << i << "].name=" << partitionInfo_[i].dispName.c_str() <<
             ", startAddr=0x" << std::hex << partitionInfo_[i].startAddr << ", size=0x" <<
-            partitionInfo_[i].partitionSize << ", lun=" << std::dec << partitionInfo_[i].lun;
+            partitionInfo_[i].partitionSize << ", lun=" << std::dec << partitionInfo_[i].lun
+            << ", partType=" << partitionInfo_[i].partType;
     }
     LOG(INFO) << "ptnInfo : ===========================================";
 }
@@ -473,9 +475,25 @@ void Ptable::PrintPtableInfo(const std::vector<PtnInfo> &ptnInfo) const
     for (size_t i = 0; i < ptnInfo.size(); i++) {
         LOG(INFO) << "ptable.entry[" << i << "].name=" << ptnInfo[i].dispName.c_str() << ", startAddr=0x" <<
         std::hex << ptnInfo[i].startAddr << ", size=0x" << ptnInfo[i].partitionSize << ", lun=" <<
-        std::dec << ptnInfo[i].lun;
+        std::dec << ptnInfo[i].lun << ", partType=" << partitionInfo_[i].partType;
     }
     LOG(INFO) << "ptnInfo : ===========================================";
+}
+
+void Ptable::SetPartitionType(const std::string &partName, PtnInfo &ptnInfo)
+{
+    if (PARTITION_AB_SUFFIX_SIZE > partName.size()) {
+        ptnInfo.partType = PARTITION_NORMAL_TYPE;
+        return;
+    }
+    std::string partSuffix = partName.substr(partName.size() - PARTITION_AB_SUFFIX_SIZE,
+        PARTITION_AB_SUFFIX_SIZE);
+    if (strcasecmp(partSuffix.c_str(), PARTITION_A_SUFFIX) == 0 ||
+        strcasecmp(partSuffix.c_str(), PARTITION_B_SUFFIX) == 0) {
+        ptnInfo.partType = PARTITION_AB_TYPE;
+        return;
+    }
+    ptnInfo.partType = PARTITION_NORMAL_TYPE;
 }
 
 void Ptable::ParsePartitionName(const uint8_t *data, const uint32_t dataLen,
@@ -527,13 +545,30 @@ bool Ptable::GetPartionInfoByName(const std::string &partitionName, PtnInfo &ptn
         LOG(ERROR) << "get partition failed! partitionInfo_ is empty";
         return false;
     }
-    for (int32_t i = 0; i < static_cast<int32_t>(partitionInfo_.size()); i++) {
-        if (partitionInfo_[i].dispName.size() == partitionName.size() &&
-            strcasecmp(partitionInfo_[i].dispName.c_str(), partitionName.c_str()) == 0) {
-            index = i;
-            ptnInfo = partitionInfo_[i];
-            return true;
+    auto findPart = [&ptnInfo, &index, this] (const std::string &partitionName) {
+        for (int32_t i = 0; i < static_cast<int32_t>(partitionInfo_.size()); i++) {
+            if (partitionInfo_[i].dispName.size() == partitionName.size() &&
+                strcasecmp(partitionInfo_[i].dispName.c_str(), partitionName.c_str()) == 0) {
+                index = i;
+                ptnInfo = partitionInfo_[i];
+                return true;
+            }
         }
+        return false;
+    };
+    if (findPart(partitionName)) {
+        LOG(INFO) << "find partition name " << partitionName;
+        return true;
+    }
+    std::string partitionNameAB = partitionName;
+    if (Utils::IsUpdaterMode()) {
+        partitionNameAB += (GetCurrentSlot() == 1 ? PARTITION_A_SUFFIX : PARTITION_B_SUFFIX);
+    } else {
+        partitionNameAB += (GetCurrentSlot() == 1 ? PARTITION_B_SUFFIX : PARTITION_A_SUFFIX);
+    }
+    if (findPart(partitionNameAB) {
+        LOG(INFO) << "find partitionAB name " << partitionNameAB;
+        return true;
     }
     LOG(ERROR) << "get partition info failed! Not found partition:" << partitionName;
     return false;

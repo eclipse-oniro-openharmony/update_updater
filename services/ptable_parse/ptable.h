@@ -34,6 +34,13 @@ public:
 
     static constexpr uint32_t GPT_PARTITION_TYPE_GUID_LEN = 16;
     static constexpr const char *PREFIX_SYS_CLASS_BLOCK = "/sys/class/block/sd";
+    static constexpr const char *PARTITION_NORMAL_TYPE = "normal";
+    static constexpr const char *PARTITION_AB_TYPE = "ab";
+    static constexpr const char *PARTITION_A_SUFFIX = "_a";
+    static constexpr const char *PARTITION_B_SUFFIX = "_b";
+    static_assert(std::char_traits<char>::length(PARTITION_A_SUFFIX) ==
+        std::char_traits<char>::length(PARTITION_B_SUFFIX), "a suffix should equal with b");
+    static constexpr size_t PARTITION_AB_SUFFIX_SIZE = std::char_traits<char>::length(PARTITION_A_SUFFIX);
 
     struct PtnInfo {
         uint64_t startAddr {};
@@ -43,6 +50,7 @@ public:
         int gptEntryBufOffset {};
         bool isTailPart {false};
         std::string dispName {};
+        std::string partType {PARTITION_NORMAL_TYPE};
         std::string writeMode {"WRITE_RAW"};
         std::string writePath {};
     };
@@ -222,6 +230,7 @@ public:
     bool ChangeGpt(uint8_t *gptBuf, uint64_t gptSize, GptParseInfo gptInfo, PtnInfo &modifyInfo);
     bool AdjustGpt(uint8_t *ptnInfoBuf, uint64_t bufSize, const std::string &ptnName, uint64_t preLastLBA,
     uint64_t lastPtnLastLBA);
+    void SetPartitionType(const std::string &partName, PtnInfo &ptnInfo);
 
 private:
     static constexpr uint64_t MBR_MAGIC_NUM_POS = 0x1FE;
