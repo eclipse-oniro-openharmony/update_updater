@@ -566,7 +566,7 @@ bool Ptable::GetPartionInfoByName(const std::string &partitionName, PtnInfo &ptn
     } else {
         partitionNameAB += (GetCurrentSlot() == 1 ? PARTITION_B_SUFFIX : PARTITION_A_SUFFIX);
     }
-    if (findPart(partitionNameAB) {
+    if (findPart(partitionNameAB)) {
         LOG(INFO) << "find partitionAB name " << partitionNameAB;
         return true;
     }
