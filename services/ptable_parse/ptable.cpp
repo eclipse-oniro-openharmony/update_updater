@@ -475,7 +475,7 @@ void Ptable::PrintPtableInfo(const std::vector<PtnInfo> &ptnInfo) const
     for (size_t i = 0; i < ptnInfo.size(); i++) {
         LOG(INFO) << "ptable.entry[" << i << "].name=" << ptnInfo[i].dispName.c_str() << ", startAddr=0x" <<
         std::hex << ptnInfo[i].startAddr << ", size=0x" << ptnInfo[i].partitionSize << ", lun=" <<
-        std::dec << ptnInfo[i].lun << ", partType=" << partitionInfo_[i].partType;
+        std::dec << ptnInfo[i].lun << ", partType=" << ptnInfo[i].partType;
     }
     LOG(INFO) << "ptnInfo : ===========================================";
 }
