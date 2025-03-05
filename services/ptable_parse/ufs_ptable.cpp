@@ -192,6 +192,7 @@ void UfsPtable::UfsReadGptEntry(const uint8_t *gptImage, const uint32_t lun,
             const uint8_t *nameOffset = data + (j * PARTITION_ENTRY_SIZE + GPT_PARTITION_NAME_OFFSET);
             // 2 bytes for 1 charactor of partition name
             ParsePartitionName(nameOffset, MAX_GPT_NAME_SIZE, newPtnInfo.dispName, MAX_GPT_NAME_SIZE / 2);
+            SetPartitionType(newPtnInfo.dispName, newPtnInfo);
             (void)memcpy_s(newPtnInfo.partitionTypeGuid, sizeof(newPtnInfo.partitionTypeGuid),
                 typeGuid, sizeof(typeGuid));
             newPtnInfo.isTailPart = tailPartFlag;
