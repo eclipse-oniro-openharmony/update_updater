@@ -398,7 +398,7 @@ static int32_t ExecuteUpdateBlock(Uscript::UScriptEnv &env, const UpdateBlockInf
     env.GetPkgManager()->ClosePkgStream(outStream);
 
     if (ExtractFileByNameFunc(env, infos.patchDataName, outStream,
-        transferParams->patchDataBuffer, transferParams->patchDataSize) != USCRIPT_SUCCESS) {
+        transferParams->dataBuffer, transferParams->dataBufferSize) != USCRIPT_SUCCESS) {
         return USCRIPT_ERROR_EXECUTE;
     }
 

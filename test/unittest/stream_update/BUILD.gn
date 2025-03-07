@@ -1,0 +1,71 @@
+# Copyright (c) 2023 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//base/update/updater/updater_default_cfg.gni")
+import("//build/test.gni")
+
+MODULE_OUTPUT_PATH = "updater/updater_test"
+updater_path = rebase_path("${updater_absolutely_path}", ".")
+
+ohos_unittest("bin_chunk_update_test") {
+  testonly = true
+  resource_config_file = "${updater_path}/test/unittest/test_data/ohos_test.xml"
+  module_out_path = MODULE_OUTPUT_PATH
+  sources = [
+    "${updater_path}/services/stream_update/bin_chunk_update.cpp",
+    "${updater_path}/utils/utils.cpp",
+    "bin_chunk_update_unittest.cpp",
+  ]
+
+  include_dirs = [
+    "${updater_path}/services/stream_update",
+    "${updater_path}/services",
+    "${updater_path}/services/common",
+    "${updater_path}/services/include",
+    "${updater_path}/services/include/applypatch",
+    "${updater_path}/services/include/log",
+    "${updater_path}/services/include/package",
+    "${updater_path}/services/include/script",
+    "${updater_path}/services/package",
+    "${updater_path}/services/package/pkg_algorithm",
+    "${updater_path}/services/package/pkg_manager",
+    "${updater_path}/services/package/pkg_package",
+    "${updater_path}/services/script",
+  ]
+
+  deps = [
+    "${updater_path}/interfaces/kits/packages:libpackageExt",
+    "${updater_path}/services:libupdater",
+    "${updater_path}/services/applypatch:libapplypatch",
+    "${updater_path}/services/fs_manager:libfsmanager",
+    "${updater_path}/services/log:libupdaterlog",
+    "${updater_path}/services/package:libupdaterpackage",
+    "${updater_path}/services/stream_update:libbinchunkupdate",
+    "${updater_path}/utils:libutils",
+  ]
+  external_deps = [
+    "bounds_checking_function:libsec_static",
+    "bzip2:libbz2",
+    "cJSON:cjson",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+    "init:libbegetutil_static",
+    "init:libfsmanager_static_real",
+    "openssl:libcrypto_shared",
+  ]
+  defines = [ "UPDATER_UT" ]
+  configs = [ "${updater_path}/test/unittest:utest_config" ]
+  install_enable = true
+  part_name = "updater"
+}

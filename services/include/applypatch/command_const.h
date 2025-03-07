@@ -25,6 +25,7 @@ enum CommandType {
     NEW,
     STASH,
     ZERO,
+    COPY,
     LAST,
 };
 

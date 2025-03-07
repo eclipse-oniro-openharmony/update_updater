@@ -36,11 +36,17 @@ public:
     virtual bool Init(const std::string &cmd_line);
     CommandType GetCommandType() const;
     std::string GetArgumentByPos(size_t pos) const;
-    void SetFileDescriptor(int fd);
-    int GetFileDescriptor() const;
+    void SetSrcFileDescriptor(int fd);
+    int GetSrcFileDescriptor() const;
+    void SetTargetFileDescriptor(int fd);
+    int GetTargetFileDescriptor() const;
+    
     TransferParams* GetTransferParams() const;
     std::string GetCommandLine() const;
     std::string GetCommandHead() const;
+    void SetIsStreamCmd(bool isStreamCmd);
+    bool IsStreamCmd() const;
+    
 private:
     CommandType ParseCommandType(const std::string &first_cmd);
 
@@ -48,8 +54,10 @@ private:
     std::string cmdhead_ {};
     std::string cmdLine_ {};
     std::vector<std::string> tokens_ {};
-    std::unique_ptr<int> fd_ {};
+    std::unique_ptr<int> srcFd_ {};
+    std::unique_ptr<int> targetFd_ {};
     TransferParams* transferParams_;
+    bool isStreamCmd_ {false};
 };
 } // namespace Updater
 #endif

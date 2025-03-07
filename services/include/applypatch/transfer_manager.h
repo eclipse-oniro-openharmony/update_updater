@@ -52,8 +52,8 @@ struct TransferParams {
     std::string freeStash;
     std::string retryFile;
     std::string devPath;
-    uint8_t *patchDataBuffer;
-    size_t patchDataSize;
+    uint8_t *dataBuffer;
+    size_t dataBufferSize;
     bool canWrite;
 };
 

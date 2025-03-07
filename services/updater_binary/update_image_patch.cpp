@@ -35,6 +35,7 @@
 #include "updater/updater_const.h"
 #include "updater/hwfault_retry.h"
 #include "utils.h"
+#include "slot_info/slot_info.h"
 
 using namespace Uscript;
 using namespace Hpackage;
@@ -70,6 +71,15 @@ int32_t USInstrImagePatch::GetParam(Uscript::UScriptContext &context, ImagePatch
         return USCRIPT_INVALID_PARAM;
     }
     para.devPath = GetBlockDeviceByMountPoint(para.partName);
+#ifndef UPDATER_UT
+    if (para.partName != "/userdata") {
+        std::string suffix = "";
+        GetPartitionSuffix(suffix);
+        para.devPath += suffix;
+    }
+#else
+    para.devPath = "/data/updater" + para.partName;
+#endif
     if (para.devPath.empty()) {
         LOG(ERROR) << "get " << para.partName << " dev path error";
         return USCRIPT_ERROR_EXECUTE;
@@ -252,6 +262,15 @@ int32_t USInstrImageShaCheck::GetParam(Uscript::UScriptContext &context, CheckPa
     }
 
     para.devPath = GetBlockDeviceByMountPoint(para.partName);
+#ifndef UPDATER_UT
+    if (para.partName != "/userdata") {
+        std::string suffix = "";
+        GetPartitionSuffix(suffix);
+        para.devPath += suffix;
+    }
+#else
+    para.devPath = "/data/updater" + para.partName;
+#endif
     if (para.devPath.empty()) {
         LOG(ERROR) << "cannot get block device of partition" << para.partName;
         return USCRIPT_ERROR_EXECUTE;

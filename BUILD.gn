@@ -49,6 +49,7 @@ group("unittest") {
       "test/unittest/flow_update/update_bin:bin_flow_update_test",
       "test/unittest/package:package_unittest",
       "test/unittest/script:script_unittest",
+      "test/unittest/stream_update:bin_chunk_update_test",
       "test/unittest/updater_binary:binary_unittest",
       "test/unittest/utils:utils_test",
     ]

@@ -28,7 +28,8 @@ extern "C" __attribute__((constructor)) void RegistBlockUpdateCommandFunction(vo
         { "erase", []() { return std::make_unique<ZeroAndEraseCommandFn>(); } },
         { "free", []() { return std::make_unique<FreeCommandFn>(); } },
         { "move", []() { return std::make_unique<DiffAndMoveCommandFn>(); } },
-        { "stash", []() { return std::make_unique<StashCommandFn>(); } }
+        { "stash", []() { return std::make_unique<StashCommandFn>(); } },
+        { "copy", []() { return std::make_unique<DiffAndMoveCommandFn>(); } }
     };
     for (auto &iter : COMMANDFUNC) {
         CommandFunctionFactory::GetInstance().RegistCommandFunction(iter.first, iter.second());

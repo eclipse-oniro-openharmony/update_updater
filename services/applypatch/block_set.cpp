@@ -258,9 +258,11 @@ int32_t BlockSet::LoadSourceBuffer(const Command &cmd, size_t &pos, std::vector<
     if (targetCmd != "-") {
         BlockSet srcBlk;
         srcBlk.ParserAndInsert(targetCmd);
-        isOverlap = IsTwoBlocksOverlap(srcBlk, *this);
+        if (!cmd.IsStreamCmd()) {
+            isOverlap = IsTwoBlocksOverlap(srcBlk, *this);
+        }
         // read source data
-        if (srcBlk.ReadDataFromBlock(cmd.GetFileDescriptor(), sourceBuffer) == 0) {
+        if (srcBlk.ReadDataFromBlock(cmd.GetSrcFileDescriptor(), sourceBuffer) == 0) {
             LOG(ERROR) << "ReadDataFromBlock failed";
             return -1;
         }
@@ -308,8 +310,13 @@ int32_t BlockSet::LoadTargetBuffer(const Command &cmd, std::vector<uint8_t> &buf
     bool isOverlap = false;
     auto ret = LoadSourceBuffer(cmd, pos, buffer, isOverlap, blockSize);
     if (ret != 1) {
+        LOG(ERROR) << "LoadSourceBuffer failed";
         return ret;
     }
+    if (cmd.IsStreamCmd()) {
+        return 0;
+    }
+
     std::string storeBase = cmd.GetTransferParams()->storeBase;
     std::string storePath = storeBase + "/" + srcHash;
     struct stat storeStat {};
@@ -389,7 +396,7 @@ int32_t BlockSet::WriteDiffToBlock(const Command &cmd, std::vector<uint8_t> &sou
     if (isImgDiff) {
         std::vector<uint8_t> empty;
         UpdatePatch::PatchParam patchParam = {sourceBuffer.data(), srcBuffSize, patchBuffer, patchLength};
-        std::unique_ptr<BlockWriter> writer = std::make_unique<BlockWriter>(cmd.GetFileDescriptor(), *this);
+        std::unique_ptr<BlockWriter> writer = std::make_unique<BlockWriter>(cmd.GetTargetFileDescriptor(), *this);
         if (writer.get() == nullptr) {
             LOG(ERROR) << "Cannot create block writer, pkgdiff patch abort!";
             return -1;
@@ -406,7 +413,7 @@ int32_t BlockSet::WriteDiffToBlock(const Command &cmd, std::vector<uint8_t> &sou
     } else {
         LOG(DEBUG) << "Run bsdiff patch.";
         UpdatePatch::PatchBuffer patchInfo = {patchBuffer, 0, patchLength};
-        std::unique_ptr<BlockWriter> writer = std::make_unique<BlockWriter>(cmd.GetFileDescriptor(), *this);
+        std::unique_ptr<BlockWriter> writer = std::make_unique<BlockWriter>(cmd.GetTargetFileDescriptor(), *this);
         if (writer.get() == nullptr) {
             LOG(ERROR) << "Cannot create block writer, pkgdiff patch abort!";
             return -1;
@@ -421,7 +428,7 @@ int32_t BlockSet::WriteDiffToBlock(const Command &cmd, std::vector<uint8_t> &sou
             return -1;
         }
     }
-    if (fsync(cmd.GetFileDescriptor()) == -1) {
+    if (fsync(cmd.GetTargetFileDescriptor()) == -1) {
         LOG(ERROR) << "Failed to sync restored data";
         return -1;
     }
