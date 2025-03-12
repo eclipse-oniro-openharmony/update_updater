@@ -619,11 +619,15 @@ UpdaterStatus UpdaterFromSdcard(UpdaterParams &upParams)
     UPDATER_INIT_RECORD;
     upParams.callbackProgress = [] (float value) { UPDATER_UI_INSTANCE.ShowProgress(value); };
     SetMessageToMisc(upParams.miscCmd, 0, "sdcard_update");
-    if (CheckSdcardPkgs(upParams) != UPDATE_SUCCESS) {
+    UpdaterStatus status = CheckSdcardPkgs(upParams);
+    if (status != UPDATE_SUCCESS) {
         LOG(ERROR) << "can not find sdcard packages";
+        if (NotifyActionResult(upParams, status, {SET_INSTALL_STATUS}) != UPDATE_SUCCESS) {
+            LOG(ERROR) << "notify action fail";
+        }
         return UPDATE_ERROR;
     }
-    UpdaterStatus status = PreSdcardUpdatePackages(upParams);
+    status = PreSdcardUpdatePackages(upParams);
     if (status == UPDATE_SUCCESS) {
         upParams.initialProgress += VERIFY_PERCENT;
         upParams.currentPercentage -= VERIFY_PERCENT;
