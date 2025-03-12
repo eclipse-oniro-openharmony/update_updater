@@ -621,6 +621,9 @@ UpdaterStatus UpdaterFromSdcard(UpdaterParams &upParams)
     SetMessageToMisc(upParams.miscCmd, 0, "sdcard_update");
     if (CheckSdcardPkgs(upParams) != UPDATE_SUCCESS) {
         LOG(ERROR) << "can not find sdcard packages";
+        if (NotifyActionResult(upParams, status, {SET_INSTALL_STATUS}) != UPDATE_SUCCESS) {
+            LOG(ERROR) << "notify action fail";
+        }
         return UPDATE_ERROR;
     }
     UpdaterStatus status = PreSdcardUpdatePackages(upParams);
