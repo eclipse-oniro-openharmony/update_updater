@@ -16,7 +16,7 @@ import("//build/test.gni")
 
 updater_path = rebase_path("${updater_absolutely_path}", ".")
 
-MODULE_OUTPUT_PATH = "updater/updater_test"
+MODULE_OUTPUT_PATH = "updater/updater"
 
 ohos_unittest("factory_reset_unittest") {
   defines = [ "UPDATER_UT" ]
