@@ -14,7 +14,7 @@
 import("//base/update/updater/updater_default_cfg.gni")
 import("//build/test.gni")
 
-MODULE_OUTPUT_PATH = "updater/updater_test"
+MODULE_OUTPUT_PATH = "updater/updater"
 
 updater_path = rebase_path("${updater_absolutely_path}", ".")
 ohos_unittest("applypatch_unittest") {
