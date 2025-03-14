@@ -14,7 +14,7 @@
 import("//base/update/updater/updater_default_cfg.gni")
 import("//build/test.gni")
 
-module_output_path = "updater/updater_test"
+module_output_path = "updater/updater"
 updater_path = rebase_path("${updater_absolutely_path}", ".")
 
 config("utest_config") {
