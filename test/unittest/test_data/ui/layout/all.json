@@ -15,7 +15,11 @@
             "fontSize" : 10,
             "bgColor" : "#ffffffff",
             "fontColor" : "#ffffffff",
-            "style" : "normal"
+            "style" : "normal",
+            "focusedBgColor" : "#ffffffff",
+            "focusedFontColor" : "#ffffffff",
+            "focusable" : false,
+            "lineBreakMode" : "ellipsis"
         },
         {
             "id" : "image_view",
