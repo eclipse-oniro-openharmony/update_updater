@@ -91,14 +91,14 @@ bool LabelOnEventListener::OnPress(OHOS::UIView &view, [[maybe_unused]] const OH
     KeyListener::SetButtonPressed(true);
     return true;
 }
- 
+
 bool LabelOnEventListener::OnRelease(OHOS::UIView &view, [[maybe_unused]] const OHOS::ReleaseEvent &event)
 {
     KeyListener::SetButtonPressed(false);
     CallBackDecorator{cb_}(view, cb_.isAsync);
     return isConsumed_;
 }
- 
+
 bool LabelOnEventListener::OnCancel(OHOS::UIView &view, [[maybe_unused]] const OHOS::CancelEvent &event)
 {
     KeyListener::SetButtonPressed(false);
@@ -180,7 +180,7 @@ bool KeyListener::ProcessPowerKey(OHOS::UIView &view, const OHOS::KeyEvent &even
     }
     // triggering button press event by key supports labelButton and label
     if (!((pView->GetViewType() == OHOS::UI_LABEL_BUTTON) || (pView->GetViewType() == OHOS::UI_LABEL))) {
-        LOG(ERROR) << "focused view is not label button or label;
+        LOG(ERROR) << "focused view is not label button or label";
         return false;
     }
     int16_t centerX = pView->GetX() + static_cast<int16_t>(static_cast<uint16_t>(pView->GetWidth()) >> 1u);
