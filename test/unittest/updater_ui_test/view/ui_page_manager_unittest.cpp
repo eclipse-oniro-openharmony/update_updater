@@ -74,7 +74,8 @@ const std::vector<UxPageInfo> UpdaterUiPageManagerUnitTest::pageInfos_ = {
          UxViewCommonInfo {
              300, 400, 600, 200, "label_id_0", "UILabel", true},
          UxLabelInfo {
-             50, "this is page1", "center", "#ff0000ff", "#000000ff", "normal"}},
+             50, "this is page1", "center", "#ff0000ff", "#000000ff", "normal",
+             "#ff0000ff", "#000000ff", false, "ellipsis"}},
       UxViewInfo {
           UxViewCommonInfo {
               300, 700, 400, 400, "image_view", "UIImageView", false},
@@ -90,7 +91,8 @@ const std::vector<UxPageInfo> UpdaterUiPageManagerUnitTest::pageInfos_ = {
          UxViewCommonInfo {
              300, 400, 600, 200, "label_id_0", "UILabel", true},
          UxLabelInfo {
-             50, "this is page2", "center", "#00ff00ff", "#000000ff", "normal"}},
+             50, "this is page2", "center", "#00ff00ff", "#000000ff", "normal",
+             "#00ff00ff", "#000000ff", false, "ellipsis"}},
       UxViewInfo {
           UxViewCommonInfo {
               300, 700, 400, 400, "image_view", "UIImageView", false},
@@ -105,7 +107,8 @@ const std::vector<UxPageInfo> UpdaterUiPageManagerUnitTest::pageInfos_ = {
          UxViewCommonInfo {
              300, 400, 600, 200, "label_id_0", "UILabel", true},
          UxLabelInfo {
-             50, "this is page2", "center", "#0000ffff", "#000000ff", "normal"}},
+             50, "this is page2", "center", "#0000ffff", "#000000ff", "normal",
+             "#0000ffff", "#000000ff", false, "ellipsis"}},
       UxViewInfo {
           UxViewCommonInfo {
               300, 700, 400, 400, "image_view", "UIImageView", false},
@@ -142,7 +145,8 @@ HWTEST_F(UpdaterUiPageManagerUnitTest, test_page_manager_init_failed, TestSize.L
                 UxViewCommonInfo {
                     300, 400, 600, 200, "label_id_0", "UILabel", true},
                 UxLabelInfo {
-                    50, "this is page1", "center", "#ff0ff", "#0", "normal"}}}, {}}
+                    50, "this is page1", "center", "#ff0ff", "#0", "normal",
+                    "#ff0ff", "#0", false, "ellipsis"}}}, {}}
         };
         EXPECT_FALSE(GetInstance().Init(pageInfo, "page1"));
     }
@@ -156,7 +160,8 @@ HWTEST_F(UpdaterUiPageManagerUnitTest, test_page_manager_init_failed, TestSize.L
                  UxViewCommonInfo {
                      300, 400, 600, 200, "label_id_0", "UILabel", true},
                  UxLabelInfo {
-                     50, "this is page1", "center", "#000000ff", "#000000ff", "normal"}}},
+                     50, "this is page1", "center", "#000000ff", "#000000ff", "normal",
+                     "#000000ff", "#000000ff", false, "ellipsis"}}},
              {{UxSubPageInfo {"", "#000000ff", {"label_id_0"}}}}}};
         EXPECT_FALSE(GetInstance().Init(pageInfo, "page1"));
 
