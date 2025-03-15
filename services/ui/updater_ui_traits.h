@@ -76,7 +76,11 @@ DEFINE_TRAIT(UxLabelInfo, TextLabelAdapter::COMPONENT_TYPE,
     (std::string, align),
     (std::string, fontColor),
     (std::string, bgColor),
-    (std::string, style)
+    (std::string, style),
+    (std::string, focusedFontColor),
+    (std::string, focusedBgColor),
+    (bool, focusable),
+    (std::string, lineBreakMode)
 );
 
 DEFINE_TRAIT(UxImageInfo, ImgViewAdapter::COMPONENT_TYPE,
