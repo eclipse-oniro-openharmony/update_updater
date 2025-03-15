@@ -28,9 +28,9 @@ public:
         : focusedFontcolor_(focusedFontColor), unfocusedFontcolor_(unfocusedFontcolor), focusedBgcolor_(focusedBgColor),
           unfocusedBgcolor_(unfocusedBgcolor)
     {}
- 
+
     ~TextLabelOnFocusListener() {}
- 
+
     bool OnFocus(OHOS::UIView &view) override
     {
         TextLabelAdapter *label = nullptr;
@@ -44,7 +44,7 @@ public:
         label->Invalidate();
         return true;
     }
- 
+
     bool OnBlur(OHOS::UIView &view) override
     {
         TextLabelAdapter *label = nullptr;
@@ -64,9 +64,9 @@ private:
     OHOS::ColorType focusedBgcolor_;
     OHOS::ColorType unfocusedBgcolor_;
 };
- 
+
 TextLabelAdapter::TextLabelAdapter() = default;
- 
+
 TextLabelAdapter::~TextLabelAdapter() = default;
 
 TextLabelAdapter::TextLabelAdapter(const UxViewInfo &info)
@@ -91,7 +91,7 @@ TextLabelAdapter::TextLabelAdapter(const UxViewInfo &info)
         this->SetFocusable(false);
         this->SetTouchable(false);
     }
- 
+
     if (spec.lineBreakMode == "marquee") {
         this->SetLineBreakMode(OHOS::UILabel::LINE_BREAK_MARQUEE);
         this->SetRollSpeed(80); // 80: label roll speed
@@ -128,7 +128,7 @@ bool TextLabelAdapter::OnPressEvent(const OHOS::PressEvent &event)
     OHOS::FocusManager::GetInstance()->RequestFocus(this);
     return UIView::OnPressEvent(event);
 }
- 
+
 void TextLabelAdapter::InitFocus(const OHOS::ColorType &fontColor, const OHOS::ColorType &bgColor,
     const OHOS::ColorType &focusedFontColor, const OHOS::ColorType &focusedBgColor)
 {
