@@ -23,7 +23,11 @@
             "bgColor": "#f1f3f5ff",
             "fontColor": "#000000e6",
             "align" : "center",
-            "style" : "normal"
+            "style": "normal",
+            "focusedBgColor": "#f1f3f5ff",
+            "focusedFontColor": "#000000e6",
+            "focusable": false,
+            "lineBreakMode" : "ellipsis"
         },
         "UIImageView": {
             "imgCnt" : 1,

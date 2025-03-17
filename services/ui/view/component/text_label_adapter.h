@@ -27,19 +27,29 @@ struct UxLabelInfo {
     std::string fontColor;
     std::string bgColor;
     std::string style;
+    std::string focusedFontColor;
+    std::string focusedBgColor;
+    bool focusable;
+    std::string lineBreakMode;
 };
 struct UxViewInfo;
 class TextLabelAdapter : public OHOS::UILabel, public ComponentCommon<TextLabelAdapter> {
     DISALLOW_COPY_MOVE(TextLabelAdapter);
+    struct TextLabelOnFocusListener;
     static constexpr uint32_t MAX_FONT_SIZE = 200;
 public:
     using SpecificInfoType = UxLabelInfo;
     static constexpr auto COMPONENT_TYPE = "UILabel";
-    TextLabelAdapter() = default;
+    TextLabelAdapter();
     explicit TextLabelAdapter(const UxViewInfo &info);
-    virtual ~TextLabelAdapter() = default;
+    virtual ~TextLabelAdapter();
+    bool OnPressEvent(const OHOS::PressEvent& event) override;
     void SetText(const std::string &txt);
     static bool IsValid(const UxLabelInfo &info);
+private:
+    void InitFocus(const OHOS::ColorType &fontColor, const OHOS::ColorType &bgColor,
+        const OHOS::ColorType &focusedFontColor, const OHOS::ColorType &focusedBgColor);
+    std::unique_ptr<TextLabelOnFocusListener> focusListener_ {};
 };
 } // namespace Updater
 #endif

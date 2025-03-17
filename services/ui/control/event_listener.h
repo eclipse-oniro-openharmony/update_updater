@@ -45,12 +45,15 @@ private:
     static std::mutex mtx_;
 };
 
-class LabelOnTouchListener final : public OHOS::UIView::OnTouchListener {
+class LabelOnEventListener final : public OHOS::UIView::OnClickListener, public OHOS::UIView::OnTouchListener {
 public:
-    LabelOnTouchListener(Callback cb, bool isConsumed)
+    LabelOnEventListener(Callback cb, bool isConsumed)
         : cb_(cb), isConsumed_(isConsumed) {}
-    ~LabelOnTouchListener() = default;
+    ~LabelOnEventListener() = default;
+    bool OnClick(OHOS::UIView &view, const OHOS::ClickEvent &event) override;
+    bool OnPress(OHOS::UIView &view, const OHOS::PressEvent &event) override;
     bool OnRelease(OHOS::UIView &view, const OHOS::ReleaseEvent &event) override;
+    bool OnCancel(OHOS::UIView &view, const OHOS::CancelEvent &event) override;
 
 private:
     Callback cb_;

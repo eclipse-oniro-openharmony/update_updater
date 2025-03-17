@@ -87,7 +87,11 @@
             "bgColor": "#000000ff",
             "fontColor": "#ffffffe6",
             "align" : "center",
-            "style" : "normal"
+            "style" : "normal",
+            "focusedBgColor": "#000000ff",
+            "focusedFontColor": "#ffffffe6",
+            "focusable": false,
+            "lineBreakMode" : "ellipsis"
         },
         "UIImageView": {
             "imgCnt" : 1,

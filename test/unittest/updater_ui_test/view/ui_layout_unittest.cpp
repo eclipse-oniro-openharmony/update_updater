@@ -108,7 +108,11 @@ HWTEST_F(UpdaterUiLayoutParserUnitTest, test_label_parser, TestSize.Level0)
         "center",
         "#ffffffff",
         "#ffffffff",
-        "normal"
+        "normal",
+        "#ffffffff",
+        "#ffffffff",
+        false,
+        "ellipsis"
     } };
     EXPECT_EQ(pageInfo.viewInfos[0], expectedLabel);
 }
@@ -151,7 +155,11 @@ HWTEST_F(UpdaterUiLayoutParserUnitTest, test_all, TestSize.Level1)
         "center",
         "#ffffffff",
         "#ffffffff",
-        "normal"
+        "normal",
+        "#ffffffff",
+        "#ffffffff",
+        false,
+        "ellipsis"
     } };
     EXPECT_EQ(pageInfo.viewInfos[0], expectedLabel);
 
@@ -180,7 +188,11 @@ HWTEST_F(UpdaterUiLayoutParserUnitTest, test_all_default, TestSize.Level0)
         "center",
         "#ffffffff",
         "#000000ff",
-        "normal"
+        "normal",
+        "#ffffffff",
+        "#000000ff",
+        false,
+        "ellipsis"
     } };
     expected.commonInfo.visible = false;
     EXPECT_EQ(expected.commonInfo, pageInfo.viewInfos[0].commonInfo);

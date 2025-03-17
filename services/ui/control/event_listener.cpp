@@ -80,11 +80,29 @@ void CallBackDecorator::CallbackWithGuard(Callback cb, OHOS::UIView &view)
     }
 }
 
-bool LabelOnTouchListener::OnRelease(OHOS::UIView &view, [[maybe_unused]] const OHOS::ReleaseEvent &event)
+bool LabelOnEventListener::OnClick(OHOS::UIView &view, [[maybe_unused]] const OHOS::ClickEvent &event)
 {
-    // wrap cb_ with CallBackDecorator, then call operator()()
     CallBackDecorator{cb_}(view, cb_.isAsync);
     return isConsumed_;
+}
+
+bool LabelOnEventListener::OnPress(OHOS::UIView &view, [[maybe_unused]] const OHOS::PressEvent &event)
+{
+    KeyListener::SetButtonPressed(true);
+    return true;
+}
+
+bool LabelOnEventListener::OnRelease(OHOS::UIView &view, [[maybe_unused]] const OHOS::ReleaseEvent &event)
+{
+    KeyListener::SetButtonPressed(false);
+    CallBackDecorator{cb_}(view, cb_.isAsync);
+    return isConsumed_;
+}
+
+bool LabelOnEventListener::OnCancel(OHOS::UIView &view, [[maybe_unused]] const OHOS::CancelEvent &event)
+{
+    KeyListener::SetButtonPressed(false);
+    return true;
 }
 
 bool BtnOnEventListener::OnClick(OHOS::UIView &view, [[maybe_unused]] const OHOS::ClickEvent &event)
@@ -160,9 +178,9 @@ bool KeyListener::ProcessPowerKey(OHOS::UIView &view, const OHOS::KeyEvent &even
         LOG(ERROR) << "focused view is nullptr";
         return false;
     }
-    // triggering button press event by key only supports label button
-    if (pView->GetViewType() != OHOS::UI_LABEL_BUTTON) {
-        LOG(ERROR) << "focused view is not label button";
+    // triggering button press event by key supports labelButton and label
+    if (!((pView->GetViewType() == OHOS::UI_LABEL_BUTTON) || (pView->GetViewType() == OHOS::UI_LABEL))) {
+        LOG(ERROR) << "focused view is not label button or label";
         return false;
     }
     int16_t centerX = pView->GetX() + static_cast<int16_t>(static_cast<uint16_t>(pView->GetWidth()) >> 1u);
