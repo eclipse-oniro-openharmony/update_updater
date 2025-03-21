@@ -109,6 +109,7 @@ void SaveLogs()
     std::string stageLogPath = std::string(UPDATER_STAGE_LOG);
 
     // save logs
+    STAGE(UPDATE_STAGE_SUCCESS) << "PostUpdaterLog";
     bool ret = CopyUpdaterLogs(TMP_LOG, updaterLogPath);
     if (!ret) {
         LOG(ERROR) << "Copy updater log failed!";
@@ -587,6 +588,8 @@ bool CopyUpdaterLogs(const std::string &sLog, const std::string &dLog)
     }
 
     while (Utils::GetFileSize(sLog) + GetDirSizeForFile(dLog) > MAX_LOG_DIR_SIZE) {
+        LOG(ERROR) << "Size bigger for" << sLog;
+        STAGE(UPDATE_STAGE_FAIL) << "sLog and dLog file error, unable to copy";
         if (DeleteOldFile(destPath) != true) {
             break;
         }

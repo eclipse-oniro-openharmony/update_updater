@@ -62,6 +62,7 @@ struct UpdaterParams {
     std::string shrinkInfo = "";
     std::string virtualShrinkInfo = "";
     std::string miscCmd {"boot_updater"};
+    std::vector<std::string> updateBin {};
     std::vector<std::string> updatePackage {};
     std::vector<std::chrono::duration<double>> installTime {};
     std::function<void(float)> callbackProgress {};
@@ -90,9 +91,15 @@ void ProgressSmoothHandler(int beginProgress, int endProgress);
 UpdaterStatus DoInstallUpdaterPackage(Hpackage::PkgManager::PkgManagerPtr pkgManager,
     UpdaterParams &upParams, PackageUpdateMode updateMode);
 
+UpdaterStatus DoInstallUpdaterBinfile(Hpackage::PkgManager::PkgManagerPtr pkgManager,
+    UpdaterParams &upParams, PackageUpdateMode updateMode);
+
 UpdaterStatus StartUpdaterProc(Hpackage::PkgManager::PkgManagerPtr pkgManager,
     UpdaterParams &upParams);
 
+UpdaterStatus StartUpdaterProcFromBin(Hpackage::PkgManager::PkgManagerPtr pkgManager,
+    UpdaterParams &upParams);
+    
 int GetUpdatePackageInfo(Hpackage::PkgManager::PkgManagerPtr pkgManager, const std::string& path);
 
 int ExecUpdate(Hpackage::PkgManager::PkgManagerPtr pkgManager, int retry, const std::string &pkgPath,

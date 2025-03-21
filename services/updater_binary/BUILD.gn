@@ -46,6 +46,7 @@ updater_gen("updater_binary") {
 ohos_static_library("libupdater_binary") {
   sources = [
     "${updater_path}/services/updater_binary/main.cpp",
+    "${updater_path}/services/updater_binary/update_processor_stream.cpp",
     "${updater_path}/services/updater_binary/update_image_block.cpp",
     "${updater_path}/services/updater_binary/update_image_patch.cpp",
     "${updater_path}/services/updater_binary/update_partitions.cpp",
@@ -61,6 +62,7 @@ ohos_static_library("libupdater_binary") {
     "${updater_path}/services/applypatch:libapplypatch",
     "${updater_path}/services/diffpatch/patch:libpatch",
     "${updater_path}/services/flow_update/update_bin:libBinFlowUpdate",
+    "${updater_path}/services/stream_update:libbinchunkupdate",
     "${updater_path}/services/fs_manager:libfsmanager",
     "${updater_path}/services/log:libupdaterlog",
     "${updater_path}/services/package:libupdaterpackage",

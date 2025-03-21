@@ -236,6 +236,7 @@ int32_t VerifyPackageWithCallback(const std::string &packagePath,
 int32_t ExtraPackageDir(const char *packagePath, [[maybe_unused]] const char *keyPath, const char *dir,
     const char *outPath)
 {
+    LOG(INFO) << "enter ExtraPackageDir:" << outPath;
     if (packagePath == nullptr || outPath == nullptr) {
         LOG(ERROR) << "Check param fail ";
         return PKG_INVALID_PARAM;
@@ -259,6 +260,7 @@ int32_t ExtraPackageDir(const char *packagePath, [[maybe_unused]] const char *ke
             continue;
         }
         PkgManager::StreamPtr outStream = nullptr;
+        LOG(INFO) << "components" << components[i];
         manager->CreatePkgStream(outStream, std::string(outPath) + components[i], 0, PkgStream::PkgStreamType_Write);
         if (outStream == nullptr) {
             LOG(ERROR) << "CreatePkgStream fail";

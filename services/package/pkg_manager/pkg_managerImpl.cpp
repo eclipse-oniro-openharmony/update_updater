@@ -239,6 +239,7 @@ PkgFilePtr PkgManagerImpl::CreatePackage(PkgStreamPtr stream, PkgFile::PkgType t
 int32_t PkgManagerImpl::LoadPackageWithoutUnPack(const std::string &packagePath,
     std::vector<std::string> &fileIds)
 {
+    LOG(INFO) << "enter LoadPackageWithoutUnPack";
     PkgFile::PkgType pkgType = GetPkgTypeByName(packagePath);
     int32_t ret = LoadPackage(packagePath, fileIds, pkgType);
     if (ret != PKG_SUCCESS) {
@@ -275,9 +276,9 @@ int32_t PkgManagerImpl::ParsePackage(StreamPtr stream, std::vector<std::string> 
     return PKG_SUCCESS;
 }
 
-int32_t PkgManagerImpl::LoadPackage(const std::string &packagePath, const std::string &keyPath,
-    std::vector<std::string> &fileIds)
+int32_t PkgManagerImpl::ParaseUpdateStreamzip(const std::string &packagePath, const std::string &keyPath, std::vector<std::string> &fileIds)
 {
+    LOG(INFO) << "enter LoadPackage -1";
     UPDATER_INIT_RECORD;
     if (access(packagePath.c_str(), 0) != 0) {
         UPDATER_LAST_WORD(PKG_INVALID_FILE, "access pkgpath failed");
@@ -294,6 +295,7 @@ int32_t PkgManagerImpl::LoadPackage(const std::string &packagePath, const std::s
         }
     }
     PkgFile::PkgType pkgType = GetPkgTypeByName(packagePath);
+    LOG(INFO) << "pkgType" << pkgType;
     unzipToFile_ = ((pkgType == PkgFile::PKG_TYPE_GZIP) ? true : unzipToFile_);
     if (pkgType == PkgFile::PKG_TYPE_UPGRADE) {
         if (LoadPackage(packagePath, fileIds, pkgType) != PKG_SUCCESS) {
@@ -304,6 +306,7 @@ int32_t PkgManagerImpl::LoadPackage(const std::string &packagePath, const std::s
         }
     } else if (pkgType != PkgFile::PKG_TYPE_NONE) {
         std::vector<std::string> innerFileNames;
+        // 加载update_full.zip
         int32_t ret = LoadPackage(packagePath, innerFileNames, pkgType);
         if (ret != PKG_SUCCESS) {
             ClearPkgFile();
@@ -317,6 +320,70 @@ int32_t PkgManagerImpl::LoadPackage(const std::string &packagePath, const std::s
                 fileIds.push_back(name);
                 continue;
             }
+            LOG(INFO) << "name = " << name;
+            LOG(INFO) << "packagePath = " << packagePath;
+            LOG(INFO) << "pkgType = " << pkgType;
+            // LOG(INFO) << "filedIds = " << fileIds;
+            ret = ExtraAndLoadPackage(GetFilePath(packagePath), name, pkgType, fileIds);
+            if (ret != PKG_SUCCESS) {
+                ClearPkgFile();
+                UPDATER_LAST_WORD(ret, "ExtraAndLoadPackage failed");
+                PKG_LOGE("unpack %s fail in package %s ", name.c_str(), packagePath.c_str());
+                return ret;
+            }
+        }
+    }
+    return PKG_SUCCESS;
+}
+int32_t PkgManagerImpl::LoadPackage(const std::string &packagePath, const std::string &keyPath,
+    std::vector<std::string> &fileIds)
+{
+    LOG(INFO) << "enter LoadPackage -1";
+    UPDATER_INIT_RECORD;
+    if (access(packagePath.c_str(), 0) != 0) {
+        UPDATER_LAST_WORD(PKG_INVALID_FILE, "access pkgpath failed");
+        return PKG_INVALID_FILE;
+    }
+    if (SetSignVerifyKeyName(keyPath) != PKG_SUCCESS) {
+        UPDATER_LAST_WORD(PKG_INVALID_FILE, "SetSignVerifyKeyName failed");
+        return PKG_INVALID_FILE;
+    }
+    // Check if package already loaded
+    for (auto iter : pkgFiles_) {
+        if (iter != nullptr && iter->GetPkgStream()->GetFileName().compare(packagePath) == 0) {
+            return PKG_SUCCESS;
+        }
+    }
+    PkgFile::PkgType pkgType = GetPkgTypeByName(packagePath);
+    LOG(INFO) << "pkgType" << pkgType;
+    unzipToFile_ = ((pkgType == PkgFile::PKG_TYPE_GZIP) ? true : unzipToFile_);
+    if (pkgType == PkgFile::PKG_TYPE_UPGRADE) {
+        if (LoadPackage(packagePath, fileIds, pkgType) != PKG_SUCCESS) {
+            ClearPkgFile();
+            UPDATER_LAST_WORD("LoadPackage failed", packagePath);
+            PKG_LOGE("Parse %s fail ", packagePath.c_str());
+            return PKG_INVALID_FILE;
+        }
+    } else if (pkgType != PkgFile::PKG_TYPE_NONE) {
+        std::vector<std::string> innerFileNames;
+        // 加载update_full.zip
+        int32_t ret = LoadPackage(packagePath, innerFileNames, pkgType);
+        if (ret != PKG_SUCCESS) {
+            ClearPkgFile();
+            PKG_LOGE("Unzip %s fail ", packagePath.c_str());
+            return ret;
+        }
+        for (auto name : innerFileNames) {
+            pkgType = GetPkgTypeByName(name);
+            if (pkgType == PkgFile::PKG_TYPE_NONE || (pkgType == PkgFile::PKG_TYPE_UPGRADE
+                && std::find(innerFileNames.begin(), innerFileNames.end(), "board_list") != innerFileNames.end())) {
+                fileIds.push_back(name);
+                continue;
+            }
+            LOG(INFO) << "name = " << name;
+            LOG(INFO) << "packagePath = " << packagePath;
+            LOG(INFO) << "pkgType = " << pkgType;
+            // LOG(INFO) << "filedIds = " << fileIds;
             ret = ExtraAndLoadPackage(GetFilePath(packagePath), name, pkgType, fileIds);
             if (ret != PKG_SUCCESS) {
                 ClearPkgFile();
@@ -343,6 +410,7 @@ const std::string PkgManagerImpl::GetExtraPath(const std::string &path)
 int32_t PkgManagerImpl::ExtraAndLoadPackage(const std::string &path, const std::string &name,
     PkgFile::PkgType type, std::vector<std::string> &fileIds)
 {
+    LOG(INFO) << "enter ExtraAndLoadPackage";
     int32_t ret = PKG_SUCCESS;
     const FileInfo *info = GetFileInfo(name);
     if (info == nullptr) {
@@ -358,11 +426,15 @@ int32_t PkgManagerImpl::ExtraAndLoadPackage(const std::string &path, const std::
         (void)mkdir(tempPath.c_str(), 0775); // 0775 : rwxrwxr-x
 #endif
     }
-
+    LOG(INFO) << "tempPath:" << tempPath;
     // Extract package to file or memory
     if (unzipToFile_ || type == PkgFile::PKG_TYPE_UPGRADE) {
+        LOG(INFO) << "PkgStreamType_Write";
+        LOG(INFO) << "info->unpackedSize" << info->unpackedSize;
         ret = CreatePkgStream(stream, tempPath + name + ".tmp", info->unpackedSize, PkgStream::PkgStreamType_Write);
     } else {
+        LOG(INFO) << "PkgStreamType_MemoryMap";
+        LOG(INFO) << "info->unpackedSize" << info->unpackedSize;
         ret = CreatePkgStream(stream, tempPath + name + ".tmp", info->unpackedSize, PkgStream::PkgStreamType_MemoryMap);
     }
     if (ret != PKG_SUCCESS) {
@@ -382,6 +454,7 @@ int32_t PkgManagerImpl::ExtraAndLoadPackage(const std::string &path, const std::
 int32_t PkgManagerImpl::LoadPackage(const std::string &packagePath, std::vector<std::string> &fileIds,
     PkgFile::PkgType type)
 {
+    LOG(INFO) << "enter LoadPackage -2";
     UPDATER_INIT_RECORD;
     PkgStreamPtr stream = nullptr;
     int32_t ret = CreatePkgStream(stream, packagePath, 0, PkgStream::PKgStreamType_FileMap);
@@ -448,6 +521,7 @@ int32_t PkgManagerImpl::LoadPackageWithStream(const std::string &packagePath, co
 int32_t PkgManagerImpl::LoadPackageWithStream(const std::string &packagePath,
     std::vector<std::string> &fileIds, PkgFile::PkgType type, PkgStreamPtr stream)
 {
+    LOG(INFO) << "enter LoadPackageWithStream";
     UPDATER_INIT_RECORD;
     int32_t ret = PKG_SUCCESS;
     PkgFilePtr pkgFile = CreatePackage(stream, type, nullptr);
@@ -474,6 +548,7 @@ int32_t PkgManagerImpl::LoadPackageWithStream(const std::string &packagePath,
 
 int32_t PkgManagerImpl::ExtractFile(const std::string &path, PkgManager::StreamPtr output)
 {
+    LOG(INFO) << "enter ExtractFile";
     UPDATER_INIT_RECORD;
     if (output == nullptr) {
         PKG_LOGE("Invalid stream");
@@ -515,6 +590,7 @@ const PkgInfo *PkgManagerImpl::GetPackageInfo(const std::string &packagePath)
 
 const FileInfo *PkgManagerImpl::GetFileInfo(const std::string &path)
 {
+    LOG(INFO) << "enter GetFileInfo";
     PkgEntryPtr pkgEntry = GetPkgEntry(path);
     if (pkgEntry != nullptr) {
         return pkgEntry->GetFileInfo();

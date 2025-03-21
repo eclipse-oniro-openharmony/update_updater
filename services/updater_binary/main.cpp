@@ -21,12 +21,14 @@
 #include "log.h"
 #include "updater/updater_const.h"
 #include "update_processor.h"
+#include "update_processor_stream.h"
 #include "utils.h"
 
 using namespace Updater;
 #ifndef UPDATER_UT
 int main(int argc, char **argv)
 {
+    LOG(INFO) << "enter updaterbinary";
     InitLogger("UPDATER_BINARY");
     if (argc < MINIMAL_ARGC_LIMIT || argc > MAXIMAL_ARGC_LIMIT) {
         LOG(ERROR) << "Invalid arguments:" << argc;
@@ -52,6 +54,14 @@ int main(int argc, char **argv)
 
     // Re-load fstab to child process.
     LoadFstab();
-    return ProcessUpdater(retry, pipeFd, packagePath, Utils::GetCertName());
+
+    // 根据 packagePath 的后缀选择执行不同的函数
+    std::string fileExtension = packagePath.substr(packagePath.find_last_of(".") + 1);
+    std::transform(fileExtension.begin(), fileExtension.end(), fileExtension.begin(), ::tolower);
+    if (fileExtension == "zip") {
+        return ProcessUpdater(retry, pipeFd, packagePath, Utils::GetCertName());
+    } else if (fileExtension == "bin") {
+        return ProcessUpdaterStream(retry, pipeFd, packagePath, Utils::GetCertName());
+    }
 }
 #endif

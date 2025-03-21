@@ -89,7 +89,7 @@ int32_t Pkcs7SignedData::ParsePkcs7Data(const uint8_t *srcData, const size_t dat
 }
 
 int32_t Pkcs7SignedData::Verify() const
-{
+{   
     std::vector<uint8_t> digestForEVP;
     for (unsigned int i = 0; i < signatureInfo.overall.length; i++) {
         digestForEVP.push_back(static_cast<uint8_t>(signatureInfo.overall.buffer[i]));

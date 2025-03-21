@@ -101,6 +101,8 @@ public:
 
     int32_t LoadPackage(const std::string &packagePath,
         std::vector<std::string> &fileIds, PkgFile::PkgType type) override;
+
+    int32_t ParaseUpdateStreamzip(const std::string &packagePath, const std::string &keyPath, std::vector<std::string> &fileIds) override;
 private:
     PkgFilePtr CreatePackage(PkgStreamPtr stream, PkgFile::PkgType type, PkgInfoPtr header = nullptr);
 

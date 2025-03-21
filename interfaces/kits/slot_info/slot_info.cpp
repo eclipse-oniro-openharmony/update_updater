@@ -36,7 +36,7 @@ void SetActiveSlot()
 #else
 void GetPartitionSuffix(std::string &suffix)
 {
-    OHOS::HDI::Partitionslot::V1_0::PartitionSlotManager psMgr;
+    OHOS::HDI::Partitionslot::V1_1::PartitionSlotManager psMgr;
     int32_t curSlot = -1;
     int32_t numOfSlots = 0;
     int32_t ret = psMgr.GetCurrentSlot(curSlot, numOfSlots);
@@ -56,7 +56,7 @@ void GetPartitionSuffix(std::string &suffix)
 
 void GetActivePartitionSuffix(std::string &suffix)
 {
-    OHOS::HDI::Partitionslot::V1_0::PartitionSlotManager psMgr;
+    OHOS::HDI::Partitionslot::V1_1::PartitionSlotManager psMgr;
     int32_t curSlot = -1;
     int32_t numOfSlots = 0;
     int32_t ret = psMgr.GetCurrentSlot(curSlot, numOfSlots);
@@ -75,7 +75,7 @@ void GetActivePartitionSuffix(std::string &suffix)
 
 void SetActiveSlot()
 {
-    OHOS::HDI::Partitionslot::V1_0::PartitionSlotManager psMgr;
+    OHOS::HDI::Partitionslot::V1_1::PartitionSlotManager psMgr;
     int32_t curSlot = -1;
     int32_t numOfSlots = 0;
     int32_t ret = psMgr.GetCurrentSlot(curSlot, numOfSlots);

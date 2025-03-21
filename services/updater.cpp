@@ -36,6 +36,7 @@
 #include "package/packages_info.h"
 #include "parameter.h"
 #include "misc_info/misc_info.h"
+#include <filesystem>
 #ifdef WITH_SELINUX
 #include <policycoreutils.h>
 #include "selinux/selinux.h"
@@ -51,7 +52,8 @@
 #include "updater_ui_stub.h"
 #include "utils.h"
 #include "write_state/write_state.h"
-
+#include <zip.h>
+namespace fs = std::filesystem;
 namespace Updater {
 using Updater::Utils::SplitString;
 using Updater::Utils::Trim;
@@ -64,6 +66,7 @@ int g_tmpValue;
 int32_t ExtractUpdaterBinary(PkgManager::PkgManagerPtr manager, std::string &packagePath,
     const std::string &updaterBinary)
 {
+    LOG(INFO) << "enter ExtractUpdaterBinary";
     UPDATER_INIT_RECORD;
     PkgManager::StreamPtr outStream = nullptr;
     int32_t ret = manager->CreatePkgStream(outStream,  GetWorkPath() + updaterBinary,
@@ -80,14 +83,42 @@ int32_t ExtractUpdaterBinary(PkgManager::PkgManagerPtr manager, std::string &pac
         return UPDATE_CORRUPT;
     }
     HashDataVerifier verifier {manager};
+    LOG(INFO) << "ExtractUpdaterBinary Path:" << packagePath;
     if (!verifier.LoadHashDataAndPkcs7(packagePath) ||
         !verifier.VerifyHashData("build_tools/", updaterBinary, outStream)) {
         LOG(ERROR) << "verify updater_binary failed";
         UPDATER_LAST_WORD(UPDATE_CORRUPT, "verify updater_binary failed");
         return UPDATE_CORRUPT;
     }
+    
     manager->ClosePkgStream(outStream);
     return UPDATE_SUCCESS;
+}
+
+const std::string GetExtraPath(const std::string &path)
+{
+    if (path.find(Updater::SDCARD_CARD_PATH) != std::string::npos) {
+        return path;
+    } else if (path == UPDATRE_SCRIPT_ZIP) {
+        return "/tmp/";
+    }
+
+    return std::string(Updater::UPDATER_PATH) + "/";
+}
+
+int GetUpdateStreamzipInfo(PkgManager::PkgManagerPtr pkgManager, const std::string &path)
+{
+    std::vector<std::string> components;
+    if (pkgManager == nullptr) {
+        LOG(ERROR) << "pkgManager is nullptr";
+        return UPDATE_CORRUPT;
+    }
+    int32_t ret = pkgManager->ParaseUpdateStreamzip(path, Utils::GetCertName(), components);;
+    if (ret != PKG_SUCCESS) {
+        LOG(INFO) << "LoadPackage fail ret :"<< ret;
+        return ret;
+    }
+    return PKG_SUCCESS;
 }
 
 int GetUpdatePackageInfo(PkgManager::PkgManagerPtr pkgManager, const std::string &path)
@@ -265,6 +296,64 @@ __attribute__((weak)) bool PreStartBinaryEntry([[maybe_unused]] const std::strin
     return true;
 }
 
+UpdaterStatus DoInstallUpdaterBinfile(PkgManager::PkgManagerPtr pkgManager, UpdaterParams &upParams,
+    PackageUpdateMode updateMode)
+{
+    UPDATER_INIT_RECORD;
+    UPDATER_UI_INSTANCE.ShowProgressPage();
+    if (upParams.callbackProgress == nullptr) {
+        LOG(ERROR) << "CallbackProgress is nullptr";
+        UPDATER_LAST_WORD(UPDATE_CORRUPT, "CallbackProgress is nullptr");
+        return UPDATE_CORRUPT;
+    }
+    upParams.callbackProgress(upParams.initialProgress * FULL_PERCENT_PROGRESS);
+    if (pkgManager == nullptr) {
+        LOG(ERROR) << "pkgManager is nullptr";
+        UPDATER_LAST_WORD(UPDATE_CORRUPT, "pkgManager is nullptr");
+        return UPDATE_CORRUPT;
+    }
+
+    if (SetupPartitions(updateMode != SDCARD_UPDATE || upParams.sdExtMode == SDCARD_UPDATE_FROM_DEV ||
+        upParams.sdExtMode == SDCARD_UPDATE_FROM_DATA || Utils::CheckUpdateMode(Updater::SDCARD_INTRAL_MODE) ||
+        Utils::CheckUpdateMode(Updater::FACTORY_INTERNAL_MODE)) != 0) {
+        UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_SETPART_FAIL), true);
+        UPDATER_LAST_WORD(UPDATE_ERROR, "SetupPartitions failed");
+        return UPDATE_ERROR;
+    }
+
+    if (upParams.retryCount > 0) {
+        LOG(INFO) << "Retry for " << upParams.retryCount << " time(s)";
+    }
+    LOG(INFO) << "upParams.updateBin[upParams.pkgLocation]:" << upParams.updateBin[upParams.pkgLocation];
+
+    // 获取zip信息
+    int ret = GetUpdateStreamzipInfo(pkgManager, STREAM_ZIP_PATH);
+    if (ret != 0) {
+        LOG(ERROR) << "get update package info fail";
+        UPDATER_LAST_WORD(UPDATE_CORRUPT, "GetUpdatePackageInfo failed");
+        return UPDATE_CORRUPT;
+    }
+    if (!PreStartBinaryEntry(upParams.updateBin[upParams.pkgLocation])) {
+        LOG(ERROR) << "pre binary process failed";
+        UPDATER_LAST_WORD(UPDATE_ERROR, "PreStartBinaryEntry failed");
+        return UPDATE_ERROR;
+    }
+
+    g_tmpProgressValue = 0;
+    // 从bin文件开启进程
+    UpdaterStatus updateRet = StartUpdaterProc(pkgManager, upParams);
+    if (updateRet != UPDATE_SUCCESS) {
+        UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_INSTALL_FAIL));
+        UPDATER_LAST_WORD(updateRet, "StartUpdaterProc failed");
+        LOG(ERROR) << "Install package failed.";
+    }
+    if (WriteResult(upParams.updateBin[upParams.pkgLocation],
+        updateRet == UPDATE_SUCCESS ? "verify_success" : "verify_fail") != UPDATE_SUCCESS) {
+        LOG(ERROR) << "write update state fail";
+    }
+    return updateRet;
+}
+
 UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, UpdaterParams &upParams,
     PackageUpdateMode updateMode)
 {
@@ -400,8 +489,36 @@ void HandleChildOutput(const std::string &buffer, int32_t bufferLen, bool &retry
     }
 }
 
+// void ExcuteSubProcFromBin(const UpdaterParams &upParams, const std::string &fullPath, int pipeWrite)
+// {
+//     LOG(INFO) << "enter ExcuteSubProcFromBin";
+//     UPDATER_INIT_RECORD;
+//     // Set process scheduler to normal if current scheduler is
+//     // SCHED_FIFO, which may cause bad performance.
+//     int policy = syscall(SYS_sched_getscheduler, getpid());
+//     if (policy == -1) {
+//         LOG(INFO) << "Cannnot get current process scheduler";
+//     } else if (policy == SCHED_FIFO) {
+//         LOG(DEBUG) << "Current process with scheduler SCHED_FIFO";
+//         struct sched_param sp = {
+//             .sched_priority = 0,
+//         };
+//         if (syscall(SYS_sched_setscheduler, getpid(), SCHED_OTHER, &sp) < 0) {
+//             LOG(WARNING) << "Cannot set current process schedule with SCHED_OTHER";
+//         }
+//     }
+//     const std::string retryPara = upParams.retryCount > 0 ? "retry=1" : "retry=0";
+//     execl(fullPath.c_str(), fullPath.c_str(), upParams.updateBin[upParams.pkgLocation].c_str(),
+//             std::to_string(pipeWrite).c_str(), retryPara.c_str(), nullptr);
+//     LOG(ERROR) << "Execute updater binary failed";
+//     UPDATER_LAST_WORD(UPDATE_ERROR, "Execute updater binary failed");
+//     exit(-1);
+// }
+
+
 void ExcuteSubProc(const UpdaterParams &upParams, const std::string &fullPath, int pipeWrite)
 {
+    LOG(INFO) << "enter ExcuteSubProc";
     UPDATER_INIT_RECORD;
     // Set process scheduler to normal if current scheduler is
     // SCHED_FIFO, which may cause bad performance.
@@ -418,8 +535,15 @@ void ExcuteSubProc(const UpdaterParams &upParams, const std::string &fullPath, i
         }
     }
     const std::string retryPara = upParams.retryCount > 0 ? "retry=1" : "retry=0";
-    execl(fullPath.c_str(), fullPath.c_str(), upParams.updatePackage[upParams.pkgLocation].c_str(),
+    if (upParams.updateBin.size() > 0) {
+        LOG(INFO) << "Binary Path:" << upParams.updateBin[upParams.pkgLocation].c_str();
+        execl(fullPath.c_str(), fullPath.c_str(), upParams.updateBin[upParams.pkgLocation].c_str(),
             std::to_string(pipeWrite).c_str(), retryPara.c_str(), nullptr);
+    } else if (upParams.updatePackage.size() > 0) {
+        LOG(INFO) << "Binary Path:" << upParams.updatePackage[upParams.pkgLocation].c_str();
+        execl(fullPath.c_str(), fullPath.c_str(), upParams.updatePackage[upParams.pkgLocation].c_str(),
+            std::to_string(pipeWrite).c_str(), retryPara.c_str(), nullptr);
+    }
     LOG(ERROR) << "Execute updater binary failed";
     UPDATER_LAST_WORD(UPDATE_ERROR, "Execute updater binary failed");
     exit(-1);
@@ -476,11 +600,30 @@ UpdaterStatus CheckProcStatus(pid_t pid, bool retryUpdate)
     return UPDATE_SUCCESS;
 }
 
-static std::string GetBinaryPath(PkgManager::PkgManagerPtr pkgManager, UpdaterParams &upParams)
+static std::string GetBinaryPathFromBin(PkgManager::PkgManagerPtr pkgManager, UpdaterParams &upParams)
 {
+    LOG(INFO) << "enter GetBinaryPathFromBin";
     std::string fullPath = GetWorkPath() + std::string(UPDATER_BINARY);
     (void)Utils::DeleteFile(fullPath);
+    std::string toolPath = "/data/updater/update_stream.zip";
+    LOG(INFO) << "GetBinaryPath:" << toolPath;
+    if (ExtractUpdaterBinary(pkgManager, toolPath, UPDATER_BINARY) != 0) {
+        LOG(INFO) << "There is no valid updater_binary in package, use updater_binary in device";
+        fullPath = "/bin/updater_binary";
+    }
 
+#ifdef UPDATER_UT
+    fullPath = "/data/updater/updater_binary";
+#endif
+    return fullPath;
+}
+
+static std::string GetBinaryPath(PkgManager::PkgManagerPtr pkgManager, UpdaterParams &upParams)
+{
+    LOG(INFO) << "enter GetBinaryPath";
+    std::string fullPath = GetWorkPath() + std::string(UPDATER_BINARY);
+    (void)Utils::DeleteFile(fullPath);
+    LOG(INFO) << "GetBinaryPath:" << upParams.updatePackage[upParams.pkgLocation];
     if (ExtractUpdaterBinary(pkgManager, upParams.updatePackage[upParams.pkgLocation], UPDATER_BINARY) != 0) {
         LOG(INFO) << "There is no valid updater_binary in package, use updater_binary in device";
         fullPath = "/bin/updater_binary";
@@ -509,7 +652,13 @@ UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, UpdaterPara
 
     int pipeRead = pfd[0];
     int pipeWrite = pfd[1];
-    std::string fullPath = GetBinaryPath(pkgManager, upParams);
+    std::string fullPath = "";
+    if (upParams.updateBin.size() > 0) {
+        fullPath = GetBinaryPathFromBin(pkgManager, upParams);
+    } else if (upParams.updatePackage.size() > 0) {
+        fullPath = GetBinaryPath(pkgManager, upParams);
+    }
+    LOG(INFO) << "fullPath" << fullPath;
     if (chmod(fullPath.c_str(), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) != 0) {
         LOG(ERROR) << "Failed to change mode";
     }
@@ -517,7 +666,6 @@ UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, UpdaterPara
 #ifdef WITH_SELINUX
     Restorecon(fullPath.c_str());
 #endif // WITH_SELINUX
-
     pid_t pid = fork();
     if (pid < 0) {
         ERROR_CODE(CODE_FORK_FAIL);

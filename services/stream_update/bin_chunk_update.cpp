@@ -93,7 +93,6 @@ UpdateResultCode BinChunkUpdate::StartBinChunkUpdate(const uint8_t *data, uint32
             return STREAM_UPDATE_FAILURE;
         }
     }
-
     dealLen = len + leftLen - curlen_;
     LOG(DEBUG) << "BinChunkUpdate StartBinChunkUpdate dealLen:" << dealLen << " len:" << len << " curlen_:" << curlen_
               << " leftLen:" << leftLen;
@@ -253,7 +252,7 @@ bool BinChunkUpdate::ProcessPartitionNum(uint8_t *data, uint32_t &len, uint32_t 
     }
 
     updateInfo_.patitionNum = ReadLE16(data + offset);
-    LOG(INFO) << "BinChunkUpdate::UpdateBinHash patitionNum:" << updateInfo_.patitionNum;
+    LOG(DEBUG) << "BinChunkUpdate::UpdateBinHash patitionNum:" << updateInfo_.patitionNum;
     updateInfo_.algorithm->Update({data + offset, tlv.length}, tlv.length);
     offset += tlv.length;
 
@@ -405,7 +404,7 @@ bool BinChunkUpdate::VerifySignature(std::vector<uint8_t> &signData)
         return false;
     }
 
-    LOG(INFO) << "BinChunkUpdate VerifyDigest success";
+    LOG(DEBUG) << "BinChunkUpdate VerifyDigest success";
     return true;
 }
 
@@ -706,7 +705,7 @@ bool BinChunkUpdate::ExecuteCmdLine()
         return false;
     }
 
-    LOG(INFO) << "cf->Execute SUCCESS";
+    LOG(DEBUG) << "cf->Execute SUCCESS";
     return true;
 }
 
