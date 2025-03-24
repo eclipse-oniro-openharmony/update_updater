@@ -113,7 +113,7 @@ int GetUpdateStreamzipInfo(PkgManager::PkgManagerPtr pkgManager, const std::stri
         LOG(ERROR) << "pkgManager is nullptr";
         return UPDATE_CORRUPT;
     }
-    int32_t ret = pkgManager->ParaseUpdateStreamzip(path, Utils::GetCertName(), components);;
+    int32_t ret = pkgManager->LoadPackage(path, Utils::GetCertName(), components);
     if (ret != PKG_SUCCESS) {
         LOG(INFO) << "LoadPackage fail ret :"<< ret;
         return ret;
@@ -488,33 +488,6 @@ void HandleChildOutput(const std::string &buffer, int32_t bufferLen, bool &retry
         LOG(WARNING) << "Child process returns unexpected message.";
     }
 }
-
-// void ExcuteSubProcFromBin(const UpdaterParams &upParams, const std::string &fullPath, int pipeWrite)
-// {
-//     LOG(INFO) << "enter ExcuteSubProcFromBin";
-//     UPDATER_INIT_RECORD;
-//     // Set process scheduler to normal if current scheduler is
-//     // SCHED_FIFO, which may cause bad performance.
-//     int policy = syscall(SYS_sched_getscheduler, getpid());
-//     if (policy == -1) {
-//         LOG(INFO) << "Cannnot get current process scheduler";
-//     } else if (policy == SCHED_FIFO) {
-//         LOG(DEBUG) << "Current process with scheduler SCHED_FIFO";
-//         struct sched_param sp = {
-//             .sched_priority = 0,
-//         };
-//         if (syscall(SYS_sched_setscheduler, getpid(), SCHED_OTHER, &sp) < 0) {
-//             LOG(WARNING) << "Cannot set current process schedule with SCHED_OTHER";
-//         }
-//     }
-//     const std::string retryPara = upParams.retryCount > 0 ? "retry=1" : "retry=0";
-//     execl(fullPath.c_str(), fullPath.c_str(), upParams.updateBin[upParams.pkgLocation].c_str(),
-//             std::to_string(pipeWrite).c_str(), retryPara.c_str(), nullptr);
-//     LOG(ERROR) << "Execute updater binary failed";
-//     UPDATER_LAST_WORD(UPDATE_ERROR, "Execute updater binary failed");
-//     exit(-1);
-// }
-
 
 void ExcuteSubProc(const UpdaterParams &upParams, const std::string &fullPath, int pipeWrite)
 {

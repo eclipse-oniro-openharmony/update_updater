@@ -45,6 +45,11 @@ using namespace Updater;
 namespace Updater {
 constexpr uint32_t BUFFER_SIZE = 50 * 1024;
 constexpr uint32_t MAX_UPDATER_BUFFER_SIZE = 2 * BUFFER_SIZE;
+constexpr uint32_t BYTE_SHIFT_8 = 8;
+constexpr uint32_t BYTE_SHIFT_16 = 16;
+constexpr uint32_t BYTE_SHIFT_24 = 24;
+constexpr uint32_t SECOND_BUFFER = 2;
+constexpr uint32_t THIRD_BUFFER = 3;
 
 enum UpdateStatus {
     UPDATE_STATE_INIT = 0,
@@ -54,42 +59,46 @@ enum UpdateStatus {
     UPDATE_STATE_MAX
 };
 
-
-bool ReadLE16(std::istream& is, uint16_t& value) {
+bool ReadLE16(std::istream& is, uint16_t& value)
+{
     char buf[2];
-    if (!is.read(buf, sizeof(buf))) return false;
+    if (!is.read(buf, sizeof(buf))) {
+        return false;
+    }
     value = static_cast<uint16_t>(static_cast<unsigned char>(buf[0])) |
-           (static_cast<uint16_t>(static_cast<unsigned char>(buf[1])) << 8);
+           (static_cast<uint16_t>(static_cast<unsigned char>(buf[1])) << BYTE_SHIFT_8);
     return true;
 }
 
-bool ReadLE32(std::istream& is, uint32_t& value) {
+bool ReadLE32(std::istream& is, uint32_t& value)
+{
     char buf[4];
-    if (!is.read(buf, sizeof(buf))) return false;
+    if (!is.read(buf, sizeof(buf))) {
+        return false;
+    }
     value = static_cast<uint32_t>(static_cast<unsigned char>(buf[0])) |
-           (static_cast<uint32_t>(static_cast<unsigned char>(buf[1])) << 8) |
-           (static_cast<uint32_t>(static_cast<unsigned char>(buf[2])) << 16) |
-           (static_cast<uint32_t>(static_cast<unsigned char>(buf[3])) << 24);
+           (static_cast<uint32_t>(static_cast<unsigned char>(buf[1])) << BYTE_SHIFT_8) |
+           (static_cast<uint32_t>(static_cast<unsigned char>(buf[SECOND_BUFFER])) << BYTE_SHIFT_16) |
+           (static_cast<uint32_t>(static_cast<unsigned char>(buf[THIRD_BUFFER])) << BYTE_SHIFT_24);
     return true;
 }
-
 static int ProcessUpdateFile(const std::string &packagePath, FILE* pipeWrite)
 {
     std::shared_ptr<Updater::BinChunkUpdate> binChunkUpdate_ {};
-    LOG(INFO) << "enter Doinstallbinfile";
     // 打开输入文件
     std::ifstream in_file(packagePath, std::ios::binary);
     if (!in_file) {
         LOG(ERROR) << "Error: Failed to open " << packagePath;
         return UPDATE_ERROR;
     }
+
     uint16_t type = 0;
     if (!ReadLE16(in_file, type)) {
         LOG(ERROR) << "Failed to read type";
         return UPDATE_ERROR;
     }
-    LOG(INFO) << "header.type = 0x" << std::hex << type;;
-    if (type != 0x11) {
+    
+    if (type != 0xaa) {
         LOG(ERROR) << "Unsupported header type: 0x" << std::hex << type;
         in_file.close();
         return UPDATE_ERROR;
@@ -99,28 +108,23 @@ static int ProcessUpdateFile(const std::string &packagePath, FILE* pipeWrite)
         LOG(ERROR) << "Failed to read length";
         return UPDATE_ERROR;
     }
-    LOG(INFO) << "header.length = " << length;
 
     if (!in_file.seekg(length, std::ios::cur)) {
         in_file.close();
         LOG(ERROR) << "Failed to seekg length";
         return UPDATE_ERROR;
     }
-   
-    LOG(INFO) << "read file zip successful!";
 
     // 读取剩余数据
-    std::vector<uint8_t> buffer_stream(BUFFER_SIZE); 
+    std::vector<uint8_t> buffer_stream(BUFFER_SIZE);
     binChunkUpdate_ = std::make_unique<Updater::BinChunkUpdate>(MAX_UPDATER_BUFFER_SIZE);
     while (!in_file.eof()) {
         in_file.read(reinterpret_cast<char*>(buffer_stream.data()), buffer_stream.size());
-        size_t read_bytes = in_file.gcount();
+        size_t readBytes = in_file.gcount();
         uint32_t dealLen = 0;
-        LOG(INFO) << "Read " << read_bytes << " bytes from new update.bin";
-        if (read_bytes > 0) {
-            LOG(INFO) << "do libbinchunkupdate";
-            UpdateResultCode ret = binChunkUpdate_->StartBinChunkUpdate(buffer_stream.data(), static_cast<uint32_t>(read_bytes), dealLen);
-            LOG(INFO) << "StartBinChunkUpdate ret = " << ret;
+        if (readBytes > 0) {
+            UpdateResultCode ret = binChunkUpdate_->StartBinChunkUpdate(
+                buffer_stream.data(), static_cast<uint32_t>(readBytes), dealLen);
             if (STREAM_UPDATE_SUCCESS == ret) {
                 LOG(INFO) << "StreamInstallProcesser ThreadExecuteFunc STREM_UPDATE_SUCCESS";
             } else if (STREAM_UPDATE_FAILURE == ret) {
@@ -136,7 +140,8 @@ static int ProcessUpdateFile(const std::string &packagePath, FILE* pipeWrite)
     return UPDATE_SUCCESS;
 }
 
-int ProcessUpdaterStream(bool retry, int pipeFd, const std::string &packagePath, const std::string &keyPath) {
+int ProcessUpdaterStream(bool retry, int pipeFd, const std::string &packagePath, const std::string &keyPath)
+{
     UPDATER_INIT_RECORD;
     UpdaterInit::GetInstance().InvokeEvent(UPDATER_BINARY_INIT_EVENT);
     Dump::GetInstance().RegisterDump("DumpHelperLog", std::make_unique<DumpHelperLog>());

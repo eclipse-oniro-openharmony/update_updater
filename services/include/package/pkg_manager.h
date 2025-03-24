@@ -152,7 +152,6 @@ public:
     virtual void ClearPkgStream() = 0;
 
     virtual int32_t ReadImgHashDataFile(const std::string &pkgType) = 0;
-
 };
 
 class PkgEntry {
@@ -278,8 +277,6 @@ public:
      */
     virtual int32_t LoadPackage(const std::string &packagePath, const std::string &keyPath,
         std::vector<std::string> &fileIds) = 0;
-
-    virtual int32_t ParaseUpdateStreamzip(const std::string &packagePath, const std::string &keyPath, std::vector<std::string> &fileIds) = 0;
 
     virtual int32_t VerifyAccPackage(const std::string &packagePath, const std::string &keyPath) = 0;
 

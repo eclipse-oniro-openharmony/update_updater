@@ -32,6 +32,5 @@ using Uscript::UScriptInstructionPtr;
 
 namespace Updater {
 int ProcessUpdaterStream(bool retry, int pipeFd, const std::string &packagePath, const std::string &keyPath);
-
 } // Updater
 #endif /* UPDATE_PROCESSOR_H */
