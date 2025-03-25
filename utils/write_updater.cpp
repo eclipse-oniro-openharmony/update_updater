@@ -36,7 +36,8 @@ static void PrintPrompts()
     cout << "factory_reset :  write_updater user_factory_reset" << endl;
     cout << "sdcard_update :  write_updater sdcard_update" << endl;
     cout << "clear command :  write_updater clear" << endl;
-    cout << "updater_para  : write_updater updater_para" << endl;
+    cout << "updater_para  :  write_updater updater_para" << endl;
+    cout << "intral_update :  write_updater ota_intral_update /data/updater/updater.zip" << endl;
 }
 
 static int ExceptionUpdater(int argc, char **argv, UpdateMessage &boot)
@@ -126,6 +127,14 @@ int main(int argc, char **argv)
     } else if (strcmp(argv[1], "sdcard_update") == 0) {
         if (strncpy_s(boot.update, sizeof(boot.update), "--sdcard_update", sizeof(boot.update) - 1) != 0) {
             cout << "strncpy_s failed!" << endl;
+            return -1;
+        }
+    } else if (strcmp(argv[1], "ota_intral_update") == 0) {
+        if (ExceptionUpdater(argc, argv, boot) == -1) {
+            return -1;
+        }
+        if (strcat_s(boot.update, sizeof(boot.update), "\n--ota_intral_update") != 0) {
+            cout << "strcat_s failed!" << endl;
             return -1;
         }
     } else if (strcmp(argv[1], "updater_para") == 0) {
