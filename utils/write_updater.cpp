@@ -130,11 +130,8 @@ int main(int argc, char **argv)
             return -1;
         }
     } else if (strcmp(argv[1], "ota_intral_update") == 0) {
-        if (ExceptionUpdater(argc, argv, boot) == -1) {
-            return -1;
-        }
-        if (strcat_s(boot.update, sizeof(boot.update), "\n--ota_intral_update") != 0) {
-            cout << "strcat_s failed!" << endl;
+        if (ExceptionUpdater(argc, argv, boot) == -1 ||
+            strcat_s(boot.update, sizeof(boot.update), "\n--ota_intral_update") != 0) {
             return -1;
         }
     } else if (strcmp(argv[1], "updater_para") == 0) {
