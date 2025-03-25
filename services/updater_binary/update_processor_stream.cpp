@@ -38,6 +38,8 @@
 #include "scope_guard.h"
 #include "bin_chunk_update.h"
 
+#define TYPE_ZIP_HEADER  0xaa
+
 using namespace Uscript;
 using namespace Hpackage;
 using namespace Updater;
@@ -98,7 +100,7 @@ static int ProcessUpdateFile(const std::string &packagePath, FILE* pipeWrite)
         return UPDATE_ERROR;
     }
     
-    if (type != 0xaa) {
+    if (type != TYPE_ZIP_HEADER) {
         LOG(ERROR) << "Unsupported header type: 0x" << std::hex << type;
         in_file.close();
         return UPDATE_ERROR;
@@ -194,7 +196,6 @@ int ProcessUpdaterStream(bool retry, int pipeFd, const std::string &packagePath,
 #endif
 
     // 调用核心函数并传递管道
-    LOG(INFO) << "enter ProcessUpdater";
     ret = ProcessUpdateFile(packagePath, pipeWrite.get());
     if (ret != UPDATE_SUCCESS) {
         LOG(ERROR) << "ProcessUpdaterStream failed with code: " << ret;

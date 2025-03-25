@@ -471,7 +471,6 @@ int UScriptInstructionRawImageWrite::GetWritePathAndOffset(const std::string &pa
 
 int ProcessUpdater(bool retry, int pipeFd, const std::string &packagePath, const std::string &keyPath)
 {
-    LOG(INFO) << "enter ProcessUpdater";
     UPDATER_INIT_RECORD;
     UpdaterInit::GetInstance().InvokeEvent(UPDATER_BINARY_INIT_EVENT);
     Dump::GetInstance().RegisterDump("DumpHelperLog", std::make_unique<DumpHelperLog>());

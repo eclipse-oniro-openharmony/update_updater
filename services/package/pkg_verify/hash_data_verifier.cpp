@@ -37,7 +37,6 @@ HashDataVerifier::~HashDataVerifier()
 
 bool HashDataVerifier::LoadHashDataAndPkcs7(const std::string &pkgPath)
 {
-    LOG(INFO) << "enter LoadHashDataAndPkcs7";
     Updater::UPDATER_INIT_RECORD;
     if (pkgPath == UPDATRE_SCRIPT_ZIP) {
         isNeedVerify_ = false;
@@ -79,7 +78,6 @@ bool HashDataVerifier::LoadHashDataFromPackage(const std::string &buffer)
 
 bool HashDataVerifier::LoadHashDataFromPackage(void)
 {
-    LOG(INFO) << "enter LoadHashDataFromPackage";
     Updater::UPDATER_INIT_RECORD;
     PkgManager::StreamPtr outStream = nullptr;
     auto info = manager_->GetFileInfo(UPDATER_HASH_SIGNED_DATA);
@@ -115,7 +113,6 @@ bool HashDataVerifier::LoadHashDataFromPackage(void)
 
 bool HashDataVerifier::LoadPkcs7FromPackage(const std::string &pkgPath)
 {
-    LOG(INFO) << "enter LoadPkcs7FromPackage";
     Updater::UPDATER_INIT_RECORD;
     PkgManager::StreamPtr pkgStream = nullptr;
     LOG(INFO) << "pkgPath:" << pkgPath;
@@ -137,14 +134,12 @@ bool HashDataVerifier::LoadPkcs7FromPackage(const std::string &pkgPath)
         UPDATER_LAST_WORD(ret, "GetSignature failed");
         return false;
     }
-    LOG(INFO) << "signature.data()" << signature.data() << "signature.size()" << signature.size();
     return pkcs7_ != nullptr && pkcs7_->ParsePkcs7Data(signature.data(), signature.size()) == 0;
 }
 
 bool HashDataVerifier::VerifyHashData(const std::string &preName,
     const std::string &fileName, PkgManager::StreamPtr stream) const
 {
-    LOG(INFO) << "enter VerifyHashData";
     if (!isNeedVerify_) {
         return true;
     }

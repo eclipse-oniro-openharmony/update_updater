@@ -66,7 +66,6 @@ int g_tmpValue;
 int32_t ExtractUpdaterBinary(PkgManager::PkgManagerPtr manager, std::string &packagePath,
     const std::string &updaterBinary)
 {
-    LOG(INFO) << "enter ExtractUpdaterBinary";
     UPDATER_INIT_RECORD;
     PkgManager::StreamPtr outStream = nullptr;
     int32_t ret = manager->CreatePkgStream(outStream,  GetWorkPath() + updaterBinary,
@@ -90,20 +89,8 @@ int32_t ExtractUpdaterBinary(PkgManager::PkgManagerPtr manager, std::string &pac
         UPDATER_LAST_WORD(UPDATE_CORRUPT, "verify updater_binary failed");
         return UPDATE_CORRUPT;
     }
-    
     manager->ClosePkgStream(outStream);
     return UPDATE_SUCCESS;
-}
-
-const std::string GetExtraPath(const std::string &path)
-{
-    if (path.find(Updater::SDCARD_CARD_PATH) != std::string::npos) {
-        return path;
-    } else if (path == UPDATRE_SCRIPT_ZIP) {
-        return "/tmp/";
-    }
-
-    return std::string(Updater::UPDATER_PATH) + "/";
 }
 
 int GetUpdateStreamzipInfo(PkgManager::PkgManagerPtr pkgManager, const std::string &path)
@@ -324,7 +311,6 @@ UpdaterStatus DoInstallUpdaterBinfile(PkgManager::PkgManagerPtr pkgManager, Upda
     if (upParams.retryCount > 0) {
         LOG(INFO) << "Retry for " << upParams.retryCount << " time(s)";
     }
-    LOG(INFO) << "upParams.updateBin[upParams.pkgLocation]:" << upParams.updateBin[upParams.pkgLocation];
 
     // 获取zip信息
     int ret = GetUpdateStreamzipInfo(pkgManager, STREAM_ZIP_PATH);
@@ -491,7 +477,6 @@ void HandleChildOutput(const std::string &buffer, int32_t bufferLen, bool &retry
 
 void ExcuteSubProc(const UpdaterParams &upParams, const std::string &fullPath, int pipeWrite)
 {
-    LOG(INFO) << "enter ExcuteSubProc";
     UPDATER_INIT_RECORD;
     // Set process scheduler to normal if current scheduler is
     // SCHED_FIFO, which may cause bad performance.
@@ -575,11 +560,9 @@ UpdaterStatus CheckProcStatus(pid_t pid, bool retryUpdate)
 
 static std::string GetBinaryPathFromBin(PkgManager::PkgManagerPtr pkgManager, UpdaterParams &upParams)
 {
-    LOG(INFO) << "enter GetBinaryPathFromBin";
     std::string fullPath = GetWorkPath() + std::string(UPDATER_BINARY);
     (void)Utils::DeleteFile(fullPath);
     std::string toolPath = "/data/updater/update_stream.zip";
-    LOG(INFO) << "GetBinaryPath:" << toolPath;
     if (ExtractUpdaterBinary(pkgManager, toolPath, UPDATER_BINARY) != 0) {
         LOG(INFO) << "There is no valid updater_binary in package, use updater_binary in device";
         fullPath = "/bin/updater_binary";
@@ -593,10 +576,8 @@ static std::string GetBinaryPathFromBin(PkgManager::PkgManagerPtr pkgManager, Up
 
 static std::string GetBinaryPath(PkgManager::PkgManagerPtr pkgManager, UpdaterParams &upParams)
 {
-    LOG(INFO) << "enter GetBinaryPath";
     std::string fullPath = GetWorkPath() + std::string(UPDATER_BINARY);
     (void)Utils::DeleteFile(fullPath);
-    LOG(INFO) << "GetBinaryPath:" << upParams.updatePackage[upParams.pkgLocation];
     if (ExtractUpdaterBinary(pkgManager, upParams.updatePackage[upParams.pkgLocation], UPDATER_BINARY) != 0) {
         LOG(INFO) << "There is no valid updater_binary in package, use updater_binary in device";
         fullPath = "/bin/updater_binary";
@@ -631,7 +612,6 @@ UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, UpdaterPara
     } else if (upParams.updatePackage.size() > 0) {
         fullPath = GetBinaryPath(pkgManager, upParams);
     }
-    LOG(INFO) << "fullPath" << fullPath;
     if (chmod(fullPath.c_str(), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) != 0) {
         LOG(ERROR) << "Failed to change mode";
     }
@@ -639,6 +619,7 @@ UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, UpdaterPara
 #ifdef WITH_SELINUX
     Restorecon(fullPath.c_str());
 #endif // WITH_SELINUX
+
     pid_t pid = fork();
     if (pid < 0) {
         ERROR_CODE(CODE_FORK_FAIL);

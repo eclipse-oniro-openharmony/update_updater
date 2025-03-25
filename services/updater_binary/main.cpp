@@ -28,7 +28,6 @@ using namespace Updater;
 #ifndef UPDATER_UT
 int main(int argc, char **argv)
 {
-    LOG(INFO) << "enter updaterbinary";
     InitLogger("UPDATER_BINARY");
     if (argc < MINIMAL_ARGC_LIMIT || argc > MAXIMAL_ARGC_LIMIT) {
         LOG(ERROR) << "Invalid arguments:" << argc;

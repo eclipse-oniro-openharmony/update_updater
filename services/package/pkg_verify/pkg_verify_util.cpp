@@ -139,7 +139,6 @@ int32_t PkgVerifyUtil::VerifyPackageSign(const PkgStreamPtr pkgStream, const std
 int32_t PkgVerifyUtil::GetSignature(const PkgStreamPtr pkgStream, size_t &signatureSize,
     std::vector<uint8_t> &signature, uint16_t &commentTotalLenAll) const
 {
-    PKG_LOGI("enter GetSignature");
     Updater::UPDATER_INIT_RECORD;
     size_t signatureStart = 0;
     int32_t ret = ParsePackage(pkgStream, signatureStart, signatureSize, commentTotalLenAll);

@@ -187,6 +187,7 @@ const char* GetFileType(const char* path, struct stat* st)
         default:       return "Unknown";
     }
 }
+
 static UpdaterStatus GetReadUpdateStreamzipFromBinfile(PkgManager::PkgManagerPtr pkgManager,
     const std::string &packagePath)
 {
@@ -471,7 +472,7 @@ UpdaterStatus InstallUpdaterBinfile(UpdaterParams &upParams, PkgManager::PkgMana
 {
     UPDATER_INIT_RECORD;
     UpdaterStatus status = UPDATE_UNKNOWN;
-    STAGE(UPDATE_STAGE_BEGIN) << "enter InstallUpdaterBinfile";
+    STAGE(UPDATE_STAGE_BEGIN) << "Install Binfile";
     status = DoInstallUpdaterBinfile(manager, upParams, HOTA_UPDATE);
     if (status != UPDATE_SUCCESS) {
         UPDATER_UI_INSTANCE.Sleep(UI_SHOW_DURATION);
@@ -603,6 +604,7 @@ static UpdaterStatus CheckVerifyPackages(UpdaterParams &upParams)
     }
     return status;
 }
+
 static UpdaterStatus VerifyCommonFiles(UpdaterParams &upParams)
 {
     if (upParams.updateBin.size() > 0) {
@@ -965,14 +967,6 @@ static void PostSdcardUpdatePackages(UpdaterParams &upParams, bool updateResult)
     if (Utils::CheckUpdateMode(Updater::SDCARD_INTRAL_MODE)) {
         PostUpdatePackages(upParams, updateResult);
     }
-}
-
-UpdaterStatus UpdaterFromBinfile(UpdaterParams &upParams)
-{
-    UPDATER_INIT_RECORD;
-    LOG(INFO) << "enter UPdaterFromBinfile";
-    upParams.callbackProgress = [] (float value) { UPDATER_UI_INSTANCE.ShowProgress(value); };
-    return UPDATE_SUCCESS;
 }
 
 UpdaterStatus UpdaterFromSdcard(UpdaterParams &upParams)
