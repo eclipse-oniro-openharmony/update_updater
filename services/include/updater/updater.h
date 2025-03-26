@@ -56,6 +56,7 @@ struct UpdaterParams {
     std::string factoryResetMode {};
     PackageUpdateMode updateMode = HOTA_UPDATE;
     int retryCount = 0;
+    int panicCount = 0;
     float initialProgress = 0; /* The upgrade starts at the progress bar location */
     float currentPercentage = 0; /* The proportion of progress bars occupied by the upgrade process */
     unsigned int pkgLocation = 0;
