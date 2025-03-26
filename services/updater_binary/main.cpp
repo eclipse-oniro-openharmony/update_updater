@@ -61,6 +61,9 @@ int main(int argc, char **argv)
         return ProcessUpdater(retry, pipeFd, packagePath, Utils::GetCertName());
     } else if (fileExtension == "bin") {
         return ProcessUpdaterStream(retry, pipeFd, packagePath, Utils::GetCertName());
+    } else {
+        LOG(ERROR) << "Invalid packagePath:" << packagePath;
+        return EXIT_INVALID_ARGS;
     }
 }
 #endif

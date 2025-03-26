@@ -96,7 +96,7 @@ UpdaterStatus DoInstallUpdaterBinfile(Hpackage::PkgManager::PkgManagerPtr pkgMan
 
 UpdaterStatus StartUpdaterProc(Hpackage::PkgManager::PkgManagerPtr pkgManager,
     UpdaterParams &upParams);
-    
+
 int GetUpdatePackageInfo(Hpackage::PkgManager::PkgManagerPtr pkgManager, const std::string& path);
 
 int ExecUpdate(Hpackage::PkgManager::PkgManagerPtr pkgManager, int retry, const std::string &pkgPath,

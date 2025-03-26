@@ -51,7 +51,7 @@
 #include "factory_reset/factory_reset.h"
 #include "write_state/write_state.h"
 
-#define TYPE_ZIP_HEADER  0xaa
+#define TYPE_ZIP_HEADER  0xaa //update.bin文件TYPE
 
 namespace Updater {
 using Utils::String2Int;
@@ -523,28 +523,43 @@ UpdaterStatus InstallUpdaterPackage(UpdaterParams &upParams, PkgManager::PkgMana
     return status;
 }
 
+static UpdaterStatus UpdateUpdateFile(const UpdaterParams &upParams,
+    std::vector<double> &pkgStartPosition, double &updateStartPosition,
+    std::vector<std::string> &updateFile)
+{
+    updateFile.clear();
+    if (upParams.updateBin.size() > 0) {
+        if (upParams.pkgLocation == upParams.updateBin.size()) {
+            updateStartPosition = VERIFY_PERCENT;
+            return UPDATE_SUCCESS;
+        }
+        for (const auto& file : upParams.updateBin) {
+            updateFile.push_back(file);
+        }
+    } else if (upParams.updatePackage.size() > 0) {
+        if (upParams.pkgLocation == upParams.updatePackage.size()) {
+            updateStartPosition = VERIFY_PERCENT;
+            return UPDATE_SUCCESS;
+        }
+        for (const auto& file : upParams.updatePackage) {
+            updateFile.push_back(file);
+        }
+    }
+    return UPDATE_SKIP;
+}
+
 static UpdaterStatus CalcProgress(const UpdaterParams &upParams,
     std::vector<double> &pkgStartPosition, double &updateStartPosition)
 {
     UPDATER_INIT_RECORD;
     int64_t allPkgSize = 0;
     std::vector<int64_t> everyPkgSize;
-    std::vector<std::string> updateFile {};
-    if (upParams.pkgLocation == upParams.updateBin.size() ||
-        upParams.pkgLocation == upParams.updatePackage.size()) {
-            updateStartPosition = VERIFY_PERCENT;
-            return UPDATE_SUCCESS;
-    }
-    if (upParams.updateBin.size() > 0) {
-        for (const auto& file : upParams.updateBin) {
-            updateFile.push_back(file);
-        }
-    } else if (upParams.updatePackage.size() > 0) {
-        for (const auto& file : upParams.updatePackage) {
-            updateFile.push_back(file);
-        }
-    }
+    std::vector<std::string> updateFile;
 
+    UpdaterStatus status = UpdateUpdateFile(upParams, pkgStartPosition, updateStartPosition, updateFile);
+    if (status == UPDATE_SUCCESS) {
+        return UPDATE_SUCCESS;
+    }
     for (const auto &path : updateFile) {
         char realPath[PATH_MAX] = {0};
         if (realpath(path.c_str(), realPath) == nullptr) {

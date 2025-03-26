@@ -36,7 +36,6 @@
 #include "package/packages_info.h"
 #include "parameter.h"
 #include "misc_info/misc_info.h"
-#include <filesystem>
 #ifdef WITH_SELINUX
 #include <policycoreutils.h>
 #include "selinux/selinux.h"
@@ -52,8 +51,7 @@
 #include "updater_ui_stub.h"
 #include "utils.h"
 #include "write_state/write_state.h"
-#include <zip.h>
-namespace fs = std::filesystem;
+
 namespace Updater {
 using Updater::Utils::SplitString;
 using Updater::Utils::Trim;
@@ -82,7 +80,6 @@ int32_t ExtractUpdaterBinary(PkgManager::PkgManagerPtr manager, std::string &pac
         return UPDATE_CORRUPT;
     }
     HashDataVerifier verifier {manager};
-    LOG(INFO) << "ExtractUpdaterBinary Path:" << packagePath;
     if (!verifier.LoadHashDataAndPkcs7(packagePath) ||
         !verifier.VerifyHashData("build_tools/", updaterBinary, outStream)) {
         LOG(ERROR) << "verify updater_binary failed";
@@ -91,21 +88,6 @@ int32_t ExtractUpdaterBinary(PkgManager::PkgManagerPtr manager, std::string &pac
     }
     manager->ClosePkgStream(outStream);
     return UPDATE_SUCCESS;
-}
-
-int GetUpdateStreamzipInfo(PkgManager::PkgManagerPtr pkgManager, const std::string &path)
-{
-    std::vector<std::string> components;
-    if (pkgManager == nullptr) {
-        LOG(ERROR) << "pkgManager is nullptr";
-        return UPDATE_CORRUPT;
-    }
-    int32_t ret = pkgManager->LoadPackage(path, Utils::GetCertName(), components);
-    if (ret != PKG_SUCCESS) {
-        LOG(INFO) << "LoadPackage fail ret :"<< ret;
-        return ret;
-    }
-    return PKG_SUCCESS;
 }
 
 int GetUpdatePackageInfo(PkgManager::PkgManagerPtr pkgManager, const std::string &path)
@@ -313,7 +295,7 @@ UpdaterStatus DoInstallUpdaterBinfile(PkgManager::PkgManagerPtr pkgManager, Upda
     }
 
     // 获取zip信息
-    int ret = GetUpdateStreamzipInfo(pkgManager, STREAM_ZIP_PATH);
+    int ret = GetUpdatePackageInfo(pkgManager, STREAM_ZIP_PATH);
     if (ret != 0) {
         LOG(ERROR) << "get update package info fail";
         UPDATER_LAST_WORD(UPDATE_CORRUPT, "GetUpdatePackageInfo failed");

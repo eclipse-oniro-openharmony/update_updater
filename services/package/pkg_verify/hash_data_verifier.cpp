@@ -115,7 +115,6 @@ bool HashDataVerifier::LoadPkcs7FromPackage(const std::string &pkgPath)
 {
     Updater::UPDATER_INIT_RECORD;
     PkgManager::StreamPtr pkgStream = nullptr;
-    LOG(INFO) << "pkgPath:" << pkgPath;
     int32_t ret = manager_->CreatePkgStream(pkgStream, pkgPath, 0, PkgStream::PkgStreamType_Read);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("CreatePackage fail %s", pkgPath.c_str());
