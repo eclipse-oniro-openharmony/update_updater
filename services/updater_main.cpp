@@ -61,6 +61,7 @@ using namespace std::literals::chrono_literals;
 constexpr struct option OPTIONS[] = {
     { "update_package", required_argument, nullptr, 0 },
     { "retry_count", required_argument, nullptr, 0 },
+    { "panic_count", required_argument, nullptr, 0 },
     { "factory_wipe_data", no_argument, nullptr, 0 },
     { "user_wipe_data", no_argument, nullptr, 0 },
     { "menu_wipe_data", no_argument, nullptr, 0 },
@@ -736,6 +737,10 @@ std::unordered_map<std::string, std::function<void ()>> InitOptionsFuncTab(char*
         {
             upParams.retryCount = atoi(optarg);
             HwFaultRetry::GetInstance().SetRetryCount(upParams.retryCount);
+        }},
+        {"panic_count", [&]() -> void
+        {
+            upParams.panicCount = atoi(optarg);
         }},
         {"factory_wipe_data", [&]() -> void
         {
