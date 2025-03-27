@@ -28,6 +28,7 @@ using namespace Updater;
 constexpr const char *HANDLE_MISC_LIB = "libupdater_handle_misc.z.so";
 constexpr const char *NOTIFY_MISC_INFO = "NotifyWriteMiscInfo";
 constexpr const char *HANDLE_MISC_LIB_PATH = "/system/lib64/libupdater_handle_misc.z.so";
+constexpr const char *LIB_PATH = "/system/lib64/";
 
 static void PrintPrompts()
 {
@@ -82,7 +83,7 @@ static void HandleMiscInfo(int argc, char **argv)
     if (!Utils::IsFileExist(HANDLE_MISC_LIB_PATH)) {
         return;
     }
-    auto handle = Utils::LoadLibrary(HANDLE_MISC_LIB);
+    auto handle = Utils::LoadLibrary(HANDLE_MISC_LIB, LIB_PATH);
     if (handle == nullptr) {
         cout << "load libupdater_handle_misc fail";
         return;
