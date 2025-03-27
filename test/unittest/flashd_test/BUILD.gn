@@ -115,10 +115,10 @@ ohos_unittest("flashd_unittest") {
   ]
   if (updater_zlib_enable) {
     external_deps += [ "zlib:libz" ]
-  ｝
-  if (updater_hdc_depend) ｛
+  }
+  if (updater_hdc_depend) {
     external_deps += [ "hdc:hdc_updater" ]
-  ｝
+  }
   configs = [ "${updater_path}/test/unittest:utest_config" ]
   install_enable = true
   part_name = "updater"
