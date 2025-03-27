@@ -954,7 +954,7 @@ int UpdaterMain(int argc, char **argv)
             UPDATER_UI_INSTANCE.SaveScreen();
         }
         // Wait for user input
-        NotifyAutoReboot();
+        NotifyAutoReboot(mode);
         while (true) {
             Utils::UsSleep(DISPLAY_TIME);
         }
