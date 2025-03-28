@@ -433,12 +433,14 @@ int RestoreOriginalFile(const std::string &packagePath, const std::string &srcIm
     int32_t ret = pkgManager->LoadPackage(pckPath, components, PkgFile::PKG_TYPE_ZIP);
     if (ret != PKG_SUCCESS) {
         LOG(ERROR) << "Fail to load package";
+        PkgManager::ReleasePackageInstance(pkgManager);
         return USCRIPT_ERROR_EXECUTE;
     }
     PostMessageFunction postMessage = nullptr;
     UScriptEnv *env = new (std::nothrow) UpdaterEnv(pkgManager, postMessage, false);
     if (env == nullptr) {
         LOG(ERROR) << "Fail to creat env";
+        PkgManager::ReleasePackageInstance(pkgManager);
         return USCRIPT_ERROR_EXECUTE;
     }
 
@@ -449,6 +451,7 @@ int RestoreOriginalFile(const std::string &packagePath, const std::string &srcIm
     }
     (void)Utils::DeleteFile(packagePath);
     (void)Utils::DeleteFile(infos.devPath);
+    PkgManager::ReleasePackageInstance(pkgManager);
     delete env;
     env = nullptr;
     return result;
