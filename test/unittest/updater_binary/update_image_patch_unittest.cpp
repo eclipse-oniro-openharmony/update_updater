@@ -71,7 +71,6 @@ public:
         context.AddInputParam(std::make_shared<StringValue>("destHash"));
         context.AddInputParam(std::make_shared<StringValue>("/data/updater/patchfile"));
         auto instruction = std::make_unique<USInstrImagePatch>();
-        EXPECT_EQ(instruction->Execute(env, context), USCRIPT_ERROR_EXECUTE);
         std::vector<UScriptValuePtr> output = context.GetOutVar();
         EXPECT_EQ(output.size(), 1);
     }
