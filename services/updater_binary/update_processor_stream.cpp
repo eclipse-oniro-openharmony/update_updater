@@ -63,7 +63,7 @@ enum UpdateStatus {
 
 bool ReadLE16(std::istream& is, uint16_t& value)
 {
-    char buf[2];
+    char buf[2] = {0};
     if (!is.read(buf, sizeof(buf))) {
         return false;
     }
@@ -74,7 +74,7 @@ bool ReadLE16(std::istream& is, uint16_t& value)
 
 bool ReadLE32(std::istream& is, uint32_t& value)
 {
-    char buf[4];
+    char buf[4] = {0};
     if (!is.read(buf, sizeof(buf))) {
         return false;
     }

@@ -51,8 +51,6 @@
 #include "factory_reset/factory_reset.h"
 #include "write_state/write_state.h"
 
-#define TYPE_ZIP_HEADER  0xaa //update.bin文件TYPE
-
 namespace Updater {
 using Utils::String2Int;
 using namespace Hpackage;
@@ -91,9 +89,11 @@ constexpr uint32_t BYTE_SHIFT_16 = 16;
 constexpr uint32_t BYTE_SHIFT_24 = 24;
 constexpr uint32_t SECOND_BUFFER = 2;
 constexpr uint32_t THIRD_BUFFER = 3;
+constexpr uint8_t TYPE_ZIP_HEADER = 0xaa;
+
 bool ReadLE16(std::istream& is, uint16_t& value)
 {
-    char buf[2];
+    char buf[2] = {0};
     if (!is.read(buf, sizeof(buf))) {
         return false;
     }
@@ -104,7 +104,7 @@ bool ReadLE16(std::istream& is, uint16_t& value)
 
 bool ReadLE32(std::istream& is, uint32_t& value)
 {
-    char buf[4];
+    char buf[4] = {0};
     if (!is.read(buf, sizeof(buf))) {
         return false;
     }
@@ -874,7 +874,8 @@ UpdaterStatus DoUpdatePackages(UpdaterParams &upParams)
     return status;
 }
 
-static void PostUpdateBinfiles(UpdaterParams &upParams, bool updateResult)
+static void PostUpdate(UpdaterParams &upParams, bool updateResult,
+    const std::vector<std::string>& updateList, const std::string& type)
 {
     std::string writeBuffer;
     std::string buf;
@@ -893,18 +894,17 @@ static void PostUpdateBinfiles(UpdaterParams &upParams, bool updateResult)
 
     for (unsigned int i = 0; i < upParams.pkgLocation; i++) {
         time = DurationToString(upParams.installTime, i);
-        writeBuffer += upParams.updateBin.size() < i + 1 ? "" : upParams.updateBin[i];
+        writeBuffer += (i < updateList.size() ? updateList[i] : "");
         writeBuffer += "|pass||install_time=" + time + "|\n";
     }
     time = DurationToString(upParams.installTime, upParams.pkgLocation);
 
-    writeBuffer += upParams.updateBin.size() < upParams.pkgLocation + 1 ? "" :
-        upParams.updateBin[upParams.pkgLocation];
+    writeBuffer += (upParams.pkgLocation < updateList.size() ? updateList[upParams.pkgLocation] : "");
     writeBuffer += "|" + buf + "|install_time=" + time + "|\n";
-    for (unsigned int i = upParams.pkgLocation + 1; i < upParams.updateBin.size(); i++) {
-        writeBuffer += upParams.updateBin[i] + "\n";
+    for (unsigned int i = upParams.pkgLocation + 1; i < updateList.size(); i++) {
+        writeBuffer += updateList[i] + "\n";
     }
-    if (writeBuffer != "") {
+    if (!writeBuffer.empty()) {
         writeBuffer.pop_back();
     }
     LOG(INFO) << "post over, writeBuffer = " << writeBuffer;
@@ -912,42 +912,14 @@ static void PostUpdateBinfiles(UpdaterParams &upParams, bool updateResult)
     DeleteInstallTimeFile();
 }
 
+static void PostUpdateBinfiles(UpdaterParams &upParams, bool updateResult)
+{
+    PostUpdate(upParams, updateResult, upParams.updateBin, "Binfiles");
+}
+
 static void PostUpdatePackages(UpdaterParams &upParams, bool updateResult)
 {
-    std::string writeBuffer;
-    std::string buf;
-    std::string time;
-    if (!updateResult) {
-        const std::string resultPath = std::string(UPDATER_PATH) + "/" + std::string(UPDATER_RESULT_FILE);
-        std::ifstream fin {resultPath};
-        if (!fin.is_open() || !std::getline(fin, buf)) {
-            LOG(ERROR) << "read result file error " << resultPath;
-            buf = "fail|";
-        }
-    } else {
-        buf = "pass|";
-        upParams.pkgLocation = upParams.pkgLocation == 0 ? upParams.pkgLocation : (upParams.pkgLocation - 1);
-    }
-
-    for (unsigned int i = 0; i < upParams.pkgLocation; i++) {
-        time = DurationToString(upParams.installTime, i);
-        writeBuffer += upParams.updatePackage.size() < i + 1 ? "" : upParams.updatePackage[i];
-        writeBuffer += "|pass||install_time=" + time + "|\n";
-    }
-    time = DurationToString(upParams.installTime, upParams.pkgLocation);
-
-    writeBuffer += upParams.updatePackage.size() < upParams.pkgLocation + 1 ? "" :
-        upParams.updatePackage[upParams.pkgLocation];
-    writeBuffer += "|" + buf + "|install_time=" + time + "|\n";
-    for (unsigned int i = upParams.pkgLocation + 1; i < upParams.updatePackage.size(); i++) {
-        writeBuffer += upParams.updatePackage[i] + "\n";
-    }
-    if (writeBuffer != "") {
-        writeBuffer.pop_back();
-    }
-    LOG(INFO) << "post over, writeBuffer = " << writeBuffer;
-    WriteDumpResult(writeBuffer, UPDATER_RESULT_FILE);
-    DeleteInstallTimeFile();
+    PostUpdate(upParams, updateResult, upParams.updatePackage, "Packages");
 }
 
 static UpdaterStatus PreSdcardUpdatePackages(UpdaterParams &upParams)

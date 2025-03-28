@@ -55,7 +55,13 @@ int main(int argc, char **argv)
     LoadFstab();
 
     // 根据 packagePath 的后缀选择执行不同的函数
-    std::string fileExtension = packagePath.substr(packagePath.find_last_of(".") + 1);
+    std::string fileExtension;
+    size_t dotPosition = packagePath.find_last_of(".");
+    if (dotPosition == std::string::npos) {
+        LOG(ERROR) << "Invalid packagePath: No extension found in " << packagePath;
+        return EXIT_INVALID_ARGS;
+    }
+    fileExtension = packagePath.substr(dotPosition + 1);
     std::transform(fileExtension.begin(), fileExtension.end(), fileExtension.begin(), ::tolower);
     if (fileExtension == "zip") {
         return ProcessUpdater(retry, pipeFd, packagePath, Utils::GetCertName());

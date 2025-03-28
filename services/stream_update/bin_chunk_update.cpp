@@ -800,10 +800,10 @@ std::string BinChunkUpdate::ComputeFileHash(const std::string &partitionName,
 bool BinChunkUpdate::VerifyPartitionHash(const std::string &partitionName, const std::string &expectedHash,
                                          const std::map<std::string, uint64_t> &dataLenInfos)
 {
-    LOG(DEBUG) << "BinChunkUpdate::VerifyPartitionHash enter";
+    LOG(INFO) << "BinChunkUpdate::VerifyPartitionHash enter";
     std::string actualHash = ComputeFileHash(partitionName, dataLenInfos);
 
-    LOG(DEBUG) << "actualHash:" << actualHash << " expectedHash:" << expectedHash;
+    LOG(INFO) << "actualHash:" << actualHash << " expectedHash:" << expectedHash;
 
     if (actualHash != expectedHash) {
         LOG(ERROR) << "Error verifying hash for partition " << partitionName;
