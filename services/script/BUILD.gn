@@ -65,6 +65,7 @@ config("libupdaterscript_exported_headers") {
     "${updater_path}/services/script/script_interpreter",
     "${updater_path}/services/script/script_manager",
     "${updater_path}/services/script/threadpool",
+    "${updater_path}/services/script",
   ]
 }
 

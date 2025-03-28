@@ -17,7 +17,7 @@
 #include "script_instruction.h"
 #include "script_manager.h"
 #include "script_utils.h"
-#include "thread_pool.h"
+#include "threadpool/thread_pool.h"
 
 using namespace Uscript;
 

@@ -63,7 +63,7 @@ ohos_unittest("script_unittest") {
     "${updater_path}/services/script/script_instruction",
     "${updater_path}/services/script/script_interpreter",
     "${updater_path}/services/script/script_manager",
-    "${updater_path}/services/script/threadpool",
+    "${updater_path}/services/script",
     "$root_out_dir/updater/updater/yacc",
     "${updater_path}/test/unittest",
     "${updater_path}/utils/include",

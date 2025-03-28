@@ -127,7 +127,7 @@ ohos_unittest("updater_unittest") {
     "${updater_path}/services/script/script_instruction",
     "${updater_path}/services/script/script_interpreter",
     "${updater_path}/services/script/script_manager",
-    "${updater_path}/services/script/threadpool",
+    "${updater_path}/services/script",
     "$root_out_dir/updater/updater/yacc",
     "${updater_path}/services/package/pkg_algorithm",
     "${updater_path}/services/package/pkg_manager",
