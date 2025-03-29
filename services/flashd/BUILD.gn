@@ -72,7 +72,6 @@ common_sources = [
   "${HDC_PATH}/common/tlv.cpp",
   "${HDC_PATH}/common/transfer.cpp",
   "${HDC_PATH}/common/usb.cpp",
-  "${HDC_PATH}/common/uv_status.cpp",
 ]
 
 config("flashd_hdc_config") {
