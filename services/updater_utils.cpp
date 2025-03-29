@@ -187,11 +187,9 @@ bool IsMountDataAndSaveLogs(void)
     bool isSdCardMode = CheckUpdateMode(SDCARD_MODE);
     bool isUsbMode = CheckUpdateMode(USB_MODE);
     bool isSdCardIntralMode = CheckUpdateMode(SDCARD_INTRAL_MODE);
-    bool isOtaIntralMode = CheckUpdateMode(OTA_INTRAL_MODE);
     bool isLogMounted = GetMountStatusForMountPoint("/log") == MountStatus::MOUNT_MOUNTED;
     bool isDataAlreadyMounted = GetMountStatusForMountPoint("/data") == MountStatus::MOUNT_MOUNTED;
-    return (!(isSdCardMode || isUsbMode) && (isDataAlreadyMounted || !isLogMounted)) ||
-        isSdCardIntralMode || isOtaIntralMode;
+    return (!(isSdCardMode || isUsbMode) && (isDataAlreadyMounted || !isLogMounted)) || isSdCardIntralMode;
 }
 
 static void DeleteUpdaterTmpFiles()
