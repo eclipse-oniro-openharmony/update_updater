@@ -150,13 +150,23 @@ bool IsDirExist(const std::string &path)
     return false;
 }
 
-void* LoadLibrary(const std::string &libName)
+void* LoadLibrary(const std::string &libName, const std::string &libPath)
 {
     if (libName.empty()) {
         LOG(ERROR) << "lib name is empty";
         return nullptr;
     }
-    void* handle = dlopen(libName.c_str(), RTLD_LAZY);
+    if (libPath != "/system/lib64/" && libPath != "/vendor/lib64/") {
+        LOG(ERROR) << "lib path invalid";
+        return nullptr;
+    }
+    std::string libAbsPath = libPath + libName;
+    char realPath[PATH_MAX + 1] = {0};
+    if (realpath(libAbsPath.c_str(), realPath) == nullptr) {
+        LOG(ERROR) << "realpath error";
+        return nullptr;
+    }
+    void* handle = dlopen(libAbsPath.c_str(), RTLD_LAZY);
     if (handle == nullptr) {
         LOG(ERROR) << "dlopen fail, lib name = " << libName << "; dlerror = " << dlerror();
         return nullptr;

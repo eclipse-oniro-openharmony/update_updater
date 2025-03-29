@@ -33,6 +33,7 @@ using Updater::Utils::SplitString;
 constexpr const char *HANDLE_MISC_LIB = "libupdater_handle_misc.z.so";
 constexpr const char *HANDLE_MISC_INFO = "HandleUpdateMiscInfo";
 constexpr const char *HANDLE_MISC_LIB_PATH = "/system/lib64/libupdater_handle_misc.z.so";
+constexpr const char *LIB_PATH = "/system/lib64/";
 
 static void HandleMiscMsg(const struct UpdateMessage &updateMsg, const std::string &upgradeType)
 {
@@ -40,7 +41,7 @@ static void HandleMiscMsg(const struct UpdateMessage &updateMsg, const std::stri
         LOG(WARNING) << "libupdater_handle_misc.z.so is not exist";
         return;
     }
-    auto handle = Utils::LoadLibrary(HANDLE_MISC_LIB);
+    auto handle = Utils::LoadLibrary(HANDLE_MISC_LIB, LIB_PATH);
     if (handle == nullptr) {
         LOG(ERROR) << "load libupdater_handle_misc fail";
         return;

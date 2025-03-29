@@ -623,7 +623,8 @@ UpdaterStatus UpdaterFromSdcard(UpdaterParams &upParams)
     UpdaterStatus status = CheckSdcardPkgs(upParams);
     if (status != UPDATE_SUCCESS) {
         LOG(ERROR) << "can not find sdcard packages";
-        if (NotifyActionResult(upParams, status, {SET_INSTALL_STATUS}) != UPDATE_SUCCESS) {
+        if (NotifyActionResult(upParams, status, {SET_INSTALL_STATUS,
+            SET_UPDATE_STATUS, GET_UPDATE_STATUS}) != UPDATE_SUCCESS) {
             LOG(ERROR) << "notify action fail";
         }
         return UPDATE_ERROR;
@@ -897,6 +898,11 @@ __attribute__((weak)) bool NotifySdUpdateReboot(const UpdaterParams &upParams)
     return false;
 }
 
+__attribute__((weak)) void NotifyAutoReboot(PackageUpdateMode &mode)
+{
+    return;
+}
+
 void RebootAfterUpdateSuccess(const UpdaterParams &upParams)
 {
     if (IsNeedWipe()) {
@@ -953,6 +959,7 @@ int UpdaterMain(int argc, char **argv)
             UPDATER_UI_INSTANCE.SaveScreen();
         }
         // Wait for user input
+        NotifyAutoReboot(mode);
         while (true) {
             Utils::UsSleep(DISPLAY_TIME);
         }
