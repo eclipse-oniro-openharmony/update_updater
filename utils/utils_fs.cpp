@@ -150,7 +150,7 @@ bool IsDirExist(const std::string &path)
     return false;
 }
 
-void* LoadLibrary(const std::string &libName, const std::string *libPath)
+void* LoadLibrary(const std::string &libName, const std::string &libPath)
 {
     if (libName.empty()) {
         LOG(ERROR) << "lib name is empty";
