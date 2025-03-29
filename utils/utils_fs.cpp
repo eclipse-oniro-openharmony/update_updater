@@ -164,8 +164,7 @@ void* LoadLibrary(const std::string &libName, const std::string &libPath)
     char realPath[PATH_MAX + 1] = {0};
     if (realpath(libAbsPath.c_str(), realPath) == nullptr) {
         LOG(ERROR) << "realpath error";
-        UPDATER_LAST_WORD(PKG_INVALID_FILE, "realpath error");
-        return PKG_INVALID_FILE;
+        return nullptr;
     }
     void* handle = dlopen(libAbsPath.c_str(), RTLD_LAZY);
     if (handle == nullptr) {
