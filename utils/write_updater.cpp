@@ -104,7 +104,6 @@ int main(int argc, char **argv)
         PrintPrompts();
         return -1;
     }
-
     const std::string miscFile = "/dev/block/by-name/misc";
     struct UpdateMessage boot {};
     struct UpdaterPara para {};
@@ -135,10 +134,7 @@ int main(int argc, char **argv)
             return -1;
         }
     } else if (strcmp(argv[1], "updater_para") == 0) {
-        if (WriteUpdaterPara(argc, para) != 0) {
-            return -1;
-        }
-        return 0;
+        return WriteUpdaterPara(argc, para) != 0 ? -1 : 0;
     } else {
         cout << "Please input correct command!" << endl;
         return -1;
