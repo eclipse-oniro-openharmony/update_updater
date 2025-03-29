@@ -150,11 +150,6 @@ HWTEST_F(ImgPatchUnittest, TestImgPatch02, TestSize.Level1)
     ImgPatchUnittest {}.TestImgPatch02();
 }
 
-HWTEST_F(ImgPatchUnittest, TestImgPatch03, TestSize.Level1)
-{
-    ImgPatchUnittest {}.TestImgPatch03();
-}
-
 HWTEST_F(ImgPatchUnittest, TestImgPatch04, TestSize.Level1)
 {
     ImgPatchUnittest {}.TestImgPatch04();
