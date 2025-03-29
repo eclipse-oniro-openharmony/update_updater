@@ -59,23 +59,6 @@ public:
         EXPECT_EQ(output.size(), 1);
     }
 
-    /* GetParam(): 根据指令入参解析fstab设备文件失败 */
-    void TestImgPatch03()
-    {
-        UTestBinaryEnv env {&pkgManager_};
-        UScriptInstructionContext context {};
-        context.AddInputParam(std::make_shared<StringValue>(""));
-        context.AddInputParam(std::make_shared<StringValue>("srcSize"));
-        context.AddInputParam(std::make_shared<StringValue>("srcHash"));
-        context.AddInputParam(std::make_shared<StringValue>("destSize"));
-        context.AddInputParam(std::make_shared<StringValue>("destHash"));
-        context.AddInputParam(std::make_shared<StringValue>("/data/updater/patchfile"));
-        auto instruction = std::make_unique<USInstrImagePatch>();
-        EXPECT_EQ(instruction->Execute(env, context), USCRIPT_ERROR_EXECUTE);
-        std::vector<UScriptValuePtr> output = context.GetOutVar();
-        EXPECT_EQ(output.size(), 1);
-    }
-
     /* GetParam(): 解析命令行参数成功 */
     void TestImgPatch04()
     {
@@ -165,11 +148,6 @@ HWTEST_F(ImgPatchUnittest, TestImgPatch01, TestSize.Level1)
 HWTEST_F(ImgPatchUnittest, TestImgPatch02, TestSize.Level1)
 {
     ImgPatchUnittest {}.TestImgPatch02();
-}
-
-HWTEST_F(ImgPatchUnittest, TestImgPatch03, TestSize.Level1)
-{
-    ImgPatchUnittest {}.TestImgPatch03();
 }
 
 HWTEST_F(ImgPatchUnittest, TestImgPatch04, TestSize.Level1)

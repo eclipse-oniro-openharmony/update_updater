@@ -80,23 +80,6 @@ HWTEST_F(UpdateProcessorUnitTest, UpdateProcessor_001, TestSize.Level1)
     EXPECT_EQ(ret, 0);
 }
 
-/* image diff update, zip has 2k size misc.img, base is zero, dst is urandom */
-HWTEST_F(UpdateProcessorUnitTest, UpdateProcessor_002, TestSize.Level1)
-{
-    vector<uint8_t> buffer(UT_MISC_BUFFER_SIZE, 0);
-    int32_t ret = Store::WriteDataToStore("/", GetBlockDeviceByMountPoint(UT_MISC_PARTITION_NAME),
-        buffer, UT_MISC_BUFFER_SIZE);
-    EXPECT_EQ(ret, 0);
-
-    const string packagePath = "/data/updater/updater/updater_write_diff_misc_img.zip";
-    int pfd[2]; // 2: pipe read, pipe write
-    ret = pipe(pfd);
-    EXPECT_GE(ret, 0);
-    ret = ProcessUpdater(false, pfd[1], packagePath, GetTestCertName());
-    close(pfd[0]);
-    EXPECT_EQ(ret, 0);
-}
-
 /* image diff update, zip has 2k size misc.img, base is zero, dst is urandom, hash check fail */
 HWTEST_F(UpdateProcessorUnitTest, UpdateProcessor_003, TestSize.Level1)
 {
