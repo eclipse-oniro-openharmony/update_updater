@@ -424,6 +424,7 @@ static UpdaterStatus PreUpdatePackages(UpdaterParams &upParams)
         return UPDATE_SUCCESS;
     }
 
+    UpdaterInit::GetInstance().InvokeEvent(UPDATER_PRE_VERIFY_PACKAGE_EVENT);
     // verify package first
     if (VerifyPackages(upParams) != UPDATE_SUCCESS) {
         return UPDATE_CORRUPT; // verify package failed must return UPDATE_CORRUPT, ux need it !!!

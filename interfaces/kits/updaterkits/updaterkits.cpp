@@ -228,7 +228,7 @@ bool RebootAndInstallSdcardPackage(const std::string &miscFile, const std::vecto
 int RebootAndInstallUpgradePackage(const std::string &miscFile, const std::vector<std::string> &packageName,
     const std::string &upgradeType)
 {
-    if (packageName.size() == 0 && upgradeType == UPGRADE_TYPE_OTA) {
+    if (packageName.size() == 0 && (upgradeType == UPGRADE_TYPE_OTA || upgradeType == UPGRADE_TYPE_OTA_INTRAL)) {
         LOG(ERROR) << "updaterkits: invalid argument. one of arugments is empty";
         return 1; // 1 : Invalid input
     }
@@ -249,6 +249,9 @@ int RebootAndInstallUpgradePackage(const std::string &miscFile, const std::vecto
     } else if (upgradeType == UPGRADE_TYPE_SD_INTRAL) {
         ret = snprintf_s(updateMsg.update, sizeof(updateMsg.update), sizeof(updateMsg.update) - 1,
             "--sdcard_intral_update\n");
+    } else if (upgradeType == UPGRADE_TYPE_OTA_INTRAL) {
+        ret = snprintf_s(updateMsg.update, sizeof(updateMsg.update), sizeof(updateMsg.update) - 1,
+            "--ota_intral_update\n");
     }
     if (ret < 0) {
         LOG(ERROR) << "updaterkits: copy updater message failed";
@@ -258,7 +261,7 @@ int RebootAndInstallUpgradePackage(const std::string &miscFile, const std::vecto
     if (addRet != 0) {
         return addRet;
     }
-    if (upgradeType == UPGRADE_TYPE_OTA) {
+    if (upgradeType == UPGRADE_TYPE_OTA || upgradeType == UPGRADE_TYPE_OTA_INTRAL) {
         WriteToMiscAndResultFileRebootToUpdater(updateMsg, upgradeType);
     } else {
         WriteToMiscAndRebootToUpdater(updateMsg);
