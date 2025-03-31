@@ -28,7 +28,10 @@ ohos_static_library("libslotinfo") {
   if (init_feature_ab_partition) {
     defines = [ "UPDATER_AB_SUPPORT" ]
     external_deps = [
+      "c_utils:utilsbase",
       "drivers_peripheral_partitionslot:libpartition_slot_manager",
+      "hilog:libhilog_base",
+      "init:libbegetutil_static",
     ]
   }
 
