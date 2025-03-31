@@ -628,6 +628,7 @@ static UpdaterStatus VerifyCommonFiles(UpdaterParams &upParams)
             LOG(WARNING) << "all package has been upgraded, skip pre process";
             return UPDATE_SUCCESS;
         }
+        UpdaterInit::GetInstance().InvokeEvent(UPDATER_PRE_VERIFY_PACKAGE_EVENT);
         // 从bin文件中提取zip文件
         if (VerifyBinfiles(upParams) != UPDATE_SUCCESS) {
             LOG(ERROR) << "VerifyBinfiles failed";
@@ -638,6 +639,7 @@ static UpdaterStatus VerifyCommonFiles(UpdaterParams &upParams)
             LOG(WARNING) << "all package has been upgraded, skip pre process";
             return UPDATE_SUCCESS;
         }
+        UpdaterInit::GetInstance().InvokeEvent(UPDATER_PRE_VERIFY_PACKAGE_EVENT);
         // verify package first
         if (VerifyPackages(upParams) != UPDATE_SUCCESS) {
             LOG(ERROR) << "VerifyPackages failed";
@@ -670,13 +672,6 @@ static UpdaterStatus PreUpdatePackages(UpdaterParams &upParams)
         (void)DeleteFile(resultPath);
         LOG(INFO) << "delete last upgrade file";
     }
-
-    if (upParams.pkgLocation == upParams.updatePackage.size()) {
-        LOG(WARNING) << "all package has been upgraded, skip pre process";
-        return UPDATE_SUCCESS;
-    }
-
-    UpdaterInit::GetInstance().InvokeEvent(UPDATER_PRE_VERIFY_PACKAGE_EVENT);
     // verify package first
     if (VerifyCommonFiles(upParams) != UPDATE_SUCCESS) {
         return UPDATE_CORRUPT; // verify package failed must return UPDATE_CORRUPT, ux need it !!!

@@ -117,10 +117,8 @@ static void HandleMiscInfo(int argc, char **argv)
     Utils::CloseLibrary(handle);
 }
 
-static int HandleCommand(int argc, char** argv)
+static int HandleCommand(int argc, char** argv, struct UpdateMessage& boot, struct UpdaterPara& para)
 {
-    struct UpdateMessage boot {};
-    struct UpdaterPara para {};
     if (strcmp(argv[1], "bin") == 0) {
         // 执行流式bin文件升级
         if (ExceptionBin(argc, argv, boot) == -1) {
@@ -168,7 +166,10 @@ int main(int argc, char **argv)
         return -1;
     }
     const std::string miscFile = "/dev/block/by-name/misc";
-    int cmdResult = HandleCommand(argc, argv);
+    struct UpdateMessage boot {};
+    struct UpdaterPara para {};
+
+    int cmdResult = HandleCommand(argc, argv, boot, para);
     if (cmdResult == -1) {
         cout << "HandleCommand failed!" << endl;
         return -1;
