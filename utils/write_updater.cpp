@@ -28,6 +28,7 @@ using namespace Updater;
 constexpr const char *HANDLE_MISC_LIB = "libupdater_handle_misc.z.so";
 constexpr const char *NOTIFY_MISC_INFO = "NotifyWriteMiscInfo";
 constexpr const char *HANDLE_MISC_LIB_PATH = "/system/lib64/libupdater_handle_misc.z.so";
+constexpr const char *LIB_PATH = "/system/lib64/";
 
 static void PrintPrompts()
 {
@@ -37,7 +38,8 @@ static void PrintPrompts()
     cout << "factory_reset :  write_updater user_factory_reset" << endl;
     cout << "sdcard_update :  write_updater sdcard_update" << endl;
     cout << "clear command :  write_updater clear" << endl;
-    cout << "updater_para  : write_updater updater_para" << endl;
+    cout << "updater_para  :  write_updater updater_para" << endl;
+    cout << "intral_update :  write_updater ota_intral_update /data/updater/updater.zip" << endl;
 }
 
 static int ExceptionBin(int argc, char **argv, UpdateMessage &boot)
@@ -100,7 +102,7 @@ static void HandleMiscInfo(int argc, char **argv)
     if (!Utils::IsFileExist(HANDLE_MISC_LIB_PATH)) {
         return;
     }
-    auto handle = Utils::LoadLibrary(HANDLE_MISC_LIB);
+    auto handle = Utils::LoadLibrary(HANDLE_MISC_LIB, LIB_PATH);
     if (handle == nullptr) {
         cout << "load libupdater_handle_misc fail";
         return;
@@ -115,13 +117,8 @@ static void HandleMiscInfo(int argc, char **argv)
     Utils::CloseLibrary(handle);
 }
 
-int main(int argc, char **argv)
+static int HandleCommand(int argc, char** argv)
 {
-    if (argc == 1) {
-        PrintPrompts();
-        return -1;
-    }
-    const std::string miscFile = "/dev/block/by-name/misc";
     struct UpdateMessage boot {};
     struct UpdaterPara para {};
     if (strcmp(argv[1], "bin") == 0) {
@@ -150,13 +147,30 @@ int main(int argc, char **argv)
             cout << "strncpy_s failed!" << endl;
             return -1;
         }
-    } else if (strcmp(argv[1], "updater_para") == 0) {
-        if (WriteUpdaterPara(argc, para) != 0) {
+    } else if (strcmp(argv[1], "ota_intral_update") == 0) {
+        if (ExceptionUpdater(argc, argv, boot) == -1 ||
+            strcat_s(boot.update, sizeof(boot.update), "\n--ota_intral_update") != 0) {
             return -1;
         }
-        return 0;
+    } else if (strcmp(argv[1], "updater_para") == 0) {
+        return WriteUpdaterPara(argc, para) != 0 ? -1 : 0;
     } else {
         cout << "Please input correct command!" << endl;
+        return -1;
+    }
+    return 0;
+}
+
+int main(int argc, char **argv)
+{
+    if (argc == 1) {
+        PrintPrompts();
+        return -1;
+    }
+    const std::string miscFile = "/dev/block/by-name/misc";
+    int cmdResult = HandleCommand(argc, argv);
+    if (cmdResult == -1) {
+        cout << "HandleCommand failed!" << endl;
         return -1;
     }
     bool ret = WriteUpdaterMessage(miscFile, boot);

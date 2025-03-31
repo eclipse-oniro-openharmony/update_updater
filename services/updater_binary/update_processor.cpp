@@ -510,6 +510,9 @@ int ProcessUpdater(bool retry, int pipeFd, const std::string &packagePath, const
         return EXIT_EXEC_SCRIPT_ERROR;
     }
     if (!DevicePtable::GetInstance().LoadPartitionInfo()) {
+        LOG(ERROR) << "load partition fail";
+        PkgManager::ReleasePackageInstance(pkgManager);
+        UPDATER_LAST_WORD("Error to load partition");
         return EXIT_EXEC_SCRIPT_ERROR;
     }
 #endif

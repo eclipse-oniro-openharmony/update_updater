@@ -18,6 +18,7 @@
 
 constexpr const char *UPGRADE_TYPE_OTA = "ota";
 constexpr const char *UPGRADE_TYPE_SD = "sdcard";
+constexpr const char *UPGRADE_TYPE_OTA_INTRAL = "ota_intral";
 constexpr const char *UPGRADE_TYPE_SD_INTRAL = "sdcard_intral";
 
 // Reboot system to updater mode and trigger installing update package.

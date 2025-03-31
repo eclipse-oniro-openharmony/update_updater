@@ -62,6 +62,7 @@ constexpr struct option OPTIONS[] = {
     { "update_bin", required_argument, nullptr, 0 },
     { "update_package", required_argument, nullptr, 0 },
     { "retry_count", required_argument, nullptr, 0 },
+    { "panic_count", required_argument, nullptr, 0 },
     { "factory_wipe_data", no_argument, nullptr, 0 },
     { "user_wipe_data", no_argument, nullptr, 0 },
     { "menu_wipe_data", no_argument, nullptr, 0 },
@@ -669,8 +670,16 @@ static UpdaterStatus PreUpdatePackages(UpdaterParams &upParams)
         (void)DeleteFile(resultPath);
         LOG(INFO) << "delete last upgrade file";
     }
-    if (VerifyCommonFiles(upParams) == UPDATE_CORRUPT) {
-        return UPDATE_CORRUPT;
+
+    if (upParams.pkgLocation == upParams.updatePackage.size()) {
+        LOG(WARNING) << "all package has been upgraded, skip pre process";
+        return UPDATE_SUCCESS;
+    }
+
+    UpdaterInit::GetInstance().InvokeEvent(UPDATER_PRE_VERIFY_PACKAGE_EVENT);
+    // verify package first
+    if (VerifyCommonFiles(upParams) != UPDATE_SUCCESS) {
+        return UPDATE_CORRUPT; // verify package failed must return UPDATE_CORRUPT, ux need it !!!
     }
 
     // Only handle UPATE_ERROR and UPDATE_SUCCESS here.Let package verify handle others.
@@ -964,7 +973,8 @@ UpdaterStatus UpdaterFromSdcard(UpdaterParams &upParams)
     UpdaterStatus status = CheckSdcardPkgs(upParams);
     if (status != UPDATE_SUCCESS) {
         LOG(ERROR) << "can not find sdcard packages";
-        if (NotifyActionResult(upParams, status, {SET_INSTALL_STATUS}) != UPDATE_SUCCESS) {
+        if (NotifyActionResult(upParams, status, {SET_INSTALL_STATUS,
+            SET_UPDATE_STATUS, GET_UPDATE_STATUS}) != UPDATE_SUCCESS) {
             LOG(ERROR) << "notify action fail";
         }
         return UPDATE_ERROR;
@@ -1098,6 +1108,10 @@ std::unordered_map<std::string, std::function<void ()>> InitOptionsFuncTab(char*
         {
             upParams.retryCount = atoi(optarg);
             HwFaultRetry::GetInstance().SetRetryCount(upParams.retryCount);
+        }},
+        {"panic_count", [&]() -> void
+        {
+            upParams.panicCount = atoi(optarg);
         }},
         {"factory_wipe_data", [&]() -> void
         {
@@ -1254,6 +1268,11 @@ __attribute__((weak)) bool NotifySdUpdateReboot(const UpdaterParams &upParams)
     return false;
 }
 
+__attribute__((weak)) void NotifyAutoReboot(PackageUpdateMode &mode)
+{
+    return;
+}
+
 void RebootAfterUpdateSuccess(const UpdaterParams &upParams)
 {
     if (IsNeedWipe()) {
@@ -1310,6 +1329,7 @@ int UpdaterMain(int argc, char **argv)
             UPDATER_UI_INSTANCE.SaveScreen();
         }
         // Wait for user input
+        NotifyAutoReboot(mode);
         while (true) {
             Utils::UsSleep(DISPLAY_TIME);
         }

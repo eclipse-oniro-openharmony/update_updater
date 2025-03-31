@@ -21,7 +21,7 @@
 #include "pkg_manager.h"
 #include "script_instruction.h"
 #include "script_manager.h"
-#include "thread_pool.h"
+#include "threadpool/thread_pool.h"
 
 namespace Uscript {
 class ScriptInstructionHelper;

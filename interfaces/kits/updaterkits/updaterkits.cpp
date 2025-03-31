@@ -33,6 +33,7 @@ using Updater::Utils::SplitString;
 constexpr const char *HANDLE_MISC_LIB = "libupdater_handle_misc.z.so";
 constexpr const char *HANDLE_MISC_INFO = "HandleUpdateMiscInfo";
 constexpr const char *HANDLE_MISC_LIB_PATH = "/system/lib64/libupdater_handle_misc.z.so";
+constexpr const char *LIB_PATH = "/system/lib64/";
 
 static void HandleMiscMsg(const struct UpdateMessage &updateMsg, const std::string &upgradeType)
 {
@@ -40,7 +41,7 @@ static void HandleMiscMsg(const struct UpdateMessage &updateMsg, const std::stri
         LOG(WARNING) << "libupdater_handle_misc.z.so is not exist";
         return;
     }
-    auto handle = Utils::LoadLibrary(HANDLE_MISC_LIB);
+    auto handle = Utils::LoadLibrary(HANDLE_MISC_LIB, LIB_PATH);
     if (handle == nullptr) {
         LOG(ERROR) << "load libupdater_handle_misc fail";
         return;
@@ -227,7 +228,7 @@ bool RebootAndInstallSdcardPackage(const std::string &miscFile, const std::vecto
 int RebootAndInstallUpgradePackage(const std::string &miscFile, const std::vector<std::string> &packageName,
     const std::string &upgradeType)
 {
-    if (packageName.size() == 0 && upgradeType == UPGRADE_TYPE_OTA) {
+    if (packageName.size() == 0 && (upgradeType == UPGRADE_TYPE_OTA || upgradeType == UPGRADE_TYPE_OTA_INTRAL)) {
         LOG(ERROR) << "updaterkits: invalid argument. one of arugments is empty";
         return 1; // 1 : Invalid input
     }
@@ -248,6 +249,9 @@ int RebootAndInstallUpgradePackage(const std::string &miscFile, const std::vecto
     } else if (upgradeType == UPGRADE_TYPE_SD_INTRAL) {
         ret = snprintf_s(updateMsg.update, sizeof(updateMsg.update), sizeof(updateMsg.update) - 1,
             "--sdcard_intral_update\n");
+    } else if (upgradeType == UPGRADE_TYPE_OTA_INTRAL) {
+        ret = snprintf_s(updateMsg.update, sizeof(updateMsg.update), sizeof(updateMsg.update) - 1,
+            "--ota_intral_update\n");
     }
     if (ret < 0) {
         LOG(ERROR) << "updaterkits: copy updater message failed";
@@ -257,7 +261,7 @@ int RebootAndInstallUpgradePackage(const std::string &miscFile, const std::vecto
     if (addRet != 0) {
         return addRet;
     }
-    if (upgradeType == UPGRADE_TYPE_OTA) {
+    if (upgradeType == UPGRADE_TYPE_OTA || upgradeType == UPGRADE_TYPE_OTA_INTRAL) {
         WriteToMiscAndResultFileRebootToUpdater(updateMsg, upgradeType);
     } else {
         WriteToMiscAndRebootToUpdater(updateMsg);
