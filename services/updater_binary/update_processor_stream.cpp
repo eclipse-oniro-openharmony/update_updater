@@ -88,31 +88,31 @@ static int ProcessUpdateFile(const std::string &packagePath, FILE* pipeWrite)
 {
     std::shared_ptr<Updater::BinChunkUpdate> binChunkUpdate_ {};
     // 打开输入文件
-    std::ifstream in_file(packagePath, std::ios::binary);
-    if (!in_file) {
+    std::ifstream inFile(packagePath, std::ios::binary);
+    if (!inFile) {
         LOG(ERROR) << "Error: Failed to open " << packagePath;
         return UPDATE_ERROR;
     }
 
     uint16_t type = 0;
-    if (!ReadLE16(in_file, type)) {
+    if (!ReadLE16(inFile, type)) {
         LOG(ERROR) << "Failed to read type";
         return UPDATE_ERROR;
     }
     
     if (type != TYPE_ZIP_HEADER) {
         LOG(ERROR) << "Unsupported header type: 0x" << std::hex << type;
-        in_file.close();
+        inFile.close();
         return UPDATE_ERROR;
     }
     uint32_t length = 0;
-    if (!ReadLE32(in_file, length)) {
+    if (!ReadLE32(inFile, length)) {
         LOG(ERROR) << "Failed to read length";
         return UPDATE_ERROR;
     }
 
-    if (!in_file.seekg(length, std::ios::cur)) {
-        in_file.close();
+    if (!inFile.seekg(length, std::ios::cur)) {
+        inFile.close();
         LOG(ERROR) << "Failed to seekg length";
         return UPDATE_ERROR;
     }
@@ -120,9 +120,9 @@ static int ProcessUpdateFile(const std::string &packagePath, FILE* pipeWrite)
     // 读取剩余数据
     std::vector<uint8_t> buffer_stream(BUFFER_SIZE);
     binChunkUpdate_ = std::make_unique<Updater::BinChunkUpdate>(MAX_UPDATER_BUFFER_SIZE);
-    while (!in_file.eof()) {
-        in_file.read(reinterpret_cast<char*>(buffer_stream.data()), buffer_stream.size());
-        size_t readBytes = in_file.gcount();
+    while (!inFile.eof()) {
+        inFile.read(reinterpret_cast<char*>(buffer_stream.data()), buffer_stream.size());
+        size_t readBytes = inFile.gcount();
         uint32_t dealLen = 0;
         if (readBytes > 0) {
             UpdateResultCode ret = binChunkUpdate_->StartBinChunkUpdate(
@@ -138,7 +138,7 @@ static int ProcessUpdateFile(const std::string &packagePath, FILE* pipeWrite)
             }
         }
     }
-    in_file.close();
+    inFile.close();
     return UPDATE_SUCCESS;
 }
 

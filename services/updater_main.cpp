@@ -133,13 +133,13 @@ static UpdaterStatus ReadUpdateStreamzip(const std::string &packagePath)
     std::string outputPathStr = outputPath.string();
     LOG(INFO) << "outputPathStr:" << outputPathStr;
 
-    std::ifstream in_file(packagePath, std::ios::binary);
-    if (!in_file) {
+    std::ifstream inFile(packagePath, std::ios::binary);
+    if (!inFile) {
         LOG(ERROR) << "Error: Failed to open " << packagePath;
         return UPDATE_ERROR;
     }
     uint16_t type;
-    if (!ReadLE16(in_file, type)) {
+    if (!ReadLE16(inFile, type)) {
         LOG(ERROR) << "Failed to read type";
         return UPDATE_ERROR;
     }
@@ -149,14 +149,14 @@ static UpdaterStatus ReadUpdateStreamzip(const std::string &packagePath)
     }
 
     uint32_t length;
-    if (!ReadLE32(in_file, length)) {
+    if (!ReadLE32(inFile, length)) {
         LOG(ERROR) << "Failed to read length";
         return UPDATE_ERROR;
     }
     LOG(INFO) << "header.length = " << length;
 
     std::vector<char> valueData(length);
-    if (!in_file.read(valueData.data(), length)) {
+    if (!inFile.read(valueData.data(), length)) {
         LOG(ERROR) << "Incomplete value data";
         return UPDATE_ERROR;
     }
