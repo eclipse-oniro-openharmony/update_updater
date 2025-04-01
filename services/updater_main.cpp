@@ -1089,7 +1089,7 @@ UpdaterStatus DoUpdaterEntry(UpdaterParams &upParams)
             std::this_thread::sleep_for(std::chrono::milliseconds(UI_SHOW_DURATION));
         }
     } else if (upParams.updateMode == SUBPKG_UPDATE) {
-        UPDATER_UI_INSTANCE.ShowProgress();
+        UPDATER_UI_INSTANCE.ShowProgressPage();
         status = UpdateSubPkg(upParams);
         if (status == UPDATE_SUCCESS) {
             UPDATER_UI_INSTANCE.ShowSuccessPage();
