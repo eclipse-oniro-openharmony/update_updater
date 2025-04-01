@@ -150,6 +150,11 @@ static int HandleCommand(int argc, char** argv, struct UpdateMessage& boot, stru
             strcat_s(boot.update, sizeof(boot.update), "\n--ota_intral_update") != 0) {
             return -1;
         }
+    } else if (strcmp(argv[1], "subpkg_update") == 0) {
+        if (strncpy_s(boot.update, sizeof(boot.update), "--subpkg_update", sizeof(boot.update) - 1) != 0) {
+            cout << "strncpy_s failed!" << endl;
+            return -1;
+        }
     } else if (strcmp(argv[1], "updater_para") == 0) {
         return WriteUpdaterPara(argc, para) != 0 ? -1 : 0;
     } else {
@@ -174,10 +179,12 @@ int main(int argc, char **argv)
         cout << "HandleCommand failed!" << endl;
         return -1;
     }
-    bool ret = WriteUpdaterMessage(miscFile, boot);
-    if (!ret) {
-        cout << "WriteUpdaterMessage failed!" << endl;
-        return -1;
+    if (strcmp(argv[1], "notify_update") != 0) {
+        bool ret = WriteUpdaterMessage(miscFile, boot);
+        if (!ret) {
+            cout << "WriteUpdaterMessage failed!" << endl;
+            return -1;
+        }
     }
     HandleMiscInfo(argc, argv);
     return 0;

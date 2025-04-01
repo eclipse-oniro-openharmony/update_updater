@@ -17,11 +17,13 @@
 
 #include <iostream>
 #include <string>
+#include "package/pkg_manager.h"
 #include "pkg_manager.h"
 #include "updater/updater.h"
 #include "updater_init.h"
 
 namespace Updater {
+using namespace Hpackage;
 enum FactoryResetMode {
     USER_WIPE_DATA = 0,
     FACTORY_WIPE_DATA,
@@ -57,6 +59,8 @@ bool IsDouble(const std::string& str);
 
 UpdaterStatus InstallUpdaterPackages(UpdaterParams &upParams);
 
+int OtaUpdatePreCheck(PkgManager::PkgeManagerPtr pkgManager, const std::string &packagePath);
+
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
@@ -75,6 +79,8 @@ bool NotifySdUpdateReboot(const UpdaterParams &upParams);
 void NotifyReboot(const std::string& rebootTarget, const std::string &rebootReason, const std::string &extData = "");
 UpdaterStatus NotifyActionResult(UpdaterParams &upParams,
     UpdaterStatus &status, const std::vector<NotifyAction> &notifyActionVec);
+UpdaterStatus UpdateSubPkg(UpdaterParams &upParams);
+void NotifyPreCheck(UpdaterStatus &status, UpdaterParams &upParams);
 #ifdef __cplusplus
 #if __cplusplus
 }

@@ -38,6 +38,7 @@ using PostMessageFunction = std::function<void(const char *cmd, const char *cont
 enum PackageUpdateMode {
     HOTA_UPDATE = 0,
     SDCARD_UPDATE,
+    SUBPKG_UPDATE,
     UNKNOWN_UPDATE,
 };
 
