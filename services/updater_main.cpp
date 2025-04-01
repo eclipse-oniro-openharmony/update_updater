@@ -1002,8 +1002,6 @@ UpdaterStatus InstallUpdaterBinfiles(UpdaterParams &upParams)
     UpdaterStatus status = PreUpdatePackages(upParams);
     if (status == UPDATE_SUCCESS) {
         status = DoUpdateBinfiles(upParams);
-    } else if (NotifyActionResult(upParams, status, {SET_UPDATE_STATUS, GET_UPDATE_STATUS}) != UPDATE_SUCCESS) {
-        LOG(ERROR) << "notify action fail";
     }
     PostUpdateBinfiles(upParams, status == UPDATE_SUCCESS);
     UpdaterInit::GetInstance().InvokeEvent(UPDATER_POST_UPDATE_PACKAGE_EVENT);
@@ -1016,6 +1014,8 @@ UpdaterStatus InstallUpdaterPackages(UpdaterParams &upParams)
     UpdaterStatus status = PreUpdatePackages(upParams);
     if (status == UPDATE_SUCCESS) {
         status = DoUpdatePackages(upParams);
+    } else if (NotifyActionResult(upParams, status, {SET_UPDATE_STATUS, GET_UPDATE_STATUS}) != UPDATE_SUCCESS) {
+        LOG(ERROR) << "notify action fail";
     }
     PostUpdatePackages(upParams, status == UPDATE_SUCCESS);
     UpdaterInit::GetInstance().InvokeEvent(UPDATER_POST_UPDATE_PACKAGE_EVENT);
