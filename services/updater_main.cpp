@@ -94,6 +94,7 @@ constexpr uint8_t TYPE_ZIP_HEADER = 0xaa;
 
 bool ReadLE16(std::istream& is, uint16_t& value)
 {
+    // 定义2字节缓冲区，用于读取小端序的16位无符号整数（每字节8位）
     char buf[2] = {0};
     if (!is.read(buf, sizeof(buf))) {
         return false;
@@ -105,6 +106,7 @@ bool ReadLE16(std::istream& is, uint16_t& value)
 
 bool ReadLE32(std::istream& is, uint32_t& value)
 {
+    // 定义4字节缓冲区，用于读取小端序的32位无符号整数（每字节8位）
     char buf[4] = {0};
     if (!is.read(buf, sizeof(buf))) {
         return false;
@@ -189,15 +191,9 @@ const char* GetFileType(const char* path, struct stat* st)
     }
 }
 
-static UpdaterStatus GetReadUpdateStreamzipFromBinfile(PkgManager::PkgManagerPtr pkgManager,
-    const std::string &packagePath)
+static UpdaterStatus GetReadUpdateStreamzipFromBinfile(const std::string &packagePath)
 {
     UPDATER_INIT_RECORD;
-    if (pkgManager == nullptr) {
-        LOG(ERROR) << "pkgManager is nullptr";
-        UPDATER_LAST_WORD(PKG_INVALID_FILE, "pkgManager is nullptr");
-        return UPDATE_CORRUPT;
-    }
     // 获取zip内容
     int32_t status = ReadUpdateStreamzip(packagePath);
     if (status != UPDATE_SUCCESS) {
@@ -322,7 +318,7 @@ static UpdaterStatus VerifyBinfiles(UpdaterParams &upParams)
             return UPDATE_ERROR;
         }
         // 从update_bin中获取zip
-        int32_t status = GetReadUpdateStreamzipFromBinfile(manager, upParams.updateBin[i]);
+        int32_t status = GetReadUpdateStreamzipFromBinfile(upParams.updateBin[i]);
         if (status != UPDATE_SUCCESS) {
             LOG(ERROR) << "GetReadUpdateStreamzipFromBinfile fail";
             return UPDATE_ERROR;
@@ -719,7 +715,7 @@ static UpdaterStatus DoInstallBinfiles(UpdaterParams &upParams, std::vector<doub
     if (manager == nullptr) {
             LOG(ERROR) << "CreatePackageInstance fail";
             return UPDATE_ERROR;
-        }
+    }
     auto startTime = std::chrono::system_clock::now();
     upParams.initialProgress = ((UPDATER_UI_INSTANCE.GetCurrentPercent() / FULL_PERCENT) >
             pkgStartPosition[upParams.pkgLocation]) ?
