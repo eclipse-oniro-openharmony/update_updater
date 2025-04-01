@@ -21,6 +21,7 @@
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#include <unordered_set>
 #include <vector>
 #include <linux/fs.h>
 #include "log/dump.h"
@@ -33,6 +34,16 @@ using Updater::Utils::SplitString;
 static std::string g_defaultUpdaterFstab = "";
 static Fstab *g_fstab = nullptr;
 static const std::string PARTITION_PATH = "/dev/block/by-name";
+static std::unordered_set<std::string> g_skipMountPointList = {"/", "/tmp", "/sdcard", INTERNAL_DATA_PATH};
+
+void AddSkipMountPoint(const std::string &mountPoint)
+{
+    if (g_skipMountPointList.find(mountPoint) != g_skipMountPointList.end()) {
+        return;
+    }
+    LOG(INFO) << "add skip mount point " << mountPoint;
+    g_skipMountPointList.insert(mountPoint);
+}
 
 static std::string GetFstabFile()
 {
@@ -337,8 +348,7 @@ int SetupPartitions(bool isMountData)
     for (const FstabItem *item = g_fstab->head; item != nullptr; item = item->next) {
         std::string mountPoint(item->mountPoint);
         std::string fsType(item->fsType);
-        if (mountPoint == "/" || mountPoint == "/tmp" || fsType == "none" ||
-            mountPoint == "/sdcard" || mountPoint == INTERNAL_DATA_PATH) {
+        if (g_skipMountPointList.find(mountPoint) != g_skipMountPointList.end() || fsType == "none") {
             continue;
         }
 
