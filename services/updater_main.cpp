@@ -798,6 +798,7 @@ static UpdaterStatus DoInstallPackages(UpdaterParams &upParams, std::vector<doub
     }
     return status;
 }
+
 UpdaterStatus DoUpdateBinfiles(UpdaterParams &upParams)
 {
     UPDATER_INIT_RECORD;
