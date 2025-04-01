@@ -20,7 +20,7 @@ config("libring_buffer_headers") {
   visibility = [ ":*" ]
   include_dirs = [
     "${updater_path}/service/common",
-    "${updater_path}/service/common/ring_buffer"
+    "${updater_path}/service/common/ring_buffer",
   ]
 }
 

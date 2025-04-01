@@ -42,7 +42,7 @@ config("libupdaterpackage_exported_headers") {
   visibility = [ ":*" ]
   include_dirs = [
     "${updater_path}/services",
-    "${updater_path}/service/common/",
+    "${updater_path}/service/common",
     "${updater_path}/service/common/ring_buffer",
     "${updater_path}/services/include/package",
     "${updater_path}/services/include",
