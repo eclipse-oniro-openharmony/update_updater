@@ -252,6 +252,9 @@ int RebootAndInstallUpgradePackage(const std::string &miscFile, const std::vecto
     } else if (upgradeType == UPGRADE_TYPE_OTA_INTRAL) {
         ret = snprintf_s(updateMsg.update, sizeof(updateMsg.update), sizeof(updateMsg.update) - 1,
             "--ota_intral_update\n");
+    } else if (upgradeType == UPGRADE_TYPE_SUBPKG_UPDATE) {
+        ret = snprintf_s(updateMsg.update, sizeof(updateMsg.update), sizeof(updateMsg.update) - 1,
+            "--subpkg_update\n");
     }
     if (ret < 0) {
         LOG(ERROR) << "updaterkits: copy updater message failed";
@@ -261,7 +264,8 @@ int RebootAndInstallUpgradePackage(const std::string &miscFile, const std::vecto
     if (addRet != 0) {
         return addRet;
     }
-    if (upgradeType == UPGRADE_TYPE_OTA || upgradeType == UPGRADE_TYPE_OTA_INTRAL) {
+    if (upgradeType == UPGRADE_TYPE_OTA || upgradeType == UPGRADE_TYPE_OTA_INTRAL ||
+        upgradeType == UPGRADE_TYPE_SUBPKG_UPDATE) {
         WriteToMiscAndResultFileRebootToUpdater(updateMsg, upgradeType);
     } else {
         WriteToMiscAndRebootToUpdater(updateMsg);

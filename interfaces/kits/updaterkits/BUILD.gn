@@ -16,6 +16,14 @@ import("//build/ohos.gni")
 
 updater_path = rebase_path("${updater_absolutely_path}", ".")
 
+config("libring_buffer_headers") {
+  visibility = [ ":*" ]
+  include_dirs = [
+    "${updater_path}/service/common",
+    "${updater_path}/service/common/ring_buffer",
+  ]
+}
+
 ohos_shared_library("libupdater_shared") {
   sources = [ "updaterkits.cpp" ]
 
@@ -46,7 +54,7 @@ ohos_shared_library("libupdater_shared") {
     "platformsdk",
     "sasdk",
   ]
-
+  public_configs = [ ":libring_buffer_headers" ]
   install_enable = true
   install_images = [
     "system",
@@ -75,6 +83,7 @@ ohos_static_library("libupdaterkits") {
     "bounds_checking_function:libsec_static",
     "init:libbegetutil_static",
   ]
+  public_configs = [ ":libring_buffer_headers" ]
   subsystem_name = "updater"
   part_name = "updater"
 }

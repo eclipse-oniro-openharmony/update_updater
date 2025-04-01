@@ -81,6 +81,7 @@ constexpr struct option OPTIONS[] = {
     { "virtual_shrink_info", required_argument, nullptr, 0 },
     {"wipe_data_factory_lowlevel", no_argument, nullptr, 0},
     { "wipe_data_at_factoryreset_0", no_argument, nullptr, 0 },
+    { "subpkg_update", no_argument, nullptr, 0 },
     { nullptr, 0, nullptr, 0 },
 };
 constexpr float VERIFY_PERCENT = 0.05;
@@ -201,7 +202,7 @@ static UpdaterStatus GetReadUpdateStreamzipFromBinfile(const std::string &packag
     return UPDATE_SUCCESS;
 }
 
-static int OtaUpdatePreCheck(PkgManager::PkgManagerPtr pkgManager, const std::string &packagePath)
+int OtaUpdatePreCheck(PkgManager::PkgManagerPtr pkgManager, const std::string &packagePath)
 {
     UPDATER_INIT_RECORD;
     if (pkgManager == nullptr) {
@@ -290,6 +291,16 @@ __attribute__((weak)) void NotifyReboot(const std::string& rebootTarget,
     const std::string &rebootReason, const std::string &extData)
 {
     Updater::Utils::UpdaterDoReboot(rebootTarget, rebootReason, extData);
+}
+
+__attribute__((weak)) UpdaterStatus UpdateSubPkg(UpdaterParams &upParams)
+{
+    return UPDATE_SUCCESS;
+}
+
+__attribute__((weak)) void NotifyPreCheck(UpdaterStatus &status, UpdaterParams &upParams)
+{
+    return;
 }
 
 static UpdaterStatus VerifyBinfiles(UpdaterParams &upParams)
@@ -787,6 +798,7 @@ static UpdaterStatus DoInstallPackages(UpdaterParams &upParams, std::vector<doub
     }
     return status;
 }
+
 UpdaterStatus DoUpdateBinfiles(UpdaterParams &upParams)
 {
     UPDATER_INIT_RECORD;
@@ -977,6 +989,8 @@ UpdaterStatus UpdaterFromSdcard(UpdaterParams &upParams)
         LOG(INFO) << "UpdaterFromSdcard start, sdcard updaterPath : " << upParams.updatePackage[upParams.pkgLocation];
         UPDATER_UI_INSTANCE.ShowLog(TR(LOG_SDCARD_NOTMOVE));
         status = DoUpdatePackages(upParams);
+    } else if (NotifyActionResult(upParams, status, {SET_UPDATE_STATUS, GET_UPDATE_STATUS}) != UPDATE_SUCCESS) {
+        LOG(ERROR) << "notify action fail";
     }
     PostSdcardUpdatePackages(upParams, status == UPDATE_SUCCESS);
     return status;
@@ -1000,6 +1014,8 @@ UpdaterStatus InstallUpdaterPackages(UpdaterParams &upParams)
     UpdaterStatus status = PreUpdatePackages(upParams);
     if (status == UPDATE_SUCCESS) {
         status = DoUpdatePackages(upParams);
+    } else if (NotifyActionResult(upParams, status, {SET_UPDATE_STATUS, GET_UPDATE_STATUS}) != UPDATE_SUCCESS) {
+        LOG(ERROR) << "notify action fail";
     }
     PostUpdatePackages(upParams, status == UPDATE_SUCCESS);
     UpdaterInit::GetInstance().InvokeEvent(UPDATER_POST_UPDATE_PACKAGE_EVENT);
@@ -1025,22 +1041,10 @@ UpdaterStatus StartUpdaterEntry(UpdaterParams &upParams)
     return status;
 }
 
-UpdaterStatus DoUpdaterEntry(UpdaterParams &upParams)
+UpdaterStatus DoFactoryRstEntry(UpdaterParams &upParams)
 {
     UpdaterStatus status = UPDATE_UNKNOWN;
-    if (upParams.updateBin.size() > 0) {
-        LOG(INFO) << "start bin update";
-        UPDATER_UI_INSTANCE.ShowProgressPage();
-        status = InstallUpdaterBinfiles(upParams);
-    } else if (upParams.updateMode == SDCARD_UPDATE) {
-        LOG(INFO) << "start sdcard update";
-        UPDATER_UI_INSTANCE.ShowProgressPage();
-        status = UpdaterFromSdcard(upParams);
-        return status;
-    } else if (upParams.updatePackage.size() > 0) {
-        UPDATER_UI_INSTANCE.ShowProgressPage();
-        status = InstallUpdaterPackages(upParams);
-    } else if (upParams.factoryResetMode == "factory_wipe_data") {
+    if (upParams.factoryResetMode == "factory_wipe_data") {
         UPDATER_UI_INSTANCE.ShowProgressPage();
         LOG(INFO) << "Factory level FactoryReset begin";
         status = UPDATE_SUCCESS;
@@ -1073,6 +1077,33 @@ UpdaterStatus DoUpdaterEntry(UpdaterParams &upParams)
             ClearUpdaterParaMisc();
             std::this_thread::sleep_for(std::chrono::milliseconds(UI_SHOW_DURATION));
         }
+    }
+    return status;
+}
+
+UpdaterStatus DoUpdaterEntry(UpdaterParams &upParams)
+{
+    UpdaterStatus status = UPDATE_UNKNOWN;
+    if (upParams.updateBin.size() > 0) {
+        LOG(INFO) << "start bin update";
+        UPDATER_UI_INSTANCE.ShowProgressPage();
+        status = InstallUpdaterBinfiles(upParams);
+    } else if (upParams.updateMode == SDCARD_UPDATE) {
+        LOG(INFO) << "start sdcard update";
+        UPDATER_UI_INSTANCE.ShowProgressPage();
+        status = UpdaterFromSdcard(upParams);
+        return status;
+    } else if (upParams.updatePackage.size() > 0) {
+        UPDATER_UI_INSTANCE.ShowProgressPage();
+        status = InstallUpdaterPackages(upParams);
+    } else if (upParams.updateMode == SUBPKG_UPDATE) {
+        UPDATER_UI_INSTANCE.ShowProgressPage();
+        status = UpdateSubPkg(upParams);
+        if (status == UPDATE_SUCCESS) {
+            UPDATER_UI_INSTANCE.ShowSuccessPage();
+        }
+    } else {
+        status = DoFactoryRstEntry(upParams);
     }
     return status;
 }
@@ -1178,6 +1209,10 @@ std::unordered_map<std::string, std::function<void ()>> InitOptionsFuncTab(char*
         {"virtual_shrink_info", [&]() -> void
         {
             upParams.virtualShrinkInfo = std::string(optarg);
+        }},
+        {"subpkg_update", [&]() -> void
+        {
+            upParams.updateMode = SUBPKG_UPDATE;
         }}
     };
     return optionsFuncTab;
