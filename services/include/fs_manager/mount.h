@@ -31,6 +31,7 @@ int MountSdcard(std::string &mountPoint, std::string &path);
 int SetupPartitions(bool isMountData = true);
 const std::string GetBlockDeviceByMountPoint(const std::string &mountPoint);
 const std::vector<std::string> GetBlockDevicesByMountPoint(const std::string &mountPoint);
+void AddSkipMountPoint(const std::string &mountPoint);
 #ifndef UPDATE_PATCH_SHARED
 MountStatus GetMountStatusForPath(const std::string &path);
 #endif
