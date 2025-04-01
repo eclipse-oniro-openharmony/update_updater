@@ -21,6 +21,7 @@
 #include "log.h"
 #include "updater/updater_const.h"
 #include "update_processor.h"
+#include "update_processor_stream.h"
 #include "utils.h"
 
 using namespace Updater;
@@ -52,6 +53,23 @@ int main(int argc, char **argv)
 
     // Re-load fstab to child process.
     LoadFstab();
-    return ProcessUpdater(retry, pipeFd, packagePath, Utils::GetCertName());
+
+    // 根据 packagePath 的后缀选择执行不同的函数
+    std::string fileExtension;
+    size_t dotPosition = packagePath.find_last_of(".");
+    if (dotPosition == std::string::npos) {
+        LOG(ERROR) << "Invalid packagePath: No extension found in " << packagePath;
+        return EXIT_INVALID_ARGS;
+    }
+    fileExtension = packagePath.substr(dotPosition + 1);
+    std::transform(fileExtension.begin(), fileExtension.end(), fileExtension.begin(), ::tolower);
+    if (fileExtension == "zip") {
+        return ProcessUpdater(retry, pipeFd, packagePath, Utils::GetCertName());
+    } else if (fileExtension == "bin") {
+        return ProcessUpdaterStream(retry, pipeFd, packagePath, Utils::GetCertName());
+    } else {
+        LOG(ERROR) << "Invalid packagePath:" << packagePath;
+        return EXIT_INVALID_ARGS;
+    }
 }
 #endif

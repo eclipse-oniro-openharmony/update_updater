@@ -47,6 +47,7 @@ using UpdateResultCode = enum {
 };
 
 using BinUpdateTip = enum {
+    BIN_UPDATE_ZIP_TIP = 0xaa,
     BIN_UPDATE_HEAD_TIP = 0x01,
     BIN_UPDATE_DATA_TIP = 0x12,
     BIN_UPDATE_HASH_TIP = 0x16

@@ -101,6 +101,7 @@ public:
 
     int32_t LoadPackage(const std::string &packagePath,
         std::vector<std::string> &fileIds, PkgFile::PkgType type) override;
+
 private:
     PkgFilePtr CreatePackage(PkgStreamPtr stream, PkgFile::PkgType type, PkgInfoPtr header = nullptr);
 

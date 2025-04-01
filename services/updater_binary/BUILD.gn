@@ -50,6 +50,7 @@ ohos_static_library("libupdater_binary") {
     "${updater_path}/services/updater_binary/update_image_patch.cpp",
     "${updater_path}/services/updater_binary/update_partitions.cpp",
     "${updater_path}/services/updater_binary/update_processor.cpp",
+    "${updater_path}/services/updater_binary/update_processor_stream.cpp",
   ]
   configs = [ ":updater_config" ]
 
@@ -65,6 +66,7 @@ ohos_static_library("libupdater_binary") {
     "${updater_path}/services/log:libupdaterlog",
     "${updater_path}/services/package:libupdaterpackage",
     "${updater_path}/services/script:libupdaterscript",
+    "${updater_path}/services/stream_update:libbinchunkupdate",
     "${updater_path}/utils:libutils",
   ]
 

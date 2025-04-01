@@ -59,6 +59,7 @@ using namespace std::literals::chrono_literals;
 
 [[maybe_unused]] constexpr int DISPLAY_TIME = 1000 * 1000;
 constexpr struct option OPTIONS[] = {
+    { "update_bin", required_argument, nullptr, 0 },
     { "update_package", required_argument, nullptr, 0 },
     { "retry_count", required_argument, nullptr, 0 },
     { "panic_count", required_argument, nullptr, 0 },
@@ -84,6 +85,36 @@ constexpr struct option OPTIONS[] = {
 };
 constexpr float VERIFY_PERCENT = 0.05;
 constexpr double FULL_PERCENT = 100.00;
+constexpr uint32_t BYTE_SHIFT_8 = 8;
+constexpr uint32_t BYTE_SHIFT_16 = 16;
+constexpr uint32_t BYTE_SHIFT_24 = 24;
+constexpr uint32_t SECOND_BUFFER = 2;
+constexpr uint32_t THIRD_BUFFER = 3;
+constexpr uint8_t TYPE_ZIP_HEADER = 0xaa;
+
+bool ReadLE16(std::istream& is, uint16_t& value)
+{
+    char buf[2] = {0}; // 2：定义2字节缓冲区，用于读取小端序的16位无符号整数（每字节8位）
+    if (!is.read(buf, sizeof(buf))) {
+        return false;
+    }
+    value = static_cast<uint16_t>(static_cast<unsigned char>(buf[0])) |
+           (static_cast<uint16_t>(static_cast<unsigned char>(buf[1])) << BYTE_SHIFT_8);
+    return true;
+}
+
+bool ReadLE32(std::istream& is, uint32_t& value)
+{
+    char buf[4] = {0}; // 4：定义4字节缓冲区，用于读取小端序的32位无符号整数（每字节8位）
+    if (!is.read(buf, sizeof(buf))) {
+        return false;
+    }
+    value = static_cast<uint32_t>(static_cast<unsigned char>(buf[0])) |
+           (static_cast<uint32_t>(static_cast<unsigned char>(buf[1])) << BYTE_SHIFT_8) |
+           (static_cast<uint32_t>(static_cast<unsigned char>(buf[SECOND_BUFFER])) << BYTE_SHIFT_16) |
+           (static_cast<uint32_t>(static_cast<unsigned char>(buf[THIRD_BUFFER])) << BYTE_SHIFT_24);
+    return true;
+}
 
 int FactoryReset(FactoryResetMode mode, const std::string &path)
 {
@@ -94,6 +125,80 @@ int FactoryReset(FactoryResetMode mode, const std::string &path)
         RestoreconPath(path); // restore selinux context for /data after factory reset success
     }
     return ret;
+}
+
+static UpdaterStatus ReadUpdateStreamzip(const std::string &packagePath)
+{
+    std::filesystem::path packageFsPath(packagePath);
+    std::filesystem::path outputPath = packageFsPath.parent_path() / "update_stream.zip";
+    std::string outputPathStr = outputPath.string();
+    LOG(INFO) << "outputPathStr:" << outputPathStr;
+
+    std::ifstream inFile(packagePath, std::ios::binary);
+    if (!inFile) {
+        LOG(ERROR) << "Error: Failed to open " << packagePath;
+        return UPDATE_ERROR;
+    }
+    uint16_t type;
+    if (!ReadLE16(inFile, type)) {
+        LOG(ERROR) << "Failed to read type";
+        return UPDATE_ERROR;
+    }
+    if (type != TYPE_ZIP_HEADER) {
+        LOG(ERROR) << "Invalid type, expected 0xaa but got " << type;
+        return UPDATE_ERROR;
+    }
+
+    uint32_t length;
+    if (!ReadLE32(inFile, length)) {
+        LOG(ERROR) << "Failed to read length";
+        return UPDATE_ERROR;
+    }
+    LOG(INFO) << "header.length = " << length;
+
+    std::vector<char> valueData(length);
+    if (!inFile.read(valueData.data(), length)) {
+        LOG(ERROR) << "Incomplete value data";
+        return UPDATE_ERROR;
+    }
+
+    std::ofstream outFile(outputPathStr, std::ios::binary);
+    if (!outFile.write(valueData.data(), length)) {
+        LOG(ERROR) << "Write failed";
+        return UPDATE_ERROR;
+    }
+    LOG(INFO) << "Successfully restored build_tools.zip to " << outputPathStr;
+    return UPDATE_SUCCESS;
+}
+
+const char* GetFileType(const char* path, struct stat* st)
+{
+    if (lstat(path, st) != 0) {
+        return "Unknown";
+    }
+    
+    switch (st->st_mode & S_IFMT) {
+        case S_IFREG:  return "File";
+        case S_IFDIR:  return "Directory";
+        case S_IFLNK:  return "Symlink";
+        case S_IFIFO:  return "FIFO";
+        case S_IFSOCK: return "Socket";
+        case S_IFCHR:  return "CharDevice";
+        case S_IFBLK:  return "BlockDevice";
+        default:       return "Unknown";
+    }
+}
+
+static UpdaterStatus GetReadUpdateStreamzipFromBinfile(const std::string &packagePath)
+{
+    UPDATER_INIT_RECORD;
+    // 获取zip内容
+    int32_t status = ReadUpdateStreamzip(packagePath);
+    if (status != UPDATE_SUCCESS) {
+        LOG(ERROR) << "ReadUpdateStreamzip failed";
+        return UPDATE_ERROR;
+    }
+    return UPDATE_SUCCESS;
 }
 
 static int OtaUpdatePreCheck(PkgManager::PkgManagerPtr pkgManager, const std::string &packagePath)
@@ -158,6 +263,12 @@ static UpdaterStatus UpdatePreCheck(UpdaterParams &upParams, const std::string p
     return UPDATE_SUCCESS;
 }
 
+__attribute__((weak)) int32_t VerifySpecialBin([[maybe_unused]]UpdaterParams &upParams)
+{
+    return PKG_SUCCESS;
+}
+
+
 __attribute__((weak)) int32_t VerifySpecialPkgs([[maybe_unused]]UpdaterParams &upParams)
 {
     return PKG_SUCCESS;
@@ -179,6 +290,60 @@ __attribute__((weak)) void NotifyReboot(const std::string& rebootTarget,
     const std::string &rebootReason, const std::string &extData)
 {
     Updater::Utils::UpdaterDoReboot(rebootTarget, rebootReason, extData);
+}
+
+static UpdaterStatus VerifyBinfiles(UpdaterParams &upParams)
+{
+    UPDATER_INIT_RECORD;
+    LOG(INFO) << "Verify binfiles start...";
+    UPDATER_UI_INSTANCE.ShowProgressPage();
+    UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_VERIFYPKG));
+
+    if (upParams.callbackProgress == nullptr) {
+        UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_VERIFYPKGFAIL), true);
+        UPDATER_LAST_WORD(UPDATE_CORRUPT, "upParams.callbackProgress is null");
+        return UPDATE_CORRUPT;
+    }
+    upParams.callbackProgress(0.0);
+    upParams.installTime.resize(upParams.updateBin.size(), std::chrono::duration<double>(0));
+    ReadInstallTime(upParams);
+    for (unsigned int i = upParams.pkgLocation; i < upParams.updateBin.size(); i++) {
+        LOG(INFO) << "Verify package:" << upParams.updateBin[i];
+        auto startTime = std::chrono::system_clock::now();
+        PkgManager::PkgManagerPtr manager = PkgManager::CreatePackageInstance();
+        if (manager == nullptr) {
+            LOG(ERROR) << "CreatePackageInstance fail";
+            return UPDATE_ERROR;
+        }
+        // 从update_bin中获取zip
+        int32_t status = GetReadUpdateStreamzipFromBinfile(upParams.updateBin[i]);
+        if (status != UPDATE_SUCCESS) {
+            LOG(ERROR) << "GetReadUpdateStreamzipFromBinfile fail";
+            return UPDATE_ERROR;
+        }
+        // 验证update_stream.zip包
+        int32_t verifyret = OtaUpdatePreCheck(manager, STREAM_ZIP_PATH);
+        PkgManager::ReleasePackageInstance(manager);
+        if (verifyret != UPDATE_SUCCESS) {
+            UpdaterVerifyFailEntry((verifyret == PKG_INVALID_DIGEST) && (upParams.updateMode == HOTA_UPDATE));
+            upParams.pkgLocation = i;
+            UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_VERIFYPKGFAIL), true);
+            auto endTime = std::chrono::system_clock::now();
+            upParams.installTime[i] = endTime - startTime;
+            return UPDATE_CORRUPT;
+        }
+        auto endTime = std::chrono::system_clock::now();
+        upParams.installTime[i] = endTime - startTime;
+    }
+
+    if (VerifySpecialBin(upParams) != PKG_SUCCESS) {
+        UPDATER_LAST_WORD(UPDATE_CORRUPT, "VerifySpecialBin failed");
+        return UPDATE_CORRUPT;
+    }
+    ProgressSmoothHandler(UPDATER_UI_INSTANCE.GetCurrentPercent(),
+        UPDATER_UI_INSTANCE.GetCurrentPercent() + static_cast<int>(VERIFY_PERCENT * FULL_PERCENT_PROGRESS));
+    LOG(INFO) << "Verify binfiles successfull...";
+    return UPDATE_SUCCESS;
 }
 
 static UpdaterStatus VerifyPackages(UpdaterParams &upParams)
@@ -298,6 +463,27 @@ bool IsBatteryCapacitySufficient()
     return capacity >= lowLevel;
 }
 
+UpdaterStatus InstallUpdaterBinfile(UpdaterParams &upParams, PkgManager::PkgManagerPtr manager)
+{
+    UPDATER_INIT_RECORD;
+    UpdaterStatus status = UPDATE_UNKNOWN;
+    STAGE(UPDATE_STAGE_BEGIN) << "Install Binfile";
+    status = DoInstallUpdaterBinfile(manager, upParams, HOTA_UPDATE);
+    if (status != UPDATE_SUCCESS) {
+        UPDATER_UI_INSTANCE.Sleep(UI_SHOW_DURATION);
+        UPDATER_UI_INSTANCE.ShowLog(TR(LOG_UPDFAIL));
+        STAGE(UPDATE_STAGE_FAIL) << "Install failed";
+        if (status == UPDATE_RETRY) {
+            HwFaultRetry::GetInstance().DoRetryAction();
+            UPDATER_UI_INSTANCE.ShowFailedPage();
+        }
+    } else {
+        LOG(INFO) << "Install binfile success.";
+        STAGE(UPDATE_STAGE_SUCCESS) << "Install binfile";
+    }
+    return status;
+}
+
 UpdaterStatus InstallUpdaterPackage(UpdaterParams &upParams, PkgManager::PkgManagerPtr manager)
 {
     UPDATER_INIT_RECORD;
@@ -332,18 +518,45 @@ UpdaterStatus InstallUpdaterPackage(UpdaterParams &upParams, PkgManager::PkgMana
     return status;
 }
 
+static UpdaterStatus UpdateUpdateFile(const UpdaterParams &upParams,
+    std::vector<double> &pkgStartPosition, double &updateStartPosition,
+    std::vector<std::string> &updateFile)
+{
+    updateFile.clear();
+    if (upParams.updateBin.size() > 0) {
+        if (upParams.pkgLocation == upParams.updateBin.size()) {
+            updateStartPosition = VERIFY_PERCENT;
+            return UPDATE_SUCCESS;
+        }
+        for (const auto& file : upParams.updateBin) {
+            updateFile.push_back(file);
+        }
+    } else if (upParams.updatePackage.size() > 0) {
+        if (upParams.pkgLocation == upParams.updatePackage.size()) {
+            updateStartPosition = VERIFY_PERCENT;
+            return UPDATE_SUCCESS;
+        }
+        for (const auto& file : upParams.updatePackage) {
+            updateFile.push_back(file);
+        }
+    }
+    return UPDATE_SKIP;
+}
+
 static UpdaterStatus CalcProgress(const UpdaterParams &upParams,
     std::vector<double> &pkgStartPosition, double &updateStartPosition)
 {
     UPDATER_INIT_RECORD;
     int64_t allPkgSize = 0;
     std::vector<int64_t> everyPkgSize;
-    if (upParams.pkgLocation == upParams.updatePackage.size()) {
-        updateStartPosition = VERIFY_PERCENT;
+    std::vector<std::string> updateFile;
+
+    UpdaterStatus status = UpdateUpdateFile(upParams, pkgStartPosition, updateStartPosition, updateFile);
+    if (status == UPDATE_SUCCESS) {
         return UPDATE_SUCCESS;
     }
-    for (const auto &path : upParams.updatePackage) {
-        char realPath[PATH_MAX + 1] = {0};
+    for (const auto &path : updateFile) {
+        char realPath[PATH_MAX] = {0};
         if (realpath(path.c_str(), realPath) == nullptr) {
             LOG(WARNING) << "Can not find updatePackage : " << path;
             everyPkgSize.push_back(0);
@@ -402,6 +615,34 @@ static UpdaterStatus CheckVerifyPackages(UpdaterParams &upParams)
     return status;
 }
 
+static UpdaterStatus VerifyCommonFiles(UpdaterParams &upParams)
+{
+    if (upParams.updateBin.size() > 0) {
+        if (upParams.pkgLocation == upParams.updateBin.size()) {
+            LOG(WARNING) << "all package has been upgraded, skip pre process";
+            return UPDATE_SUCCESS;
+        }
+        UpdaterInit::GetInstance().InvokeEvent(UPDATER_PRE_VERIFY_PACKAGE_EVENT);
+        // 从bin文件中提取zip文件
+        if (VerifyBinfiles(upParams) != UPDATE_SUCCESS) {
+            LOG(ERROR) << "VerifyBinfiles failed";
+            return UPDATE_CORRUPT; // verify binfiles failed must return UPDATE_CORRUPT, ux need it !!!
+        }
+    } else if (upParams.updatePackage.size() > 0) {
+        if (upParams.pkgLocation == upParams.updatePackage.size()) {
+            LOG(WARNING) << "all package has been upgraded, skip pre process";
+            return UPDATE_SUCCESS;
+        }
+        UpdaterInit::GetInstance().InvokeEvent(UPDATER_PRE_VERIFY_PACKAGE_EVENT);
+        // verify package first
+        if (VerifyPackages(upParams) != UPDATE_SUCCESS) {
+            LOG(ERROR) << "VerifyPackages failed";
+            return UPDATE_CORRUPT; // verify package failed must return UPDATE_CORRUPT, ux need it !!!
+        }
+    }
+    return UPDATE_SUCCESS;
+}
+
 static UpdaterStatus PreUpdatePackages(UpdaterParams &upParams)
 {
     UPDATER_INIT_RECORD;
@@ -409,31 +650,33 @@ static UpdaterStatus PreUpdatePackages(UpdaterParams &upParams)
 
     UpdaterStatus status = UPDATE_UNKNOWN;
 
-    upParams.installTime.resize(upParams.updatePackage.size(), std::chrono::duration<double>(0));
-    if (CheckMountData() != 0) {
-        return UPDATE_ERROR;
+    if (upParams.updateBin.size() > 0) {
+        upParams.installTime.resize(upParams.updateBin.size(), std::chrono::duration<double>(0));
+        if (CheckMountData() != 0) {
+            return UPDATE_ERROR;
+        }
+    } else if (upParams.updatePackage.size() > 0) {
+        upParams.installTime.resize(upParams.updatePackage.size(), std::chrono::duration<double>(0));
+        if (CheckMountData() != 0) {
+            return UPDATE_ERROR;
+        }
     }
     const std::string resultPath = std::string(UPDATER_PATH) + "/" + std::string(UPDATER_RESULT_FILE);
     if (access(resultPath.c_str(), F_OK) != -1) {
         (void)DeleteFile(resultPath);
         LOG(INFO) << "delete last upgrade file";
     }
-
-    if (upParams.pkgLocation == upParams.updatePackage.size()) {
-        LOG(WARNING) << "all package has been upgraded, skip pre process";
-        return UPDATE_SUCCESS;
-    }
-
-    UpdaterInit::GetInstance().InvokeEvent(UPDATER_PRE_VERIFY_PACKAGE_EVENT);
     // verify package first
-    if (VerifyPackages(upParams) != UPDATE_SUCCESS) {
+    if (VerifyCommonFiles(upParams) != UPDATE_SUCCESS) {
         return UPDATE_CORRUPT; // verify package failed must return UPDATE_CORRUPT, ux need it !!!
     }
 
     // Only handle UPATE_ERROR and UPDATE_SUCCESS here.Let package verify handle others.
-    if (IsSpaceCapacitySufficient(upParams) == UPDATE_ERROR) {
-        UPDATER_LAST_WORD(status, "space nott enough");
-        return status;
+    if (upParams.updatePackage.size() > 0) {
+        if (IsSpaceCapacitySufficient(upParams) == UPDATE_ERROR) {
+            UPDATER_LAST_WORD(status, "space nott enough");
+            return status;
+        }
     }
     if (upParams.retryCount == 0 && !IsBatteryCapacitySufficient()) {
         UPDATER_UI_INSTANCE.ShowUpdInfo(TR(LOG_LOWPOWER));
@@ -455,6 +698,49 @@ static UpdaterStatus PreUpdatePackages(UpdaterParams &upParams)
         return UPDATE_CORRUPT;
     }
     return UPDATE_SUCCESS;
+}
+
+static UpdaterStatus DoInstallBinfiles(UpdaterParams &upParams, std::vector<double> &pkgStartPosition)
+{
+    UPDATER_INIT_RECORD;
+    UpdaterStatus status = UPDATE_UNKNOWN;
+    if (upParams.pkgLocation == upParams.updateBin.size()) {
+        LOG(WARNING) << "all Binfiles has been installed, directly return success";
+        upParams.callbackProgress(FULL_PERCENT_PROGRESS);
+        return UPDATE_SUCCESS;
+    }
+    PkgManager::PkgManagerPtr manager = PkgManager::CreatePackageInstance();
+    if (manager == nullptr) {
+            LOG(ERROR) << "CreatePackageInstance fail";
+            return UPDATE_ERROR;
+    }
+    auto startTime = std::chrono::system_clock::now();
+    upParams.initialProgress = ((UPDATER_UI_INSTANCE.GetCurrentPercent() / FULL_PERCENT) >
+            pkgStartPosition[upParams.pkgLocation]) ?
+            (UPDATER_UI_INSTANCE.GetCurrentPercent() / FULL_PERCENT) : pkgStartPosition[upParams.pkgLocation];
+        upParams.currentPercentage = pkgStartPosition[upParams.pkgLocation + 1] - upParams.initialProgress;
+        LOG(INFO) << "InstallUpdaterBin pkg is " << upParams.updateBin[upParams.pkgLocation] <<
+            " percent:" << upParams.initialProgress << "~" << pkgStartPosition[upParams.pkgLocation + 1];
+    // 安装bin文件
+    status = InstallUpdaterBinfile(upParams, manager);
+    auto endTime = std::chrono::system_clock::now();
+    upParams.installTime[upParams.pkgLocation] = upParams.installTime[upParams.pkgLocation] + endTime - startTime;
+    WriteInstallTime(upParams);
+    if (status != UPDATE_SUCCESS) {
+        LOG(ERROR) << "InstallUpdaterBin failed! Pkg is " << upParams.updateBin[upParams.pkgLocation];
+        if (!CheckResultFail()) {
+            UPDATER_LAST_WORD(status, "InstallUpdaterBin failed");
+        }
+        PkgManager::ReleasePackageInstance(manager);
+        return status;
+    }
+    ProgressSmoothHandler(
+        static_cast<int>(upParams.initialProgress * FULL_PERCENT_PROGRESS +
+        upParams.currentPercentage * GetTmpProgressValue()),
+        static_cast<int>(pkgStartPosition[upParams.pkgLocation + 1] * FULL_PERCENT_PROGRESS));
+    SetMessageToMisc(upParams.miscCmd, upParams.pkgLocation + 1, "upgraded_pkg_num");
+    PkgManager::ReleasePackageInstance(manager);
+    return status;
 }
 
 static UpdaterStatus DoInstallPackages(UpdaterParams &upParams, std::vector<double> &pkgStartPosition)
@@ -501,6 +787,48 @@ static UpdaterStatus DoInstallPackages(UpdaterParams &upParams, std::vector<doub
     }
     return status;
 }
+UpdaterStatus DoUpdateBinfiles(UpdaterParams &upParams)
+{
+    UPDATER_INIT_RECORD;
+    UpdaterStatus status = UPDATE_UNKNOWN;
+    std::vector<double> pkgStartPosition {};
+    double updateStartPosition = 0.0;
+    status = CalcProgress(upParams, pkgStartPosition, updateStartPosition);
+    if (status != UPDATE_SUCCESS) {
+        UPDATER_LAST_WORD(status, "CalcProgress failed");
+        return status;
+    }
+    for (unsigned int i = 0; i < upParams.updateBin.size(); i++) {
+        LOG(INFO) << "package " << i << ":" << upParams.updateBin[i] <<
+            " percent:" << upParams.currentPercentage;
+    }
+    if (upParams.callbackProgress == nullptr) {
+        LOG(ERROR) << "CallbackProgress is nullptr";
+        return UPDATE_CORRUPT;
+    }
+    float value = (UPDATER_UI_INSTANCE.GetCurrentPercent() > (updateStartPosition * FULL_PERCENT_PROGRESS)) ?
+        UPDATER_UI_INSTANCE.GetCurrentPercent() : (updateStartPosition * FULL_PERCENT_PROGRESS);
+    upParams.callbackProgress(value);
+    // 执行安装
+    status = DoInstallBinfiles(upParams, pkgStartPosition);
+    if (NotifyActionResult(upParams, status, {GET_UPDATE_STATUS}) != UPDATE_SUCCESS) {
+        LOG(ERROR) << "get status fail";
+        return UPDATE_CORRUPT;
+    }
+    if (status != UPDATE_SUCCESS) {
+        UPDATER_LAST_WORD(status, "DoInstallBinfiles failed");
+        return status;
+    }
+    if (upParams.forceUpdate) {
+        UPDATER_UI_INSTANCE.ShowLogRes(TR(LABEL_UPD_OK_SHUTDOWN));
+    }
+    if (NotifyActionResult(upParams, status, {GET_UPDATE_STATUS}) != UPDATE_SUCCESS) {
+        LOG(ERROR) << "get status fail";
+        return UPDATE_CORRUPT;
+    }
+    UPDATER_UI_INSTANCE.ShowSuccessPage();
+    return status;
+}
 
 UpdaterStatus DoUpdatePackages(UpdaterParams &upParams)
 {
@@ -544,7 +872,8 @@ UpdaterStatus DoUpdatePackages(UpdaterParams &upParams)
     return status;
 }
 
-static void PostUpdatePackages(UpdaterParams &upParams, bool updateResult)
+static void PostUpdate(UpdaterParams &upParams, bool updateResult,
+    const std::vector<std::string>& updateList, const std::string& type)
 {
     std::string writeBuffer;
     std::string buf;
@@ -563,23 +892,32 @@ static void PostUpdatePackages(UpdaterParams &upParams, bool updateResult)
 
     for (unsigned int i = 0; i < upParams.pkgLocation; i++) {
         time = DurationToString(upParams.installTime, i);
-        writeBuffer += upParams.updatePackage.size() < i + 1 ? "" : upParams.updatePackage[i];
+        writeBuffer += (i < updateList.size() ? updateList[i] : "");
         writeBuffer += "|pass||install_time=" + time + "|\n";
     }
     time = DurationToString(upParams.installTime, upParams.pkgLocation);
 
-    writeBuffer += upParams.updatePackage.size() < upParams.pkgLocation + 1 ? "" :
-        upParams.updatePackage[upParams.pkgLocation];
+    writeBuffer += (upParams.pkgLocation < updateList.size() ? updateList[upParams.pkgLocation] : "");
     writeBuffer += "|" + buf + "|install_time=" + time + "|\n";
-    for (unsigned int i = upParams.pkgLocation + 1; i < upParams.updatePackage.size(); i++) {
-        writeBuffer += upParams.updatePackage[i] + "\n";
+    for (unsigned int i = upParams.pkgLocation + 1; i < updateList.size(); i++) {
+        writeBuffer += updateList[i] + "\n";
     }
-    if (writeBuffer != "") {
+    if (!writeBuffer.empty()) {
         writeBuffer.pop_back();
     }
     LOG(INFO) << "post over, writeBuffer = " << writeBuffer;
     WriteDumpResult(writeBuffer, UPDATER_RESULT_FILE);
     DeleteInstallTimeFile();
+}
+
+static void PostUpdateBinfiles(UpdaterParams &upParams, bool updateResult)
+{
+    PostUpdate(upParams, updateResult, upParams.updateBin, "Binfiles");
+}
+
+static void PostUpdatePackages(UpdaterParams &upParams, bool updateResult)
+{
+    PostUpdate(upParams, updateResult, upParams.updatePackage, "Packages");
 }
 
 static UpdaterStatus PreSdcardUpdatePackages(UpdaterParams &upParams)
@@ -644,6 +982,18 @@ UpdaterStatus UpdaterFromSdcard(UpdaterParams &upParams)
     return status;
 }
 
+UpdaterStatus InstallUpdaterBinfiles(UpdaterParams &upParams)
+{
+    UpdaterInit::GetInstance().InvokeEvent(UPDATER_PRE_UPDATE_PACKAGE_EVENT);
+    UpdaterStatus status = PreUpdatePackages(upParams);
+    if (status == UPDATE_SUCCESS) {
+        status = DoUpdateBinfiles(upParams);
+    }
+    PostUpdateBinfiles(upParams, status == UPDATE_SUCCESS);
+    UpdaterInit::GetInstance().InvokeEvent(UPDATER_POST_UPDATE_PACKAGE_EVENT);
+    return status;
+}
+
 UpdaterStatus InstallUpdaterPackages(UpdaterParams &upParams)
 {
     UpdaterInit::GetInstance().InvokeEvent(UPDATER_PRE_UPDATE_PACKAGE_EVENT);
@@ -664,12 +1014,10 @@ UpdaterStatus StartUpdaterEntry(UpdaterParams &upParams)
         LOG(ERROR) << "PreStartUpdaterEntry failed";
         return status;
     }
-
     status = DoUpdaterEntry(upParams);
     if (status != UPDATE_SUCCESS) {
         LOG(WARNING) << "DoUpdaterEntry failed";
     }
-
     status = PostStartUpdaterEntry(upParams, status);
     if (status != UPDATE_SUCCESS) {
         LOG(ERROR) << "PostStartUpdaterEntry failed";
@@ -680,7 +1028,11 @@ UpdaterStatus StartUpdaterEntry(UpdaterParams &upParams)
 UpdaterStatus DoUpdaterEntry(UpdaterParams &upParams)
 {
     UpdaterStatus status = UPDATE_UNKNOWN;
-    if (upParams.updateMode == SDCARD_UPDATE) {
+    if (upParams.updateBin.size() > 0) {
+        LOG(INFO) << "start bin update";
+        UPDATER_UI_INSTANCE.ShowProgressPage();
+        status = InstallUpdaterBinfiles(upParams);
+    } else if (upParams.updateMode == SDCARD_UPDATE) {
         LOG(INFO) << "start sdcard update";
         UPDATER_UI_INSTANCE.ShowProgressPage();
         status = UpdaterFromSdcard(upParams);
@@ -729,6 +1081,12 @@ std::unordered_map<std::string, std::function<void ()>> InitOptionsFuncTab(char*
     PackageUpdateMode &mode, UpdaterParams &upParams)
 {
     std::unordered_map<std::string, std::function<void ()>> optionsFuncTab {
+        {"update_bin", [&]() -> void
+        {
+            upParams.updateBin.push_back(optarg);
+            (void)UPDATER_UI_INSTANCE.SetMode(UPDATERMODE_OTA);
+            mode = HOTA_UPDATE;
+        }},
         {"update_package", [&]() -> void
         {
             upParams.updatePackage.push_back(optarg);

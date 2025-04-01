@@ -33,12 +33,30 @@ constexpr const char *LIB_PATH = "/system/lib64/";
 static void PrintPrompts()
 {
     cout << "Please input correct command, examples :" << endl;
+    cout << "bin           :  write_updater bin /data/updater/update.bin" <<endl;
     cout << "updater       :  write_updater updater /data/updater/updater.zip" << endl;
     cout << "factory_reset :  write_updater user_factory_reset" << endl;
     cout << "sdcard_update :  write_updater sdcard_update" << endl;
     cout << "clear command :  write_updater clear" << endl;
     cout << "updater_para  :  write_updater updater_para" << endl;
     cout << "intral_update :  write_updater ota_intral_update /data/updater/updater.zip" << endl;
+}
+
+static int ExceptionBin(int argc, char **argv, UpdateMessage &boot)
+{
+    if (argc < BINARY_MAX_ARGS) {
+        cout << "Please input correct updater command!" << endl;
+        return -1;
+    }
+    if (argv[WRITE_SECOND_CMD] != nullptr) {
+        // 加入新字段
+        if (snprintf_s(boot.update, sizeof(boot.update), sizeof(boot.update) - 1, "--update_bin=%s",
+            argv[WRITE_SECOND_CMD]) == -1) {
+            cout << "WriteUpdaterMessage snprintf_s failed!" << endl;
+            return -1;
+        }
+    }
+    return 0;
 }
 
 static int ExceptionUpdater(int argc, char **argv, UpdateMessage &boot)
@@ -99,16 +117,14 @@ static void HandleMiscInfo(int argc, char **argv)
     Utils::CloseLibrary(handle);
 }
 
-int main(int argc, char **argv)
+static int HandleCommand(int argc, char** argv, struct UpdateMessage& boot, struct UpdaterPara& para)
 {
-    if (argc == 1) {
-        PrintPrompts();
-        return -1;
-    }
-    const std::string miscFile = "/dev/block/by-name/misc";
-    struct UpdateMessage boot {};
-    struct UpdaterPara para {};
-    if (strcmp(argv[1], "updater") == 0) {
+    if (strcmp(argv[1], "bin") == 0) {
+        // 执行流式bin文件升级
+        if (ExceptionBin(argc, argv, boot) == -1) {
+            return -1;
+        }
+    } else if (strcmp(argv[1], "updater") == 0) {
         if (ExceptionUpdater(argc, argv, boot) == -1) {
             return -1;
         }
@@ -138,6 +154,24 @@ int main(int argc, char **argv)
         return WriteUpdaterPara(argc, para) != 0 ? -1 : 0;
     } else {
         cout << "Please input correct command!" << endl;
+        return -1;
+    }
+    return 0;
+}
+
+int main(int argc, char **argv)
+{
+    if (argc == 1) {
+        PrintPrompts();
+        return -1;
+    }
+    const std::string miscFile = "/dev/block/by-name/misc";
+    struct UpdateMessage boot {};
+    struct UpdaterPara para {};
+
+    int cmdResult = HandleCommand(argc, argv, boot, para);
+    if (cmdResult == -1) {
+        cout << "HandleCommand failed!" << endl;
         return -1;
     }
     bool ret = WriteUpdaterMessage(miscFile, boot);
