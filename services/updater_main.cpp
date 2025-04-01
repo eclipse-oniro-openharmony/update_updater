@@ -1041,22 +1041,10 @@ UpdaterStatus StartUpdaterEntry(UpdaterParams &upParams)
     return status;
 }
 
-UpdaterStatus DoUpdaterEntry(UpdaterParams &upParams)
+UpdaterStatus DoFactoryRstEntry(UpdaterParams &upParams)
 {
     UpdaterStatus status = UPDATE_UNKNOWN;
-    if (upParams.updateBin.size() > 0) {
-        LOG(INFO) << "start bin update";
-        UPDATER_UI_INSTANCE.ShowProgressPage();
-        status = InstallUpdaterBinfiles(upParams);
-    } else if (upParams.updateMode == SDCARD_UPDATE) {
-        LOG(INFO) << "start sdcard update";
-        UPDATER_UI_INSTANCE.ShowProgressPage();
-        status = UpdaterFromSdcard(upParams);
-        return status;
-    } else if (upParams.updatePackage.size() > 0) {
-        UPDATER_UI_INSTANCE.ShowProgressPage();
-        status = InstallUpdaterPackages(upParams);
-    } else if (upParams.factoryResetMode == "factory_wipe_data") {
+    if (upParams.factoryResetMode == "factory_wipe_data") {
         UPDATER_UI_INSTANCE.ShowProgressPage();
         LOG(INFO) << "Factory level FactoryReset begin";
         status = UPDATE_SUCCESS;
@@ -1089,12 +1077,33 @@ UpdaterStatus DoUpdaterEntry(UpdaterParams &upParams)
             ClearUpdaterParaMisc();
             std::this_thread::sleep_for(std::chrono::milliseconds(UI_SHOW_DURATION));
         }
+    }
+    return status;
+}
+
+UpdaterStatus DoUpdaterEntry(UpdaterParams &upParams)
+{
+    UpdaterStatus status = UPDATE_UNKNOWN;
+    if (upParams.updateBin.size() > 0) {
+        LOG(INFO) << "start bin update";
+        UPDATER_UI_INSTANCE.ShowProgressPage();
+        status = InstallUpdaterBinfiles(upParams);
+    } else if (upParams.updateMode == SDCARD_UPDATE) {
+        LOG(INFO) << "start sdcard update";
+        UPDATER_UI_INSTANCE.ShowProgressPage();
+        status = UpdaterFromSdcard(upParams);
+        return status;
+    } else if (upParams.updatePackage.size() > 0) {
+        UPDATER_UI_INSTANCE.ShowProgressPage();
+        status = InstallUpdaterPackages(upParams);
     } else if (upParams.updateMode == SUBPKG_UPDATE) {
         UPDATER_UI_INSTANCE.ShowProgressPage();
         status = UpdateSubPkg(upParams);
         if (status == UPDATE_SUCCESS) {
             UPDATER_UI_INSTANCE.ShowSuccessPage();
         }
+    } else {
+        status = DoFactoryRstEntry(upParams);
     }
     return status;
 }
