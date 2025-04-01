@@ -63,8 +63,7 @@ enum UpdateStatus {
 
 bool ReadLE16(std::istream& is, uint16_t& value)
 {
-    // 定义2字节缓冲区，用于读取小端序的16位无符号整数（每字节8位）
-    char buf[2] = {0};
+    char buf[2] = {0}; // 2：定义2字节缓冲区，用于读取小端序的16位无符号整数（每字节8位）
     if (!is.read(buf, sizeof(buf))) {
         return false;
     }
@@ -75,8 +74,7 @@ bool ReadLE16(std::istream& is, uint16_t& value)
 
 bool ReadLE32(std::istream& is, uint32_t& value)
 {
-    // 定义4字节缓冲区，用于读取小端序的32位无符号整数（每字节8位）
-    char buf[4] = {0};
+    char buf[4] = {0}; // 4：定义4字节缓冲区，用于读取小端序的32位无符号整数（每字节8位）
     if (!is.read(buf, sizeof(buf))) {
         return false;
     }
