@@ -19,7 +19,7 @@ updater_path = rebase_path("${updater_absolutely_path}", ".")
 config("libring_buffer_headers") {
   visibility = [ ":*" ]
   include_dirs = [
-    "${updater_path}/service/common/",
+    "${updater_path}/service/common",
     "${updater_path}/service/common/ring_buffer"
   ]
 }
