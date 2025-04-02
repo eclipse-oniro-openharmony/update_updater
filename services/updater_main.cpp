@@ -615,17 +615,6 @@ static int CheckMountData()
     return UPDATE_ERROR;
 }
 
-static UpdaterStatus CheckVerifyPackages(UpdaterParams &upParams)
-{
-    UpdaterStatus status = UPDATE_SUCCESS;
-    if (NotifyActionResult(upParams, status, {PROCESS_PACKAGE, SET_INSTALL_STATUS, GET_INSTALL_STATUS}) !=
-        UPDATE_SUCCESS) {
-        LOG(ERROR) << "notify action fail";
-        return UPDATE_CORRUPT;
-    }
-    return status;
-}
-
 static UpdaterStatus VerifyCommonFiles(UpdaterParams &upParams)
 {
     if (upParams.updateBin.size() > 0) {
@@ -704,10 +693,6 @@ static UpdaterStatus PreUpdatePackages(UpdaterParams &upParams)
         return UPDATE_ERROR;
     }
 #endif
-    if (CheckVerifyPackages(upParams) != UPDATE_SUCCESS) {
-        LOG(ERROR) << "verify packages fail";
-        return UPDATE_CORRUPT;
-    }
     return UPDATE_SUCCESS;
 }
 
@@ -952,10 +937,6 @@ static UpdaterStatus PreSdcardUpdatePackages(UpdaterParams &upParams)
         return UPDATE_ERROR;
     }
 #endif
-    if (CheckVerifyPackages(upParams) != UPDATE_SUCCESS) {
-        LOG(ERROR) << "verify packages fail";
-        return UPDATE_CORRUPT;
-    }
     return UPDATE_SUCCESS;
 }
 
@@ -972,6 +953,7 @@ UpdaterStatus UpdaterFromSdcard(UpdaterParams &upParams)
     upParams.callbackProgress = [] (float value) { UPDATER_UI_INSTANCE.ShowProgress(value); };
     SetMessageToMisc(upParams.miscCmd, 0, "sdcard_update");
     UpdaterStatus status = CheckSdcardPkgs(upParams);
+    NotifyPreCheck(status, upParams);
     if (status != UPDATE_SUCCESS) {
         LOG(ERROR) << "can not find sdcard packages";
         if (NotifyActionResult(upParams, status, {SET_INSTALL_STATUS,
@@ -1012,6 +994,7 @@ UpdaterStatus InstallUpdaterPackages(UpdaterParams &upParams)
 {
     UpdaterInit::GetInstance().InvokeEvent(UPDATER_PRE_UPDATE_PACKAGE_EVENT);
     UpdaterStatus status = PreUpdatePackages(upParams);
+    NotifyPreCheck(status, upParams);
     if (status == UPDATE_SUCCESS) {
         status = DoUpdatePackages(upParams);
     } else if (NotifyActionResult(upParams, status, {SET_UPDATE_STATUS, GET_UPDATE_STATUS}) != UPDATE_SUCCESS) {
@@ -1311,6 +1294,11 @@ void RebootAfterUpdateSuccess(const UpdaterParams &upParams)
         NotifyReboot("", "Updater update success");
 }
 
+__attribute__((weak)) void ProcessLogs()
+{
+    return;
+}
+
 int UpdaterMain(int argc, char **argv)
 {
     [[maybe_unused]] UpdaterStatus status = UPDATE_UNKNOWN;
@@ -1329,6 +1317,7 @@ int UpdaterMain(int argc, char **argv)
 #if !defined(UPDATER_UT) && defined(UPDATER_UI_SUPPORT)
     UPDATER_UI_INSTANCE.Sleep(UI_SHOW_DURATION);
     if (status != UPDATE_SUCCESS && status != UPDATE_SKIP) {
+        ProcessLogs();
         if (mode == HOTA_UPDATE) {
             UPDATER_UI_INSTANCE.ShowFailedPage();
             UpdaterInit::GetInstance().InvokeEvent(UPDATER_POST_INIT_EVENT);
