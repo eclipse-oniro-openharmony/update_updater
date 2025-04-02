@@ -40,6 +40,8 @@ static void PrintPrompts()
     cout << "clear command :  write_updater clear" << endl;
     cout << "updater_para  :  write_updater updater_para" << endl;
     cout << "intral_update :  write_updater ota_intral_update /data/updater/updater.zip" << endl;
+    cout << "subpkg_update :  write_updater subpkg_update" << endl;
+    cout << "notify_update :  write_updater notify_update" << endl;
 }
 
 static int ExceptionBin(int argc, char **argv, UpdateMessage &boot)
@@ -157,6 +159,8 @@ static int HandleCommand(int argc, char** argv, struct UpdateMessage& boot, stru
         }
     } else if (strcmp(argv[1], "updater_para") == 0) {
         return WriteUpdaterPara(argc, para) != 0 ? -1 : 0;
+    } else if (strcmp(argv[1], "notify_update") == 0) {
+        return 0;
     } else {
         cout << "Please input correct command!" << endl;
         return -1;

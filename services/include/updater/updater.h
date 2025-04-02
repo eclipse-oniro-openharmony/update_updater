@@ -47,7 +47,9 @@ enum NotifyAction {
     SET_INSTALL_STATUS,
     GET_INSTALL_STATUS,
     SET_UPDATE_STATUS,
-    GET_UPDATE_STATUS
+    GET_UPDATE_STATUS,
+    SEND_LOG,
+    RECEIVE_LOG
 };
 
 struct UpdaterParams {
