@@ -123,13 +123,9 @@ static int HandleCommand(int argc, char** argv, struct UpdateMessage& boot, stru
 {
     if (strcmp(argv[1], "bin") == 0) {
         // 执行流式bin文件升级
-        if (ExceptionBin(argc, argv, boot) == -1) {
-            return -1;
-        }
+        return ExceptionBin(argc, argv, boot);
     } else if (strcmp(argv[1], "updater") == 0) {
-        if (ExceptionUpdater(argc, argv, boot) == -1) {
-            return -1;
-        }
+        return ExceptionUpdater(argc, argv, boot);
     } else if (strcmp(argv[1], "user_factory_reset") == 0) {
         if (strncpy_s(boot.update, sizeof(boot.update), "--user_wipe_data", sizeof(boot.update) - 1) != 0) {
             cout << "strncpy_s failed!" << endl;

@@ -62,6 +62,8 @@ UpdaterStatus InstallUpdaterPackages(UpdaterParams &upParams);
 
 int OtaUpdatePreCheck(Hpackage::PkgManager::PkgManagerPtr pkgManager, const std::string &packagePath);
 
+void ProcessUpdateResult(PackageUpdateMode &mode, UpdaterStatus &status, UpdaterParams &upParams);
+
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {

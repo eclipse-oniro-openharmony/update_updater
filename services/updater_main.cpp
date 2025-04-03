@@ -1301,6 +1301,32 @@ __attribute__((weak)) void ProcessLogs()
     return;
 }
 
+void ProcessUpdateResult(PackageUpdateMode &mode, UpdaterStatus &status, UpdaterParams &upParams)
+{
+    if (mode == HOTA_UPDATE) {
+        UPDATER_UI_INSTANCE.ShowFailedPage();
+        UpdaterInit::GetInstance().InvokeEvent(UPDATER_POST_INIT_EVENT);
+        if (upParams.forceReboot) {
+            Utils::UsSleep(5 * DISPLAY_TIME); // 5 : 5s
+            PostUpdater(true);
+            NotifyReboot("", "Updater night update fail");
+        }
+    } else if (mode == SDCARD_UPDATE) {
+        UPDATER_UI_INSTANCE.ShowLogRes(
+            status == UPDATE_CORRUPT ? TR(LOGRES_VERIFY_FAILED) : TR(LOGRES_UPDATE_FAILED));
+        UPDATER_UI_INSTANCE.ShowFailedPage();
+    } else if (upParams.factoryResetMode == "user_wipe_data" ||
+        upParams.factoryResetMode == "menu_wipe_data" || upParams.factoryResetMode == "factory_wipe_data") {
+        UPDATER_UI_INSTANCE.ShowFailedPage();
+    } else if (CheckUpdateMode(USB_UPDATE_FAIL)) {
+        (void)UPDATER_UI_INSTANCE.SetMode(UPDATERMODE_USBUPDATE);
+        UPDATER_UI_INSTANCE.ShowFailedPage();
+    } else {
+        UPDATER_UI_INSTANCE.ShowMainpage();
+        UPDATER_UI_INSTANCE.SaveScreen();
+    }
+}
+
 int UpdaterMain(int argc, char **argv)
 {
     [[maybe_unused]] UpdaterStatus status = UPDATE_UNKNOWN;
@@ -1319,28 +1345,9 @@ int UpdaterMain(int argc, char **argv)
     UPDATER_UI_INSTANCE.Sleep(UI_SHOW_DURATION);
     if (status != UPDATE_SUCCESS && status != UPDATE_SKIP) {
         ProcessLogs();
-        if (mode == HOTA_UPDATE) {
-            UPDATER_UI_INSTANCE.ShowFailedPage();
-            UpdaterInit::GetInstance().InvokeEvent(UPDATER_POST_INIT_EVENT);
-            if (upParams.forceReboot) {
-                Utils::UsSleep(5 * DISPLAY_TIME); // 5 : 5s
-                PostUpdater(true);
-                NotifyReboot("", "Updater night update fail");
-                return 0;
-            }
-        } else if (mode == SDCARD_UPDATE) {
-            UPDATER_UI_INSTANCE.ShowLogRes(
-                status == UPDATE_CORRUPT ? TR(LOGRES_VERIFY_FAILED) : TR(LOGRES_UPDATE_FAILED));
-            UPDATER_UI_INSTANCE.ShowFailedPage();
-        } else if (upParams.factoryResetMode == "user_wipe_data" ||
-            upParams.factoryResetMode == "menu_wipe_data" || upParams.factoryResetMode == "factory_wipe_data") {
-            UPDATER_UI_INSTANCE.ShowFailedPage();
-        } else if (CheckUpdateMode(USB_UPDATE_FAIL)) {
-            (void)UPDATER_UI_INSTANCE.SetMode(UPDATERMODE_USBUPDATE);
-            UPDATER_UI_INSTANCE.ShowFailedPage();
-        } else {
-            UPDATER_UI_INSTANCE.ShowMainpage();
-            UPDATER_UI_INSTANCE.SaveScreen();
+        ProcessUpdateResult(mode, status, upParams);
+        if (mode == HOTA_UPDATE && upParams.forceReboot) {
+            return 0;
         }
         // Wait for user input
         NotifyAutoReboot(mode);
