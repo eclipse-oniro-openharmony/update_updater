@@ -18,7 +18,6 @@
 #include <string>
 
 namespace Updater {
-constexpr const char *SUB_PACKAGE_FILE = "update_sub.zip";
 constexpr const char *INSTALL_TIME_FILE = "install_time";
 constexpr const char *COMMAND_FILE = "/data/updater/command";
 constexpr const char *TMP_LOG = "/tmp/updater.log";
