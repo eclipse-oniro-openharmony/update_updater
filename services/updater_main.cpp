@@ -1195,7 +1195,9 @@ std::unordered_map<std::string, std::function<void ()>> InitOptionsFuncTab(char*
         }},
         {"subpkg_update", [&]() -> void
         {
+            (void)UPDATER_UI_INSTANCE.SetMode(UPDATERMODE_OTA);
             upParams.updateMode = SUBPKG_UPDATE;
+            mode = HOTA_UPDATE;
         }}
     };
     return optionsFuncTab;

@@ -60,7 +60,7 @@ bool IsDouble(const std::string& str);
 
 UpdaterStatus InstallUpdaterPackages(UpdaterParams &upParams);
 
-int OtaUpdatePreCheck(PkgManager::PkgManagerPtr pkgManager, const std::string &packagePath);
+int OtaUpdatePreCheck(Hpackage::PkgManager::PkgManagerPtr pkgManager, const std::string &packagePath);
 
 #ifdef __cplusplus
 #if __cplusplus
