@@ -971,8 +971,6 @@ UpdaterStatus UpdaterFromSdcard(UpdaterParams &upParams)
         LOG(INFO) << "UpdaterFromSdcard start, sdcard updaterPath : " << upParams.updatePackage[upParams.pkgLocation];
         UPDATER_UI_INSTANCE.ShowLog(TR(LOG_SDCARD_NOTMOVE));
         status = DoUpdatePackages(upParams);
-    } else if (NotifyActionResult(upParams, status, {SET_UPDATE_STATUS, GET_UPDATE_STATUS}) != UPDATE_SUCCESS) {
-        LOG(ERROR) << "notify action fail";
     }
     PostSdcardUpdatePackages(upParams, status == UPDATE_SUCCESS);
     return status;
@@ -997,8 +995,6 @@ UpdaterStatus InstallUpdaterPackages(UpdaterParams &upParams)
     NotifyPreCheck(status, upParams);
     if (status == UPDATE_SUCCESS) {
         status = DoUpdatePackages(upParams);
-    } else if (NotifyActionResult(upParams, status, {SET_UPDATE_STATUS, GET_UPDATE_STATUS}) != UPDATE_SUCCESS) {
-        LOG(ERROR) << "notify action fail";
     }
     PostUpdatePackages(upParams, status == UPDATE_SUCCESS);
     UpdaterInit::GetInstance().InvokeEvent(UPDATER_POST_UPDATE_PACKAGE_EVENT);
