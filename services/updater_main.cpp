@@ -1077,6 +1077,10 @@ UpdaterStatus DoUpdaterEntry(UpdaterParams &upParams)
         status = InstallUpdaterPackages(upParams);
     } else if (upParams.updateMode == SUBPKG_UPDATE) {
         UPDATER_UI_INSTANCE.ShowProgressPage();
+        if (CheckMountData() != 0) {
+            LOG(ERROR) << "subpkg update mount data fail";
+            return UPDATE_ERROR;
+        }
         status = UpdateSubPkg(upParams);
         if (status == UPDATE_SUCCESS) {
             UPDATER_UI_INSTANCE.ShowSuccessPage();
