@@ -23,7 +23,6 @@
 #include "updater_init.h"
 
 namespace Updater {
-using namespace Hpackage;
 enum FactoryResetMode {
     USER_WIPE_DATA = 0,
     FACTORY_WIPE_DATA,
@@ -61,7 +60,9 @@ bool IsDouble(const std::string& str);
 
 UpdaterStatus InstallUpdaterPackages(UpdaterParams &upParams);
 
-int OtaUpdatePreCheck(PkgManager::PkgManagerPtr pkgManager, const std::string &packagePath);
+int OtaUpdatePreCheck(Hpackage::PkgManager::PkgManagerPtr pkgManager, const std::string &packagePath);
+
+void ProcessUpdateResult(PackageUpdateMode &mode, UpdaterStatus &status, UpdaterParams &upParams);
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -82,6 +83,7 @@ void NotifyReboot(const std::string& rebootTarget, const std::string &rebootReas
 UpdaterStatus NotifyActionResult(UpdaterParams &upParams,
     UpdaterStatus &status, const std::vector<NotifyAction> &notifyActionVec);
 UpdaterStatus UpdateSubPkg(UpdaterParams &upParams);
+void ProcessLogs();
 void NotifyPreCheck(UpdaterStatus &status, UpdaterParams &upParams);
 #ifdef __cplusplus
 #if __cplusplus

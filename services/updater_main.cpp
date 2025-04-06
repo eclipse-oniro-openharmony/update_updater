@@ -615,17 +615,6 @@ static int CheckMountData()
     return UPDATE_ERROR;
 }
 
-static UpdaterStatus CheckVerifyPackages(UpdaterParams &upParams)
-{
-    UpdaterStatus status = UPDATE_SUCCESS;
-    if (NotifyActionResult(upParams, status, {PROCESS_PACKAGE, SET_INSTALL_STATUS, GET_INSTALL_STATUS}) !=
-        UPDATE_SUCCESS) {
-        LOG(ERROR) << "notify action fail";
-        return UPDATE_CORRUPT;
-    }
-    return status;
-}
-
 static UpdaterStatus VerifyCommonFiles(UpdaterParams &upParams)
 {
     if (upParams.updateBin.size() > 0) {
@@ -704,10 +693,6 @@ static UpdaterStatus PreUpdatePackages(UpdaterParams &upParams)
         return UPDATE_ERROR;
     }
 #endif
-    if (CheckVerifyPackages(upParams) != UPDATE_SUCCESS) {
-        LOG(ERROR) << "verify packages fail";
-        return UPDATE_CORRUPT;
-    }
     return UPDATE_SUCCESS;
 }
 
@@ -952,10 +937,6 @@ static UpdaterStatus PreSdcardUpdatePackages(UpdaterParams &upParams)
         return UPDATE_ERROR;
     }
 #endif
-    if (CheckVerifyPackages(upParams) != UPDATE_SUCCESS) {
-        LOG(ERROR) << "verify packages fail";
-        return UPDATE_CORRUPT;
-    }
     return UPDATE_SUCCESS;
 }
 
@@ -972,6 +953,7 @@ UpdaterStatus UpdaterFromSdcard(UpdaterParams &upParams)
     upParams.callbackProgress = [] (float value) { UPDATER_UI_INSTANCE.ShowProgress(value); };
     SetMessageToMisc(upParams.miscCmd, 0, "sdcard_update");
     UpdaterStatus status = CheckSdcardPkgs(upParams);
+    NotifyPreCheck(status, upParams);
     if (status != UPDATE_SUCCESS) {
         LOG(ERROR) << "can not find sdcard packages";
         if (NotifyActionResult(upParams, status, {SET_INSTALL_STATUS,
@@ -989,8 +971,6 @@ UpdaterStatus UpdaterFromSdcard(UpdaterParams &upParams)
         LOG(INFO) << "UpdaterFromSdcard start, sdcard updaterPath : " << upParams.updatePackage[upParams.pkgLocation];
         UPDATER_UI_INSTANCE.ShowLog(TR(LOG_SDCARD_NOTMOVE));
         status = DoUpdatePackages(upParams);
-    } else if (NotifyActionResult(upParams, status, {SET_UPDATE_STATUS, GET_UPDATE_STATUS}) != UPDATE_SUCCESS) {
-        LOG(ERROR) << "notify action fail";
     }
     PostSdcardUpdatePackages(upParams, status == UPDATE_SUCCESS);
     return status;
@@ -1012,10 +992,9 @@ UpdaterStatus InstallUpdaterPackages(UpdaterParams &upParams)
 {
     UpdaterInit::GetInstance().InvokeEvent(UPDATER_PRE_UPDATE_PACKAGE_EVENT);
     UpdaterStatus status = PreUpdatePackages(upParams);
+    NotifyPreCheck(status, upParams);
     if (status == UPDATE_SUCCESS) {
         status = DoUpdatePackages(upParams);
-    } else if (NotifyActionResult(upParams, status, {SET_UPDATE_STATUS, GET_UPDATE_STATUS}) != UPDATE_SUCCESS) {
-        LOG(ERROR) << "notify action fail";
     }
     PostUpdatePackages(upParams, status == UPDATE_SUCCESS);
     UpdaterInit::GetInstance().InvokeEvent(UPDATER_POST_UPDATE_PACKAGE_EVENT);
@@ -1098,6 +1077,10 @@ UpdaterStatus DoUpdaterEntry(UpdaterParams &upParams)
         status = InstallUpdaterPackages(upParams);
     } else if (upParams.updateMode == SUBPKG_UPDATE) {
         UPDATER_UI_INSTANCE.ShowProgressPage();
+        if (CheckMountData() != 0) {
+            LOG(ERROR) << "subpkg update mount data fail";
+            return UPDATE_ERROR;
+        }
         status = UpdateSubPkg(upParams);
         if (status == UPDATE_SUCCESS) {
             UPDATER_UI_INSTANCE.ShowSuccessPage();
@@ -1212,7 +1195,9 @@ std::unordered_map<std::string, std::function<void ()>> InitOptionsFuncTab(char*
         }},
         {"subpkg_update", [&]() -> void
         {
+            (void)UPDATER_UI_INSTANCE.SetMode(UPDATERMODE_OTA);
             upParams.updateMode = SUBPKG_UPDATE;
+            mode = HOTA_UPDATE;
         }}
     };
     return optionsFuncTab;
@@ -1311,6 +1296,37 @@ void RebootAfterUpdateSuccess(const UpdaterParams &upParams)
         NotifyReboot("", "Updater update success");
 }
 
+__attribute__((weak)) void ProcessLogs()
+{
+    return;
+}
+
+void ProcessUpdateResult(PackageUpdateMode &mode, UpdaterStatus &status, UpdaterParams &upParams)
+{
+    if (mode == HOTA_UPDATE) {
+        UPDATER_UI_INSTANCE.ShowFailedPage();
+        UpdaterInit::GetInstance().InvokeEvent(UPDATER_POST_INIT_EVENT);
+        if (upParams.forceReboot) {
+            Utils::UsSleep(5 * DISPLAY_TIME); // 5 : 5s
+            PostUpdater(true);
+            NotifyReboot("", "Updater night update fail");
+        }
+    } else if (mode == SDCARD_UPDATE) {
+        UPDATER_UI_INSTANCE.ShowLogRes(
+            status == UPDATE_CORRUPT ? TR(LOGRES_VERIFY_FAILED) : TR(LOGRES_UPDATE_FAILED));
+        UPDATER_UI_INSTANCE.ShowFailedPage();
+    } else if (upParams.factoryResetMode == "user_wipe_data" ||
+        upParams.factoryResetMode == "menu_wipe_data" || upParams.factoryResetMode == "factory_wipe_data") {
+        UPDATER_UI_INSTANCE.ShowFailedPage();
+    } else if (CheckUpdateMode(USB_UPDATE_FAIL)) {
+        (void)UPDATER_UI_INSTANCE.SetMode(UPDATERMODE_USBUPDATE);
+        UPDATER_UI_INSTANCE.ShowFailedPage();
+    } else {
+        UPDATER_UI_INSTANCE.ShowMainpage();
+        UPDATER_UI_INSTANCE.SaveScreen();
+    }
+}
+
 int UpdaterMain(int argc, char **argv)
 {
     [[maybe_unused]] UpdaterStatus status = UPDATE_UNKNOWN;
@@ -1318,7 +1334,6 @@ int UpdaterMain(int argc, char **argv)
     upParams.callbackProgress = [] (float value) { UPDATER_UI_INSTANCE.ShowProgress(value); };
     UpdaterInit::GetInstance().InvokeEvent(UPDATER_PRE_INIT_EVENT);
     std::vector<std::string> args = ParseParams(argc, argv);
-
     LOG(INFO) << "Ready to start";
 #if !defined(UPDATER_UT) && defined(UPDATER_UI_SUPPORT)
     UPDATER_UI_INSTANCE.InitEnv();
@@ -1329,28 +1344,10 @@ int UpdaterMain(int argc, char **argv)
 #if !defined(UPDATER_UT) && defined(UPDATER_UI_SUPPORT)
     UPDATER_UI_INSTANCE.Sleep(UI_SHOW_DURATION);
     if (status != UPDATE_SUCCESS && status != UPDATE_SKIP) {
-        if (mode == HOTA_UPDATE) {
-            UPDATER_UI_INSTANCE.ShowFailedPage();
-            UpdaterInit::GetInstance().InvokeEvent(UPDATER_POST_INIT_EVENT);
-            if (upParams.forceReboot) {
-                Utils::UsSleep(5 * DISPLAY_TIME); // 5 : 5s
-                PostUpdater(true);
-                NotifyReboot("", "Updater night update fail");
-                return 0;
-            }
-        } else if (mode == SDCARD_UPDATE) {
-            UPDATER_UI_INSTANCE.ShowLogRes(
-                status == UPDATE_CORRUPT ? TR(LOGRES_VERIFY_FAILED) : TR(LOGRES_UPDATE_FAILED));
-            UPDATER_UI_INSTANCE.ShowFailedPage();
-        } else if (upParams.factoryResetMode == "user_wipe_data" ||
-            upParams.factoryResetMode == "menu_wipe_data" || upParams.factoryResetMode == "factory_wipe_data") {
-            UPDATER_UI_INSTANCE.ShowFailedPage();
-        } else if (CheckUpdateMode(USB_UPDATE_FAIL)) {
-            (void)UPDATER_UI_INSTANCE.SetMode(UPDATERMODE_USBUPDATE);
-            UPDATER_UI_INSTANCE.ShowFailedPage();
-        } else {
-            UPDATER_UI_INSTANCE.ShowMainpage();
-            UPDATER_UI_INSTANCE.SaveScreen();
+        ProcessLogs();
+        ProcessUpdateResult(mode, status, upParams);
+        if (mode == HOTA_UPDATE && upParams.forceReboot) {
+            return 0;
         }
         // Wait for user input
         NotifyAutoReboot(mode);
