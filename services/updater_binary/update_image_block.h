@@ -20,6 +20,14 @@
 #include "script_manager.h"
 
 namespace Updater {
+struct UpdateBlockInfo {
+    std::string partitionName;
+    std::string transferName;
+    std::string newDataName;
+    std::string patchDataName;
+    std::string devPath;
+};
+
 class UScriptInstructionBlockUpdate : public Uscript::UScriptInstruction {
 public:
     UScriptInstructionBlockUpdate() {}
@@ -57,6 +65,19 @@ private:
     int32_t SetShaInfo(Uscript::UScriptContext &context, ShaInfo &shaInfo);
     bool IsTargetShaDiff(const std::string &devPath, const ShaInfo &shaInfo);
 };
+
+#ifdef __cplusplus
+#if __cplusplus
+extern "C" {
+#endif
+#endif /* __cplusplus */
+void GetWriteDevPath(const std::string &path, [[maybe_unused]]const std::string &partitionName,
+                     std::string &devPath);
+#ifdef __cplusplus
+#if __cplusplus
+}
+#endif
+#endif /* __cplusplus */
 }
 
 #endif // UPDATER_UPDATE_IMAGE_BLOCK_H

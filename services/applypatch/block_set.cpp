@@ -356,7 +356,7 @@ int32_t BlockSet::WriteZeroToBlock(int fd, bool isErase)
         off64_t offset = static_cast<off64_t>(iter->first * H_BLOCK_SIZE);
         int ret = 0;
 
-        if (isErase) {
+        if (isErase && Utils::IsUpdaterMode()) {
 #ifndef UPDATER_UT
             size_t writeSize = (iter->second - iter->first) * H_BLOCK_SIZE;
             uint64_t arguments[2] = {static_cast<uint64_t>(offset), writeSize};

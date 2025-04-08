@@ -120,7 +120,7 @@ CommandResult ZeroAndEraseCommandFn::Execute(const Command &params)
         isErase = true;
         LOG(INFO) << "Start run ERASE command";
     }
-    if (isErase) {
+    if (isErase && Utils::IsUpdaterMode()) {
         struct stat statBlock {};
         if (fstat(params.GetTargetFileDescriptor(), &statBlock) == -1) {
             LOG(ERROR) << "Failed to fstat";

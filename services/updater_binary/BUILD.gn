@@ -52,7 +52,7 @@ ohos_static_library("libupdater_binary") {
     "${updater_path}/services/updater_binary/update_processor.cpp",
     "${updater_path}/services/updater_binary/update_processor_stream.cpp",
   ]
-  configs = [ ":updater_config" ]
+  public_configs = [ ":updater_config" ]
 
   ldflags = [ "-Wl -std=c++11" ]
 

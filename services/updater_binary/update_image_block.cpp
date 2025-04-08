@@ -42,6 +42,15 @@ constexpr int32_t SHA_CHECK_PARAMS = 3;
 constexpr int32_t SHA_CHECK_TARGETPAIRS_INDEX = 3;
 constexpr int32_t SHA_CHECK_TARGETSHA_INDEX = 4;
 constexpr int32_t SHA_CHECK_TARGET_PARAMS = 5;
+
+__attribute__((weak)) void GetWriteDevPath(const std::string &path, [[maybe_unused]]const std::string &partitionName,
+    std::string &devPath)
+{
+    devPath = path;
+    LOG(INFO) << "GetWriteDevPath: " << devPath;
+    return;
+}
+
 static int ExtractNewData(const PkgBuffer &buffer, size_t size, size_t start, bool isFinish, const void* context)
 {
     void *p = const_cast<void *>(context);
@@ -133,14 +142,6 @@ static int32_t ReturnAndPushParam(int32_t returnValue, Uscript::UScriptContext &
     context.PushParam(returnValue);
     return returnValue;
 }
-
-struct UpdateBlockInfo {
-    std::string partitionName;
-    std::string transferName;
-    std::string newDataName;
-    std::string patchDataName;
-    std::string devPath;
-};
 
 static int32_t GetUpdateBlockInfo(struct UpdateBlockInfo &infos, Uscript::UScriptEnv &env,
     Uscript::UScriptContext &context)
@@ -293,7 +294,9 @@ static int32_t ExtractDiffPackageAndLoad(const UpdateBlockInfo &infos, Uscript::
 static int32_t DoExecuteUpdateBlock(const UpdateBlockInfo &infos, TransferManagerPtr tm,
     Hpackage::PkgManager::StreamPtr &outStream, const std::vector<std::string> &lines, Uscript::UScriptContext &context)
 {
-    int fd = open(infos.devPath.c_str(), O_RDWR | O_LARGEFILE);
+    std::string devPath = "";
+    GetWriteDevPath(infos.devPath, infos.partitionName, devPath);
+    int fd = open(devPath.c_str(), O_RDWR | O_LARGEFILE);
     auto env = tm->GetTransferParams()->env;
     if (fd == -1) {
         LOG(ERROR) << "Failed to open block";
