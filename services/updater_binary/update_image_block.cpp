@@ -294,7 +294,9 @@ static int32_t ExtractDiffPackageAndLoad(const UpdateBlockInfo &infos, Uscript::
 static int32_t DoExecuteUpdateBlock(const UpdateBlockInfo &infos, TransferManagerPtr tm,
     Hpackage::PkgManager::StreamPtr &outStream, const std::vector<std::string> &lines, Uscript::UScriptContext &context)
 {
-    int fd = open(infos.devPath.c_str(), O_RDWR | O_LARGEFILE);
+    std::string devPath = "";
+    GetWriteDevPath(infos.devPath, infos.partitionName, devPath);
+    int fd = open(devPath.c_str(), O_RDWR | O_LARGEFILE);
     auto env = tm->GetTransferParams()->env;
     if (fd == -1) {
         LOG(ERROR) << "Failed to open block";
