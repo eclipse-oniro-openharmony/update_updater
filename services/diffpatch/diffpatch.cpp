@@ -69,6 +69,7 @@ int32_t PatchMapFile(const std::string &fileName, MemMapInfo &info)
     void *mappedData = mmap(nullptr, st.st_size, PROT_READ, MAP_PRIVATE, info.fd, 0);
     if (mappedData == MAP_FAILED) {
         close(info.fd);
+        info.fd = -1;
         PATCH_LOGE("Failed to memory map");
         return -1;
     }
