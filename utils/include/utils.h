@@ -24,6 +24,7 @@
 #include <vector>
 
 namespace Updater {
+enum
 namespace Utils {
 constexpr int N_BIN = 2;
 constexpr int N_OCT = 8;
