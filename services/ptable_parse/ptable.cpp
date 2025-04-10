@@ -560,6 +560,7 @@ bool Ptable::GetPartionInfoByName(const std::string &partitionName, PtnInfo &ptn
         LOG(INFO) << "find partition name " << partitionName;
         return true;
     }
+    int updateSlot;
     std::string partitionNameAB = partitionName;
     if (Utils::IsUpdaterMode()) {
         partitionNameAB += (GetCurrentSlot() == 1 ? PARTITION_A_SUFFIX : PARTITION_B_SUFFIX);
