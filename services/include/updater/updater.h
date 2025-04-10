@@ -92,6 +92,10 @@ void SetTmpProgressValue(int value);
 
 void ProgressSmoothHandler(int beginProgress, int endProgress);
 
+UpdaterStatus SetUpdateSlotParam(UpdaterParams &upParams, bool isUpdateCurrSlot);
+
+UpdaterStatus ClearUpdateSlotParam();
+
 UpdaterStatus DoInstallUpdaterPackage(Hpackage::PkgManager::PkgManagerPtr pkgManager,
     UpdaterParams &upParams, PackageUpdateMode updateMode);
 
