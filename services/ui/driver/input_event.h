@@ -43,7 +43,6 @@ public:
     static InputEvent &GetInstance();
     int HandleInputEvent(const struct input_event *iev, uint32_t type);
     void GetInputDeviceType(uint32_t devIndex, uint32_t &type);
-    static void ReportEventPkgCallback(const InputEventPackage **pkgs, const uint32_t count, uint32_t devIndex);
     /**
      * @brief Init input device driver.
      */
@@ -52,8 +51,6 @@ public:
 private:
     OHOS::sptr<OHOS::HDI::Input::V1_0::IInputCallback> callback_ {nullptr};
     OHOS::sptr<OHOS::HDI::Input::V1_0::IInputInterfaces> inputInterface_ = nullptr;
-    IInputInterface *inputInterface_;
-    InputEventCb callback_;
     std::unordered_map<uint32_t, uint32_t> devTypeMap_{};
     AddInputDeviceFunc addInputDeviceHelper_;
     HandlePointersEventFunc handlePointersEventHelper_;
