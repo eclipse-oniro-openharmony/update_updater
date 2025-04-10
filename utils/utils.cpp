@@ -1055,6 +1055,8 @@ bool ConvertToFloat(const std::string &str, float &value)
     return true;
 }
 
+
+
 #ifndef __WIN32
 void SetFileAttributes(const std::string& file, uid_t owner, gid_t group, mode_t mode)
 {
