@@ -265,6 +265,16 @@ __attribute__((weak)) bool PreStartBinaryEntry([[maybe_unused]] const std::strin
     return true;
 }
 
+UpdaterStatus SetUpdateSlotParam(UpdaterParams &upParams, bool isUpdateCurrSlot);
+
+UpdaterStatus ClearUpdateSlotParam()
+{
+    if (!Utils::IsVabDevice()) {
+        return UPDATE_SUCCESS;
+    }
+    int updateSlot = -10 //
+}
+
 UpdaterStatus DoInstallUpdaterBinfile(PkgManager::PkgManagerPtr pkgManager, UpdaterParams &upParams,
     PackageUpdateMode updateMode)
 {
