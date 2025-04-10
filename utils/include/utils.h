@@ -24,6 +24,11 @@
 #include <vector>
 
 namespace Updater {
+enum SlotType {
+    NOT_AB,
+    SLOT_A,
+    SLOT_B,
+};
 namespace Utils {
 constexpr int N_BIN = 2;
 constexpr int N_OCT = 8;
@@ -109,6 +114,9 @@ bool ConvertToLong(const std::string &str, int32_t &value);
 bool ConvertToUnsignedLong(const std::string &str, uint32_t &value, int base = 0);
 bool ConvertToDouble(const std::string &str, double &value);
 bool ConvertToFloat(const std::string &str, float &value);
+bool IsVabDevice();
+bool SetUpdateSlot(int updateSlot);
+int GetUpdateSlot();
 #ifndef __WIN32
 void SetFileAttributes(const std::string& file, uid_t owner, gid_t group, mode_t mode);
 #endif

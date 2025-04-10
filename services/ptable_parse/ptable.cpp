@@ -561,11 +561,12 @@ bool Ptable::GetPartionInfoByName(const std::string &partitionName, PtnInfo &ptn
         return true;
     }
     std::string partitionNameAB = partitionName;
-    if (Utils::IsUpdaterMode()) {
-        partitionNameAB += (GetCurrentSlot() == 1 ? PARTITION_A_SUFFIX : PARTITION_B_SUFFIX);
-    } else {
-        partitionNameAB += (GetCurrentSlot() == 1 ? PARTITION_B_SUFFIX : PARTITION_A_SUFFIX);
+    int updateSlot = Utils::GetUpdateSlot();
+    if (updateSlot < 1 || updateSlot > 2) { // 2 : slot b
+        LOG(ERROR) << "get update slot fail";
+        return false;
     }
+    partitionNameAB += (updateSlot == SLOT_A ? PARTITION_A_SUFFIX : PARTITION_B_SUFFIX);
     if (findPart(partitionNameAB)) {
         LOG(INFO) << "find partitionAB name " << partitionNameAB;
         return true;

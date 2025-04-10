@@ -265,6 +265,53 @@ __attribute__((weak)) bool PreStartBinaryEntry([[maybe_unused]] const std::strin
     return true;
 }
 
+bool IsUpdateBasePkg(UpdaterParams &upParams)
+{
+    for (auto pkgPath : upParams.updatePackage) {
+        if (pkgPath.find("_base") != std::string::npos) {
+            LOG(INFO) << "this update include base pkg";
+            return true;
+        }
+    }
+    return false;
+}
+ 
+UpdaterStatus SetUpdateSlotParam(UpdaterParams &upParams, bool isUpdateCurrSlot)
+{
+    if (!Utils::IsVabDevice()) {
+        return UPDATE_SUCCESS;
+    }
+    if (!isUpdateCurrSlot && !IsUpdateBasePkg(upParams)) {
+        isUpdateCurrSlot = true;
+    }
+    int currentSlot = GetCurrentSlot();
+    if (currentSlot < 1 || currentSlot > 2) { // 2 : max slot
+        LOG(ERROR) << "GetCurrentSlot failed";
+        return UPDATE_ERROR;
+    }
+    bool isUpdateSlotA = (currentSlot == SLOT_A && isUpdateCurrSlot) ||
+        (currentSlot == SLOT_B && !isUpdateCurrSlot);
+    int updateSlot = isUpdateSlotA ? SLOT_A : SLOT_B;
+    if (!Utils::SetUpdateSlot(updateSlot)) {
+        LOG(ERROR) << "set update.part.slot fail";
+        return UPDATE_ERROR;
+    }
+    return UPDATE_SUCCESS;
+}
+ 
+UpdaterStatus ClearUpdateSlotParam()
+{
+    if (!Utils::IsVabDevice()) {
+        return UPDATE_SUCCESS;
+    }
+    int updateSlot = -10; // -10 : default value
+    if (!Utils::SetUpdateSlot(updateSlot)) {
+        LOG(ERROR) << "clear update.part.slot fail";
+        return UPDATE_ERROR;
+    }
+    return UPDATE_SUCCESS;
+}
+
 UpdaterStatus DoInstallUpdaterBinfile(PkgManager::PkgManagerPtr pkgManager, UpdaterParams &upParams,
     PackageUpdateMode updateMode)
 {

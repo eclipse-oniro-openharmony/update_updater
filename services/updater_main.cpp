@@ -666,6 +666,10 @@ static UpdaterStatus PreUpdatePackages(UpdaterParams &upParams)
         (void)DeleteFile(resultPath);
         LOG(INFO) << "delete last upgrade file";
     }
+    if (SetUpdateSlotParam(upParams, false) != UPDATE_SUCCESS) {
+        LOG(ERROR) << "SetUpdateSlotParam failed";
+        return UPDATE_ERROR;
+    }
     // verify package first
     if (VerifyCommonFiles(upParams) != UPDATE_SUCCESS) {
         return UPDATE_CORRUPT; // verify package failed must return UPDATE_CORRUPT, ux need it !!!
@@ -858,20 +862,42 @@ UpdaterStatus DoUpdatePackages(UpdaterParams &upParams)
         UPDATER_LAST_WORD(status, "DoInstallPackages failed");
         return status;
     }
+    return status;
+}
+
+static void ShowSuccessUi(UpdaterParams &upParams, UpdaterStatus &status)
+{
+    if (status != UPDATE_SUCCESS) {
+        LOG(ERROR) << "update not succ";
+        return;
+    }
     if (upParams.forceUpdate) {
         UPDATER_UI_INSTANCE.ShowLogRes(TR(LABEL_UPD_OK_SHUTDOWN));
     }
     if (NotifyActionResult(upParams, status, {GET_UPDATE_STATUS}) != UPDATE_SUCCESS) {
         LOG(ERROR) << "get status fail";
-        return UPDATE_CORRUPT;
+        status = UPDATE_CORRUPT;
+        return;
     }
     UPDATER_UI_INSTANCE.ShowSuccessPage();
-    return status;
+}
+ 
+__attribute__((weak)) UpdaterStatus CheckAndSetSlot([[maybe_unused]]UpdaterParams &upParams)
+{
+    LOG(INFO) << "not need check and set slot";
+    return UPDATE_SUCCESS;
 }
 
-static void PostUpdate(UpdaterParams &upParams, bool updateResult,
+static void PostUpdate(UpdaterParams &upParams, UpdaterStatus &status,
     const std::vector<std::string>& updateList, const std::string& type)
 {
+    if (status == UPDATE_SUCCESS) {
+        status = CheckAndSetSlot(upParams);
+    }
+    ClearUpdateSlotParam();
+    ShowSuccessUi(upParams, status);
+    bool updateResult = (status == UPDATE_SUCCESS);
+
     std::string writeBuffer;
     std::string buf;
     std::string time;
@@ -907,14 +933,14 @@ static void PostUpdate(UpdaterParams &upParams, bool updateResult,
     DeleteInstallTimeFile();
 }
 
-static void PostUpdateBinfiles(UpdaterParams &upParams, bool updateResult)
+static void PostUpdateBinfiles(UpdaterParams &upParams, UpdaterStatus &status)
 {
-    PostUpdate(upParams, updateResult, upParams.updateBin, "Binfiles");
+    PostUpdate(upParams, status, upParams.updateBin, "Binfiles");
 }
 
-static void PostUpdatePackages(UpdaterParams &upParams, bool updateResult)
+static void PostUpdatePackages(UpdaterParams &upParams, UpdaterStatus &status)
 {
-    PostUpdate(upParams, updateResult, upParams.updatePackage, "Packages");
+    PostUpdate(upParams, status, upParams.updatePackage, "Packages");
 }
 
 static UpdaterStatus PreSdcardUpdatePackages(UpdaterParams &upParams)
@@ -926,6 +952,10 @@ static UpdaterStatus PreSdcardUpdatePackages(UpdaterParams &upParams)
         UPDATER_UI_INSTANCE.Sleep(UI_SHOW_DURATION);
         LOG(ERROR) << "Battery is not sufficient for install package.";
         return UPDATE_SKIP;
+    }
+    if (SetUpdateSlotParam(upParams, true) != UPDATE_SUCCESS) {
+        LOG(ERROR) << "SetUpdateSlotParam failed";
+        return UPDATE_ERROR;
     }
     UpdaterStatus status = VerifyPackages(upParams);
     if (status != UPDATE_SUCCESS) {
@@ -940,10 +970,18 @@ static UpdaterStatus PreSdcardUpdatePackages(UpdaterParams &upParams)
     return UPDATE_SUCCESS;
 }
 
-static void PostSdcardUpdatePackages(UpdaterParams &upParams, bool updateResult)
+static void PostSdcardUpdatePackages(UpdaterParams &upParams, UpdaterStatus &status)
 {
+    ClearUpdateSlotParam();
     if (Utils::CheckUpdateMode(Updater::SDCARD_INTRAL_MODE)) {
-        PostUpdatePackages(upParams, updateResult);
+        PostUpdatePackages(upParams, status);
+    } else if (status == UPDATE_SUCCESS) {
+        if (NotifyActionResult(upParams, status, {GET_UPDATE_STATUS}) != UPDATE_SUCCESS) {
+            LOG(ERROR) << "get status fail";
+            status = UPDATE_CORRUPT;
+            return;
+        }
+        UPDATER_UI_INSTANCE.ShowSuccessPage();
     }
 }
 
@@ -972,7 +1010,7 @@ UpdaterStatus UpdaterFromSdcard(UpdaterParams &upParams)
         UPDATER_UI_INSTANCE.ShowLog(TR(LOG_SDCARD_NOTMOVE));
         status = DoUpdatePackages(upParams);
     }
-    PostSdcardUpdatePackages(upParams, status == UPDATE_SUCCESS);
+    PostSdcardUpdatePackages(upParams, status);
     return status;
 }
 
@@ -983,7 +1021,7 @@ UpdaterStatus InstallUpdaterBinfiles(UpdaterParams &upParams)
     if (status == UPDATE_SUCCESS) {
         status = DoUpdateBinfiles(upParams);
     }
-    PostUpdateBinfiles(upParams, status == UPDATE_SUCCESS);
+    PostUpdateBinfiles(upParams, status);
     UpdaterInit::GetInstance().InvokeEvent(UPDATER_POST_UPDATE_PACKAGE_EVENT);
     return status;
 }
@@ -996,7 +1034,7 @@ UpdaterStatus InstallUpdaterPackages(UpdaterParams &upParams)
     if (status == UPDATE_SUCCESS) {
         status = DoUpdatePackages(upParams);
     }
-    PostUpdatePackages(upParams, status == UPDATE_SUCCESS);
+    PostUpdatePackages(upParams, status);
     UpdaterInit::GetInstance().InvokeEvent(UPDATER_POST_UPDATE_PACKAGE_EVENT);
     return status;
 }

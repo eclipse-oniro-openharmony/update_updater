@@ -1055,6 +1055,59 @@ bool ConvertToFloat(const std::string &str, float &value)
     return true;
 }
 
+bool IsVabDevice()
+{
+    char partType[PARAM_SIZE + 1] = {0};
+    if (GetParameter("ohos.boot.update.partition_type", "", partType, sizeof(partType) - 1) <= 0) {
+        LOG(ERROR) << "get part partition failed";
+        return false;
+    }
+    LOG(INFO) << "device type is " << partType;
+    return std::string(partType) == "vab";
+}
+ 
+bool SetUpdateSlot(int setSlot)
+{
+    if (setSlot == -1) {
+        LOG(ERROR) << "setSlot is invalid value";
+        return false;
+    }
+    int tryNum = 3;
+    std::string setSlotStr = std::to_string(setSlot);
+    while (tryNum-- > 0) {
+        if (SetParameter("update.part.slot", setSlotStr.c_str()) != 0) {
+            LOG(ERROR) << "set update.part.slot fail";
+            continue;
+        }
+        if (GetUpdateSlot() == setSlot) {
+            LOG(INFO) << "set update.part.slot is " << setSlot;
+            return true;
+        }
+        if (tryNum != 0) {
+            sleep(1);
+        }
+    }
+    return false;
+}
+ 
+int GetUpdateSlot()
+{
+    if (!IsVabDevice()) {
+        return NOT_AB;
+    }
+    char paramValue[PARAM_SIZE + 1] = {0};
+    if (GetParameter("update.part.slot", "", paramValue, sizeof(paramValue) - 1) <= 0) {
+        LOG(ERROR) << "get update.part.slot failed";
+        return -1;
+    }
+    int updateSlot = -1;
+    if (!Utils::ConvertToLong(paramValue, updateSlot)) {
+        LOG(ERROR) << "ConvertToLong failed";
+        return -1;
+    }
+    return updateSlot;
+}
+
 #ifndef __WIN32
 void SetFileAttributes(const std::string& file, uid_t owner, gid_t group, mode_t mode)
 {
