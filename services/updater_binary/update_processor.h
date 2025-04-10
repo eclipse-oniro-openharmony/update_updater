@@ -90,6 +90,8 @@ public:
     UScriptInstructionPkgExtractRetSuc() {}
     ~UScriptInstructionPkgExtractRetSuc() override {}
     int32_t Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context) override;
+private:
+    std::mutex extractNoRetMutex_;
 };
 
 class UScriptInstructionUpdateFromBin : public Uscript::UScriptInstruction {
