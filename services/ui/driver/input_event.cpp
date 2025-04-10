@@ -18,7 +18,6 @@
 #include "keys_input_device.h"
 
 namespace Updater {
-constexpr const int MAX_INPUT_DEVICES = 32;
 extern "C" __attribute__((constructor)) void RegisterAddInputDeviceHelper(void)
 {
     InputEvent::GetInstance().RegisterAddInputDeviceHelper(AddInputDevice);
@@ -67,56 +66,67 @@ void InputEvent::GetInputDeviceType(uint32_t devIndex, uint32_t &type)
     type = it->second;
 }
 
-void InputEvent::ReportEventPkgCallback(const InputEventPackage **pkgs, const uint32_t count, uint32_t devIndex)
+int32_t InputEvent::HdfInputEventCallback::EventPkgCallback(
+    const std::vector<OHOS::HDI::Input::V1_0::EventPackage>& pkgs, uint32_t devIndex)
 {
-    if (pkgs == nullptr || *pkgs == nullptr) {
-        return;
+    if (pkgs.empty()) {
+        LOG(WARNING) << "pkgs is empty";
+        return HDF_FAILURE;
     }
-    for (uint32_t i = 0; i < count; i++) {
+    for (uint32_t i = 0; i < pkgs.size(); i++) {
         struct input_event ev = {
-            .type = static_cast<__u16>(pkgs[i]->type),
-            .code = static_cast<__u16>(pkgs[i]->code),
-            .value = pkgs[i]->value,
+            .type = static_cast<__u16>(pkgs[i].type),
+            .code = static_cast<__u16>(pkgs[i].code),
+            .value = pkgs[i].value,
         };
         uint32_t type = 0;
         InputEvent::GetInstance().GetInputDeviceType(devIndex, type);
         InputEvent::GetInstance().HandleInputEvent(&ev, type);
     }
-    return;
+    return HDF_SUCCESS;
+}
+ 
+int32_t InputEvent::HdfInputEventCallback::HotPlugCallback(const OHOS::HDI::Input::V1_0::HotPlugEvent &event)
+{
+    return HDF_SUCCESS;
 }
 
 int InputEvent::HdfInit()
 {
-    int ret = GetInputInterface(&inputInterface_);
-    if (ret != INPUT_SUCCESS) {
+    inputInterface_ = OHOS::HDI::Input::V1_0::IInputInterfaces::Get(true);
+    if (inputInterface_ == nullptr) {
         LOG(ERROR) << "get input driver interface failed";
-        return ret;
+        return HDF_FAILURE;
     }
-
+ 
     sleep(1); // need wait thread running
-
-    InputDevDesc sta[MAX_INPUT_DEVICES] = {{0}};
-    ret = inputInterface_->iInputManager->ScanInputDevice(sta, MAX_INPUT_DEVICES);
-    if (ret != INPUT_SUCCESS) {
+ 
+    std::vector<OHOS::HDI::Input::V1_0::DevDesc> sta = {};
+    int ret = inputInterface_->ScanInputDevice(sta);
+    if (ret != HDF_SUCCESS) {
         LOG(ERROR) << "scan device failed";
         return ret;
     }
-
-    for (int i = 0; i < MAX_INPUT_DEVICES; i++) {
+ 
+    for (int i = 0; i < sta.size(); i++) {
         uint32_t idx = sta[i].devIndex;
         uint32_t dev = sta[i].devType;
-        if ((idx == 0) || (inputInterface_->iInputManager->OpenInputDevice(idx) == INPUT_FAILURE)) {
+        if ((idx == 0) || (inputInterface_->OpenInputDevice(idx) == HDF_FAILURE)) {
             continue;
         }
         devTypeMap_.insert(std::pair<uint32_t, uint32_t>(idx, dev));
-
+ 
         LOG(INFO) << "hdf devType:" << dev << ", devIndex:" << idx;
     }
-
+ 
     /* first param not necessary, pass default 1 */
-    callback_.EventPkgCallback = ReportEventPkgCallback;
-    ret = inputInterface_->iInputReporter->RegisterReportCallback(1, &callback_);
-    if (ret != INPUT_SUCCESS) {
+    callback_ = new (std::nothrow) HdfInputEventCallback();
+    if (callback_ == nullptr) {
+        LOG(ERROR) << "callback is nullptr";
+        return ret;
+    }
+    ret = inputInterface_->RegisterReportCallback(1, callback_);
+    if (ret != HDF_SUCCESS) {
         LOG(ERROR) << "register callback failed for device 1";
         return ret;
     }

@@ -15,12 +15,12 @@
 #ifndef UPDATER_UI_INPUT_EVENT_H
 #define UPDATER_UI_INPUT_EVENT_H
 #include <linux/input.h>
+#include <unordered_set>
 #include "common/input_device_manager.h"
 #include "dock/pointer_input_device.h"
-#include "input_manager.h"
 #include "macros_updater.h"
-#include <unordered_set>
 #include "pointers_input_device.h"
+#include "v1_0/iinput_interfaces.h"
 
 namespace Updater {
 using AddInputDeviceFunc = std::function<void()>;
@@ -28,6 +28,14 @@ using HandlePointersEventFunc = std::function<void(const input_event &ev, uint32
 class InputEvent {
     DISALLOW_COPY_MOVE(InputEvent);
 public:
+    class HdfInputEventCallback : public OHOS::HDI::Input::V1_0::IInputCallback {
+    public:
+        HdfInputEventCallback() = default;
+        ~HdfInputEventCallback() override = default;
+        int32_t EventPkgCallback(const std::vector<OHOS::HDI::Input::V1_0::EventPackage> &pkgs,
+            uint32_t devIndex) override;
+        int32_t HotPlugCallback(const OHOS::HDI::Input::V1_0::HotPlugEvent &event) override;
+    };
     void RegisterAddInputDeviceHelper(AddInputDeviceFunc ptr);
     void RegisterHandleEventHelper(HandlePointersEventFunc ptr);
     InputEvent() = default;
@@ -42,6 +50,8 @@ public:
     int HdfInit();
 
 private:
+    OHOS::sptr<OHOS::HDI::Input::V1_0::IInputCallback> callback_ {nullptr};
+    OHOS::sptr<OHOS::HDI::Input::V1_0::IInputInterfaces> inputInterface_ = nullptr;
     IInputInterface *inputInterface_;
     InputEventCb callback_;
     std::unordered_map<uint32_t, uint32_t> devTypeMap_{};

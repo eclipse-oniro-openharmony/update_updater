@@ -98,7 +98,7 @@ ohos_unittest("ui_unittest") {
     "bounds_checking_function:libsec_static",
     "cJSON:cjson",
     "c_utils:utils",
-    "drivers_peripheral_input:hdi_input",
+    "drivers_interface_input:libinput_proxy_1.0",
     "googletest:gmock_main",
     "googletest:gtest_main",
     "hilog:libhilog",
