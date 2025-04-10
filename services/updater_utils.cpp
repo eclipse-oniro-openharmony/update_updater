@@ -109,7 +109,7 @@ bool DeleteUpdaterPath(const std::string &path)
             (currentName.compare(MODULE_UPDATE_RESULT_FILE) == 0) ||
             (currentName.compare(UPLOAD_LOG_TIME_FILE) == 0) ||
             (currentName.compare(INSTALL_TIME_FILE) == 0) ||
-            ((currentName.compare(ROLLBACK_FILE) == 0))) {
+            (currentName.compare(ROLLBACK_FILE) == 0)) {
             continue;
         }
         if (sdcardTmp && currentName.find(SDCARD_PACKAGE_SUFFIX) != std::string::npos) {
