@@ -85,7 +85,7 @@ int32_t InputEvent::HdfInputEventCallback::EventPkgCallback(
     }
     return HDF_SUCCESS;
 }
- 
+
 int32_t InputEvent::HdfInputEventCallback::HotPlugCallback(const OHOS::HDI::Input::V1_0::HotPlugEvent &event)
 {
     return HDF_SUCCESS;
@@ -100,14 +100,14 @@ int InputEvent::HdfInit()
     }
  
     sleep(1); // need wait thread running
- 
+
     std::vector<OHOS::HDI::Input::V1_0::DevDesc> sta = {};
     int ret = inputInterface_->ScanInputDevice(sta);
     if (ret != HDF_SUCCESS) {
         LOG(ERROR) << "scan device failed";
         return ret;
     }
- 
+
     for (int i = 0; i < sta.size(); i++) {
         uint32_t idx = sta[i].devIndex;
         uint32_t dev = sta[i].devType;
@@ -118,7 +118,7 @@ int InputEvent::HdfInit()
  
         LOG(INFO) << "hdf devType:" << dev << ", devIndex:" << idx;
     }
- 
+
     /* first param not necessary, pass default 1 */
     callback_ = new (std::nothrow) HdfInputEventCallback();
     if (callback_ == nullptr) {
