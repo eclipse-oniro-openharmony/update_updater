@@ -474,8 +474,6 @@ bool IsBatteryCapacitySufficient()
     return capacity >= lowLevel;
 }
 
-
-
 UpdaterStatus InstallUpdaterBinfile(UpdaterParams &upParams, PkgManager::PkgManagerPtr manager)
 {
     UPDATER_INIT_RECORD;
