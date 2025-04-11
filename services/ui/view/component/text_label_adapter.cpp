@@ -83,13 +83,14 @@ TextLabelAdapter::TextLabelAdapter(const UxViewInfo &info)
     auto bgColor = StrToColor(spec.bgColor);
     this->SetStyle(OHOS::STYLE_BACKGROUND_COLOR, bgColor.full);
     this->SetStyle(OHOS::STYLE_BACKGROUND_OPA, bgColor.alpha);
-    if (spec.focusable) {
+    this->SetTouchable(spec.touchable);
+    if (spec.focusInfo.focusable) {
         LOG(DEBUG) << "init focus listener for " << viewId_;
-        InitFocus(fontColor, bgColor, StrToColor(spec.focusedFontColor),
-            StrToColor(spec.focusedBgColor));
+        InitFocus(fontColor, bgColor, StrToColor(spec.focusInfo.focusedFontColor),
+            StrToColor(spec.focusInfo.focusedBgColor));
+        this->SetTouchable(true);
     } else {
         this->SetFocusable(false);
-        this->SetTouchable(false);
     }
 
     if (spec.lineBreakMode == "marquee") {
