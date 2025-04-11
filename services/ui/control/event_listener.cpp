@@ -80,29 +80,11 @@ void CallBackDecorator::CallbackWithGuard(Callback cb, OHOS::UIView &view)
     }
 }
 
-bool LabelOnEventListener::OnClick(OHOS::UIView &view, [[maybe_unused]] const OHOS::ClickEvent &event)
+bool LabelOnTouchListener::OnRelease(OHOS::UIView &view, [[maybe_unused]] const OHOS::ReleaseEvent &event)
 {
+    // wrap cb_ with CallBackDecorator, then call operator()()
     CallBackDecorator{cb_}(view, cb_.isAsync);
     return isConsumed_;
-}
-
-bool LabelOnEventListener::OnPress(OHOS::UIView &view, [[maybe_unused]] const OHOS::PressEvent &event)
-{
-    KeyListener::SetButtonPressed(true);
-    return true;
-}
-
-bool LabelOnEventListener::OnRelease(OHOS::UIView &view, [[maybe_unused]] const OHOS::ReleaseEvent &event)
-{
-    KeyListener::SetButtonPressed(false);
-    CallBackDecorator{cb_}(view, cb_.isAsync);
-    return isConsumed_;
-}
-
-bool LabelOnEventListener::OnCancel(OHOS::UIView &view, [[maybe_unused]] const OHOS::CancelEvent &event)
-{
-    KeyListener::SetButtonPressed(false);
-    return true;
 }
 
 bool BtnOnEventListener::OnClick(OHOS::UIView &view, [[maybe_unused]] const OHOS::ClickEvent &event)
@@ -188,7 +170,9 @@ bool KeyListener::ProcessPowerKey(OHOS::UIView &view, const OHOS::KeyEvent &even
     if (event.GetState() == OHOS::InputDevice::STATE_PRESS) {
         LOG(DEBUG) << "OnPress";
         pView->OnClickEvent(OHOS::Point { centerX, centerY });
-    }
+    } else if (event.GetState() == OHOS::InputDevice::STATE_RELEASE) {
+        LOG(DEBUG) << "OnRelease";
+        pView->OnReleaseEvent(OHOS::Point { centerX, centerY });
 #endif
     return true;
 }
