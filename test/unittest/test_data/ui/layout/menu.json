@@ -10,9 +10,12 @@
             "fontColor" : "#ffffffff",
             "align" : "center",
             "style" : "normal",
-            "focusedBgColor" : "#000000ff",
-            "focusedFontColor" : "#ffffffff",
-            "focusable" : false,
+            "focusInfo" : {
+                "focusedBgColor" : "#000000ff",
+                "focusedFontColor" : "#ffffffff",
+                "focusable" : false
+            },
+            "touchable" : false,
             "lineBreakMode" : "ellipsis"
         }
     },
