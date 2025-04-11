@@ -17,9 +17,16 @@
 
 #include "component_common.h"
 #include "components/ui_label.h"
+#include "json_visitor.h"
 #include "macros_updater.h"
 
 namespace Updater {
+DEFINE_STRUCT_TRAIT(LabelFocusInfo, "",
+    (std::string, focusedFontColor),
+    (std::string, focusedBgColor),
+    (bool, focusable)
+);
+
 struct UxLabelInfo {
     uint8_t fontSize;
     std::string text;
@@ -27,9 +34,8 @@ struct UxLabelInfo {
     std::string fontColor;
     std::string bgColor;
     std::string style;
-    std::string focusedFontColor;
-    std::string focusedBgColor;
-    bool focusable;
+    LabelFocusInfo focusInfo;
+    bool touchable;
     std::string lineBreakMode;
 };
 struct UxViewInfo;
