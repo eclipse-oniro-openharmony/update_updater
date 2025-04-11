@@ -173,6 +173,7 @@ bool KeyListener::ProcessPowerKey(OHOS::UIView &view, const OHOS::KeyEvent &even
     } else if (event.GetState() == OHOS::InputDevice::STATE_RELEASE) {
         LOG(DEBUG) << "OnRelease";
         pView->OnReleaseEvent(OHOS::Point { centerX, centerY });
+    }
 #endif
     return true;
 }
