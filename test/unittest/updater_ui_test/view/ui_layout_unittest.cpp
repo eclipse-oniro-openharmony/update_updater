@@ -157,11 +157,10 @@ HWTEST_F(UpdaterUiLayoutParserUnitTest, test_all, TestSize.Level1)
         "center",
         "#ffffffff",
         "#ffffffff",
-        {"#ffffffff",
         "normal",
+        {"#ffffffff",
+        "#ffffffff",
         false},
-        "#ffffffff",
-        "#ffffffff",
         false,
         "ellipsis"
     } };
@@ -191,12 +190,11 @@ HWTEST_F(UpdaterUiLayoutParserUnitTest, test_all_default, TestSize.Level0)
         "Reboot to normal system",
         "center",
         "#ffffffff",
+        "#000000ff",
+        "normal",
         {"#ffffffff",
         "#000000ff",
         false},
-        "normal",
-        "#ffffffff",
-        "#000000ff",
         false,
         "ellipsis"
     } };
