@@ -16,9 +16,12 @@
             "bgColor" : "#ffffffff",
             "fontColor" : "#ffffffff",
             "style" : "normal",
-            "focusedBgColor" : "#ffffffff",
-            "focusedFontColor" : "#ffffffff",
-            "focusable" : false,
+            "focusInfo" : {
+                "focusedBgColor" : "#ffffffff",
+                "focusedFontColor" : "#ffffffff",
+                "focusable" : false
+            },
+            "touchable" : false,
             "lineBreakMode" : "ellipsis"
         },
         {
