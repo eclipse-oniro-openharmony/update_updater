@@ -100,8 +100,8 @@ int64_t GetFilesFromDirectory(const std::string &path, std::vector<std::string> 
 
 bool RemoveDir(const std::string &path)
 {
-    if (path.empty()) {
-        LOG(ERROR) << "input path is empty.";
+    if (path.empty() || path == "/") {
+        LOG(ERROR) << "input path is invalid.";
         return false;
     }
     std::string strPath = path;
