@@ -361,7 +361,7 @@ HWTEST_F(UpdaterUiComponentUnitTest, test_text_label_adapter_constructor, TestSi
 {
     constexpr auto labelText = "hello";
     UxLabelInfo specInfo {100, "hello", "center", "#000000ff", "#000000ff", "normal",
-        "#000000ff", "#000000ff", false, "ellipsis"};
+        {"#000000ff", "#000000ff", false}, false, "ellipsis"};
     UxViewCommonInfo commonInfo {0, 0, 0, 0, "id", "UILabel", false};
     UxViewInfo info {commonInfo, specInfo};
     TextLabelAdapter textLabel {info};
@@ -381,7 +381,7 @@ HWTEST_F(UpdaterUiComponentUnitTest, test_text_label_adapter_set_text, TestSize.
 {
     TextLabelAdapter textLabel {UxViewInfo {{0, 0, 0, 0, "id", "UILabel", false},
         UxLabelInfo {255, "", "", "#000000ff", "#000000ff", "normal",
-            "#000000ff", "#000000ff", false, "ellipsis"}}};
+            {"#000000ff", "#000000ff", false}, false, "ellipsis"}}};
     constexpr auto testString = "test text";
     textLabel.SetText(testString);
     EXPECT_STREQ(textLabel.GetText(), testString);
