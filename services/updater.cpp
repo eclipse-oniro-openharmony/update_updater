@@ -562,10 +562,13 @@ UpdaterStatus HandlePipeMsg(UpdaterParams &upParams, int pipeRead, bool &retryUp
     return UPDATE_SUCCESS;
 }
 
-UpdaterStatus CheckProcStatus(pid_t pid, bool retryUpdate)
+UpdaterStatus CheckProcStatus(UpdaterParams &upParams, bool retryUpdate)
 {
     int status;
-    if (waitpid(pid, &status, 0) == -1) {
+    ON_SCOPE_EXIT(resetBinaryPid) {
+        upParams.binaryPid = -1;
+    };
+    if (waitpid(upParams.binaryPid, &status, 0) == -1) {
         LOG(ERROR) << "waitpid error";
         return UPDATE_ERROR;
     }
@@ -652,6 +655,7 @@ UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, UpdaterPara
     pid_t pid = fork();
     if (pid < 0) {
         ERROR_CODE(CODE_FORK_FAIL);
+        upParams.binaryPid = -1;
         UPDATER_LAST_WORD(UPDATE_ERROR, "fork failed");
         return UPDATE_ERROR;
     }
@@ -664,6 +668,7 @@ UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, UpdaterPara
         ExcuteSubProc(upParams, fullPath, pipeWrite);
     }
 
+    upParams.binaryPid = pid;
     close(pipeWrite); // close write endpoint
     bool retryUpdate = false;
     if (HandlePipeMsg(upParams, pipeRead, retryUpdate) != UPDATE_SUCCESS) {
@@ -671,7 +676,7 @@ UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, UpdaterPara
         return UPDATE_ERROR;
     }
 
-    return CheckProcStatus(pid, retryUpdate);
+    return CheckProcStatus(upParams, retryUpdate);
 }
 
 std::string GetWorkPath()

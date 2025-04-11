@@ -76,6 +76,7 @@ std::string GetCertName();
 bool WriteFully(int fd, const uint8_t *data, size_t size);
 bool ReadFully(int fd, void* data, size_t size);
 bool ReadFileToString(int fd, std::string &content);
+bool ReadStringFromProcFile(const std::string &filePath, std::string &content);
 bool CopyFile(const std::string &src, const std::string &dest, bool isAppend = false);
 bool CopyDir(const std::string &srcPath, const std::string &dstPath);
 bool WriteStringToFile(int fd, const std::string& content);
