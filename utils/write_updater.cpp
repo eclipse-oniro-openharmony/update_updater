@@ -187,5 +187,6 @@ int main(int argc, char **argv)
         }
     }
     HandleMiscInfo(argc, argv);
+    _exit(-1);
     return 0;
 }
