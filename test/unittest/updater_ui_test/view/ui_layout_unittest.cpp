@@ -112,7 +112,6 @@ HWTEST_F(UpdaterUiLayoutParserUnitTest, test_label_parser, TestSize.Level0)
         {"#ffffffff",
         "#ffffffff",
         false},
-        "#ffffffff",
         false,
         "ellipsis"
     } };
