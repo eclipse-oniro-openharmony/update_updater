@@ -108,7 +108,7 @@ ohos_static_library("libui") {
     sources = []
   } else {
     external_deps += [
-      "drivers_peripheral_input:hdi_input",
+      "drivers_interface_input:libinput_proxy_1.0",
       "ui_lite:libupdater_layout",
     ]
   }

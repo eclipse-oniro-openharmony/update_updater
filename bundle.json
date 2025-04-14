@@ -49,7 +49,7 @@
             "components": [
                 "init",
                 "hdc",
-                "drivers_peripheral_input",
+                "drivers_interface_input",
                 "drivers_peripheral_partitionslot",
                 "c_utils",
                 "hilog",
