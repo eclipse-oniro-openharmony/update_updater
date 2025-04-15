@@ -152,6 +152,11 @@ void FbdevDriver::RegisterBlankHook(FbBlankHook blankHook)
     blankHook_ = blankHook;
 }
 
+void FbdevDriver::RegisterBrightnessHook(FbBrightnessHook brightness)
+{
+    brightnessHook_ = brightness;
+}
+
 void FbdevDriver::ReleaseFb(const struct FbBufferObject *fbo)
 {
     /*
@@ -174,6 +179,9 @@ bool FbdevDriver::FbPowerContrl(int fd, bool powerOn)
     if (ioctl(fd, FBIOBLANK, powerOn ? FB_BLANK_UNBLANK : FB_BLANK_POWERDOWN) < 0) {
         LOG(ERROR) << "failed to set fb0 power " << powerOn;
         return false;
+    }
+    if (brightnessHook_ != nullptr) {
+        brightnessHook_(devPath_, powerOn);
     }
     return true;
 }

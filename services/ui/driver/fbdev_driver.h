@@ -34,6 +34,7 @@ struct FbBufferObject {
 class FbdevDriver : public GraphicDrv {
     DISALLOW_COPY_MOVE(FbdevDriver);
     using FbBlankHook = std::function<void(int, bool)>;
+    using FbBrightnessHook = std::function<void(const std::string &devPath, bool blank)>;
 public:
     FbdevDriver() = default;
     ~FbdevDriver() override;
@@ -44,6 +45,7 @@ public:
     void Exit(void) override;
     static void SetDevPath(const std::string &devPath);
     static void RegisterBlankHook(FbBlankHook blankHook);
+    static void RegisterBrightnessHook(FbBrightnessHook brightness);
 private:
     void FBLog() const;
     void ReleaseFb(const struct FbBufferObject *fbo);
@@ -53,6 +55,7 @@ private:
     bool FbPowerContrl(int fd, bool powerOn);
     static inline std::string devPath_ = FB_DEV_PATH;
     static inline FbBlankHook blankHook_ {};
+    static inline FbBrightnessHook brightnessHook_ {};
 };
 } // namespace Updater
 #endif
