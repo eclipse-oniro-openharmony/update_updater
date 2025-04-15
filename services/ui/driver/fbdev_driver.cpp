@@ -152,9 +152,9 @@ void FbdevDriver::RegisterBlankHook(FbBlankHook blankHook)
     blankHook_ = blankHook;
 }
 
-void FbdevDriver::RegisterBrightnessHook(FbBrightnessHook brightnessHook_)
+void FbdevDriver::RegisterBrightnessHook(FbBrightnessHook brightness)
 {
-    brightnessHook_ = blankHook;
+    brightnessHook_ = brightness;
 }
 
 void FbdevDriver::ReleaseFb(const struct FbBufferObject *fbo)
