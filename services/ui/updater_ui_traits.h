@@ -77,9 +77,8 @@ DEFINE_TRAIT(UxLabelInfo, TextLabelAdapter::COMPONENT_TYPE,
     (std::string, fontColor),
     (std::string, bgColor),
     (std::string, style),
-    (std::string, focusedFontColor),
-    (std::string, focusedBgColor),
-    (bool, focusable),
+    (LabelFocusInfo, focusInfo),
+    (bool, touchable),
     (std::string, lineBreakMode)
 );
 

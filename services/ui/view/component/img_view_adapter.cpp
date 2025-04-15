@@ -85,6 +85,7 @@ ImgViewAdapter::ImgViewAdapter(const UxViewInfo &info)
     currId_ = 0;
     valid_ = true;
     this->SetAutoEnable(false);
+    this->SetTouchable(true);
     SetViewCommonInfo(info.commonInfo);
     LOG(DEBUG) << "dir:" << dir_ << ", imgCnt:" << imgCnt_ << ", interval:" << interval_;
     if (interval_ == 0) {

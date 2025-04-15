@@ -38,21 +38,15 @@ EventManager &EventManager::GetInstance()
     return instance;
 }
 
-void EventManager::Add(const ComInfo &viewId, std::unique_ptr<LabelOnEventListener> listener)
+void EventManager::Add(const ComInfo &viewId, std::unique_ptr<LabelOnTouchListener> listener)
 {
     if (!pgMgr_.IsValidCom(viewId)) {
         LOG(ERROR) << "not an valid view " << viewId;
         return;
     }
     auto com = pgMgr_[viewId.pageId][viewId.comId].As();
-    // both click and touch listener
-    LabelOnEventListener *labelListener = listener.get();
-    // save this listener
-    labelOnClickListener_.push_back(std::move(listener));
-    com->SetOnClickListener(labelListener);
-    // this touch listener used to disable volume key when pressing button
-    com->SetTouchable(true);
-    com->SetOnTouchListener(labelListener);
+    labelOnTouchListener_.push_back(std::move(listener));
+    com->SetOnTouchListener(labelOnTouchListener_.back().get());
 }
 
 void EventManager::Add(const ComInfo &viewId, std::unique_ptr<BtnOnEventListener> listener)
@@ -94,10 +88,9 @@ void EventManager::Add(const ComInfo &viewId, EventType evt, Callback cb)
     switch (evt) {
         case EventType::CLICKEVENT:
             Add(viewId, std::make_unique<BtnOnEventListener>(cb, true));
-            Add(viewId, std::make_unique<LabelOnEventListener>(cb, true));
             break;
         case EventType::TOUCHEVENT:
-            Add(viewId, std::make_unique<LabelOnEventListener>(cb, true));
+            Add(viewId, std::make_unique<LabelOnTouchListener>(cb, true));
             break;
         case EventType::DRAGEVENT:
             Add(viewId, std::make_unique<BtnOnDragListener>(cb, true));

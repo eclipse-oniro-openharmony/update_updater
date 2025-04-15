@@ -10,9 +10,12 @@
             "fontColor": "#000000e6",
             "align" : "center",
             "style" : "normal",
-            "focusedBgColor": "#f1f3f5ff",
-            "focusedFontColor": "#000000e6",
-            "focusable" : false,
+            "focusInfo": {
+                "focusedBgColor": "#f1f3f5ff",
+                "focusedFontColor": "#000000e6",
+                "focusable" : false
+            },
+            "touchable" : false,
             "lineBreakMode" : "ellipsis"
         },
         "UIImageView": {

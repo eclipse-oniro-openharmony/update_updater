@@ -109,8 +109,9 @@ HWTEST_F(UpdaterUiLayoutParserUnitTest, test_label_parser, TestSize.Level0)
         "#ffffffff",
         "#ffffffff",
         "normal",
+        {"#ffffffff",
         "#ffffffff",
-        "#ffffffff",
+        false},
         false,
         "ellipsis"
     } };
@@ -156,8 +157,9 @@ HWTEST_F(UpdaterUiLayoutParserUnitTest, test_all, TestSize.Level1)
         "#ffffffff",
         "#ffffffff",
         "normal",
+        {"#ffffffff",
         "#ffffffff",
-        "#ffffffff",
+        false},
         false,
         "ellipsis"
     } };
@@ -189,8 +191,9 @@ HWTEST_F(UpdaterUiLayoutParserUnitTest, test_all_default, TestSize.Level0)
         "#ffffffff",
         "#000000ff",
         "normal",
-        "#ffffffff",
+        {"#ffffffff",
         "#000000ff",
+        false},
         false,
         "ellipsis"
     } };

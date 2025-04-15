@@ -32,7 +32,7 @@ public:
     EventManager();
     ~EventManager() = default;
     static EventManager &GetInstance();
-    void Add(const ComInfo &viewId, std::unique_ptr<LabelOnEventListener> listener);
+    void Add(const ComInfo &viewId, std::unique_ptr<LabelOnTouchListener> listener);
     void Add(const ComInfo &viewId, std::unique_ptr<BtnOnEventListener> listener);
     void Add(const ComInfo &viewId, std::unique_ptr<BtnOnDragListener> listener);
     void Add(const ComInfo &viewId, EventType evt, Callback cb);
@@ -40,7 +40,7 @@ public:
 private:
     PageManager &pgMgr_;
     std::unique_ptr<KeyListener> helper_ {};
-    std::vector<std::unique_ptr<OHOS::UIView::OnClickListener>> labelOnClickListener_;
+    std::vector<std::unique_ptr<OHOS::UIView::OnTouchListener>> labelOnTouchListener_;
     std::vector<std::unique_ptr<OHOS::UIView::OnClickListener>> btnOnClickListener_;
     std::vector<std::unique_ptr<OHOS::UIView::OnDragListener>> btnOnDragListener;
 };
