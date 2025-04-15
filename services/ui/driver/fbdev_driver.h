@@ -55,7 +55,7 @@ private:
     bool FbPowerContrl(int fd, bool powerOn);
     static inline std::string devPath_ = FB_DEV_PATH;
     static inline FbBlankHook blankHook_ {};
-    static inline FbBrightnessHook brightnesskHook_ {};
+    static inline FbBrightnessHook brightnessHook_ {};
 };
 } // namespace Updater
 #endif
