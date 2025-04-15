@@ -57,7 +57,7 @@ vector<string> SplitString(const string &str, const string &pattern)
     return ret;
 }
 
-static PackagesInfoPtr g_packagesInfoInstance = nullptr;
+static thread_local PackagesInfoPtr g_packagesInfoInstance = nullptr;
 PackagesInfoPtr PackagesInfo::GetPackagesInfoInstance()
 {
     if (g_packagesInfoInstance == nullptr) {
