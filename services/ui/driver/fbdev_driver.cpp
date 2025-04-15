@@ -181,9 +181,7 @@ bool FbdevDriver::FbPowerContrl(int fd, bool powerOn)
         return false;
     }
     if (brightnessHook_ != nullptr) {
-        if (!devPath_.empty()) {
-            brightnessHook_(devPath_, powerOn);
-        }
+        brightnessHook_(devPath_, powerOn);
     }
     return true;
 }
