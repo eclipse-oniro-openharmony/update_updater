@@ -296,6 +296,7 @@ int32_t UScriptInstructionPkgExtract::Execute(Uscript::UScriptEnv &env, Uscript:
 
 int32_t UScriptInstructionPkgExtractRetSuc::Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context)
 {
+    std::unique_lock<std::mutex> lock(extractNoRetMutex_);
     int32_t ret = UScriptInstructionPkgExtract::Execute(env, context);
     if (ret != USCRIPT_SUCCESS) {
         LOG(ERROR) << "Error to extract file, ret = " << ret;
