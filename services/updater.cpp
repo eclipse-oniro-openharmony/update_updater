@@ -610,7 +610,10 @@ static std::string GetBinaryPath(PkgManager::PkgManagerPtr pkgManager, UpdaterPa
 {
     std::string fullPath = GetWorkPath() + std::string(UPDATER_BINARY);
     (void)Utils::DeleteFile(fullPath);
-    if (ExtractUpdaterBinary(pkgManager, upParams.updatePackage[upParams.pkgLocation], UPDATER_BINARY) != 0) {
+    if (access("/data/updater/rollback", F_OK) != 0) {
+        LOG(INFO) << "There is rollback, use updater_binary in device";
+        fullPath = "/bin/updater_binary";
+    } else if (ExtractUpdaterBinary(pkgManager, upParams.updatePackage[upParams.pkgLocation], UPDATER_BINARY) != 0) {
         LOG(INFO) << "There is no valid updater_binary in package, use updater_binary in device";
         fullPath = "/bin/updater_binary";
     }
