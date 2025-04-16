@@ -290,7 +290,11 @@ int32_t USInstrImageShaCheck::CheckHash(const CheckPara &para)
         LOG(ERROR) << "para size error " << para.srcSize;
         return USCRIPT_ERROR_EXECUTE;
     }
-    size_t length = std::stoul(para.srcSize);
+    uint32_t length = 0;
+    if (!Utils::ConvertToUnsignedLong(para.srcSize, length)) {
+        LOG(ERROR) << "ConvertToUnsignedLong error";
+        return USCRIPT_ERROR_EXECUTE;
+    }
     UpdatePatch::BlockBuffer data = { mapBuffer.memory, length };
     std::string resultSha = UpdatePatch::GeneraterBufferHash(data);
     std::transform(resultSha.begin(), resultSha.end(), resultSha.begin(), ::toupper);
