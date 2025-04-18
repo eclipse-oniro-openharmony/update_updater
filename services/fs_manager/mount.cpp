@@ -340,6 +340,7 @@ bool MountMetadata()
     for (insigned int retryCount = 1; retryCount <= retryTimes; retryCount++) {
         LOG(INFO) << "the retry time is " << retryCount;
         if (MountForPath("/metadata") == 0) {
+            LOG(INFO) << "mount metadata success";
             mountSuccess = true;
             break;
         }
