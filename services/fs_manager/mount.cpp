@@ -348,6 +348,7 @@ bool MountMetadata()
 
     return mountSuccess;
 }
+
 int SetupPartitions(bool isMountData, bool isMountMetadata)
 {
     UPDATER_INIT_RECORD;
