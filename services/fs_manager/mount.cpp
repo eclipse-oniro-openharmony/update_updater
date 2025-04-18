@@ -332,7 +332,23 @@ int FormatPartition(const std::string &path, bool isZeroErase)
     return ((ret != 0) ? -1 : 0);
 }
 
-int SetupPartitions(bool isMountData)
+bool MountMetadata()
+{
+    bool mountSuccess = false;
+    unisgned int retryTimes = 3; // wait 3s
+
+    for (insigned int retryCount = 1; retryCount <= retryTimes; retryCount++) {
+        LOG(INFO) << "the retry time is " << retryCount;
+        if (MountForPath("/metadata") == 0) {
+            mountSuccess = true;
+            break;
+        }
+        sleep(1); // sleep 1 second to wait mount metadata
+    }
+
+    return mountSuccess;
+}
+int SetupPartitions(bool isMountData, bool isMountMetadata)
 {
     UPDATER_INIT_RECORD;
     if (!Utils::IsUpdaterMode()) {
@@ -351,7 +367,13 @@ int SetupPartitions(bool isMountData)
         if (g_skipMountPointList.find(mountPoint) != g_skipMountPointList.end() || fsType == "none") {
             continue;
         }
-
+        
+        if (mountPoint == "/metadata" && isMountData) {
+            if (!MountMetadata()) {
+                LOG(INFO) << "MountMetadata failed";
+            }
+            continue;
+        }
         if (mountPoint == "/data" && isMountData) {
             // factory wireless upgrade use /internaldata to mount userdata
             if (GetMountStatusForMountPoint(INTERNAL_DATA_PATH) != MOUNT_MOUNTED && MountForPath(mountPoint) != 0) {
