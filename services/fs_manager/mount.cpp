@@ -335,9 +335,9 @@ int FormatPartition(const std::string &path, bool isZeroErase)
 bool MountMetadata()
 {
     bool mountSuccess = false;
-    unisgned int retryTimes = 3; // wait 3s
+    unsigned int retryTimes = 3; // wait 3s
 
-    for (insigned int retryCount = 1; retryCount <= retryTimes; retryCount++) {
+    for (unsigned int retryCount = 1; retryCount <= retryTimes; retryCount++) {
         LOG(INFO) << "the retry time is " << retryCount;
         if (MountForPath("/metadata") == 0) {
             LOG(INFO) << "mount metadata success";
