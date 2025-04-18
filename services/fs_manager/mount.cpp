@@ -367,8 +367,8 @@ int SetupPartitions(bool isMountData, bool isMountMetadata)
         if (g_skipMountPointList.find(mountPoint) != g_skipMountPointList.end() || fsType == "none") {
             continue;
         }
-        
-        if (mountPoint == "/metadata" && isMountData) {
+
+        if (mountPoint == "/metadata" && isMountMetadata) {
             if (!MountMetadata()) {
                 LOG(INFO) << "MountMetadata failed";
             }
