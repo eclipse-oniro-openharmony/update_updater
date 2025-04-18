@@ -331,7 +331,8 @@ UpdaterStatus DoInstallUpdaterBinfile(PkgManager::PkgManagerPtr pkgManager, Upda
 
     if (SetupPartitions(updateMode != SDCARD_UPDATE || upParams.sdExtMode == SDCARD_UPDATE_FROM_DEV ||
         upParams.sdExtMode == SDCARD_UPDATE_FROM_DATA || Utils::CheckUpdateMode(Updater::SDCARD_INTRAL_MODE) ||
-        Utils::CheckUpdateMode(Updater::FACTORY_INTERNAL_MODE)) != 0) {
+        Utils::CheckUpdateMode(Updater::FACTORY_INTERNAL_MODE),
+        Utils::IsVabDevice() && updateMode == HOTA_UPDATE) != 0) {
         UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_SETPART_FAIL), true);
         UPDATER_LAST_WORD(UPDATE_ERROR, "SetupPartitions failed");
         return UPDATE_ERROR;
@@ -388,7 +389,8 @@ UpdaterStatus DoInstallUpdaterPackage(PkgManager::PkgManagerPtr pkgManager, Upda
 
     if (SetupPartitions(updateMode != SDCARD_UPDATE || upParams.sdExtMode == SDCARD_UPDATE_FROM_DEV ||
         upParams.sdExtMode == SDCARD_UPDATE_FROM_DATA || Utils::CheckUpdateMode(Updater::SDCARD_INTRAL_MODE) ||
-        Utils::CheckUpdateMode(Updater::FACTORY_INTERNAL_MODE)) != 0) {
+        Utils::CheckUpdateMode(Updater::FACTORY_INTERNAL_MODE),
+        Utils::IsVabDevice() && updateMode == HOTA_UPDATE) != 0) {
         UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_SETPART_FAIL), true);
         UPDATER_LAST_WORD(UPDATE_ERROR, "SetupPartitions failed");
         return UPDATE_ERROR;
