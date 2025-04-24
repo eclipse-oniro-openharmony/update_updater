@@ -233,7 +233,6 @@ int32_t ScriptManagerImpl::ExecuteScript(int32_t priority)
             ret = ExtractAndExecuteScript(manager, scriptFiles_[priority][i]);
             if (ret != USCRIPT_SUCCESS) {
                 USCRIPT_LOGE("Failed to execute script %s", scriptFiles_[priority][i].c_str());
-                UPDATER_LAST_WORD(ret, "Failed to execute script " + scriptFiles_[priority][i]);
                 retCode = ret;
             }
         }
