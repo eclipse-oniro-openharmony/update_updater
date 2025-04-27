@@ -360,10 +360,13 @@ static UpdaterStatus VerifyBinfiles(UpdaterParams &upParams)
 static UpdaterStatus VerifyPackages(UpdaterParams &upParams)
 {
     UPDATER_INIT_RECORD;
+    UpdaterStatus status = UPDATE_SUCCESS;
+    if (NotifyActionResult(upParams, status, {PROCESS_PACKAGE}) != UPDATE_SUCCESS) {
+        return UPDATE_CORRUPT;
+    }
     LOG(INFO) << "Verify packages start...";
     UPDATER_UI_INSTANCE.ShowProgressPage();
     UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_VERIFYPKG));
-
     if (upParams.callbackProgress == nullptr) {
         UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_VERIFYPKGFAIL), true);
         UPDATER_LAST_WORD(UPDATE_CORRUPT, "upParams.callbackProgress is null");
@@ -385,7 +388,6 @@ static UpdaterStatus VerifyPackages(UpdaterParams &upParams)
         if (verifyret == UPDATE_SUCCESS) {
             verifyret = UpdatePreCheck(upParams, upParams.updatePackage[i]);
         }
-
         if (verifyret != UPDATE_SUCCESS) {
             UpdaterVerifyFailEntry((verifyret == PKG_INVALID_DIGEST) && (upParams.updateMode == HOTA_UPDATE));
             upParams.pkgLocation = i;
@@ -998,8 +1000,7 @@ UpdaterStatus UpdaterFromSdcard(UpdaterParams &upParams)
     status = CheckSdcardPkgs(upParams);
     if (status != UPDATE_SUCCESS) {
         LOG(ERROR) << "can not find sdcard packages";
-        if (NotifyActionResult(upParams, status, {SET_INSTALL_STATUS,
-            SET_UPDATE_STATUS, GET_UPDATE_STATUS}) != UPDATE_SUCCESS) {
+        if (NotifyActionResult(upParams, status, {SET_UPDATE_STATUS, GET_UPDATE_STATUS}) != UPDATE_SUCCESS) {
             LOG(ERROR) << "notify action fail";
         }
         return UPDATE_ERROR;
