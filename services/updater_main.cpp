@@ -362,7 +362,6 @@ static UpdaterStatus VerifyPackages(UpdaterParams &upParams)
     UPDATER_INIT_RECORD;
     UpdaterStatus status = UPDATE_SUCCESS;
     if (NotifyActionResult(upParams, status, {PROCESS_PACKAGE}) != UPDATE_SUCCESS) {
-        LOG(ERROR) << "pkg abnormal";
         return UPDATE_CORRUPT;
     }
     LOG(INFO) << "Verify packages start...";
