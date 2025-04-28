@@ -165,6 +165,7 @@ ohos_unittest("updater_unittest") {
     "bounds_checking_function:libsec_static",
     "bzip2:libbz2",
     "cJSON:cjson",
+    "c_utils:utils",
     "googletest:gmock_main",
     "googletest:gtest_main",
     "hilog:libhilog_base",
