@@ -317,6 +317,7 @@ int DiskAlloc(const std::string &path)
 
     disk = NewBlockDisk(*dev, GPT);
     if (disk == nullptr) {
+        free(dev);
         LOG(ERROR) << "NewBlockDevice nullptr ";
         return 0;
     }
