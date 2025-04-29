@@ -41,7 +41,7 @@
             },
             "resPage" : {
                 "successPageId" : "upd:updateSuccess",
-                "failPageId" : "upd:updateFailedNoButton"
+                "failPageId" : "upd:normalUpdateFailed"
             }
         },
         "factoryRst" : {
