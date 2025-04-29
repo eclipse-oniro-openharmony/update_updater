@@ -74,7 +74,7 @@ HWTEST_F(UpdaterUiStrategyUnitTest, test_load_strategy_for_each_mode, TestSize.L
     sdCardCfg.progressPage = ProgressPage {"upd:sdUpdate", "UpdBox_Progress", "bar",
         "OHOSIcon_Image", "img", "PowerLongPressWarning_Image"};
     sdCardCfg.labelLogResId = {"upd", "UpdateInfoDark_Label"};
-    sdCardCfg.resPage = {"upd:updateSuccess", "upd:updateFailedNoButton"};
+    sdCardCfg.resPage = {"upd:updateSuccess", "upd:normalUpdateFailed"};
 
     auto &factoryRstCfg = expected[UPDATERMODE_FACTORYRST];
     factoryRstCfg = defaultCfg;
