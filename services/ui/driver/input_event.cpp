@@ -108,7 +108,7 @@ int InputEvent::HdfInit()
         return ret;
     }
 
-    for (int i = 0; i < sta.size(); i++) {
+    for (size_t i = 0; i < sta.size(); i++) {
         uint32_t idx = sta[i].devIndex;
         uint32_t dev = sta[i].devType;
         if ((idx == 0) || (inputInterface_->OpenInputDevice(idx) == HDF_FAILURE)) {
