@@ -48,7 +48,11 @@ void DeleteInstallTimeFile()
 bool IsDouble(const std::string& str)
 {
     std::regex pattern("^[-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?$");
-    return std::regex_match(str, pattern);
+    if (!std::regex_match(str, pattern)) {
+        LOG(ERROR) << "match double failed";
+        return false;
+    }
+    return true;
 }
  
 void WriteInstallTime(UpdaterParams &upParams)
