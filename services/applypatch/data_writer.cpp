@@ -56,6 +56,12 @@ int DataWriter::OpenPath(const std::string &path)
     return fd;
 }
 
+bool DataWriter::Sync(void)
+{
+    LOG(WARNING) << "sync unimplemented";
+    return true;
+}
+
 std::unique_ptr<DataWriter> DataWriter::CreateDataWriter(WriteMode mode, const std::string &path,
     uint64_t offset)
 {
