@@ -77,4 +77,18 @@ int RawWriter::WriteInternal(int fd, const uint8_t *data, size_t len)
     offset_ += static_cast<off64_t>(len);
     return 0;
 }
+
+bool RawWriter::Sync(void)
+{
+    if (fd_ < 0) {
+        LOG(ERROR) << "invalid fd " << fd_;
+        return false;
+    }
+    if (fsync(fd_) != 0) {
+        LOG(ERROR) << "fsync failed, errno is " << errno;
+        return false;
+    }
+    LOG(INFO) << "fsync successfully " << fd_;
+    return true;
+}
 } // namespace Updater

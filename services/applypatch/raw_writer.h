@@ -26,7 +26,7 @@ namespace Updater {
 class RawWriter : public DataWriter {
 public:
     bool Write(const uint8_t *addr, size_t len, const void *context) override;
-
+    bool Sync(void) override;
     RawWriter(const std::string path, uint64_t offset) : fd_(-1), path_(path), offset_(offset) {}
     RawWriter(const std::string path, uint64_t startAddr, uint64_t offset) : fd_(-1),
         path_(path), offset_(startAddr + offset) {}
