@@ -39,6 +39,10 @@ void GetPartitionSuffix(std::string &suffix)
 {
     sptr<OHOS::HDI::Partitionslot::V1_0::IPartitionSlot> partitionslot =
         OHOS::HDI::Partitionslot::V1_0::IPartitionSlot::Get(true);
+    if (partitionslot == nullptr) {
+        LOG(ERROR) << "partitionslot ptr is nullptr";
+        return;
+    }
     int32_t curSlot = -1;
     int32_t numOfSlots = 0;
     int32_t ret = partitionslot->GetSlotSuffix(curSlot, numOfSlots);
@@ -60,6 +64,10 @@ void GetActivePartitionSuffix(std::string &suffix)
 {
     sptr<OHOS::HDI::Partitionslot::V1_0::IPartitionSlot> partitionslot =
         OHOS::HDI::Partitionslot::V1_0::IPartitionSlot::Get(true);
+    if (partitionslot == nullptr) {
+        LOG(ERROR) << "partitionslot ptr is nullptr";
+        return;
+    }
     int32_t curSlot = -1;
     int32_t numOfSlots = 0;
     int32_t ret = partitionslot->GetCurrentSlot(curSlot, numOfSlots);
@@ -80,6 +88,10 @@ void SetActiveSlot()
 {
     sptr<OHOS::HDI::Partitionslot::V1_0::IPartitionSlot> partitionslot =
         OHOS::HDI::Partitionslot::V1_0::IPartitionSlot::Get(true);
+    if (partitionslot == nullptr) {
+        LOG(ERROR) << "partitionslot ptr is nullptr";
+        return;
+    }
     int32_t curSlot = -1;
     int32_t numOfSlots = 0;
     int32_t ret = partitionslot->GetCurrentSlot(curSlot, numOfSlots);
