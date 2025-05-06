@@ -69,10 +69,10 @@ void GetActivePartitionSuffix(std::string &suffix)
         return;
     }
     int32_t curSlot = -1;
-    std::string numOfSlots = "0";
+    int32_t numOfSlots = 0;
     int32_t ret = partitionslot->GetCurrentSlot(curSlot, numOfSlots);
     LOG(INFO) << "Get slot info, curSlot: " << curSlot << "numOfSlots :" << numOfSlots;
-    if (ret != 0 || curSlot <= 0 || curSlot > 2 || std::stoi(numOfSlots) != 2) { // 2: max slot num
+    if (ret != 0 || curSlot <= 0 || curSlot > 2 || numOfSlots != 2) { // 2: max slot num
         suffix = "";
         return;
     }
@@ -94,7 +94,7 @@ void SetActiveSlot()
     }
     int32_t curSlot = -1;
     std::string numOfSlots = "0";
-    int32_t ret = partitionslot->GetCurrentSlot(curSlot, numOfSlots);
+    int32_t ret = partitionslot->GetCurrentSlot(curSlot, std::stoi(numOfSlots));
     LOG(INFO) << "Get slot info, curSlot: " << curSlot << "numOfSlots :" << numOfSlots;
     if (ret != 0 || curSlot <= 0 || curSlot > 2 || std::stoi(numOfSlots) != 2) { // 2: max slot num
         return;
