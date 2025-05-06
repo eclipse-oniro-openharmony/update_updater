@@ -44,16 +44,16 @@ void GetPartitionSuffix(std::string &suffix)
         return;
     }
     int32_t curSlot = -1;
-    int32_t numOfSlots = 0;
-    int32_t ret = partitionslot->GetSlotSuffix(curSlot, std::to_string(numOfSlots));
+    std::string numOfSlots = "0";
+    int32_t ret = partitionslot->GetSlotSuffix(curSlot, numOfSlots);
     LOG(INFO) << "Get slot info, curSlot: " << curSlot << "numOfSlots :" << numOfSlots;
-    if (ret != 0 || curSlot <= 0 || curSlot > 2 || numOfSlots != 2) { // 2: max slot num
+    if (ret != 0 || curSlot <= 0 || curSlot > 2 || std::stoi(numOfSlots) != 2) { // 2: max slot num
         suffix = "";
         return;
     }
 
     int32_t updateSlot = curSlot == 1 ? 2 : 1;
-    ret = partitionslot->GetSlotSuffix(updateSlot, std::to_string(suffix));
+    ret = partitionslot->GetSlotSuffix(updateSlot, suffix);
     if (ret != 0) {
         LOG(ERROR) << "Get slot suffix error, partitionPath: " << suffix;
         suffix = "";
@@ -69,15 +69,15 @@ void GetActivePartitionSuffix(std::string &suffix)
         return;
     }
     int32_t curSlot = -1;
-    int32_t numOfSlots = 0;
+    std::string numOfSlots = "0";
     int32_t ret = partitionslot->GetCurrentSlot(curSlot, numOfSlots);
     LOG(INFO) << "Get slot info, curSlot: " << curSlot << "numOfSlots :" << numOfSlots;
-    if (ret != 0 || curSlot <= 0 || curSlot > 2 || numOfSlots != 2) { // 2: max slot num
+    if (ret != 0 || curSlot <= 0 || curSlot > 2 || std::stoi(numOfSlots) != 2) { // 2: max slot num
         suffix = "";
         return;
     }
 
-    ret = partitionslot->GetSlotSuffix(curSlot, std::to_string(suffix));
+    ret = partitionslot->GetSlotSuffix(curSlot, suffix);
     if (ret != 0) {
         LOG(ERROR) << "Get slot suffix error, partitionPath: " << suffix;
         suffix = "";
@@ -93,10 +93,10 @@ void SetActiveSlot()
         return;
     }
     int32_t curSlot = -1;
-    int32_t numOfSlots = 0;
+    std::string numOfSlots = "0";
     int32_t ret = partitionslot->GetCurrentSlot(curSlot, numOfSlots);
     LOG(INFO) << "Get slot info, curSlot: " << curSlot << "numOfSlots :" << numOfSlots;
-    if (ret != 0 || curSlot <= 0 || curSlot > 2 || numOfSlots != 2) { // 2: max slot num
+    if (ret != 0 || curSlot <= 0 || curSlot > 2 || std::stoi(numOfSlots) != 2) { // 2: max slot num
         return;
     }
 
