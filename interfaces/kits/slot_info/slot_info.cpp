@@ -17,7 +17,8 @@
 
 #include "log/log.h"
 #ifdef UPDATER_AB_SUPPORT
-#include "partitionslot_manager.h"
+#include "v1_0/ipartition_slot.h"
+using namespace OHOS::HDI::Partitionslot::V1_0;
 #endif
 
 namespace Updater {
@@ -36,10 +37,11 @@ void SetActiveSlot()
 #else
 void GetPartitionSuffix(std::string &suffix)
 {
-    OHOS::HDI::Partitionslot::V1_0::PartitionSlotManager psMgr;
+    sptr<OHOS::HDI::Partitionslot::V1_0::IPartitionSlot> partitionslot = 
+        OHOS::HDI::Partitionslot::V1_0::IPartitionSlot::Get(true);
     int32_t curSlot = -1;
     int32_t numOfSlots = 0;
-    int32_t ret = psMgr.GetCurrentSlot(curSlot, numOfSlots);
+    int32_t ret = partitionslot->GetSlotSuffix(curSlot, numOfSlots);
     LOG(INFO) << "Get slot info, curSlot: " << curSlot << "numOfSlots :" << numOfSlots;
     if (ret != 0 || curSlot <= 0 || curSlot > 2 || numOfSlots != 2) { // 2: max slot num
         suffix = "";
@@ -47,7 +49,7 @@ void GetPartitionSuffix(std::string &suffix)
     }
 
     int32_t updateSlot = curSlot == 1 ? 2 : 1;
-    ret = psMgr.GetSlotSuffix(updateSlot, suffix);
+    ret = partitionslot->GetSlotSuffix(updateSlot, suffix);
     if (ret != 0) {
         LOG(ERROR) << "Get slot suffix error, partitionPath: " << suffix;
         suffix = "";
@@ -56,17 +58,18 @@ void GetPartitionSuffix(std::string &suffix)
 
 void GetActivePartitionSuffix(std::string &suffix)
 {
-    OHOS::HDI::Partitionslot::V1_0::PartitionSlotManager psMgr;
+    sptr<OHOS::HDI::Partitionslot::V1_0::IPartitionSlot> partitionslot = 
+        OHOS::HDI::Partitionslot::V1_0::IPartitionSlot::Get(true);
     int32_t curSlot = -1;
     int32_t numOfSlots = 0;
-    int32_t ret = psMgr.GetCurrentSlot(curSlot, numOfSlots);
+    int32_t ret = partitionslot->GetCurrentSlot(curSlot, numOfSlots);
     LOG(INFO) << "Get slot info, curSlot: " << curSlot << "numOfSlots :" << numOfSlots;
     if (ret != 0 || curSlot <= 0 || curSlot > 2 || numOfSlots != 2) { // 2: max slot num
         suffix = "";
         return;
     }
 
-    ret = psMgr.GetSlotSuffix(curSlot, suffix);
+    ret = partitionslot->GetSlotSuffix(curSlot, suffix);
     if (ret != 0) {
         LOG(ERROR) << "Get slot suffix error, partitionPath: " << suffix;
         suffix = "";
@@ -75,17 +78,18 @@ void GetActivePartitionSuffix(std::string &suffix)
 
 void SetActiveSlot()
 {
-    OHOS::HDI::Partitionslot::V1_0::PartitionSlotManager psMgr;
+    sptr<OHOS::HDI::Partitionslot::V1_0::IPartitionSlot> partitionslot = 
+        OHOS::HDI::Partitionslot::V1_0::IPartitionSlot::Get(true);
     int32_t curSlot = -1;
     int32_t numOfSlots = 0;
-    int32_t ret = psMgr.GetCurrentSlot(curSlot, numOfSlots);
+    int32_t ret = partitionslot->GetCurrentSlot(curSlot, numOfSlots);
     LOG(INFO) << "Get slot info, curSlot: " << curSlot << "numOfSlots :" << numOfSlots;
     if (ret != 0 || curSlot <= 0 || curSlot > 2 || numOfSlots != 2) { // 2: max slot num
         return;
     }
 
     int32_t activeSlot = curSlot == 1 ? 2 : 1;
-    ret = psMgr.SetActiveSlot(activeSlot);
+    ret = partitionslot->SetActiveSlot(activeSlot);
     if (ret != 0) {
         LOG(ERROR) << "Set active slot error, slot: " << activeSlot;
     }

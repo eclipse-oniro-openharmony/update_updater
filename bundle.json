@@ -50,7 +50,7 @@
                 "init",
                 "hdc",
                 "drivers_interface_input",
-                "drivers_peripheral_partitionslot",
+                "drivers_interface_partitionslot",
                 "c_utils",
                 "hilog",
                 "selinux_adapter",
