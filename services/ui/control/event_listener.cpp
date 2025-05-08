@@ -80,9 +80,16 @@ void CallBackDecorator::CallbackWithGuard(Callback cb, OHOS::UIView &view)
     }
 }
 
+bool LabelOnTouchListener::OnPress(OHOS::UIView &view, [[maybe_unused]] const OHOS::PressEvent &event)
+{
+    KeyListener::SetButtonPressed(true);
+    return true;
+}
+
 bool LabelOnTouchListener::OnRelease(OHOS::UIView &view, [[maybe_unused]] const OHOS::ReleaseEvent &event)
 {
     // wrap cb_ with CallBackDecorator, then call operator()()
+    KeyListener::SetButtonPressed(false);
     CallBackDecorator{cb_}(view, cb_.isAsync);
     return isConsumed_;
 }
