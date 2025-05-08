@@ -50,6 +50,7 @@ public:
     LabelOnTouchListener(Callback cb, bool isConsumed)
         : cb_(cb), isConsumed_(isConsumed) {}
     ~LabelOnTouchListener() = default;
+    bool OnPress(OHOS::UIView &view, const OHOS::PressEvent &event) override;
     bool OnRelease(OHOS::UIView &view, const OHOS::ReleaseEvent &event) override;
 
 private:
