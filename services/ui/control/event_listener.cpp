@@ -86,6 +86,12 @@ bool LabelOnTouchListener::OnPress(OHOS::UIView &view, [[maybe_unused]] const OH
     return true;
 }
 
+bool LabelOnTouchListener::OnCancel(OHOS::UIView &view, [[maybe_unused]] const OHOS::CancelEvent &event)
+{
+    KeyListener::SetButtonPressed(false);
+    return true;
+}
+
 bool LabelOnTouchListener::OnRelease(OHOS::UIView &view, [[maybe_unused]] const OHOS::ReleaseEvent &event)
 {
     // wrap cb_ with CallBackDecorator, then call operator()()
