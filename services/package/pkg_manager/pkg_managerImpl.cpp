@@ -573,7 +573,7 @@ int32_t PkgManagerImpl::CreatePkgStream(StreamPtr &stream, const std::string &fi
 int32_t PkgManagerImpl::DoCreatePkgStream(PkgStreamPtr &stream, const std::string &fileName, int32_t type)
 {
     UPDATER_INIT_RECORD;
-    static char const *modeFlags[] = { "rb", "wb+" };
+    static char const *modeFlags[] = { "rbe", "wbe+" };
     char realPath[PATH_MAX + 1] = {};
 #ifdef _WIN32
     if (type == PkgStream::PkgStreamType_Read && _fullpath(realPath, fileName.c_str(), PATH_MAX) == nullptr) {
