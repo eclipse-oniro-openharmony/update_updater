@@ -51,6 +51,10 @@ public:
     {
         return PKG_SUCCESS;
     }
+    int32_t VerifyOtaPackage(const std::string &packagePath, bool isSupportOldSig) override
+    {
+        return PKG_SUCCESS;
+    }
     int32_t VerifyOtaPackage(const std::string &devPath, uint64_t offset, size_t size) override
     {
         return PKG_SUCCESS;
