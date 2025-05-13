@@ -1313,9 +1313,13 @@ __attribute__((weak)) bool IsNeedWipe()
 
 __attribute__((weak)) bool NotifySdUpdateReboot(const UpdaterParams &upParams)
 {
-    if (upParams.sdExtMode == SDCARD_UPDATE_FROM_DEV ||
-        upParams.sdExtMode == SDCARD_UPDATE_FROM_DATA) {
+    if (upParams.sdExtMode == SDCARD_UPDATE_FROM_DEV) {
         NotifyReboot("updater", "Updater wipe data after upgrade success", "--user_wipe_data");
+        return true;
+    }
+    if (upParams.sdExtMode == SDCARD_UPDATE_FROM_DATA) {
+        std::string extData = "--user_wipe_data\n--" + ERASE_LOG_OEMINFO;
+        NotifyReboot("updater", "Updater wipe data after upgrade success", );
         return true;
     }
     return false;

@@ -48,6 +48,7 @@ constexpr const char *SDCARD_PACKAGE_SUFFIX = ".zip";
 constexpr const char *POWEROFF = "shutdown";
 constexpr const char *BOOTDEV_TYPE = "/proc/bootdevice/type";
 constexpr const char *UPLOAD_LOG_TIME_FILE = "upload_time";
+constexpr const char *ERASE_LOG_OEMINFO = "not_erase_log_switch";
 
 // update mode
 constexpr const char *SDCARD_MODE = "sdcard_update";
