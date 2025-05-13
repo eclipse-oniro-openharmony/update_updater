@@ -1087,6 +1087,11 @@ int32_t PkgManagerImpl::VerifyOtaPackage(const std::string &devPath, uint64_t of
 
 int32_t PkgManagerImpl::VerifyOtaPackage(const std::string &packagePath)
 {
+    return VerifyOtaPackage(packagePath, true);
+}
+ 
+int32_t PkgManagerImpl::VerifyOtaPackage(const std::string &packagePath, bool isSupportOldSig)
+{
     UPDATER_INIT_RECORD;
     PkgStreamPtr pkgStream = nullptr;
     int32_t ret = CreatePkgStream(pkgStream, packagePath, 0, PkgStream::PkgStreamType_Read);
@@ -1096,7 +1101,7 @@ int32_t PkgManagerImpl::VerifyOtaPackage(const std::string &packagePath)
         return ret;
     }
 
-    PkgVerifyUtil verifyUtil;
+    PkgVerifyUtil verifyUtil {isSupportOldSig};
     ret = verifyUtil.VerifyPackageSign(pkgStream, packagePath);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("Verify zpkcs7 signature failed.");

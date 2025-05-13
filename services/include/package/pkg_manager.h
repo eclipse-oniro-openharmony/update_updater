@@ -282,6 +282,8 @@ public:
 
     virtual int32_t VerifyOtaPackage(const std::string &devPath, uint64_t offset, size_t size) = 0;
 
+    virtual int32_t VerifyOtaPackage(const std::string &packagePath, bool isSupportOldSig) = 0;
+
     virtual int32_t VerifyOtaPackage(const std::string &packagePath) = 0;
 
     virtual int32_t VerifyBinFile(const std::string &packagePath, const std::string &keyPath,

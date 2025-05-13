@@ -123,8 +123,9 @@ int32_t PkgVerifyUtil::VerifyPackageSign(const PkgStreamPtr pkgStream, const std
         return ret;
     }
     size_t srcDataLen = pkgStream->GetFileLength() - commentTotalLenAll - 2;
-
-    ret = HashCheck(pkgStream, srcDataLen, hash, path);
+    PKG_LOGI("is old sig support %d", isOldSigSupport_);
+    // normal mode currently do not support this signature format. skip this check to save time
+    ret = isOldSigSupport_ ? HashCheck(pkgStream, srcDataLen, hash, path) : PKG_INVALID_DIGEST;
     if (ret != PKG_SUCCESS) {
         srcDataLen = pkgStream->GetFileLength() - signatureSize - ZIP_EOCD_FIXED_PART_LEN;
         ret = HashCheck(pkgStream, srcDataLen, hash, path);
