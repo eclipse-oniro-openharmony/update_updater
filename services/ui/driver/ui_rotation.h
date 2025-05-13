@@ -26,7 +26,8 @@ enum class UI_ROTATION_DEGREE {
     UI_ROTATION_0,
     UI_ROTATION_90,
     UI_ROTATION_180,
-    UI_ROTATION_270
+    UI_ROTATION_270,
+    UI_ROTATION_NULL
 };
 
 class UiRotation final {
