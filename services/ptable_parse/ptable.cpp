@@ -458,7 +458,7 @@ void Ptable::PrintPtableInfo() const
         LOG(INFO) << "ptable.entry[" << i << "].name=" << partitionInfo_[i].dispName.c_str() <<
             ", startAddr=0x" << std::hex << partitionInfo_[i].startAddr << ", size=0x" <<
             partitionInfo_[i].partitionSize << ", lun=" << std::dec << partitionInfo_[i].lun
-            << ", partType=" << partitionInfo_[i].partType;
+            << ", partType=" << static_cast<std::underlying_type<PartType>::type>(partitionInfo_[i].partType);
     }
     LOG(INFO) << "ptnInfo : ===========================================";
 }
@@ -475,25 +475,33 @@ void Ptable::PrintPtableInfo(const std::vector<PtnInfo> &ptnInfo) const
     for (size_t i = 0; i < ptnInfo.size(); i++) {
         LOG(INFO) << "ptable.entry[" << i << "].name=" << ptnInfo[i].dispName.c_str() << ", startAddr=0x" <<
         std::hex << ptnInfo[i].startAddr << ", size=0x" << ptnInfo[i].partitionSize << ", lun=" <<
-        std::dec << ptnInfo[i].lun << ", partType=" << ptnInfo[i].partType;
+        std::dec << ptnInfo[i].lun << ", partType=" <<
+        static_cast<std::underlying_type<PartType>::type>(ptnInfo[i].partType);
     }
     LOG(INFO) << "ptnInfo : ===========================================";
 }
 
 void Ptable::SetPartitionType(const std::string &partName, PtnInfo &ptnInfo)
 {
+    if (partName.find("RESERVED") != std::string::npos) {
+        ptnInfo.partType = PartType::RESERVED_TYPE;
+        return;
+    }
     if (PARTITION_AB_SUFFIX_SIZE > partName.size()) {
-        ptnInfo.partType = PARTITION_NORMAL_TYPE;
+        ptnInfo.partType = PartType::COMMON_TYPE;
         return;
     }
     std::string partSuffix = partName.substr(partName.size() - PARTITION_AB_SUFFIX_SIZE,
         PARTITION_AB_SUFFIX_SIZE);
-    if (strcasecmp(partSuffix.c_str(), PARTITION_A_SUFFIX) == 0 ||
-        strcasecmp(partSuffix.c_str(), PARTITION_B_SUFFIX) == 0) {
-        ptnInfo.partType = PARTITION_AB_TYPE;
+    if (strcasecmp(partSuffix.c_str(), PARTITION_A_SUFFIX) == 0) {
+        ptnInfo.partType = PartType::A_TYPE;
         return;
     }
-    ptnInfo.partType = PARTITION_NORMAL_TYPE;
+    if (strcasecmp(partSuffix.c_str(), PARTITION_B_SUFFIX) == 0) {
+        ptnInfo.partType = PartType::B_TYPE;
+        return;
+    }
+    ptnInfo.partType = PartType::COMMON_TYPE;
 }
 
 void Ptable::ParsePartitionName(const uint8_t *data, const uint32_t dataLen,
@@ -658,9 +666,10 @@ bool Ptable::WritePartitionBufToFile(uint8_t *ptbImgBuffer, const uint32_t imgBu
         LOG(ERROR) << "Invalid param ";
         return false;
     }
-    std::ofstream ptbFile(PTABLE_TEMP_PATH, std::ios::ate | std::ios::binary);
+    const char *ptablePath = Utils::IsUpdaterMode() ? PTABLE_TEMP_PATH : PTABLE_NORMAL_PATH;
+    std::ofstream ptbFile(ptablePath, std::ios::ate | std::ios::binary);
     if (ptbFile.fail()) {
-        LOG(ERROR) << "Failed to open " << PTABLE_TEMP_PATH << strerror(errno);
+        LOG(ERROR) << "Failed to open " << ptablePath << strerror(errno);
         return false;
     }
     ptbFile.write(reinterpret_cast<const char*>(ptbImgBuffer), imgBufSize);
@@ -679,10 +688,10 @@ bool Ptable::ReadPartitionFileToBuffer(uint8_t *ptbImgBuffer, uint32_t &imgBufSi
         LOG(ERROR) << "Invalid param ";
         return false;
     }
-
-    std::ifstream ptbFile(PTABLE_TEMP_PATH, std::ios::in | std::ios::binary);
+    const char *ptablePath = Utils::IsUpdaterMode() ? PTABLE_TEMP_PATH : PTABLE_NORMAL_PATH;
+    std::ifstream ptbFile(ptablePath, std::ios::in | std::ios::binary);
     if (!ptbFile.is_open()) {
-        LOG(ERROR) << "open " << PTABLE_TEMP_PATH << " failed " << strerror(errno);
+        LOG(ERROR) << "open " << ptablePath << " failed " << strerror(errno);
         return false;
     }
 
@@ -704,10 +713,11 @@ bool Ptable::ReadPartitionFileToBuffer(uint8_t *ptbImgBuffer, uint32_t &imgBufSi
 
 void Ptable::DeletePartitionTmpFile()
 {
-    if (Utils::DeleteFile(PTABLE_TEMP_PATH) != 0) {
-        LOG(ERROR) << "delete ptable tmp file fail " << PTABLE_TEMP_PATH << strerror(errno);
+    const char *ptablePath = Utils::IsUpdaterMode() ? PTABLE_TEMP_PATH : PTABLE_NORMAL_PATH;
+    if (Utils::DeleteFile(ptablePath) != 0) {
+        LOG(ERROR) << "delete ptable tmp file fail " << ptablePath << strerror(errno);
         return;
     }
-    LOG(INFO) << "delete ptable tmp file success " << PTABLE_TEMP_PATH;
+    LOG(INFO) << "delete ptable tmp file success " << ptablePath;
 }
 } // namespace Updater
