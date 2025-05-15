@@ -23,14 +23,23 @@
 namespace Updater {
 #ifndef UPDATER_UT
 constexpr const char *PTABLE_TEMP_PATH = "/tmp/update_ptable.img";
+constexpr const char *PTABLE_NORMAL_PATH = "/mnt/sys_installer/update_ptable.img";
 #else
 constexpr const char *PTABLE_TEMP_PATH = "/data/update/update_ptable.img";
+constexpr const char *PTABLE_NORMAL_PATH = "/data/update/update_ptable.img";
 #endif
 class Ptable {
 public:
     Ptable() = default;
     DISALLOW_COPY_MOVE(Ptable);
     virtual ~Ptable() {}
+
+    enum class PartType {
+        COMMON_TYPE = 0,
+        A_TYPE,
+        B_TYPE,
+        RESERVED_TYPE
+    };
 
     static constexpr uint32_t GPT_PARTITION_TYPE_GUID_LEN = 16;
     static constexpr const char *PREFIX_SYS_CLASS_BLOCK = "/sys/class/block/sd";
@@ -50,7 +59,7 @@ public:
         int gptEntryBufOffset {};
         bool isTailPart {false};
         std::string dispName {};
-        std::string partType {PARTITION_NORMAL_TYPE};
+        PartType partType {PartType::COMMON_TYPE};
         std::string writeMode {"WRITE_RAW"};
         std::string writePath {};
     };

@@ -288,7 +288,8 @@ void PtableManager::InitCompositePtable()
 
 bool PtableManager::LoadPartitionInfoWithFile()
 {
-    if (!Utils::IsFileExist(PTABLE_TEMP_PATH)) {
+    const char *ptablePath = Utils::IsUpdaterMode() ? PTABLE_TEMP_PATH : PTABLE_NORMAL_PATH;
+    if (!Utils::IsFileExist(ptablePath)) {
         LOG(ERROR) << "ptable file is not exist, no need write";
         return false;
     }
