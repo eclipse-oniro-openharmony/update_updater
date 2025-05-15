@@ -20,6 +20,7 @@
 #include <string>
 #include <sched.h>
 #include <syscall.h>
+#include <sys/prctl.h>
 #include <sys/stat.h>
 #include <sys/statvfs.h>
 #include <sys/wait.h>
@@ -60,6 +61,17 @@ using namespace Hpackage;
 int g_percentage = 100;
 int g_tmpProgressValue;
 int g_tmpValue;
+
+static void SetBinaryDeathSig(void)
+{
+    if (Utils::IsUpdaterMode()) {
+        LOG(INFO) << "no need set death sig, when updater mode";
+        return;
+    }
+    if (prctl(PR_SET_PDEATHSIG, SIGTERM) == -1) {
+        LOG(ERROR) << "prctl failed " << strerror(errno);
+    }
+}
 
 int32_t ExtractUpdaterBinary(PkgManager::PkgManagerPtr manager, std::string &packagePath,
     const std::string &updaterBinary)
@@ -509,6 +521,7 @@ void HandleChildOutput(const std::string &buffer, int32_t bufferLen, bool &retry
 void ExcuteSubProc(const UpdaterParams &upParams, const std::string &fullPath, int pipeWrite)
 {
     UPDATER_INIT_RECORD;
+    SetBinaryDeathSig();
     // Set process scheduler to normal if current scheduler is
     // SCHED_FIFO, which may cause bad performance.
     int policy = syscall(SYS_sched_getscheduler, getpid());
