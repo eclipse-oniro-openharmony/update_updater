@@ -63,6 +63,7 @@ ohos_executable("diff") {
   deps = [
     "${updater_path}/services/log:libupdaterlog",
     "${updater_path}/services/package:libupdaterpackage",
+    "${updater_path}/utils:libutils_common",
   ]
 
   external_deps = [
