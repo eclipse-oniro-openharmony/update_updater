@@ -112,6 +112,7 @@ private:
     FILE *stream_;
     size_t fileLength_;
     int32_t streamType_;
+    std::recursive_mutex fileStreamLock_;
 };
 
 class MemoryMapStream : public PkgStreamImpl {

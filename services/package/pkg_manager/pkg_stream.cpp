@@ -75,6 +75,7 @@ FileStream::~FileStream()
 int32_t FileStream::Read(PkgBuffer &data, size_t start, size_t needRead, size_t &readLen)
 {
     Updater::UPDATER_INIT_RECORD;
+    std::lock_guard<std::recursive_mutex> lock(fileStreamLock_);
     if (stream_ == nullptr) {
         PKG_LOGE("Invalid stream");
         UPDATER_LAST_WORD(PKG_INVALID_STREAM, "Invalid stream");
@@ -111,6 +112,7 @@ int32_t FileStream::Read(PkgBuffer &data, size_t start, size_t needRead, size_t 
 
 int32_t FileStream::Write(const PkgBuffer &data, size_t size, size_t start)
 {
+    std::lock_guard<std::recursive_mutex> lock(fileStreamLock_);
     if (streamType_ != PkgStreamType_Write) {
         PKG_LOGE("Invalid stream type");
         return PKG_INVALID_STREAM;
@@ -134,6 +136,7 @@ int32_t FileStream::Write(const PkgBuffer &data, size_t size, size_t start)
 
 size_t FileStream::GetFileLength()
 {
+    std::lock_guard<std::recursive_mutex> lock(fileStreamLock_);
     if (stream_ == nullptr) {
         PKG_LOGE("Invalid stream");
         return 0;
@@ -159,6 +162,7 @@ size_t FileStream::GetFileLength()
 
 int32_t FileStream::Seek(long int offset, int whence)
 {
+    std::lock_guard<std::recursive_mutex> lock(fileStreamLock_);
     if (stream_ == nullptr) {
         PKG_LOGE("Invalid stream");
         return PKG_INVALID_STREAM;
@@ -168,6 +172,7 @@ int32_t FileStream::Seek(long int offset, int whence)
 
 int32_t FileStream::Flush(size_t size)
 {
+    std::lock_guard<std::recursive_mutex> lock(fileStreamLock_);
     if (stream_ == nullptr) {
         PKG_LOGE("Invalid stream");
         return PKG_INVALID_STREAM;
