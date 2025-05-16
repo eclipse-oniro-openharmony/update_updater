@@ -345,6 +345,34 @@ static int32_t ExtractFileByName(Uscript::UScriptEnv &env, const std::string &fi
     return USCRIPT_SUCCESS;
 }
 
+static int32_t ExtractPatchDatFile(Uscript::UScriptEnv &env, const UpdateBlockInfo &infos,
+    Hpackage::PkgManager::StreamPtr &outStream, std::string &datFile)
+{
+    if (env.GetPkgManager() == nullptr) {
+        LOG(ERROR) << "Error to get pkg manager";
+        return USCRIPT_ERROR_EXECUTE;
+    }
+ 
+    if ((!Utils::IsDirExist(UPDATER_PATH)) && (Utils::MkdirRecursive(UPDATER_PATH, S_IRWXU) != 0)) {
+        LOG(ERROR) << "Failed to make path";
+        return USCRIPT_ERROR_EXECUTE;
+    }
+    std::string fileName = std::string(UPDATER_PATH) + "/" + infos.patchDataName;
+    auto ret = env.GetPkgManager()->CreatePkgStream(outStream, fileName, 0, PkgStream::PkgStreamType_Write);
+    if (ret != USCRIPT_SUCCESS || outStream == nullptr) {
+        LOG(ERROR) << "Error to create output stream";
+        return USCRIPT_ERROR_EXECUTE;
+    }
+    ret = env.GetPkgManager()->ExtractFile(infos.patchDataName, outStream);
+    if (ret != USCRIPT_SUCCESS) {
+        LOG(ERROR) << "Error to extract file";
+        env.GetPkgManager()->ClosePkgStream(outStream);
+        return USCRIPT_ERROR_EXECUTE;
+    }
+    datFile = fileName;
+    return USCRIPT_SUCCESS;
+}
+
 static int32_t ExecuteUpdateBlock(Uscript::UScriptEnv &env, Uscript::UScriptContext &context)
 {
     UpdateBlockInfo infos {};
@@ -385,8 +413,11 @@ static int32_t ExecuteUpdateBlock(Uscript::UScriptEnv &env, Uscript::UScriptCont
     env.GetPkgManager()->ClosePkgStream(outStream);
 
     LOG(INFO) << "Start unpack new data thread done. Get patch data: " << infos.patchDataName;
-    if (ExtractFileByName(env, infos.patchDataName, outStream,
-        transferParams->dataBuffer, transferParams->dataBufferSize) != USCRIPT_SUCCESS) {
+    transferParams->isUpdaterMode = Utils::IsUpdaterMode();
+    int ret = transferParams->isUpdaterMode ? ExtractFileByName(env, infos.patchDataName, outStream,
+        transferParams->patchDataBuffer, transferParams->patchDataSize) : ExtractPatchDatFile(env,
+        infos, outStream, transferParams->patchDatFile);
+    if (ret != USCRIPT_SUCCESS) {
         return USCRIPT_ERROR_EXECUTE;
     }
 

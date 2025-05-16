@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "pkg_algo_deflate.h"
+#include <unistd.h>
 #include "pkg_stream.h"
 #include "pkg_utils.h"
 #include "securec.h"
@@ -23,6 +24,7 @@ constexpr uint32_t DEFLATE_IN_BUFFER_SIZE = 1024 * 64;
 constexpr uint32_t DEFLATE_OUT_BUFFER_SIZE = 1024 * 32;
 constexpr uint32_t INFLATE_IN_BUFFER_SIZE = 1024 * 1024 * 1024;
 constexpr uint32_t INFLATE_OUT_BUFFER_SIZE = 1024 * 1024;
+constexpr uint32_t INFLATE_IN_BUFFER_SIZE_NORMAL_MODE = 10 * 1024 * 1024;
 
 int32_t PkgAlgoDeflate::DeflateData(const PkgStreamPtr outStream, z_stream &zstream, int32_t flush,
     PkgBuffer &outBuffer, size_t &destOffset) const
@@ -235,7 +237,8 @@ int32_t PkgAlgoDeflate::InitStream(z_stream &zstream, bool zip, PkgBuffer &inBuf
             PKG_LOGE("fail deflateInit2");
             return PKG_NOT_EXIST_ALGORITHM;
         }
-        inBuffer.length = INFLATE_IN_BUFFER_SIZE;
+        inBuffer.length = (access("/bin/updater", 0) == 0) ?
+            INFLATE_IN_BUFFER_SIZE : INFLATE_IN_BUFFER_SIZE_NORMAL_MODE;
         outBuffer.length = INFLATE_OUT_BUFFER_SIZE;
     }
 

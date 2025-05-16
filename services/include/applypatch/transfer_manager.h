@@ -52,9 +52,11 @@ struct TransferParams {
     std::string freeStash;
     std::string retryFile;
     std::string devPath;
+    std::string patchDatFile;
     uint8_t *dataBuffer;
     size_t dataBufferSize;
     bool canWrite;
+    bool isUpdaterMode;
 };
 
 class TransferManager;

@@ -196,6 +196,26 @@ int32_t DiffAndMoveCommandFn::WriteDiffToBlock(const Command &params, std::vecto
     return targetBlock.WriteDiffToBlock(params, srcBuffer, patchBuffer, patchLength, type == CommandType::IMGDIFF);
 }
 
+int32_t DiffAndMoveCommandFn::WriteFileToBlock(const Command &params, std::vector<uint8_t> &srcBuffer,
+    size_t offset, size_t patchLength, BlockSet &targetBlock)
+{
+    std::ifstream fin(params.GetTransferParams()->patchDatFile, std::ios::in | std::ios::binary);
+    if (!fin.is_open()) {
+        LOG(ERROR) << "open dat file failed " << params.GetTransferParams()->patchDatFile;
+        return static_cast<int>(FAILED);
+    }
+    std::unique_ptr<uint8_t[]> patchBuffer = std::make_unique<uint8_t[]>(patchLength);
+    (void)memset_s(patchBuffer.get(), patchLength, 0, patchLength);
+    if ((!fin.seekg(static_cast<int>(offset), std::ios::beg)) ||
+        (!fin.read(reinterpret_cast<char *>(patchBuffer.get()), patchLength))) {
+        LOG(ERROR) << "read dat file failed gcount " << fin.gcount() << ", patch len " << patchLength;
+        fin.close();
+        return static_cast<int>(FAILED);
+    }
+    fin.close();
+    return WriteDiffToBlock(params, srcBuffer, patchBuffer.get(), patchLength, targetBlock);
+}
+
 CommandResult DiffAndMoveCommandFn::Execute(const Command &params)
 {
     CommandType type = params.GetCommandType();
@@ -227,8 +247,12 @@ CommandResult DiffAndMoveCommandFn::Execute(const Command &params)
             offset = Utils::String2Int<size_t>(params.GetArgumentByPos(pos++), Utils::N_DEC);
         }
         size_t patchLength = Utils::String2Int<size_t>(params.GetArgumentByPos(pos++), Utils::N_DEC);
-        uint8_t *patchBuffer = params.GetTransferParams()->dataBuffer + offset;
-        ret = WriteDiffToBlock(params, buffer, patchBuffer, patchLength, targetBlock);
+        if (params.GetTransferParams()->isUpdaterMode) {
+            uint8_t *patchBuffer = params.GetTransferParams()->patchDataBuffer + offset;
+            ret = WriteDiffToBlock(params, buffer, patchBuffer, patchLength, targetBlock);
+        } else {
+            ret = WriteFileToBlock(params, buffer, offset, patchLength, targetBlock);
+        }
     } else {
         ret = targetBlock.WriteDataToBlock(params.GetTargetFileDescriptor(), buffer) == 0 ? -1 : 0;
     }
