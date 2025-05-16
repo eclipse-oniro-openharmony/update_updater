@@ -248,7 +248,7 @@ CommandResult DiffAndMoveCommandFn::Execute(const Command &params)
         }
         size_t patchLength = Utils::String2Int<size_t>(params.GetArgumentByPos(pos++), Utils::N_DEC);
         if (params.GetTransferParams()->isUpdaterMode) {
-            uint8_t *patchBuffer = params.GetTransferParams()->patchDataBuffer + offset;
+            uint8_t *patchBuffer = params.GetTransferParams()->dataBuffer + offset;
             ret = WriteDiffToBlock(params, buffer, patchBuffer, patchLength, targetBlock);
         } else {
             ret = WriteFileToBlock(params, buffer, offset, patchLength, targetBlock);

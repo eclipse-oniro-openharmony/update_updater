@@ -415,7 +415,7 @@ static int32_t ExecuteUpdateBlock(Uscript::UScriptEnv &env, Uscript::UScriptCont
     LOG(INFO) << "Start unpack new data thread done. Get patch data: " << infos.patchDataName;
     transferParams->isUpdaterMode = Utils::IsUpdaterMode();
     int ret = transferParams->isUpdaterMode ? ExtractFileByName(env, infos.patchDataName, outStream,
-        transferParams->patchDataBuffer, transferParams->patchDataSize) : ExtractPatchDatFile(env,
+        transferParams->dataBuffer, transferParams->dataBufferSize) : ExtractPatchDatFile(env,
         infos, outStream, transferParams->patchDatFile);
     if (ret != USCRIPT_SUCCESS) {
         return USCRIPT_ERROR_EXECUTE;
