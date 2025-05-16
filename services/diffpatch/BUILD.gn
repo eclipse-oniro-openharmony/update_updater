@@ -1,3 +1,76 @@
+int32_t DiffAndMoveCommandFn::WriteFileToBlock(const Command &params, std::vector<uint8_t> &srcBuffer,
+    size_t offset, size_t patchLength, BlockSet &targetBlock)
+{
+    std::ifstream fin(params.GetTransferParams()->patchDatFile, std::ios::in | std::ios::binary);
+    if (!fin.is_open()) {
+        LOG(ERROR) << "open dat file failed " << params.GetTransferParams()->patchDatFile;
+        return static_cast<int>(FAILED);
+    }
+    std::unique_ptr<uint8_t[]> patchBuffer = std::make_unique<uint8_t[]>(patchLength);
+    (void)memset_s(patchBuffer.get(), patchLength, 0, patchLength);
+    if ((!fin.seekg(static_cast<int>(offset), std::ios::beg)) ||
+        (!fin.read(reinterpret_cast<char *>(patchBuffer.get()), patchLength))) {
+        LOG(ERROR) << "read dat file failed gcount " << fin.gcount() << ", patch len " << patchLength;
+        fin.close();
+        return static_cast<int>(FAILED);
+    }
+    fin.close();
+    return WriteDiffToBlock(params, srcBuffer, patchBuffer.get(), patchLength, targetBlock);
+}
+
+        if (params.GetTransferParams()->isUpdaterMode) {
+            uint8_t *patchBuffer = params.GetTransferParams()->patchDataBuffer + offset;
+            ret = WriteDiffToBlock(params, buffer, patchBuffer, patchLength, targetBlock);
+        } else {
+            ret = WriteFileToBlock(params, buffer, offset, patchLength, targetBlock);
+        }
+
+    virtual int32_t WriteFileToBlock(const Command &params, std::vector<uint8_t> &srcBuffer,
+        size_t offset, size_t patchLength, BlockSet &targetBlock);
+
+    // using PkgStreamType_Read type to reduce memory usage
+    auto streamType = Utils::IsUpdaterMode() ? PkgStream::PKgStreamType_FileMap : PkgStream::PkgStreamType_Read;
+    int32_t ret = CreatePkgStream(stream, packagePath, 0, streamType);
+
+std::lock_guard<std::recursive_mutex> lock(fileStreamLock_);
+std::recursive_mutex fileStreamLock_;
+
+static int32_t ExtractPatchDatFile(Uscript::UScriptEnv &env, const UpdateBlockInfo &infos,
+    Hpackage::PkgManager::StreamPtr &outStream, std::string &datFile)
+{
+    if (env.GetPkgManager() == nullptr) {
+        LOG(ERROR) << "Error to get pkg manager";
+        return USCRIPT_ERROR_EXECUTE;
+    }
+ 
+    if ((!Utils::IsDirExist(UPDATER_PATH)) && (Utils::MkdirRecursive(UPDATER_PATH, S_IRWXU) != 0)) {
+        LOG(ERROR) << "Failed to make path";
+        return USCRIPT_ERROR_EXECUTE;
+    }
+    std::string fileName = std::string(UPDATER_PATH) + "/" + infos.patchDataName;
+    auto ret = env.GetPkgManager()->CreatePkgStream(outStream, fileName, 0, PkgStream::PkgStreamType_Write);
+    if (ret != USCRIPT_SUCCESS || outStream == nullptr) {
+        LOG(ERROR) << "Error to create output stream";
+        return USCRIPT_ERROR_EXECUTE;
+    }
+    ret = env.GetPkgManager()->ExtractFile(infos.patchDataName, outStream);
+    if (ret != USCRIPT_SUCCESS) {
+        LOG(ERROR) << "Error to extract file";
+        env.GetPkgManager()->ClosePkgStream(outStream);
+        return USCRIPT_ERROR_EXECUTE;
+    }
+    datFile = fileName;
+    return USCRIPT_SUCCESS;
+}
+
+    transferParams->isUpdaterMode = Utils::IsUpdaterMode();
+    int ret = transferParams->isUpdaterMode ? ExtractFileByName(env, infos.patchDataName, outStream,
+        transferParams->patchDataBuffer, transferParams->patchDataSize) : ExtractPatchDatFile(env,
+        infos, outStream, transferParams->patchDatFile);
+    if (ret != USCRIPT_SUCCESS) {
+
+
+
 # Copyright (C) 2022 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
