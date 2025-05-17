@@ -18,6 +18,7 @@
 #include <cerrno>
 #include <cstdint>
 #include <cstdlib>
+#include <dlfcn.h>
 #include <dirent.h>
 #include <fcntl.h>
 #include <limits>
@@ -75,6 +76,53 @@ bool IsUpdaterMode()
     }
     LOG(INFO) << "normal mode";
     return false;
+}
+
+void* LoadLibrary(const std::string &libName, const std::string &libPath)
+{
+    if (libName.empty()) {
+        LOG(ERROR) << "lib name is empty";
+        return nullptr;
+    }
+    if (libPath != "/system/lib64/" && libPath != "/vendor/lib64/") {
+        LOG(ERROR) << "lib path invalid";
+        return nullptr;
+    }
+    std::string libAbsPath = libPath + libName;
+    char realPath[PATH_MAX + 1] = {0};
+    if (realpath(libAbsPath.c_str(), realPath) == nullptr) {
+        LOG(ERROR) << "realpath error";
+        return nullptr;
+    }
+    void* handle = dlopen(libAbsPath.c_str(), RTLD_LAZY);
+    if (handle == nullptr) {
+        LOG(ERROR) << "dlopen fail, lib name = " << libName << "; dlerror = " << dlerror();
+        return nullptr;
+    }
+    return handle;
+}
+
+void CloseLibrary(void* handle)
+{
+    if (handle == nullptr) {
+        LOG(ERROR) << "handle is nulptr";
+        return;
+    }
+    dlclose(handle);
+    handle = nullptr;
+}
+
+void* GetFunction(void* handle, const std::string &funcName)
+{
+    if (handle == nullptr) {
+        LOG(ERROR) << "handle is nullptr";
+        return nullptr;
+    }
+    if (funcName.empty()) {
+        LOG(ERROR) << "func name is empty";
+        return nullptr;
+    }
+    return dlsym(handle, funcName.c_str());
 }
 } // Utils
 } // updater
