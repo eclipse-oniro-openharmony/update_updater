@@ -548,8 +548,8 @@ void ExcuteSubProc(const UpdaterParams &upParams, const std::string &fullPath, i
             std::to_string(pipeWrite).c_str(), retryPara.c_str(), nullptr);
     }
     if (ret < 0) {
-        LOG(ERROR) << "Execute updater binary failed";
-        UPDATER_LAST_WORD(UPDATE_ERROR, "Execute updater binary failed");
+        LOG(ERROR) << "Execute updater binary failed, errno = " << errno;
+        UPDATER_LAST_WORD(UPDATE_ERROR, "Execute updater binary failed, errno = ", errno);
         exit(-1);
     }
 }
