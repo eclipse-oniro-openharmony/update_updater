@@ -537,7 +537,7 @@ void ExcuteSubProc(const UpdaterParams &upParams, const std::string &fullPath, i
         }
     }
     const std::string retryPara = upParams.retryCount > 0 ? "retry=1" : "retry=0";
-    int ret = 0;
+    int ret = -1;
     if (upParams.updateBin.size() > 0) {
         LOG(INFO) << "Binary Path:" << upParams.updateBin[upParams.pkgLocation].c_str();
         ret = execl(fullPath.c_str(), fullPath.c_str(), upParams.updateBin[upParams.pkgLocation].c_str(),
