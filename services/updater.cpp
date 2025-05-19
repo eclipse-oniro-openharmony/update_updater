@@ -537,18 +537,21 @@ void ExcuteSubProc(const UpdaterParams &upParams, const std::string &fullPath, i
         }
     }
     const std::string retryPara = upParams.retryCount > 0 ? "retry=1" : "retry=0";
+    int ret = -1;
     if (upParams.updateBin.size() > 0) {
         LOG(INFO) << "Binary Path:" << upParams.updateBin[upParams.pkgLocation].c_str();
-        execl(fullPath.c_str(), fullPath.c_str(), upParams.updateBin[upParams.pkgLocation].c_str(),
+        ret = execl(fullPath.c_str(), fullPath.c_str(), upParams.updateBin[upParams.pkgLocation].c_str(),
             std::to_string(pipeWrite).c_str(), retryPara.c_str(), nullptr);
     } else if (upParams.updatePackage.size() > 0) {
         LOG(INFO) << "Binary Path:" << upParams.updatePackage[upParams.pkgLocation].c_str();
-        execl(fullPath.c_str(), fullPath.c_str(), upParams.updatePackage[upParams.pkgLocation].c_str(),
+        ret = execl(fullPath.c_str(), fullPath.c_str(), upParams.updatePackage[upParams.pkgLocation].c_str(),
             std::to_string(pipeWrite).c_str(), retryPara.c_str(), nullptr);
     }
-    LOG(ERROR) << "Execute updater binary failed";
-    UPDATER_LAST_WORD(UPDATE_ERROR, "Execute updater binary failed");
-    exit(-1);
+    if (ret < 0) {
+        LOG(ERROR) << "Execute updater binary failed, errno = " << errno;
+        UPDATER_LAST_WORD(UPDATE_ERROR, "Execute updater binary failed, errno = ", errno);
+        exit(-1);
+    }
 }
 
 UpdaterStatus HandlePipeMsg(UpdaterParams &upParams, int pipeRead, bool &retryUpdate)

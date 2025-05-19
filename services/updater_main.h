@@ -27,6 +27,7 @@ enum FactoryResetMode {
     USER_WIPE_DATA = 0,
     FACTORY_WIPE_DATA,
     MENU_WIPE_DATA,
+    CLEAR_SPACE,
     INVALID_MODE,
 };
 
