@@ -887,6 +887,9 @@ static void ShowSuccessUi(UpdaterParams &upParams, UpdaterStatus &status)
 __attribute__((weak)) UpdaterStatus CheckAndSetSlot([[maybe_unused]]UpdaterParams &upParams)
 {
     LOG(INFO) << "not need check and set slot";
+#ifndef UPDATER_UT
+    SetActiveSlot(); //UPDATER_AB_SUPPORT 
+#endif
     return UPDATE_SUCCESS;
 }
 
