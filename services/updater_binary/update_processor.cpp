@@ -526,11 +526,6 @@ int ProcessUpdater(bool retry, int pipeFd, const std::string &packagePath, const
             }
         });
     PkgManager::ReleasePackageInstance(pkgManager);
-#ifndef UPDATER_UT
-    if (ret == 0) {
-        SetActiveSlot();
-    }
-#endif
     return ret;
 }
 } // Updater

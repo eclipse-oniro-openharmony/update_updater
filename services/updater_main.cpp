@@ -50,6 +50,7 @@
 #include "utils.h"
 #include "factory_reset/factory_reset.h"
 #include "write_state/write_state.h"
+#include "slot_info/slot_info.h"
 
 namespace Updater {
 using Utils::String2Int;
@@ -887,6 +888,9 @@ static void ShowSuccessUi(UpdaterParams &upParams, UpdaterStatus &status)
 __attribute__((weak)) UpdaterStatus CheckAndSetSlot([[maybe_unused]]UpdaterParams &upParams)
 {
     LOG(INFO) << "not need check and set slot";
+#ifndef UPDATER_UT
+    SetActiveSlot(); //UPDATER_AB_SUPPORT 
+#endif
     return UPDATE_SUCCESS;
 }
 
