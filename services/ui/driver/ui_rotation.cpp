@@ -108,14 +108,22 @@ void UiRotation::RotateBuffer(const uint8_t *origBuf, uint8_t *dstBuf, uint32_t 
     int x {}, y {};
     const uint8_t *srcP = nullptr;
     uint8_t *dstP = nullptr;
-    for (int h = rect_.GetTop(); h <= rect_.GetBottom(); h++) {
-        for (int w = rect_.GetLeft(); w <= rect_.GetRight(); w++) {
+    int top = rect_.GetTop();
+    int bottom = rect_.GetBottom();
+    int left = rect_.GetLeft();
+    int right = rect_.GetRight();
+    for (int h = top; h <= bottom; h++) {
+        for (int w = left; w <= right; w++) {
             x = offsetX_ + w * cosR_ - h * sinR_;
             y = offsetY_ + h * cosR_ + w * sinR_;
             srcP = origBuf + h * oldRowBytes_ + w * pixelBytes_;
             dstP = dstBuf + y * newRowBytes_ + x * pixelBytes_;
-            for (int j = 0; j < pixelBytes_; j++) {
-                *dstP++ = *srcP++;
+            if (memcpy_s(dstP, pixelBytes_, srcP, pixelBytes_) != EOK) {
+                LOG(ERROR) << "flip memcpy_s fail " << "w = " << w << " h = " << h;
+                return;
+            } else {
+                srcP += pixelBytes_;
+                dstP += pixelBytes_;
             }
         }
     }
