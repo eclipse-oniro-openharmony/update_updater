@@ -254,7 +254,8 @@ void SetTmpProgressValue(int value)
     g_tmpProgressValue = value;
 }
 
-void ProgressSmoothHandler(int beginProgress, int endProgress)
+void ProgressSmoothHandler(int beginProgress, int endProgress,
+    [[maybe_unused]] UpdaterParams = {}, [[maybe_unused]] bool isFinish = false)
 {
     if (endProgress < 0 || endProgress > FULL_PERCENT_PROGRESS || beginProgress < 0) {
         return;
@@ -277,9 +278,16 @@ __attribute__((weak)) bool PreStartBinaryEntry([[maybe_unused]] const std::strin
     return true;
 }
 
-__attribute__((weak)) float GetProgress(float progressVal)
+float g_progressRatio = 1.0;
+
+void SetTotalProgressRatio(float ratio)
 {
-    return progressVal;
+    g_progressRatio = ratio;
+}
+
+float GetTotalProgressRatio()
+{
+    return g_progressRatio;
 }
 
 bool IsUpdateBasePkg(UpdaterParams &upParams)
@@ -468,7 +476,7 @@ void SetProgress(const std::vector<std::string> &output, UpdaterParams &upParams
     if (frac >= FULL_EPSINON && g_tmpValue + g_percentage < FULL_PERCENT_PROGRESS) {
         g_tmpValue += g_percentage;
         g_tmpProgressValue = g_tmpValue;
-        upParams.callbackProgress(GetProgress(g_tmpProgressValue *
+        upParams.callbackProgress(GetTotalProgressRatio() * (g_tmpProgressValue *
             upParams.currentPercentage + upParams.initialProgress * FULL_PERCENT_PROGRESS));
         return;
     }
@@ -476,7 +484,7 @@ void SetProgress(const std::vector<std::string> &output, UpdaterParams &upParams
     if (g_tmpProgressValue == 0) {
         return;
     }
-    upParams.callbackProgress(GetProgress(g_tmpProgressValue *
+    upParams.callbackProgress(GetTotalProgressRatio() * (g_tmpProgressValue *
         upParams.currentPercentage + upParams.initialProgress * FULL_PERCENT_PROGRESS));
 }
 }

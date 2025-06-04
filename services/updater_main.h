@@ -63,6 +63,14 @@ UpdaterStatus InstallUpdaterPackages(UpdaterParams &upParams);
 
 int OtaUpdatePreCheck(Hpackage::PkgManager::PkgManagerPtr pkgManager, const std::string &packagePath);
 
+void SetPrgrsSmoothHandlerFunc(std::function<void(float, float, UpdaterParams, bool)> func);
+
+void SetTotalProgressRatio(float ratio);
+
+float GetTotalProgressRatio();
+
+void ProcessPrgrsSmooth(float beginProgress, float endProgress, UpdaterParams upParams, bool isFinish);
+
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
@@ -72,8 +80,6 @@ bool IsSupportOption([[maybe_unused]] const std::string &option);
 UpdaterStatus ProcessOtherOption([[maybe_unused]] const std::string &option,
     [[maybe_unused]] UpdaterParams &upParams, PackageUpdateMode &mode);
 bool PreStartBinaryEntry([[maybe_unused]] const std::string &path);
-float GetProgress(float progressVal);
-void ProcessProgress(UpdaterParams &upParams, float start, float end, bool isFinish);
 int32_t VerifySpecialPkgs([[maybe_unused]]UpdaterParams &upParams);
 UpdaterStatus CheckAndSetSlot([[maybe_unused]]UpdaterParams &upParams);
 void UpdaterVerifyFailEntry(bool verifyret);
