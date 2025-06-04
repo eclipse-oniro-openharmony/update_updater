@@ -277,6 +277,11 @@ __attribute__((weak)) bool PreStartBinaryEntry([[maybe_unused]] const std::strin
     return true;
 }
 
+__attribute__((weak)) float GetProgress(float progressVal)
+{
+    return progressVal;
+}
+
 bool IsUpdateBasePkg(UpdaterParams &upParams)
 {
     for (auto pkgPath : upParams.updatePackage) {
@@ -334,7 +339,7 @@ UpdaterStatus DoInstallUpdaterBinfile(PkgManager::PkgManagerPtr pkgManager, Upda
         UPDATER_LAST_WORD(UPDATE_CORRUPT, "CallbackProgress is nullptr");
         return UPDATE_CORRUPT;
     }
-    upParams.callbackProgress(upParams.initialProgress * FULL_PERCENT_PROGRESS);
+    upParams.callbackProgress(GetProgress(upParams.initialProgress * FULL_PERCENT_PROGRESS));
     if (pkgManager == nullptr) {
         LOG(ERROR) << "pkgManager is nullptr";
         UPDATER_LAST_WORD(UPDATE_CORRUPT, "pkgManager is nullptr");
@@ -463,16 +468,16 @@ void SetProgress(const std::vector<std::string> &output, UpdaterParams &upParams
     if (frac >= FULL_EPSINON && g_tmpValue + g_percentage < FULL_PERCENT_PROGRESS) {
         g_tmpValue += g_percentage;
         g_tmpProgressValue = g_tmpValue;
-        upParams.callbackProgress(g_tmpProgressValue *
-            upParams.currentPercentage + upParams.initialProgress * FULL_PERCENT_PROGRESS);
+        upParams.callbackProgress(GetProgress(g_tmpProgressValue *
+            upParams.currentPercentage + upParams.initialProgress * FULL_PERCENT_PROGRESS));
         return;
     }
     g_tmpProgressValue = tmpProgressValue + g_tmpValue;
     if (g_tmpProgressValue == 0) {
         return;
     }
-    upParams.callbackProgress(g_tmpProgressValue *
-        upParams.currentPercentage + upParams.initialProgress * FULL_PERCENT_PROGRESS);
+    upParams.callbackProgress(GetProgress(g_tmpProgressValue *
+        upParams.currentPercentage + upParams.initialProgress * FULL_PERCENT_PROGRESS));
 }
 }
 

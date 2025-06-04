@@ -304,6 +304,11 @@ __attribute__((weak)) void NotifyPreCheck(UpdaterStatus &status, UpdaterParams &
     return;
 }
 
+__attribute__((weak)) void ProcessProgress(UpdaterParams &upParams, float start, float end, bool isFinish)
+{
+    ProgressSmoothHandle(start, end);
+}
+
 static UpdaterStatus VerifyBinfiles(UpdaterParams &upParams)
 {
     UPDATER_INIT_RECORD;
@@ -404,8 +409,9 @@ static UpdaterStatus VerifyPackages(UpdaterParams &upParams)
         UPDATER_LAST_WORD(UPDATE_CORRUPT, "VerifySpecialPkgs failed");
         return UPDATE_CORRUPT;
     }
-    ProgressSmoothHandler(UPDATER_UI_INSTANCE.GetCurrentPercent(),
-        UPDATER_UI_INSTANCE.GetCurrentPercent() + static_cast<int>(VERIFY_PERCENT * FULL_PERCENT_PROGRESS));
+    ProcessProgress(upParams, UPDATER_UI_INSTANCE.GetCurrentPercent(),
+        UPDATER_UI_INSTANCE.GetCurrentPercent() + static_cast<int>(VERIFY_PERCENT * FULL_PERCENT_PROGRESS),
+        false);
     LOG(INFO) << "Verify packages successfull...";
     return UPDATE_SUCCESS;
 }
@@ -781,10 +787,11 @@ static UpdaterStatus DoInstallPackages(UpdaterParams &upParams, std::vector<doub
             PkgManager::ReleasePackageInstance(manager);
             return status;
         }
-        ProgressSmoothHandler(
-            static_cast<int>(upParams.initialProgress * FULL_PERCENT_PROGRESS +
+        ProcessProgress(
+            upParams, static_cast<int>(upParams.initialProgress * FULL_PERCENT_PROGRESS +
             upParams.currentPercentage * GetTmpProgressValue()),
-            static_cast<int>(pkgStartPosition[upParams.pkgLocation + 1] * FULL_PERCENT_PROGRESS));
+            static_cast<int>(pkgStartPosition[upParams.pkgLocation + 1] * FULL_PERCENT_PROGRESS),
+            upParams.pkgLocation == upParams.updatePackage.size() - 1);
         SetMessageToMisc(upParams.miscCmd, upParams.pkgLocation + 1, "upgraded_pkg_num");
         PkgManager::ReleasePackageInstance(manager);
     }
@@ -855,7 +862,7 @@ UpdaterStatus DoUpdatePackages(UpdaterParams &upParams)
     }
     float value = (UPDATER_UI_INSTANCE.GetCurrentPercent() > (updateStartPosition * FULL_PERCENT_PROGRESS)) ?
         UPDATER_UI_INSTANCE.GetCurrentPercent() : (updateStartPosition * FULL_PERCENT_PROGRESS);
-    upParams.callbackProgress(value);
+    upParams.callbackProgress(GetProgress(value));
     status = DoInstallPackages(upParams, pkgStartPosition);
     if (NotifyActionResult(upParams, status, {SET_UPDATE_STATUS}) != UPDATE_SUCCESS) {
         LOG(ERROR) << "set status fail";
