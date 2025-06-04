@@ -306,7 +306,7 @@ __attribute__((weak)) void NotifyPreCheck(UpdaterStatus &status, UpdaterParams &
 
 __attribute__((weak)) void ProcessProgress(UpdaterParams &upParams, float start, float end, bool isFinish)
 {
-    ProgressSmoothHandle(start, end);
+    ProgressSmoothHandler(start, end);
 }
 
 static UpdaterStatus VerifyBinfiles(UpdaterParams &upParams)
@@ -410,8 +410,7 @@ static UpdaterStatus VerifyPackages(UpdaterParams &upParams)
         return UPDATE_CORRUPT;
     }
     ProcessProgress(upParams, UPDATER_UI_INSTANCE.GetCurrentPercent(),
-        UPDATER_UI_INSTANCE.GetCurrentPercent() + static_cast<int>(VERIFY_PERCENT * FULL_PERCENT_PROGRESS),
-        false);
+        UPDATER_UI_INSTANCE.GetCurrentPercent() + static_cast<int>(VERIFY_PERCENT * FULL_PERCENT_PROGRESS), false);
     LOG(INFO) << "Verify packages successfull...";
     return UPDATE_SUCCESS;
 }
