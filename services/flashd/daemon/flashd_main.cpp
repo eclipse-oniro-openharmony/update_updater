@@ -58,6 +58,7 @@ int FlashdMain(int argc, char **argv)
         Base::PrintMessage("Both TCP and USB are disable, default enable usb");
         enableUsb = true;
     }
+    Utils::SetParameter("updater.flashd.configfs", "1");
     HdcDaemon daemon(false);
     daemon.InitMod(enableTcp, enableUsb);
 #ifndef UPDATER_UT
