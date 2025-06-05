@@ -288,7 +288,7 @@ static int UmountRetry(const std::string &path)
         }
         sleep(1);
     }
-    LOG(ERROR) << "Umount " << path << "failed: " << retryCount << " times";
+
     return -1;
 }
 
