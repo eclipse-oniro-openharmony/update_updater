@@ -38,6 +38,7 @@ public:
     uint16_t GetScreenHeight() override;
     void StopEngine(void);
     void SetSleepTime(uint32_t sleepTime);
+    void HandleScreenPowerDown(bool blank);
 private:
     void FlushThreadLoop() const;
     void InitFontEngine(const char *fontPath) const;
