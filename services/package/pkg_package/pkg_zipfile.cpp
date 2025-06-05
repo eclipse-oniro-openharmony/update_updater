@@ -34,7 +34,6 @@ constexpr uint32_t LOCAL_HEADER_SIGNATURE = 0x04034b50;
 constexpr uint32_t CENTRAL_SIGNATURE = 0x02014b50;
 constexpr uint32_t END_CENTRAL_SIGNATURE = 0x06054b50;
 constexpr uint32_t DATA_DESC_SIGNATURE = 0x08074b50;
-constexpr uint32_t MAX_BUFFER_SIZE = 1024 * 64;
 // mask value that signifies that the entry has a DD
 constexpr uint32_t GPBDD_FLAG_MASK = 0x0008;
 constexpr uint32_t ZIP_PKG_ALIGNMENT_DEF = 1;
@@ -636,31 +635,6 @@ int32_t ZipFileEntry::DecodeLocalFileHeader(PkgStreamPtr inStream, PkgBuffer &da
     return PKG_SUCCESS;
 }
 
-int32_t ZipFileEntry::Stored(const PkgStreamPtr inStream, const PkgStreamPtr outStream,
-    PkgAlgorithmContext &context)
-{
-    size_t start = 0;
-    size_t startWrite = 0;
-    size_t remainSize = context.packedSize;
-    while (remainSize > 0) {
-        PkgBuffer buffer(MAX_BUFFER_SIZE);
-        size_t readLen = (remainSize > buffer.length) ? buffer.length : remainSize;
-        int32_t ret = inStream->Read(buffer, context.srcOffset, readLen, start);
-        if (ret != PKG_SUCCESS) {
-            PKG_LOGE("read buffer from inStream failed");
-            return ret;
-        }
-        ret = outStream->Write(buffer, readLen, startWrite);
-        if (ret != PKG_SUCCESS) {
-            PKG_LOGE("write buffer in outStream failed");
-            return ret;
-        }
-        startWrite += readLen;
-        remainSize -= readLen;
-    }
-    return PKG_SUCCESS;
-}
-
 int32_t ZipFileEntry::Unpack(PkgStreamPtr outStream)
 {
     PkgAlgorithm::PkgAlgorithmPtr algorithm = PkgAlgorithmFactory::GetAlgorithm(&fileInfo_.fileInfo);
@@ -681,11 +655,11 @@ int32_t ZipFileEntry::Unpack(PkgStreamPtr outStream)
     };
     int32_t ret = PKG_SUCCESS;
     switch (fileInfo_.method) {
+        case Z_STORED:
+            algorithm = std::make_shared<PkgAlgorithm>();
+            [[fallthrough]];
         case Z_DEFLATED:
             ret = algorithm->Unpack(inStream, outStream, context);
-            break;
-        case Z_STORED:
-            ret = Stored(inStream, outStream, context);
             break;
         default:
             ret = PKG_INVALID_PARAM;

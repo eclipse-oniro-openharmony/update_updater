@@ -141,8 +141,6 @@ public:
 
     int32_t Pack(PkgStreamPtr inStream, size_t startOffset, size_t &encodeLen) override;
 
-    int32_t Stored(const PkgStreamPtr inStream, const PkgStreamPtr outStream, PkgAlgorithmContext &context);
-
     int32_t Unpack(PkgStreamPtr outStream) override;
 
     int32_t DecodeHeader(PkgBuffer &buffer, size_t headerOffset, size_t dataOffset,
