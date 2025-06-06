@@ -420,9 +420,8 @@ static UpdaterStatus VerifyPackages(UpdaterParams &upParams)
         UPDATER_LAST_WORD(UPDATE_CORRUPT, "VerifySpecialPkgs failed");
         return UPDATE_CORRUPT;
     }
-    ProcessPrgrsSmooth(UPDATER_UI_INSTANCE.GetCurrentPercent(),
-        UPDATER_UI_INSTANCE.GetCurrentPercent() + static_cast<int>(VERIFY_PERCENT * FULL_PERCENT_PROGRESS), 
-        upParams, false);
+    ProcessPrgrsSmooth(UPDATER_UI_INSTANCE.GetCurrentPercent(), UPDATER_UI_INSTANCE.GetCurrentPercent() +
+        static_cast<int>(VERIFY_PERCENT * FULL_PERCENT_PROGRESS), upParams, false);
     LOG(INFO) << "Verify packages successfull...";
     return UPDATE_SUCCESS;
 }
