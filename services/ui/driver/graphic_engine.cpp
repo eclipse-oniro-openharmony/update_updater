@@ -131,6 +131,15 @@ void GraphicEngine::SetSleepTime(uint32_t sleepTime)
     sleepTime_ = sleepTime;
 }
 
+void GraphicEngine::HandleScreenPowerDown(bool blank)
+{
+    if (sfDev_ == nullptr) {
+        LOG(ERROR) << "sfDev_ is nullptr";
+        return;
+    }
+    sfDev_->Blank(blank);
+}
+
 OHOS::BufferInfo *GraphicEngine::GetFBBufferInfo()
 {
     if (buffInfo_ != nullptr) {
