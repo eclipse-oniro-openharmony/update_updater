@@ -87,7 +87,8 @@
                 "//base/update/updater/services/diffpatch:diff(//build/toolchain/linux:clang_${host_cpu})",
                 "//base/update/updater/services/ui:libui",
                 "//base/update/updater/services/flow_update/update_bin:libBinFlowUpdate",
-                "//base/update/updater/services/stream_update:libbinchunkupdate"
+                "//base/update/updater/services/stream_update:libbinchunkupdate",
+                "//base/update/updater/services/write_state:libwritestate"
             ],
             "inner_kits": [
                 {
@@ -325,6 +326,13 @@
                     "header": {
                         "header_files": [],
                         "header_base": "//base/update/updater/services/script/threadpool"
+                    }
+                },
+                {
+                    "name": "//base/update/updater/services/write_state:libwritestate",
+                    "header": {
+                        "header_files": [],
+                        "header_base": "//base/update/updater/services/write_state"
                     }
                 }
             ],
