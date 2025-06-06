@@ -255,7 +255,7 @@ void SetTmpProgressValue(int value)
 }
 
 void ProgressSmoothHandler(int beginProgress, int endProgress,
-    [[maybe_unused]] UpdaterParams = {}, [[maybe_unused]] bool isFinish = false)
+    [[maybe_unused]] UpdaterParams upParams, [[maybe_unused]] bool isFinish);
 {
     if (endProgress < 0 || endProgress > FULL_PERCENT_PROGRESS || beginProgress < 0) {
         return;
