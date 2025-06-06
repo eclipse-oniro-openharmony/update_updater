@@ -131,7 +131,7 @@ void GraphicEngine::SetSleepTime(uint32_t sleepTime)
     sleepTime_ = sleepTime;
 }
 
-void HandleScreenPowerDown(bool blank)
+void GraphicEngine::HandleScreenPowerDown(bool blank)
 {
     if (sfDev_ == nullptr) {
         LOG(ERROR) << "sfDev_ is nullptr";
