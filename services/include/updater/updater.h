@@ -93,7 +93,7 @@ int GetTmpProgressValue();
 void SetTmpProgressValue(int value);
 
 void ProgressSmoothHandler(int beginProgress, int endProgress,
-    [[maybe_unused]] UpdaterParams = {}, [[maybe_unused]] bool isFinish = false);
+    [[maybe_unused]] UpdaterParams upParams = {}, [[maybe_unused]] bool isFinish = false);
 
 UpdaterStatus SetUpdateSlotParam(UpdaterParams &upParams, bool isUpdateCurrSlot);
 
