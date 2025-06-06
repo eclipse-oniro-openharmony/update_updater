@@ -347,7 +347,7 @@ UpdaterStatus DoInstallUpdaterBinfile(PkgManager::PkgManagerPtr pkgManager, Upda
         UPDATER_LAST_WORD(UPDATE_CORRUPT, "CallbackProgress is nullptr");
         return UPDATE_CORRUPT;
     }
-    upParams.callbackProgress(GetProgress(upParams.initialProgress * FULL_PERCENT_PROGRESS));
+    upParams.callbackProgress(GetTotalProgressRatio() * (upParams.initialProgress * FULL_PERCENT_PROGRESS));
     if (pkgManager == nullptr) {
         LOG(ERROR) << "pkgManager is nullptr";
         UPDATER_LAST_WORD(UPDATE_CORRUPT, "pkgManager is nullptr");
