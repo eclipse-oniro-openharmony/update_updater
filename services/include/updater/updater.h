@@ -92,7 +92,8 @@ int32_t ExtractUpdaterBinary(Hpackage::PkgManager::PkgManagerPtr manager, std::s
 int GetTmpProgressValue();
 void SetTmpProgressValue(int value);
 
-void ProgressSmoothHandler(int beginProgress, int endProgress);
+void ProgressSmoothHandler(int beginProgress, int endProgress,
+    [[maybe_unused]] UpdaterParams upParams = {}, [[maybe_unused]] bool isFinish = false);
 
 UpdaterStatus SetUpdateSlotParam(UpdaterParams &upParams, bool isUpdateCurrSlot);
 

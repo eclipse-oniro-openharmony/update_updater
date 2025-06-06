@@ -254,7 +254,8 @@ void SetTmpProgressValue(int value)
     g_tmpProgressValue = value;
 }
 
-void ProgressSmoothHandler(int beginProgress, int endProgress)
+void ProgressSmoothHandler(int beginProgress, int endProgress,
+    [[maybe_unused]] UpdaterParams upParams, [[maybe_unused]] bool isFinish)
 {
     if (endProgress < 0 || endProgress > FULL_PERCENT_PROGRESS || beginProgress < 0) {
         return;
@@ -275,6 +276,18 @@ __attribute__((weak)) bool PreStartBinaryEntry([[maybe_unused]] const std::strin
 {
     LOG(INFO) << "pre binary process";
     return true;
+}
+
+float g_progressRatio = 1.0;
+
+void SetTotalProgressRatio(float ratio)
+{
+    g_progressRatio = ratio;
+}
+
+float GetTotalProgressRatio()
+{
+    return g_progressRatio;
 }
 
 bool IsUpdateBasePkg(UpdaterParams &upParams)
@@ -334,7 +347,7 @@ UpdaterStatus DoInstallUpdaterBinfile(PkgManager::PkgManagerPtr pkgManager, Upda
         UPDATER_LAST_WORD(UPDATE_CORRUPT, "CallbackProgress is nullptr");
         return UPDATE_CORRUPT;
     }
-    upParams.callbackProgress(upParams.initialProgress * FULL_PERCENT_PROGRESS);
+    upParams.callbackProgress(GetTotalProgressRatio() * (upParams.initialProgress * FULL_PERCENT_PROGRESS));
     if (pkgManager == nullptr) {
         LOG(ERROR) << "pkgManager is nullptr";
         UPDATER_LAST_WORD(UPDATE_CORRUPT, "pkgManager is nullptr");
@@ -463,16 +476,16 @@ void SetProgress(const std::vector<std::string> &output, UpdaterParams &upParams
     if (frac >= FULL_EPSINON && g_tmpValue + g_percentage < FULL_PERCENT_PROGRESS) {
         g_tmpValue += g_percentage;
         g_tmpProgressValue = g_tmpValue;
-        upParams.callbackProgress(g_tmpProgressValue *
-            upParams.currentPercentage + upParams.initialProgress * FULL_PERCENT_PROGRESS);
+        upParams.callbackProgress(GetTotalProgressRatio() * (g_tmpProgressValue *
+            upParams.currentPercentage + upParams.initialProgress * FULL_PERCENT_PROGRESS));
         return;
     }
     g_tmpProgressValue = tmpProgressValue + g_tmpValue;
     if (g_tmpProgressValue == 0) {
         return;
     }
-    upParams.callbackProgress(g_tmpProgressValue *
-        upParams.currentPercentage + upParams.initialProgress * FULL_PERCENT_PROGRESS);
+    upParams.callbackProgress(GetTotalProgressRatio() * (g_tmpProgressValue *
+        upParams.currentPercentage + upParams.initialProgress * FULL_PERCENT_PROGRESS));
 }
 }
 

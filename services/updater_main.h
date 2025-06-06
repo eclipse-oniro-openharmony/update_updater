@@ -63,6 +63,14 @@ UpdaterStatus InstallUpdaterPackages(UpdaterParams &upParams);
 
 int OtaUpdatePreCheck(Hpackage::PkgManager::PkgManagerPtr pkgManager, const std::string &packagePath);
 
+void SetPrgrsSmoothHandlerFunc(std::function<void(float, float, UpdaterParams, bool)> func);
+
+void SetTotalProgressRatio(float ratio);
+
+float GetTotalProgressRatio();
+
+void ProcessPrgrsSmooth(float beginProgress, float endProgress, UpdaterParams upParams, bool isFinish);
+
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
