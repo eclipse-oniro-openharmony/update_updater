@@ -99,6 +99,7 @@ ohos_static_library("libupdater_static") {
     "openssl:libcrypto_shared",
     "openssl:libssl_shared",
     "zlib:libz",
+    "drivers_peripheral_partitionslot:libpartition_slot_manager",
   ]
   if (updater_ui_support) {
     external_deps += [ "drivers_interface_input:libinput_proxy_1.0" ]
@@ -177,6 +178,7 @@ ohos_static_library("libupdater") {
     "openssl:libcrypto_shared",
     "openssl:libssl_shared",
     "zlib:libz",
+    "drivers_peripheral_partitionslot:libpartition_slot_manager",
   ]
 
   # add updater custom library

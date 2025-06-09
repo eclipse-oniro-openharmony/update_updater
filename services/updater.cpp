@@ -52,6 +52,7 @@
 #include "updater_ui_stub.h"
 #include "utils.h"
 #include "write_state/write_state.h"
+#include "slot_info/slot_info.h"
 
 namespace Updater {
 using Updater::Utils::SplitString;
@@ -323,7 +324,18 @@ UpdaterStatus SetUpdateSlotParam(UpdaterParams &upParams, bool isUpdateCurrSlot)
     }
     return UPDATE_SUCCESS;
 }
- 
+
+UpdaterStatus SetUpdateSuffixParam()
+{
+    std::string updateSuffix = "";
+    GetPartitionSuffix(updateSuffix);
+    if (!Utils::SetUpdateSuffix(updateSuffix)) {
+        LOG(ERROR) << "set update.part.suffix fail";
+        return UPDATE_ERROR;
+    }
+    return UPDATE_SUCCESS;
+}
+
 UpdaterStatus ClearUpdateSlotParam()
 {
     if (!Utils::IsVabDevice()) {
@@ -332,6 +344,16 @@ UpdaterStatus ClearUpdateSlotParam()
     int updateSlot = -10; // -10 : default value
     if (!Utils::SetUpdateSlot(updateSlot)) {
         LOG(ERROR) << "clear update.part.slot fail";
+        return UPDATE_ERROR;
+    }
+    return UPDATE_SUCCESS;
+}
+
+UpdaterStatus ClearUpdateSuffixParam()
+{
+    std::string updateSuffix = "";
+    if (!Utils::SetUpdateSuffix(updateSuffix)) {
+        LOG(ERROR) << "clear update.part.suffix fail";
         return UPDATE_ERROR;
     }
     return UPDATE_SUCCESS;

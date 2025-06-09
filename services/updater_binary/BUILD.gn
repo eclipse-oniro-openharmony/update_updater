@@ -58,7 +58,6 @@ ohos_static_library("libupdater_binary") {
 
   deps = [
     "${updater_path}/interfaces/kits/misc_info:libmiscinfo",
-    "${updater_path}/interfaces/kits/slot_info:libslotinfo",
     "${updater_path}/services/applypatch:libapplypatch",
     "${updater_path}/services/diffpatch/patch:libpatch",
     "${updater_path}/services/flow_update/update_bin:libBinFlowUpdate",

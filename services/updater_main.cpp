@@ -689,6 +689,11 @@ static UpdaterStatus PreUpdatePackages(UpdaterParams &upParams)
         LOG(ERROR) << "SetUpdateSlotParam failed";
         return UPDATE_ERROR;
     }
+    // set update slot suffix
+    if(SetUpdateSuffixParam() != UPDATE_SUCCESS) {
+        LOG(ERROR) << "SetUpdateSuffixParam failed";
+        return UPDATE_ERROR;
+    }
     // verify package first
     if (VerifyCommonFiles(upParams) != UPDATE_SUCCESS) {
         return UPDATE_CORRUPT; // verify package failed must return UPDATE_CORRUPT, ux need it !!!
@@ -918,6 +923,7 @@ static void PostUpdate(UpdaterParams &upParams, UpdaterStatus &status,
         status = CheckAndSetSlot(upParams);
     }
     ClearUpdateSlotParam();
+    ClearUpdateSuffixParam();
     ShowSuccessUi(upParams, status);
     bool updateResult = (status == UPDATE_SUCCESS);
 
@@ -980,6 +986,11 @@ static UpdaterStatus PreSdcardUpdatePackages(UpdaterParams &upParams)
         LOG(ERROR) << "SetUpdateSlotParam failed";
         return UPDATE_ERROR;
     }
+    // set update slot suffix
+    if (SetUpdateSuffixParam() != UPDATE_SUCCESS) {
+        LOG(ERROR) << "SetUpdateSuffixParam failed";
+        return UPDATE_ERROR;
+    }
     UpdaterStatus status = VerifyPackages(upParams);
     if (status != UPDATE_SUCCESS) {
         return UPDATE_CORRUPT; // verify package failed must return UPDATE_CORRUPT, ux need it !!!
@@ -996,6 +1007,7 @@ static UpdaterStatus PreSdcardUpdatePackages(UpdaterParams &upParams)
 static void PostSdcardUpdatePackages(UpdaterParams &upParams, UpdaterStatus &status)
 {
     ClearUpdateSlotParam();
+    ClearUpdateSuffixParam();
     if (Utils::CheckUpdateMode(Updater::SDCARD_INTRAL_MODE)) {
         PostUpdatePackages(upParams, status);
     } else if (status == UPDATE_SUCCESS) {

@@ -460,8 +460,7 @@ int UScriptInstructionRawImageWrite::GetWritePathAndOffset(const std::string &pa
 
 #ifndef UPDATER_UT
     if (partitionName != "/userdata") {
-        std::string suffix = "";
-        GetPartitionSuffix(suffix);
+        std::string suffix = Utils::GetUpdateSuffix();
         writePath += suffix;
     }
     LOG(INFO) << "write partition path: " << writePath;

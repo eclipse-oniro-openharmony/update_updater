@@ -73,8 +73,7 @@ int32_t USInstrImagePatch::GetParam(Uscript::UScriptContext &context, ImagePatch
     para.devPath = GetBlockDeviceByMountPoint(para.partName);
 #ifndef UPDATER_UT
     if (para.partName != "/userdata") {
-        std::string suffix = "";
-        GetPartitionSuffix(suffix);
+        std::string suffix = Utils::GetUpdateSuffix();
         para.devPath += suffix;
     }
 #else
@@ -264,8 +263,7 @@ int32_t USInstrImageShaCheck::GetParam(Uscript::UScriptContext &context, CheckPa
     para.devPath = GetBlockDeviceByMountPoint(para.partName);
 #ifndef UPDATER_UT
     if (para.partName != "/userdata") {
-        std::string suffix = "";
-        GetPartitionSuffix(suffix);
+        std::string suffix = Utils::GetUpdateSuffix();
         para.devPath += suffix;
     }
 #else
