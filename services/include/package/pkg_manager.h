@@ -231,6 +231,13 @@ public:
     using PkgFileConstructor = std::function<PkgFilePtr(
         PkgManagerPtr manager, PkgStreamPtr stream, PkgManager::PkgInfoPtr header)>;
 
+    class PkgManagerFactory {
+    public:
+        virtual ~PkgManagerFactory() = default;
+        virtual PkgManagerPtr CreatePackageManager(void) const;
+        virtual void ReleasePkgManager(PkgManagerPtr pkgManger) const;
+    };
+
     virtual ~PkgManager() = default;
 
     virtual void RegisterPkgFileCreator(const std::string &fileType, PkgFileConstructor constructor) = 0;

@@ -47,6 +47,14 @@ public:
     {
         pPtable_ = std::move(ptable);
     }
+    std::unique_ptr<Ptable> GetPtable(void)
+    {
+        return std::move(pPtable_);
+    }
+    void SetDeviceStorageType(StorageType storageType)
+    {
+        storage_ = storageType;
+    }
 #endif
 
     std::unique_ptr<Ptable> pPtable_;
