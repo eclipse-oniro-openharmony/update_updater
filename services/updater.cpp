@@ -351,7 +351,7 @@ UpdaterStatus ClearUpdateSlotParam()
 
 UpdaterStatus ClearUpdateSuffixParam()
 {
-    std::string updateSuffix = "";
+    std::string updateSuffix = " ";
     if (!Utils::SetUpdateSuffix(updateSuffix)) {
         LOG(ERROR) << "clear update.part.suffix fail";
         return UPDATE_ERROR;
