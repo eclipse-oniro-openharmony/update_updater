@@ -53,6 +53,7 @@ ohos_unittest("updater_service_unittest") {
 
   deps = [
     "${updater_path}/interfaces/kits/misc_info:libmiscinfo",
+    "${updater_path}/interfaces/kits/slot_info:libslotinfo",
     "${updater_path}/interfaces/kits/packages:libpackageExt",
     "${updater_path}/services/applypatch:libapplypatch",
     "${updater_path}/services/diffpatch/patch:libpatch",
