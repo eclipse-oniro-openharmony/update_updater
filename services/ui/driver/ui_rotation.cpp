@@ -105,7 +105,8 @@ void UiRotation::RotateBuffer(const uint8_t *origBuf, uint8_t *dstBuf, uint32_t 
         return;
     }
 
-    int x {}, y {};
+    int x {};
+    int y {};
     const uint8_t *srcP = nullptr;
     uint8_t *dstP = nullptr;
     int top = rect_.GetTop();
