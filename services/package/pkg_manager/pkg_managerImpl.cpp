@@ -51,6 +51,16 @@ constexpr int32_t DIGEST_FLAGS_HAS_SIGN = 2;
 constexpr int32_t DIGEST_FLAGS_SIGNATURE = 4;
 constexpr uint32_t VERIFY_FINSH_PERCENT = 100;
 
+PkgManager::PkgManagerPtr PkgManager::PkgManagerFactory::CreatePackageManager(void) const
+{
+    return PkgManager::CreatePackageInstance();
+}
+
+void PkgManager::PkgManagerFactory::ReleasePkgManager(PkgManagerPtr pkgManger) const
+{
+    PkgManager::ReleasePackageInstance(pkgManger);
+}
+
 PkgManager::PkgManagerPtr PkgManager::CreatePackageInstance()
 {
     return new(std::nothrow) PkgManagerImpl();
