@@ -291,7 +291,7 @@ HWTEST_F(UpdaterUtilUnitTest, InstallUpdaterPackageTest, TestSize.Level1)
 HWTEST_F(UpdaterUtilUnitTest, DoUpdatePackagesTest, TestSize.Level1)
 {
     UpdaterParams upParams;
-    EXPECT_EQ(DoUpdatePackages(upParams), UPDATE_CORRUPT);
+    EXPECT_EQ(DoUpdatePackages(upParams), UPDATE_ERROR);
     upParams.updatePackage.push_back("/data/updater/updater/updater_full.zip");
     EXPECT_EQ(DoUpdatePackages(upParams), UPDATE_CORRUPT);
     upParams.callbackProgress = [] (float value) { UPDATER_UI_INSTANCE.ShowProgress(value); };
@@ -303,7 +303,7 @@ HWTEST_F(UpdaterUtilUnitTest, StartUpdaterEntryTest, TestSize.Level1)
 {
     UpdaterParams upParams;
     upParams.factoryResetMode = "factory_wipe_data";
-    EXPECT_EQ(DoUpdatePackages(upParams), UPDATE_CORRUPT);
+    EXPECT_EQ(DoUpdatePackages(upParams), UPDATE_ERROR);
     upParams.factoryResetMode = "user_wipe_data";
     EXPECT_EQ(DoUpdatePackages(upParams), UPDATE_CORRUPT);
     upParams.factoryResetMode = "menu_wipe_data";
