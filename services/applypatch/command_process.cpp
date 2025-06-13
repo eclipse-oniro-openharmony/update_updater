@@ -229,10 +229,7 @@ CommandResult DiffAndMoveCommandFn::Execute(const Command &params)
     BlockSet targetBlock;
     std::vector<uint8_t> buffer;
     CommandResult result = FAILED;
-    if (!LoadTarget(params, pos, buffer, targetBlock, result)) {
-        return result;
-    }
-    if (!params.GetTransferParams()->canWrite) {
+    if (!LoadTarget(params, pos, buffer, targetBlock, result) || !params.GetTransferParams()->canWrite) {
         return result;
     }
 
