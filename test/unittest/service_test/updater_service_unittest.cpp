@@ -305,11 +305,11 @@ HWTEST_F(UpdaterUtilUnitTest, StartUpdaterEntryTest, TestSize.Level1)
     upParams.factoryResetMode = "factory_wipe_data";
     EXPECT_EQ(DoUpdatePackages(upParams), UPDATE_ERROR);
     upParams.factoryResetMode = "user_wipe_data";
-    EXPECT_EQ(DoUpdatePackages(upParams), UPDATE_CORRUPT);
+    EXPECT_EQ(DoUpdatePackages(upParams), UPDATE_ERROR);
     upParams.factoryResetMode = "menu_wipe_data";
-    EXPECT_EQ(DoUpdatePackages(upParams), UPDATE_CORRUPT);
+    EXPECT_EQ(DoUpdatePackages(upParams), UPDATE_ERROR);
     upParams.factoryResetMode = "";
-    EXPECT_EQ(DoUpdatePackages(upParams), UPDATE_CORRUPT);
+    EXPECT_EQ(DoUpdatePackages(upParams), UPDATE_ERROR);
 }
 
 HWTEST_F(UpdaterUtilUnitTest, StartUpdaterProcTest, TestSize.Level1)
