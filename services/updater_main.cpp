@@ -906,7 +906,7 @@ __attribute__((weak)) UpdaterStatus CheckAndSetSlot([[maybe_unused]]UpdaterParam
 {
     LOG(INFO) << "not need check and set slot";
 #ifndef UPDATER_UT
-    SetActiveSlot(); // UPDATER_AB_SUPPORT 
+    SetActiveSlot(); // UPDATER_AB_SUPPORT
 #endif
     return UPDATE_SUCCESS;
 }
