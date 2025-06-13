@@ -73,7 +73,6 @@ ohos_unittest("updater_service_unittest") {
     "libdrm:libdrm",
     "openssl:libcrypto_shared",
     "openssl:libssl_shared",
-    "ui_lite:libupdater_layout",
     "zlib:libz",
   ]
   configs = [ "${updater_path}/test/unittest:utest_config" ]
