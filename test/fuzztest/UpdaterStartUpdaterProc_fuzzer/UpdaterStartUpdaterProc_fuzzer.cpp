@@ -25,7 +25,6 @@
 #include "pkg_algo_digest.h"
 #include "pkg_utils.h"
 #include "updater.h"
-#include "updater_ui.h"
 
 using namespace Updater;
 using namespace Hpackage;
