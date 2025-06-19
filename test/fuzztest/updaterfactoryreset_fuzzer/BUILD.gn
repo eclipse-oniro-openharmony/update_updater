@@ -73,9 +73,6 @@ ohos_fuzztest("UpdaterFactoryResetFuzzTest") {
   ]
   if (ohos_indep_compiler_enable) {
     deps += [ "${updater_path}/interfaces/kits/slot_info:libslotinfo", ]
-    external_deps += [
-      "pcre2:libpcre2",
-    ]
   }
   cflags = [
     "-g",

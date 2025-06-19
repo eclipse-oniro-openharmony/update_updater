@@ -57,11 +57,6 @@ ohos_fuzztest("DoPartitionsFuzzTest") {
     "openssl:libssl_shared",
     "zlib:libz",
   ]
-  if (ohos_indep_compiler_enable) {
-    external_deps += [
-      "pcre2:libpcre2",
-    ]
-  }
   cflags = [
     "-g",
     "-O0",

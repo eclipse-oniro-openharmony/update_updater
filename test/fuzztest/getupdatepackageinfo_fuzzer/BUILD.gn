@@ -54,9 +54,6 @@ ohos_fuzztest("GetUpdatePackageInfoFuzzTest") {
   ]
   if (ohos_indep_compiler_enable) {
     deps += [ "${updater_path}/interfaces/kits/misc_info:libmiscinfo", ]
-    external_deps += [
-      "pcre2:libpcre2",
-    ]
   }
   cflags = [
     "-g",

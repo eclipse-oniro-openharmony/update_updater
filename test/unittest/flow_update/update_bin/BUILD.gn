@@ -76,11 +76,6 @@ ohos_unittest("bin_flow_update_test") {
     "init:libfsmanager_static_real",
     "openssl:libcrypto_shared",
   ]
-  if (ohos_indep_compiler_enable) {
-    external_deps += [
-      "pcre2:libpcre2",
-    ]
-  }
   defines = [ "UPDATER_UT" ]
   configs = [ "${updater_path}/test/unittest:utest_config" ]
   install_enable = true

@@ -106,11 +106,6 @@ ohos_unittest("ui_unittest") {
     "libpng:libpng",
     "ui_lite:libupdater_layout",
   ]
-  if (ohos_indep_compiler_enable) {
-    external_deps += [
-      "pcre2:libpcre2",
-    ]
-  }
   install_enable = true
   part_name = "updater"
 }

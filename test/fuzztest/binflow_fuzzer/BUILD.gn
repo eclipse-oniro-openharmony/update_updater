@@ -77,11 +77,6 @@ ohos_fuzztest("BinFlowFuzzTest") {
     "init:libbegetutil_static",
     "openssl:libcrypto_shared",
   ]
-  if (ohos_indep_compiler_enable) {
-    external_deps += [
-      "pcre2:libpcre2",
-    ]
-  }
   cflags = [
     "-g",
     "-O0",
