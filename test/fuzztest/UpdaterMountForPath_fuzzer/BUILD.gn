@@ -45,6 +45,7 @@ ohos_fuzztest("UpdaterMountForPathFuzzTest") {
   ]
 
   external_deps = [ "init:libbegetutil_static" ]
+
   cflags = [
     "-g",
     "-O0",

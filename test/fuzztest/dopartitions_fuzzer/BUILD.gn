@@ -57,6 +57,7 @@ ohos_fuzztest("DoPartitionsFuzzTest") {
     "openssl:libssl_shared",
     "zlib:libz",
   ]
+
   cflags = [
     "-g",
     "-O0",

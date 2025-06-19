@@ -66,6 +66,7 @@ ohos_fuzztest("ExtractAndExecuteScriptFuzzTest") {
     "openssl:libssl_shared",
     "zlib:libz",
   ]
+
   cflags = [
     "-g",
     "-O0",

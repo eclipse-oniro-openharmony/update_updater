@@ -63,6 +63,7 @@ ohos_fuzztest("UpdaterMainFuzzTest") {
     "openssl:libssl_shared",
     "zlib:libz",
   ]
+
   cflags = [
     "-g",
     "-O0",

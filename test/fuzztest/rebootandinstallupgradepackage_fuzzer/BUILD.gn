@@ -52,6 +52,7 @@ ohos_fuzztest("RebootAndInstallUpgradePackageFuzzTest") {
     "c_utils:utils",
     "init:libbegetutil_static",
   ]
+
   cflags = [
     "-g",
     "-O0",
