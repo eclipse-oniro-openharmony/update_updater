@@ -55,6 +55,7 @@
                 "hilog",
                 "selinux_adapter",
                 "ui_lite",
+                "graphic_utils_lite",
                 "bounds_checking_function",
                 "bzip2",
                 "cJSON",
