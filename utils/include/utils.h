@@ -117,7 +117,10 @@ bool ConvertToDouble(const std::string &str, double &value);
 bool ConvertToFloat(const std::string &str, float &value);
 bool IsVabDevice();
 bool SetUpdateSlot(int updateSlot);
+bool SetUpdateSuffix(std::string stringsuffix);
 int GetUpdateSlot();
+std::string GetUpdateSuffix();
+std::string GetUpdateActiveSuffix();
 #ifndef __WIN32
 void SetFileAttributes(const std::string& file, uid_t owner, gid_t group, mode_t mode);
 #endif

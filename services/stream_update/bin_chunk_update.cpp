@@ -214,15 +214,11 @@ UpdateResultCode BinChunkUpdate::UpdateBinHash(uint8_t *data, uint32_t &len)
         return STREAM_UPDATE_FAILURE;
     }
 
-    //切换ab分区
-    #ifndef UPDATER_UT
-    SetActiveSlot();
-    #else
     int result = remove("/data/updater/test.txt");
     if (result != 0) {
         LOG(ERROR) << "Failed to remove /data/updater/test.txt, error: " << strerror(errno);
     }
-    #endif
+
     LOG(DEBUG) << "BinChunkUpdate::UpdateBinHash exit";
     return STREAM_UPDATE_COMPLETE;
 }
@@ -518,10 +514,9 @@ bool BinChunkUpdate::OpenDevPath()
     targetPath = devPath;
 
     if (updateInfo_.curPartition != "/userdata") {
-        std::string suffix = "";
-        GetPartitionSuffix(suffix);
+        std::string suffix = Utils::GetUpdateSuffix();
         targetPath += suffix;
-        GetActivePartitionSuffix(suffix);
+        suffix = Utils::GetUpdateActiveSuffix();
         srcPath += suffix;
     }
 
@@ -761,8 +756,7 @@ std::string BinChunkUpdate::ComputeFileHash(const std::string &partitionName,
     #ifndef UPDATER_UT
     std::string devPath = GetBlockDeviceByMountPoint(partitionName);
     if (partitionName != "/userdata") {
-        std::string suffix = "";
-        GetPartitionSuffix(suffix);
+        std::string suffix = Utils::GetUpdateSuffix();
         devPath += suffix;
     }
     #else

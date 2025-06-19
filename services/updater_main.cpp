@@ -662,6 +662,21 @@ static UpdaterStatus VerifyCommonFiles(UpdaterParams &upParams)
     return UPDATE_SUCCESS;
 }
 
+static UpdaterStatus SetUpdateParam(UpdaterParams &upParams, bool isUpdateCurrSlot)
+{
+    // set update slot
+    if (SetUpdateSlotParam(upParams, false) != UPDATE_SUCCESS) {
+        LOG(ERROR) << "SetUpdateSlotParam failed";
+        return UPDATE_ERROR;
+    }
+    // set update suffix
+    if (SetUpdateSuffixParam() != UPDATE_SUCCESS) {
+        LOG(ERROR) << "SetUpdateSuffixParam failed";
+        return UPDATE_ERROR;
+    }
+    return UPDATE_SUCCESS;
+}
+
 static UpdaterStatus PreUpdatePackages(UpdaterParams &upParams)
 {
     UPDATER_INIT_RECORD;
@@ -685,8 +700,8 @@ static UpdaterStatus PreUpdatePackages(UpdaterParams &upParams)
         (void)DeleteFile(resultPath);
         LOG(INFO) << "delete last upgrade file";
     }
-    if (SetUpdateSlotParam(upParams, false) != UPDATE_SUCCESS) {
-        LOG(ERROR) << "SetUpdateSlotParam failed";
+    if (SetUpdateParam(upParams, false) != UPDATE_SUCCESS) {
+        LOG(ERROR) << "SetUpdateParam failed";
         return UPDATE_ERROR;
     }
     // verify package first
@@ -918,6 +933,7 @@ static void PostUpdate(UpdaterParams &upParams, UpdaterStatus &status,
         status = CheckAndSetSlot(upParams);
     }
     ClearUpdateSlotParam();
+    ClearUpdateSuffixParam();
     ShowSuccessUi(upParams, status);
     bool updateResult = (status == UPDATE_SUCCESS);
 
@@ -976,8 +992,8 @@ static UpdaterStatus PreSdcardUpdatePackages(UpdaterParams &upParams)
         LOG(ERROR) << "Battery is not sufficient for install package.";
         return UPDATE_SKIP;
     }
-    if (SetUpdateSlotParam(upParams, true) != UPDATE_SUCCESS) {
-        LOG(ERROR) << "SetUpdateSlotParam failed";
+    if (SetUpdateParam(upParams, true) != UPDATE_SUCCESS) {
+        LOG(ERROR) << "SetUpdateParam failed";
         return UPDATE_ERROR;
     }
     UpdaterStatus status = VerifyPackages(upParams);
@@ -996,6 +1012,7 @@ static UpdaterStatus PreSdcardUpdatePackages(UpdaterParams &upParams)
 static void PostSdcardUpdatePackages(UpdaterParams &upParams, UpdaterStatus &status)
 {
     ClearUpdateSlotParam();
+    ClearUpdateSuffixParam();
     if (Utils::CheckUpdateMode(Updater::SDCARD_INTRAL_MODE)) {
         PostUpdatePackages(upParams, status);
     } else if (status == UPDATE_SUCCESS) {

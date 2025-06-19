@@ -1111,7 +1111,30 @@ bool SetUpdateSlot(int setSlot)
     }
     return false;
 }
- 
+
+bool SetUpdateSuffix(std::string stringsuffix)
+{
+    if (stringsuffix.empty()) {
+        LOG(ERROR) << "suffix is empty";
+        return false;
+    }
+    int tryNum = 3;
+    while (tryNum-- > 0) {
+        if (SetParameter("update.part.suffix", stringsuffix.c_str()) != 0) {
+            LOG(ERROR) << "set update.part.suffix fail";
+            continue;
+        }
+        if (strcmp(GetUpdateSuffix().c_str(), stringsuffix.c_str()) == 0) {
+            LOG(INFO) << "set update.part.suffix is " << stringsuffix;
+            return true;
+        }
+        if (tryNum != 0) {
+            sleep(1);
+        }
+    }
+    return false;
+}
+
 int GetUpdateSlot()
 {
     if (!IsVabDevice()) {
@@ -1128,6 +1151,36 @@ int GetUpdateSlot()
         return -1;
     }
     return updateSlot;
+}
+
+std::string GetUpdateSuffix()
+{
+    char paramValue[PARAM_SIZE + 1] = {0};
+    if (GetParameter("update.part.suffix", "", paramValue, sizeof(paramValue) - 1) <= 0) {
+        LOG(ERROR) << "get update.part.suffix failed";
+        return std::string(paramValue);
+    }
+    LOG(INFO) << "GetUpdateSuffix = " << paramValue;
+    return std::string(paramValue);
+}
+
+std::string GetUpdateActiveSuffix()
+{
+    char paramValue[PARAM_SIZE + 1] = {0};
+    if (GetParameter("update.part.suffix", "", paramValue, sizeof(paramValue) - 1) <= 0) {
+        LOG(ERROR) << "get update.part.suffix failed";
+        return std::string(paramValue);
+    }
+    if (strcmp(paramValue, "_a") == 0) {
+        strncpy_s(paramValue, sizeof(paramValue), "_b", sizeof("_b"));
+    } else if (strcmp(paramValue, "_b") == 0) {
+        strncpy_s(paramValue, sizeof(paramValue), "_a", sizeof("_a"));
+    } else {
+        LOG(ERROR) << "Unexpected suffix value: " << paramValue;
+        return std::string(paramValue);
+    }
+    LOG(INFO) << "GetUpdateActiveSuffix = " << paramValue;
+    return std::string(paramValue);
 }
 
 #ifndef __WIN32

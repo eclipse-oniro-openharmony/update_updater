@@ -181,8 +181,7 @@ static int32_t GetUpdateBlockInfo(struct UpdateBlockInfo &infos, Uscript::UScrip
     infos.devPath = GetBlockDeviceByMountPoint(infos.partitionName);
 #ifndef UPDATER_UT
     if (infos.partitionName != "/userdata") {
-        std::string suffix = "";
-        GetPartitionSuffix(suffix);
+        std::string suffix = Utils::GetUpdateSuffix();
         infos.devPath += suffix;
     }
 #else
@@ -498,8 +497,7 @@ int32_t UScriptInstructionBlockCheck::Execute(Uscript::UScriptEnv &env, Uscript:
     auto devPath = GetBlockDeviceByMountPoint(partitionName);
 #ifndef UPDATER_UT
     if (partitionName != "/userdata") {
-        std::string suffix = "";
-        GetPartitionSuffix(suffix);
+        std::string suffix = Utils::GetUpdateSuffix();
         devPath += suffix;
     }
 #else
@@ -767,8 +765,7 @@ int32_t UScriptInstructionShaCheck::Execute(Uscript::UScriptEnv &env, Uscript::U
     }
 #ifndef UPDATER_UT
     if (partitionName != "/userdata") {
-        std::string suffix = "";
-        GetPartitionSuffix(suffix);
+        std::string suffix = Utils::GetUpdateSuffix();
         devPath += suffix;
     }
     LOG(INFO) << "write partition path: " << devPath;
