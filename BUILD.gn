@@ -44,8 +44,6 @@ group("unittest") {
       "test/unittest/applypatch_test:applypatch_unittest",
       "test/unittest/common/ring_buffer:ring_buffer_test",
       "test/unittest/factory_reset_test:factory_reset_unittest",
-      "test/unittest/flashd_test:flashd_unittest",
-      "test/unittest/flashd_test:flashd_utils_unittest",
       "test/unittest/flow_update/update_bin:bin_flow_update_test",
       "test/unittest/package:package_unittest",
       "test/unittest/script:script_unittest",
@@ -53,6 +51,12 @@ group("unittest") {
       "test/unittest/updater_binary:binary_unittest",
       "test/unittest/utils:utils_test",
     ]
+    if (!ohos_indep_compiler_enable) {
+      deps += [
+        "test/unittest/flashd_test:flashd_unittest",
+        "test/unittest/flashd_test:flashd_utils_unittest",
+      ]
+    }
     if (updater_cfg_file == "") {
       deps += [
         "test/unittest/script:user_instruction",

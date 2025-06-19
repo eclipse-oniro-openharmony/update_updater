@@ -36,7 +36,6 @@ updater_common_deps = [
   "${updater_path}/interfaces/kits/packages:libpackageExt",
   "${updater_path}/services/applypatch:libapplypatch",
   "${updater_path}/services/diffpatch/patch:libpatch",
-  "${updater_path}/services/flashd:libflashd",
   "${updater_path}/services/fs_manager:libfsmanager",
   "${updater_path}/services/log:libupdaterlog",
   "${updater_path}/services/package:libupdaterpackage",
@@ -50,9 +49,12 @@ updater_gen("updater") {
   # force link flashd library
   ldflags = [
     "-Wl,--whole-archive",
-    rebase_path("${target_out_dir}/flashd/libflashd.a"),
     "-Wl,--no-whole-archive",
   ]
+
+  if (!ohos_indep_compiler_enable) {
+    ldflags += [ rebase_path("${target_out_dir}/flashd/libflashd.a"), ]
+  }
 
   part_name = "updater"
   subsystem_name = "updater"
@@ -82,6 +84,10 @@ ohos_static_library("libupdater_static") {
     "${updater_path}/services/sdcard_update:libsdupdate",
     "${updater_path}/interfaces/kits/slot_info:libslotinfo",
   ]
+
+  if (!ohos_indep_compiler_enable) {
+    deps += [ "${updater_path}/services/flashd:libflashd", ]
+  }
 
   if (defined(use_ptable)) {
     include_dirs += [ "${updater_path}/services/ptable_parse" ]
@@ -148,6 +154,10 @@ ohos_static_library("libupdater") {
   include_dirs = updater_common_include
 
   deps = updater_common_deps
+
+  if (!ohos_indep_compiler_enable) {
+    deps += [ "${updater_path}/services/flashd:libflashd", ]
+  }
 
   public_configs = [ ":libupdater_exported_headers" ]
 

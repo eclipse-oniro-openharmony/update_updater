@@ -74,6 +74,11 @@ ohos_unittest("applypatch_unittest") {
     "openssl:libcrypto_shared",
     "openssl:libssl_shared",
   ]
+  if (ohos_indep_compiler_enable) {
+    external_deps += [
+      "pcre2:libpcre2",
+    ]
+  }
   configs = [ "${updater_path}/test/unittest:utest_config" ]
   install_enable = true
   part_name = "updater"

@@ -41,7 +41,11 @@ ohos_fuzztest("WriteUpdaterMsgFuzzTest") {
     "bounds_checking_function:libsec_static",
     "init:libbegetutil_static",
   ]
-
+  if (ohos_indep_compiler_enable) {
+    external_deps += [
+      "pcre2:libpcre2",
+    ]
+  }
   cflags = [
     "-g",
     "-O0",

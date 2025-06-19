@@ -64,7 +64,8 @@
                 "lz4",
                 "openssl",
                 "selinux",
-                "zlib"
+                "zlib",
+                "pcre2"
             ],
             "third_party": []
         },

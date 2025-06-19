@@ -71,7 +71,12 @@ ohos_fuzztest("UpdaterFactoryResetFuzzTest") {
     "openssl:libssl_shared",
     "zlib:libz",
   ]
-
+  if (ohos_indep_compiler_enable) {
+    deps += [ "${updater_path}/interfaces/kits/slot_info:libslotinfo", ]
+    external_deps += [
+      "pcre2:libpcre2",
+    ]
+  }
   cflags = [
     "-g",
     "-O0",

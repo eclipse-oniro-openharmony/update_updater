@@ -97,6 +97,11 @@ ohos_unittest("script_unittest") {
     "openssl:libssl_shared",
     "zlib:libz",
   ]
+  if (ohos_indep_compiler_enable) {
+    external_deps += [
+      "pcre2:libpcre2",
+    ]
+  }
   install_enable = true
   part_name = "updater"
 }
