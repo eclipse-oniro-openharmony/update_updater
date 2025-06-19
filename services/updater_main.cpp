@@ -723,14 +723,6 @@ static UpdaterStatus PreUpdatePackages(UpdaterParams &upParams)
         LOG(ERROR) << "Battery is not sufficient for install package.";
         return UPDATE_SKIP;
     }
-
-#ifdef UPDATER_USE_PTABLE
-    if (!PtablePreProcess::GetInstance().DoPtableProcess(upParams)) {
-        LOG(ERROR) << "DoPtableProcess failed";
-        UPDATER_LAST_WORD(UPDATE_ERROR, "DoPtableProcess failed");
-        return UPDATE_ERROR;
-    }
-#endif
     return UPDATE_SUCCESS;
 }
 
@@ -872,6 +864,12 @@ UpdaterStatus DoUpdatePackages(UpdaterParams &upParams)
     UpdaterStatus status = UPDATE_UNKNOWN;
     std::vector<double> pkgStartPosition {};
     double updateStartPosition = 0.0;
+#ifdef UPDATER_USE_PTABLE
+    if (!PtablePreProcess::GetInstance().DoPtableProcess(upParams)) {
+        LOG(ERROR) << "DoPtableProcess failed";
+        return UPDATE_ERROR;
+    }
+#endif
     status = CalcProgress(upParams, pkgStartPosition, updateStartPosition);
     if (status != UPDATE_SUCCESS) {
         UPDATER_LAST_WORD(status, "CalcProgress failed");
@@ -1000,12 +998,6 @@ static UpdaterStatus PreSdcardUpdatePackages(UpdaterParams &upParams)
     if (status != UPDATE_SUCCESS) {
         return UPDATE_CORRUPT; // verify package failed must return UPDATE_CORRUPT, ux need it !!!
     }
-#ifdef UPDATER_USE_PTABLE
-    if (!PtablePreProcess::GetInstance().DoPtableProcess(upParams)) {
-        LOG(ERROR) << "DoPtableProcess failed";
-        return UPDATE_ERROR;
-    }
-#endif
     return UPDATE_SUCCESS;
 }
 
