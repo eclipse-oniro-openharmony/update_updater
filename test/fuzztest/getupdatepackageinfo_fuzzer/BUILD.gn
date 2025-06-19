@@ -52,7 +52,9 @@ ohos_fuzztest("GetUpdatePackageInfoFuzzTest") {
     "openssl:libssl_shared",
     "zlib:libz",
   ]
-
+  if (ohos_indep_compiler_enable) {
+    deps += [ "${updater_path}/interfaces/kits/misc_info:libmiscinfo", ]
+  }
   cflags = [
     "-g",
     "-O0",

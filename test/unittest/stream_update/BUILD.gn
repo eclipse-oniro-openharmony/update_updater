@@ -64,6 +64,9 @@ ohos_unittest("bin_chunk_update_test") {
     "init:libfsmanager_static_real",
     "openssl:libcrypto_shared",
   ]
+  if (ohos_indep_compiler_enable) {
+    deps += [ "${updater_path}/interfaces/kits/misc_info:libmiscinfo", ]
+  }
   defines = [ "UPDATER_UT" ]
   configs = [ "${updater_path}/test/unittest:utest_config" ]
   install_enable = true
