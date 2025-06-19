@@ -41,6 +41,7 @@ ohos_fuzztest("WriteUpdaterMsgFuzzTest") {
     "bounds_checking_function:libsec_static",
     "init:libbegetutil_static",
   ]
+
   cflags = [
     "-g",
     "-O0",
