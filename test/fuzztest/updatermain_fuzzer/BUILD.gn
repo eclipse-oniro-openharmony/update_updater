@@ -51,6 +51,11 @@ ohos_fuzztest("UpdaterMainFuzzTest") {
     "${updater_path}/utils:libutils",
     "${updater_path}/utils:libutils_fs",
   ]
+  if (ohos_indep_compiler_enable) {
+    deps += [
+      "${updater_path}/interfaces/kits/slot_info:libslotinfo",
+    ]
+  }
 
   external_deps = [
     "bounds_checking_function:libsec_static",
