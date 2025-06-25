@@ -266,7 +266,6 @@ CommandResult DiffAndMoveCommandFn::Execute(const Command &params)
     }
 
     int32_t ret = WriteDataToBlocks(params, type, pos, targetBlock, buffer);
-
     if (ret != 0) {
         LOG(ERROR) << "fail to write block data.";
         return errno == EIO ? NEED_RETRY : FAILED;
