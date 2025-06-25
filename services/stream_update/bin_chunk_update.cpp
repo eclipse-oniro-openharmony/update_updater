@@ -133,7 +133,7 @@ UpdateResultCode BinChunkUpdate::ProcessHeader(const uint8_t *data)
     return STREAM_UPDATE_SUCCESS;
 }
 
-UpdateResultCode BinChunkUpdate::SkipTargetData(const uint8_t *data, uint32_t len, uint32_t &dealLen) 
+UpdateResultCode BinChunkUpdate::SkipTargetData(const uint8_t *data, uint32_t len, uint32_t &dealLen)
 {
     if (skipLength_ <= 0) {
         LOG(ERROR) << "no valid skipRemaining_ = ";
