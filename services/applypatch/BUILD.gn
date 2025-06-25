@@ -69,6 +69,9 @@ ohos_static_library("libapplypatch") {
     "openssl:libcrypto_static",
     "zlib:libz",
   ]
+  if (init_feature_ab_partition) {
+    defines = [ "UPDATER_AB_SUPPORT" ]
+  }
   public_configs = [ ":libapplypatch_exported_headers" ]
   subsystem_name = "updater"
   part_name = "updater"

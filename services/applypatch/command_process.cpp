@@ -244,12 +244,17 @@ CommandResult DiffAndMoveCommandFn::Execute(const Command &params)
             offset = Utils::String2Int<size_t>(params.GetArgumentByPos(pos++), Utils::N_DEC);
         }
         size_t patchLength = Utils::String2Int<size_t>(params.GetArgumentByPos(pos++), Utils::N_DEC);
+#ifndef UPDATER_AB_SUPPORT
         if (Utils::IsUpdaterMode()) {
             uint8_t *patchBuffer = params.GetTransferParams()->dataBuffer + offset;
             ret = WriteDiffToBlock(params, buffer, patchBuffer, patchLength, targetBlock);
         } else {
             ret = WriteFileToBlock(params, buffer, offset, patchLength, targetBlock);
         }
+#else
+        uint8_t *patchBuffer = params.GetTransferParams()->dataBuffer + offset;
+        ret = WriteDiffToBlock(params, buffer, patchBuffer, patchLength, targetBlock);
+#endif
     } else {
         ret = targetBlock.WriteDataToBlock(params.GetTargetFileDescriptor(), buffer) == 0 ? -1 : 0;
     }
