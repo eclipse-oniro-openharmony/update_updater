@@ -61,6 +61,8 @@ public:
     DiffAndMoveCommandFn() {}
     ~DiffAndMoveCommandFn() override {}
     CommandResult Execute(const Command &params) override;
+    virtual int32_t WriteDataToBlocks(const Command &params, CommandType type,
+                                      size_t pos, BlockSet &targetBlock, std::vector<uint8_t> &buffer);
     virtual int32_t WriteDiffToBlock(const Command &params, std::vector<uint8_t> &srcBuffer,
                                      uint8_t *patchBuffer, size_t patchLength, BlockSet &targetBlock);
     virtual int32_t WriteFileToBlock(const Command &params, std::vector<uint8_t> &srcBuffer,

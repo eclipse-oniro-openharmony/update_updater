@@ -189,6 +189,35 @@ bool LoadTarget(const Command &params, size_t &pos, std::vector<uint8_t> &buffer
     return true;
 }
 
+int32_t DiffAndMoveCommandFn::WriteDataToBlocks(const Command &params, CommandType type,
+                                                size_t pos, BlockSet &targetBlock, std::vector<uint8_t> &buffer)
+{
+    if (type != CommandType::MOVE && type != CommandType::COPY) {
+        pos = H_MOVE_CMD_ARGS_START;
+        size_t offset;
+        if (params.IsStreamCmd()) {
+            offset = 0;
+            pos++;
+        } else {
+            offset = Utils::String2Int<size_t>(params.GetArgumentByPos(pos++), Utils::N_DEC);
+        }
+        size_t patchLength = Utils::String2Int<size_t>(params.GetArgumentByPos(pos++), Utils::N_DEC);
+
+#ifndef UPDATER_AB_SUPPORT
+        if (Utils::IsUpdaterMode()) {
+            uint8_t *patchBuffer = params.GetTransferParams()->dataBuffer + offset;
+            return WriteDiffToBlock(params, buffer, patchBuffer, patchLength, targetBlock);
+        }
+        return WriteFileToBlock(params, buffer, offset, patchLength, targetBlock);
+#else
+        uint8_t *patchBuffer = params.GetTransferParams()->dataBuffer + offset;
+        return WriteDiffToBlock(params, buffer, patchBuffer, patchLength, targetBlock);
+#endif
+    } else {
+        return targetBlock.WriteDataToBlock(params.GetTargetFileDescriptor(), buffer) == 0 ? -1 : 0;
+    }
+}
+
 int32_t DiffAndMoveCommandFn::WriteDiffToBlock(const Command &params, std::vector<uint8_t> &srcBuffer,
                                                uint8_t *patchBuffer, size_t patchLength, BlockSet &targetBlock)
 {
@@ -229,39 +258,20 @@ CommandResult DiffAndMoveCommandFn::Execute(const Command &params)
     BlockSet targetBlock;
     std::vector<uint8_t> buffer;
     CommandResult result = FAILED;
-    if (!LoadTarget(params, pos, buffer, targetBlock, result) || !params.GetTransferParams()->canWrite) {
+    if (!LoadTarget(params, pos, buffer, targetBlock, result)) {
+        return result;
+    }
+    if (!params.GetTransferParams()->canWrite) {
         return result;
     }
 
-    int32_t ret = -1;
-    if (type != CommandType::MOVE && type != CommandType::COPY) {
-        pos = H_MOVE_CMD_ARGS_START;
-        size_t offset;
-        if (params.IsStreamCmd()) {
-            offset = 0;
-            pos++;
-        } else {
-            offset = Utils::String2Int<size_t>(params.GetArgumentByPos(pos++), Utils::N_DEC);
-        }
-        size_t patchLength = Utils::String2Int<size_t>(params.GetArgumentByPos(pos++), Utils::N_DEC);
-#ifndef UPDATER_AB_SUPPORT
-        if (Utils::IsUpdaterMode()) {
-            uint8_t *patchBuffer = params.GetTransferParams()->dataBuffer + offset;
-            ret = WriteDiffToBlock(params, buffer, patchBuffer, patchLength, targetBlock);
-        } else {
-            ret = WriteFileToBlock(params, buffer, offset, patchLength, targetBlock);
-        }
-#else
-        uint8_t *patchBuffer = params.GetTransferParams()->dataBuffer + offset;
-        ret = WriteDiffToBlock(params, buffer, patchBuffer, patchLength, targetBlock);
-#endif
-    } else {
-        ret = targetBlock.WriteDataToBlock(params.GetTargetFileDescriptor(), buffer) == 0 ? -1 : 0;
-    }
+    int32_t ret = WriteDataToBlocks(params, type, pos, targetBlock, buffer);
+
     if (ret != 0) {
         LOG(ERROR) << "fail to write block data.";
         return errno == EIO ? NEED_RETRY : FAILED;
     }
+
     std::string storeBase = params.GetTransferParams()->storeBase;
     std::string freeStash = params.GetTransferParams()->freeStash;
     if (!freeStash.empty()) {
