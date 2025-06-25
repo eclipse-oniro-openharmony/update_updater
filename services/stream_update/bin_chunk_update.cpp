@@ -37,6 +37,10 @@ using namespace std::placeholders;
 
 constexpr const char *UPDATE_BIN_FILE = "update.bin";
 constexpr const size_t HASH_BUFFER_SIZE = 50 * 1024;
+constexpr uint16_t HEADER_TYPE_BYTE = 2;
+constexpr uint16_t TOTAL_TL_BYTES = 6;
+constexpr uint8_t ZIP_HEADER_TLV_TYPE = 0xaa;
+
 BinChunkUpdate::BinChunkUpdate(uint32_t maxBufSize)
 {
     LOG(DEBUG) << "BinChunkUpdate::BinChunkUpdate enter";
@@ -75,6 +79,15 @@ UpdateResultCode BinChunkUpdate::StartBinChunkUpdate(const uint8_t *data, uint32
     uint32_t leftLen = curlen_;
     LOG(DEBUG) << "BinChunkUpdate::StartBinChunkUpdate leftLen:" << leftLen;
     dealLen = 0;
+
+    if (ProcessHeader(data) == STREAM_UPDATE_FAILURE) {
+        return STREAM_UPDATE_FAILURE;
+    }
+
+    if (SkipTargetData(data, len, dealLen) == STREAM_UPDATE_SUCCESS) {
+        return STREAM_UPDATE_SUCCESS;
+    }
+
     while (remainLen > 0) {
         if (!AddRemainData(data + len - remainLen, remainLen)) {
             LOG(ERROR) << "AddRemainData error";
@@ -98,6 +111,51 @@ UpdateResultCode BinChunkUpdate::StartBinChunkUpdate(const uint8_t *data, uint32
     LOG(DEBUG) << "BinChunkUpdate StartBinChunkUpdate dealLen:" << dealLen << " len:" << len << " curlen_:" << curlen_
               << " leftLen:" << leftLen;
     return ret;
+}
+
+UpdateResultCode BinChunkUpdate::ProcessHeader(const uint8_t *data)
+{
+    if (firstBuffer) {
+        int type = ReadLE16(data);
+        LOG(INFO) << "type = " << type;
+        if (type != ZIP_HEADER_TLV_TYPE) {
+            LOG(INFO) << "Not support type " << type;
+            skipLength_ = 0;
+            firstBuffer = false;
+            return STREAM_UPDATE_SUCCESS;
+        }
+        firstBuffer = false;
+        skipLength_ = ReadLE32(data + HEADER_TYPE_BYTE) + TOTAL_TL_BYTES;
+        LOG(INFO) << "Skipped chunk: type=0xaa, length=" << skipLength_;
+    } else {
+        LOG(INFO) << "no need process length";
+    }
+    return STREAM_UPDATE_SUCCESS;
+}
+
+UpdateResultCode BinChunkUpdate::SkipTargetData(const uint8_t *data, uint32_t len, uint32_t &dealLen) 
+{
+    if (skipLength_ <= 0) {
+        LOG(ERROR) << "no valid skipRemaining_ = ";
+        return STREAM_UPDATE_FAILURE;
+    }
+    const size_t skip = std::min<size_t>(skipLength_, len);
+    if (skipLength_ < len) {
+        LOG(INFO) << "Add remain data to buffer_" << skipLength_;
+        if (memmove_s(buffer_, len - skipLength_, data + skipLength_, len - skipLength_) != EOK) {
+            LOG(ERROR) << "memmove failed";
+            skipLength_ = 0;
+            return STREAM_UPDATE_FAILURE;
+        }
+        dealLen = skipLength_;
+        curlen_ = len - skipLength_;
+        skipLength_ = 0;
+        return STREAM_UPDATE_SUCCESS;
+    }
+    skipLength_ -= skip;
+    LOG(INFO) << "skipRemaining_ = " << skipLength_;
+    dealLen = len;
+    return STREAM_UPDATE_SUCCESS;
 }
 
 UpdateResultCode BinChunkUpdate::ProcessBufferData()

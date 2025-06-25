@@ -93,6 +93,8 @@ private:
     UpdateResultCode UpdateBinData(uint8_t *data, uint32_t &len);
     UpdateResultCode UpdateBinHash(uint8_t *data, uint32_t &len);
     UpdateResultCode UpdateBinOther(uint8_t *data, uint32_t &len);
+    UpdateResultCode ProcessHeader(const uint8_t *data);
+    UpdateResultCode SkipTargetData(const uint8_t *data, uint32_t len, uint32_t &dealLen);
 
     bool AddRemainData(const uint8_t *data, uint32_t &len);
     bool MoveRemainingData();
@@ -135,6 +137,8 @@ private:
     uint32_t maxBufSize_ = 0;
     uint32_t curlen_ = 0;
     uint32_t offset_ = 0;
+    uint32_t skipLength_ = 0;
+    bool firstBuffer = true;
 
     std::map<ChunkInstallStep, std::function<UpdateResultCode (uint8_t *, uint32_t &)>> chunkInstallProcess_;
     BinChunkUpdateInfo updateInfo_ {};
