@@ -138,7 +138,7 @@ private:
     uint32_t curlen_ = 0;
     uint32_t offset_ = 0;
     uint32_t skipLength_ = 0;
-    bool firstBuffer = true;
+    bool firstBuffer_ = true;
 
     std::map<ChunkInstallStep, std::function<UpdateResultCode (uint8_t *, uint32_t &)>> chunkInstallProcess_;
     BinChunkUpdateInfo updateInfo_ {};

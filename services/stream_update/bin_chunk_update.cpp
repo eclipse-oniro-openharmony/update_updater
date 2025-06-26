@@ -115,16 +115,16 @@ UpdateResultCode BinChunkUpdate::StartBinChunkUpdate(const uint8_t *data, uint32
 
 UpdateResultCode BinChunkUpdate::ProcessHeader(const uint8_t *data)
 {
-    if (firstBuffer) {
+    if (firstBuffer_) {
         int type = ReadLE16(data);
         LOG(INFO) << "type = " << type;
         if (type != ZIP_HEADER_TLV_TYPE) {
             LOG(INFO) << "Not support type " << type;
             skipLength_ = 0;
-            firstBuffer = false;
+            firstBuffer_ = false;
             return STREAM_UPDATE_SUCCESS;
         }
-        firstBuffer = false;
+        firstBuffer_ = false;
         skipLength_ = ReadLE32(data + HEADER_TYPE_BYTE) + TOTAL_TL_BYTES;
         LOG(INFO) << "Skipped chunk: type=0xaa, length=" << skipLength_;
     } else {
