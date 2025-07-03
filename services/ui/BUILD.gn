@@ -112,6 +112,7 @@ ohos_static_library("libui") {
 
   if (defined(updater_ui_extend_cfg)) {
     deps += [ "${updater_path}/services/ui:copy_ui_extend_cfg" ]
+    updater_ui_extend_cfg_target_path = "${target_gen_dir}/" + updater_ui_extend_cfg_name
     include_dirs += [ updater_ui_extend_cfg_target_path ]
   }
 
