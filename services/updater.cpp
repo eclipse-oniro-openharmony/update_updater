@@ -307,9 +307,6 @@ UpdaterStatus SetUpdateSlotParam(UpdaterParams &upParams, bool isUpdateCurrSlot)
     if (!Utils::IsVabDevice()) {
         return UPDATE_SUCCESS;
     }
-    if (!isUpdateCurrSlot && !IsUpdateBasePkg(upParams)) {
-        isUpdateCurrSlot = true;
-    }
     int currentSlot = GetCurrentSlot();
     if (currentSlot < 1 || currentSlot > 2) { // 2 : max slot
         LOG(ERROR) << "GetCurrentSlot failed";
