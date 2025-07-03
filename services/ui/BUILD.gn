@@ -38,6 +38,19 @@ config("updater_ui_support_cfg") {
   }
 }
 
+if (defined(updater_ui_extend_cfg)) {
+  action("copy_ui_extend_cfg") {
+    script = "copy_ui_extend_cfg.py"
+    updater_ui_extend_cfg_target_path = "${target_gen_dir}/" + updater_ui_extend_cfg_name
+    sources = [ updater_ui_extend_cfg ]
+    outputs = [ "${target_gen_dir}/test.txt" ]
+    args = [
+      rebase_path(updater_ui_extend_cfg, "."),
+      rebase_path(updater_ui_extend_cfg_target_path, "."),
+    ]
+  }
+}
+
 ohos_static_library("libui") {
   public_configs = [ ":updater_ui_support_cfg" ]
 
@@ -97,6 +110,11 @@ ohos_static_library("libui") {
     "${updater_path}/utils:libutils",
   ]
 
+  if (defined(updater_ui_extend_cfg)) {
+    deps += [ "${updater_path}/services/ui:copy_ui_extend_cfg" ]
+    include_dirs += [ updater_ui_extend_cfg_target_path ]
+  }
+
   external_deps = [
     "bounds_checking_function:libsec_static",
     "cJSON:cjson",
@@ -116,10 +134,6 @@ ohos_static_library("libui") {
 
   if (defined(updater_ui_custom_deps)) {
     external_deps += updater_ui_custom_deps
-  }
-
-  if (defined(updater_ui_custom_cfg)) {
-    public_configs += updater_ui_custom_cfg
   }
 
   subsystem_name = "updater"
