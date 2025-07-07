@@ -1370,8 +1370,13 @@ __attribute__((weak)) void NotifyAutoReboot(PackageUpdateMode &mode)
     return;
 }
 
-void RebootAfterUpdateSuccess(const UpdaterParams &upParams)
+void RebootAfterUpdateSuccess(const UpdaterParams &upParams, const std::vector<std::string> &args)
 {
+    std::string extData;
+    if (IsNeedUpdateNode(args, extData)) {
+        LOG(INFO) << "Need reboot to updater again.";
+        NotifyReboot("updater", "Updater update dev node after upgrade success when ptable change", extData);
+    }
     if (IsNeedWipe()) {
         NotifyReboot("updater", "Updater wipe data after upgrade success", "--user_wipe_data");
         return;
@@ -1433,7 +1438,7 @@ int UpdaterMain(int argc, char **argv)
     }
 #endif
     PostUpdater(true);
-    RebootAfterUpdateSuccess(upParams);
+    RebootAfterUpdateSuccess(upParams, args);
     return 0;
 }
 } // Updater

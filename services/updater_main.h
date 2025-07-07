@@ -35,7 +35,7 @@ int UpdaterMain(int argc, char **argv);
 
 int FactoryReset(FactoryResetMode mode, const std::string &path);
 
-void RebootAfterUpdateSuccess(const UpdaterParams &upParams);
+void RebootAfterUpdateSuccess(const UpdaterParams &upParams, const std::vector<std::string> &args);
 
 UpdaterStatus InstallUpdaterPackage(UpdaterParams &upParams, Hpackage::PkgManager::PkgManagerPtr manager);
 

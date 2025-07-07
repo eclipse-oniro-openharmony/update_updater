@@ -28,4 +28,8 @@ __attribute__((weak)) UpdaterStatus PostStartUpdaterEntry(UpdaterParams &upParam
 {
     return status;
 }
+__attribute__((weak)) bool IsNeedUpdateNode(const std::vector<std::string> &args, std::string &extData)
+{
+    return false;
+}
 } // Updater
