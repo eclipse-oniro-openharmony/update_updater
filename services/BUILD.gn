@@ -112,7 +112,10 @@ ohos_static_library("libupdater_static") {
   }
 
   if (updater_ui_support) {
-    external_deps += [ "ui_lite:libupdater_layout" ]
+    external_deps += [
+        "ui_lite:libupdater_layout",
+        "graphic_utils_lite:utils_lite",
+    ]
     deps += [ "${updater_path}/services/ui:libui" ]
   }
 
@@ -201,7 +204,10 @@ ohos_static_library("libupdater") {
   }
 
   if (updater_ui_support) {
-    external_deps += [ "ui_lite:libupdater_layout" ]
+    external_deps += [
+        "ui_lite:libupdater_layout",
+        "graphic_utils_lite:utils_lite",
+    ]
   }
 
   if (build_selinux) {
