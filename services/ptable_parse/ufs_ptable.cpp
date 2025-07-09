@@ -23,8 +23,12 @@
 #include "log/log.h"
 #include "securec.h"
 #include "updater/updater_const.h"
+#include "utils.h"
 
 namespace Updater {
+constexpr const uint32_t LUN_FOR_SLOT_A = 3;
+constexpr const uint32_t LUN_FOR_SLOT_B = 4;
+
 uint32_t UfsPtable::GetDeviceLunNum()
 {
     return deviceLunNum_;
@@ -614,7 +618,7 @@ bool UfsPtable::EditPartitionBuf(uint8_t *imageBuf, uint64_t imgBufSize, std::ve
     }
     return true;
 }
- 
+
 bool UfsPtable::GetPtableImageBuffer(uint8_t *imageBuf, const uint32_t imgBufSize)
 {
     uint32_t imgBlockSize = ptableData_.lbaLen; // 512
@@ -661,6 +665,135 @@ bool UfsPtable::GetPtableImageBuffer(uint8_t *imageBuf, const uint32_t imgBufSiz
             LOG(ERROR) << "MemReadWithOffset " << ufsNode << " error" << gptInfoLen;
             return false;
         }
+    }
+    return true;
+}
+
+void UfsPtable::GetTgtPartitionName(std::string &name, const int sourceSlot)
+{
+    LOG(INFO) << "Get target PartitionName. source: " << name;
+    if (name.size() < PARTITION_AB_SUFFIX_SIZE) {
+        name += (sourceSlot == SLOT_A ? PARTITION_B_SUFFIX : PARTITION_A_SUFFIX);
+        LOG(INFO) << "Get target PartitionName: " << name;
+        return;
+    }
+    std::string suffix = name.substr(name.size() - PARTITION_AB_SUFFIX_SIZE, PARTITION_AB_SUFFIX_SIZE);
+    std::string partitionName = name.substr(0, name.size() - PARTITION_AB_SUFFIX_SIZE);
+    if (strcasecmp(suffix.c_str(), PARTITION_A_SUFFIX) == 0) {
+        name = partitionName + PARTITION_B_SUFFIX;
+    } else if (strcasecmp(suffix.c_str(), PARTITION_B_SUFFIX) == 0) {
+        name = partitionName + PARTITION_A_SUFFIX;
+    } else {
+        name += (sourceSlot == SLOT_A ? PARTITION_B_SUFFIX : PARTITION_A_SUFFIX);
+    }
+    return;
+}
+
+bool UfsPtable::EditABPartition(uint8_t *gptImage, const uint32_t blockSize, const int sourceSlot)
+{
+    uint32_t partEntryCnt = blockSize / PARTITION_ENTRY_SIZE; // blockSize = 4096
+    uint32_t partition0 = GET_LLWORD_FROM_BYTE(gptImage + blockSize + PARTITION_ENTRIES_OFFSET);
+
+    uint32_t count = 0;
+    uint8_t *data = nullptr;
+    for (uint32_t i = 0; i < (MAX_PARTITION_NUM / partEntryCnt) && count < MAX_PARTITION_NUM; i++) {
+        data = gptImage + (partition0 + i) * blockSize;
+        for (uint32_t j = 0; j < partEntryCnt; j++) {
+            uint8_t typeGuid[GPT_PARTITION_TYPE_GUID_LEN] = {0};
+            if (memcpy_s(typeGuid, sizeof(typeGuid), &data[(j * PARTITION_ENTRY_SIZE)], sizeof(typeGuid)) != EOK) {
+                LOG(ERROR) << "memcpy guid fail";
+            }
+            if (typeGuid[0] == 0x00 && typeGuid[1] == 0x00) { // 0x00 means no partition
+                i = MAX_PARTITION_NUM / partEntryCnt;
+                break;
+            }
+            uint8_t *nameOffset = data + (j * PARTITION_ENTRY_SIZE + GPT_PARTITION_NAME_OFFSET);
+            // 2 bytes for 1 charactor of partition name
+            std::string name;
+            ParsePartitionName(nameOffset, MAX_GPT_NAME_SIZE, name, MAX_GPT_NAME_SIZE / 2);
+            GetTgtPartitionName(name, sourceSlot);
+            if (!WritePartitionName(name, name.length(), nameOffset, MAX_GPT_NAME_SIZE)) {
+                LOG(ERROR) << "Write PartitionName failed: " << name;
+                return false;
+            }
+            count++;
+        }
+    }
+    LOG(INFO) << "start to Calculate Crc32";
+    // Updating CRC of the Partition entry array in both headers
+    uint32_t partCount = GET_LWORD_FROM_BYTE(gptImage + blockSize + PARTITION_COUNT_OFFSET);
+    uint32_t entrySize = GET_LWORD_FROM_BYTE(gptImage + blockSize + PENTRY_SIZE_OFFSET);
+    // mbr len + gptHeader len = 2 blockSize
+    uint32_t crcValue = CalculateCrc32(gptImage + (blockSize * 2), partCount * entrySize);
+    PUT_LONG(gptImage + blockSize + PARTITION_CRC_OFFSET, crcValue);
+    // Clearing CRC fields to calculate
+    PUT_LONG(gptImage + blockSize + HEADER_CRC_OFFSET, 0);
+    crcValue = CalculateCrc32(gptImage + blockSize, GPT_CRC_LEN);
+    PUT_LONG(gptImage + blockSize + HEADER_CRC_OFFSET, crcValue);
+    return true;
+}
+
+bool UfsPtable::ModifyBufferPartitionName(uint8_t *buffer, const uint32_t bufferSize, const int sourceSlot)
+{
+    LOG(INFO) << "start to modify partition name in buffer";
+    if (buffer == nullptr || bufferSize == 0) {
+        LOG(ERROR) << "invaild input";
+        return false;
+    }
+    uint32_t blockSize = GetDeviceBlockSize();
+    if (blockSize == 0) {
+        LOG(ERROR) << "invaild blockSize: " << blockSize;
+        return false;
+    }
+
+    if (!EditABPartition(buffer, blockSize, sourceSlot)) {
+        LOG(ERROR) << "Edit AB PartitionName failed";
+        return false;
+    }
+    LOG(INFO) << "modify partition name in buffer finished";
+    return true;
+}
+
+bool UfsPtable::SyncABLunPtableDevice(const int sourceSlot)
+{
+    LOG(INFO) << "start to sync ABLun Ptable in Device";
+    std::string srcNodePath = GetDeviceLunNodePath(sourceSlot == SLOT_A ? LUN_FOR_SLOT_A : LUN_FOR_SLOT_B);
+    uint32_t len = ptableData_.writeDeviceLunSize;
+    std::unique_ptr<uint8_t[]> buffer = std::make_unique<uint8_t[]>(len);
+    if (buffer == nullptr) {
+        LOG(ERROR) << "new buffer failed!";
+        return false;
+    }
+    if (!MemReadWithOffset(srcNodePath, 0, buffer.get(), len)) {
+        LOG(ERROR) << "read ptable from " << srcNodePath << " failed!";
+        return false;
+    }
+    if (!ModifyBufferPartitionName(buffer.get(), len, sourceSlot)) {
+        LOG(ERROR) << "Modify PartitionName failed!";
+        return false;
+    }
+    std::string tgtNodePath = GetDeviceLunNodePath(sourceSlot == SLOT_A ? LUN_FOR_SLOT_B : LUN_FOR_SLOT_A);
+    if (!WriteBufferToPath(tgtNodePath, 0, buffer.get(), len)) {
+        LOG(ERROR) << "write first gpt fail";
+        return false;
+    }
+    LOG(INFO) << "Sync ABLun Ptable in Device success";
+    return true;
+}
+
+bool UfsPtable::GetABLunPartitionInfo(const int sourceSlot, std::string &srcNode,
+    std::string &tgtNode, uint32_t &offset)
+{
+    srcNode = GetDeviceLunNodePath(sourceSlot == SLOT_A ? LUN_FOR_SLOT_A : LUN_FOR_SLOT_B);
+    tgtNode = GetDeviceLunNodePath(sourceSlot == SLOT_A ? LUN_FOR_SLOT_B : LUN_FOR_SLOT_A);
+    offset = ptableData_.writeDeviceLunSize;
+    if (offset == 0) {
+        LOG(ERROR) << "invalid offset";
+        return false;
+    }
+    if (!CheckFileExist(srcNode) || !CheckFileExist(tgtNode)) {
+        LOG(ERROR) << "Node is not exist. srcNode:" << srcNode << " tgtNode:" << (tgtNode);
+        return false;
     }
     return true;
 }

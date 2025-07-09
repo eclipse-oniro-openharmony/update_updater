@@ -33,6 +33,9 @@ public:
     bool GetPtableImageBuffer(uint8_t *imageBuf, const uint32_t imgBufSize) override;
     bool CorrectBufByPtnList(uint8_t *imageBuf, uint64_t imgBufSize, const std::vector<PtnInfo> &srcInfo,
                              const std::vector<PtnInfo> &dstInfo) override;
+    bool SyncABLunPtableDevice(const int sourceSlot) override;
+    bool GetABLunPartitionInfo(const int sourceSlot, const std::string &srcNode,
+        const std::string &tgtNode, uint32_t &offset) override;
 #ifndef UPDATER_UT
 protected:
 #else
@@ -68,6 +71,9 @@ private:
 #else
 public:
 #endif
+    bool EditABPartition(uint8_t *gptImage, const uint32_t blockSize, const int sourceSlot);
+    void GetTgtPartitionName(std::string &name, const int sourceSlot);
+    bool ModifyBufferPartitionName(uint8_t *buffer, const uint32_t bufferSize, const int sourceSlot);
     bool WriteBackupPartitionTable(uint32_t lunIdx, uint64_t lunSize);
     bool UfsReadGpt(const uint8_t *gptImage, const uint32_t len, const uint32_t lun, const uint32_t blockSize);
     void UfsReadGptEntry(const uint8_t *gptImage, const uint32_t lun,

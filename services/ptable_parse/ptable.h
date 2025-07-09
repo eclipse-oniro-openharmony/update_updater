@@ -93,7 +93,9 @@ public:
     virtual void AddChildPtable(std::unique_ptr<Ptable> child) {}
     virtual bool CorrectBufByPtnList(uint8_t *imageBuf, uint64_t imgBufSize, const std::vector<PtnInfo> &srcInfo,
                                      const std::vector<PtnInfo> &dstInfo);
-
+    virtual bool SyncABLunPtableDevice(const int sourceSlot);
+    virtual bool GetABLunPartitionInfo(const int sourceSlot, const std::string &srcNode,
+        const std::string &tgtNode, uint32_t &offset);
     int GetEndPtnIndex()
     {
         return endPtnIndex_;
@@ -232,6 +234,7 @@ public:
         const uint32_t blockSize, GPTHeaderInfo& gptHeaderInfo);
     void ParsePartitionName(const uint8_t *data, const uint32_t dataLen,
         std::string &name, const uint32_t nameLen);
+    void WritePartitionName(std::string &name, const uint32_t nameLen, uint8_t *data, const uint32_t dataLen);
     uint32_t CalculateCrc32(const uint8_t *buffer, const uint32_t len);
     bool WritePtablePartition(const std::string &path, uint64_t offset, const uint8_t *buffer, uint32_t size);
     bool CheckFileExist(const std::string &fileName);
