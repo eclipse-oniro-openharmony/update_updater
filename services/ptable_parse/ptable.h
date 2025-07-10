@@ -94,8 +94,8 @@ public:
     virtual bool CorrectBufByPtnList(uint8_t *imageBuf, uint64_t imgBufSize, const std::vector<PtnInfo> &srcInfo,
                                      const std::vector<PtnInfo> &dstInfo);
     virtual bool SyncABLunPtableDevice(const int sourceSlot);
-    virtual bool GetABLunPartitionInfo(const int sourceSlot, const std::string &srcNode,
-        const std::string &tgtNode, uint32_t &offset);
+    virtual bool GetABLunPartitionInfo(const int sourceSlot, std::string &srcNode,
+        std::string &tgtNode, uint32_t &offset);
 
     int GetEndPtnIndex()
     {

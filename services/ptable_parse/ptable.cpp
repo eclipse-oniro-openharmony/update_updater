@@ -54,12 +54,11 @@ bool SyncABLunPtableDevice(const int sourceSlot)
     return false;
 }
 
-bool GetABLunPartitionInfo(const int sourceSlot, const std::string &srcNode,
-    const std::string &tgtNode, uint32_t &offset)
+bool GetABLunPartitionInfo(const int sourceSlot, std::string &srcNode, std::string &tgtNode, uint32_t &offset)
 {
     (void)sourceSlot;
-    (void)partitionName;
-    (void)partitionName;
+    (void)srcNode;
+    (void)tgtNode;
     (void)offset;
     return false;
 }
