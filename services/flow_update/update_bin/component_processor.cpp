@@ -154,6 +154,10 @@ int32_t RawImgProcessor::PreProcess(Uscript::UScriptEnv &env)
     std::string writePath;
     uint64_t offset = 0;
     uint64_t partitionSize = 0;
+    if (SetWriteName(partitionName) != USCRIPT_SUCCESS) {
+        LOG(ERROR) << "Error set write name fail";
+        return USCRIPT_ERROR_EXECUTE;
+    }
     if (GetWritePathAndOffset(partitionName, writePath, offset, partitionSize) != USCRIPT_SUCCESS) {
         LOG(ERROR) << "Get partition:%s WritePathAndOffset fail \'" <<
             partitionName.substr(1, partitionName.size()) << "\'.";
@@ -241,9 +245,9 @@ int RawImgProcessor::GetWritePathAndOffset(const std::string &partitionName, std
 #ifdef UPDATER_USE_PTABLE
     DevicePtable &devicePtb = DevicePtable::GetInstance();
     Ptable::PtnInfo ptnInfo;
-    if (!devicePtb.GetPartionInfoByName(partitionName, ptnInfo)) {
+    if (!devicePtb.GetPartionInfoByName(writeName_, ptnInfo)) {
         LOG(ERROR) << "Datawriter: cannot find device path for partition \'" <<
-            partitionName.substr(1, partitionName.size()) << "\'.";
+            writeName_.substr(1, writeName_.size()) << "\'.";
         return USCRIPT_ERROR_EXECUTE;
     }
     writePath = ptnInfo.writePath;
