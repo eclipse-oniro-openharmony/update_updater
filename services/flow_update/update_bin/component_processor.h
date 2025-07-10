@@ -133,9 +133,10 @@ public:
     int32_t PreProcess(Uscript::UScriptEnv &env) override;
     int32_t DoProcess(Uscript::UScriptEnv &env) override;
     int32_t PostProcess(Uscript::UScriptEnv &env) override;
-private:
-    int GetWritePathAndOffset(const std::string &partitionName, std::string &writePath, uint64_t &offset,
+protected:
+    virtual GetWritePathAndOffset(const std::string &partitionName, std::string &writePath, uint64_t &offset,
                               uint64_t &partitionSize);
+private:
     virtual int RawImageWriteProcessor(const Hpackage::PkgBuffer &buffer, size_t size, size_t start,
                                bool isFinish, const void* context);
     std::unique_ptr<DataWriter> writer_ = nullptr;
