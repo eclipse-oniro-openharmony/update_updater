@@ -50,17 +50,17 @@ bool Ptable::CorrectBufByPtnList(uint8_t *imageBuf, uint64_t imgBufSize, const s
 
 bool SyncABLunPtableDevice(const int sourceSlot)
 {
-    UNUSED(sourceSlot);
+    (void)sourceSlot;
     return false;
 }
 
 bool GetABLunPartitionInfo(const int sourceSlot, const std::string &srcNode,
     const std::string &tgtNode, uint32_t &offset)
 {
-    UNUSED(sourceSlot);
-    UNUSED(partitionName);
-    UNUSED(partitionName);
-    UNUSED(offset);
+    (void)sourceSlot;
+    (void)partitionName;
+    (void)partitionName;
+    (void)offset;
     return false;
 }
 

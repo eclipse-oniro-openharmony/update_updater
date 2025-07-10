@@ -34,8 +34,8 @@ public:
     bool CorrectBufByPtnList(uint8_t *imageBuf, uint64_t imgBufSize, const std::vector<PtnInfo> &srcInfo,
                              const std::vector<PtnInfo> &dstInfo) override;
     bool SyncABLunPtableDevice(const int sourceSlot) override;
-    bool GetABLunPartitionInfo(const int sourceSlot, const std::string &srcNode,
-        const std::string &tgtNode, uint32_t &offset) override;
+    bool GetABLunPartitionInfo(const int sourceSlot, std::string &srcNode,
+        std::string &tgtNode, uint32_t &offset) override;
 #ifndef UPDATER_UT
 protected:
 #else
