@@ -91,6 +91,44 @@ b、 产品中添加需要编译的组件
 
 编译配置在build仓下，build\_updater\_image.sh 脚本中，该脚本由OHOS 编译系统调用。
 
+## AB流式升级<a name="section218mcpsimp"></a>
+
+用户设备并非在data分区上总是有足够的空间用于下载OTA升级包，同时用户有时候不需要进入小系统升级来影响设备体验。为了解决这些问题，OpenHarmony中添加了对AB流式升级的更新，可以在下载数据块Chunk写入备用B分区，而无需将数据块或者升级包存储到data分区；同时不需要进入updater小系统进行升级，用户设备操作在活跃A分区，更新在备用B分区。
+
+### 关键技术<a name="section220mcpsimp"></a>
+
+1、 支持AB分区独立升级，实现无缝更新。
+
+2、 支持流式升级断点续传，在网络断开连接、用户操作暂停等操作后，重新点击下载并更新可以实现继续更新。
+
+3、 支持多种安全校验，每个数据块Chunk会带有哈希校验，更新完后会对每个镜像进行完整性校验。
+
+4、 支持异常回滚机制，确保升级失败时自动恢复到稳定分区，确保用户体验。
+
+5、 支持流式传输数据块自定义，可以根据设备data分区大小自调整。
+
+### 做包流程<a name="section220mcpsimp"></a>
+
+在AB流式升级当中，修改的重点是在原AB差分或者全量升级包的基础上，对大于本文档数据大小要求的new和diff操作要进行更小的切片，并按照TLV格式把差分依赖文件都封装到update.bin文件中
+
+1、 切割内容大于45KB的diff/new
+
+输入参数:pkgdiff、new命令
+
+输出结果:对于pkgdiff命令尝试生成diff文件，如果diff文件大于45KB，就把pkgdiff命令分成多个pkgdiff，直到每个pkgdiff命令的diff文件大小都小于45KB。new命令直接判断block的内容大小，不满足大小的，就分割成多个new命令
+
+2、计算img总块除去action列表中操作的块
+
+输入参数：action列表中所有操作过的块，img总块
+
+输出参数：两者补集，即将需要copy的块进行升序排序，连续的组成集合，按照原有new的格式进行组合成copy命令
+
+3、根据TLV格式封装action及diff等内容到update.bin
+
+输入参数:transfer.list、new.dat、patch.dat
+
+输出结果:将transfer.list每一行封装成一个chunk，依赖的内容在new.dat和patch.dat中查找，并按TLV格式生成update.bin
+
 ## 相关仓<a name="section247mcpsimp"></a>
 
 [升级子系统](https://gitee.com/openharmony/docs/blob/master/zh-cn/readme/%E5%8D%87%E7%BA%A7%E5%AD%90%E7%B3%BB%E7%BB%9F.md)
@@ -100,4 +138,3 @@ b、 产品中添加需要编译的组件
 [build](https://gitee.com/openharmony/build)
 
 [productdefine\_common](https://gitee.com/openharmony/productdefine_common)
-
