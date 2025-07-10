@@ -82,6 +82,44 @@ For example, to add the updater for Hi3516D V300, add the following code to the 
 
 Add the compilation configuration to the  **build\_updater\_image.sh**  script, which is stored in the  **build**  repository and called by the OpenHarmony compilation system.
 
+## AB Streaming Update<a name="section218mcpsimp"></a>
+
+User devices may not always have sufficient space on the data partition for downloading OTA upgrade packages. Furthermore, entering the microsystem for upgrades sometimes impacts the user experience. To resolve these issues, OpenHarmony has introduced support for AB Streaming Updates. This feature allows downloading data chunks (Chunks) to be written directly to the inactive B partition, eliminating the need to store the chunks or the full update package on the data partition. Simultaneously, users can continue operating their devices on the active A partition while the update is applied to the inactive B partition, bypassing the need to enter the updater microsystem.
+
+### Key Technologies<a name="section220mcpsimp"></a>
+
+1、 Supports independent AB partition upgrades, enabling seamless updates.
+
+2、 Supports resumable streaming updates, allowing updates to continue after interruptions like network disconnections or user pauses.
+
+3、 Supports multiple security checks, including hash verification for each data chunk and integrity verification for each image after the update.
+
+4、 Supports exception rollback, ensuring the device automatically reverts to the stable partition upon upgrade failure for a consistent user experience.
+
+5、 Supports customizable streaming data chunk size, adjustable based on the device's data partition capacity.
+
+### Packaging Process<a name="section220mcpsimp"></a>
+
+The AB Streaming Update modifies the packaging of standard AB differential or full OTA packages. new and diff operations larger than the specified data size requirement in this document are split into smaller chunks. All delta dependency files are then packaged into the update.bin file using the TLV format.
+
+1、 Split diff/new content exceeding 45KB
+
+Input parameters: pkgdiff, new commands.
+
+​Output: For the pkgdiff command, attempt to generate a diff file. If the diff file is larger than 45KB, split the pkgdiff operation into multiple smaller pkgdiff commands until each generated diff file is under 45KB. For the new command, directly check the block content size. Split any block not meeting the size requirement into multiple new commands.
+
+2、​Calculate img blocks excluding those operated on in the action list
+
+Input parameters: All blocks operated on in the action list, Total blocks of the img.
+
+Output: The complement set of the two. Sort the required copy blocks in ascending order. Group consecutive blocks into sets. Combine them into copy commands using the standard new command format.
+
+3、Package action, diff, etc., into update.bin per TLV format
+
+Input parameters: transfer.list, new.dat, patch.dat.
+
+Output: Package each line of the transfer.list as a chunk. Locate the dependent content in new.dat and patch.dat. Generate update.bin in TLV format.
+
 ## Repositories Involved<a name="section247mcpsimp"></a>
 
 Update subsystem
