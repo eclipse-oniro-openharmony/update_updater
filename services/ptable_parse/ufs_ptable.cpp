@@ -710,7 +710,7 @@ bool UfsPtable::EditABPartition(uint8_t *gptImage, const uint32_t blockSize, con
             uint8_t *nameOffset = data + (j * PARTITION_ENTRY_SIZE + GPT_PARTITION_NAME_OFFSET);
             // 2 bytes for 1 charactor of partition name
             std::string name;
-            ParsePartitionName(nameOffset, MAX_GPT_NAME_SIZE, name, MAX_GPT_NAME_SIZE / 2);
+            ParsePartitionName(nameOffset, MAX_GPT_NAME_SIZE, name, MAX_GPT_NAME_SIZE / 2); // 2 : 2 bytes
             GetTgtPartitionName(name, sourceSlot);
             if (!WritePartitionName(name, name.length(), nameOffset, MAX_GPT_NAME_SIZE)) {
                 LOG(ERROR) << "Write PartitionName failed: " << name;

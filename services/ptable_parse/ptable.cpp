@@ -555,8 +555,8 @@ bool Ptable::WritePartitionName(const std::string &name, const uint32_t nameLen,
     }
     // convert utf16 to utf8 , 2 bytes for 1 charactor of partition name
     for (uint32_t n = 0; n < nameLen; n++) {
-        data[n * 2] = static_cast<uint8_t>(tolower(name[n]));
-        data[n * 2 + 1] = 0;
+        data[n * 2] = static_cast<uint8_t>(tolower(name[n])); // 2 : 2 bytes
+        data[n * 2 + 1] = 0; // 2 : 2 bytes
     }
     LOG(INFO) << "Write Partition Name success: " << name;
     return true;
