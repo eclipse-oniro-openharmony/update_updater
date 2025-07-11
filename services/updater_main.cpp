@@ -686,7 +686,7 @@ static UpdaterStatus PreUpdatePackages(UpdaterParams &upParams)
     UpdaterStatus status = UPDATE_UNKNOWN;
     ON_SCOPE_EXIT(syncresult) {
         NotifyPreCheck(status, upParams);
-    }
+    };
 
     if (upParams.updateBin.size() > 0) {
         upParams.installTime.resize(upParams.updateBin.size(), std::chrono::duration<double>(0));
@@ -1004,7 +1004,7 @@ static UpdaterStatus PreSdcardUpdatePackages(UpdaterParams &upParams)
     UpdaterStatus status = UPDATE_UNKNOWN;
     ON_SCOPE_EXIT(syncresult) {
         NotifyPreCheck(status, upParams);
-    }
+    };
     upParams.installTime.resize(upParams.updatePackage.size(), std::chrono::duration<double>(0));
     // verify packages first
     if (upParams.retryCount == 0 && !IsBatteryCapacitySufficient()) {
