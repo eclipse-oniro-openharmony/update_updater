@@ -691,8 +691,8 @@ static UpdaterStatus VerifyUpParams(UpdaterParams &upParams)
     // Only handle UPATE_ERROR and UPDATE_SUCCESS here.Let package verify handle others.
     if (upParams.updatePackage.size() > 0) {
         if (IsSpaceCapacitySufficient(upParams) == UPDATE_ERROR) {
-            UPDATER_LAST_WORD(status, "space nott enough");
-            return status;
+            UPDATER_LAST_WORD(UPDATE_UNKNOWN, "space nott enough");
+            return UPDATE_UNKNOWN;
         }
     }
     if (upParams.retryCount == 0 && !IsBatteryCapacitySufficient()) {
