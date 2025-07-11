@@ -42,6 +42,7 @@
 #include "pkg_utils.h"
 #include "ptable_parse/ptable_process.h"
 #include "sdcard_update/sdcard_update.h"
+#include "scope_guard.h"
 #include "securec.h"
 #include "updater/updater_const.h"
 #include "updater/hwfault_retry.h"
@@ -683,6 +684,9 @@ static UpdaterStatus PreUpdatePackages(UpdaterParams &upParams)
     LOG(INFO) << "start to update packages, start index:" << upParams.pkgLocation;
 
     UpdaterStatus status = UPDATE_UNKNOWN;
+    ON_SCOPE_EXIT(syncresult) {
+        NotifyPreCheck(status, upParams);
+    }
 
     if (upParams.updateBin.size() > 0) {
         upParams.installTime.resize(upParams.updateBin.size(), std::chrono::duration<double>(0));
@@ -723,6 +727,20 @@ static UpdaterStatus PreUpdatePackages(UpdaterParams &upParams)
         LOG(ERROR) << "Battery is not sufficient for install package.";
         return UPDATE_SKIP;
     }
+    status = UPDATE_SUCCESS;
+    NotifyPreCheck(status, upParams);
+    if (status != UPDATE_SUCCESS) {
+        CANCEL_SCOPE_EXIT_GUARD(syncresult);
+        return UPDATE_CORRUPT;
+    }
+
+#ifdef UPDATER_USE_PTABLE
+    if (!PtablePreProcess::GetInstance().DoPtableProcess(upParams)) {
+        LOG(ERROR) << "DoPtableProcess failed";
+        return UPDATE_ERROR;
+    }
+#endif
+    CANCEL_SCOPE_EXIT_GUARD(syncresult);
     return UPDATE_SUCCESS;
 }
 
@@ -864,12 +882,6 @@ UpdaterStatus DoUpdatePackages(UpdaterParams &upParams)
     UpdaterStatus status = UPDATE_UNKNOWN;
     std::vector<double> pkgStartPosition {};
     double updateStartPosition = 0.0;
-#ifdef UPDATER_USE_PTABLE
-    if (!PtablePreProcess::GetInstance().DoPtableProcess(upParams)) {
-        LOG(ERROR) << "DoPtableProcess failed";
-        return UPDATE_ERROR;
-    }
-#endif
     status = CalcProgress(upParams, pkgStartPosition, updateStartPosition);
     if (status != UPDATE_SUCCESS) {
         UPDATER_LAST_WORD(status, "CalcProgress failed");
@@ -989,6 +1001,10 @@ static void PostUpdatePackages(UpdaterParams &upParams, UpdaterStatus &status)
 
 static UpdaterStatus PreSdcardUpdatePackages(UpdaterParams &upParams)
 {
+    UpdaterStatus status = UPDATE_UNKNOWN;
+    ON_SCOPE_EXIT(syncresult) {
+        NotifyPreCheck(status, upParams);
+    }
     upParams.installTime.resize(upParams.updatePackage.size(), std::chrono::duration<double>(0));
     // verify packages first
     if (upParams.retryCount == 0 && !IsBatteryCapacitySufficient()) {
@@ -1001,10 +1017,18 @@ static UpdaterStatus PreSdcardUpdatePackages(UpdaterParams &upParams)
         LOG(ERROR) << "SetUpdateParam failed";
         return UPDATE_ERROR;
     }
-    UpdaterStatus status = VerifyPackages(upParams);
+    status = VerifyPackages(upParams);
+    NotifyPreCheck(status, upParams);
+    CANCEL_SCOPE_EXIT_GUARD(syncresult);
     if (status != UPDATE_SUCCESS) {
         return UPDATE_CORRUPT; // verify package failed must return UPDATE_CORRUPT, ux need it !!!
     }
+#ifdef UPDATER_USE_PTABLE
+    if (!PtablePreProcess::GetInstance().DoPtableProcess(upParams)) {
+        LOG(ERROR) << "DoPtableProcess failed";
+        return UPDATE_ERROR;
+    }
+#endif
     return UPDATE_SUCCESS;
 }
 
@@ -1044,7 +1068,6 @@ UpdaterStatus UpdaterFromSdcard(UpdaterParams &upParams)
         return UPDATE_ERROR;
     }
     status = PreSdcardUpdatePackages(upParams);
-    NotifyPreCheck(status, upParams);
     if (status == UPDATE_SUCCESS) {
         upParams.initialProgress += VERIFY_PERCENT;
         upParams.currentPercentage -= VERIFY_PERCENT;
@@ -1074,7 +1097,6 @@ UpdaterStatus InstallUpdaterPackages(UpdaterParams &upParams)
 {
     UpdaterInit::GetInstance().InvokeEvent(UPDATER_PRE_UPDATE_PACKAGE_EVENT);
     UpdaterStatus status = PreUpdatePackages(upParams);
-    NotifyPreCheck(status, upParams);
     if (status == UPDATE_SUCCESS) {
         status = DoUpdatePackages(upParams);
     }
