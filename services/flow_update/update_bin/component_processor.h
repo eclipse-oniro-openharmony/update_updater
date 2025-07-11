@@ -54,6 +54,12 @@ public:
         pkgFileSize_ = fileSize;
     }
 
+    virtual int SetWriteName(const std::string &partitionName)
+    {
+        writeName_ = partitionName;
+        return Uscript::USCRIPT_SUCCESS;
+    }
+
     void SetPkgFileInfo(size_t offset, size_t fileSize, float proportion)
     {
         readOffset_ = offset;
@@ -70,6 +76,7 @@ public:
     }
 protected:
     std::string name_;
+    std::string writeName_;
     size_t totalSize_ {};
     size_t readOffset_ {};
     size_t pkgFileSize_ {};
