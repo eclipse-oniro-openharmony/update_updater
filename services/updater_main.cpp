@@ -678,16 +678,41 @@ static UpdaterStatus SetUpdateParam(UpdaterParams &upParams, bool isUpdateCurrSl
     return UPDATE_SUCCESS;
 }
 
+static UpdaterStatus VerifyUpParams(UpdaterParams &upParams)
+{
+    if (SetUpdateParam(upParams, false) != UPDATE_SUCCESS) {
+        LOG(ERROR) << "SetUpdateParam failed";
+        return UPDATE_ERROR;
+    }
+    // verify package first
+    if (VerifyCommonFiles(upParams) != UPDATE_SUCCESS) {
+        return UPDATE_CORRUPT; // verify package failed must return UPDATE_CORRUPT, ux need it !!!
+    }
+    // Only handle UPATE_ERROR and UPDATE_SUCCESS here.Let package verify handle others.
+    if (upParams.updatePackage.size() > 0) {
+        if (IsSpaceCapacitySufficient(upParams) == UPDATE_ERROR) {
+            UPDATER_LAST_WORD(status, "space nott enough");
+            return status;
+        }
+    }
+    if (upParams.retryCount == 0 && !IsBatteryCapacitySufficient()) {
+        UPDATER_UI_INSTANCE.ShowUpdInfo(TR(LOG_LOWPOWER));
+        UPDATER_UI_INSTANCE.Sleep(UI_SHOW_DURATION);
+        UPDATER_LAST_WORD(UPDATE_ERROR, "Battery is not sufficient for install package.");
+        LOG(ERROR) << "Battery is not sufficient for install package.";
+        return UPDATE_SKIP;
+    }
+    return UPDATE_SUCCESS;
+}
+
 static UpdaterStatus PreUpdatePackages(UpdaterParams &upParams)
 {
     UPDATER_INIT_RECORD;
     LOG(INFO) << "start to update packages, start index:" << upParams.pkgLocation;
-
     UpdaterStatus status = UPDATE_UNKNOWN;
     ON_SCOPE_EXIT(syncresult) {
         NotifyPreCheck(status, upParams);
-    }
-
+    };
     if (upParams.updateBin.size() > 0) {
         upParams.installTime.resize(upParams.updateBin.size(), std::chrono::duration<double>(0));
         if (CheckMountData() != 0) {
@@ -704,36 +729,16 @@ static UpdaterStatus PreUpdatePackages(UpdaterParams &upParams)
         (void)DeleteFile(resultPath);
         LOG(INFO) << "delete last upgrade file";
     }
-    if (SetUpdateParam(upParams, false) != UPDATE_SUCCESS) {
-        LOG(ERROR) << "SetUpdateParam failed";
-        return UPDATE_ERROR;
+    status = VerifyUpParams(upParams);
+    if (status != UPDATE_SUCCESS) {
+        LOG(ERROR) << "verify updater params fail";
+        return status;
     }
-    // verify package first
-    if (VerifyCommonFiles(upParams) != UPDATE_SUCCESS) {
-        return UPDATE_CORRUPT; // verify package failed must return UPDATE_CORRUPT, ux need it !!!
-    }
-
-    // Only handle UPATE_ERROR and UPDATE_SUCCESS here.Let package verify handle others.
-    if (upParams.updatePackage.size() > 0) {
-        if (IsSpaceCapacitySufficient(upParams) == UPDATE_ERROR) {
-            UPDATER_LAST_WORD(status, "space nott enough");
-            return status;
-        }
-    }
-    if (upParams.retryCount == 0 && !IsBatteryCapacitySufficient()) {
-        UPDATER_UI_INSTANCE.ShowUpdInfo(TR(LOG_LOWPOWER));
-        UPDATER_UI_INSTANCE.Sleep(UI_SHOW_DURATION);
-        UPDATER_LAST_WORD(UPDATE_ERROR, "Battery is not sufficient for install package.");
-        LOG(ERROR) << "Battery is not sufficient for install package.";
-        return UPDATE_SKIP;
-    }
-    status = UPDATE_SUCCESS;
     NotifyPreCheck(status, upParams);
     if (status != UPDATE_SUCCESS) {
         CANCEL_SCOPE_EXIT_GUARD(syncresult);
         return UPDATE_CORRUPT;
     }
-
 #ifdef UPDATER_USE_PTABLE
     if (!PtablePreProcess::GetInstance().DoPtableProcess(upParams)) {
         LOG(ERROR) << "DoPtableProcess failed";
@@ -1004,7 +1009,7 @@ static UpdaterStatus PreSdcardUpdatePackages(UpdaterParams &upParams)
     UpdaterStatus status = UPDATE_UNKNOWN;
     ON_SCOPE_EXIT(syncresult) {
         NotifyPreCheck(status, upParams);
-    }
+    };
     upParams.installTime.resize(upParams.updatePackage.size(), std::chrono::duration<double>(0));
     // verify packages first
     if (upParams.retryCount == 0 && !IsBatteryCapacitySufficient()) {
