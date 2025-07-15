@@ -307,8 +307,11 @@ UpdaterStatus SetUpdateSlotParam(UpdaterParams &upParams, bool isUpdateCurrSlot)
     if (!Utils::IsVabDevice()) {
         return UPDATE_SUCCESS;
     }
-    if (!isUpdateCurrSlot && !IsUpdateBasePkg(upParams)) {
-        isUpdateCurrSlot = true;
+    if (!isUpdateCurrSlot && upParams.updatePackage.size() == 1) {
+        std::string pkgPath = upParams.updatePackage[0];
+        if (pkgPath.find("updater.zip") != std::string::npos) {
+            isUpdateCurrSlot = true;
+        }
     }
     int currentSlot = GetCurrentSlot();
     if (currentSlot < 1 || currentSlot > 2) { // 2 : max slot

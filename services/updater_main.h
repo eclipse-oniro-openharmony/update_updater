@@ -35,7 +35,7 @@ int UpdaterMain(int argc, char **argv);
 
 int FactoryReset(FactoryResetMode mode, const std::string &path);
 
-void RebootAfterUpdateSuccess(const UpdaterParams &upParams);
+void RebootAfterUpdateSuccess(const UpdaterParams &upParams, const std::vector<std::string> &args);
 
 UpdaterStatus InstallUpdaterPackage(UpdaterParams &upParams, Hpackage::PkgManager::PkgManagerPtr manager);
 
@@ -82,6 +82,7 @@ UpdaterStatus ProcessOtherOption([[maybe_unused]] const std::string &option,
 bool PreStartBinaryEntry([[maybe_unused]] const std::string &path);
 int32_t VerifySpecialPkgs([[maybe_unused]]UpdaterParams &upParams);
 UpdaterStatus CheckAndSetSlot([[maybe_unused]]UpdaterParams &upParams);
+bool PostUpdateSyncProcess([[maybe_unused]] bool isOtaUpdate, [[maybe_unused]] const UpdaterParams &upParams);
 void UpdaterVerifyFailEntry(bool verifyret);
 bool IsSpareBoardBoot(void);
 bool IsNeedWipe();

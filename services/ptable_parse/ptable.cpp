@@ -48,6 +48,21 @@ bool Ptable::CorrectBufByPtnList(uint8_t *imageBuf, uint64_t imgBufSize, const s
     return false;
 }
 
+bool SyncABLunPtableDevice(const int sourceSlot)
+{
+    (void)sourceSlot;
+    return false;
+}
+
+bool GetABLunPartitionInfo(const int sourceSlot, std::string &srcNode, std::string &tgtNode, uint32_t &offset)
+{
+    (void)sourceSlot;
+    (void)srcNode;
+    (void)tgtNode;
+    (void)offset;
+    return false;
+}
+
 uint32_t Ptable::GetPtablePartitionNum() const
 {
     return partitionInfo_.size();
@@ -527,6 +542,23 @@ void Ptable::ParsePartitionName(const uint8_t *data, const uint32_t dataLen,
     }
     name = outName;
     return;
+}
+
+bool Ptable::WritePartitionName(const std::string &name, const uint32_t nameLen,
+    uint8_t *data, const uint32_t dataLen)
+{
+    // 2 : convert utf16 to utf8 , 2 bytes for 1 charactor
+    if (data == nullptr || dataLen == 0 || nameLen == 0 || dataLen < nameLen * 2) {
+        LOG(ERROR) << "Invalid parameters";
+        return false;
+    }
+    // convert utf16 to utf8 , 2 bytes for 1 charactor of partition name
+    for (uint32_t n = 0; n < nameLen; n++) {
+        data[n * 2] = static_cast<uint8_t>(tolower(name[n])); // 2 : 2 bytes
+        data[n * 2 + 1] = 0; // 2 : 2 bytes
+    }
+    LOG(INFO) << "Write Partition Name success: " << name;
+    return true;
 }
 
 bool Ptable::WriteBufferToPath(const std::string &path, const uint64_t offset,
