@@ -1114,10 +1114,6 @@ bool SetUpdateSlot(int setSlot)
 
 bool SetUpdateSuffix(std::string stringsuffix)
 {
-    if (stringsuffix.empty()) {
-        LOG(ERROR) << "suffix is empty";
-        return false;
-    }
     int tryNum = 3;
     while (tryNum-- > 0) {
         if (SetParameter("update.part.suffix", stringsuffix.c_str()) != 0) {
