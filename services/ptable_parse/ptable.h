@@ -96,6 +96,7 @@ public:
     virtual bool SyncABLunPtableDevice(const int sourceSlot);
     virtual bool GetABLunPartitionInfo(const int sourceSlot, std::string &srcNode,
         std::string &tgtNode, uint32_t &offset);
+    virtual void ClearPartitionInfo();
 
     int GetEndPtnIndex()
     {

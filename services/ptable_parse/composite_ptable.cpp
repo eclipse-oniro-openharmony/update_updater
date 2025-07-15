@@ -125,4 +125,16 @@ void CompositePtable::AppendChildPtnInfo(const std::vector<PtnInfo> &ptnInfo)
 {
     partitionInfo_.insert(partitionInfo_.end(), ptnInfo.begin(), ptnInfo.end());
 }
+
+void CompositePtable::ClearPartitionInfo()
+{
+    std::vector<PtnInfo>().swap(partitionInfo_);
+    for (const auto &iter : childs_) {
+        if (iter == nullptr) {
+            LOG(ERROR) << "invalid iter ptable";
+            return;
+        }
+        iter->ClearPartitionInfo();
+    }
+}
 }

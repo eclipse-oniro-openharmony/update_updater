@@ -88,6 +88,11 @@ std::vector<Ptable::PtnInfo>& Ptable::GetPtablePartitionInfoInstance()
     return partitionInfo_;
 }
 
+void Ptable::ClearPartitionInfo()
+{
+    partitionInfo_.clear();
+}
+
 bool Ptable::InitPtable()
 {
     if (!partitionInfo_.empty()) {

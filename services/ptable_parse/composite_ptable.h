@@ -31,6 +31,7 @@ public:
     bool EditPartitionBuf(uint8_t *imageBuf, uint64_t imgBufSize, std::vector<PtnInfo> &modifyList) override;
     bool GetPtableImageBuffer(uint8_t *imageBuf, const uint32_t imgBufSize) override;
     void AddChildPtable(std::unique_ptr<Ptable> child) override;
+    void ClearPartitionInfo() override;
 
 private:
     bool CheckBuff(const uint8_t *buf, const uint64_t size)
