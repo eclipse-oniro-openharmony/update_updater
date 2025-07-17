@@ -96,6 +96,7 @@ bool RingBuffer::Push(uint8_t *buf, uint32_t len)
         }
     }
 
+ 
     uint32_t index = writeIndex_ & (num_ - 1);
     if (memcpy_s(bufArray_[index], singleSize_, buf, len) != EOK) {
         LOG(ERROR) << "memcpy error, len:" << len;
