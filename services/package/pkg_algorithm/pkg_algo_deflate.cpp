@@ -22,7 +22,7 @@
 namespace Hpackage {
 constexpr uint32_t DEFLATE_IN_BUFFER_SIZE = 1024 * 64;
 constexpr uint32_t DEFLATE_OUT_BUFFER_SIZE = 1024 * 32;
-constexpr uint32_t INFLATE_IN_BUFFER_SIZE = 1024 * 1024 * 1024;
+constexpr uint32_t INFLATE_IN_BUFFER_SIZE = 100 * 1024 * 1024;
 constexpr uint32_t INFLATE_OUT_BUFFER_SIZE = 1024 * 1024;
 constexpr uint32_t INFLATE_IN_BUFFER_SIZE_NORMAL_MODE = 10 * 1024 * 1024;
 
