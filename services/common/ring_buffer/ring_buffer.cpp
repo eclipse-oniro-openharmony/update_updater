@@ -96,13 +96,16 @@ bool RingBuffer::Push(uint8_t *buf, uint32_t len)
         }
     }
 
-    uint32_t index = writeIndex_ & (num_ - 1);
-    if (memcpy_s(bufArray_[index], singleSize_, buf, len) != EOK) {
-        LOG(ERROR) << "memcpy error, len:" << len;
-        return false;
+    {
+        std::unique_lock<std::mutex> arrayLock(arrayMtx_);
+        uint32_t index = writeIndex_ & (num_ - 1);
+        if (memcpy_s(bufArray_[index], singleSize_, buf, len) != EOK) {
+            LOG(ERROR) << "memcpy error, len:" << len;
+            return false;
+        }
+        lenArray_[index] = len;
+        writeIndex_ = (writeIndex_ + 1) & (2 * num_ - 1); // 2: logic buffer size
     }
-    lenArray_[index] = len;
-    writeIndex_ = (writeIndex_ + 1) & (2 * num_ - 1); // 2: logic buffer size
 
     std::unique_lock<std::mutex> popLock(notifyMtx_);
     notEmpty_.notify_all();
@@ -127,13 +130,16 @@ bool RingBuffer::Pop(uint8_t *buf, uint32_t maxLen, uint32_t &len)
         }
     }
 
-    uint32_t index = readIndex_ & (num_ - 1);
-    if (memcpy_s(buf, maxLen, bufArray_[index], lenArray_[index]) != EOK) {
-        LOG(ERROR) << "memcpy error, len:" << lenArray_[index];
-        return false;
+    {
+        std::unique_lock<std::mutex> arrayLock(arrayMtx_);
+        uint32_t index = readIndex_ & (num_ - 1);
+        if (memcpy_s(buf, maxLen, bufArray_[index], lenArray_[index]) != EOK) {
+            LOG(ERROR) << "memcpy error, len:" << lenArray_[index];
+            return false;
+        }
+        len = lenArray_[index];
+        readIndex_ = (readIndex_ + 1) & (2 * num_ - 1); // 2: logic buffer size
     }
-    len = lenArray_[index];
-    readIndex_ = (readIndex_ + 1) & (2 * num_ - 1); // 2: logic buffer size
 
     std::unique_lock<std::mutex> popLock(notifyMtx_);
     notFull_.notify_all();
