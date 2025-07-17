@@ -52,6 +52,7 @@ private:
     std::condition_variable notFull_;
     std::condition_variable notEmpty_;
     std::mutex notifyMtx_;
+    std::mutex arrayMtx_;
 };
 } // namespace Updater
 #endif // __RING_BUFFER_H__
