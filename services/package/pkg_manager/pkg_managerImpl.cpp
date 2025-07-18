@@ -394,10 +394,7 @@ int32_t PkgManagerImpl::LoadPackage(const std::string &packagePath, std::vector<
 {
     UPDATER_INIT_RECORD;
     PkgStreamPtr stream = nullptr;
-    // using PkgStreamType_Read type to reduce memory usage
-    auto streamType = (access("/bin/updater", 0) == 0) ?
-        PkgStream::PKgStreamType_FileMap : PkgStream::PkgStreamType_Read;
-    int32_t ret = CreatePkgStream(stream, packagePath, 0, streamType);
+    int32_t ret = CreatePkgStream(stream, packagePath, 0, PkgStream::PkgStreamType_Read);
     if (ret != PKG_SUCCESS) {
         PKG_LOGE("Create input stream fail %s", packagePath.c_str());
         UPDATER_LAST_WORD(ret, "CreatePkgStream failed");
