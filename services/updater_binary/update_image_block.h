@@ -73,6 +73,7 @@ extern "C" {
 #endif /* __cplusplus */
 void GetWriteDevPath(const std::string &path, [[maybe_unused]]const std::string &partitionName,
                      std::string &devPath);
+void SyncWriteDevPath(int fd, [[maybe_unused]] const std::string &partitionName);
 #ifdef __cplusplus
 #if __cplusplus
 }
