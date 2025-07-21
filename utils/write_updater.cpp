@@ -132,7 +132,7 @@ static int WriteUpdaterPara(int argc, UpdaterPara &para)
         return -1;
     }
     if (resLanguage != 0 || resVersionSuffix != 0){
-        cout << "WriteUpdaterLanguage or WriteUpdaterVersionSuffix failed" << endl;
+        cout << "WriteUpdaterLanguage or WriteUpdaterVersionSuffix fail" << endl;
         return -1;
     }
     return 0;
