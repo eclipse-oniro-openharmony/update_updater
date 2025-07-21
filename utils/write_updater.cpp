@@ -71,7 +71,15 @@ static int WriteUpdaterLanguaUp(UpdaterPara &para){
             cout << "Get const.global.locale parameter failed" << endl;
             return -1;
         }
-    }    
+    }
+    （void)memset_s(para.language, MAX_PARA_SIZE, 0, MAX_PARA_SIZE);
+    res = memcpy_s(para.language, MAX_PARA_SIZE, language, sizeof(language) - 1);
+    para.language[MAX_PARA_SIZE - 1] = '\0';
+    if(res != 0){
+         cout << "memcpy_s para.language failed" << endl;
+         return -1;
+    }
+    return 0;
 }
 
 static int ExceptionUpdater(int argc, char **argv, UpdateMessage &boot)
