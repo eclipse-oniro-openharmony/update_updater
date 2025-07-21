@@ -62,7 +62,7 @@ static int ExceptionBin(int argc, char **argv, UpdateMessage &boot)
 }
 
 static int WriteUpdaterLanguaUp(UpdaterPara &para){
-    char language[MAX_PARA_SI
+    char language[MAX_PARA_SIZE + 1] {};
 }
 
 static int ExceptionUpdater(int argc, char **argv, UpdateMessage &boot)
