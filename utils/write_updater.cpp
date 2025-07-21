@@ -61,6 +61,10 @@ static int ExceptionBin(int argc, char **argv, UpdateMessage &boot)
     return 0;
 }
 
+static int WriteUpdaterLanguaUp(UpdaterPara &para){
+    char language[MAX_PARA_SI
+}
+
 static int ExceptionUpdater(int argc, char **argv, UpdateMessage &boot)
 {
     if (argc < BINARY_MAX_ARGS) {
