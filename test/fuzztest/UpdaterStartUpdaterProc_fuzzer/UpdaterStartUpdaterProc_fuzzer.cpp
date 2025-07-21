@@ -165,6 +165,7 @@ static int StartUpdaterProcFun(const std::string &patch)
     UpdaterParams upParams;
     upParams.updatePackage.push_back(patch);
     upParams.retryCount = 0;
+    upParams.forceBindLittleCpu = true;
     status = StartUpdaterProc(pkgManager, upParams);
     LOG(INFO) << "[fuzz] status " << status;
     PkgManager::ReleasePackageInstance(pkgManager);
