@@ -942,7 +942,7 @@ __attribute__((weak)) UpdaterStatus CheckAndSetSlot([[maybe_unused]]UpdaterParam
 }
 
 __attribute__((weak)) bool PostUpdateSyncProcess([[maybe_unused]] bool isOtaUpdate,
-    [[maybe_unused]] const UpdaterParams &upParams)
+    [[maybe_unused]] const UpdaterParams &upParams, [[maybe_unused]] UpdaterStatus &status)
 {
     LOG(INFO) << "not need sync process";
     return true;
@@ -1039,7 +1039,7 @@ static UpdaterStatus PreSdcardUpdatePackages(UpdaterParams &upParams)
 
 static void PostSdcardUpdatePackages(UpdaterParams &upParams, UpdaterStatus &status)
 {
-    (void)PostUpdateSyncProcess(false, upParams);
+    (void)PostUpdateSyncProcess(false, upParams, status);
     ClearUpdateSlotParam();
     ClearUpdateSuffixParam();
     if (Utils::CheckUpdateMode(Updater::SDCARD_INTRAL_MODE)) {
@@ -1106,7 +1106,7 @@ UpdaterStatus InstallUpdaterPackages(UpdaterParams &upParams)
         status = DoUpdatePackages(upParams);
     }
     PostUpdatePackages(upParams, status);
-    (void)PostUpdateSyncProcess(true, upParams);
+    (void)PostUpdateSyncProcess(true, upParams, status);
     UpdaterInit::GetInstance().InvokeEvent(UPDATER_POST_UPDATE_PACKAGE_EVENT);
     return status;
 }
