@@ -72,7 +72,7 @@ static int WriteUpdaterLanguage(UpdaterPara &para){
             return -1;
         }
     }
-    （void)memset_s(para.language, MAX_PARA_SIZE, 0, MAX_PARA_SIZE);
+    (void)memset_s(para.language, MAX_PARA_SIZE, 0, MAX_PARA_SIZE);
     res = memcpy_s(para.language, MAX_PARA_SIZE, language, sizeof(language) - 1);
     para.language[MAX_PARA_SIZE - 1] = '\0';
     if(res != 0){
@@ -89,7 +89,7 @@ static int WriteUpdaterVersionSuffix(UpdaterPara &para){
         cout << "Get const.settings.os_version_suffix parameter failed" << endl;
         return -1;
     }
-    （void)memset_s(para.osVersionSuffix, MAX_PARA_SIZE, 0, MAX_PARA_SIZE);
+    (void)memset_s(para.osVersionSuffix, MAX_PARA_SIZE, 0, MAX_PARA_SIZE);
     res = memcpy_s(para.osVersionSuffix, MAX_PARA_SIZE, osVersionSuffix, sizeof(osVersionSuffix) - 1);
     para.osVersionSuffix[MAX_PARA_SIZE - 1] = '\0';
     if(res != 0){
