@@ -61,12 +61,12 @@ static int ExceptionBin(int argc, char **argv, UpdateMessage &boot)
     return 0;
 }
 
-static int WriteUpdaterLanguaUp(UpdaterPara &para){
+static int WriteUpdaterLanguage(UpdaterPara &para){
     char language[MAX_PARA_SIZE + 1] {};
-    int res = GetParameter("persist.global.locale", "", para.language, MAX_PARA_SIZE);
+    int res = GetParameter("persist.global.locale", "", language, MAX_PARA_SIZE);
     if (res <= 0) {
         cout << "Get persist.global.locale parameter failed" << endl;
-        res = GetParameter("const.global.locale", "", para.language, MAX_PARA_SIZE);
+        res = GetParameter("const.global.locale", "", language, MAX_PARA_SIZE);
         if (res <= 0) {
             cout << "Get const.global.locale parameter failed" << endl;
             return -1;
@@ -78,6 +78,23 @@ static int WriteUpdaterLanguaUp(UpdaterPara &para){
     if(res != 0){
          cout << "memcpy_s para.language failed" << endl;
          return -1;
+    }
+    return 0;
+}
+
+static int WriteUpdaterVersionSuffix(UpdaterPara &para){
+    char osVersionSuffix[MAX_PARA_SIZE + 1] {};
+    int res = GetParameter("const.settings.os_version_suffix", "", osVersionSuffix, MAX_PARA_SIZE);
+    if (res < 0) {
+        cout << "Get const.settings.os_version_suffix parameter failed" << endl;
+        return -1;
+    }
+    （void)memset_s(para.osVersionSuffix, MAX_PARA_SIZE, 0, MAX_PARA_SIZE);
+    res = memcpy_s(para.osVersionSuffix, MAX_PARA_SIZE, osVersionSuffix, sizeof(osVersionSuffix) - 1);
+    para.osVersionSuffix[MAX_PARA_SIZE - 1] = '\0';
+    if(res != 0){
+        cout << "memcpy_s para.osVersionSuffix failed" << endl;
+        return -1;
     }
     return 0;
 }
@@ -104,17 +121,18 @@ static int WriteUpdaterPara(int argc, UpdaterPara &para)
         cout << "please input correct updater command!" << endl;
         return -1;
     }
-    int res = GetParameter("persist.global.locale", "", para.language, MAX_PARA_SIZE);
-    if (res <= 0) {
-        cout << "Get persist.global.locale parameter failed" << endl;
-        res = GetParameter("const.global.locale", "", para.language, MAX_PARA_SIZE);
-        if (res <= 0) {
-            cout << "Get const.global.locale parameter failed" << endl;
-            return -1;
-        }
+    if (!ReadUpdaterParaMisc(para)) {
+        cout << "ReadUpdaterParaMisc failed" << endl;
+        return -1;
     }
+    int resLanguage = WriteUpdaterLanguage(para);
+    int resVersionSuffix = WriteUpdaterVersionSuffix(para);
     if (!WriteUpdaterParaMisc(para)) {
         cout << "WriteUpdaterParaMisc failed!" << endl;
+        return -1;
+    }
+    if (resLanguage != 0 || resVersionSuffix != 0){
+        cout << "WriteUpdaterLanguage or WriteUpdaterVersionSuffix failed" << endl;
         return -1;
     }
     return 0;
