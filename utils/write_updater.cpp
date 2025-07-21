@@ -61,7 +61,8 @@ static int ExceptionBin(int argc, char **argv, UpdateMessage &boot)
     return 0;
 }
 
-static int WriteUpdaterLanguage(UpdaterPara &para){
+static int WriteUpdaterLanguage(UpdaterPara &para)
+{
     char language[MAX_PARA_SIZE + 1] {};
     int res = GetParameter("persist.global.locale", "", language, MAX_PARA_SIZE);
     if (res <= 0) {
@@ -75,14 +76,15 @@ static int WriteUpdaterLanguage(UpdaterPara &para){
     (void)memset_s(para.language, MAX_PARA_SIZE, 0, MAX_PARA_SIZE);
     res = memcpy_s(para.language, MAX_PARA_SIZE, language, sizeof(language) - 1);
     para.language[MAX_PARA_SIZE - 1] = '\0';
-    if(res != 0){
-         cout << "memcpy_s para.language failed" << endl;
-         return -1;
+    if(res != 0) {
+        cout << "memcpy_s para.language failed" << endl;
+        return -1;
     }
     return 0;
 }
 
-static int WriteUpdaterVersionSuffix(UpdaterPara &para){
+static int WriteUpdaterVersionSuffix(UpdaterPara &para)
+{
     char osVersionSuffix[MAX_PARA_SIZE + 1] {};
     int res = GetParameter("const.settings.os_version_suffix", "", osVersionSuffix, MAX_PARA_SIZE);
     if (res < 0) {
@@ -92,7 +94,7 @@ static int WriteUpdaterVersionSuffix(UpdaterPara &para){
     (void)memset_s(para.osVersionSuffix, MAX_PARA_SIZE, 0, MAX_PARA_SIZE);
     res = memcpy_s(para.osVersionSuffix, MAX_PARA_SIZE, osVersionSuffix, sizeof(osVersionSuffix) - 1);
     para.osVersionSuffix[MAX_PARA_SIZE - 1] = '\0';
-    if(res != 0){
+    if(res != 0) {
         cout << "memcpy_s para.osVersionSuffix failed" << endl;
         return -1;
     }
@@ -131,7 +133,7 @@ static int WriteUpdaterPara(int argc, UpdaterPara &para)
         cout << "WriteUpdaterParaMisc failed!" << endl;
         return -1;
     }
-    if (resLanguage != 0 || resVersionSuffix != 0){
+    if (resLanguage != 0 || resVersionSuffix != 0) {
         cout << "WriteUpdaterLanguage or WriteUpdaterVersionSuffix fail" << endl;
         return -1;
     }
