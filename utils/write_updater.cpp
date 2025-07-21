@@ -63,6 +63,15 @@ static int ExceptionBin(int argc, char **argv, UpdateMessage &boot)
 
 static int WriteUpdaterLanguaUp(UpdaterPara &para){
     char language[MAX_PARA_SIZE + 1] {};
+    int res = GetParameter("persist.global.locale", "", para.language, MAX_PARA_SIZE);
+    if (res <= 0) {
+        cout << "Get persist.global.locale parameter failed" << endl;
+        res = GetParameter("const.global.locale", "", para.language, MAX_PARA_SIZE);
+        if (res <= 0) {
+            cout << "Get const.global.locale parameter failed" << endl;
+            return -1;
+        }
+    }    
 }
 
 static int ExceptionUpdater(int argc, char **argv, UpdateMessage &boot)
