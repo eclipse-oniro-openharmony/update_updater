@@ -13,12 +13,17 @@
  * limitations under the License.
  */
 #include <chrono>
+#include <fstream>
+#include <iostream>
 #include <dirent.h>
 #include <fcntl.h>
+#include <sched.h>
 #include <sys/mount.h>
 #include <sys/stat.h>
 #include <sys/statvfs.h>
+#include <sys/syscall.h>
 #include <regex>
+#include <thread>
 
 #include "applypatch/partition_record.h"
 #include "flashd/flashd.h"
@@ -286,5 +291,67 @@ std::optional<BootMode> SelectMode(const UpdateMessage &boot)
 
     LOG(INFO) << "enter " << it->modeName << " mode";
     return *it;
+}
+
+std::vector<pid_t> GetAllTids(pid_t pid)
+{
+    std::vector<pid_t> tids;
+    std::string pathName = std::string("/proc/").append(std::to_string(pid)).append("/task");
+    char tmpPath[PATH_MAX + 1] = {0};
+    if (realpath(pathName.c_str(), tmpPath) == nullptr || tmpPath[0] == '\0') {
+        LOG(ERROR) << "realpath fail pathName:" << pathName;
+        return tids;
+    }
+    DIR *dir = opendir(tmpPath);
+    if (dir == nullptr) {
+        LOG(ERROR) << "opendir fail pathName:" << pathName;
+        return tids;
+    }
+    struct dirent *de = nullptr;
+    while((de = readdir(dir)) != nullptr) {
+        if (!(de->d_type & DT_DIR) || !isdigit(de->d_name[0])) {
+            continue;
+        }
+        pid_t temp = static_cast<pid_t>(atoi(de->d_name));
+        if (temp > 0) {
+            tids.push_back(temp);
+        }
+    }
+    closedir(dir);
+    return tids;
+}
+
+bool SetCpuAffinityByPid(pid_t binaryPid, unsigned int reservedCores)
+{
+    LOG(INFO) << "SetCpuAffinityByPid binaryPid:" << binaryPid;
+    if (binaryPid == -1) {
+        LOG(WARNING) << "invalid binaryPid:" << binaryPid;
+        return false;
+    }
+    unsigned int coreCount = std::thread::hardware_concurrency();
+    LOG(INFO) << "coreCount:" << coreCount << ", reservedCores:" << reservedCores;
+    if (coreCount <= reservedCores) {
+        LOG(WARNING) << "coreCount:" << coreCount << " <= " << reservedCores;
+        return false;
+    }
+    cpu_set_t mask;
+    CPU_ZERO(&mask);
+    for (unsigned int i = 0; i < coreCount - reservedCores; i ++) {
+        CPU_SET(i, &mask);
+    }
+    std::vector<pid_t> tids = GetAllTids(binaryPid);
+    if (tids.empty()) {
+        LOG(WARNING) << "set affinity faild, tids is null";
+        return false;
+    }
+    int syscallRes;
+    for (auto& tid : tids) {
+        syscallRes = syscall(__NR_sched_setaffinity, tid, sizeof(mask), &mask);
+        LOG(INFO) << "setaffinity tid:" << tid;
+        if (syscallRes != 0) {
+            LOG(ERROR) << "set affinity faild:" << syscallRes;
+        }
+    }
+    return true;
 }
 } // namespace Updater
