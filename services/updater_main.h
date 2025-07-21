@@ -82,7 +82,8 @@ UpdaterStatus ProcessOtherOption([[maybe_unused]] const std::string &option,
 bool PreStartBinaryEntry([[maybe_unused]] const std::string &path);
 int32_t VerifySpecialPkgs([[maybe_unused]]UpdaterParams &upParams);
 UpdaterStatus CheckAndSetSlot([[maybe_unused]]UpdaterParams &upParams);
-bool PostUpdateSyncProcess([[maybe_unused]] bool isOtaUpdate, [[maybe_unused]] const UpdaterParams &upParams);
+bool PostUpdateSyncProcess([[maybe_unused]] bool isOtaUpdate, [[maybe_unused]] const UpdaterParams &upParams,
+    [[maybe_unused]] UpdaterStatus &status);
 void UpdaterVerifyFailEntry(bool verifyret);
 bool IsSpareBoardBoot(void);
 bool IsNeedWipe();
