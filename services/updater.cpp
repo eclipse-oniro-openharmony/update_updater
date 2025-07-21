@@ -59,6 +59,8 @@ using Updater::Utils::SplitString;
 using Updater::Utils::Trim;
 using namespace Hpackage;
 
+constexpr uint32_t LITTLE_CPU_CORES = 4;
+
 int g_percentage = 100;
 int g_tmpProgressValue;
 int g_tmpValue;
@@ -728,6 +730,11 @@ UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, UpdaterPara
     }
 
     upParams.binaryPid = pid;
+    if (upParams.forceBindLittleCpu) {
+        unsigned int coreCount = std::thread::hardware_concurrency();
+        unsigned int reservedCores = coreCount - uint32_t LITTLE_CPU_CORES;
+        SetCpuAffinityByPid(upParams.binaryPid, reservedCores);
+    }
     close(pipeWrite); // close write endpoint
     bool retryUpdate = false;
     if (HandlePipeMsg(upParams, pipeRead, retryUpdate) != UPDATE_SUCCESS) {
