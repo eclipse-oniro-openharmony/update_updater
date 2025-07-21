@@ -76,7 +76,7 @@ static int WriteUpdaterLanguage(UpdaterPara &para)
     (void)memset_s(para.language, MAX_PARA_SIZE, 0, MAX_PARA_SIZE);
     res = memcpy_s(para.language, MAX_PARA_SIZE, language, sizeof(language) - 1);
     para.language[MAX_PARA_SIZE - 1] = '\0';
-    if(res != 0) {
+    if (res != 0) {
         cout << "memcpy_s para.language failed" << endl;
         return -1;
     }
@@ -94,7 +94,7 @@ static int WriteUpdaterVersionSuffix(UpdaterPara &para)
     (void)memset_s(para.osVersionSuffix, MAX_PARA_SIZE, 0, MAX_PARA_SIZE);
     res = memcpy_s(para.osVersionSuffix, MAX_PARA_SIZE, osVersionSuffix, sizeof(osVersionSuffix) - 1);
     para.osVersionSuffix[MAX_PARA_SIZE - 1] = '\0';
-    if(res != 0) {
+    if (res != 0) {
         cout << "memcpy_s para.osVersionSuffix failed" << endl;
         return -1;
     }
