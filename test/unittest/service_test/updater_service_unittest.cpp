@@ -316,7 +316,7 @@ HWTEST_F(UpdaterUtilUnitTest, StartUpdaterProcTest, TestSize.Level1)
 {
     Hpackage::PkgManager::PkgManagerPtr pkgManager = Hpackage::PkgManager::CreatePackageInstance();
     UpdaterParams upParams;
-    upParams.forceBindLittleCpu = true;
+    upParams.isLoadReduction = true;
     EXPECT_EQ(StartUpdaterProc(nullptr, upParams), UPDATE_CORRUPT);
     EXPECT_EQ(StartUpdaterProc(pkgManager, upParams), UPDATE_ERROR);
 }
