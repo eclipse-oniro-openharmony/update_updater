@@ -730,11 +730,7 @@ UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, UpdaterPara
     }
 
     upParams.binaryPid = pid;
-    if (upParams.forceBindLittleCpu) {
-        unsigned int coreCount = std::thread::hardware_concurrency();
-        unsigned int reservedCores = coreCount - uint32_t LITTLE_CPU_CORES;
-        SetCpuAffinityByPid(upParams.binaryPid, reservedCores);
-    }
+    ReduceLoad(upParams);
     close(pipeWrite); // close write endpoint
     bool retryUpdate = false;
     if (HandlePipeMsg(upParams, pipeRead, retryUpdate) != UPDATE_SUCCESS) {
