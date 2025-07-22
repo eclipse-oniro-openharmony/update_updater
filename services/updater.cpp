@@ -59,8 +59,6 @@ using Updater::Utils::SplitString;
 using Updater::Utils::Trim;
 using namespace Hpackage;
 
-constexpr uint32_t LITTLE_CPU_CORES = 4;
-
 int g_percentage = 100;
 int g_tmpProgressValue;
 int g_tmpValue;
