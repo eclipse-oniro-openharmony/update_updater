@@ -113,6 +113,7 @@ constexpr int32_t DEFAULT_PIPE_NUM = 2;
 constexpr int32_t BINARY_MAX_ARGS = 3;
 constexpr int32_t BINARY_SECOND_ARG = 2;
 constexpr int32_t WRITE_SECOND_CMD = 2;
+constexpr uint32_t LITTLE_CPU_CORES = 4;
 constexpr int REBOOT = 0;
 constexpr int WIPE_DATA = 1;
 constexpr int WIPE_CACHE = 2;
