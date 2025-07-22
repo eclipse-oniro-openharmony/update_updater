@@ -29,7 +29,7 @@ constexpr int MAX_FAULTINFO_SIZE = 32;
 constexpr int MAX_RESERVED_SIZE = 224;
 
 constexpr int MAX_PARA_SIZE = 32;
-constexpr int MAX_RESERVED_SIZE_PARA = 224;
+constexpr int MAX_RESERVED_SIZE_PARA = 192;
 
 // misc partition offset definition. max size of misc is 2MB, do not overflow.
 constexpr off_t MISC_BASE_OFFSET = 0;
@@ -57,6 +57,7 @@ struct UpdateMessage {
 
 struct UpdaterPara {
     char language[MAX_PARA_SIZE];
+    char osVersionSuffix[MAX_PARA_SIZE];
     char reserved[MAX_RESERVED_SIZE_PARA];
 };
 
