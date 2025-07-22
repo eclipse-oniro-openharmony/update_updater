@@ -297,10 +297,14 @@ std::vector<pid_t> GetAllTids(pid_t pid)
 {
     std::vector<pid_t> tids;
     std::string pathName = std::string("/proc/").append(std::to_string(pid)).append("/task");
-    char tmpPath[PATH_MAX + 1] = {0};
+    char tmpPath[PATH_MAX] = {0};
     if (realpath(pathName.c_str(), tmpPath) == nullptr || tmpPath[0] == '\0') {
         LOG(ERROR) << "realpath fail pathName:" << pathName;
         return tids;
+    }
+    size_t len = strlen(tmpPath);
+    if (len < PATH_MAX) {
+        tmpPath[len] = '\0';
     }
     DIR *dir = opendir(tmpPath);
     if (dir == nullptr) {
@@ -308,13 +312,18 @@ std::vector<pid_t> GetAllTids(pid_t pid)
         return tids;
     }
     struct dirent *de = nullptr;
-    while((de = readdir(dir)) != nullptr) {
+    while ((de = readdir(dir)) != nullptr) {
         if (!(de->d_type & DT_DIR) || !isdigit(de->d_name[0])) {
             continue;
         }
-        pid_t temp = static_cast<pid_t>(atoi(de->d_name));
-        if (temp > 0) {
-            tids.push_back(temp);
+        int32_t temp = -1;
+        if (!Utils::ConvertToLong(de->d_name, temp)) {
+            LOG(ERROR) << "ConvertToLong failed";
+            continue;
+        }
+        pid_t tid = static_cast<pid_t>(temp);
+        if (tid > 0) {
+            tids.push_back(tid);
         }
     }
     closedir(dir);
@@ -336,7 +345,7 @@ bool SetCpuAffinityByPid(pid_t binaryPid, unsigned int reservedCores)
     }
     cpu_set_t mask;
     CPU_ZERO(&mask);
-    for (unsigned int i = 0; i < coreCount - reservedCores; i ++) {
+    for (unsigned int i = 0; i < coreCount - reservedCores; i++) {
         CPU_SET(i, &mask);
     }
     std::vector<pid_t> tids = GetAllTids(binaryPid);
@@ -353,5 +362,14 @@ bool SetCpuAffinityByPid(pid_t binaryPid, unsigned int reservedCores)
         }
     }
     return true;
+}
+
+void ReduceLoad(const UpdaterParams &upParams)
+{
+    if (upParams.isLoadReduction) {
+        unsigned int coreCount = std::thread::hardware_concurrency();
+        unsigned int reservedCores = coreCount - LITTLE_CPU_CORES;
+        SetCpuAffinityByPid(upParams.binaryPid, reservedCores);
+    }
 }
 } // namespace Updater
