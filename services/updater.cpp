@@ -680,7 +680,7 @@ static std::string GetBinaryPath(PkgManager::PkgManagerPtr pkgManager, UpdaterPa
     return fullPath;
 }
 
-static std::string GetFullPath(PkgManager::PkgManagerPtr pkgManager, const UpdaterParams &upParams)
+static std::string GetFullPath(PkgManager::PkgManagerPtr pkgManager, UpdaterParams &upParams)
 {
     std::string fullPath = "";
     if (upParams.updateBin.size() > 0) {
