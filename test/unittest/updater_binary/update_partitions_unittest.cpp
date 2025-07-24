@@ -28,6 +28,9 @@
 #include "unittest_comm.h"
 #include "update_processor.h"
 #include "utils.h"
+#include "cJSON.h"
+#include "fs_manager/partitions.h"
+#include "update_partitions.h"
 
 using namespace Updater;
 using namespace testing::ext;
@@ -98,5 +101,107 @@ HWTEST_F(UpdatePartitionsUnitTest, UpdatePartitions_Unitest02, TestSize.Level1)
     ScriptManager::ReleaseScriptManager();
     PkgManager::ReleasePackageInstance(pkgManager);
     EXPECT_EQ(partRet, USCRIPT_SUCCESS);
+}
+
+HWTEST_F(UpdatePartitionsUnitTest, UpdatePartitions_Unitest04, TestSize.Level1)
+{
+    const char *partitionInfo = R"(
+    {
+        "disk": "sda",
+        "partition": [
+            {
+                "nostart": 512,
+            },
+            {
+                "start": 32,
+            },
+            {
+                "start": 32,
+                "length": 1
+            },
+            {
+                "start": 32,
+                "length": 1,
+                "partName": "cust",
+            }
+        ],
+        "sector_size": 4096
+    }
+    )";
+    cJSON *root = cJSON_Parse(partitionInfo);
+    if (root == nullptr) {
+        cout << "cJSON_Parse error" << endl;
+        return;
+    }
+    cJSON *partitions = cJSON_GetObjectItem(root, "Partition");
+    if (partitions == nullptr) {
+        cout << "cJSON_GetObjectItem error" << endl;
+        cJSON_Delete(root);
+        return;
+    }
+    struct Partition *myPartition = static_cast<struct Partition*>(calloc(1, sizeof(struct Partition)));
+    if (!myPartition) {
+        cout << "calloc error" << endl;
+        cJSON_Delete(root);
+        return;
+    }
+ 
+    UpdatePartitions partition;
+    EXPECT_TRUE(!partition.SetPartitionInfo(partitions, 10, myPartition)); // 10: error index
+    EXPECT_TRUE(!partition.SetPartitionInfo(partitions, 0, myPartition)); // 0: error start
+    EXPECT_TRUE(!partition.SetPartitionInfo(partitions, 1, myPartition)); // 1: error length
+    EXPECT_TRUE(!partition.SetPartitionInfo(partitions, 2, myPartition)); // 2: error partName
+    EXPECT_TRUE(!partition.SetPartitionInfo(partitions, 3, myPartition)); // 2: error fstype
+    cout << "UpdatePartitions_Unitest04 success" << endl;
+    free(myPartition);
+    cJSON_Delete(root);
+}
+ 
+HWTEST_F(UpdatePartitionsUnitTest, UpdatePartitions_Unitest05, TestSize.Level1)
+{
+    const char *noPartitionInfo = R"(
+    {
+        "disk": "sda",
+        "partitionx": [
+            {
+                "nostart": 512,
+            }
+        ],
+        "sector_size": 4096
+    }
+    )";
+    const char *partitionInfo = R"(
+    {
+        "disk": "sda",
+        "partition": [
+            {
+                "nostart": 512,
+            }
+        ],
+        "sector_size": 4096
+    }
+    )";
+    const char *partitionInfoNew = R"(
+    {
+        "disk": "sda",
+        "partition": [
+            {
+                "nostart": 512,
+            },
+            {
+                "start": 512,
+            }
+        ],
+        "sector_size": 4096
+    }
+    )";
+ 
+    PartitonList newPartList {};
+    UpdatePartitions partition;
+    EXPECT_TRUE(partition.ParsePartitionInfo("test", newPartList) != 1); // error root
+    EXPECT_TRUE(partition.ParsePartitionInfo(std::string(noPartitionInfo), newPartList) != 1); // error partitions
+    EXPECT_TRUE(partition.ParsePartitionInfo(std::string(partitionInfo), newPartList) != 1); // error number
+    EXPECT_TRUE(partition.ParsePartitionInfo(std::string(partitionInfoNew), newPartList) != 1); // error number
+    cout << "UpdatePartitions_Unitest05 success" << endl;
 }
 } // namespace updater_ut
