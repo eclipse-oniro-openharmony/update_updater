@@ -152,7 +152,6 @@ HWTEST_F(UpdatePartitionsUnitTest, UpdatePartitions_Unitest04, TestSize.Level1)
     EXPECT_TRUE(!partition.SetPartitionInfo(partitions, 1, myPartition)); // 1: error length
     EXPECT_TRUE(!partition.SetPartitionInfo(partitions, 2, myPartition)); // 2: error partName
     EXPECT_TRUE(!partition.SetPartitionInfo(partitions, 3, myPartition)); // 2: error fstype
-    cout << "UpdatePartitions_Unitest04 success" << endl;
     free(myPartition);
     cJSON_Delete(root);
 }
@@ -202,6 +201,5 @@ HWTEST_F(UpdatePartitionsUnitTest, UpdatePartitions_Unitest05, TestSize.Level1)
     EXPECT_TRUE(partition.ParsePartitionInfo(std::string(noPartitionInfo), newPartList) != 1); // error partitions
     EXPECT_TRUE(partition.ParsePartitionInfo(std::string(partitionInfo), newPartList) != 1); // error number
     EXPECT_TRUE(partition.ParsePartitionInfo(std::string(partitionInfoNew), newPartList) != 1); // error number
-    cout << "UpdatePartitions_Unitest05 success" << endl;
 }
 } // namespace updater_ut
