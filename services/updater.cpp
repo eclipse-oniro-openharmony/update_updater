@@ -683,16 +683,15 @@ static std::string GetBinaryPath(PkgManager::PkgManagerPtr pkgManager, UpdaterPa
 UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, UpdaterParams &upParams)
 {
     UPDATER_INIT_RECORD;
+    if (pkgManager == nullptr) {
+        UPDATER_LAST_WORD(UPDATE_CORRUPT, "pkgManager is nullptr");
+        return UPDATE_CORRUPT;
+    }
     int pfd[DEFAULT_PIPE_NUM]; /* communication between parent and child */
     if (pipe(pfd) < 0) {
         LOG(ERROR) << "Create pipe failed: ";
         UPDATER_LAST_WORD(UPDATE_ERROR, "Create pipe failed");
         return UPDATE_ERROR;
-    }
-    if (pkgManager == nullptr) {
-        LOG(ERROR) << "pkgManager is nullptr";
-        UPDATER_LAST_WORD(UPDATE_CORRUPT, "pkgManager is nullptr");
-        return UPDATE_CORRUPT;
     }
 
     int pipeRead = pfd[0];
