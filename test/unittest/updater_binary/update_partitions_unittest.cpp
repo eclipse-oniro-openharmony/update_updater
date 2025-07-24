@@ -110,10 +110,10 @@ HWTEST_F(UpdatePartitionsUnitTest, UpdatePartitions_Unitest04, TestSize.Level1)
         "disk": "sda",
         "partition": [
             {
-                "nostart": 512,
+                "nostart": 512
             },
             {
-                "start": 32,
+                "start": 32
             },
             {
                 "start": 32,
@@ -122,7 +122,7 @@ HWTEST_F(UpdatePartitionsUnitTest, UpdatePartitions_Unitest04, TestSize.Level1)
             {
                 "start": 32,
                 "length": 1,
-                "partName": "cust",
+                "partName": "cust"
             }
         ],
         "sector_size": 4096
@@ -163,7 +163,7 @@ HWTEST_F(UpdatePartitionsUnitTest, UpdatePartitions_Unitest05, TestSize.Level1)
         "disk": "sda",
         "partitionx": [
             {
-                "nostart": 512,
+                "nostart": 512
             }
         ],
         "sector_size": 4096
@@ -174,7 +174,7 @@ HWTEST_F(UpdatePartitionsUnitTest, UpdatePartitions_Unitest05, TestSize.Level1)
         "disk": "sda",
         "partition": [
             {
-                "nostart": 512,
+                "nostart": 512
             }
         ],
         "sector_size": 4096
@@ -185,10 +185,10 @@ HWTEST_F(UpdatePartitionsUnitTest, UpdatePartitions_Unitest05, TestSize.Level1)
         "disk": "sda",
         "partition": [
             {
-                "nostart": 512,
+                "nostart": 512
             },
             {
-                "start": 512,
+                "start": 512
             }
         ],
         "sector_size": 4096
