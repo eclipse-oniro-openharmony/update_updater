@@ -29,6 +29,9 @@ public:
     int32_t Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context) override;
 #ifndef UPDATER_UT
 private:
+#else
+public:
+#endif
     int ParsePartitionInfo(const std::string &partitionInfo, PartitonList &newPartList) const;
     int DoNewPartitions(PartitonList &newPartList);
     bool SetPartitionInfo(const cJSON* partitions, int idx, struct Partition* myPartition) const;
