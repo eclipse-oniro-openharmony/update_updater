@@ -680,10 +680,25 @@ static std::string GetBinaryPath(PkgManager::PkgManagerPtr pkgManager, UpdaterPa
     return fullPath;
 }
 
+static std::string GetFullPath(PkgManager::PkgManagerPtr pkgManager, const UpdaterParams &upParams)
+{
+    std::string fullPath = "";
+    if (upParams.updateBin.size() > 0) {
+        fullPath = GetBinaryPathFromBin(pkgManager, upParams);
+    } else if (upParams.updatePackage.size() > 0) {
+        fullPath = GetBinaryPath(pkgManager, upParams);
+    }
+    if (chmod(fullPath.c_str(), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) != 0) {
+        LOG(ERROR) << "Failed to change mode";
+    }
+    return fullPath;
+}
+
 UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, UpdaterParams &upParams)
 {
     UPDATER_INIT_RECORD;
     if (pkgManager == nullptr) {
+        LOG(ERROR) << "pkgManager is nullptr";
         UPDATER_LAST_WORD(UPDATE_CORRUPT, "pkgManager is nullptr");
         return UPDATE_CORRUPT;
     }
@@ -696,15 +711,7 @@ UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, UpdaterPara
 
     int pipeRead = pfd[0];
     int pipeWrite = pfd[1];
-    std::string fullPath = "";
-    if (upParams.updateBin.size() > 0) {
-        fullPath = GetBinaryPathFromBin(pkgManager, upParams);
-    } else if (upParams.updatePackage.size() > 0) {
-        fullPath = GetBinaryPath(pkgManager, upParams);
-    }
-    if (chmod(fullPath.c_str(), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) != 0) {
-        LOG(ERROR) << "Failed to change mode";
-    }
+    std::string fullPath = GetFullPath(pkgManager, upParams);
 
 #ifdef WITH_SELINUX
     Restorecon(fullPath.c_str());
@@ -715,6 +722,8 @@ UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, UpdaterPara
         ERROR_CODE(CODE_FORK_FAIL);
         upParams.binaryPid = -1;
         UPDATER_LAST_WORD(UPDATE_ERROR, "fork failed");
+        close(pipeRead);
+        close(pipeWrite);
         return UPDATE_ERROR;
     }
 
