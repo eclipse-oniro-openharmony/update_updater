@@ -27,6 +27,7 @@ public:
     UpdatePartitions() {}
     virtual ~UpdatePartitions() {}
     int32_t Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context) override;
+#ifndef UPDATER_UT
 private:
     int ParsePartitionInfo(const std::string &partitionInfo, PartitonList &newPartList) const;
     int DoNewPartitions(PartitonList &newPartList);
