@@ -680,23 +680,8 @@ static std::string GetBinaryPath(PkgManager::PkgManagerPtr pkgManager, UpdaterPa
     return fullPath;
 }
 
-UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, UpdaterParams &upParams)
+static std::string GetFullPath(PkgManager::PkgManagerPtr pkgManager, UpdaterParams &upParams)
 {
-    UPDATER_INIT_RECORD;
-    int pfd[DEFAULT_PIPE_NUM]; /* communication between parent and child */
-    if (pipe(pfd) < 0) {
-        LOG(ERROR) << "Create pipe failed: ";
-        UPDATER_LAST_WORD(UPDATE_ERROR, "Create pipe failed");
-        return UPDATE_ERROR;
-    }
-    if (pkgManager == nullptr) {
-        LOG(ERROR) << "pkgManager is nullptr";
-        UPDATER_LAST_WORD(UPDATE_CORRUPT, "pkgManager is nullptr");
-        return UPDATE_CORRUPT;
-    }
-
-    int pipeRead = pfd[0];
-    int pipeWrite = pfd[1];
     std::string fullPath = "";
     if (upParams.updateBin.size() > 0) {
         fullPath = GetBinaryPathFromBin(pkgManager, upParams);
@@ -706,6 +691,27 @@ UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, UpdaterPara
     if (chmod(fullPath.c_str(), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) != 0) {
         LOG(ERROR) << "Failed to change mode";
     }
+    return fullPath;
+}
+
+UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, UpdaterParams &upParams)
+{
+    UPDATER_INIT_RECORD;
+    if (pkgManager == nullptr) {
+        LOG(ERROR) << "pkgManager is nullptr";
+        UPDATER_LAST_WORD(UPDATE_CORRUPT, "pkgManager is nullptr");
+        return UPDATE_CORRUPT;
+    }
+    int pfd[DEFAULT_PIPE_NUM]; /* communication between parent and child */
+    if (pipe(pfd) < 0) {
+        LOG(ERROR) << "Create pipe failed: ";
+        UPDATER_LAST_WORD(UPDATE_ERROR, "Create pipe failed");
+        return UPDATE_ERROR;
+    }
+
+    int pipeRead = pfd[0];
+    int pipeWrite = pfd[1];
+    std::string fullPath = GetFullPath(pkgManager, upParams);
 
 #ifdef WITH_SELINUX
     Restorecon(fullPath.c_str());
@@ -716,6 +722,8 @@ UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, UpdaterPara
         ERROR_CODE(CODE_FORK_FAIL);
         upParams.binaryPid = -1;
         UPDATER_LAST_WORD(UPDATE_ERROR, "fork failed");
+        close(pipeRead);
+        close(pipeWrite);
         return UPDATE_ERROR;
     }
 
@@ -728,6 +736,7 @@ UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, UpdaterPara
     }
 
     upParams.binaryPid = pid;
+    ReduceLoad(upParams);
     close(pipeWrite); // close write endpoint
     bool retryUpdate = false;
     if (HandlePipeMsg(upParams, pipeRead, retryUpdate) != UPDATE_SUCCESS) {

@@ -56,6 +56,7 @@ enum NotifyAction {
 struct UpdaterParams {
     bool forceUpdate = false;
     bool forceReboot = false;
+    bool isLoadReduction = false;
     std::string sdExtMode {};
     std::string factoryResetMode {};
     PackageUpdateMode updateMode = HOTA_UPDATE;
@@ -144,5 +145,11 @@ void RegisterMode(const BootMode &mode);
 std::vector<BootMode> &GetBootModes(void);
 
 std::optional<BootMode> SelectMode(const UpdateMessage &boot);
+
+std::vector<pid_t> GetAllTids(pid_t pid);
+
+bool SetCpuAffinityByPid(pid_t binaryPid, unsigned int reservedCores);
+
+void ReduceLoad(const UpdaterParams &upParams);
 } // Updater
 #endif /* UPDATER_UPDATER_H */
