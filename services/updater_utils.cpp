@@ -15,6 +15,8 @@
 #include <chrono>
 #include <fstream>
 #include <iostream>
+#include <regex>
+#include <thread>
 #include <dirent.h>
 #include <fcntl.h>
 #include <sched.h>
@@ -22,8 +24,6 @@
 #include <sys/stat.h>
 #include <sys/statvfs.h>
 #include <sys/syscall.h>
-#include <regex>
-#include <thread>
 
 #include "applypatch/partition_record.h"
 #include "flashd/flashd.h"
