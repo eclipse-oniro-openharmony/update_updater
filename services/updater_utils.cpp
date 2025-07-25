@@ -297,14 +297,10 @@ std::vector<pid_t> GetAllTids(pid_t pid)
 {
     std::vector<pid_t> tids;
     std::string pathName = std::string("/proc/").append(std::to_string(pid)).append("/task");
-    char tmpPath[PATH_MAX] = {0};
+    char tmpPath[PATH_MAX + 1] = {0};
     if (realpath(pathName.c_str(), tmpPath) == nullptr || tmpPath[0] == '\0') {
         LOG(ERROR) << "realpath fail pathName:" << pathName;
         return tids;
-    }
-    size_t len = strlen(tmpPath);
-    if (len < PATH_MAX) {
-        tmpPath[len] = '\0';
     }
     DIR *dir = opendir(tmpPath);
     if (dir == nullptr) {
