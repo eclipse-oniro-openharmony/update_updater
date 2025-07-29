@@ -624,7 +624,7 @@ static int CheckMountData()
     UPDATER_INIT_RECORD;
     constexpr int retryTime = 3;
     for (int i = 0; i < retryTime; i++) {
-        if (SetupPartitions() == 0) {
+        if (SetupPartitions(true, Utils::IsVabDevice()) == 0) {
             return 0;
         }
         LOG(INFO) << "retry mount userdata number:" << i;
