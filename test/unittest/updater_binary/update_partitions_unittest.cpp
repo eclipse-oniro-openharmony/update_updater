@@ -131,7 +131,6 @@ HWTEST_F(UpdatePartitionsUnitTest, UpdatePartitions_Unitest04, TestSize.Level1)
     cJSON *root = cJSON_Parse(partitionInfo);
     ASSERT_NE(root, nullptr);
     cJSON *partitions = cJSON_GetObjectItem(root, "Partition");
-    ASSERT_NE(root, nullptr);
     ASSERT_NE(partitions, nullptr);
     struct Partition *myPartition = static_cast<struct Partition*>(calloc(1, sizeof(struct Partition)));
     ASSERT_NE(myPartition, nullptr);
