@@ -129,22 +129,12 @@ HWTEST_F(UpdatePartitionsUnitTest, UpdatePartitions_Unitest04, TestSize.Level1)
     }
     )";
     cJSON *root = cJSON_Parse(partitionInfo);
-    if (root == nullptr) {
-        cout << "cJSON_Parse error" << endl;
-        return;
-    }
+    EXCEPT_NE(root, nullptr);
     cJSON *partitions = cJSON_GetObjectItem(root, "Partition");
-    if (partitions == nullptr) {
-        cout << "cJSON_GetObjectItem error" << endl;
-        cJSON_Delete(root);
-        return;
-    }
+    EXCEPT_NE(root, nullptr);
+    EXCEPT_NE(partitions, nullptr);
     struct Partition *myPartition = static_cast<struct Partition*>(calloc(1, sizeof(struct Partition)));
-    if (!myPartition) {
-        cout << "calloc error" << endl;
-        cJSON_Delete(root);
-        return;
-    }
+    EXCEPT_NE(myPartition, nullptr);
  
     UpdatePartitions partition;
     EXPECT_TRUE(!partition.SetPartitionInfo(partitions, 10, myPartition)); // 10: error index
