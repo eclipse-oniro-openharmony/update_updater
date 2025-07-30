@@ -43,11 +43,23 @@ constexpr int32_t SHA_CHECK_TARGETPAIRS_INDEX = 3;
 constexpr int32_t SHA_CHECK_TARGETSHA_INDEX = 4;
 constexpr int32_t SHA_CHECK_TARGET_PARAMS = 5;
 
-__attribute__((weak)) void GetWriteDevPath(const std::string &path, [[maybe_unused]]const std::string &partitionName,
+__attribute__((weak)) void GetWriteDevPath(const std::string &path, [[maybe_unused]] const std::string &partitionName,
     std::string &devPath)
 {
     devPath = path;
     LOG(INFO) << "GetWriteDevPath: " << devPath;
+    return;
+}
+
+__attribute__((weak)) void SyncWriteDevPath(int fd, [[maybe_unused]] const std::string &partitionName)
+{
+    if (fd < 0) {
+        LOG(ERROR) << "fd is invalid";
+        return;
+    }
+    if (fsync(fd) == -1) {
+        LOG(ERROR) << "fsync failed for " << partitionName;
+    }
     return;
 }
 
@@ -303,7 +315,7 @@ static int32_t DoExecuteUpdateBlock(const UpdateBlockInfo &infos, TransferManage
         return USCRIPT_ERROR_EXECUTE;
     }
     int32_t ret = ExecuteTransferCommand(fd, lines, tm, context, infos);
-    fsync(fd);
+    SyncWriteDevPath(fd, infos.partitionName);
     close(fd);
     fd = -1;
     env->GetPkgManager()->ClosePkgStream(outStream);
