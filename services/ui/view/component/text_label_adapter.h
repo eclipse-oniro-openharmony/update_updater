@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #define UPDATER_UI_TEXT_LABEL_ADAPTER_H
 
 #include "component_common.h"
+#include "component_factory.h"
 #include "components/ui_label.h"
 #include "json_visitor.h"
 #include "macros_updater.h"
@@ -38,13 +39,13 @@ struct UxLabelInfo {
     bool touchable;
     std::string lineBreakMode;
 };
-struct UxViewInfo;
-class TextLabelAdapter : public OHOS::UILabel, public ComponentCommon<TextLabelAdapter> {
+
+class TextLabelAdapter : public OHOS::UILabel, public ComponentCommon<TextLabelAdapter, UxLabelInfo> {
     DISALLOW_COPY_MOVE(TextLabelAdapter);
     struct TextLabelOnFocusListener;
     static constexpr uint32_t MAX_FONT_SIZE = 200;
 public:
-    using SpecificInfoType = UxLabelInfo;
+
     static constexpr auto COMPONENT_TYPE = "UILabel";
     TextLabelAdapter();
     explicit TextLabelAdapter(const UxViewInfo &info);

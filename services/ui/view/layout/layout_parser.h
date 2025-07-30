@@ -25,7 +25,6 @@ class LayoutParser {
 public:
     static LayoutParser &GetInstance();
     bool LoadLayout(const std::vector<std::string> &layoutFiles, std::vector<UxPageInfo> &vec) const;
-    bool LoadLayout(const std::string &layoutFile, UxPageInfo &pageInfo) const;
 private:
     LayoutParser();
     ~LayoutParser();

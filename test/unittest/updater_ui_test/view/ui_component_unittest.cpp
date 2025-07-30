@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,14 +14,17 @@
  */
 
 #include <thread>
-#include "gtest/gtest.h"
+#include <vector>
+#include "common/task_manager.h"
 #include "component/box_progress_adapter.h"
 #include "component/component_factory.h"
+#include "component/component_register.h"
 #include "component/label_btn_adapter.h"
 #include "component/text_label_adapter.h"
-#include "common/task_manager.h"
 #include "dock/focus_manager.h"
+#include "gtest/gtest.h"
 #include "ui_test_graphic_engine.h"
+#include "view/page/view_proxy.h"
 #include "view_api.h"
 
 using namespace testing::ext;
@@ -34,9 +37,23 @@ public:
     {
         TestGraphicEngine::GetInstance();
     }
-    static void TearDownTestCase(void) {}
-    void SetUp() override {}
+    static void TearDownTestCase(void)
+    {
+        components_.clear();
+    }
+    void SetUp() override
+    {
+        RegisterComponents();
+    }
+
     void TearDown() override {}
+
+protected:
+    template <typename T>
+    T *CreateAdapterProxy(UxViewCommonInfo commonInfo, typename T::SpecificInfoType specInfo);
+
+private:
+    inline static std::vector<std::unique_ptr<ViewProxy>> components_;
 };
 
 constexpr static int32_t MAX_PROGRESS_VALUE = 100;
@@ -51,12 +68,41 @@ void CheckCommInfo(OHOS::UIView &view, const UxViewCommonInfo &common)
     EXPECT_EQ(view.IsVisible(), common.visible);
 }
 
+template <typename T>
+T *UpdaterUiComponentUnitTest::CreateAdapterProxy(UxViewCommonInfo commonInfo, typename T::SpecificInfoType specInfo)
+{
+    UxViewInfo info {};
+    info.commonInfo = commonInfo;
+    info.specificInfo = ComponentFactory::CreateSpecificInfo(T::COMPONENT_TYPE);
+    if (info.specificInfo == nullptr) {
+        LOG(ERROR) << "create specific info failed, COMPONENT_TYPE: " << T::COMPONENT_TYPE;
+        return nullptr;
+    }
+
+    static_cast<SpecificInfoWrapper<T> *>(info.specificInfo.get())->data = specInfo;
+
+    std::unique_ptr<ComponentInterface> ptr = ComponentFactory::CreateView(T::COMPONENT_TYPE, info);
+    if (ptr == nullptr) {
+        LOG(ERROR) << "create component failed, COMPONENT_TYPE: " << T::COMPONENT_TYPE;
+        return nullptr;
+    }
+
+    CheckCommInfo(*static_cast<T *>(ptr.get()), info.commonInfo);
+
+    std::string message = std::string("component id:") + info.commonInfo.id + ", ";
+    std::unique_ptr<ViewProxy> proxy = std::make_unique<ViewProxy>(std::move(ptr), message);
+    T* raw = proxy->As<T>();
+    components_.emplace_back(std::move(proxy));
+    return raw;
+}
+
 HWTEST_F(UpdaterUiComponentUnitTest, test_box_progress_constructor, TestSize.Level0)
 {
     UxBoxProgressInfo specInfo {50, "#ffffffff", "#000000ff", "", false};
     UxViewCommonInfo commonInfo {10, 10, 1000, 1000, "id", "UIBoxProgress", false};
-    BoxProgressAdapter boxProgress {UxViewInfo {commonInfo, specInfo}};
-    CheckCommInfo(boxProgress, commonInfo);
+    BoxProgressAdapter *boxProgressPtr = CreateAdapterProxy<BoxProgressAdapter>(commonInfo, specInfo);
+    ASSERT_NE(boxProgressPtr, nullptr);
+    BoxProgressAdapter &boxProgress = *boxProgressPtr;
 
     auto fgColor = StrToColor(specInfo.fgColor);
     auto bgColor = StrToColor(specInfo.bgColor);
@@ -64,8 +110,8 @@ HWTEST_F(UpdaterUiComponentUnitTest, test_box_progress_constructor, TestSize.Lev
     EXPECT_EQ(boxProgress.GetBackgroundStyle(OHOS::STYLE_BACKGROUND_OPA), bgColor.alpha);
     EXPECT_EQ(boxProgress.GetForegroundStyle(OHOS::STYLE_BACKGROUND_COLOR), fgColor.full);
     EXPECT_EQ(boxProgress.GetForegroundStyle(OHOS::STYLE_BACKGROUND_OPA), fgColor.alpha);
-    EXPECT_EQ(boxProgress.GetValue(), static_cast<int>(static_cast<float>(specInfo.defaultValue) /
-        MAX_PROGRESS_VALUE * (commonInfo.w - 1)));
+    EXPECT_EQ(boxProgress.GetValue(),
+        static_cast<int>(static_cast<float>(specInfo.defaultValue) / MAX_PROGRESS_VALUE * (commonInfo.w - 1)));
     EXPECT_EQ(boxProgress.GetRangeMin(), 0);
     EXPECT_EQ(boxProgress.GetRangeMax(), commonInfo.w - 1);
 }
@@ -85,7 +131,9 @@ HWTEST_F(UpdaterUiComponentUnitTest, test_box_progress_set_value_without_ep, Tes
     UxViewCommonInfo commonInfo {10, 10, 1000, 1000, "id", "UIBoxProgress", false};
     constexpr float validValue = 40;
     {
-        BoxProgressAdapter boxProgress {UxViewInfo {commonInfo, specInfo}};
+        BoxProgressAdapter *boxProgressPtr = CreateAdapterProxy<BoxProgressAdapter>(commonInfo, specInfo);
+        ASSERT_NE(boxProgressPtr, nullptr);
+        BoxProgressAdapter &boxProgress = *boxProgressPtr;
 
         boxProgress.SetValue(-1);
         EXPECT_EQ(boxProgress.GetValue(), 0);
@@ -96,7 +144,10 @@ HWTEST_F(UpdaterUiComponentUnitTest, test_box_progress_set_value_without_ep, Tes
     }
     {
         specInfo.hasEp = true;
-        BoxProgressAdapter boxProgress {UxViewInfo {commonInfo, specInfo}};
+        BoxProgressAdapter *boxProgressPtr = CreateAdapterProxy<BoxProgressAdapter>(commonInfo, specInfo);
+        ASSERT_NE(boxProgressPtr, nullptr);
+        BoxProgressAdapter &boxProgress = *boxProgressPtr;
+
         boxProgress.SetValue(validValue);
         EXPECT_EQ(boxProgress.GetValue(), static_cast<int>(validValue / MAX_PROGRESS_VALUE * (commonInfo.w - 1)));
     }
@@ -105,16 +156,22 @@ HWTEST_F(UpdaterUiComponentUnitTest, test_box_progress_set_value_without_ep, Tes
 HWTEST_F(UpdaterUiComponentUnitTest, test_box_progress_set_visible_without_ep, TestSize.Level0)
 {
     {
-        UxViewInfo info {{10, 10, 1000, 1000, "id", "UIBoxProgress", false},
-        UxBoxProgressInfo {50, "#ffffffff", "#000000ff", "", false}};
-        BoxProgressAdapter boxProgress {info};
+        UxViewCommonInfo commonInfo {10, 10, 1000, 1000, "id", "UIBoxProgress", false};
+        UxBoxProgressInfo specificInfo {50, "#ffffffff", "#000000ff", "", false};
+        BoxProgressAdapter *boxProgressPtr = CreateAdapterProxy<BoxProgressAdapter>(commonInfo, specificInfo);
+        ASSERT_NE(boxProgressPtr, nullptr);
+        BoxProgressAdapter &boxProgress = *boxProgressPtr;
+
         boxProgress.SetVisible(true);
         EXPECT_TRUE(boxProgress.IsVisible());
     }
     {
-        UxViewInfo info {{10, 10, 1000, 1000, "id", "UIBoxProgress", false},
-        UxBoxProgressInfo {50, "#ffffffff", "#000000ff", "", true}};
-        BoxProgressAdapter boxProgress {info};
+        UxViewCommonInfo commonInfo {10, 10, 1000, 1000, "id", "UIBoxProgress", false};
+        UxBoxProgressInfo specificInfo {50, "#ffffffff", "#000000ff", "", true};
+        BoxProgressAdapter *boxProgressPtr = CreateAdapterProxy<BoxProgressAdapter>(commonInfo, specificInfo);
+        ASSERT_NE(boxProgressPtr, nullptr);
+        BoxProgressAdapter &boxProgress = *boxProgressPtr;
+
         boxProgress.SetVisible(true);
         EXPECT_TRUE(boxProgress.IsVisible());
     }
@@ -125,52 +182,64 @@ HWTEST_F(UpdaterUiComponentUnitTest, test_box_progress_init_endpoint, TestSize.L
     UxBoxProgressInfo specInfo {50, "#ffffffff", "#000000ff", "", false};
     UxViewCommonInfo commonInfo {10, 10, 1000, 1000, "id", "UIBoxProgress", false};
     {
-        BoxProgressAdapter boxProgress {UxViewInfo {commonInfo, specInfo}};
-        EXPECT_TRUE(boxProgress.InitEp());
+        BoxProgressAdapter *boxProgress = CreateAdapterProxy<BoxProgressAdapter>(commonInfo, specInfo);
+        ASSERT_NE(boxProgress, nullptr);
+        EXPECT_TRUE(boxProgress->InitEp());
     }
     {
         specInfo.hasEp = true;
-        BoxProgressAdapter boxProgress {UxViewInfo {commonInfo, specInfo}};
-        EXPECT_FALSE(boxProgress.InitEp());
+        BoxProgressAdapter *boxProgress = CreateAdapterProxy<BoxProgressAdapter>(commonInfo, specInfo);
+        ASSERT_NE(boxProgress, nullptr);
+        EXPECT_FALSE(boxProgress->InitEp());
     }
     {
+        BoxProgressAdapter *boxProgress = CreateAdapterProxy<BoxProgressAdapter>(commonInfo, specInfo);
+        ASSERT_NE(boxProgress, nullptr);
         OHOS::UIViewGroup parent {};
-        BoxProgressAdapter boxProgress {UxViewInfo {commonInfo, specInfo}};
-        parent.Add(&boxProgress);
-        EXPECT_FALSE(boxProgress.InitEp());
+        parent.Add(boxProgress);
+        EXPECT_FALSE(boxProgress->InitEp());
     }
     {
         constexpr auto epId = "endpoint";
         specInfo.endPoint = epId;
-        OHOS::UIViewGroup parent {};
-        BoxProgressAdapter boxProgress {UxViewInfo {commonInfo, specInfo}};
+        BoxProgressAdapter *boxProgress = CreateAdapterProxy<BoxProgressAdapter>(commonInfo, specInfo);
+        ASSERT_NE(boxProgress, nullptr);
         LabelBtnAdapter labelBtn {};
         labelBtn.SetViewId(epId);
-        parent.Add(&boxProgress);
+
+        OHOS::UIViewGroup parent {};
+        parent.Add(boxProgress);
         parent.Add(&labelBtn);
-        EXPECT_FALSE(boxProgress.InitEp());
+        EXPECT_FALSE(boxProgress->InitEp());
     }
     {
         constexpr auto epId = "endpoint";
         specInfo.endPoint = epId;
-        OHOS::UIViewGroup parent {};
-        BoxProgressAdapter boxProgress {UxViewInfo {commonInfo, specInfo}};
+        BoxProgressAdapter *boxProgress = CreateAdapterProxy<BoxProgressAdapter>(commonInfo, specInfo);
+        ASSERT_NE(boxProgress, nullptr);
         ImgViewAdapter imgView {};
         imgView.SetViewId(epId);
-        parent.Add(&boxProgress);
+
+        OHOS::UIViewGroup parent {};
+        parent.Add(boxProgress);
         parent.Add(&imgView);
-        EXPECT_TRUE(boxProgress.InitEp());
+        EXPECT_TRUE(boxProgress->InitEp());
     }
 }
 
 HWTEST_F(UpdaterUiComponentUnitTest, test_box_progress_with_ep, TestSize.Level0)
 {
     constexpr auto epId = "endpoint";
-    OHOS::UIViewGroup parent {};
+    UxViewCommonInfo commonInfo {10, 10, 1000, 1000, "id", "UIBoxProgress", false};
+    UxBoxProgressInfo specificInfo {50, "#ffffffff", "#000000ff", epId, true};
+    BoxProgressAdapter *boxProgressPtr = CreateAdapterProxy<BoxProgressAdapter>(commonInfo, specificInfo);
+    ASSERT_NE(boxProgressPtr, nullptr);
+    BoxProgressAdapter &boxProgress = *boxProgressPtr;
+
     ImgViewAdapter epView {};
-    BoxProgressAdapter boxProgress {UxViewInfo {UxViewCommonInfo {10, 10, 1000, 1000, "id", "UIBoxProgress", false},
-        UxBoxProgressInfo {50, "#ffffffff", "#000000ff", epId, true}}};
     epView.SetViewId(epId);
+
+    OHOS::UIViewGroup parent {};
     parent.Add(&boxProgress);
     parent.Add(&epView);
     EXPECT_TRUE(boxProgress.InitEp());
@@ -184,8 +253,8 @@ HWTEST_F(UpdaterUiComponentUnitTest, test_box_progress_with_ep, TestSize.Level0)
     EXPECT_FALSE(epView.IsVisible());
 
     boxProgress.SetVisible(true);
-    constexpr float testValue = 50;
-    constexpr float halfDivisor = 2.0;
+    float testValue = 50;
+    float halfDivisor = 2.0;
     boxProgress.SetValue(testValue);
     float rate = static_cast<float>(boxProgress.GetValue()) / boxProgress.GetRangeMax();
     EXPECT_EQ(epView.GetX(), static_cast<int16_t>(boxProgress.GetX() -
@@ -202,8 +271,9 @@ HWTEST_F(UpdaterUiComponentUnitTest, test_img_view_adapter_constructor, TestSize
         interval = 0;
         UxImageInfo specInfo {"", "", 100, interval};
         UxViewCommonInfo commonInfo {10, 10, 1000, 1000, id, "UIImageView", false};
-        ImgViewAdapter imgView {UxViewInfo {commonInfo, specInfo}};
-        CheckCommInfo(imgView, commonInfo);
+        ImgViewAdapter *imgViewPtr = CreateAdapterProxy<ImgViewAdapter>(commonInfo, specInfo);
+        ASSERT_NE(imgViewPtr, nullptr);
+        ImgViewAdapter &imgView = *imgViewPtr;
 
         EXPECT_EQ(imgView.GetX(), commonInfo.x);
         EXPECT_EQ(imgView.GetY(), commonInfo.y);
@@ -217,8 +287,9 @@ HWTEST_F(UpdaterUiComponentUnitTest, test_img_view_adapter_constructor, TestSize
         constexpr auto id = "img";
         UxImageInfo specInfo {"", "", 100, interval};
         UxViewCommonInfo commonInfo {10, 10, 1000, 1000, id, "UIImageView", false};
-        ImgViewAdapter imgView {UxViewInfo {commonInfo, specInfo}};
-        CheckCommInfo(imgView, commonInfo);
+        ImgViewAdapter *imgViewPtr = CreateAdapterProxy<ImgViewAdapter>(commonInfo, specInfo);
+        ASSERT_NE(imgViewPtr, nullptr);
+        ImgViewAdapter &imgView = *imgViewPtr;
 
         ASSERT_NE(imgView.GetAnimatorCallback(), nullptr);
         ASSERT_NE(imgView.GetAnimator(), nullptr);
@@ -252,15 +323,22 @@ HWTEST_F(UpdaterUiComponentUnitTest, test_img_view_adapter_start_stop, TestSize.
     }
     {
         // non animator
-        ImgViewAdapter imgView {UxViewInfo {UxViewCommonInfo {10, 10, 1000, 1000, "id", "UIImageView", false},
-            UxImageInfo {"respath", "", 100, 0}}};
+        UxViewCommonInfo commonInfo {10, 10, 1000, 1000, "id", "UIImageView", false};
+        UxImageInfo specInfo {"respath", "", 100, 0};
+        ImgViewAdapter *imgViewPtr = CreateAdapterProxy<ImgViewAdapter>(commonInfo, specInfo);
+        ASSERT_NE(imgViewPtr, nullptr);
+        ImgViewAdapter &imgView = *imgViewPtr;
+
         EXPECT_FALSE(imgView.Start());
         EXPECT_FALSE(imgView.Stop());
     }
     {
         using namespace std::literals::chrono_literals;
-        ImgViewAdapter imgView {UxViewInfo {UxViewCommonInfo {10, 10, 1000, 1000, "id", "UIImageView", false},
-            UxImageInfo {"", "fileprefix", 100, 10}}};
+        UxViewCommonInfo commonInfo {10, 10, 1000, 1000, "id", "UIImageView", false};
+        UxImageInfo specInfo {"", "fileprefix", 100, 10};
+        ImgViewAdapter *imgViewPtr = CreateAdapterProxy<ImgViewAdapter>(commonInfo, specInfo);
+        ASSERT_NE(imgViewPtr, nullptr);
+        ImgViewAdapter &imgView = *imgViewPtr;
 
         uint32_t currId = 0;
         EXPECT_FALSE(imgView.Stop()); // stop would fail when hasn't been started
@@ -294,9 +372,9 @@ HWTEST_F(UpdaterUiComponentUnitTest, test_label_btn_adapter_constructor, TestSiz
     constexpr auto labelText = "hello";
     UxLabelBtnInfo specInfo {100, "hello", "#ffffffff", "#000000ff", "#000000ff", "#ffffffff", true};
     UxViewCommonInfo commonInfo {0, 0, 0, 0, "id", "UILabelButton", false};
-    UxViewInfo info {commonInfo, specInfo};
-    LabelBtnAdapter labelBtn {info};
-    CheckCommInfo(labelBtn, commonInfo);
+    LabelBtnAdapter *labelBtnPtr = CreateAdapterProxy<LabelBtnAdapter>(commonInfo, specInfo);
+    ASSERT_NE(labelBtnPtr, nullptr);
+    LabelBtnAdapter &labelBtn = *labelBtnPtr;
 
     auto fontColor = StrToColor(specInfo.txtColor);
     auto bgColor = StrToColor(specInfo.bgColor);
@@ -310,10 +388,18 @@ HWTEST_F(UpdaterUiComponentUnitTest, test_label_btn_adapter_constructor, TestSiz
 
 HWTEST_F(UpdaterUiComponentUnitTest, test_label_btn_adapter_on_press, TestSize.Level0)
 {
-    LabelBtnAdapter labelBtn1 {UxViewInfo {{0, 0, 50, 50, "id", "UILabelButton", true},
-        UxLabelBtnInfo {100, "", "#000000ff", "#ffffffff", "#ffffffff", "#000000ff", true}}};
-    LabelBtnAdapter labelBtn2 {UxViewInfo {{100, 100, 50, 50, "id", "UILabelButton", true},
-        UxLabelBtnInfo {100, "", "#000000ff", "#ffffffff", "#ffffffff", "#000000ff", true}}};
+    UxViewCommonInfo commonInfo1{0, 0, 50, 50, "id", "UILabelButton", true};
+    UxLabelBtnInfo specInfo1{100, "", "#000000ff", "#ffffffff", "#ffffffff", "#000000ff", true};
+    LabelBtnAdapter *labelBtn1Ptr = CreateAdapterProxy<LabelBtnAdapter>(commonInfo1, specInfo1);
+    ASSERT_NE(labelBtn1Ptr, nullptr);
+    LabelBtnAdapter &labelBtn1 = *labelBtn1Ptr;
+
+    UxViewCommonInfo commonInfo2{100, 100, 50, 50, "id", "UILabelButton", true};
+    UxLabelBtnInfo specInfo2{100, "", "#000000ff", "#ffffffff", "#ffffffff", "#000000ff", true};
+    LabelBtnAdapter *labelBtn2Ptr = CreateAdapterProxy<LabelBtnAdapter>(commonInfo2, specInfo2);
+    ASSERT_NE(labelBtn2Ptr, nullptr);
+    LabelBtnAdapter &labelBtn2 = *labelBtn2Ptr;
+
     OHOS::FocusManager::GetInstance()->RequestFocus(&labelBtn2);
     labelBtn1.OnPressEvent(OHOS::PressEvent {OHOS::Point {}});
     EXPECT_EQ(OHOS::FocusManager::GetInstance()->GetFocusedView(), &labelBtn1);
@@ -337,8 +423,12 @@ HWTEST_F(UpdaterUiComponentUnitTest, test_label_btn_adapter_is_valid, TestSize.L
 
 HWTEST_F(UpdaterUiComponentUnitTest, test_label_btn_adapter_set_text, TestSize.Level0)
 {
-    LabelBtnAdapter labelBtn {UxViewInfo {{0, 0, 0, 0, "id", "UILabelButton", false},
-        UxLabelBtnInfo {100, "", "#000000ff", "#000000ff", "#000000ff", "#000000ff", false}}};
+    UxViewCommonInfo commonInfo {0, 0, 0, 0, "id", "UILabelButton", false};
+    UxLabelBtnInfo specInfo {100, "", "#000000ff", "#000000ff", "#000000ff", "#000000ff", false};
+    LabelBtnAdapter *labelBtnPtr = CreateAdapterProxy<LabelBtnAdapter>(commonInfo, specInfo);
+    ASSERT_NE(labelBtnPtr, nullptr);
+    LabelBtnAdapter &labelBtn = *labelBtnPtr;
+
     constexpr auto testString = "test text";
     labelBtn.SetText(testString);
     EXPECT_STREQ(labelBtn.GetText(), testString);
@@ -363,9 +453,9 @@ HWTEST_F(UpdaterUiComponentUnitTest, test_text_label_adapter_constructor, TestSi
     UxLabelInfo specInfo {100, "hello", "center", "#000000ff", "#000000ff", "normal",
         {"#000000ff", "#000000ff", false}, false, "ellipsis"};
     UxViewCommonInfo commonInfo {0, 0, 0, 0, "id", "UILabel", false};
-    UxViewInfo info {commonInfo, specInfo};
-    TextLabelAdapter textLabel {info};
-    CheckCommInfo(textLabel, commonInfo);
+    TextLabelAdapter *textLabelPtr = CreateAdapterProxy<TextLabelAdapter>(commonInfo, specInfo);
+    ASSERT_NE(textLabelPtr, nullptr);
+    TextLabelAdapter &textLabel = *textLabelPtr;
 
     auto fontColor = StrToColor(specInfo.fontColor);
     auto bgColor = StrToColor(specInfo.bgColor);
@@ -379,9 +469,14 @@ HWTEST_F(UpdaterUiComponentUnitTest, test_text_label_adapter_constructor, TestSi
 
 HWTEST_F(UpdaterUiComponentUnitTest, test_text_label_adapter_set_text, TestSize.Level0)
 {
-    TextLabelAdapter textLabel {UxViewInfo {{0, 0, 0, 0, "id", "UILabel", false},
-        UxLabelInfo {255, "", "", "#000000ff", "#000000ff", "normal",
-            {"#000000ff", "#000000ff", false}, false, "ellipsis"}}};
+    UxViewCommonInfo commonInfo {0, 0, 0, 0, "id", "UILabel", false};
+    UxLabelInfo specInfo {255, "", "", "#000000ff", "#000000ff", "normal",
+        {"#000000ff", "#000000ff", false}, false, "ellipsis"};
+
+    TextLabelAdapter *textLabelPtr = CreateAdapterProxy<TextLabelAdapter>(commonInfo, specInfo);
+    ASSERT_NE(textLabelPtr, nullptr);
+    TextLabelAdapter &textLabel = *textLabelPtr;
+
     constexpr auto testString = "test text";
     textLabel.SetText(testString);
     EXPECT_STREQ(textLabel.GetText(), testString);
@@ -392,4 +487,4 @@ HWTEST_F(UpdaterUiComponentUnitTest, test_text_label_adapter_set_text, TestSize.
     textLabel.SetText("");
     EXPECT_STREQ(textLabel.GetText(), "");
 }
-}
+}  // namespace

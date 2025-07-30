@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +25,7 @@ enum UpdaterInitEvent {
 
     // updater
     UPDATER_PRE_INIT_EVENT,
+    UPDATER_COMPONENT_REGISTER_EVENT,
     UPDATER_INIT_EVENT,
     UPDATER_PRE_UPDATE_PACKAGE_EVENT,
     UPDATER_PRE_VERIFY_PACKAGE_EVENT,

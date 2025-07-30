@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,12 +14,13 @@
  */
 
 #include "layout_parser.h"
+#include "auto_layout.h"
 #include "component/component_factory.h"
+#include "component/component_register.h"
 #include "components/ui_view.h"
 #include "json_visitor.h"
 #include "log/log.h"
 #include "view_api.h"
-#include "auto_layout.h"
 
 namespace Updater {
 namespace {
@@ -35,6 +36,7 @@ class LayoutParser::Impl {
 public:
     bool LoadLayout(const std::vector<std::string> &layoutFiles, std::vector<UxPageInfo> &vec) const
     {
+        RegisterComponents();
         layout.Init();
         std::vector<UxPageInfo>().swap(vec);
         UxPageInfo pageInfo = {};
@@ -48,6 +50,8 @@ public:
         }
         return true;
     }
+
+private:
     bool LoadLayout(const std::string &filename, UxPageInfo &pageInfo) const
     {
         JsonNode node {std::filesystem::path {filename}};
@@ -66,7 +70,7 @@ public:
 
         return true;
     }
-private:
+
     bool ParseViewInfo(const JsonNode &root, std::vector<UxViewInfo> &vec) const
     {
         UxViewInfo info {};
@@ -85,25 +89,25 @@ private:
                 return false;
             }
             const JsonNode &commonDefault = defaultNode[COMMON_LABEL];
+            const JsonNode &specificDefault = defaultNode[*viewType];
+
+            // for common info
             if (!Visit<SETVAL>(componentNode, commonDefault, info.commonInfo)) {
                 LOG(ERROR) << "set common info failed";
                 return false;
             }
+            // for specific info
+            info.specificInfo = ComponentFactory::CreateSpecificInfo(*viewType);
+            if (info.specificInfo == nullptr) {
+                LOG(ERROR) << "create specific info failed, COMMON_TYPE: " << *viewType;
+                return false;
+            }
+            if (!info.specificInfo->DeserializeFromJson(comNode, specificDefault)) {
+                LOG(ERROR) << "parse specific info failed, COMMON_TYPE: " << *viewType;
+                return false;
+            }
 
-            auto it = GetSpecificInfoMap<COMPONENT_TYPE_LIST>().find(*viewType);
-            if (it == GetSpecificInfoMap<COMPONENT_TYPE_LIST>().end()) {
-                LOG(ERROR) << "Can't recognize this type " << *viewType;
-                return false;
-            }
-            info.specificInfo = it->second();
-            auto visitor = [&comNode, &defaultNode] (auto &args) {
-                const JsonNode &defaultComNode = defaultNode[Traits<std::decay_t<decltype(args)>>::STRUCT_KEY];
-                return Visit<SETVAL>(comNode, defaultComNode, args);
-            };
-            if (!std::visit(visitor, info.specificInfo)) {
-                return false;
-            }
-            vec.push_back(std::move(info));
+            vec.emplace_back(std::move(info));
             info = {};
         }
         return true;
@@ -118,11 +122,6 @@ LayoutParser &LayoutParser::GetInstance()
 {
     static LayoutParser layoutParser;
     return layoutParser;
-}
-
-bool LayoutParser::LoadLayout(const std::string &layoutFile, UxPageInfo &pageInfo) const
-{
-    return pImpl_->LoadLayout(layoutFile, pageInfo);
 }
 
 bool LayoutParser::LoadLayout(const std::vector<std::string> &layoutFiles, std::vector<UxPageInfo> &vec) const

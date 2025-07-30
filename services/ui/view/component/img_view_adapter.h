@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@
 #include <thread>
 #include "animator/animator_manager.h"
 #include "component_common.h"
+#include "component_factory.h"
 #include "components/ui_image_view.h"
 #include "macros_updater.h"
 
@@ -29,8 +30,8 @@ struct UxImageInfo {
     uint32_t imgCnt;
     uint32_t updInterval;
 };
-struct UxViewInfo;
-class ImgViewAdapter : public OHOS::UIImageView, public ComponentCommon<ImgViewAdapter> {
+
+class ImgViewAdapter : public OHOS::UIImageView, public ComponentCommon<ImgViewAdapter, UxImageInfo> {
     DISALLOW_COPY_MOVE(ImgViewAdapter);
     class ImgAnimatorCallback;
     static constexpr uint32_t MAX_IMG_CNT = 300;
@@ -38,7 +39,7 @@ class ImgViewAdapter : public OHOS::UIImageView, public ComponentCommon<ImgViewA
     static constexpr uint32_t USECOND_TO_MSECOND = 1000;
     static constexpr int ANIMATION_FILE_NAME_LENGTH = 5;
 public:
-    using SpecificInfoType = UxImageInfo;
+
     static constexpr auto COMPONENT_TYPE = "UIImageView";
     ImgViewAdapter();
     explicit ImgViewAdapter(const UxViewInfo &info);

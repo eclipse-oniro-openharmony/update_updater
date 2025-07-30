@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -81,24 +81,42 @@ bool BasePage::BuildComs(const UxPageInfo &pageInfo)
 
 bool BasePage::BuildCom(const UxViewInfo &viewInfo, int &minY)
 {
-    if (!ComponentFactory::CheckUxComponent(viewInfo)) {
+    if (viewInfo.specificInfo == nullptr) {
         LOG(ERROR) << "component (" << viewInfo.commonInfo.id
-            << ") is invalid, please check your page config json";
+                   << ") specific info is null, please check your page config json";
         return false;
     }
-    auto upView = std::make_unique<ViewProxy>(ComponentFactory::CreateUxComponent(viewInfo),
-        std::string("component id:") + viewInfo.commonInfo.id + ", ");
-    auto &view = *upView;
+    if (!viewInfo.specificInfo->IsValid()) {
+        LOG(ERROR) << "component (" << viewInfo.commonInfo.id << ") is invalid, please check your page config json";
+        return false;
+    }
+
+    std::unique_ptr<ComponentInterface> viewPtr =
+        ComponentFactory::CreateView(viewInfo.specificInfo->GetType(), viewInfo);
+    if (viewPtr == nullptr) {
+        LOG(ERROR) << "create component view failed";
+        return false;
+    }
+    std::string message = std::string("component id:") + viewInfo.commonInfo.id + ", ";
+    auto upView = std::make_unique<ViewProxy>(std::move(viewPtr), message);
+
+    auto &viewObj = *upView;
+    OHOS::UIView *view = viewObj.operator->();
+    if (view == nullptr) {
+        LOG(ERROR) << "view is nullptr";
+        return false;
+    }
+
     if (view->GetViewId() == nullptr) {
         LOG(ERROR) << "id is nullptr";
         return false;
     }
     if (view->IsFocusable() && viewInfo.commonInfo.y < minY) {
         minY = viewInfo.commonInfo.y;
-        focusedView_ = view.operator->();
+        focusedView_ = view;
     }
     coms_.push_back(std::move(upView));
-    root_->Add(view.operator->());
+    root_->Add(view);
     // empty id is allowed. id is needed only when get specific view by id.
     if (std::string(view->GetViewId()).empty()) {
         return true; // skip this view. build com success, but not save in map
