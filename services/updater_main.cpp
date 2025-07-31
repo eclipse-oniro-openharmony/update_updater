@@ -378,7 +378,6 @@ void ProcessPrgrsSmooth(float beginProgress, float endProgress, UpdaterParams up
 static UpdaterStatus VerifyPackages(UpdaterParams &upParams)
 {
     UPDATER_INIT_RECORD;
-    UpdaterStatus status = UPDATE_SUCCESS;
     LOG(INFO) << "Verify packages start...";
     UPDATER_UI_INSTANCE.ShowProgressPage();
     UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_VERIFYPKG));
