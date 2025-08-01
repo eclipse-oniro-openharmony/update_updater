@@ -160,7 +160,8 @@ static bool IsPackagePath(const std::string &path)
     if (path.find("--force_update_action=") != std::string::npos ||
         path.find("--night_update") != std::string::npos ||
         path.find("--shrink_info=") != std::string::npos ||
-        path.find("--virtual_shrink_info=") != std::string::npos) {
+        path.find("--virtual_shrink_info=") != std::string::npos ||
+        path.find("--screen_state=") != std::string::npos) {
             return false;
         }
     return true;
