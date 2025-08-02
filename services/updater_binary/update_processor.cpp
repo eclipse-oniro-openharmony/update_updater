@@ -83,7 +83,8 @@ const std::vector<std::string> UpdaterEnv::GetInstructionNames() const
     static std::vector<std::string> updaterCmds = {
         "sha_check", "first_block_check", "block_update",
         "raw_image_write", "update_partitions", "image_patch",
-        "image_sha_check", "pkg_extract", "pkg_extract_no_ret", "update_from_bin"
+        "image_sha_check", "pkg_extract", "pkg_extract_no_ret", "update_from_bin",
+        "is_updater_mode"
     };
     return updaterCmds;
 }
@@ -111,6 +112,8 @@ int32_t UpdaterInstructionFactory::CreateInstructionInstance(UScriptInstructionP
         instr = new UScriptInstructionPkgExtractRetSuc();
     } else if (name == "update_from_bin") {
         instr = new UScriptInstructionBinFlowWrite();
+    } else if (name == "is_updater_mode") {
+        instr = new UScriptInstructionIsUpdaterMode();
     }
     return USCRIPT_SUCCESS;
 }
@@ -526,5 +529,10 @@ int ProcessUpdater(bool retry, int pipeFd, const std::string &packagePath, const
         });
     PkgManager::ReleasePackageInstance(pkgManager);
     return ret;
+}
+
+int32_t UScriptInstructionIsUpdaterMode::Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context)
+{
+    return Utils::IsUpdaterMode() ? 1 : 0;
 }
 } // Updater
