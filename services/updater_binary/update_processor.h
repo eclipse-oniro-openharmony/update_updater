@@ -106,5 +106,12 @@ public:
 private:
     static size_t stashDataSize_;
 };
+
+class UScriptInstructionIsUpdaterMode : public Uscript::UScriptInstruction {
+public:
+    UScriptInstructionIsUpdaterMode() {}
+    virtual ~UScriptInstructionIsUpdaterMode() {}
+    int32_t Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context) override;
+};
 } // Updater
 #endif /* UPDATE_PROCESSOR_H */
