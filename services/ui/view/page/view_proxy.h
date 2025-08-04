@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,7 +19,7 @@
 #include <memory>
 #include <string>
 #include <type_traits>
-#include "component/component_factory.h"
+#include "component/component_common.h"
 #include "components/ui_view.h"
 #include "log/log.h"
 
@@ -45,7 +45,7 @@ public:
         std::string errMsg {};
         return As<T>(errMsg);
     }
-    template<typename T, std::enable_if_t<IS_UPDATER_COMPONENT<T>>* = nullptr>
+    template<typename T, EnableIfIsUpdaterComponent<T>* = nullptr>
     T *As(std::string &errMsg) const
     {
         static T dummy;
@@ -60,7 +60,7 @@ public:
         }
         return static_cast<T *>(view_.get());
     }
-    template<typename T = OHOS::UIView, std::enable_if_t<!IS_UPDATER_COMPONENT<T>>* = nullptr>
+    template<typename T = OHOS::UIView, EnableIfNotUpdaterComponent<T>* = nullptr>
     T *As(std::string &errMsg) const
     {
         static T dummy;

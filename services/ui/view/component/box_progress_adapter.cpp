@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,7 +24,7 @@ namespace Updater {
 BoxProgressAdapter::BoxProgressAdapter(const UxViewInfo &info)
 {
     SetViewCommonInfo(info.commonInfo);
-    const UxBoxProgressInfo &spec = std::get<UxBoxProgressInfo>(info.specificInfo);
+    const UxBoxProgressInfo &spec = AsSpecific(info.specificInfo);
     this->SetRange(progressWidth_ - 1, 0);
     this->SetValue(spec.defaultValue);
 

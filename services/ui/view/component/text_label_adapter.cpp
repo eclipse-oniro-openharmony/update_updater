@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -71,7 +71,7 @@ TextLabelAdapter::~TextLabelAdapter() = default;
 
 TextLabelAdapter::TextLabelAdapter(const UxViewInfo &info)
 {
-    const UxLabelInfo &spec = std::get<UxLabelInfo>(info.specificInfo);
+    const UxLabelInfo &spec = AsSpecific(info.specificInfo);
     SetViewCommonInfo(info.commonInfo);
     this->SetAlign(GetAlign(spec.align), OHOS::TEXT_ALIGNMENT_CENTER);
     this->SetText(TranslateText(spec.text).c_str());
@@ -102,7 +102,7 @@ TextLabelAdapter::TextLabelAdapter(const UxViewInfo &info)
 bool TextLabelAdapter::IsValid(const UxLabelInfo &info)
 {
     if (info.fontSize > MAX_FONT_SIZE) {
-        LOG(ERROR) << "label viewinfo check failed, fontSize: " << info.fontSize;
+        LOG(ERROR) << "label viewinfo check failed, fontSize: " << static_cast<uint32_t>(info.fontSize);
         return false;
     }
 

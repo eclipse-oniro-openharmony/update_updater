@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 
 #include <string>
 #include "component_common.h"
+#include "component_factory.h"
 #include "components/ui_box_progress.h"
 #include "macros_updater.h"
 
@@ -29,13 +30,13 @@ struct UxBoxProgressInfo {
     std::string endPoint;
     bool hasEp;
 };
-struct UxViewInfo;
+
 class ImgViewAdapter;
-class BoxProgressAdapter : public OHOS::UIBoxProgress, public ComponentCommon<BoxProgressAdapter> {
+class BoxProgressAdapter : public OHOS::UIBoxProgress, public ComponentCommon<BoxProgressAdapter, UxBoxProgressInfo> {
     static constexpr uint32_t MAX_PROGRESS_VALUE = 100;
     DISALLOW_COPY_MOVE(BoxProgressAdapter);
 public:
-    using SpecificInfoType = UxBoxProgressInfo;
+
     static constexpr auto COMPONENT_TYPE = "UIBoxProgress";
     BoxProgressAdapter() = default;
     explicit BoxProgressAdapter(const UxViewInfo &info);

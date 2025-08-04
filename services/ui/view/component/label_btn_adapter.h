@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 
 #include <memory>
 #include "component_common.h"
+#include "component_factory.h"
 #include "components/ui_label_button.h"
 #include "macros_updater.h"
 
@@ -30,13 +31,13 @@ struct UxLabelBtnInfo {
     std::string focusedBgColor;
     bool focusable;
 };
-struct UxViewInfo;
-class LabelBtnAdapter : public OHOS::UILabelButton, public ComponentCommon<LabelBtnAdapter> {
+
+class LabelBtnAdapter : public OHOS::UILabelButton, public ComponentCommon<LabelBtnAdapter, UxLabelBtnInfo> {
     DISALLOW_COPY_MOVE(LabelBtnAdapter);
     struct LabelBtnOnFocusListener;
     static constexpr uint32_t MAX_FONT_SIZE = 200;
 public:
-    using SpecificInfoType = UxLabelBtnInfo;
+
     static constexpr auto COMPONENT_TYPE = "UILabelButton";
     LabelBtnAdapter();
     explicit LabelBtnAdapter(const UxViewInfo &info);
