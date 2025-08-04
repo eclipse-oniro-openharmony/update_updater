@@ -27,7 +27,7 @@ using DataBuffer = struct {
     size_t length;
 };
 
-using HwSigningSigntureInfo = struct {
+using SignatureInfo = struct {
     DataBuffer overall;
     DataBuffer hashResult;
     int nid;
@@ -55,8 +55,8 @@ enum {
 
 class VerifyHelper {
 public:
-    virtual int32_t GetDigestFromSubBlocks(std::vector<uint8_t> &digestBlock,
-        HwSigningSigntureInfo &signatureInfo, std::vector<uint8_t> &digest) = 0;
+    virtual int32_t GetDigestFromSubBlocks(
+        std::vector<uint8_t> &digestBlock, SignatureInfo &signatureInfo, std::vector<uint8_t> &digest) = 0;
 
     virtual ~VerifyHelper() {}
 };
@@ -80,8 +80,7 @@ public:
 
     static Pkcs7SignedData &GetInstance();
 
-    int32_t GetDigest(std::vector<uint8_t> &digestBlock,
-        HwSigningSigntureInfo &signatureInfo, std::vector<uint8_t> &digest);
+    int32_t GetDigest(std::vector<uint8_t> &digestBlock, SignatureInfo &signatureInfo, std::vector<uint8_t> &digest);
 
     int32_t ReadSig(const uint8_t *sourceData, const uint32_t sourceDataLen, std::vector<std::vector<uint8_t>> &sigs);
 private:
@@ -100,7 +99,7 @@ private:
     PKCS7 *pkcs7_;
     std::vector<uint8_t> digest_;
     std::vector<Pkcs7SignerInfo> signerInfos_;
-    HwSigningSigntureInfo signatureInfo;
+    SignatureInfo signatureInfo;
     std::unique_ptr<VerifyHelper> helper_ {};
 };
 
@@ -110,8 +109,8 @@ public:
 
     ~Pkcs7VerifyHelper() override;
 
-    int32_t GetDigestFromSubBlocks(std::vector<uint8_t> &digestBlock,
-        HwSigningSigntureInfo &signatureInfo, std::vector<uint8_t> &digest) override;
+    int32_t GetDigestFromSubBlocks(
+        std::vector<uint8_t> &digestBlock, SignatureInfo &signatureInfo, std::vector<uint8_t> &digest) override;
 };
 } // namespace Hpackage
 #endif
