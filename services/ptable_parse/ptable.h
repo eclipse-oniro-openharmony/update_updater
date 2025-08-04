@@ -81,10 +81,10 @@ public:
     bool GetPartionInfoByName(const std::string &partitionName, PtnInfo &ptnInfo, int32_t &index);
     std::vector<PtnInfo>& GetPtablePartitionInfoInstance();
     bool LoadPtnInfo(const std::vector<PtnInfo>& ptnInfo);
-    bool WritePartitionBufToFile(uint8_t *ptbImgBuffer, const uint32_t imgBufSize);
     bool ReadPartitionFileToBuffer(uint8_t *ptbImgBuffer, uint32_t &imgBufSize);
     void DeletePartitionTmpFile();
 
+    virtual bool WritePartitionBufToFile(uint8_t *ptbImgBuffer, const uint32_t imgBufSize);
     virtual bool ParsePartitionFromBuffer(uint8_t *ptbImgBuffer, const uint32_t imgBufSize) = 0;
     virtual bool LoadPtableFromDevice() = 0;
     virtual bool WritePartitionTable() = 0;
