@@ -433,9 +433,13 @@ HWTEST_F(UpdaterUiPageManagerUnitTest, test_page_manager_show_more_page_than_que
     GetInstance().ShowPage("page1");
     GetInstance().ShowPage("page2");
     GetInstance().ShowPage("page3");
-    EXPECT_TRUE(CheckResult(GetInstance().Report(), { "page3" }));
+    GetInstance().ShowPage("page2");
+    EXPECT_TRUE(CheckResult(GetInstance().Report(), { "page2" }));
 
     // Don't show and enqueue page showing currently
+    GetInstance().GoBack();
+    EXPECT_TRUE(CheckResult(GetInstance().Report(), { "page3" }));
+
     GetInstance().GoBack();
     EXPECT_TRUE(CheckResult(GetInstance().Report(), { "page2" }));
 
@@ -445,7 +449,7 @@ HWTEST_F(UpdaterUiPageManagerUnitTest, test_page_manager_show_more_page_than_que
     GetInstance().GoBack();
     EXPECT_TRUE(CheckResult(GetInstance().Report(), { "page3" }));
 
-    // max queue size is 3, when bigger than 3, queue tail will be pop, so can't show page3 here
+    // max queue size is 4, when bigger than 4, queue tail will be pop, so can't show page3 here
     GetInstance().GoBack();
     EXPECT_TRUE(CheckResult(GetInstance().Report(), { "page3" }));
     GetInstance().Reset();
