@@ -194,7 +194,7 @@ UScriptValuePtr ScriptInterpreter::ExecuteNativeFunc(UScriptContextPtr context,
     }
     if (params == nullptr) {
         int32_t ret = instruction->Execute(*scriptManager_->GetScriptEnv(name), *funcContext.get());
-        if (ret != USCRIPT_SUCCESS) {
+        if (ret != USCRIPT_SUCCESS && ret != USCRIPT_UPDATER_MODE_VALUE) {
             error->SetValue(ret);
             return error;
         }
@@ -222,7 +222,7 @@ UScriptValuePtr ScriptInterpreter::ExecuteNativeFunc(UScriptContextPtr context,
 
     int32_t ret = instruction->Execute(*scriptManager_->GetScriptEnv(name), *funcContext.get());
     INTERPRETER_LOGI(*this, context, "ExecuteNativeFunc::Execute %s result: %d", name.c_str(), ret);
-    if (ret != USCRIPT_SUCCESS) {
+    if (ret != USCRIPT_SUCCESS && ret != USCRIPT_UPDATER_MODE_VALUE) {
         error->SetValue(ret);
         return error;
     }
