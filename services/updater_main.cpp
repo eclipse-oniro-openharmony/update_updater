@@ -45,7 +45,7 @@
 #include "scope_guard.h"
 #include "securec.h"
 #include "updater/updater_const.h"
-#include "updater/hwfault_retry.h"
+#include "updater/hardware_fault_retry.h"
 #include "updater/updater_preprocess.h"
 #include "updater_ui_stub.h"
 #include "utils.h"
@@ -501,7 +501,7 @@ UpdaterStatus InstallUpdaterBinfile(UpdaterParams &upParams, PkgManager::PkgMana
         UPDATER_UI_INSTANCE.ShowLog(TR(LOG_UPDFAIL));
         STAGE(UPDATE_STAGE_FAIL) << "Install failed";
         if (status == UPDATE_RETRY) {
-            HwFaultRetry::GetInstance().DoRetryAction();
+            HardwareFaultRetry::GetInstance().DoRetryAction();
             UPDATER_UI_INSTANCE.ShowFailedPage();
         }
     } else {
@@ -535,7 +535,7 @@ UpdaterStatus InstallUpdaterPackage(UpdaterParams &upParams, PkgManager::PkgMana
         UPDATER_UI_INSTANCE.ShowLog(TR(LOG_UPDFAIL));
         STAGE(UPDATE_STAGE_FAIL) << "Install failed";
         if (status == UPDATE_RETRY) {
-            HwFaultRetry::GetInstance().DoRetryAction();
+            HardwareFaultRetry::GetInstance().DoRetryAction();
             UPDATER_UI_INSTANCE.ShowFailedPage();
         }
     } else {
@@ -1216,7 +1216,7 @@ std::unordered_map<std::string, std::function<void ()>> InitOptionsFuncTab(char*
         {"retry_count", [&]() -> void
         {
             upParams.retryCount = atoi(optarg);
-            HwFaultRetry::GetInstance().SetRetryCount(upParams.retryCount);
+            HardwareFaultRetry::GetInstance().SetRetryCount(upParams.retryCount);
         }},
         {"panic_count", [&]() -> void
         {

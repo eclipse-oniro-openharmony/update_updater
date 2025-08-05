@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "updater/hwfault_retry.h"
+#include "updater/hardware_fault_retry.h"
 #include <unistd.h>
 #include "init_reboot.h"
 #include "log/log.h"
@@ -24,13 +24,13 @@
 #include "securec.h"
 
 namespace Updater {
-HwFaultRetry &HwFaultRetry::GetInstance()
+HardwareFaultRetry &HardwareFaultRetry::GetInstance()
 {
-    static HwFaultRetry instance;
+    static HardwareFaultRetry instance;
     return instance;
 }
 
-HwFaultRetry::HwFaultRetry()
+HardwareFaultRetry::HardwareFaultRetry()
 {
     RetryFunc rebootFunc = [this]() {
                                 return this->RebootRetry();
@@ -40,14 +40,14 @@ HwFaultRetry::HwFaultRetry()
     RegisterFunc(BLOCK_UPDATE_FAILED_REBOOT, rebootFunc);
 }
 
-void HwFaultRetry::RegisterFunc(const std::string &faultInfo, RetryFunc func)
+void HardwareFaultRetry::RegisterFunc(const std::string &faultInfo, RetryFunc func)
 {
     if (!retryMap_.emplace(faultInfo, func).second) {
         LOG(ERROR) << "emplace: " << faultInfo.c_str() << " fail";
     }
 }
 
-void HwFaultRetry::RegisterDefaultFunc(const std::string &faultInfo)
+void HardwareFaultRetry::RegisterDefaultFunc(const std::string &faultInfo)
 {
     if (!retryMap_.emplace(faultInfo, [this]() {
                                 return this->RebootRetry();
@@ -56,14 +56,14 @@ void HwFaultRetry::RegisterDefaultFunc(const std::string &faultInfo)
     }
 }
 
-void HwFaultRetry::RemoveFunc(const std::string &faultInfo)
+void HardwareFaultRetry::RemoveFunc(const std::string &faultInfo)
 {
     if (retryMap_.erase(faultInfo) == 0) {
         LOG(ERROR) << "erase " << faultInfo.c_str() << " fail";
     }
 }
 
-void HwFaultRetry::DoRetryAction()
+void HardwareFaultRetry::DoRetryAction()
 {
     auto it = retryMap_.find(faultInfo_);
     if (it == retryMap_.end() || it->second == nullptr) {
@@ -73,32 +73,32 @@ void HwFaultRetry::DoRetryAction()
     return (it->second)();
 }
 
-void HwFaultRetry::SetFaultInfo(const std::string &faultInfo)
+void HardwareFaultRetry::SetFaultInfo(const std::string &faultInfo)
 {
     faultInfo_ = faultInfo;
 }
 
-void HwFaultRetry::SetRetryCount(const uint32_t count)
+void HardwareFaultRetry::SetRetryCount(const uint32_t count)
 {
     retryCount_ = count;
 }
 
-void HwFaultRetry::SetEffectiveValue(bool value)
+void HardwareFaultRetry::SetEffectiveValue(bool value)
 {
     effective_ = value;
 }
 
-void HwFaultRetry::SetRebootCmd(const std::string &rebootCmd)
+void HardwareFaultRetry::SetRebootCmd(const std::string &rebootCmd)
 {
     rebootCmd_ = rebootCmd;
 }
 
-bool HwFaultRetry::IsRetry(void)
+bool HardwareFaultRetry::IsRetry(void)
 {
     return isRetry_;
 }
 
-void HwFaultRetry::RebootRetry()
+void HardwareFaultRetry::RebootRetry()
 {
     if (!effective_) {
         LOG(WARNING) << "Special scenarios do not take effect, not need retry.";

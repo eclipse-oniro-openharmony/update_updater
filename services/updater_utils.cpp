@@ -31,7 +31,7 @@
 #include "misc_info/misc_info.h"
 #include "package/pkg_manager.h"
 #include "securec.h"
-#include "updater/hwfault_retry.h"
+#include "updater/hardware_fault_retry.h"
 #include "updater/updater.h"
 #include "updater/updater_const.h"
 #include "updater_main.h"
@@ -228,7 +228,7 @@ void PostUpdater(bool clearMisc)
     if (!access(COMMAND_FILE, 0) && unlink(COMMAND_FILE) != 0) {
         LOG(ERROR) << "Delete command failed";
     }
-    if (!HwFaultRetry::GetInstance().IsRetry()) {
+    if (!HardwareFaultRetry::GetInstance().IsRetry()) {
         DeleteUpdaterTmpFiles();
     }
     if (isMountDataAndSaveLogs) {

@@ -28,7 +28,7 @@
 #include "log/dump.h"
 #include "log/log.h"
 #include "updater/updater_const.h"
-#include "updater/hwfault_retry.h"
+#include "updater/hardware_fault_retry.h"
 #include "utils.h"
 #include "slot_info/slot_info.h"
 
