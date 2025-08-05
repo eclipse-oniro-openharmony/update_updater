@@ -35,17 +35,14 @@ private:
 
 void PkgSignatureTest::SetUpTestSuite()
 {
-
 }
 
 void PkgSignatureTest::TearDownTestSuite()
 {
-
 }
 
 void PkgSignatureTest::SetUp()
 {
-    
 }
 
 void PkgSignatureTest::TearDown()
