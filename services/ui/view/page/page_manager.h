@@ -51,7 +51,7 @@ private:
     bool BuildSubPages(const std::string &pageId, const std::shared_ptr<Page> &basePage,
         std::vector<UxSubPageInfo> &subPageInfos, std::string_view entry);
     bool IsValidPage(const std::shared_ptr<Page> &pg) const;
-    static constexpr size_t MAX_PAGE_QUEUE_SZ = 3;
+    static constexpr size_t MAX_PAGE_QUEUE_SZ = 4;
     std::deque<std::shared_ptr<Page>> pageQueue_ {};
     std::unordered_map<std::string, std::shared_ptr<Page>> pageMap_ {};
     std::vector<std::shared_ptr<Page>> pages_ {};
