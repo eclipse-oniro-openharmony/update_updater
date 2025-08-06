@@ -31,6 +31,7 @@ ohos_unittest("package_unittest") {
     "pkg_manager_unittest.cpp",
     "pkg_package_unittest.cpp",
     "pkg_verify_unittest.cpp",
+    "pkg_signature_info_unittest.cpp",
   ]
 
   sources += [

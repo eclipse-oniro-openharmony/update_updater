@@ -148,7 +148,7 @@ updater部件是在升级模式下的轻量小系统，ux组件是一套系统�
     "coms": [
         {
             "type": "UIImageView",
-            "id": "HarmonyOSIcon_Image",
+            "id": "OpenHarmonyIcon_Image",
             "x": 120,
             "y": 426,
             "w": 480,
@@ -160,7 +160,7 @@ updater部件是在升级模式下的轻量小系统，ux组件是一套系统�
     "coms": [
         {
             "type": "UIImageView",
-            "id": "HarmonyOSIcon_Image",
+            "id": "OpenHarmonyIcon_Image",
             "x": 0,
             "y": 0,
             "w": 480,

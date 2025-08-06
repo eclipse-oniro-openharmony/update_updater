@@ -281,15 +281,15 @@ Pkcs7VerifyHelper::~Pkcs7VerifyHelper()
     return;
 }
 
-int32_t Pkcs7VerifyHelper::GetDigestFromSubBlocks(std::vector<uint8_t> &digestBlock,
-    HwSigningSigntureInfo &signatureInfo, std::vector<uint8_t> &digest)
+int32_t Pkcs7VerifyHelper::GetDigestFromSubBlocks(
+    std::vector<uint8_t> &digestBlock, SignatureInfo &signatureInfo, std::vector<uint8_t> &digest)
 {
     PKG_LOGE("Pkcs7VerifyHelper in");
     return -1;
 }
 
-int32_t Pkcs7SignedData::GetDigest(std::vector<uint8_t> &digestBlock,
-    HwSigningSigntureInfo &signatureInfo, std::vector<uint8_t> &digest)
+int32_t Pkcs7SignedData::GetDigest(
+    std::vector<uint8_t> &digestBlock, SignatureInfo &signatureInfo, std::vector<uint8_t> &digest)
 {
     if (helper_ == nullptr) {
         PKG_LOGE("helper_ null error");
