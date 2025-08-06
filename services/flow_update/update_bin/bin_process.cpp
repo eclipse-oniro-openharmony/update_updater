@@ -33,6 +33,9 @@ using namespace Hpackage;
 using namespace Uscript;
 
 namespace Updater {
+using Updater::Utils::GetAllTids;
+using Updater::Utils::VectorToString;
+
 constexpr uint32_t STASH_BUFFER_SIZE = 4 * 1024 * 1024;
 constexpr uint32_t MAX_BUFFER_NUM = 16;
 constexpr uint8_t ES_IMAGE = 6;
@@ -232,7 +235,9 @@ int32_t UScriptInstructionBinFlowWrite::ProcessBinFile(Uscript::UScriptEnv &env,
         LOG(ERROR) << "Error to load flow data stream";
         return USCRIPT_ERROR_EXECUTE;
     }
-
+    LOG(INFO) << "Get binary tids";
+    std::vector<pid_t> tids = GetAllTids(getpid());
+    env.PostMessage("set_binary_tids", VectorToString(tids));
     for (const auto &iter : innerFileNames) {
         // 根据镜像名称获取分区名称和大小
         std::string partitionName = iter;
