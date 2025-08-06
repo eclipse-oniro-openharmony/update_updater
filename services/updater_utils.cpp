@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 #include <chrono>
-#include <fstream>
-#include <iostream>
 #include <regex>
 #include <thread>
 #include <dirent.h>
@@ -40,6 +38,8 @@
 namespace Updater {
 using namespace Hpackage;
 using namespace Updater::Utils;
+
+std::vector<std::string> g_binaryTids;
 
 void DeleteInstallTimeFile()
 {
@@ -293,43 +293,11 @@ std::optional<BootMode> SelectMode(const UpdateMessage &boot)
     return *it;
 }
 
-std::vector<pid_t> GetAllTids(pid_t pid)
-{
-    std::vector<pid_t> tids;
-    std::string pathName = std::string("/proc/").append(std::to_string(pid)).append("/task");
-    char tmpPath[PATH_MAX + 1] = {0};
-    if (realpath(pathName.c_str(), tmpPath) == nullptr || tmpPath[0] == '\0') {
-        LOG(ERROR) << "realpath fail pathName:" << pathName;
-        return tids;
-    }
-    DIR *dir = opendir(tmpPath);
-    if (dir == nullptr) {
-        LOG(ERROR) << "opendir fail pathName:" << pathName;
-        return tids;
-    }
-    struct dirent *de = nullptr;
-    while ((de = readdir(dir)) != nullptr) {
-        if (!(de->d_type & DT_DIR) || !isdigit(de->d_name[0])) {
-            continue;
-        }
-        int32_t temp = -1;
-        if (!Utils::ConvertToLong(de->d_name, temp)) {
-            LOG(ERROR) << "ConvertToLong failed";
-            continue;
-        }
-        pid_t tid = static_cast<pid_t>(temp);
-        if (tid > 0) {
-            tids.push_back(tid);
-        }
-    }
-    closedir(dir);
-    return tids;
-}
-
 bool SetCpuAffinityByPid(pid_t binaryPid, unsigned int reservedCores)
 {
     LOG(INFO) << "SetCpuAffinityByPid binaryPid:" << binaryPid;
-    if (binaryPid == -1) {
+    if (binaryPid == -1 || std::find(
+        g_binaryTids.begin(), g_binaryTids.end(), std::to_string(binaryPid)) == g_binaryTids.end()) {
         LOG(WARNING) << "invalid binaryPid:" << binaryPid;
         return false;
     }
@@ -344,13 +312,14 @@ bool SetCpuAffinityByPid(pid_t binaryPid, unsigned int reservedCores)
     for (unsigned int i = 0; i < coreCount - reservedCores; i++) {
         CPU_SET(i, &mask);
     }
-    std::vector<pid_t> tids = GetAllTids(binaryPid);
-    if (tids.empty()) {
-        LOG(WARNING) << "set affinity faild, tids is null";
-        return false;
-    }
     int syscallRes;
-    for (auto& tid : tids) {
+    for (auto& str : g_binaryTids) {
+        int32_t temp = -1;
+        if (!Utils::ConvertToLong(str, temp)) {
+            LOG(ERROR) << "ConvertToLong failed";
+            continue;
+        }
+        pid_t tid = static_cast<pid_t>(temp);
         syscallRes = syscall(__NR_sched_setaffinity, tid, sizeof(mask), &mask);
         LOG(INFO) << "setaffinity tid:" << tid;
         if (syscallRes != 0) {
@@ -367,5 +336,17 @@ void ReduceLoad(const UpdaterParams &upParams)
         unsigned int reservedCores = coreCount - LITTLE_CPU_CORES;
         SetCpuAffinityByPid(upParams.binaryPid, reservedCores);
     }
+}
+
+void SetBinaryTids(const std::vector<std::string> &output, UpdaterParams &upParams)
+{
+    if (output.size() < DEFAULT_PROCESS_NUM) {
+        LOG(ERROR) << "check output fail";
+        return;
+    }
+    auto outputInfo = Trim(output[1]);
+    LOG(INFO) << "binary tids:" << outputInfo;
+    g_binaryTids = SplitString(outputInfo, ",");
+    ReduceLoad(upParams);
 }
 } // namespace Updater
