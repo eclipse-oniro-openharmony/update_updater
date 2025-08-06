@@ -24,7 +24,6 @@
 namespace Updater {
 class HardwareFaultRetry {
 public:
-    HardwareFaultRetry();
     ~HardwareFaultRetry() = default;
 
     static HardwareFaultRetry &GetInstance();
@@ -48,6 +47,9 @@ private:
     uint32_t retryCount_ {};
     bool effective_ = true;
     bool isRetry_ = false;
+
+private:
+    HardwareFaultRetry();
 };
 } // Updater
 #endif // UPDATER_HARDWARE_FAULT_RETRY_H
