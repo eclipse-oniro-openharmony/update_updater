@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef UPDATER_HWFAULT_RETRY_H
-#define UPDATER_HWFAULT_RETRY_H
+#ifndef UPDATER_HARDWARE_FAULT_RETRY_H
+#define UPDATER_HARDWARE_FAULT_RETRY_H
 
 #include "log/log.h"
 #include <unordered_map>
@@ -22,12 +22,11 @@
 #include <unistd.h>
 
 namespace Updater {
-class HwFaultRetry {
+class HardwareFaultRetry {
 public:
-    HwFaultRetry();
-    ~HwFaultRetry() = default;
+    ~HardwareFaultRetry() = default;
 
-    static HwFaultRetry &GetInstance();
+    static HardwareFaultRetry &GetInstance();
     using RetryFunc = std::function<void ()>;
     void DoRetryAction();
     void RegisterFunc(const std::string &faultInfo, RetryFunc func);
@@ -48,6 +47,9 @@ private:
     uint32_t retryCount_ {};
     bool effective_ = true;
     bool isRetry_ = false;
+
+private:
+    HardwareFaultRetry();
 };
 } // Updater
-#endif // UPDATER_HWFAULT_RETRY_H
+#endif // UPDATER_HARDWARE_FAULT_RETRY_H
