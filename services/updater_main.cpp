@@ -224,7 +224,7 @@ int OtaUpdatePreCheck(PkgManager::PkgManagerPtr pkgManager, const std::string &p
         return PKG_INVALID_FILE;
     }
 
-    int32_t ret = pkgManager->VerifyOtaPackage(packagePath);
+    int32_t ret = pkgManager->VerifyOtaPackage(realPath);
     if (ret != PKG_SUCCESS) {
         LOG(INFO) << "VerifyOtaPackage fail ret :" << ret;
         UPDATER_LAST_WORD("sign", ret);
