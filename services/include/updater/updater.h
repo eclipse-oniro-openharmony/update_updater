@@ -146,10 +146,10 @@ std::vector<BootMode> &GetBootModes(void);
 
 std::optional<BootMode> SelectMode(const UpdateMessage &boot);
 
-std::vector<pid_t> GetAllTids(pid_t pid);
-
 bool SetCpuAffinityByPid(pid_t binaryPid, unsigned int reservedCores);
 
 void ReduceLoad(const UpdaterParams &upParams);
+
+void SetBinaryTids(const std::vector<std::string> &output, UpdaterParams &upParams)
 } // Updater
 #endif /* UPDATER_UPDATER_H */
