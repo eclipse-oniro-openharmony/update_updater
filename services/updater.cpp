@@ -551,6 +551,8 @@ void HandleChildOutput(const std::string &buffer, int32_t bufferLen, bool &retry
         }
     } else if (outputHeader == "set_progress") {
         SetProgress(output, upParams);
+    } else if (outputHeader == "set_binary_tids") {
+        SetBinaryTids(output, upParams);
     } else {
         LOG(WARNING) << "Child process returns unexpected message.";
     }
@@ -736,7 +738,6 @@ UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, UpdaterPara
     }
 
     upParams.binaryPid = pid;
-    ReduceLoad(upParams);
     close(pipeWrite); // close write endpoint
     bool retryUpdate = false;
     if (HandlePipeMsg(upParams, pipeRead, retryUpdate) != UPDATE_SUCCESS) {
