@@ -552,7 +552,7 @@ void HandleChildOutput(const std::string &buffer, int32_t bufferLen, bool &retry
     } else if (outputHeader == "set_progress") {
         SetProgress(output, upParams);
     } else if (outputHeader == "set_binary_tids") {
-        SetBinaryTids(output, upParams);
+        UpdateBinaryTids(output, upParams);
     } else {
         LOG(WARNING) << "Child process returns unexpected message.";
     }
