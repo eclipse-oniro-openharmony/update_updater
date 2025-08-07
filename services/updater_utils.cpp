@@ -39,6 +39,8 @@ namespace Updater {
 using namespace Hpackage;
 using namespace Updater::Utils;
 
+std::mutex setAffinityLock_;
+
 void DeleteInstallTimeFile()
 {
     const std::string installTimeFilePath = std::string(UPDATER_PATH) + "/" + std::string(INSTALL_TIME_FILE);
@@ -293,6 +295,7 @@ std::optional<BootMode> SelectMode(const UpdateMessage &boot)
 
 bool SetCpuAffinityByPid(const UpdaterParams &upParams, unsigned int reservedCores)
 {
+    std::lock_guard<std::mutex> lock(setAffinityLock_);
     std::vector<std::string> binaryTids = upParams.binaryTids;
     if (upParams.binaryPid == -1 || std::find(
         binaryTids.begin(), binaryTids.end(), std::to_string(upParams.binaryPid)) == binaryTids.end()) {
