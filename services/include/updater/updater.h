@@ -150,6 +150,6 @@ bool SetCpuAffinityByPid(pid_t binaryPid, unsigned int reservedCores);
 
 void ReduceLoad(const UpdaterParams &upParams);
 
-void SetBinaryTids(const std::vector<std::string> &output, UpdaterParams &upParams)
+void SetBinaryTids(const std::vector<std::string> &output, UpdaterParams &upParams);
 } // Updater
 #endif /* UPDATER_UPDATER_H */
