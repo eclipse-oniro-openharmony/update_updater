@@ -31,11 +31,9 @@
 using namespace std;
 using namespace Hpackage;
 using namespace Uscript;
+using namespace Utils;
 
 namespace Updater {
-using Updater::Utils::GetAllTids;
-using Updater::Utils::VectorToString;
-
 constexpr uint32_t STASH_BUFFER_SIZE = 4 * 1024 * 1024;
 constexpr uint32_t MAX_BUFFER_NUM = 16;
 constexpr uint8_t ES_IMAGE = 6;
