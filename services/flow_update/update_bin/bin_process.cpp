@@ -31,7 +31,7 @@
 using namespace std;
 using namespace Hpackage;
 using namespace Uscript;
-using namespace Utils;
+using namespace Updater::Utils;
 
 namespace Updater {
 constexpr uint32_t STASH_BUFFER_SIZE = 4 * 1024 * 1024;
