@@ -73,6 +73,7 @@ struct UpdaterParams {
     std::vector<std::string> updatePackage {};
     std::vector<std::chrono::duration<double>> installTime {};
     std::function<void(float)> callbackProgress {};
+    std::vector<std::string> binaryTids {};
 };
 
 using CondFunc = std::function<bool(const UpdateMessage &)>;
@@ -146,10 +147,8 @@ std::vector<BootMode> &GetBootModes(void);
 
 std::optional<BootMode> SelectMode(const UpdateMessage &boot);
 
-bool SetCpuAffinityByPid(pid_t binaryPid, unsigned int reservedCores);
+bool SetCpuAffinityByPid(const UpdaterParams &upParams, unsigned int reservedCores);
 
-void ReduceLoad(const UpdaterParams &upParams);
-
-void SetBinaryTids(const std::vector<std::string> &output, UpdaterParams &upParams);
+void UpdateBinaryTids(const std::vector<std::string> &output, UpdaterParams &upParams);
 } // Updater
 #endif /* UPDATER_UPDATER_H */
