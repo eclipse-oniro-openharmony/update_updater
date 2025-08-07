@@ -311,10 +311,10 @@ bool SetCpuAffinityByPid(const UpdaterParams &upParams, unsigned int reservedCor
         CPU_SET(i, &mask);
     }
     int syscallRes;
-    for (auto& str : binaryTids) {
+    for (auto &str : binaryTids) {
         int32_t temp = -1;
         if (!Utils::ConvertToLong(str, temp)) {
-            LOG(ERROR) << "ConvertToLong failed";
+            LOG(ERROR) << "ConvertToLong failed:" << str;
             continue;
         }
         pid_t tid = static_cast<pid_t>(temp);
