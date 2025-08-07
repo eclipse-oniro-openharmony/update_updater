@@ -293,12 +293,12 @@ std::optional<BootMode> SelectMode(const UpdateMessage &boot)
     return *it;
 }
 
-bool SetCpuAffinityByPid(pid_t binaryPid, unsigned int reservedCores)
+bool SetCpuAffinityByPid(const UpdaterParams &upParams, unsigned int reservedCores)
 {
-    LOG(INFO) << "SetCpuAffinityByPid binaryPid:" << binaryPid;
-    if (binaryPid == -1 || std::find(
-        g_binaryTids.begin(), g_binaryTids.end(), std::to_string(binaryPid)) == g_binaryTids.end()) {
-        LOG(WARNING) << "invalid binaryPid:" << binaryPid;
+    std::vector<std::string> binaryTids = upParams.binaryTids;
+    if (upParams.binaryPid == -1 || std::find(
+        binaryTids.begin(), binaryTids.end(), std::to_string(upParams.binaryPid)) == binaryTids.end()) {
+        LOG(WARNING) << "invalid binaryPid:" << upParams.binaryPid;
         return false;
     }
     unsigned int coreCount = std::thread::hardware_concurrency();
@@ -313,7 +313,7 @@ bool SetCpuAffinityByPid(pid_t binaryPid, unsigned int reservedCores)
         CPU_SET(i, &mask);
     }
     int syscallRes;
-    for (auto& str : g_binaryTids) {
+    for (auto& str : binaryTids) {
         int32_t temp = -1;
         if (!Utils::ConvertToLong(str, temp)) {
             LOG(ERROR) << "ConvertToLong failed";
@@ -329,16 +329,7 @@ bool SetCpuAffinityByPid(pid_t binaryPid, unsigned int reservedCores)
     return true;
 }
 
-void ReduceLoad(const UpdaterParams &upParams)
-{
-    if (upParams.isLoadReduction) {
-        unsigned int coreCount = std::thread::hardware_concurrency();
-        unsigned int reservedCores = coreCount - LITTLE_CPU_CORES;
-        SetCpuAffinityByPid(upParams.binaryPid, reservedCores);
-    }
-}
-
-void SetBinaryTids(const std::vector<std::string> &output, UpdaterParams &upParams)
+void UpdateBinaryTids(const std::vector<std::string> &output, UpdaterParams &upParams)
 {
     if (output.size() < DEFAULT_PROCESS_NUM) {
         LOG(ERROR) << "check output fail";
@@ -346,7 +337,11 @@ void SetBinaryTids(const std::vector<std::string> &output, UpdaterParams &upPara
     }
     auto outputInfo = Trim(output[1]);
     LOG(INFO) << "binary tids:" << outputInfo;
-    g_binaryTids = SplitString(outputInfo, ",");
-    ReduceLoad(upParams);
+    upParams.binaryTids = SplitString(outputInfo, ",");
+    if (upParams.isLoadReduction) {
+        unsigned int coreCount = std::thread::hardware_concurrency();
+        unsigned int reservedCores = coreCount - LITTLE_CPU_CORES;
+        SetCpuAffinityByPid(upParams, reservedCores);
+    }
 }
 } // namespace Updater
