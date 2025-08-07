@@ -194,11 +194,6 @@ ohos_static_library("libupdater") {
     "drivers_peripheral_partitionslot:libpartition_slot_manager",
   ]
 
-  # add updater custom library
-  if (defined(updater_custom_external_deps)) {
-    external_deps += updater_custom_external_deps
-  }
-
   if (updater_ui_support) {
     external_deps += [ "drivers_interface_input:libinput_proxy_1.0" ]
   }

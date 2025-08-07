@@ -134,10 +134,6 @@ ohos_static_library("libui") {
     ]
   }
 
-  if (defined(updater_ui_custom_deps)) {
-    external_deps += updater_ui_custom_deps
-  }
-
   subsystem_name = "updater"
   part_name = "updater"
 }
