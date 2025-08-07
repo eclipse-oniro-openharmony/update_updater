@@ -39,8 +39,6 @@ namespace Updater {
 using namespace Hpackage;
 using namespace Updater::Utils;
 
-std::vector<std::string> g_binaryTids;
-
 void DeleteInstallTimeFile()
 {
     const std::string installTimeFilePath = std::string(UPDATER_PATH) + "/" + std::string(INSTALL_TIME_FILE);
