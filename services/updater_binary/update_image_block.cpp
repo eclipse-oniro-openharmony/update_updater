@@ -35,6 +35,7 @@
 using namespace Uscript;
 using namespace Hpackage;
 using namespace Updater;
+using namespace Updater::Utils;
 
 namespace Updater {
 constexpr int32_t SHA_CHECK_SECOND = 2;
@@ -426,7 +427,8 @@ static int32_t ExecuteUpdateBlock(Uscript::UScriptEnv &env, Uscript::UScriptCont
         env.GetPkgManager()->ClosePkgStream(outStream);
         return USCRIPT_ERROR_EXECUTE;
     }
-
+    std::vector<pid_t> tids = GetAllTids(getpid());
+    env.PostMessage("set_binary_tids", VectorToString(tids));
     return DoExecuteUpdateBlock(infos, tm.get(), outStream, lines, context);
 }
 
