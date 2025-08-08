@@ -1179,6 +1179,54 @@ std::string GetUpdateActiveSuffix()
     return std::string(paramValue);
 }
 
+std::vector<pid_t> GetAllTids(pid_t pid)
+{
+    std::vector<pid_t> tids;
+    tids.push_back(pid);
+    std::string pathName = std::string("/proc/").append(std::to_string(pid)).append("/task");
+    char tmpPath[PATH_MAX + 1] = {0};
+    if (realpath(pathName.c_str(), tmpPath) == nullptr || tmpPath[0] == '\0') {
+        LOG(ERROR) << "realpath fail pathName:" << pathName;
+        return tids;
+    }
+    DIR *dir = opendir(tmpPath);
+    if (dir == nullptr) {
+        LOG(ERROR) << "opendir fail pathName:" << pathName;
+        return tids;
+    }
+    struct dirent *de = nullptr;
+    while ((de = readdir(dir)) != nullptr) {
+        if (!(de->d_type & DT_DIR) || !isdigit(de->d_name[0])) {
+            continue;
+        }
+        int32_t temp = -1;
+        if (!Utils::ConvertToLong(de->d_name, temp)) {
+            LOG(ERROR) << "ConvertToLong failed";
+            continue;
+        }
+        pid_t tid = static_cast<pid_t>(temp);
+        if (tid > 0) {
+            tids.push_back(tid);
+        }
+    }
+    closedir(dir);
+    return tids;
+}
+
+std::string VectorToString(const std::vector<pid_t> &pids)
+{
+    if (pids.empty()) {
+        return "";
+    }
+    std::ostringstream oss;
+    auto it = pids.begin();
+    oss << *it++;
+    while (it != pids.end()) {
+        oss << "," << *it++;
+    }
+    return oss.str();
+}
+
 #ifndef __WIN32
 void SetFileAttributes(const std::string& file, uid_t owner, gid_t group, mode_t mode)
 {
