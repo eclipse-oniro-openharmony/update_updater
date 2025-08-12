@@ -281,7 +281,7 @@ __attribute__((weak)) bool PreStartBinaryEntry([[maybe_unused]] const std::strin
 
 __attribute__((weak)) bool EnableCodeSignForBinary([[maybe_unused]] const std::string &fullPath)
 {
-    LOG(INFO) << "enable code sign for binary";
+    LOG(INFO) << "no need to enable code sign for binary";
     return true;
 }
 
