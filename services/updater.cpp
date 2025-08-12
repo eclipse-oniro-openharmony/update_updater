@@ -421,7 +421,7 @@ UpdaterStatus DoInstallUpdaterBinfile(PkgManager::PkgManagerPtr pkgManager, Upda
     }
 
     g_tmpProgressValue = 0;
-    // 从bin文件开启进�?
+    // 从bin文件开启进程
     UpdaterStatus updateRet = StartUpdaterProc(pkgManager, upParams);
     if (updateRet != UPDATE_SUCCESS) {
         UPDATER_UI_INSTANCE.ShowUpdInfo(TR(UPD_INSTALL_FAIL));
