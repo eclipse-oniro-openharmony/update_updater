@@ -40,7 +40,9 @@
         "syscap": [],
         "features": [
             "updater_ui_support",
-            "updater_cfg_file"
+            "updater_cfg_file",
+            "updater_feature_use_ptable",
+            "updater_feature_use_as_executable"
         ],
         "adapted_system_type": [ "standard" ],
         "rom": "",

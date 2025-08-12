@@ -16,6 +16,8 @@ import("//build/ohos.gni")
 init_feature_ab_partition = true
 declare_args() {
   updater_cfg_file = ""
+  updater_feature_use_ptable = true
+  updater_feature_use_as_executable = false
   updater_ui_support = true
   if (!defined(global_parts_info.arkui_ui_lite)) {
     updater_ui_support = false
@@ -32,13 +34,16 @@ declare_args() {
   }
 }
 
-if (updater_cfg_file != "") {
+if (!updater_feature_use_as_executable) {
   updater_sign_on_server = true
-  import("${updater_cfg_file}")
+}
+
+if (updater_feature_use_ptable) {
+  use_ptable = "enable"
 }
 
 template("updater_gen") {
-  if (updater_cfg_file != "") {
+  if (!updater_feature_use_as_executable) {
     ohos_source_set(target_name) {
       forward_variables_from(invoker, "*")
     }

@@ -57,12 +57,7 @@ group("unittest") {
         "test/unittest/flashd_test:flashd_utils_unittest",
       ]
     }
-    if (updater_cfg_file == "") {
-      deps += [
-        "test/unittest/script:user_instruction",
-        "test/unittest/script:user_instruction_invalid",
-      ]
-    }
+
     if (updater_ui_support) {
       deps += [
         "test/unittest/service_test:updater_service_unittest",
