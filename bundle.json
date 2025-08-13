@@ -42,7 +42,8 @@
             "updater_ui_support",
             "updater_cfg_file",
             "updater_feature_use_ptable",
-            "updater_feature_use_as_executable"
+            "updater_feature_updater_gen_executable",
+            "updater_feature_sign_on_server"
         ],
         "adapted_system_type": [ "standard" ],
         "rom": "",
