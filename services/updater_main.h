@@ -94,7 +94,6 @@ UpdaterStatus NotifyActionResult(UpdaterParams &upParams,
     UpdaterStatus &status, const std::vector<NotifyAction> &notifyActionVec);
 UpdaterStatus UpdateSubPkg(UpdaterParams &upParams);
 void NotifyPreCheck(UpdaterStatus &status, UpdaterParams &upParams);
-bool EnableCodeSignForBinary([[maybe_unused]] const std::string &fullPath);
 #ifdef __cplusplus
 #if __cplusplus
 }

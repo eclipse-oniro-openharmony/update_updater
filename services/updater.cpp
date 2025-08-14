@@ -279,12 +279,6 @@ __attribute__((weak)) bool PreStartBinaryEntry([[maybe_unused]] const std::strin
     return true;
 }
 
-__attribute__((weak)) bool EnableCodeSignForBinary([[maybe_unused]] const std::string &fullPath)
-{
-    LOG(INFO) << "no need to enable code sign for binary";
-    return true;
-}
-
 float g_progressRatio = 1.0;
 
 void SetTotalProgressRatio(float ratio)
@@ -728,11 +722,6 @@ UpdaterStatus StartUpdaterProc(PkgManager::PkgManagerPtr pkgManager, UpdaterPara
 #ifdef WITH_SELINUX
     Restorecon(fullPath.c_str());
 #endif // WITH_SELINUX
-    if (!EnableCodeSignForBinary(fullPath)) {
-        LOG(ERROR) << "Failed to sign for binary";
-        UPDATER_LAST_WORD(UPDATE_ERROR, "Failed to sign for binary");
-        return UPDATE_ERROR;
-    }
     pid_t pid = fork();
     if (pid < 0) {
         ERROR_CODE(CODE_FORK_FAIL);
@@ -765,6 +754,6 @@ std::string GetWorkPath()
         return G_WORK_PATH;
     }
 
-    return std::string(UPDATER_PATH) + "/";
+    return std::string(SYS_INSTALLER_PATH) + "/";
 }
 } // namespace Updater
