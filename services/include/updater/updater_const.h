@@ -32,6 +32,7 @@ constexpr const char *UPDATER_STAGE_LOG = "/data/updater/log/updater_stage_log";
 constexpr const char *UPDATER_LOG_FILE = "updater_log";
 constexpr const char *UPDATER_STAGE_FILE = "updater_stage_log";
 constexpr const char *UPDATER_PATH = "/data/updater";
+constexpr const char *SYS_INSTALLER_PATH = "/mnt/sys_installer";
 constexpr const char *UPDATER_LOCALE_FILE = "locale";
 constexpr const char *UPDATER_RESULT_FILE = "updater_result";
 constexpr const char *MODULE_UPDATE_RESULT_FILE = "module_update_result";
