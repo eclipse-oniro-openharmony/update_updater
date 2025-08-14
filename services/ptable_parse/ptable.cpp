@@ -78,6 +78,12 @@ bool Ptable::LoadPtnInfo(const std::vector<PtnInfo> &ptnInfo)
     return true;
 }
 
+bool Ptable::CorrectBufByPtnList(unit8_t *imageBuf, unit64_t imageBufSize, const std::vector<PtnInfo> &srcInfo,
+                                 const std::vector<PtnInfo> &dstInfo)
+{
+    return false;
+}
+
 void Ptable::SetReservedSize(uint64_t reservedSize)
 {
     reservedSize_ = reservedSize;
