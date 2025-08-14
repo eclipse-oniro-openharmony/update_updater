@@ -44,6 +44,8 @@ ohos_static_library("libBinFlowUpdate") {
     "${updater_path}/services/script",
     "${updater_path}/utils/include",
   ]
+
+  public_config = [ ":libprocess_exported_headers" ]
   deps = [
     "${updater_path}/interfaces/kits/packages:libpackageExt",
     "${updater_path}/services/applypatch:libapplypatch",
