@@ -425,7 +425,7 @@ int32_t UpgradePkgFile::ReadPackageInfo(std::vector<uint8_t> &signData, size_t &
         }
     }
 
-    ret = memset_s(buffer.buffer + UPGRADE_RESERVE_LEN, buffer.length, 0, GetUpgradeSignatureLen());
+    ret = memset_s(buffer.buffer + UPGRADE_RESERVE_LEN, buffer.length - UPGRADE_RESERVE_LEN, 0, GetUpgradeSignatureLen());
     if (ret != EOK) {
         PKG_LOGE("memset buff fail");
         UPDATER_LAST_WORD(PKG_NONE_MEMORY, "memset buff fail");
