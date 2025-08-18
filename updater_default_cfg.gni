@@ -16,6 +16,9 @@ import("//build/ohos.gni")
 init_feature_ab_partition = true
 declare_args() {
   updater_cfg_file = ""
+  updater_feature_use_ptable = true
+  updater_feature_updater_gen_executable = false
+  updater_feature_sign_on_server = true
   updater_ui_support = true
   if (!defined(global_parts_info.arkui_ui_lite)) {
     updater_ui_support = false
@@ -23,7 +26,7 @@ declare_args() {
   updater_hdc_depend = true
   updater_absolutely_path = "//base/update/updater"
   hdc_base = "//developtools/hdc"
-  updater_sign_on_server = false
+  updater_sign_on_server = true
   updater_zlib_enable = true
 
   if (defined(global_parts_info) &&
@@ -32,13 +35,16 @@ declare_args() {
   }
 }
 
-if (updater_cfg_file != "") {
+if (updater_feature_sign_on_server) {
   updater_sign_on_server = true
-  import("${updater_cfg_file}")
+}
+
+if (updater_feature_use_ptable) {
+  use_ptable = "enable"
 }
 
 template("updater_gen") {
-  if (updater_cfg_file != "") {
+  if (!updater_feature_updater_gen_executable) {
     ohos_source_set(target_name) {
       forward_variables_from(invoker, "*")
     }
