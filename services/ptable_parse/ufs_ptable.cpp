@@ -310,6 +310,11 @@ bool UfsPtable::ParsePartitionFromBuffer(uint8_t *ptbImgBuffer, const uint32_t i
             ufsPtnDataInfo_.push_back(newLunPtnDataInfo);
             continue;
         }
+        if (deviceBlockSize >=TMP_DATA_SIZE || imgBlockSize > (TMP_DATA_SIZE - deviceBlockSize) ||
+            GPT_ENTRYS_SIZE > (TMP_DATA_SIZE - 2 * deviceBlockSize)) {
+            LOG(ERROR) << "memcpy_s size fail";
+            return false;
+        }
         // for hisi: change ptable.img(512 bytes/block) into format of device(4096 bytes/block)
         if (memcpy_s(newLunPtnDataInfo.data, TMP_DATA_SIZE, lunStart, imgBlockSize) != EOK) {
             LOG(WARNING) << "memcpy_s pmbr fail";
@@ -565,8 +570,13 @@ bool UfsPtable::CorrectBufByPtnList(uint8_t *imageBuf, uint64_t imgBufSize, cons
         }
         std::copy(newEntryBuf.begin(), newEntryBuf.end(), newBuf.begin() + srcInfo[i].gptEntryBufOffset);
     }
-    if (memcpy_s(ufsLunEntryStart, imgBufSize - (ufsLunEntryStart - imageBuf), newBuf.data(), editLen) != 0) {
-        LOG(ERROR) << "memcpy fail. destSize :" << imgBufSize - (ufsLunEntryStart - imageBuf);
+    size_t destSize = imgBufSize - (ufsLunEntryStart - imageBuf);
+    if ((ufsLunEntryStart - imageBuf) >= imgBufSize || editLen > destSize){
+        LOG(ERROR) << "memcpy size fail destSize" << destSize << "editLen" << editLen;
+        return false;
+    }
+    if (memcpy_s(ufsLunEntryStart, destSize, newBuf.data(), editLen) != 0) {
+        LOG(ERROR) << "memcpy fail. destSize :" << destSize;
         return false;
     }
     return true;
