@@ -228,7 +228,7 @@ int32_t BlocksBufferDiff::WritePatchHeader(int64_t controlSize,
         return -1;
     }
 
-    int32_t ret = memcpy_s(patchData_.data() + offset_, patchData_.size(), BSDIFF_MAGIC,
+    int32_t ret = memcpy_s(patchData_.data() + offset_, patchData_.size() - offset_, BSDIFF_MAGIC,
         std::char_traits<char>::length(BSDIFF_MAGIC));
     if (ret != 0) {
         PATCH_LOGE("Failed to copy magic");
