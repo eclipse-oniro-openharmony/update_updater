@@ -128,10 +128,17 @@ std::ostream& StageLogger::OutputUpdaterStage()
 
 void Logger(int level, const char* fileName, int32_t line, const char* format, ...)
 {
-    std::vector<char> buff(1024); // 1024 : max length of buff
     va_list list;
     va_start(list, format);
-    int size = vsnprintf_s(reinterpret_cast<char*>(buff.data()), buff.capacity(), buff.capacity(), format, list);
+    int requiredSize = _vscprintf(format, list);
+    va_end(list);
+    if (requiredSize < 0) {
+        UpdaterLogger(level).OutputUpdaterLog(fileName, line) << "Invalid format string";
+        return;
+    }
+    std::vector<char> buff(requiredSize + 1);
+    va_start(list, format);
+    int size = vsnprintf_s(reinterpret_cast<char*>(buff.data()), buff.size(), requiredSize, format, list);
     va_end(list);
     if (size < EOK) {
         UpdaterLogger(level).OutputUpdaterLog(fileName, line) << "vsnprintf_s failed";
