@@ -584,7 +584,11 @@ int32_t CompressedImageDiff::CompressData(Hpackage::PkgManager::FileInfoPtr info
             if ((start + outSize) > outData.size()) {
                 outData.resize(IGMDIFF_LIMIT_UNIT * ((start + outSize) / IGMDIFF_LIMIT_UNIT + 1));
             }
-            return memcpy_s(outData.data() + start, outData.size(), data.buffer, size);
+            if (memcpy_s(outData.data() + start, outData.size() - start, data.buffer, size) != EOK) {
+                PATCH_LOGE("Failed to memcpy_s data");
+                return -1;
+            }
+            return 0;
         }, nullptr);
     int32_t ret = pkgManager->CompressBuffer(info, {buffer.buffer, buffer.length}, stream1);
     if (ret != 0) {
