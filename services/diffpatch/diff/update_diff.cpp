@@ -111,7 +111,11 @@ int32_t ImageParser::Extract(const std::string &fileName, std::vector<uint8_t> &
             if ((start + bufferSize) > buffer.size()) {
                 buffer.resize(IGMDIFF_LIMIT_UNIT * ((start + bufferSize) / IGMDIFF_LIMIT_UNIT + 1));
             }
-            return memcpy_s(buffer.data() + start, buffer.size(), data.buffer, size);
+            if (memcpy_s(buffer.data() + start, buffer.size() - start, data.buffer, size) != EOK) {
+                PATCH_LOGE("Failed to memcpy_s data");
+                return -1;
+            }
+            return 0;
         }, nullptr);
     if (ret != 0) {
         PATCH_LOGE("Failed to extract data");
