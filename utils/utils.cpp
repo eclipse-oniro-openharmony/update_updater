@@ -943,7 +943,7 @@ void SetFaultInfoToMisc(const std::string &faultInfo)
         return;
     }
     (void)memset_s(msg.faultinfo, sizeof(msg.faultinfo), 0, sizeof(msg.faultinfo));
-    if (strncpy_s(msg.faultinfo, sizeof(msg.faultinfo), faultInfo.c_str(), faultInfo.size() + 1) != EOK) {
+    if (strncpy_s(msg.faultinfo, sizeof(msg.faultinfo), faultInfo.c_str(), faultInfoSize + 1) != EOK) {
         LOG(ERROR) << "SetMessageToMisc strncpy_s failed";
         return;
     }
