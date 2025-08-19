@@ -144,6 +144,7 @@ void Logger(int level, const char* fileName, int32_t line, const char* format, .
         UpdaterLogger(level).OutputUpdaterLog(fileName, line) << "vsnprintf_s failed";
         return;
     }
+    buff[requiredSize] = "\0";
     std::string str(buff.data(), size);
     UpdaterLogger(level).OutputUpdaterLog(fileName, line) << str;
 }
