@@ -842,13 +842,22 @@ void SetMessageToMisc(const std::string &miscCmd, const int message, const std::
         return;
     }
     std::vector<std::string> args = ParseParams(0, nullptr);
+    if (args.empty()) {
+        LOG(ERROR) << "No arguments parsed";
+        return;
+    }
     struct UpdateMessage msg {};
     if (!ReadUpdaterMiscMsg(msg)) {
         LOG(ERROR) << "SetMessageToMisc read misc failed";
         return;
     }
+    size_t cmdSize = miscCmd.size();
+    if (cmdSize >= sizeof(msg.command)) {
+        LOG(ERROR) << "Command exceeds maximum size";
+        return;
+    }
     (void)memset_s(msg.command, sizeof(msg.command), 0, sizeof(msg.command));
-    if (strncpy_s(msg.command, sizeof(msg.command), miscCmd.c_str(), miscCmd.size() + 1) != EOK) {
+    if (strncpy_s(msg.command, sizeof(msg.command), miscCmd.c_str(), cmdSize + 1) != EOK) {
         LOG(ERROR) << "SetMessageToMisc strncpy_s failed";
         return;
     }
@@ -894,8 +903,13 @@ void SetCmdToMisc(const std::string &miscCmd)
         return;
     }
 
+    size_t cmdSize = miscCmd.size();
+    if (cmdSize >= sizeof(msg.command)) {
+        LOG(ERROR) << "Command exceeds maximum size";
+        return;
+    }
     (void)memset_s(msg.command, sizeof(msg.command), 0, sizeof(msg.command));
-    if (strncpy_s(msg.command, sizeof(msg.command), miscCmd.c_str(), miscCmd.size() + 1) != EOK) {
+    if (strncpy_s(msg.command, sizeof(msg.command), miscCmd.c_str(), cmdSize + 1) != EOK) {
         LOG(ERROR) << "SetMessageToMisc strncpy_s failed";
         return;
     }
@@ -923,6 +937,11 @@ void SetFaultInfoToMisc(const std::string &faultInfo)
         return;
     }
 
+    size_t faultInfoSize = faultInfo.size();
+    if(faultInfoSize >= sizeof(msg.faultInfo)) {
+        LOG(ERROR) << "faultInfo exceeds maximum size";
+        return;
+    }
     (void)memset_s(msg.faultinfo, sizeof(msg.faultinfo), 0, sizeof(msg.faultinfo));
     if (strncpy_s(msg.faultinfo, sizeof(msg.faultinfo), faultInfo.c_str(), faultInfo.size() + 1) != EOK) {
         LOG(ERROR) << "SetMessageToMisc strncpy_s failed";
