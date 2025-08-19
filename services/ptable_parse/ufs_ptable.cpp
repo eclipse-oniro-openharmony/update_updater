@@ -310,7 +310,7 @@ bool UfsPtable::ParsePartitionFromBuffer(uint8_t *ptbImgBuffer, const uint32_t i
             ufsPtnDataInfo_.push_back(newLunPtnDataInfo);
             continue;
         }
-        if (deviceBlockSize >=TMP_DATA_SIZE || imgBlockSize > (TMP_DATA_SIZE - deviceBlockSize) ||
+        if (deviceBlockSize >= TMP_DATA_SIZE || imgBlockSize > (TMP_DATA_SIZE - deviceBlockSize) ||
             GPT_ENTRYS_SIZE > (TMP_DATA_SIZE - 2 * deviceBlockSize)) {
             LOG(ERROR) << "memcpy_s size fail";
             return false;
