@@ -112,7 +112,7 @@ int32_t Lz4FrameAdapter::WriteData(const BlockBuffer &srcData)
 {
     size_t blockSize = LZ4_BLOCK_SIZE(blockSizeID_);
     int32_t ret = 0;
-    if ((currDataSize_ + srcData.length) < inData_.size()) {
+    if (currDataSize_ < inData_.size() && srcData.length < (inData_.size() - currDataSize_)) {
         ret = memcpy_s(inData_.data() + currDataSize_, inData_.size() - currDataSize_, srcData.buffer, srcData.length);
         if (ret != 0) {
             PATCH_LOGE("Failed to copy data ");
