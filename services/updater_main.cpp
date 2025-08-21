@@ -97,7 +97,7 @@ constexpr uint8_t TYPE_ZIP_HEADER = 0xaa;
 
 bool ReadLE16(std::istream& is, uint16_t& value)
 {
-    char buf[2] = {0}; // 2：定义2字节缓冲区，用于读取小端序的16位无符号整数（每字节8位）
+    char buf[2] = {0}; // 2：定�?2字节缓冲区，用于读取小端序的16位无符号整数（每字节8位）
     if (!is.read(buf, sizeof(buf))) {
         return false;
     }
@@ -108,7 +108,7 @@ bool ReadLE16(std::istream& is, uint16_t& value)
 
 bool ReadLE32(std::istream& is, uint32_t& value)
 {
-    char buf[4] = {0}; // 4：定义4字节缓冲区，用于读取小端序的32位无符号整数（每字节8位）
+    char buf[4] = {0}; // 4：定�?4字节缓冲区，用于读取小端序的32位无符号整数（每字节8位）
     if (!is.read(buf, sizeof(buf))) {
         return false;
     }
@@ -334,7 +334,7 @@ static UpdaterStatus VerifyBinfiles(UpdaterParams &upParams)
             LOG(ERROR) << "GetReadUpdateStreamzipFromBinfile fail";
             return UPDATE_ERROR;
         }
-        // 验证update_stream.zip包
+        // 验证update_stream.zip�?
         int32_t verifyret = OtaUpdatePreCheck(manager, STREAM_ZIP_PATH);
         PkgManager::ReleasePackageInstance(manager);
         if (verifyret != UPDATE_SUCCESS) {
@@ -529,6 +529,9 @@ UpdaterStatus InstallUpdaterPackage(UpdaterParams &upParams, PkgManager::PkgMana
         status = DoInstallUpdaterPackage(manager, upParams, SDCARD_UPDATE);
     } else {
         status = DoInstallUpdaterPackage(manager, upParams, HOTA_UPDATE);
+        if (NotifyActionResult(upParams, status, {SET_RETRY_STATUS}) != UPDATE_SUCCESS) {
+            LOG(ERROR) << "set retry status fail";
+        }
     }
     if (status != UPDATE_SUCCESS) {
         UPDATER_UI_INSTANCE.Sleep(UI_SHOW_DURATION);
