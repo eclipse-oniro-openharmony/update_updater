@@ -192,7 +192,7 @@ static void DestroyDiskPartitions(Disk &disk)
     disk.partList.clear();
 }
 
-static void DestroyDiskDevices(const Disk &disk)
+static void DestroyDiskDevices(Disk &disk)
 {
     if (disk.dev != nullptr) {
         if (disk.dev->specific != nullptr) {
