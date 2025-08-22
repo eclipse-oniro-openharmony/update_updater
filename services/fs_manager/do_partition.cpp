@@ -199,6 +199,7 @@ static void DestroyDiskDevices(const Disk &disk)
             free(disk.dev->specific);
         }
         free(disk.dev);
+        disk.dev = NULL;
     }
 }
 
