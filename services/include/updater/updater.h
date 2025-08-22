@@ -29,6 +29,7 @@ enum UpdaterStatus {
     UPDATE_CORRUPT, /* package or verify failed, something is broken. */
     UPDATE_SKIP, /* skip update because of condition is not satisfied, e.g, battery is low */
     UPDATE_RETRY,
+    UPDATE_RETRY_FAIL,
     UPDATE_SPACE_NOTENOUGH,
     UPDATE_UNKNOWN
 };
@@ -51,6 +52,7 @@ enum NotifyAction {
     TRIGGER_SDUPDATE,
     TRIGGER_FACTORYRST,
     TRIGGER_EUPDATER,
+    SET_RETRY_STATUS
 };
 
 struct UpdaterParams {

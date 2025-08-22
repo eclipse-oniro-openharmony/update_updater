@@ -529,6 +529,9 @@ UpdaterStatus InstallUpdaterPackage(UpdaterParams &upParams, PkgManager::PkgMana
         status = DoInstallUpdaterPackage(manager, upParams, SDCARD_UPDATE);
     } else {
         status = DoInstallUpdaterPackage(manager, upParams, HOTA_UPDATE);
+        if (NotifyActionResult(upParams, status, {SET_RETRY_STATUS}) != UPDATE_SUCCESS) {
+            LOG(ERROR) << "set retry status fail";
+        }
     }
     if (status != UPDATE_SUCCESS) {
         UPDATER_UI_INSTANCE.Sleep(UI_SHOW_DURATION);
