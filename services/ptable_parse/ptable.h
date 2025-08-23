@@ -75,7 +75,7 @@ public:
     uint32_t GetPtablePartitionNum() const;
     void SetReservedSize(uint64_t reservedSize);
     bool InitPtable();
-    uint32_t GetDefaultImageSize() const;
+    virtual uint32_t GetDefaultImageSize() const;
     void PrintPtableInfo() const;
     void PrintPtableInfo(const std::vector<PtnInfo> &ptnInfo) const;
     bool GetPartionInfoByName(const std::string &partitionName, PtnInfo &ptnInfo, int32_t &index);
