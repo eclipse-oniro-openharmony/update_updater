@@ -585,7 +585,7 @@ int32_t CompressedImageDiff::CompressData(Hpackage::PkgManager::FileInfoPtr info
                 outData.resize(IGMDIFF_LIMIT_UNIT * ((start + outSize) / IGMDIFF_LIMIT_UNIT + 1));
             }
             if (memcpy_s(outData.data() + start, outData.size() - start, data.buffer, size) != EOK) {
-                PATCH_LOGE("Failed to memcpy_s data");
+                PATCH_LOGE("Failed to memcpy_s data outData.size() = %zu size = %zu", outData.size(), size);
                 return -1;
             }
             return 0;
