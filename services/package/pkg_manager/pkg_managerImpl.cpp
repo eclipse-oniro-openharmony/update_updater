@@ -861,6 +861,9 @@ int32_t PkgManagerImpl::GenerateFileDigest(PkgStreamPtr stream,
         if (digestMethod != PKG_DIGEST_TYPE_SHA256) {
             buffer = buff.buffer + SIGN_SHA256_LEN;
         }
+        if (digestInfos[DIGEST_INFO_SIGNATURE].size() < signatureLen) {
+            digestInfos[DIGEST_INFO_SIGNATURE].resize(signatureLen);
+        }
         if (memcpy_s(digestInfos[DIGEST_INFO_SIGNATURE].data(), signatureLen, buffer, signatureLen) != EOK) {
             PKG_LOGE("GenerateFileDigest memcpy failed");
             return PKG_NONE_MEMORY;
