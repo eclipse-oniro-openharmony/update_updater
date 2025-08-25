@@ -34,7 +34,7 @@ constexpr uint32_t BUCKET_SIZE = 256;
 constexpr uint32_t MULTIPLE_TWO = 2;
 constexpr int64_t BLOCK_SCORE = 8;
 constexpr int64_t MIN_LENGTH = 16;
-constexpr uint32_t MAX_PATCH_LENGTH = 1073741824;
+constexpr uint32_t MAX_PATCH_LENGTH = 1024 * 1024 * 1024; // 1G
 
 static void WriteLE64(const BlockBuffer &buffer, int64_t value)
 {
