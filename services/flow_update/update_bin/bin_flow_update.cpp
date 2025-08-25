@@ -92,7 +92,7 @@ int32_t BinFlowUpdate::StartBinFlowUpdate(uint8_t *data, uint32_t len)
 bool BinFlowUpdate::AddRemainData(uint8_t *data, uint32_t &len)
 {
     if (curlen_ >= maxBufSize_) {
-        LOG(ERROR) << "curlen_ failed";
+        LOG(ERROR) << "curlen_ failed : curlen_ = " << curlen_ << "maxBufSize_ = " << maxBufSize_;
         return false;
     }
     uint32_t copySize = std::min(static_cast<size_t>(len), static_cast<size_t>(maxBufSize_ - curlen_));
