@@ -131,7 +131,7 @@ void Logger(int level, const char* fileName, int32_t line, const char* format, .
     std::vector<char> buff(1024); // 1024 : max length of buff
     va_list list;
     va_start(list, format);
-    int size = vsnprintf_s(reinterpret_cast<char*>(buff.data()), buff.size(), buff.size() - 1, format, list);
+    int size = vsnprintf_s(reinterpret_cast<char*>(buff.data()), buff.capacity(), buff.capacity() - 1, format, list);
     va_end(list);
     if (size < EOK) {
         UpdaterLogger(level).OutputUpdaterLog(fileName, line) << "vsnprintf_s failed";
