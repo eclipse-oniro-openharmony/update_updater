@@ -81,7 +81,7 @@ int32_t BlocksDiff::MakePatch(const std::string &oldFileName, const std::string 
     BlockBuffer newInfo = {newBuffer.memory, newBuffer.length};
     BlockBuffer oldInfo = {oldBuffer.memory, oldBuffer.length};
     if (oldInfo.length > MAX_PATCH_LENGTH) {
-        PATCH_LOGE("length is illegal");
+        PATCH_LOGE("length is illegal, current length is %zu", oldInfo.length);
         return -1;
     }
     std::unique_ptr<BlocksDiff> blockdiff = std::make_unique<BlocksStreamDiff>(patchFile, 0);
