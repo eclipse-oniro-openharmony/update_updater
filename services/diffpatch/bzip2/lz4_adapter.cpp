@@ -119,8 +119,8 @@ int32_t Lz4FrameAdapter::WriteData(const BlockBuffer &srcData)
             return -1;
         }
         currDataSize_ += srcData.length;
-    } else if (currDataSize_ >= inData_.size()) {
-        PATCH_LOGE("Failed to size ");
+    } else if (currDataSize_ > inData_.size()) {
+        PATCH_LOGE("Failed to size currDataSize_ = %zu, inData_.size() = %zu", currDataSize_, inData_.size());
         return -1;
     } else {
         size_t hasCopyLen = inData_.size() - currDataSize_;
