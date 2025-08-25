@@ -574,7 +574,7 @@ bool UfsPtable::CorrectBufByPtnList(uint8_t *imageBuf, uint64_t imgBufSize, cons
             "imgBufSize" << imgBufSize;
         return false;
     }
-    if (memcpy_s(ufsLunEntryStart, imgBufSize - (ufsLunEntryStart -imageBuf), newBuf.data(), editLen) != 0) {
+    if (memcpy_s(ufsLunEntryStart, imgBufSize - (ufsLunEntryStart - imageBuf), newBuf.data(), editLen) != 0) {
         LOG(ERROR) << "memcpy fail. destSize :" << imgBufSize - (ufsLunEntryStart - imageBuf);
         return false;
     }
