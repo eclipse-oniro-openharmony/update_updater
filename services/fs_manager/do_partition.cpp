@@ -197,6 +197,7 @@ static void DestroyDiskDevices(Disk &disk)
     if (disk.dev != nullptr) {
         if (disk.dev->specific != nullptr) {
             free(disk.dev->specific);
+            disk.dev->specific = NULL;
         }
         free(disk.dev);
         disk.dev = NULL;
