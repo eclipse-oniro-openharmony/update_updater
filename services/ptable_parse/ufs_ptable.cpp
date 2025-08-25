@@ -310,7 +310,7 @@ bool UfsPtable::ParsePartitionFromBuffer(uint8_t *ptbImgBuffer, const uint32_t i
             ufsPtnDataInfo_.push_back(newLunPtnDataInfo);
             continue;
         }
-        if (2 * deviceBlockSize >= TMP_DATA_SIZE)) {
+        if (2 * deviceBlockSize >= TMP_DATA_SIZE) {
             LOG(ERROR) << "memcpy_s size fail";
             return false;
         }
@@ -571,7 +571,7 @@ bool UfsPtable::CorrectBufByPtnList(uint8_t *imageBuf, uint64_t imgBufSize, cons
     }
     if ((ufsLunEntryStart - imageBuf) >= imgBufSize) {
         LOG(ERROR) << "memcpy size fail imageBuf" << imageBuf << "ufsLunEntryStart" << ufsLunEntryStart
-            "imgBufSize" << imgBufSize;
+            << "imgBufSize" << imgBufSize;
         return false;
     }
     if (memcpy_s(ufsLunEntryStart, imgBufSize - (ufsLunEntryStart - imageBuf), newBuf.data(), editLen) != 0) {
