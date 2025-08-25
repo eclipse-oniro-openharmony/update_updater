@@ -310,10 +310,6 @@ bool UfsPtable::ParsePartitionFromBuffer(uint8_t *ptbImgBuffer, const uint32_t i
             ufsPtnDataInfo_.push_back(newLunPtnDataInfo);
             continue;
         }
-        if (2 * deviceBlockSize >= TMP_DATA_SIZE) {
-            LOG(ERROR) << "memcpy_s size fail";
-            return false;
-        }
         // for hisi: change ptable.img(512 bytes/block) into format of device(4096 bytes/block)
         if (memcpy_s(newLunPtnDataInfo.data, TMP_DATA_SIZE, lunStart, imgBlockSize) != EOK) {
             LOG(WARNING) << "memcpy_s pmbr fail";
