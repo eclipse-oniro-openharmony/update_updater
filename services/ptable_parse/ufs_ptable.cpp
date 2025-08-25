@@ -310,7 +310,7 @@ bool UfsPtable::ParsePartitionFromBuffer(uint8_t *ptbImgBuffer, const uint32_t i
             ufsPtnDataInfo_.push_back(newLunPtnDataInfo);
             continue;
         }
-        if (TMP_DATA_SIZE <= 2 * deviceBlockSize)) {
+        if (2 * deviceBlockSize >= TMP_DATA_SIZE)) {
             LOG(ERROR) << "memcpy_s size fail";
             return false;
         }
@@ -569,7 +569,7 @@ bool UfsPtable::CorrectBufByPtnList(uint8_t *imageBuf, uint64_t imgBufSize, cons
         }
         std::copy(newEntryBuf.begin(), newEntryBuf.end(), newBuf.begin() + srcInfo[i].gptEntryBufOffset);
     }
-    if ((ufsLunEntryStart - imageBuf) >= imgBufSize){
+    if ((ufsLunEntryStart - imageBuf) >= imgBufSize) {
         LOG(ERROR) << "memcpy size fail imageBuf" << imageBuf << "ufsLunEntryStart" << ufsLunEntryStart
             "imgBufSize" << imgBufSize;
         return false;
