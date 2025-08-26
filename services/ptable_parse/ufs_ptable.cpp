@@ -566,7 +566,7 @@ bool UfsPtable::CorrectBufByPtnList(uint8_t *imageBuf, uint64_t imgBufSize, cons
         std::copy(newEntryBuf.begin(), newEntryBuf.end(), newBuf.begin() + srcInfo[i].gptEntryBufOffset);
     }
     uint64_t offset = static_cast<uint64_t>(ufsLunEntryStart - imageBuf);
-    if (imageBuf > ufsLunEntryStart || offset >= (int64_t)imgBufSize) {
+    if (imageBuf > ufsLunEntryStart || offset >= imgBufSize) {
         LOG(ERROR) << "memcpy size fail imageBuf" << imageBuf << "ufsLunEntryStart" << ufsLunEntryStart
             << "imgBufSize" << imgBufSize;
         return false;
