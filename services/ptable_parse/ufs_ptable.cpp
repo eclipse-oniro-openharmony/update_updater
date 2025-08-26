@@ -28,6 +28,8 @@
 namespace Updater {
 constexpr const uint32_t LUN_FOR_SLOT_A = 3;
 constexpr const uint32_t LUN_FOR_SLOT_B = 4;
+constexpr const uint32_t DeviceBlockSize_A = 512;
+constexpr const uint32_t DeviceBlockSize_B = 4096;
 
 uint32_t UfsPtable::GetDeviceLunNum()
 {
@@ -284,15 +286,16 @@ void UfsPtable::UfsPatchGptHeader(UfsPartitionDataInfo &ptnDataInfo, const uint3
 // blocksize is 4096, lbaLen is 512. Because in ptable.img block is 512 while in device block is 4096
 bool UfsPtable::ParsePartitionFromBuffer(uint8_t *ptbImgBuffer, const uint32_t imgBufSize)
 {
-    if (ptbImgBuffer == nullptr) {
+    if (ptbImgBuffer == nullptr || (imgBufSize < ptableData_.emmcGptDataLen + ptableData_.imgLuSize +
+        GetPtableExtraOffset())) {
         LOG(ERROR) << "input param invalid";
         return false;
     }
 
     uint32_t imgBlockSize = ptableData_.lbaLen; // 512
     uint32_t deviceBlockSize = GetDeviceBlockSize();
-    if (imgBufSize < ptableData_.emmcGptDataLen + ptableData_.imgLuSize + GetPtableExtraOffset()) {
-        LOG(ERROR) << "input param invalid imgBufSize";
+    if(deviceBlockSize != DeviceBlockSize_A && deviceBlockSize != DeviceBlockSize_B) {
+        LOG(ERROR) << "deviceBlockSize fail:" << deviceBlockSize;
         return false;
     }
 
