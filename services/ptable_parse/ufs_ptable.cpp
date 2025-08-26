@@ -28,8 +28,8 @@
 namespace Updater {
 constexpr const uint32_t LUN_FOR_SLOT_A = 3;
 constexpr const uint32_t LUN_FOR_SLOT_B = 4;
-constexpr const uint32_t ImgBlockSize = 512;
-constexpr const uint32_t DeviceBlockSize = 4096;
+constexpr const uint32_t IMG_BLOCK_SIZE = 512;
+constexpr const uint32_t DEVICE_BLOCK_SIZE = 4096;
 
 uint32_t UfsPtable::GetDeviceLunNum()
 {
@@ -294,7 +294,7 @@ bool UfsPtable::ParsePartitionFromBuffer(uint8_t *ptbImgBuffer, const uint32_t i
 
     uint32_t imgBlockSize = ptableData_.lbaLen; // 512
     uint32_t deviceBlockSize = GetDeviceBlockSize();
-    if (deviceBlockSize != ImgBlockSize && deviceBlockSize != DeviceBlockSize) {
+    if (deviceBlockSize != IMG_BLOCK_SIZE && deviceBlockSize != DEVICE_BLOCK_SIZE) {
         LOG(ERROR) << "deviceBlockSize fail:" << deviceBlockSize;
         return false;
     }
