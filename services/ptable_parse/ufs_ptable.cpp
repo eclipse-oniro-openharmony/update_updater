@@ -565,15 +565,13 @@ bool UfsPtable::CorrectBufByPtnList(uint8_t *imageBuf, uint64_t imgBufSize, cons
         }
         std::copy(newEntryBuf.begin(), newEntryBuf.end(), newBuf.begin() + srcInfo[i].gptEntryBufOffset);
     }
-    if ((int64_t)imgBufSize > INT64_MAX) {
-        LOG(ERROR) << "imgBufSize excel INT64_MAX"; 
-    }
-    if (imageBuf > ufsLunEntryStart || (ufsLunEntryStart - imageBuf) >= (int64_t)imgBufSize) {
+    uint64_t offset = static_cast<uint64_t>(ufsLunEntryStart - imageBuf);
+    if (imageBuf > ufsLunEntryStart || offset >= (int64_t)imgBufSize) {
         LOG(ERROR) << "memcpy size fail imageBuf" << imageBuf << "ufsLunEntryStart" << ufsLunEntryStart
             << "imgBufSize" << imgBufSize;
         return false;
     }
-    if (memcpy_s(ufsLunEntryStart, imgBufSize - (ufsLunEntryStart - imageBuf), newBuf.data(), editLen) != 0) {
+    if (memcpy_s(ufsLunEntryStart, imgBufSize - offset, newBuf.data(), editLen) != 0) {
         LOG(ERROR) << "memcpy fail. destSize :" << imgBufSize - (ufsLunEntryStart - imageBuf);
         return false;
     }
