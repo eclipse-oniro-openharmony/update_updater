@@ -294,7 +294,7 @@ bool UfsPtable::ParsePartitionFromBuffer(uint8_t *ptbImgBuffer, const uint32_t i
 
     uint32_t imgBlockSize = ptableData_.lbaLen; // 512
     uint32_t deviceBlockSize = GetDeviceBlockSize();
-    if(deviceBlockSize != DeviceBlockSize_A && deviceBlockSize != DeviceBlockSize_B) {
+    if (deviceBlockSize != DeviceBlockSize_A && deviceBlockSize != DeviceBlockSize_B) {
         LOG(ERROR) << "deviceBlockSize fail:" << deviceBlockSize;
         return false;
     }
