@@ -565,7 +565,7 @@ bool UfsPtable::CorrectBufByPtnList(uint8_t *imageBuf, uint64_t imgBufSize, cons
         }
         std::copy(newEntryBuf.begin(), newEntryBuf.end(), newBuf.begin() + srcInfo[i].gptEntryBufOffset);
     }
-    if((int64_t)imgBufSize > INT64_MAX) {
+    if ((int64_t)imgBufSize > INT64_MAX) {
         LOG(ERROR) << "imgBufSize excel INT64_MAX"; 
     }
     if (imageBuf > ufsLunEntryStart || (ufsLunEntryStart - imageBuf) >= (int64_t)imgBufSize) {
