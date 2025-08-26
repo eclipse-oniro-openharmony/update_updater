@@ -34,6 +34,7 @@ constexpr uint32_t BUCKET_SIZE = 256;
 constexpr uint32_t MULTIPLE_TWO = 2;
 constexpr int64_t BLOCK_SCORE = 8;
 constexpr int64_t MIN_LENGTH = 16;
+constexpr uint32_t MAX_PATCH_LENGTH = 1024 * 1024 * 1024; // 1G
 
 static void WriteLE64(const BlockBuffer &buffer, int64_t value)
 {
@@ -79,6 +80,10 @@ int32_t BlocksDiff::MakePatch(const std::string &oldFileName, const std::string 
     }
     BlockBuffer newInfo = {newBuffer.memory, newBuffer.length};
     BlockBuffer oldInfo = {oldBuffer.memory, oldBuffer.length};
+    if (oldInfo.length > MAX_PATCH_LENGTH) {
+        PATCH_LOGE("length is illegal, current length is %zu", oldInfo.length);
+        return -1;
+    }
     std::unique_ptr<BlocksDiff> blockdiff = std::make_unique<BlocksStreamDiff>(patchFile, 0);
     size_t patchSize = 0;
     ret = blockdiff->MakePatch(newInfo, oldInfo, patchSize);
