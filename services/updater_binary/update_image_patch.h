@@ -60,6 +60,8 @@ public:
     USInstrImageShaCheck() {}
     virtual ~USInstrImageShaCheck() {}
     int32_t Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context) override;
+    virtual GetParam(Uscript::UScriptContext &context, CheckPara &para);
+    virtual GetParam(Uscript::UScriptContext &context, CheckPara &para);
 private:
     int32_t ExecuteShaCheck(Uscript::UScriptEnv &env, Uscript::UScriptContext &context);
     int32_t GetParam(Uscript::UScriptContext &context, CheckPara &para);
