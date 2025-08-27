@@ -27,6 +27,7 @@
 #include "applypatch/store.h"
 #include "applypatch/transfer_manager.h"
 #include "applypatch/partition_record.h"
+#include "applypatch/partition_record.h"
 #include "diffpatch/diffpatch.h"
 #include "dump.h"
 #include "fs_manager/mount.h"
