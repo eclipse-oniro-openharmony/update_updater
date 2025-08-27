@@ -285,7 +285,7 @@ int32_t USInstrImageShaCheck::GetParam(Uscript::UScriptContext &context, CheckPa
     return USCRIPT_SUCCESS;
 }
 
-std::string USInstrImageShaCheck::GetHashData(const CheckPara &para, const size_t length)
+std::string USInstrImageShaCheck::GetHashData(const CheckPara &para, const uint64_t length)
 {
     UpdatePatch::MemMapInfo mapBuffer {};
     if (PatchMapFile(para.devPath, mapBuffer) != UpdatePatch::PATCH_SUCCESS) {
