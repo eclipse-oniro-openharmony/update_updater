@@ -285,7 +285,7 @@ int32_t USInstrImageShaCheck::GetParam(Uscript::UScriptContext &context, CheckPa
     return USCRIPT_SUCCESS;
 }
 
-std::string USInstrImageShaCheck::GetHashData(const CheckPara &para, const uint64_t length)
+std::string USInstrImageShaCheck::GetHashData(const CheckPara &para, const size_t length)
 {
     UpdatePatch::MemMapInfo mapBuffer {};
     if (PatchMapFile(para.devPath, mapBuffer) != UpdatePatch::PATCH_SUCCESS) {
@@ -304,8 +304,8 @@ int32_t USInstrImageShaCheck::CheckHash(const CheckPara &para)
         LOG(ERROR) << "para size error " << para.srcSize;
         return USCRIPT_ERROR_EXECUTE;
     }
-    uint64_t length = 0;
-    if (!Utils::ConvertToUnsignedLongLong(para.srcSize, length)) {
+    size_t length = 0;
+    if (!Utils::ConvertToUnsignedLongLong(para.srcSize, static_cast<uint64_t>(length))) {
         LOG(ERROR) << "ConvertToUnsignedLong error";
         return USCRIPT_ERROR_EXECUTE;
     }
