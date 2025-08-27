@@ -304,8 +304,8 @@ int32_t USInstrImageShaCheck::CheckHash(const CheckPara &para)
         LOG(ERROR) << "para size error " << para.srcSize;
         return USCRIPT_ERROR_EXECUTE;
     }
-    size_t length = 0;
-    if (!Utils::ConvertToUnsignedLongLong(para.srcSize, static_cast<uint64_t>(length))) {
+    uint64_t length = 0;
+    if (!Utils::ConvertToUnsignedLongLong(para.srcSize, length)) {
         LOG(ERROR) << "ConvertToUnsignedLong error";
         return USCRIPT_ERROR_EXECUTE;
     }
