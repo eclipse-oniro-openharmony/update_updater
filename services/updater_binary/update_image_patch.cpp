@@ -247,7 +247,12 @@ int32_t USInstrImageShaCheck::Execute(Uscript::UScriptEnv &env, Uscript::UScript
 
 std::string USInstrImageShaCheck::GetDevicePath(const std::string &partName)
 {
-    return GetBlockDeviceByMountPoint(partName);
+    std::string devPath = GetBlockDeviceByMountPoint(partName);
+    if (partName != "/userdata") {
+        std::string suffix = Utils::GetUpdateSuffix();
+        devPath += suffix;
+    }
+    return devPath;
 }
 
 int32_t USInstrImageShaCheck::GetParam(Uscript::UScriptContext &context, CheckPara &para)
@@ -267,12 +272,8 @@ int32_t USInstrImageShaCheck::GetParam(Uscript::UScriptContext &context, CheckPa
         return USCRIPT_INVALID_PARAM;
     }
 
-    para.devPath = GetDevicePath(para.partName);
 #ifndef UPDATER_UT
-    if (para.partName != "/userdata" && para.devPath.find("dm") == std::string::npos) {
-        std::string suffix = Utils::GetUpdateSuffix();
-        para.devPath += suffix;
-    }
+    para.devPath = GetDevicePath(para.partName);
 #else
     para.devPath = "/data/updater" + para.partName;
 #endif
