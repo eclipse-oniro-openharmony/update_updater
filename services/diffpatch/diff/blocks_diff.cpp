@@ -228,12 +228,13 @@ int32_t BlocksBufferDiff::WritePatchHeader(int64_t controlSize,
     int64_t diffDataSize, int64_t newSize, size_t &headerLen)
 {
     headerLen = std::char_traits<char>::length(BSDIFF_MAGIC) + sizeof(int64_t) + sizeof(int64_t) + sizeof(int64_t);
-    if (patchData_.size() <= headerLen + offset_) {
-        PATCH_LOGE("Invalid patch size");
+    if (headerLen >= patchData_.size() || offset_ >= (patchData_.size() - headerLen)) {
+        PATCH_LOGE("Invalid patch size headerLen = %zu, offset_ = %zu, patchData_.size = %zu",
+            headerLen, offset_, patchData_.size());
         return -1;
     }
 
-    int32_t ret = memcpy_s(patchData_.data() + offset_, patchData_.size(), BSDIFF_MAGIC,
+    int32_t ret = memcpy_s(patchData_.data() + offset_, patchData_.size() - offset_, BSDIFF_MAGIC,
         std::char_traits<char>::length(BSDIFF_MAGIC));
     if (ret != 0) {
         PATCH_LOGE("Failed to copy magic");

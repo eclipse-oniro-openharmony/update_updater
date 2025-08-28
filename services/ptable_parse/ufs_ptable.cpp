@@ -28,6 +28,8 @@
 namespace Updater {
 constexpr const uint32_t LUN_FOR_SLOT_A = 3;
 constexpr const uint32_t LUN_FOR_SLOT_B = 4;
+constexpr const uint32_t IMG_BLOCK_SIZE = 512;
+constexpr const uint32_t DEVICE_BLOCK_SIZE = 4096;
 
 uint32_t UfsPtable::GetDeviceLunNum()
 {
@@ -284,15 +286,16 @@ void UfsPtable::UfsPatchGptHeader(UfsPartitionDataInfo &ptnDataInfo, const uint3
 // blocksize is 4096, lbaLen is 512. Because in ptable.img block is 512 while in device block is 4096
 bool UfsPtable::ParsePartitionFromBuffer(uint8_t *ptbImgBuffer, const uint32_t imgBufSize)
 {
-    if (ptbImgBuffer == nullptr) {
+    if (ptbImgBuffer == nullptr || (imgBufSize < ptableData_.emmcGptDataLen + ptableData_.imgLuSize +
+        GetPtableExtraOffset())) {
         LOG(ERROR) << "input param invalid";
         return false;
     }
 
     uint32_t imgBlockSize = ptableData_.lbaLen; // 512
     uint32_t deviceBlockSize = GetDeviceBlockSize();
-    if (imgBufSize < ptableData_.emmcGptDataLen + ptableData_.imgLuSize + GetPtableExtraOffset()) {
-        LOG(ERROR) << "input param invalid imgBufSize";
+    if (deviceBlockSize != IMG_BLOCK_SIZE && deviceBlockSize != DEVICE_BLOCK_SIZE) {
+        LOG(ERROR) << "deviceBlockSize fail:" << deviceBlockSize;
         return false;
     }
 
@@ -565,7 +568,13 @@ bool UfsPtable::CorrectBufByPtnList(uint8_t *imageBuf, uint64_t imgBufSize, cons
         }
         std::copy(newEntryBuf.begin(), newEntryBuf.end(), newBuf.begin() + srcInfo[i].gptEntryBufOffset);
     }
-    if (memcpy_s(ufsLunEntryStart, imgBufSize - (ufsLunEntryStart - imageBuf), newBuf.data(), editLen) != 0) {
+    uint64_t offset = static_cast<uint64_t>(ufsLunEntryStart - imageBuf);
+    if (imageBuf > ufsLunEntryStart || offset >= imgBufSize) {
+        LOG(ERROR) << "memcpy size fail imageBuf" << imageBuf << "ufsLunEntryStart" << ufsLunEntryStart
+            << "imgBufSize" << imgBufSize;
+        return false;
+    }
+    if (memcpy_s(ufsLunEntryStart, imgBufSize - offset, newBuf.data(), editLen) != 0) {
         LOG(ERROR) << "memcpy fail. destSize :" << imgBufSize - (ufsLunEntryStart - imageBuf);
         return false;
     }
