@@ -27,11 +27,13 @@
 #include "applypatch/store.h"
 #include "applypatch/transfer_manager.h"
 #include "applypatch/partition_record.h"
+#include "applypatch/update_progress.h"
 #include "diffpatch/diffpatch.h"
 #include "dump.h"
 #include "fs_manager/mount.h"
 #include "log/log.h"
 #include "patch/update_patch.h"
+#include "threadpool/thread_pool.h"
 #include "updater/updater_const.h"
 #include "updater/hardware_fault_retry.h"
 #include "utils.h"
@@ -243,6 +245,16 @@ int32_t USInstrImageShaCheck::Execute(Uscript::UScriptEnv &env, Uscript::UScript
     return result;
 }
 
+std::string USInstrImageShaCheck::GetDevicePath(const std::string &partName)
+{
+    std::string devPath = GetBlockDeviceByMountPoint(partName);
+    if (partName != "/userdata") {
+        std::string suffix = Utils::GetUpdateSuffix();
+        devPath += suffix;
+    }
+    return devPath;
+}
+
 int32_t USInstrImageShaCheck::GetParam(Uscript::UScriptContext &context, CheckPara &para)
 {
     if (context.GetParamCount() != IMAGE_PATCH_CHECK_CMD_LEN) {
@@ -260,46 +272,53 @@ int32_t USInstrImageShaCheck::GetParam(Uscript::UScriptContext &context, CheckPa
         return USCRIPT_INVALID_PARAM;
     }
 
-    para.devPath = GetBlockDeviceByMountPoint(para.partName);
 #ifndef UPDATER_UT
-    if (para.partName != "/userdata") {
-        std::string suffix = Utils::GetUpdateSuffix();
-        para.devPath += suffix;
-    }
+    para.devPath = GetDevicePath(para.partName);
 #else
     para.devPath = "/data/updater" + para.partName;
 #endif
     if (para.devPath.empty()) {
-        LOG(ERROR) << "cannot get block device of partition" << para.partName;
+        LOG(ERROR) << "cannot get block device of partition " << para.partName;
         return USCRIPT_ERROR_EXECUTE;
     }
     LOG(INFO) << "dev path: " << para.devPath;
     return USCRIPT_SUCCESS;
 }
 
-int32_t USInstrImageShaCheck::CheckHash(const CheckPara &para)
+std::string USInstrImageShaCheck::GetHashData(const CheckPara &para, const uint64_t length)
 {
     UpdatePatch::MemMapInfo mapBuffer {};
     if (PatchMapFile(para.devPath, mapBuffer) != UpdatePatch::PATCH_SUCCESS) {
         LOG(ERROR) << "PatchMapFile error";
-        return USCRIPT_ERROR_EXECUTE;
-    }
-    if (!std::all_of(para.srcSize.begin(), para.srcSize.end(), ::isdigit)) {
-        LOG(ERROR) << "para size error " << para.srcSize;
-        return USCRIPT_ERROR_EXECUTE;
-    }
-    uint32_t length = 0;
-    if (!Utils::ConvertToUnsignedLong(para.srcSize, length)) {
-        LOG(ERROR) << "ConvertToUnsignedLong error";
-        return USCRIPT_ERROR_EXECUTE;
+        return "";
     }
     UpdatePatch::BlockBuffer data = { mapBuffer.memory, length };
     std::string resultSha = UpdatePatch::GeneraterBufferHash(data);
     std::transform(resultSha.begin(), resultSha.end(), resultSha.begin(), ::toupper);
+    return resultSha;
+}
+
+int32_t USInstrImageShaCheck::CheckHash(const CheckPara &para)
+{
+    if (para.srcSize.empty() || !std::all_of(para.srcSize.begin(), para.srcSize.end(), ::isdigit)) {
+        LOG(ERROR) << "para size error " << para.srcSize;
+        return USCRIPT_ERROR_EXECUTE;
+    }
+    uint64_t length = 0;
+    if (!Utils::ConvertToUnsignedLongLong(para.srcSize, length)) {
+        LOG(ERROR) << "ConvertToUnsignedLong error";
+        return USCRIPT_ERROR_EXECUTE;
+    }
+    std::string resultSha = GetHashData(para, length);
+    if (resultSha.empty()) {
+        LOG(ERROR) << "get hash fail of partition " << para.partName;
+        return USCRIPT_ERROR_EXECUTE;
+    }
     if (resultSha != para.srcHash) {
-        LOG(ERROR) << "resultSha:" << resultSha << " srcHash:" << para.srcHash;
+        LOG(ERROR) << para.partName << " resultSha:" << resultSha << " srcHash:" << para.srcHash;
         return USCRIPT_INVALID_PARAM;
     }
+    SetUpdateProgress(Uscript::GetScriptProportion() * Uscript::GetTotalProportion());
     return USCRIPT_SUCCESS;
 }
 

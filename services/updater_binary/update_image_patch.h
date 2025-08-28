@@ -60,6 +60,8 @@ public:
     USInstrImageShaCheck() {}
     virtual ~USInstrImageShaCheck() {}
     int32_t Execute(Uscript::UScriptEnv &env, Uscript::UScriptContext &context) override;
+    virtual std::string GetDevicePath(const std::string &partName);
+    virtual std::string GetHashData(const CheckPara &para, const uint64_t length);
 private:
     int32_t ExecuteShaCheck(Uscript::UScriptEnv &env, Uscript::UScriptContext &context);
     int32_t GetParam(Uscript::UScriptContext &context, CheckPara &para);
