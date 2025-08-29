@@ -35,7 +35,7 @@ extern int RebootAndInstallUpgradePackage(const std::string &miscFile, const std
 // @param rebootFunc callback function.
 // @return returns true if trigger update package installing success, else returns false.
 extern int RebootAndInstallUpgradePackage(const std::string &miscFile, const std::vector<std::string> &packageName,
-    const std::string &upgradeType = UPGRADE_TYPE_OTA, const RebootFunType &rebootFunc);
+    const std::string &upgradeType, const RebootFunType &rebootFunc);
 
 // Reboot system to sdcard update mode and trigger installing update package.
 // @return returns true if trigger update package installing success, else returns false.

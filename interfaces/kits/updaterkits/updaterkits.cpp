@@ -147,7 +147,7 @@ static bool WriteToMiscAndResultFileRebootToUpdater(const struct UpdateMessage &
     std::string writeMiscAfter = "0x80000008";
     WriteUpdaterResultFile(pkgPath, writeMiscAfter);
     if (rebootFunc) {
-        rebootFunc()
+        rebootFunc();
     } else {
         DoReboot("updater:reboot to updater to trigger update");
     }
@@ -231,7 +231,7 @@ bool RebootAndInstallSdcardPackage(const std::string &miscFile, const std::vecto
 }
 
 int RebootAndInstallUpgradePackage(const std::string &miscFile, const std::vector<std::string> &packageName,
-    const std::string &upgradeType, const RebootFunType &rebootFunType)
+    const std::string &upgradeType, const RebootFunType &rebootFunc)
 {
     if (packageName.size() == 0 && (upgradeType == UPGRADE_TYPE_OTA || upgradeType == UPGRADE_TYPE_OTA_INTRAL)) {
         LOG(ERROR) << "updaterkits: invalid argument. one of arugments is empty";
