@@ -127,7 +127,7 @@ static std::string ParsePkgPath(const struct UpdateMessage &updateMsg)
 }
 
 static bool WriteToMiscAndResultFileRebootToUpdater(const struct UpdateMessage &updateMsg,
-    const std::string &upgradeType)
+    const std::string &upgradeType, const RebootFunType &rebootFunc)
 {
     // Write package name to misc, then trigger reboot.
     const char *bootCmd = "boot_updater";
@@ -146,7 +146,11 @@ static bool WriteToMiscAndResultFileRebootToUpdater(const struct UpdateMessage &
     // Flag after the misc in written
     std::string writeMiscAfter = "0x80000008";
     WriteUpdaterResultFile(pkgPath, writeMiscAfter);
-    DoReboot("updater:reboot to updater to trigger update");
+    if (rebootFunc) {
+        rebootFunc()
+    } else {
+        DoReboot("updater:reboot to updater to trigger update");
+    }
     while (true) {
         pause();
     }
@@ -227,7 +231,7 @@ bool RebootAndInstallSdcardPackage(const std::string &miscFile, const std::vecto
 }
 
 int RebootAndInstallUpgradePackage(const std::string &miscFile, const std::vector<std::string> &packageName,
-    const std::string &upgradeType)
+    const std::string &upgradeType, const RebootFunType &rebootFunType)
 {
     if (packageName.size() == 0 && (upgradeType == UPGRADE_TYPE_OTA || upgradeType == UPGRADE_TYPE_OTA_INTRAL)) {
         LOG(ERROR) << "updaterkits: invalid argument. one of arugments is empty";
@@ -267,13 +271,19 @@ int RebootAndInstallUpgradePackage(const std::string &miscFile, const std::vecto
     }
     if (upgradeType == UPGRADE_TYPE_OTA || upgradeType == UPGRADE_TYPE_OTA_INTRAL ||
         upgradeType == UPGRADE_TYPE_SUBPKG_UPDATE) {
-        WriteToMiscAndResultFileRebootToUpdater(updateMsg, upgradeType);
+        WriteToMiscAndResultFileRebootToUpdater(updateMsg, upgradeType, rebootFunc);
     } else {
         WriteToMiscAndRebootToUpdater(updateMsg);
     }
 
     // Never get here.
     return 0;
+}
+
+int RebootAndInstallUpgradePackage(const std::string &miscFile, const std::vector<std::string> &packageName,
+                                   const std::string &upgradeType)
+{
+    return RebootAndInstallUpgradePackage(miscFile, packageName, upgradeType, nullptr);
 }
 
 bool RebootAndCleanUserData(const std::string &miscFile, const std::string &cmd)

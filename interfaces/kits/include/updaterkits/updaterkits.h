@@ -15,7 +15,9 @@
 #ifndef UPDATER_KITS_H
 #define UPDATER_KITS_H
 #include <string>
+#include <functional>
 
+using RebootFunType = std::function<void()>;
 constexpr const char *UPGRADE_TYPE_OTA = "ota";
 constexpr const char *UPGRADE_TYPE_SD = "sdcard";
 constexpr const char *UPGRADE_TYPE_OTA_INTRAL = "ota_intral";
@@ -27,6 +29,13 @@ constexpr const char *UPGRADE_TYPE_SUBPKG_UPDATE = "subpkg_update";
 // @return returns true if trigger update package installing success, else returns false.
 extern int RebootAndInstallUpgradePackage(const std::string &miscFile, const std::vector<std::string> &packageName,
     const std::string &upgradeType = UPGRADE_TYPE_OTA);
+
+// Reboot system to updater mode and trigger installing update package.
+// @param packageName update package file name.
+// @param rebootFunc callback function.
+// @return returns true if trigger update package installing success, else returns false.
+extern int RebootAndInstallUpgradePackage(const std::string &miscFile, const std::vector<std::string> &packageName,
+    const std::string &upgradeType = UPGRADE_TYPE_OTA, const RebootFunType &rebootFunc);
 
 // Reboot system to sdcard update mode and trigger installing update package.
 // @return returns true if trigger update package installing success, else returns false.
