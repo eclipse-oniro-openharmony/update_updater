@@ -147,7 +147,7 @@ static bool WriteToMiscAndResultFileRebootToUpdater(const struct UpdateMessage &
     std::string writeMiscAfter = "0x80000008";
     WriteUpdaterResultFile(pkgPath, writeMiscAfter);
     if (rebootFunc != nullptr && rebootFunc() != 0) {
-        LOG(ERROR) << "reboot callback Failed";
+        LOG(ERROR) << "Reboot Callback Failed";
         return false;
     } else if (rebootFunc == nullptr) {
         DoReboot("updater:reboot to updater to trigger update");
