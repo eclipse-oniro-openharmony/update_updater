@@ -17,7 +17,7 @@
 #include <string>
 #include <functional>
 
-using RebootFunType = std::function<void()>;
+using RebootFunType = std::function<int()>;
 constexpr const char *UPGRADE_TYPE_OTA = "ota";
 constexpr const char *UPGRADE_TYPE_SD = "sdcard";
 constexpr const char *UPGRADE_TYPE_OTA_INTRAL = "ota_intral";

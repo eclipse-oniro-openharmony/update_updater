@@ -146,10 +146,11 @@ static bool WriteToMiscAndResultFileRebootToUpdater(const struct UpdateMessage &
     // Flag after the misc in written
     std::string writeMiscAfter = "0x80000008";
     WriteUpdaterResultFile(pkgPath, writeMiscAfter);
-    if (rebootFunc == nullptr) {
+    if (rebootFunc != nullptr && rebootFunc() != 0) {
+        LOG(ERROR) << "reboot func Failed";
+        return false;
+    } else if (rebootFunc == nullptr) {
         DoReboot("updater:reboot to updater to trigger update");
-    } else {
-        rebootFunc();
     }
     while (true) {
         pause();
@@ -271,7 +272,9 @@ int RebootAndInstallUpgradePackage(const std::string &miscFile, const std::vecto
     }
     if (upgradeType == UPGRADE_TYPE_OTA || upgradeType == UPGRADE_TYPE_OTA_INTRAL ||
         upgradeType == UPGRADE_TYPE_SUBPKG_UPDATE) {
-        WriteToMiscAndResultFileRebootToUpdater(updateMsg, upgradeType, rebootFunc);
+        if (!WriteToMiscAndResultFileRebootToUpdater(updateMsg, upgradeType, rebootFunc)) {
+            return 6; // 6 : Reboot failed
+        }
     } else {
         WriteToMiscAndRebootToUpdater(updateMsg);
     }
