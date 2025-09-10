@@ -58,6 +58,7 @@ LanguageUI &LanguageUI::GetInstance()
 bool LanguageUI::Init(Language language)
 {
     language_ = language;
+    LOG(INFO) << "parse language = " << static_cast<int>(language_);
     if (!Parse()) {
         LOG(ERROR) << "parse language resources failed";
         return false;
@@ -210,6 +211,7 @@ Language LanguageUI::ParseLanguage() const
         LOG(ERROR) << "ReadUpdaterParaMisc failed";
         return DEFAULT_LOCALE;
     }
+    LOG(INFO) << "read para language = " << para.language;
     if (strcmp(para.language, "") == 0) {
         LOG(INFO) << "Language in misc is empty";
         return Language::CHINESE;
