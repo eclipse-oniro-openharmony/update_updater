@@ -548,6 +548,7 @@ PkgEntryPtr PkgManagerImpl::GetPkgEntry(const std::string &path)
 
 PkgManager::StreamPtr PkgManagerImpl::GetPkgFileStream(const std::string &fileName)
 {
+    std::lock_guard<std::mutex> lock(mapLock_);
     auto iter = pkgStreams_.find(fileName);
     if (iter != pkgStreams_.end()) {
         return (*iter).second;
