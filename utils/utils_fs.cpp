@@ -77,7 +77,11 @@ int64_t GetFilesFromDirectory(const std::string &path, std::vector<std::string> 
         return -1;
     }
     DIR *dirp = opendir(path.c_str());
-    struct dirent *dp;
+    if (dirp == nullptr) {
+        LOG(ERROR) << "Failed to opendir errno=" << errno;
+        return -1;
+    }
+    struct dirent *dp = nullptr;
     int64_t totalSize = 0;
     while ((dp = readdir(dirp)) != nullptr) {
         std::string fileName = path + "/" + dp->d_name;
@@ -95,6 +99,7 @@ int64_t GetFilesFromDirectory(const std::string &path, std::vector<std::string> 
         }
     }
     closedir(dirp);
+    dirp = nullptr;
     return totalSize;
 }
 

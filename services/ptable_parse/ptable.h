@@ -82,7 +82,7 @@ public:
     std::vector<PtnInfo>& GetPtablePartitionInfoInstance();
     bool LoadPtnInfo(const std::vector<PtnInfo>& ptnInfo);
     bool ReadPartitionFileToBuffer(uint8_t *ptbImgBuffer, uint32_t &imgBufSize);
-    void DeletePartitionTmpFile();
+    static void DeletePartitionTmpFile();
 
     virtual bool WritePartitionBufToFile(uint8_t *ptbImgBuffer, const uint32_t imgBufSize);
     virtual bool ParsePartitionFromBuffer(uint8_t *ptbImgBuffer, const uint32_t imgBufSize) = 0;

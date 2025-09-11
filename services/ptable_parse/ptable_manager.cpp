@@ -334,24 +334,24 @@ bool PtableManager::WritePtableWithFile()
 {
     if (pPtable_ == nullptr) {
         LOG(ERROR) << "pPtable_ is nullptr";
-        pPtable_->DeletePartitionTmpFile();
+        Ptable::DeletePartitionTmpFile();
         return true;
     }
 
     if (!LoadPartitionInfoWithFile()) {
         LOG(ERROR) << "load partition info with file fail";
-        pPtable_->DeletePartitionTmpFile();
+        Ptable::DeletePartitionTmpFile();
         return true;
     }
 
 #ifndef UPDATER_UT
     if (!pPtable_->WritePartitionTable()) {
         LOG(ERROR) << "Write ptable to device failed! Please load ptable first!";
-        pPtable_->DeletePartitionTmpFile();
+        Ptable::DeletePartitionTmpFile();
         return false;
     }
 #endif
-    pPtable_->DeletePartitionTmpFile();
+    Ptable::DeletePartitionTmpFile();
     LOG(INFO) << "write patble with file success";
     return true;
 }
