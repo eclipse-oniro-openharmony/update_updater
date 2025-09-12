@@ -17,6 +17,7 @@
 
 #include "composite_ptable.h"
 #include "log/log.h"
+#include "package/pkg_manager.h"
 #include "securec.h"
 #include "updater/updater_const.h"
 #include "utils.h"
